@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "129456494556",
+    "project_id": "fighter-edge-app",
+    "storage_bucket": "fighter-edge-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:129456494556:android:4ed247361fb8e5eca42119",
+        "android_client_info": {
+          "package_name": "com.fighteredge.fighter_edge"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCPTpUtTKzjkX10AsclOow9JTzM83kwFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,64 @@
+import 'package:flutter/material.dart';
+
+import '../theme/app_colors.dart';
+
+/// Subscription tiers. Payments are not wired yet — upgrading flips the plan
+/// locally so the gating model is fully functional and testable.
+enum Plan { free, pro }
+
+extension PlanInfo on Plan {
+  String get label => switch (this) {
+        Plan.free => 'Free',
+        Plan.pro => 'Pro',
+      };
+
+  Color get color => switch (this) {
+        Plan.free => AppColors.textSecondary,
+        Plan.pro => AppColors.primary,
+      };
+}
+
+/// The gate-able capabilities of the app.
+enum Feature {
+  cornerCoach,
+  advancedTimerStyles,
+  unlimitedWeightHistory,
+  nutritionAnalytics,
+  fullTechniqueLibrary,
+}
+
+extension FeatureInfo on Feature {
+  /// Human-readable name shown on the paywall.
+  String get title => switch (this) {
+        Feature.cornerCoach => 'Corner Coach',
+        Feature.advancedTimerStyles => 'All Timer Presets',
+        Feature.unlimitedWeightHistory => 'Unlimited Weight History',
+        Feature.nutritionAnalytics => 'Nutrition Analytics',
+        Feature.fullTechniqueLibrary => 'Full Technique Library',
+      };
+}
+
+/// Central entitlement rules. Free users get a usable but limited app;
+/// everything below is unlocked by Pro.
+class Entitlements {
+  Entitlements._();
+
+  /// Features that require Pro. Anything not listed is available to everyone.
+  static const Set<Feature> _proOnly = {
+    Feature.cornerCoach,
+    Feature.advancedTimerStyles,
+    Feature.unlimitedWeightHistory,
+    Feature.nutritionAnalytics,
+    Feature.fullTechniqueLibrary,
+  };
+
+  /// Free-tier hard limits (enforced in the UI/business logic).
+  static const int freeWeightHistoryLimit = 5;
+  static const int freeTechniqueLimit = 3;
+  static const int freeTimerStyleCount = 1; // only the first preset
+
+  static bool isProOnly(Feature f) => _proOnly.contains(f);
+
+  static bool allows(Plan plan, Feature f) =>
+      plan == Plan.pro || !isProOnly(f);
+}

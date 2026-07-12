@@ -1,0 +1,57 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:fighter_edge/billing/subscription.dart';
+import 'package:fighter_edge/models/app_user.dart';
+
+void main() {
+  AppUser sample() => AppUser(
+        id: 'u1',
+        email: 'a@b.com',
+        displayName: 'Ayoub',
+        plan: Plan.free,
+        createdAt: DateTime.utc(2024, 1, 2, 3, 4, 5),
+        emailVerified: true,
+      );
+
+  group('AppUser', () {
+    test('isPro reflects the plan', () {
+      expect(sample().isPro, isFalse);
+      expect(sample().copyWith(plan: Plan.pro).isPro, isTrue);
+    });
+
+    test('copyWith changes only the given fields', () {
+      final u = sample();
+      final u2 = u.copyWith(displayName: 'Sam', plan: Plan.pro);
+      expect(u2.id, u.id);
+      expect(u2.email, u.email);
+      expect(u2.displayName, 'Sam');
+      expect(u2.plan, Plan.pro);
+      expect(u2.createdAt, u.createdAt);
+    });
+
+    test('toJson / fromJson round-trips', () {
+      final u = sample();
+      final restored = AppUser.fromJson(u.toJson());
+      expect(restored.id, u.id);
+      expect(restored.email, u.email);
+      expect(restored.displayName, u.displayName);
+      expect(restored.plan, u.plan);
+      expect(restored.emailVerified, u.emailVerified);
+      expect(restored.createdAt, u.createdAt);
+    });
+
+    test('fromJson defaults missing/invalid fields safely', () {
+      final u = AppUser.fromJson({
+        'id': 'x',
+        'email': 'x@y.com',
+        // no displayName, unknown plan, bad date
+        'plan': 'enterprise',
+        'createdAt': 'not-a-date',
+      });
+      expect(u.displayName, '');
+      expect(u.plan, Plan.free);
+      expect(u.emailVerified, isFalse);
+      expect(u.createdAt, isA<DateTime>());
+    });
+  });
+}

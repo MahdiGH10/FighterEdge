@@ -1,0 +1,26 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "fighter-edge-app",
+          "appId": "1:129456494556:android:4ed247361fb8e5eca42119",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "fighter-edge-app",
+          "configurations": {
+            "android": "1:129456494556:android:4ed247361fb8e5eca42119",
+            "web": "1:129456494556:web:29441575c1290122a42119"
+          }
+        }
+      }
+    }
+  }
+}
