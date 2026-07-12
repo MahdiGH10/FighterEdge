@@ -36,27 +36,29 @@ class _CornerCoachScreenState extends State<CornerCoachScreen> {
       body: ProGate(
         feature: Feature.cornerCoach,
         child: ListView(
-        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
-        children: [
-          const SizedBox(height: Insets.md),
-          Center(
-            child: Text('ROUND $_round',
-                style: AppTheme.display(30, color: AppColors.primary, spacing: 1)),
-          ),
-          const SizedBox(height: Insets.sm),
-          Text(pep,
-              textAlign: TextAlign.center,
-              style: AppTheme.body(14,
-                  weight: FontWeight.w500, color: AppColors.textSecondary)),
-          const SizedBox(height: Insets.xl),
-          for (final c in MockData.coachCues) _CueCard(c),
-          const SizedBox(height: Insets.md),
-          PrimaryButton(
-            'Next Round',
-            expand: true,
-            onPressed: () => setState(() => _round++),
-          ),
-        ],
+          padding:
+              const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+          children: [
+            const SizedBox(height: Insets.md),
+            Center(
+              child: Text('ROUND $_round',
+                  style: AppTheme.display(30,
+                      color: AppColors.primary, spacing: 1)),
+            ),
+            const SizedBox(height: Insets.sm),
+            Text(pep,
+                textAlign: TextAlign.center,
+                style: AppTheme.body(14,
+                    weight: FontWeight.w500, color: AppColors.textSecondary)),
+            const SizedBox(height: Insets.xl),
+            for (final c in MockData.coachCues) _CueCard(c),
+            const SizedBox(height: Insets.md),
+            PrimaryButton(
+              'Next Round',
+              expand: true,
+              onPressed: () => setState(() => _round++),
+            ),
+          ],
         ),
       ),
     );

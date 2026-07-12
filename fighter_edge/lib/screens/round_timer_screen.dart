@@ -108,7 +108,8 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
   }
 
   double get _progress {
-    final total = _phase == _Phase.rest ? _style.restSeconds : _style.workSeconds;
+    final total =
+        _phase == _Phase.rest ? _style.restSeconds : _style.workSeconds;
     if (total == 0) return 0;
     return 1 - (_secondsLeft / total);
   }
@@ -166,11 +167,12 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(_clock,
-                      style: AppTheme.display(64, color: AppColors.textPrimary)),
+                      style:
+                          AppTheme.display(64, color: AppColors.textPrimary)),
                   const SizedBox(height: Insets.xs),
                   Text(_phaseLabel,
-                      style: AppTheme.display(18,
-                          color: _phaseColor, spacing: 3)),
+                      style:
+                          AppTheme.display(18, color: _phaseColor, spacing: 3)),
                 ],
               ),
             ),

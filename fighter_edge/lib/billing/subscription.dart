@@ -59,6 +59,5 @@ class Entitlements {
 
   static bool isProOnly(Feature f) => _proOnly.contains(f);
 
-  static bool allows(Plan plan, Feature f) =>
-      plan == Plan.pro || !isProOnly(f);
+  static bool allows(Plan plan, Feature f) => plan == Plan.pro || !isProOnly(f);
 }

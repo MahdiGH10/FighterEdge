@@ -126,8 +126,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   SocialButton(
                     icon: Icons.apple,
                     label: 'Continue with Apple',
-                    onPressed:
-                        auth.isBusy ? null : () => _social(auth.signInWithApple),
+                    onPressed: auth.isBusy
+                        ? null
+                        : () => _social(auth.signInWithApple),
                   ),
                   const SizedBox(height: Insets.md),
                   SocialButton(

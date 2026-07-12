@@ -77,8 +77,8 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
   }
 
   Future<void> _addWeighIn(BuildContext context, AppState state) async {
-    final controller = TextEditingController(
-        text: state.latestWeight.toStringAsFixed(1));
+    final controller =
+        TextEditingController(text: state.latestWeight.toStringAsFixed(1));
     final value = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(

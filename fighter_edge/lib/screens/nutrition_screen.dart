@@ -28,8 +28,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
     final t = state.target;
     final consumed = state.consumedCalories;
     final ratio = consumed / t.calories;
-    final ringColor =
-        ratio > 1 ? AppColors.negative : AppColors.positive;
+    final ringColor = ratio > 1 ? AppColors.negative : AppColors.positive;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -80,8 +79,7 @@ class _TodayView extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = state.target;
     return ListView(
-      padding:
-          const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
         const SectionHeader('Calories'),
         AppCard(
@@ -110,8 +108,8 @@ class _TodayView extends StatelessWidget {
                 children: [
                   _Macro('Protein', state.consumedProtein, t.protein,
                       AppColors.protein),
-                  _Macro('Carbs', state.consumedCarbs, t.carbs,
-                      AppColors.carbs),
+                  _Macro(
+                      'Carbs', state.consumedCarbs, t.carbs, AppColors.carbs),
                   _Macro('Fats', state.consumedFats, t.fats, AppColors.fats),
                 ],
               ),
@@ -136,8 +134,7 @@ class _MealsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final eaten = state.meals.where((m) => m.eaten).length;
     return ListView(
-      padding:
-          const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
         SectionHeader('Meals logged · $eaten/${state.meals.length}'),
         for (final m in state.meals)
@@ -156,7 +153,8 @@ class _AnalyticsView extends StatelessWidget {
     return const EmptyState(
       icon: Icons.insights,
       title: 'Analytics',
-      message: 'Weekly calorie and macro trends will appear here\nonce meal history is being logged.',
+      message:
+          'Weekly calorie and macro trends will appear here\nonce meal history is being logged.',
     );
   }
 }
@@ -218,7 +216,8 @@ class _MealRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(meal.name, style: AppTheme.body(15, weight: FontWeight.w700)),
+                  Text(meal.name,
+                      style: AppTheme.body(15, weight: FontWeight.w700)),
                   const SizedBox(height: 2),
                   Text(meal.items,
                       style: AppTheme.body(12,

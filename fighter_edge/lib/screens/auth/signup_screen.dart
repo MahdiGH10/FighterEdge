@@ -58,8 +58,7 @@ class _SignupScreenState extends State<SignupScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: Insets.sm),
-            Text('Start your camp',
-                style: AppTheme.display(22)),
+            Text('Start your camp', style: AppTheme.display(22)),
             const SizedBox(height: Insets.xs),
             Text('Track training, weight, nutrition and more.',
                 style: AppTheme.body(13, color: AppColors.textSecondary)),

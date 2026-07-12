@@ -43,7 +43,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       title: 'Reset Password',
       showBack: true,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(Insets.xl, Insets.lg, Insets.xl, Insets.xxl),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.xl, Insets.lg, Insets.xl, Insets.xxl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

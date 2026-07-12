@@ -23,7 +23,8 @@ class FilterChips extends StatelessWidget {
     final chips = <Widget>[
       for (int i = 0; i < options.length; i++)
         Padding(
-          padding: EdgeInsets.only(right: i == options.length - 1 ? 0 : Insets.sm),
+          padding:
+              EdgeInsets.only(right: i == options.length - 1 ? 0 : Insets.sm),
           child: _Chip(
             label: options[i],
             selected: i == selectedIndex,
@@ -48,7 +49,8 @@ class _Chip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _Chip({required this.label, required this.selected, required this.onTap});
+  const _Chip(
+      {required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

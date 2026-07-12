@@ -6,8 +6,9 @@ import '../../theme/app_theme.dart';
 
 /// Shows a branded error snackbar for an auth failure.
 void showAuthError(BuildContext context, Object error) {
-  final message =
-      error is AuthException ? error.message : 'Something went wrong. Try again.';
+  final message = error is AuthException
+      ? error.message
+      : 'Something went wrong. Try again.';
   showAuthMessage(context, message);
 }
 
@@ -78,8 +79,7 @@ class SocialButton extends StatelessWidget {
             children: [
               Icon(icon, size: 20, color: AppColors.textPrimary),
               const SizedBox(width: Insets.md),
-              Text(label,
-                  style: AppTheme.body(14, weight: FontWeight.w600)),
+              Text(label, style: AppTheme.body(14, weight: FontWeight.w600)),
             ],
           ),
         ),

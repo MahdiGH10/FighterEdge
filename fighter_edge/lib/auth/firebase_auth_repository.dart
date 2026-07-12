@@ -161,7 +161,8 @@ class FirebaseAuthRepository implements AuthRepository {
     required String email,
     required String code,
   }) async {
-    throw const AuthException('unsupported', 'Email-link sign-in isn\'t set up yet.');
+    throw const AuthException(
+        'unsupported', 'Email-link sign-in isn\'t set up yet.');
   }
 
   @override
@@ -173,7 +174,8 @@ class FirebaseAuthRepository implements AuthRepository {
     // payments, move this to a Cloud Function triggered by a verified payment
     // webhook and forbid client `plan` writes in Firestore rules.
     try {
-      await _doc(user.id).set({'plan': user.plan.name}, SetOptions(merge: true));
+      await _doc(user.id)
+          .set({'plan': user.plan.name}, SetOptions(merge: true));
     } catch (e) {
       debugPrint('[auth] updatePlan Firestore write failed: $e');
     }
@@ -186,7 +188,9 @@ class FirebaseAuthRepository implements AuthRepository {
       'email-already-in-use' => 'An account with this email already exists.',
       'invalid-email' => 'Enter a valid email address.',
       'weak-password' => 'Password must be at least 6 characters.',
-      'user-not-found' || 'wrong-password' || 'invalid-credential' =>
+      'user-not-found' ||
+      'wrong-password' ||
+      'invalid-credential' =>
         'Incorrect email or password.',
       'network-request-failed' => 'Network error. Check your connection.',
       'popup-closed-by-user' || 'cancelled' => 'Sign-in cancelled.',

@@ -18,9 +18,17 @@ class PaywallScreen extends StatelessWidget {
   static const _benefits = [
     ('Corner Coach', 'Round-by-round AI game plan', Icons.record_voice_over),
     ('All Timer Presets', 'Boxing, MMA & BJJ interval sets', Icons.timer),
-    ('Unlimited Weight History', 'Full trend history & analytics', Icons.show_chart),
+    (
+      'Unlimited Weight History',
+      'Full trend history & analytics',
+      Icons.show_chart
+    ),
     ('Nutrition Analytics', 'Weekly macro & calorie insights', Icons.insights),
-    ('Full Technique Library', 'Every discipline, unlocked', Icons.sports_martial_arts),
+    (
+      'Full Technique Library',
+      'Every discipline, unlocked',
+      Icons.sports_martial_arts
+    ),
   ];
 
   @override
@@ -89,12 +97,10 @@ class PaywallScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text('\$9.99 / month',
-                      style: AppTheme.display(24)),
+                  Text('\$9.99 / month', style: AppTheme.display(24)),
                   const SizedBox(height: 2),
                   Text('Cancel anytime',
-                      style:
-                          AppTheme.body(12, color: AppColors.textSecondary)),
+                      style: AppTheme.body(12, color: AppColors.textSecondary)),
                 ],
               ),
             ),

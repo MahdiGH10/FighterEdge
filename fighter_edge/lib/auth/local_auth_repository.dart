@@ -37,8 +37,7 @@ class LocalAuthRepository implements AuthRepository {
     if (email != null) {
       final account = _accounts()[email];
       if (account != null) {
-        _current = AppUser.fromJson(
-            account['user'] as Map<String, dynamic>);
+        _current = AppUser.fromJson(account['user'] as Map<String, dynamic>);
       }
     }
     _controller.add(_current);
@@ -111,8 +110,7 @@ class LocalAuthRepository implements AuthRepository {
       _signInSocial('google', 'Google Athlete');
 
   @override
-  Future<AppUser> signInWithApple() =>
-      _signInSocial('apple', 'Apple Athlete');
+  Future<AppUser> signInWithApple() => _signInSocial('apple', 'Apple Athlete');
 
   @override
   Future<void> sendMagicLink(String email) async {
@@ -219,12 +217,12 @@ class LocalAuthRepository implements AuthRepository {
   void _validateEmail(String email) {
     final re = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
     if (!re.hasMatch(email)) {
-      throw const AuthException('invalid-email', 'Enter a valid email address.');
+      throw const AuthException(
+          'invalid-email', 'Enter a valid email address.');
     }
   }
 
-  String _newId() =>
-      'local_${DateTime.now().microsecondsSinceEpoch}';
+  String _newId() => 'local_${DateTime.now().microsecondsSinceEpoch}';
 
   void dispose() => _controller.close();
 }

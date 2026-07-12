@@ -56,8 +56,8 @@ class AppHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-          Insets.lg, Insets.md, Insets.lg, Insets.md),
+      padding:
+          const EdgeInsets.fromLTRB(Insets.lg, Insets.md, Insets.lg, Insets.md),
       child: Row(
         children: [
           if (showBack)

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class TrainingSession {
-  final String day;      // Mon, Tue...
-  final String title;    // Striking
+  final String day; // Mon, Tue...
+  final String title; // Striking
   final String subtitle; // Boxing + Combinations
   final IconData icon;
   final bool completed;

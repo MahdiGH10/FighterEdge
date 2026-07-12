@@ -54,7 +54,8 @@ class DashboardScreen extends StatelessWidget {
                           deltaIcon: losing
                               ? Icons.arrow_downward
                               : Icons.arrow_upward,
-                          onTap: () => _push(context, const WeightTrackerScreen()),
+                          onTap: () =>
+                              _push(context, const WeightTrackerScreen()),
                         ),
                       ),
                       const SizedBox(width: Insets.md),
@@ -170,7 +171,8 @@ class _NextSessionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Fight Camp', style: AppTheme.body(15, weight: FontWeight.w700)),
+                Text('Fight Camp',
+                    style: AppTheme.body(15, weight: FontWeight.w700)),
                 const SizedBox(height: 2),
                 Text('Striking · 60 min',
                     style: AppTheme.body(12,
@@ -212,7 +214,8 @@ class _ActivityRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(a.title, style: AppTheme.body(14, weight: FontWeight.w600)),
+                  Text(a.title,
+                      style: AppTheme.body(14, weight: FontWeight.w600)),
                   const SizedBox(height: 2),
                   Text(a.subtitle,
                       style: AppTheme.body(12,
@@ -250,7 +253,8 @@ class FighterAvatar extends StatelessWidget {
         ),
         border: Border.all(color: AppColors.primary, width: 1.5),
       ),
-      child: Icon(Icons.person, size: size * 0.55, color: AppColors.textSecondary),
+      child:
+          Icon(Icons.person, size: size * 0.55, color: AppColors.textSecondary),
     );
   }
 }

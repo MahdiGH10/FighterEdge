@@ -56,7 +56,8 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
       title: 'Email Sign-In',
       showBack: true,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(Insets.xl, Insets.lg, Insets.xl, Insets.xxl),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.xl, Insets.lg, Insets.xl, Insets.xxl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

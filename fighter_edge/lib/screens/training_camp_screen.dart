@@ -131,7 +131,8 @@ class _SessionRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(s.title, style: AppTheme.body(14, weight: FontWeight.w700)),
+                  Text(s.title,
+                      style: AppTheme.body(14, weight: FontWeight.w700)),
                   const SizedBox(height: 2),
                   Text(s.subtitle,
                       style: AppTheme.body(12,

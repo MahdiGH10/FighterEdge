@@ -65,7 +65,8 @@ void main() {
         throwsA(isA<AuthException>()
             .having((e) => e.code, 'code', 'user-not-found')),
       );
-      final u = await repo.signInWithEmail(email: 'a@b.com', password: 'secret1');
+      final u =
+          await repo.signInWithEmail(email: 'a@b.com', password: 'secret1');
       expect(u.email, 'a@b.com');
     });
 

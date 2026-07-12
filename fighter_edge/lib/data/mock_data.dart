@@ -33,10 +33,11 @@ class MockData {
   static const todayIndex = 2; // Wednesday highlighted
 
   static const recentActivity = <ActivityEntry>[
-    ActivityEntry('Strength Training', 'Upper Body', 'Yesterday',
-        Icons.fitness_center),
+    ActivityEntry(
+        'Strength Training', 'Upper Body', 'Yesterday', Icons.fitness_center),
     ActivityEntry('Mobility', 'Hip Flow', '2 days ago', Icons.self_improvement),
-    ActivityEntry('BJJ Rolling', 'Guard Retention', '3 days ago', Icons.sports_mma),
+    ActivityEntry(
+        'BJJ Rolling', 'Guard Retention', '3 days ago', Icons.sports_mma),
   ];
 
   static const week = <TrainingSession>[
@@ -120,10 +121,14 @@ class MockData {
   static const disciplines = ['All', 'Striking', 'Wrestling', 'BJJ', 'Clinch'];
 
   static const coachCues = <CoachCue>[
-    CoachCue('FOCUS', 'Control the pace and stay composed.', Icons.center_focus_strong),
-    CoachCue('DEFENSE', 'Keep your guard high. Avoid unnecessary risks.', Icons.shield),
-    CoachCue('OFFENSE', 'Set up your combinations behind the jab.', Icons.sports_mma),
-    CoachCue('CONDITIONING', 'You\'re strong. Keep your breathing under control.', Icons.favorite),
+    CoachCue('FOCUS', 'Control the pace and stay composed.',
+        Icons.center_focus_strong),
+    CoachCue('DEFENSE', 'Keep your guard high. Avoid unnecessary risks.',
+        Icons.shield),
+    CoachCue('OFFENSE', 'Set up your combinations behind the jab.',
+        Icons.sports_mma),
+    CoachCue('CONDITIONING',
+        'You\'re strong. Keep your breathing under control.', Icons.favorite),
   ];
 
   static const timerStyles = <TimerStyle>[

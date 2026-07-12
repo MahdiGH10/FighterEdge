@@ -24,8 +24,8 @@ class MoreScreen extends StatelessWidget {
           'Round-by-round game plan', const CornerCoachScreen()),
       _MoreEntry(Icons.self_improvement, 'Mobility',
           'Recovery & mobility flows', const _MobilityScreen()),
-      _MoreEntry(Icons.person_outline, 'Profile',
-          'Your fighter stats & goals', const ProfileScreen()),
+      _MoreEntry(Icons.person_outline, 'Profile', 'Your fighter stats & goals',
+          const ProfileScreen()),
     ];
 
     return Scaffold(
@@ -96,7 +96,8 @@ class _MoreRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(e.title, style: AppTheme.body(15, weight: FontWeight.w700)),
+                  Text(e.title,
+                      style: AppTheme.body(15, weight: FontWeight.w700)),
                   const SizedBox(height: 2),
                   Text(e.subtitle,
                       style: AppTheme.body(12,
@@ -125,7 +126,8 @@ class _MobilityScreen extends StatelessWidget {
       body: EmptyState(
         icon: Icons.self_improvement,
         title: 'Mobility Flows',
-        message: 'Guided recovery and mobility routines\nare coming in a future update.',
+        message:
+            'Guided recovery and mobility routines\nare coming in a future update.',
       ),
     );
   }

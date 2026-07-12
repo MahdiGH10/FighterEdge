@@ -37,8 +37,7 @@ void main() {
       await tester.pumpWidget(wrapApp(const LoginScreen(), repo: repo));
       await tester.pump();
 
-      await tester.enterText(
-          find.byType(TextField).at(0), 'nobody@test.com');
+      await tester.enterText(find.byType(TextField).at(0), 'nobody@test.com');
       await tester.enterText(find.byType(TextField).at(1), 'whatever');
       await tester.tap(find.byType(PrimaryButton));
       await tester.pump(); // start async

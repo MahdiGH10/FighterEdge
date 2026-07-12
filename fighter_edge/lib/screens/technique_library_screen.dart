@@ -22,7 +22,8 @@ class _TechniqueLibraryScreenState extends State<TechniqueLibraryScreen> {
   List<Technique> get _visible {
     final discipline = MockData.disciplines[_filter];
     return MockData.techniques.where((t) {
-      final matchesDiscipline = discipline == 'All' || t.discipline == discipline;
+      final matchesDiscipline =
+          discipline == 'All' || t.discipline == discipline;
       final matchesQuery = _query.isEmpty ||
           t.title.toLowerCase().contains(_query.toLowerCase()) ||
           t.category.toLowerCase().contains(_query.toLowerCase());
@@ -90,7 +91,8 @@ class _SearchField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: 'Search techniques',
         hintStyle: AppTheme.body(14, color: AppColors.textMuted),
-        prefixIcon: const Icon(Icons.search, color: AppColors.textMuted, size: 20),
+        prefixIcon:
+            const Icon(Icons.search, color: AppColors.textMuted, size: 20),
         filled: true,
         fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.symmetric(vertical: 0),
@@ -144,7 +146,8 @@ class _TechniqueCard extends StatelessWidget {
                           color: AppColors.primary,
                           spacing: 0.8)),
                   const SizedBox(height: 3),
-                  Text(t.title, style: AppTheme.body(15, weight: FontWeight.w700)),
+                  Text(t.title,
+                      style: AppTheme.body(15, weight: FontWeight.w700)),
                   const SizedBox(height: 3),
                   Text('${t.videoCount} videos',
                       style: AppTheme.body(12,
@@ -160,7 +163,8 @@ class _TechniqueCard extends StatelessWidget {
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.play_arrow, color: Colors.white, size: 22),
+              child:
+                  const Icon(Icons.play_arrow, color: Colors.white, size: 22),
             ),
           ],
         ),
