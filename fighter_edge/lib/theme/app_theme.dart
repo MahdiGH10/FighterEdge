@@ -19,6 +19,15 @@ class Radii {
   static const double card = 20;
   static const double button = 14;
   static const double chip = 100;
+  static const double nav = 24;
+}
+
+class MotionTokens {
+  MotionTokens._();
+  static const Duration fast = Duration(milliseconds: 160);
+  static const Duration standard = Duration(milliseconds: 260);
+  static const Duration reveal = Duration(milliseconds: 420);
+  static const Curve emphasized = Cubic(0.2, 0.8, 0.2, 1);
 }
 
 class AppTheme {
@@ -39,7 +48,7 @@ class AppTheme {
   /// Body / UI font.
   static TextStyle body(double size,
       {FontWeight weight = FontWeight.w500, Color? color, double? spacing}) {
-    return GoogleFonts.inter(
+    return GoogleFonts.manrope(
       fontSize: size,
       fontWeight: weight,
       color: color ?? AppColors.textPrimary,
@@ -56,13 +65,17 @@ class AppTheme {
         secondary: AppColors.primary,
         surface: AppColors.surface,
       ),
-      textTheme: GoogleFonts.interTextTheme(base.textTheme).apply(
+      textTheme: GoogleFonts.manropeTextTheme(base.textTheme).apply(
         bodyColor: AppColors.textPrimary,
         displayColor: AppColors.textPrimary,
       ),
       dividerColor: AppColors.border,
       splashColor: AppColors.primarySoft,
       highlightColor: Colors.transparent,
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
     );
   }
 }

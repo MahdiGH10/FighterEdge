@@ -9,6 +9,9 @@ class AppCard extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
   final Color? color;
+  final Color? accent;
+  final Gradient? gradient;
+  final bool elevated;
 
   const AppCard({
     super.key,
@@ -16,24 +19,45 @@ class AppCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(Insets.lg),
     this.onTap,
     this.color,
+    this.accent,
+    this.gradient,
+    this.elevated = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final content = Container(
-      padding: padding,
+    final borderColor = accent?.withValues(alpha: .42) ?? AppColors.border;
+    final content = Ink(
       decoration: BoxDecoration(
-        color: color ?? AppColors.surface,
+        color: gradient == null ? color ?? AppColors.surfaceGlass : null,
+        gradient: gradient,
         borderRadius: BorderRadius.circular(Radii.card),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderColor),
+        boxShadow: elevated
+            ? [
+                BoxShadow(
+                  color: (accent ?? Colors.black).withValues(alpha: .16),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
+                ),
+              ]
+            : null,
       ),
-      child: child,
+      child: Padding(padding: padding, child: child),
     );
     if (onTap == null) return content;
-    return InkWell(
-      borderRadius: BorderRadius.circular(Radii.card),
-      onTap: onTap,
-      child: content,
+    return Semantics(
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(Radii.card),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(Radii.card),
+          onTap: onTap,
+          child: content,
+        ),
+      ),
     );
   }
 }
@@ -47,6 +71,7 @@ class StatCard extends StatelessWidget {
   final Color deltaColor;
   final IconData? deltaIcon;
   final VoidCallback? onTap;
+  final Color? accent;
 
   const StatCard({
     super.key,
@@ -57,12 +82,14 @@ class StatCard extends StatelessWidget {
     this.deltaColor = AppColors.positive,
     this.deltaIcon,
     this.onTap,
+    this.accent,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppCard(
       onTap: onTap,
+      accent: accent,
       padding: const EdgeInsets.symmetric(
           horizontal: Insets.md, vertical: Insets.lg),
       child: Column(
@@ -77,21 +104,27 @@ class StatCard extends StatelessWidget {
                 spacing: 0.8),
           ),
           const SizedBox(height: Insets.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(value, style: AppTheme.display(24)),
-              if (unit.isNotEmpty) ...[
-                const SizedBox(width: 3),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 3),
-                  child: Text(unit,
-                      style: AppTheme.body(11,
-                          weight: FontWeight.w600, color: AppColors.textMuted)),
-                ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(value, style: AppTheme.display(24)),
+                if (unit.isNotEmpty) ...[
+                  const SizedBox(width: 3),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: Text(unit,
+                        style: AppTheme.body(11,
+                            weight: FontWeight.w600,
+                            color: AppColors.textMuted)),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
           if (delta != null) ...[
             const SizedBox(height: Insets.xs),

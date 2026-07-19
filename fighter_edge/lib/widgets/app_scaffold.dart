@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import 'premium_effects.dart';
 
 /// Standard screen scaffold: dark header with title + optional actions,
 /// then a scrollable body. Used by the secondary (non-tab) screens.
@@ -29,13 +30,15 @@ class ScreenScaffold extends StatelessWidget {
       backgroundColor: AppColors.background,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNav,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            AppHeader(title: title, actions: actions, showBack: showBack),
-            Expanded(child: body),
-          ],
+      body: PremiumBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              AppHeader(title: title, actions: actions, showBack: showBack),
+              Expanded(child: body),
+            ],
+          ),
         ),
       ),
     );
@@ -87,12 +90,16 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(6),
-        child: Icon(icon, color: AppColors.textPrimary, size: 26),
+    return Semantics(
+      button: true,
+      label: 'Back',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: SizedBox.square(
+          dimension: 44,
+          child: Icon(icon, color: AppColors.textPrimary, size: 26),
+        ),
       ),
     );
   }
@@ -105,12 +112,15 @@ class HeaderIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(6),
-        child: Icon(icon, color: AppColors.textSecondary, size: 22),
+    return Semantics(
+      button: onTap != null,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: SizedBox.square(
+          dimension: 44,
+          child: Icon(icon, color: AppColors.textSecondary, size: 22),
+        ),
       ),
     );
   }
