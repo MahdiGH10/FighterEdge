@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
 import '../models/training_session.dart';
+import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
@@ -64,6 +65,7 @@ class _WeekView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
@@ -89,7 +91,8 @@ class _WeekView extends StatelessWidget {
             style: AppTheme.body(12,
                 weight: FontWeight.w500, color: AppColors.textSecondary)),
         const SizedBox(height: Insets.lg),
-        for (final s in MockData.week) _SessionRow(s),
+        for (final s in state.sessions)
+          _SessionRow(s, onToggle: () => state.toggleSession(s)),
       ],
     );
   }
@@ -97,13 +100,15 @@ class _WeekView extends StatelessWidget {
 
 class _SessionRow extends StatelessWidget {
   final TrainingSession s;
-  const _SessionRow(this.s);
+  final VoidCallback onToggle;
+  const _SessionRow(this.s, {required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: Insets.md),
       child: AppCard(
+        onTap: onToggle,
         padding: const EdgeInsets.all(Insets.md),
         child: Row(
           children: [
