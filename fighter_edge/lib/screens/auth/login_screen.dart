@@ -55,122 +55,152 @@ class _LoginScreenState extends State<LoginScreen> {
         auth.supportsGoogle || auth.supportsApple || auth.supportsMagicLink;
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(Insets.xl),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: Insets.xl),
-                  const BrandLogo(scale: 1.1),
-                  const SizedBox(height: Insets.xxl),
-                  Text('Welcome back',
-                      textAlign: TextAlign.center, style: AppTheme.display(22)),
-                  const SizedBox(height: Insets.xs),
-                  Text('Sign in to continue your camp',
-                      textAlign: TextAlign.center,
-                      style: AppTheme.body(13, color: AppColors.textSecondary)),
-                  const SizedBox(height: Insets.xl),
-                  AppTextField(
-                    controller: _email,
-                    label: 'Email',
-                    icon: Icons.mail_outline,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: Insets.md),
-                  AppTextField(
-                    controller: _password,
-                    label: 'Password',
-                    icon: Icons.lock_outline,
-                    obscure: _obscure,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _signIn(),
-                    suffix: IconButton(
-                      icon: Icon(
-                          _obscure ? Icons.visibility_off : Icons.visibility,
-                          color: AppColors.textMuted,
-                          size: 20),
-                      onPressed: () => setState(() => _obscure = !_obscure),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (_) => const ForgotPasswordScreen())),
-                      child: Text('Forgot password?',
-                          style: AppTheme.body(12,
-                              weight: FontWeight.w600,
-                              color: AppColors.primary)),
-                    ),
-                  ),
-                  const SizedBox(height: Insets.sm),
-                  PrimaryButton(
-                    auth.isBusy ? 'Signing in…' : 'Sign In',
-                    expand: true,
-                    onPressed: auth.isBusy ? null : _signIn,
-                  ),
-                  if (hasSecondaryAuth) ...[
-                    const SizedBox(height: Insets.xl),
-                    const OrDivider(),
-                    const SizedBox(height: Insets.xl),
-                    if (auth.supportsGoogle) ...[
-                      SocialButton(
-                        icon: Icons.g_mobiledata,
-                        label: 'Continue with Google',
-                        onPressed: auth.isBusy
-                            ? null
-                            : () => _social(auth.signInWithGoogle),
-                      ),
-                      const SizedBox(height: Insets.md),
-                    ],
-                    if (auth.supportsApple) ...[
-                      SocialButton(
-                        icon: Icons.apple,
-                        label: 'Continue with Apple',
-                        onPressed: auth.isBusy
-                            ? null
-                            : () => _social(auth.signInWithApple),
-                      ),
-                      const SizedBox(height: Insets.md),
-                    ],
-                    if (auth.supportsMagicLink)
-                      SocialButton(
-                        icon: Icons.mail_lock_outlined,
-                        label: 'Email me a sign-in code',
-                        onPressed: auth.isBusy
-                            ? null
-                            : () => Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => const MagicLinkScreen())),
-                      ),
-                  ],
-                  const SizedBox(height: Insets.xl),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("New here? ",
-                          style: AppTheme.body(13,
-                              color: AppColors.textSecondary)),
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) => const SignupScreen())),
-                        child: Text('Create account',
-                            style: AppTheme.body(13,
-                                weight: FontWeight.w700,
-                                color: AppColors.primary)),
-                      ),
-                    ],
-                  ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/login_background.png',
+            fit: BoxFit.cover,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.background.withValues(alpha: 0.55),
+                  AppColors.background.withValues(alpha: 0.88),
+                  AppColors.background,
                 ],
+                stops: const [0.0, 0.45, 0.85],
               ),
             ),
           ),
-        ),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(Insets.xl),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: Insets.xl),
+                      const BrandLogo(scale: 1.1),
+                      const SizedBox(height: Insets.xxl),
+                      Text('Welcome back',
+                          textAlign: TextAlign.center,
+                          style: AppTheme.display(22)),
+                      const SizedBox(height: Insets.xs),
+                      Text('Sign in to continue your camp',
+                          textAlign: TextAlign.center,
+                          style: AppTheme.body(13,
+                              color: AppColors.textSecondary)),
+                      const SizedBox(height: Insets.xl),
+                      AppTextField(
+                        controller: _email,
+                        label: 'Email',
+                        icon: Icons.mail_outline,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: Insets.md),
+                      AppTextField(
+                        controller: _password,
+                        label: 'Password',
+                        icon: Icons.lock_outline,
+                        obscure: _obscure,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _signIn(),
+                        suffix: IconButton(
+                          icon: Icon(
+                              _obscure
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: AppColors.textMuted,
+                              size: 20),
+                          onPressed: () => setState(() => _obscure = !_obscure),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      const ForgotPasswordScreen())),
+                          child: Text('Forgot password?',
+                              style: AppTheme.body(12,
+                                  weight: FontWeight.w600,
+                                  color: AppColors.primary)),
+                        ),
+                      ),
+                      const SizedBox(height: Insets.sm),
+                      PrimaryButton(
+                        auth.isBusy ? 'Signing in…' : 'Sign In',
+                        expand: true,
+                        onPressed: auth.isBusy ? null : _signIn,
+                      ),
+                      if (hasSecondaryAuth) ...[
+                        const SizedBox(height: Insets.xl),
+                        const OrDivider(),
+                        const SizedBox(height: Insets.xl),
+                        if (auth.supportsGoogle) ...[
+                          SocialButton(
+                            icon: Icons.g_mobiledata,
+                            label: 'Continue with Google',
+                            onPressed: auth.isBusy
+                                ? null
+                                : () => _social(auth.signInWithGoogle),
+                          ),
+                          const SizedBox(height: Insets.md),
+                        ],
+                        if (auth.supportsApple) ...[
+                          SocialButton(
+                            icon: Icons.apple,
+                            label: 'Continue with Apple',
+                            onPressed: auth.isBusy
+                                ? null
+                                : () => _social(auth.signInWithApple),
+                          ),
+                          const SizedBox(height: Insets.md),
+                        ],
+                        if (auth.supportsMagicLink)
+                          SocialButton(
+                            icon: Icons.mail_lock_outlined,
+                            label: 'Email me a sign-in code',
+                            onPressed: auth.isBusy
+                                ? null
+                                : () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (_) =>
+                                            const MagicLinkScreen())),
+                          ),
+                      ],
+                      const SizedBox(height: Insets.xl),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("New here? ",
+                              style: AppTheme.body(13,
+                                  color: AppColors.textSecondary)),
+                          GestureDetector(
+                            onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (_) => const SignupScreen())),
+                            child: Text('Create account',
+                                style: AppTheme.body(13,
+                                    weight: FontWeight.w700,
+                                    color: AppColors.primary)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

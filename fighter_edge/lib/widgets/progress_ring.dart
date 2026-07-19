@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 
 /// A circular progress arc (used for weekly overview dots and timer/calorie rings).
 class ProgressRing extends StatelessWidget {
@@ -25,16 +26,25 @@ class ProgressRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _RingPainter(
-          progress: progress.clamp(0.0, 1.0),
-          strokeWidth: strokeWidth,
-          color: color,
-          trackColor: trackColor,
-        ),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(end: progress.clamp(0.0, 1.0)),
+        duration: reduceMotion ? Duration.zero : MotionTokens.standard,
+        curve: MotionTokens.emphasized,
+        builder: (context, value, builtChild) {
+          return CustomPaint(
+            painter: _RingPainter(
+              progress: value,
+              strokeWidth: strokeWidth,
+              color: color,
+              trackColor: trackColor,
+            ),
+            child: builtChild,
+          );
+        },
         child: child == null ? null : Center(child: child),
       ),
     );
@@ -86,5 +96,6 @@ class _RingPainter extends CustomPainter {
   bool shouldRepaint(_RingPainter old) =>
       old.progress != progress ||
       old.color != color ||
-      old.strokeWidth != strokeWidth;
+      old.strokeWidth != strokeWidth ||
+      old.trackColor != trackColor;
 }

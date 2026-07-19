@@ -11,7 +11,6 @@ dependencies:
     sdk: flutter
   provider: ^6.1.2
   fl_chart: ^0.68.0
-  google_fonts: ^6.2.1
   intl: ^0.19.0
   shared_preferences: ^2.2.3
   crypto: ^3.0.3
@@ -28,3 +27,13 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/login_background.png
+  fonts:
+    - family: Oswald
+      fonts:
+        - asset: assets/fonts/Oswald-Variable.ttf
+          weight: 700
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf

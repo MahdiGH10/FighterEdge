@@ -174,7 +174,7 @@ class _ProfileHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GradientText(name, style: AppTheme.display(24)),
+              Text(name, style: AppTheme.display(24)),
               const SizedBox(height: 2),
               Text(tagline,
                   style: AppTheme.body(13,

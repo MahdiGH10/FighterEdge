@@ -112,7 +112,7 @@ class StatCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Text(value, style: AppTheme.display(24)),
+                _AnimatedMetricValue(value: value),
                 if (unit.isNotEmpty) ...[
                   const SizedBox(width: 3),
                   Padding(
@@ -141,6 +141,31 @@ class StatCard extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+class _AnimatedMetricValue extends StatelessWidget {
+  final String value;
+
+  const _AnimatedMetricValue({required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final numeric = double.tryParse(value);
+    if (numeric == null || MediaQuery.disableAnimationsOf(context)) {
+      return Text(value, style: AppTheme.display(24));
+    }
+
+    final decimals = value.contains('.') ? value.split('.').last.length : 0;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: numeric),
+      duration: MotionTokens.standard,
+      curve: MotionTokens.emphasized,
+      builder: (context, animated, _) {
+        return Text(animated.toStringAsFixed(decimals),
+            style: AppTheme.display(24));
+      },
     );
   }
 }

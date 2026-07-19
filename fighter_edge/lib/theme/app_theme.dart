@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
@@ -36,7 +35,8 @@ class AppTheme {
   /// Condensed athletic font for headings / big numbers.
   static TextStyle display(double size,
       {FontWeight weight = FontWeight.w700, Color? color, double? spacing}) {
-    return GoogleFonts.oswald(
+    return TextStyle(
+      fontFamily: 'Oswald',
       fontSize: size,
       fontWeight: weight,
       color: color ?? AppColors.textPrimary,
@@ -48,7 +48,8 @@ class AppTheme {
   /// Body / UI font.
   static TextStyle body(double size,
       {FontWeight weight = FontWeight.w500, Color? color, double? spacing}) {
-    return GoogleFonts.manrope(
+    return TextStyle(
+      fontFamily: 'Inter',
       fontSize: size,
       fontWeight: weight,
       color: color ?? AppColors.textPrimary,
@@ -65,16 +66,66 @@ class AppTheme {
         secondary: AppColors.primary,
         surface: AppColors.surface,
       ),
-      textTheme: GoogleFonts.manropeTextTheme(base.textTheme).apply(
-        bodyColor: AppColors.textPrimary,
-        displayColor: AppColors.textPrimary,
-      ),
+      textTheme: base.textTheme
+          .apply(
+            fontFamily: 'Inter',
+            bodyColor: AppColors.textPrimary,
+            displayColor: AppColors.textPrimary,
+          )
+          .copyWith(
+            displayLarge: display(32),
+            displayMedium: display(28),
+            displaySmall: display(24),
+          ),
       dividerColor: AppColors.border,
       splashColor: AppColors.primarySoft,
       highlightColor: Colors.transparent,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: _FighterEdgePageTransitionsBuilder(),
+          TargetPlatform.iOS: _FighterEdgePageTransitionsBuilder(),
+          TargetPlatform.macOS: _FighterEdgePageTransitionsBuilder(),
+          TargetPlatform.windows: _FighterEdgePageTransitionsBuilder(),
+          TargetPlatform.linux: _FighterEdgePageTransitionsBuilder(),
+        },
+      ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.transparent,
         elevation: 0,
+      ),
+    );
+  }
+}
+
+class _FighterEdgePageTransitionsBuilder extends PageTransitionsBuilder {
+  const _FighterEdgePageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (route.settings.name == Navigator.defaultRouteName ||
+        MediaQuery.disableAnimationsOf(context)) {
+      return child;
+    }
+
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: MotionTokens.emphasized,
+      reverseCurve: Curves.easeInCubic,
+    );
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, .025),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
       ),
     );
   }

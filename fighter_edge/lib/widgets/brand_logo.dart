@@ -13,16 +13,42 @@ class BrandLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: 56 * scale,
-          height: 56 * scale,
-          decoration: BoxDecoration(
-            color: AppColors.primarySoft,
-            borderRadius: BorderRadius.circular(16 * scale),
-            border: Border.all(color: AppColors.primary, width: 2),
+        SizedBox(
+          width: 58 * scale,
+          height: 58 * scale,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundRaised,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.primary, width: 2),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: AppColors.primaryGlow,
+                      blurRadius: 18,
+                      offset: Offset(0, 8),
+                    ),
+                  ],
+                ),
+              ),
+              Transform.rotate(
+                angle: .56,
+                child: Container(
+                  width: 7 * scale,
+                  height: 48 * scale,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBright,
+                    borderRadius: BorderRadius.circular(8 * scale),
+                  ),
+                ),
+              ),
+              Text('FE',
+                  style: AppTheme.display(22 * scale,
+                      weight: FontWeight.w800, spacing: .4)),
+            ],
           ),
-          child: Icon(Icons.sports_mma,
-              color: AppColors.primary, size: 30 * scale),
         ),
         SizedBox(height: 14 * scale),
         RichText(

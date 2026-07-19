@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/screens/dashboard_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
+import 'package:fighter_edge/theme/app_theme.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -35,7 +36,7 @@ void main() {
     await tester.pump();
 
     state.addWeight(DateTime.now(), 75.0);
-    await tester.pump();
+    await tester.pumpAndSettle(MotionTokens.standard);
     expect(find.text('75.0'), findsWidgets);
   });
 

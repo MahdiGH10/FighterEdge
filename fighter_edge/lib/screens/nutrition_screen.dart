@@ -244,8 +244,10 @@ class _Check extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
+      duration: reduceMotion ? Duration.zero : MotionTokens.fast,
+      curve: MotionTokens.emphasized,
       width: 26,
       height: 26,
       decoration: BoxDecoration(
@@ -256,9 +258,16 @@ class _Check extends StatelessWidget {
           width: 2,
         ),
       ),
-      child: checked
-          ? const Icon(Icons.check, size: 16, color: Colors.white)
-          : null,
+      child: AnimatedSwitcher(
+        duration: reduceMotion ? Duration.zero : MotionTokens.fast,
+        transitionBuilder: (child, animation) {
+          return ScaleTransition(scale: animation, child: child);
+        },
+        child: checked
+            ? const Icon(Icons.check,
+                key: ValueKey('meal-check'), size: 16, color: Colors.white)
+            : const SizedBox(key: ValueKey('meal-empty')),
+      ),
     );
   }
 }

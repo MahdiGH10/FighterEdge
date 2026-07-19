@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../data/mock_data.dart';
 import '../models/coach_cue.dart';
@@ -88,15 +89,18 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
           _running = false;
           _ticker?.cancel();
           _secondsLeft = 0;
+          HapticFeedback.heavyImpact();
         } else {
           _phase = _Phase.rest;
           _secondsLeft = _style.restSeconds;
+          HapticFeedback.mediumImpact();
         }
       } else {
         // rest -> next work round
         _round++;
         _phase = _Phase.work;
         _secondsLeft = _style.workSeconds;
+        HapticFeedback.mediumImpact();
       }
     });
   }
@@ -137,6 +141,8 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final urgent = _running && _phase == _Phase.work && _secondsLeft <= 10;
     return ScreenScaffold(
       title: 'Round Timer',
       showBack: true,
@@ -158,22 +164,40 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
             const SizedBox(height: 2),
             Text('$_round / ${_style.rounds}', style: AppTheme.display(22)),
             const SizedBox(height: Insets.xl),
-            ProgressRing(
-              progress: _progress,
-              size: 260,
-              strokeWidth: 12,
-              color: _phaseColor,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_clock,
-                      style:
-                          AppTheme.display(64, color: AppColors.textPrimary)),
-                  const SizedBox(height: Insets.xs),
-                  Text(_phaseLabel,
-                      style:
-                          AppTheme.display(18, color: _phaseColor, spacing: 3)),
-                ],
+            TweenAnimationBuilder<double>(
+              key: ValueKey(urgent ? _secondsLeft : _phaseLabel),
+              tween: Tween(begin: urgent ? 1.035 : 1.0, end: 1.0),
+              duration: reduceMotion
+                  ? Duration.zero
+                  : const Duration(milliseconds: 420),
+              curve: Curves.easeOutCubic,
+              builder: (context, scale, child) {
+                return Transform.scale(scale: scale, child: child);
+              },
+              child: ProgressRing(
+                progress: _progress,
+                size: 260,
+                strokeWidth: urgent ? 14 : 12,
+                color: _phaseColor,
+                trackColor: urgent
+                    ? AppColors.primarySoft.withValues(alpha: .35)
+                    : AppColors.track,
+                child: AnimatedSwitcher(
+                  duration: reduceMotion ? Duration.zero : MotionTokens.fast,
+                  child: Column(
+                    key: ValueKey('$_clock-$_phaseLabel'),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(_clock,
+                          style: AppTheme.display(64,
+                              color: AppColors.textPrimary)),
+                      const SizedBox(height: Insets.xs),
+                      Text(_phaseLabel,
+                          style: AppTheme.display(18,
+                              color: _phaseColor, spacing: 3)),
+                    ],
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: Insets.xl),

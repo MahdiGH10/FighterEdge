@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../controllers/auth_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/brand_logo.dart';
+import '../../widgets/premium_effects.dart';
 import '../home_shell.dart';
 import 'login_screen.dart';
 
@@ -29,7 +30,11 @@ class _Splash extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: AppColors.background,
-      body: Center(child: BrandLogo(scale: 1.2)),
+      body: PremiumBackground(
+        child: Center(
+          child: PremiumReveal(child: BrandLogo(scale: 1.2)),
+        ),
+      ),
     );
   }
 }
