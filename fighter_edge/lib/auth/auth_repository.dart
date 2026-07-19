@@ -52,6 +52,6 @@ abstract class AuthRepository {
 
   Future<void> signOut();
 
-  /// Persist a plan change for the current user (upgrade to Pro, etc.).
-  Future<AppUser> updatePlan(AppUser user);
+  /// Reload the current user and server-owned entitlement state.
+  Future<AppUser?> refreshCurrentUser();
 }

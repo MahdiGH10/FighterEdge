@@ -9,7 +9,8 @@ import '../helpers/test_harness.dart';
 /// Headless end-to-end journey (runs under `flutter test`). The same flow lives
 /// in integration_test/app_flow_test.dart for on-device / CI driver runs.
 void main() {
-  testWidgets('signup → hit Pro gate → upgrade → unlock → sign out',
+  testWidgets(
+      'signup -> hit Pro gate -> checkout intent stays locked -> sign out',
       (tester) async {
     tester.view.physicalSize = const Size(1400, 3400);
     tester.view.devicePixelRatio = 1.0;
@@ -20,7 +21,7 @@ void main() {
     await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
     await tester.pumpAndSettle();
 
-    // Login → signup.
+    // Login -> signup.
     expect(find.text('Welcome back'), findsOneWidget);
     await tester.tap(find.text('Create account'));
     await tester.pumpAndSettle();
@@ -37,28 +38,29 @@ void main() {
     // Dashboard.
     expect(find.text('DASHBOARD'), findsOneWidget);
 
-    // More → Corner Coach (Pro-gated).
+    // More -> Corner Coach (Pro-gated).
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Corner Coach'));
     await tester.pumpAndSettle();
     expect(find.text('Corner Coach is Pro'), findsOneWidget);
 
-    // Upgrade via paywall.
-    await tester.tap(find.byType(PrimaryButton)); // Unlock with Pro
+    // Checkout intent via paywall. Billing is not wired yet, so this must not
+    // grant Pro from the client.
+    await tester.tap(find.byType(PrimaryButton)); // Unlock with Pro.
     await tester.pumpAndSettle();
     expect(find.text('Unlock your full edge'), findsOneWidget);
-    await tester.tap(find.byType(PrimaryButton)); // Upgrade to Pro
+    await tester.tap(find.byType(PrimaryButton)); // Join Pro Waitlist.
     await tester.pumpAndSettle();
+    expect(find.textContaining('Payments are not active yet'), findsOneWidget);
 
-    // Corner Coach now unlocked.
-    expect(find.text('Corner Coach is Pro'), findsNothing);
-    expect(find.text('ROUND 3'), findsOneWidget);
-    expect(repo.currentUser!.isPro, isTrue);
+    // Corner Coach remains locked until a trusted billing backend grants Pro.
+    expect(repo.currentUser!.isPro, isFalse);
 
-    // Sign out from Profile → back to login.
-    await tester.tap(find.byIcon(Icons.chevron_left)); // custom header back
+    // Sign out from Profile -> back to login.
+    await tester.tap(find.byIcon(Icons.chevron_left)); // Paywall -> lock.
     await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.chevron_left)); // Lock -> More.
     await tester.pumpAndSettle();
     await tester.tap(find.text('Profile'));
     await tester.pumpAndSettle();

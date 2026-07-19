@@ -169,18 +169,14 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<void> signOut() => _auth.signOut();
 
   @override
-  Future<AppUser> updatePlan(AppUser user) async {
-    // NOTE: writing the plan from the client is a demo affordance. Before real
-    // payments, move this to a Cloud Function triggered by a verified payment
-    // webhook and forbid client `plan` writes in Firestore rules.
-    try {
-      await _doc(user.id)
-          .set({'plan': user.plan.name}, SetOptions(merge: true));
-    } catch (e) {
-      debugPrint('[auth] updatePlan Firestore write failed: $e');
+  Future<AppUser?> refreshCurrentUser() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      _cached = null;
+      return null;
     }
-    _cached = user;
-    return user;
+    await user.reload();
+    return _hydrate(_auth.currentUser ?? user);
   }
 
   String _message(FirebaseAuthException e) {

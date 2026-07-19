@@ -41,17 +41,16 @@ void main() {
     expect(auth.isBusy, isFalse);
   });
 
-  test('upgrade flips entitlement gates', () async {
+  test('checkout intent does not grant Pro entitlements from the client',
+      () async {
     final auth = AuthController(repo);
     await auth.signUp('a@b.com', 'secret1', 'A');
     expect(auth.allows(Feature.cornerCoach), isFalse);
 
-    await auth.setPlan(Plan.pro);
-    expect(auth.isPro, isTrue);
-    expect(auth.allows(Feature.cornerCoach), isTrue);
-
-    await auth.setPlan(Plan.free);
+    await expectLater(auth.startProCheckout(), throwsA(anything));
     expect(auth.isPro, isFalse);
+    expect(auth.allows(Feature.cornerCoach), isFalse);
+    expect(auth.isBusy, isFalse);
   });
 
   test('sign-out returns to unauthenticated', () async {

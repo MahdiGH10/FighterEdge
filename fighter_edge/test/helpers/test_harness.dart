@@ -26,7 +26,7 @@ Future<LocalAuthRepository> makeRepo({
     await repo.signUpWithEmail(
         email: testEmail, password: testPassword, displayName: testName);
     if (plan == Plan.pro) {
-      await repo.updatePlan(repo.currentUser!.copyWith(plan: Plan.pro));
+      await repo.debugSetPlan(Plan.pro);
     }
   }
   return repo;

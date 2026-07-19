@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 
-/// Subscription tiers. Payments are not wired yet — upgrading flips the plan
-/// locally so the gating model is fully functional and testable.
+/// Subscription tiers. The client reads this entitlement state, but paid-plan
+/// changes must come from a trusted billing backend/webhook.
 enum Plan { free, pro }
 
 extension PlanInfo on Plan {
@@ -52,10 +52,10 @@ class Entitlements {
     Feature.fullTechniqueLibrary,
   };
 
-  /// Free-tier hard limits (enforced in the UI/business logic).
+  /// Free-tier hard limits enforced in the UI/business logic.
   static const int freeWeightHistoryLimit = 5;
   static const int freeTechniqueLimit = 3;
-  static const int freeTimerStyleCount = 1; // only the first preset
+  static const int freeTimerStyleCount = 1;
 
   static bool isProOnly(Feature f) => _proOnly.contains(f);
 

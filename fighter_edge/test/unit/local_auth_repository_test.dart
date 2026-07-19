@@ -106,10 +106,10 @@ void main() {
       expect(a.email, isNot(g.email));
     });
 
-    test('session + plan persist across a fresh repo', () async {
-      final u = await repo.signUpWithEmail(
+    test('session + debug-seeded plan persist across a fresh repo', () async {
+      await repo.signUpWithEmail(
           email: 'a@b.com', password: 'secret1', displayName: 'A');
-      await repo.updatePlan(u.copyWith(plan: Plan.pro));
+      await repo.debugSetPlan(Plan.pro);
 
       final repo2 = LocalAuthRepository();
       await repo2.init();

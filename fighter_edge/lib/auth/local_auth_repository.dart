@@ -156,12 +156,18 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AppUser> updatePlan(AppUser user) async {
-    await _persistAccount(user, null);
-    if (_current?.id == user.id) {
-      _current = user;
-      _controller.add(_current);
+  Future<AppUser?> refreshCurrentUser() async => _current;
+
+  /// Test/dev-only entitlement seeding. Production UI must never call this.
+  Future<AppUser> debugSetPlan(Plan plan) async {
+    final current = _current;
+    if (current == null) {
+      throw const AuthException('signed-out', 'Sign in before changing plan.');
     }
+    final user = current.copyWith(plan: plan);
+    await _persistAccount(user, null);
+    _current = user;
+    _controller.add(_current);
     return user;
   }
 

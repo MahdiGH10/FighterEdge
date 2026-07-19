@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../auth/auth_repository.dart';
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
 import '../theme/app_colors.dart';
@@ -8,8 +9,8 @@ import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 
-/// Upgrade screen. Payments aren't wired yet — "Upgrade" flips the plan to Pro
-/// locally so the entitlement model is fully demoable.
+/// Upgrade screen. Payments are not wired yet, so this screen collects intent
+/// without granting paid entitlements from the client.
 class PaywallScreen extends StatelessWidget {
   /// Optional feature that triggered the paywall, highlighted at the top.
   final Feature? highlight;
@@ -36,7 +37,7 @@ class PaywallScreen extends StatelessWidget {
     final auth = context.watch<AuthController>();
     final isPro = auth.isPro;
     return ScreenScaffold(
-      title: 'Fighter Edge Pro',
+      title: 'FighterEdge Pro',
       showBack: true,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, Insets.xxl),
@@ -80,10 +81,10 @@ class PaywallScreen extends StatelessWidget {
                 Text('You\'re on Pro',
                     style: AppTheme.display(18, color: AppColors.positive)),
                 const SizedBox(height: Insets.lg),
-                TextButton(
-                  onPressed: () => auth.setPlan(Plan.free),
-                  child: Text('Downgrade to Free (demo)',
-                      style: AppTheme.body(12, color: AppColors.textMuted)),
+                GhostButton(
+                  'Refresh Status',
+                  icon: Icons.refresh,
+                  onPressed: auth.isBusy ? null : auth.refreshCurrentUser,
                 ),
               ],
             )
@@ -106,18 +107,24 @@ class PaywallScreen extends StatelessWidget {
             ),
             const SizedBox(height: Insets.lg),
             PrimaryButton(
-              auth.isBusy ? 'Upgrading…' : 'Upgrade to Pro',
+              auth.isBusy ? 'Opening checkout...' : 'Join Pro Waitlist',
               icon: Icons.bolt,
               expand: true,
               onPressed: auth.isBusy
                   ? null
                   : () async {
-                      await auth.setPlan(Plan.pro);
-                      if (context.mounted) Navigator.of(context).maybePop();
+                      try {
+                        await auth.startProCheckout();
+                      } on AuthException catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.message)),
+                        );
+                      }
                     },
             ),
             const SizedBox(height: Insets.sm),
-            Text('Demo: no real payment is taken.',
+            Text('No payment will be taken until store billing is connected.',
                 textAlign: TextAlign.center,
                 style: AppTheme.body(11, color: AppColors.textMuted)),
           ],

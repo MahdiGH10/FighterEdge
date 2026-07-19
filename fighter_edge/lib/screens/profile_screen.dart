@@ -130,7 +130,7 @@ class _SubscriptionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(isPro ? 'Fighter Edge Pro' : 'Free Plan',
+                Text(isPro ? 'FighterEdge Pro' : 'Free Plan',
                     style: AppTheme.body(15, weight: FontWeight.w700)),
                 const SizedBox(height: 2),
                 Text(

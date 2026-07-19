@@ -1,23 +1,45 @@
 rules_version = '2';
 
 // FighterEdge Firestore security rules.
-// Each user can read/write ONLY their own profile document. Everything else is
-// denied by default.
-//
-// NOTE: for the current no-payments build the owner may also write their own
-// `plan` field (so the demo "Upgrade" works). Before shipping paid Pro, replace
-// the users rule with the stricter version in docs/firebase_setup.md §5 that
-// forbids client `plan` writes, and set the plan from a verified payment
-// webhook via a Cloud Function (Admin SDK bypasses these rules).
+// Users can read and maintain their own profile document, but billing fields
+// are server-owned. A trusted backend/webhook using the Admin SDK should write
+// plan and entitlement state.
 service cloud.firestore {
   match /databases/{database}/documents {
 
     match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && isFreeProfileCreate();
+      allow update: if isOwner(uid) && billingFieldsUnchanged();
+      allow delete: if false;
     }
 
     match /{document=**} {
       allow read, write: if false;
+    }
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function isFreeProfileCreate() {
+      return !('plan' in request.resource.data) ||
+        request.resource.data.plan == 'free';
+    }
+
+    function billingFieldsUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'plan',
+        'entitlement',
+        'entitlements',
+        'billing',
+        'billingProvider',
+        'customerId',
+        'subscriptionId',
+        'productId',
+        'expiresAt',
+        'gracePeriodEndsAt',
+      ]);
     }
   }
 }

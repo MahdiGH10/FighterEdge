@@ -50,7 +50,7 @@ class ProLock extends StatelessWidget {
             Text('${feature.title} is Pro',
                 textAlign: TextAlign.center, style: AppTheme.display(20)),
             const SizedBox(height: Insets.sm),
-            Text('Upgrade to Fighter Edge Pro to unlock this feature.',
+            Text('Upgrade to FighterEdge Pro to unlock this feature.',
                 textAlign: TextAlign.center,
                 style: AppTheme.body(13, color: AppColors.textMuted)),
             const SizedBox(height: Insets.xl),

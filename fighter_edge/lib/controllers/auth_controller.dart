@@ -9,9 +9,8 @@ import '../models/app_user.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
-/// App-facing auth state. Wraps an [AuthRepository] and exposes status +
-/// the current user to the widget tree via Provider. All screens read this;
-/// none of them know which backend is behind it.
+/// App-facing auth state. Wraps an [AuthRepository] and exposes status and the
+/// current user to the widget tree via Provider.
 class AuthController extends ChangeNotifier {
   final AuthRepository _repo;
   StreamSubscription<AppUser?>? _sub;
@@ -22,7 +21,7 @@ class AuthController extends ChangeNotifier {
 
   AuthController(this._repo) {
     // Seed status synchronously from the current snapshot: a broadcast stream
-    // won't replay the initial event emitted before we subscribe here.
+    // will not replay the initial event emitted before this subscription.
     _user = _repo.currentUser;
     _status =
         _user == null ? AuthStatus.unauthenticated : AuthStatus.authenticated;
@@ -42,7 +41,6 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Runs a side-effect auth action with busy-state management (no user change).
   Future<void> _run(Future<void> Function() action) async {
     _busy = true;
     notifyListeners();
@@ -54,9 +52,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// Runs an action that returns the new signed-in user and applies it
-  /// synchronously, so state is correct the moment the future resolves (the
-  /// broadcast auth stream may deliver the same change a microtask later).
   Future<void> _apply(Future<AppUser> Function() action) =>
       _run(() async => _onUserChanged(await action()));
 
@@ -85,24 +80,25 @@ class AuthController extends ChangeNotifier {
         _onUserChanged(null);
       });
 
-  /// Upgrade/downgrade the current user's plan.
+  /// Starts the Pro purchase flow.
   ///
-  /// SECURITY: this is a CLIENT-side write, safe only for the current
-  /// no-payments demo. Before shipping paid Pro, plan changes must be made
-  /// server-side from a verified payment webhook (see docs/firebase_setup.md
-  /// §5–6) and Firestore rules must forbid the client writing `plan`. Never
-  /// trust a client-supplied plan for entitlement decisions that cost money.
-  Future<void> setPlan(Plan plan) async {
-    final u = _user;
-    if (u == null) return;
-    await _apply(() => _repo.updatePlan(u.copyWith(plan: plan)));
-  }
+  /// This intentionally does not change the user's plan. Paid entitlements must
+  /// be granted by a trusted billing backend, then refreshed here.
+  Future<void> startProCheckout() => _run(() async {
+        throw const AuthException(
+          'billing-not-configured',
+          'Payments are not active yet. Pro checkout will unlock after the store billing setup is connected.',
+        );
+      });
+
+  Future<void> refreshCurrentUser() => _run(() async {
+        _onUserChanged(await _repo.refreshCurrentUser());
+      });
 
   bool allows(Feature feature) => Entitlements.allows(plan, feature);
 
-  /// DEV ONLY: with the local backend, returns the last simulated magic code
-  /// so the passwordless flow is demoable without a real email service.
-  /// Returns null under a real provider (e.g. Firebase).
+  /// DEV ONLY: with the local backend, returns the last simulated magic code so
+  /// the passwordless flow is demoable without a real email service.
   String? get devMagicHint {
     final r = _repo;
     return r is LocalAuthRepository ? r.lastMagicCode : null;
