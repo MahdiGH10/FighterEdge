@@ -33,6 +33,10 @@ class AuthController extends ChangeNotifier {
   bool get isBusy => _busy;
   bool get isPro => _user?.isPro ?? false;
   Plan get plan => _user?.plan ?? Plan.free;
+  bool get supportsGoogle => _repo.supportsGoogle;
+  bool get supportsApple => _repo.supportsApple;
+  bool get supportsMagicLink => _repo.supportsMagicLink;
+  bool get supportsEmailVerification => _repo.supportsEmailVerification;
 
   void _onUserChanged(AppUser? user) {
     _user = user;
@@ -68,6 +72,9 @@ class AuthController extends ChangeNotifier {
 
   Future<void> sendPasswordReset(String email) =>
       _run(() => _repo.sendPasswordReset(email));
+
+  Future<void> sendEmailVerification() =>
+      _run(() => _repo.sendEmailVerification());
 
   Future<void> sendMagicLink(String email) =>
       _run(() => _repo.sendMagicLink(email));

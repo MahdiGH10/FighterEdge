@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/screens/dashboard_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
 
@@ -36,4 +38,43 @@ void main() {
     await tester.pump();
     expect(find.text('75.0'), findsWidgets);
   });
+
+  testWidgets('unverified users can request another verification email',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final repo = VerificationLocalAuthRepository();
+    await repo.init();
+    await repo.signUpWithEmail(
+      email: testEmail,
+      password: testPassword,
+      displayName: testName,
+    );
+
+    await tester.pumpWidget(wrapApp(
+      DashboardScreen(onNavigate: (_) {}),
+      repo: repo,
+      state: AppState(),
+    ));
+    await tester.pump();
+
+    expect(find.text('Verify your email'), findsOneWidget);
+
+    await tester.tap(find.text('Resend'));
+    await tester.pump();
+
+    expect(repo.verificationSent, isTrue);
+    expect(find.text('Verification email sent.'), findsOneWidget);
+  });
+}
+
+class VerificationLocalAuthRepository extends LocalAuthRepository {
+  bool verificationSent = false;
+
+  @override
+  bool get supportsEmailVerification => true;
+
+  @override
+  Future<void> sendEmailVerification() async {
+    verificationSent = true;
+  }
 }

@@ -51,6 +51,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
+    final hasSecondaryAuth =
+        auth.supportsGoogle || auth.supportsApple || auth.supportsMagicLink;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -112,33 +114,40 @@ class _LoginScreenState extends State<LoginScreen> {
                     expand: true,
                     onPressed: auth.isBusy ? null : _signIn,
                   ),
-                  const SizedBox(height: Insets.xl),
-                  const OrDivider(),
-                  const SizedBox(height: Insets.xl),
-                  SocialButton(
-                    icon: Icons.g_mobiledata,
-                    label: 'Continue with Google',
-                    onPressed: auth.isBusy
-                        ? null
-                        : () => _social(auth.signInWithGoogle),
-                  ),
-                  const SizedBox(height: Insets.md),
-                  SocialButton(
-                    icon: Icons.apple,
-                    label: 'Continue with Apple',
-                    onPressed: auth.isBusy
-                        ? null
-                        : () => _social(auth.signInWithApple),
-                  ),
-                  const SizedBox(height: Insets.md),
-                  SocialButton(
-                    icon: Icons.mail_lock_outlined,
-                    label: 'Email me a sign-in code',
-                    onPressed: auth.isBusy
-                        ? null
-                        : () => Navigator.of(context).push(MaterialPageRoute(
-                            builder: (_) => const MagicLinkScreen())),
-                  ),
+                  if (hasSecondaryAuth) ...[
+                    const SizedBox(height: Insets.xl),
+                    const OrDivider(),
+                    const SizedBox(height: Insets.xl),
+                    if (auth.supportsGoogle) ...[
+                      SocialButton(
+                        icon: Icons.g_mobiledata,
+                        label: 'Continue with Google',
+                        onPressed: auth.isBusy
+                            ? null
+                            : () => _social(auth.signInWithGoogle),
+                      ),
+                      const SizedBox(height: Insets.md),
+                    ],
+                    if (auth.supportsApple) ...[
+                      SocialButton(
+                        icon: Icons.apple,
+                        label: 'Continue with Apple',
+                        onPressed: auth.isBusy
+                            ? null
+                            : () => _social(auth.signInWithApple),
+                      ),
+                      const SizedBox(height: Insets.md),
+                    ],
+                    if (auth.supportsMagicLink)
+                      SocialButton(
+                        icon: Icons.mail_lock_outlined,
+                        label: 'Email me a sign-in code',
+                        onPressed: auth.isBusy
+                            ? null
+                            : () => Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => const MagicLinkScreen())),
+                      ),
+                  ],
                   const SizedBox(height: Insets.xl),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

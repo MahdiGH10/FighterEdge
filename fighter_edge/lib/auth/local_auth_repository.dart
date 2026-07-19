@@ -29,6 +29,18 @@ class LocalAuthRepository implements AuthRepository {
   /// "your code is ..." without a real email service).
   String? lastMagicCode;
 
+  @override
+  bool get supportsGoogle => true;
+
+  @override
+  bool get supportsApple => true;
+
+  @override
+  bool get supportsMagicLink => true;
+
+  @override
+  bool get supportsEmailVerification => false;
+
   /// Must be called once at startup to restore any persisted session.
   @override
   Future<void> init() async {
@@ -103,6 +115,12 @@ class LocalAuthRepository implements AuthRepository {
   Future<void> sendPasswordReset(String email) async {
     // Simulated: in production Firebase emails a reset link.
     debugPrint('[auth] password reset link sent to $email');
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    // Simulated local backend: production Firebase sends the real email.
+    debugPrint('[auth] verification email sent to ${_current?.email}');
   }
 
   @override

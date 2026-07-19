@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../controllers/auth_controller.dart';
 import '../data/mock_data.dart';
 import '../models/training_session.dart';
 import '../state/app_state.dart';
@@ -22,9 +23,13 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const f = MockData.fighter;
+    final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
     final weightDelta = state.weeklyDelta;
     final losing = weightDelta <= 0;
+    final showVerificationBanner = auth.supportsEmailVerification &&
+        auth.user != null &&
+        !auth.user!.emailVerified;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: PremiumBackground(
@@ -44,6 +49,10 @@ class DashboardScreen extends StatelessWidget {
                     PremiumReveal(
                       child: _ProfileHeader(name: f.name, tagline: f.tagline),
                     ),
+                    if (showVerificationBanner) ...[
+                      const SizedBox(height: Insets.lg),
+                      _EmailVerificationBanner(auth: auth),
+                    ],
                     const SizedBox(height: Insets.lg),
                     SizedBox(
                       height: 126,
@@ -176,6 +185,77 @@ class _ProfileHeader extends StatelessWidget {
         const PremiumBadge('Camp mode'),
       ],
     );
+  }
+}
+
+class _EmailVerificationBanner extends StatelessWidget {
+  final AuthController auth;
+  const _EmailVerificationBanner({required this.auth});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      accent: AppColors.warning,
+      padding: const EdgeInsets.all(Insets.md),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.mark_email_unread_outlined,
+                color: AppColors.warning, size: 21),
+          ),
+          const SizedBox(width: Insets.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Verify your email',
+                    style: AppTheme.body(14, weight: FontWeight.w800)),
+                const SizedBox(height: 2),
+                Text('Secure your account before fight camp gets serious.',
+                    style: AppTheme.body(12,
+                        weight: FontWeight.w500,
+                        color: AppColors.textSecondary)),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: auth.isBusy
+                ? null
+                : () async {
+                    try {
+                      await auth.sendEmailVerification();
+                      if (!context.mounted) return;
+                      _showDashboardMessage(
+                          context, 'Verification email sent.');
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      _showDashboardMessage(
+                          context, 'Could not send verification email.');
+                    }
+                  },
+            child: Text('Resend',
+                style: AppTheme.body(12,
+                    weight: FontWeight.w800, color: AppColors.warning)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDashboardMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        backgroundColor: AppColors.surfaceElevated,
+        content:
+            Text(message, style: AppTheme.body(13, weight: FontWeight.w600)),
+      ));
   }
 }
 

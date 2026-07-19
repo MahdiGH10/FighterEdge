@@ -20,6 +20,10 @@ void main() {
     expect(auth.status, AuthStatus.unauthenticated);
     expect(auth.user, isNull);
     expect(auth.isPro, isFalse);
+    expect(auth.supportsGoogle, isTrue);
+    expect(auth.supportsApple, isTrue);
+    expect(auth.supportsMagicLink, isTrue);
+    expect(auth.supportsEmailVerification, isFalse);
   });
 
   test('signup authenticates and notifies listeners', () async {

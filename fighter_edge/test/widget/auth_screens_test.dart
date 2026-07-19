@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/screens/auth/login_screen.dart';
 import 'package:fighter_edge/screens/auth/signup_screen.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
@@ -44,6 +46,21 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50)); // finish + snackbar
       expect(find.text('No account found for this email.'), findsOneWidget);
     });
+
+    testWidgets('hides auth methods the repository does not support',
+        (tester) async {
+      useTallScreen(tester);
+      SharedPreferences.setMockInitialValues({});
+      final repo = GoogleOnlyLocalAuthRepository();
+      await repo.init();
+
+      await tester.pumpWidget(wrapApp(const LoginScreen(), repo: repo));
+      await tester.pump();
+
+      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.text('Continue with Apple'), findsNothing);
+      expect(find.text('Email me a sign-in code'), findsNothing);
+    });
   });
 
   group('SignupScreen', () {
@@ -81,4 +98,12 @@ void main() {
       expect(repo.currentUser?.email, 'new@fighter.com');
     });
   });
+}
+
+class GoogleOnlyLocalAuthRepository extends LocalAuthRepository {
+  @override
+  bool get supportsApple => false;
+
+  @override
+  bool get supportsMagicLink => false;
 }

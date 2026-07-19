@@ -15,6 +15,11 @@ class AuthException implements Exception {
 /// The single seam the whole app talks to for identity. Swapping providers
 /// (Local → Firebase) means implementing this one interface — no UI changes.
 abstract class AuthRepository {
+  bool get supportsGoogle => true;
+  bool get supportsApple => true;
+  bool get supportsMagicLink => true;
+  bool get supportsEmailVerification => false;
+
   /// Restore any persisted session before the app builds. Call once at startup.
   Future<void> init();
 
@@ -36,6 +41,8 @@ abstract class AuthRepository {
   });
 
   Future<void> sendPasswordReset(String email);
+
+  Future<void> sendEmailVerification();
 
   Future<AppUser> signInWithGoogle();
 

@@ -22,6 +22,18 @@ class FirebaseAuthRepository implements AuthRepository {
 
   AppUser? _cached;
 
+  @override
+  bool get supportsGoogle => true;
+
+  @override
+  bool get supportsApple => false;
+
+  @override
+  bool get supportsMagicLink => false;
+
+  @override
+  bool get supportsEmailVerification => true;
+
   DocumentReference<Map<String, dynamic>> _doc(String uid) =>
       _db.collection('users').doc(uid);
 
@@ -120,6 +132,20 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<void> sendPasswordReset(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(e.code, _message(e));
+    }
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const AuthException(
+          'signed-out', 'Sign in before requesting verification.');
+    }
+    try {
+      await user.sendEmailVerification();
     } on FirebaseAuthException catch (e) {
       throw AuthException(e.code, _message(e));
     }
