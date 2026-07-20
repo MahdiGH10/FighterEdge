@@ -171,10 +171,40 @@ class _WeightView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: Insets.xl),
+        Row(
+          children: [
+            Expanded(
+              child: StatCard(
+                label: '7-day avg',
+                value: state.sevenDayAverage.toStringAsFixed(1),
+                unit: 'kg',
+              ),
+            ),
+            const SizedBox(width: Insets.md),
+            Expanded(
+              child: StatCard(
+                label: 'Goal gap',
+                value: state.weightToGoal.abs().toStringAsFixed(1),
+                unit: 'kg',
+                delta: state.weightToGoal <= 0 ? 'At goal' : 'To 74 kg',
+                deltaColor: state.weightToGoal <= 0
+                    ? AppColors.positive
+                    : AppColors.warning,
+                deltaIcon: state.weightToGoal <= 0
+                    ? Icons.check_circle
+                    : Icons.flag_outlined,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: Insets.xl),
         AppCard(
           child: SizedBox(
             height: 200,
-            child: _WeightChart(entries: state.weights),
+            child: _WeightChart(
+              entries: state.weights,
+              goalWeightKg: state.goalWeightKg,
+            ),
           ),
         ),
         const SizedBox(height: Insets.xl),
@@ -198,7 +228,8 @@ class _WeightView extends StatelessWidget {
 
 class _WeightChart extends StatelessWidget {
   final List<WeightEntry> entries;
-  const _WeightChart({required this.entries});
+  final double goalWeightKg;
+  const _WeightChart({required this.entries, required this.goalWeightKg});
 
   @override
   Widget build(BuildContext context) {
@@ -213,8 +244,10 @@ class _WeightChart extends StatelessWidget {
         FlSpot(i.toDouble(), entries[i].kg),
     ];
     final values = entries.map((e) => e.kg).toList();
-    final minY = (values.reduce((a, b) => a < b ? a : b) - 1).floorToDouble();
-    final maxY = (values.reduce((a, b) => a > b ? a : b) + 1).ceilToDouble();
+    final minValue = [...values, goalWeightKg].reduce((a, b) => a < b ? a : b);
+    final maxValue = [...values, goalWeightKg].reduce((a, b) => a > b ? a : b);
+    final minY = (minValue - 1).floorToDouble();
+    final maxY = (maxValue + 1).ceilToDouble();
 
     return LineChart(
       LineChartData(
@@ -290,6 +323,23 @@ class _WeightChart extends StatelessWidget {
             ),
           ),
         ],
+        extraLinesData: ExtraLinesData(
+          horizontalLines: [
+            HorizontalLine(
+              y: goalWeightKg,
+              color: AppColors.warning.withValues(alpha: .82),
+              strokeWidth: 1.5,
+              dashArray: [6, 5],
+              label: HorizontalLineLabel(
+                show: true,
+                alignment: Alignment.topRight,
+                style: AppTheme.body(10,
+                    weight: FontWeight.w700, color: AppColors.warning),
+                labelResolver: (_) => 'Goal ${goalWeightKg.toStringAsFixed(0)}',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

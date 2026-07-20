@@ -96,6 +96,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('75.0'), findsWidgets); // headline
+      await tester.scrollUntilVisible(find.text('75.0 kg'), 240,
+          scrollable: find.byType(Scrollable).first);
       expect(find.text('75.0 kg'), findsOneWidget); // history row
     });
 

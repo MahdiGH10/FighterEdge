@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../data/mock_data.dart';
 import '../models/coach_cue.dart';
+import '../models/training_session.dart';
+import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
@@ -15,7 +18,8 @@ import '../widgets/progress_ring.dart';
 enum _Phase { work, rest, done }
 
 class RoundTimerScreen extends StatefulWidget {
-  const RoundTimerScreen({super.key});
+  final TrainingSession? session;
+  const RoundTimerScreen({super.key, this.session});
 
   @override
   State<RoundTimerScreen> createState() => _RoundTimerScreenState();
@@ -90,6 +94,14 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
           _ticker?.cancel();
           _secondsLeft = 0;
           HapticFeedback.heavyImpact();
+          final session = widget.session;
+          if (session != null) {
+            context.read<AppState>().completeSession(
+                  session,
+                  rpe: 7,
+                  note: 'Completed from round timer',
+                );
+          }
         } else {
           _phase = _Phase.rest;
           _secondsLeft = _style.restSeconds;

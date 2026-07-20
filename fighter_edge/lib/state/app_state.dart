@@ -18,6 +18,7 @@ class AppState extends ChangeNotifier {
   List<WeightEntry> _weights = MockData.seedWeights();
   List<Meal> _meals = MockData.seedMeals();
   List<TrainingSession> _sessions = List.of(MockData.week);
+  DateTime _nutritionDate = DateTime.now();
   StreamSubscription<List<WeightEntry>>? _weightSub;
   StreamSubscription<List<Meal>>? _mealSub;
   StreamSubscription<List<TrainingSession>>? _sessionSub;
@@ -57,19 +58,7 @@ class AppState extends ChangeNotifier {
       notifyListeners();
     });
 
-    _mealSub = repo.watchMeals(userId, DateTime.now()).listen((meals) {
-      if (meals.isEmpty && !_seededMealsForCurrentUser) {
-        _seededMealsForCurrentUser = true;
-        unawaited(repo.saveMealsForDate(
-          userId,
-          DateTime.now(),
-          MockData.seedMeals(),
-        ));
-        return;
-      }
-      _meals = List.of(meals);
-      notifyListeners();
-    });
+    _watchMealsForCurrentDate(repo, userId);
 
     _sessionSub = repo.watchSessions(userId).listen((sessions) {
       if (sessions.isEmpty && !_seededSessionsForCurrentUser) {
@@ -103,6 +92,20 @@ class AppState extends ChangeNotifier {
   List<WeightEntry> get weightHistoryDesc =>
       [..._weights]..sort((a, b) => b.date.compareTo(a.date));
 
+  double get goalWeightKg => 74;
+
+  double get weightToGoal =>
+      latestWeight == 0 ? 0 : latestWeight - goalWeightKg;
+
+  double get sevenDayAverage {
+    final cutoff = DateTime.now().subtract(const Duration(days: 7));
+    final recent = _weights.where((w) => !w.date.isBefore(cutoff)).toList();
+    final source = recent.isEmpty ? _weights : recent;
+    if (source.isEmpty) return 0;
+    return source.fold<double>(0, (sum, entry) => sum + entry.kg) /
+        source.length;
+  }
+
   void addWeight(DateTime date, double kg) {
     final entry = WeightEntry(date, kg);
     _weights.add(entry);
@@ -117,6 +120,9 @@ class AppState extends ChangeNotifier {
   // ---- Nutrition ----
   List<Meal> get meals => List.unmodifiable(_meals);
   MacroTarget get target => MockData.macroTarget;
+  DateTime get nutritionDate => _nutritionDate;
+  bool get isTodayNutrition =>
+      mealDateKey(_nutritionDate) == mealDateKey(DateTime.now());
 
   int get consumedCalories =>
       _meals.where((m) => m.eaten).fold(0, (s, m) => s + m.calories);
@@ -132,9 +138,35 @@ class AppState extends ChangeNotifier {
     final repo = _dataRepository;
     final userId = _userId;
     if (repo != null && userId != null) {
-      unawaited(repo.saveMealsForDate(userId, DateTime.now(), _meals));
+      unawaited(repo.saveMealsForDate(userId, _nutritionDate, _meals));
     }
     notifyListeners();
+  }
+
+  void addMeal(Meal meal) {
+    _meals.add(meal);
+    final repo = _dataRepository;
+    final userId = _userId;
+    if (repo != null && userId != null) {
+      unawaited(repo.saveMealsForDate(userId, _nutritionDate, _meals));
+    }
+    notifyListeners();
+  }
+
+  void shiftNutritionDate(int days) {
+    _nutritionDate =
+        DateTime(_nutritionDate.year, _nutritionDate.month, _nutritionDate.day)
+            .add(Duration(days: days));
+    _seededMealsForCurrentUser = false;
+    final repo = _dataRepository;
+    final userId = _userId;
+    if (repo == null || userId == null) {
+      _meals = isTodayNutrition ? MockData.seedMeals() : [];
+      notifyListeners();
+      return;
+    }
+    _mealSub?.cancel();
+    _watchMealsForCurrentDate(repo, userId);
   }
 
   // ---- Training ----
@@ -143,10 +175,51 @@ class AppState extends ChangeNotifier {
   int get completedSessionCount =>
       _sessions.where((session) => session.completed).length;
 
+  List<TrainingSession> get completedSessionsDesc {
+    final completed = _sessions.where((s) => s.completed).toList();
+    completed.sort((a, b) {
+      final aDate = a.completedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bDate = b.completedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bDate.compareTo(aDate);
+    });
+    return List.unmodifiable(completed);
+  }
+
+  int get currentStreakDays {
+    final completedDays = {
+      for (final session in _sessions.where((s) => s.completed))
+        mealDateKey(session.completedAt ?? DateTime.now()),
+    };
+    var streak = 0;
+    var cursor = DateTime.now();
+    while (completedDays.contains(mealDateKey(cursor))) {
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    return streak;
+  }
+
   void toggleSession(TrainingSession session) {
     final index = _sessions.indexWhere((item) => item.id == session.id);
     if (index == -1) return;
-    final updated = session.copyWith(completed: !session.completed);
+    completeSession(session, completed: !session.completed);
+  }
+
+  void completeSession(
+    TrainingSession session, {
+    bool completed = true,
+    int rpe = 7,
+    String note = '',
+  }) {
+    final index = _sessions.indexWhere((item) => item.id == session.id);
+    if (index == -1) return;
+    final updated = session.copyWith(
+      completed: completed,
+      completedAt: completed ? DateTime.now() : null,
+      clearCompletedAt: !completed,
+      rpe: completed ? rpe.clamp(1, 10) : 0,
+      note: completed ? note.trim() : '',
+    );
     _sessions[index] = updated;
     final repo = _dataRepository;
     final userId = _userId;
@@ -162,5 +235,21 @@ class AppState extends ChangeNotifier {
     _mealSub?.cancel();
     _sessionSub?.cancel();
     super.dispose();
+  }
+
+  void _watchMealsForCurrentDate(DataRepository repo, String userId) {
+    _mealSub = repo.watchMeals(userId, _nutritionDate).listen((meals) {
+      if (meals.isEmpty && isTodayNutrition && !_seededMealsForCurrentUser) {
+        _seededMealsForCurrentUser = true;
+        unawaited(repo.saveMealsForDate(
+          userId,
+          _nutritionDate,
+          MockData.seedMeals(),
+        ));
+        return;
+      }
+      _meals = List.of(meals);
+      notifyListeners();
+    });
   }
 }

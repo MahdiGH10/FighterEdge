@@ -18,6 +18,8 @@ class TechniqueLibraryScreen extends StatefulWidget {
 class _TechniqueLibraryScreenState extends State<TechniqueLibraryScreen> {
   int _filter = 1; // "Striking" selected like the mockup
   String _query = '';
+  final Set<String> _favorites = {};
+  final Map<String, int> _progress = {};
 
   List<Technique> get _visible {
     final discipline = MockData.disciplines[_filter];
@@ -68,13 +70,99 @@ class _TechniqueLibraryScreenState extends State<TechniqueLibraryScreen> {
                       padding: const EdgeInsets.fromLTRB(
                           Insets.lg, 0, Insets.lg, Insets.xxl),
                       itemCount: _visible.length,
-                      itemBuilder: (_, i) => _TechniqueCard(_visible[i]),
+                      itemBuilder: (_, i) {
+                        final technique = _visible[i];
+                        return _TechniqueCard(
+                          technique,
+                          favorite: _favorites.contains(technique.id),
+                          progress: _progress[technique.id] ?? 0,
+                          onFavorite: () => setState(() {
+                            if (!_favorites.remove(technique.id)) {
+                              _favorites.add(technique.id);
+                            }
+                          }),
+                          onOpen: () => _openTechnique(technique),
+                        );
+                      },
                     ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _openTechnique(Technique technique) async {
+    final current = _progress[technique.id] ?? 0;
+    final next = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      showDragHandle: true,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(technique.title, style: AppTheme.display(22)),
+            const SizedBox(height: Insets.xs),
+            Text('${technique.category} · ${technique.videoCount} lessons',
+                style: AppTheme.body(13, color: AppColors.textSecondary)),
+            const SizedBox(height: Insets.lg),
+            AppCard(
+              padding: const EdgeInsets.all(Insets.lg),
+              child: Row(
+                children: [
+                  const Icon(Icons.play_circle_fill,
+                      color: AppColors.primary, size: 36),
+                  const SizedBox(width: Insets.md),
+                  Expanded(
+                    child: Text(
+                      'Video playback unlocks once real sources are connected.',
+                      style: AppTheme.body(13,
+                          weight: FontWeight.w600,
+                          color: AppColors.textSecondary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: Insets.lg),
+            Text(technique.focus,
+                style: AppTheme.body(14, color: AppColors.textPrimary)),
+            const SizedBox(height: Insets.lg),
+            Row(
+              children: [
+                Expanded(
+                  child: _ProgressButton(
+                    label: 'Studied',
+                    selected: current >= 1,
+                    onTap: () => Navigator.pop(ctx, 1),
+                  ),
+                ),
+                const SizedBox(width: Insets.sm),
+                Expanded(
+                  child: _ProgressButton(
+                    label: 'Drilled',
+                    selected: current >= 2,
+                    onTap: () => Navigator.pop(ctx, 2),
+                  ),
+                ),
+                const SizedBox(width: Insets.sm),
+                Expanded(
+                  child: _ProgressButton(
+                    label: 'Sharp',
+                    selected: current >= 3,
+                    onTap: () => Navigator.pop(ctx, 3),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    if (next != null) setState(() => _progress[technique.id] = next);
   }
 }
 
@@ -111,13 +199,24 @@ class _SearchField extends StatelessWidget {
 
 class _TechniqueCard extends StatelessWidget {
   final Technique t;
-  const _TechniqueCard(this.t);
+  final bool favorite;
+  final int progress;
+  final VoidCallback onFavorite;
+  final VoidCallback onOpen;
+  const _TechniqueCard(
+    this.t, {
+    required this.favorite,
+    required this.progress,
+    required this.onFavorite,
+    required this.onOpen,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: Insets.md),
       child: AppCard(
+        onTap: onOpen,
         padding: const EdgeInsets.all(Insets.md),
         child: Row(
           children: [
@@ -153,8 +252,20 @@ class _TechniqueCard extends StatelessWidget {
                       style: AppTheme.body(12,
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
+                  const SizedBox(height: Insets.sm),
+                  LinearProgressIndicator(
+                    value: (progress / 3).clamp(0, 1),
+                    minHeight: 4,
+                    backgroundColor: AppColors.track,
+                    valueColor:
+                        const AlwaysStoppedAnimation(AppColors.positive),
+                  ),
                 ],
               ),
+            ),
+            HeaderIcon(
+              favorite ? Icons.bookmark : Icons.bookmark_border,
+              onTap: onFavorite,
             ),
             Container(
               width: 36,
@@ -169,6 +280,30 @@ class _TechniqueCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ProgressButton extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ProgressButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: selected ? AppColors.positive : AppColors.textPrimary,
+        side:
+            BorderSide(color: selected ? AppColors.positive : AppColors.border),
+      ),
+      onPressed: onTap,
+      child: Text(label),
     );
   }
 }

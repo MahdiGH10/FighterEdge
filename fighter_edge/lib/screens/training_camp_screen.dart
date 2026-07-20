@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/training_session.dart';
@@ -7,7 +8,9 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
+import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
+import 'round_timer_screen.dart';
 
 class TrainingCampScreen extends StatefulWidget {
   const TrainingCampScreen({super.key});
@@ -48,7 +51,7 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
                 index: _tab,
                 children: const [
                   _WeekView(),
-                  _PlaceholderView('Monthly calendar coming soon'),
+                  _HistoryView(),
                   _PlaceholderView('Full fight-camp plan coming soon'),
                 ],
               ),
@@ -92,23 +95,93 @@ class _WeekView extends StatelessWidget {
                 weight: FontWeight.w500, color: AppColors.textSecondary)),
         const SizedBox(height: Insets.lg),
         for (final s in state.sessions)
-          _SessionRow(s, onToggle: () => state.toggleSession(s)),
+          _SessionRow(
+            s,
+            onStart: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => RoundTimerScreen(session: s),
+            )),
+            onLog: () => _logSession(context, state, s),
+          ),
       ],
     );
+  }
+
+  Future<void> _logSession(
+    BuildContext context,
+    AppState state,
+    TrainingSession session,
+  ) async {
+    var rpe = session.rpe == 0 ? 7 : session.rpe;
+    final note = TextEditingController(text: session.note);
+    final result = await showDialog<({int rpe, String note})>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: Text('Log ${session.title}', style: AppTheme.display(18)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('RPE $rpe / 10',
+                  style: AppTheme.body(13,
+                      weight: FontWeight.w700, color: AppColors.textSecondary)),
+              Slider(
+                value: rpe.toDouble(),
+                min: 1,
+                max: 10,
+                divisions: 9,
+                activeColor: AppColors.primary,
+                onChanged: (value) => setDialogState(() => rpe = value.round()),
+              ),
+              TextField(
+                controller: note,
+                minLines: 2,
+                maxLines: 3,
+                style: AppTheme.body(14),
+                cursorColor: AppColors.primary,
+                decoration: const InputDecoration(
+                  hintText: 'Quick reflection',
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primary),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Cancel',
+                  style: AppTheme.body(14, color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, (rpe: rpe, note: note.text)),
+              child: Text('Save',
+                  style: AppTheme.body(14,
+                      weight: FontWeight.w700, color: AppColors.primary)),
+            ),
+          ],
+        ),
+      ),
+    );
+    note.dispose();
+    if (result == null) return;
+    state.completeSession(session, rpe: result.rpe, note: result.note);
   }
 }
 
 class _SessionRow extends StatelessWidget {
   final TrainingSession s;
-  final VoidCallback onToggle;
-  const _SessionRow(this.s, {required this.onToggle});
+  final VoidCallback onStart;
+  final VoidCallback onLog;
+  const _SessionRow(this.s, {required this.onStart, required this.onLog});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: Insets.md),
       child: AppCard(
-        onTap: onToggle,
         padding: const EdgeInsets.all(Insets.md),
         child: Row(
           children: [
@@ -146,7 +219,16 @@ class _SessionRow extends StatelessWidget {
                 ],
               ),
             ),
-            _CompletionDot(completed: s.completed),
+            if (s.completed)
+              _CompletionDot(completed: s.completed)
+            else
+              PrimaryButton('Start',
+                  icon: Icons.play_arrow, onPressed: onStart),
+            const SizedBox(width: Insets.sm),
+            HeaderIcon(
+              s.completed ? Icons.edit_note : Icons.check_circle_outline,
+              onTap: onLog,
+            ),
           ],
         ),
       ),
@@ -177,6 +259,74 @@ class _CompletionDot extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: AppColors.border, width: 2),
+      ),
+    );
+  }
+}
+
+class _HistoryView extends StatelessWidget {
+  const _HistoryView();
+
+  @override
+  Widget build(BuildContext context) {
+    final sessions = context.watch<AppState>().completedSessionsDesc;
+    if (sessions.isEmpty) {
+      return const _PlaceholderView(
+          'Complete or log a session to build history');
+    }
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      children: [
+        Text('SESSION HISTORY', style: AppTheme.display(20)),
+        const SizedBox(height: Insets.lg),
+        for (final session in sessions) _HistoryRow(session),
+      ],
+    );
+  }
+}
+
+class _HistoryRow extends StatelessWidget {
+  final TrainingSession session;
+  const _HistoryRow(this.session);
+
+  @override
+  Widget build(BuildContext context) {
+    final completedAt = session.completedAt;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Insets.md),
+      child: AppCard(
+        padding: const EdgeInsets.all(Insets.md),
+        child: Row(
+          children: [
+            Icon(session.icon, color: AppColors.primary, size: 24),
+            const SizedBox(width: Insets.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(session.title,
+                      style: AppTheme.body(14, weight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Text(
+                    completedAt == null
+                        ? 'Logged'
+                        : DateFormat('MMM d, h:mm a').format(completedAt),
+                    style: AppTheme.body(12, color: AppColors.textSecondary),
+                  ),
+                  if (session.note.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(session.note,
+                        style:
+                            AppTheme.body(12, color: AppColors.textSecondary)),
+                  ],
+                ],
+              ),
+            ),
+            Text('RPE ${session.rpe}',
+                style: AppTheme.body(12,
+                    weight: FontWeight.w800, color: AppColors.warning)),
+          ],
+        ),
       ),
     );
   }

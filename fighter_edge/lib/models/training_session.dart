@@ -7,6 +7,9 @@ class TrainingSession {
   final String subtitle; // Boxing + Combinations
   final IconData icon;
   final bool completed;
+  final DateTime? completedAt;
+  final int rpe;
+  final String note;
 
   const TrainingSession({
     String? id,
@@ -15,15 +18,28 @@ class TrainingSession {
     required this.subtitle,
     required this.icon,
     required this.completed,
+    this.completedAt,
+    this.rpe = 0,
+    this.note = '',
   }) : id = id ?? '$day-$title';
 
-  TrainingSession copyWith({bool? completed}) => TrainingSession(
+  TrainingSession copyWith({
+    bool? completed,
+    DateTime? completedAt,
+    int? rpe,
+    String? note,
+    bool clearCompletedAt = false,
+  }) =>
+      TrainingSession(
         id: id,
         day: day,
         title: title,
         subtitle: subtitle,
         icon: icon,
         completed: completed ?? this.completed,
+        completedAt: clearCompletedAt ? null : completedAt ?? this.completedAt,
+        rpe: rpe ?? this.rpe,
+        note: note ?? this.note,
       );
 
   Map<String, dynamic> toJson() => {
@@ -33,6 +49,9 @@ class TrainingSession {
         'subtitle': subtitle,
         'iconName': _iconName(icon),
         'completed': completed,
+        'completedAt': completedAt?.toIso8601String(),
+        'rpe': rpe,
+        'note': note,
       };
 
   factory TrainingSession.fromJson(Map<String, dynamic> json) {
@@ -43,6 +62,9 @@ class TrainingSession {
       subtitle: json['subtitle'] as String? ?? '',
       icon: _iconFromName(json['iconName'] as String?),
       completed: json['completed'] as bool? ?? false,
+      completedAt: DateTime.tryParse(json['completedAt'] as String? ?? ''),
+      rpe: (json['rpe'] as num?)?.toInt() ?? 0,
+      note: json['note'] as String? ?? '',
     );
   }
 

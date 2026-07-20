@@ -95,9 +95,11 @@ class DashboardScreen extends StatelessWidget {
                             width: 142,
                             child: StatCard(
                               label: 'Streak',
-                              value: '${f.currentStreak}',
+                              value: '${state.currentStreakDays}',
                               unit: 'days',
-                              delta: 'On fire',
+                              delta: state.currentStreakDays > 0
+                                  ? 'On fire'
+                                  : 'Log today',
                               deltaColor: AppColors.warning,
                               deltaIcon: Icons.local_fire_department,
                               accent: AppColors.warning,

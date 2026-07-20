@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/meal.dart';
@@ -38,8 +39,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
           children: [
             AppHeader(
               title: 'Nutrition',
-              actions: [HeaderIcon(Icons.calendar_month, onTap: () {})],
+              actions: [HeaderIcon(Icons.add, onTap: () => _addMeal(state))],
             ),
+            _DateSwitcher(state: state),
+            const SizedBox(height: Insets.md),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
               child: FilterChips(
@@ -61,6 +64,147 @@ class _NutritionScreenState extends State<NutritionScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addMeal(AppState state) async {
+    final name = TextEditingController();
+    final items = TextEditingController();
+    final calories = TextEditingController();
+    final protein = TextEditingController();
+    final carbs = TextEditingController();
+    final fats = TextEditingController();
+    final meal = await showDialog<Meal>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Add Meal', style: AppTheme.display(18)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _DialogField(controller: name, label: 'Meal name'),
+              _DialogField(controller: items, label: 'Items'),
+              _DialogField(
+                  controller: calories, label: 'Calories', number: true),
+              Row(
+                children: [
+                  Expanded(
+                      child: _DialogField(
+                          controller: protein, label: 'Protein', number: true)),
+                  const SizedBox(width: Insets.sm),
+                  Expanded(
+                      child: _DialogField(
+                          controller: carbs, label: 'Carbs', number: true)),
+                  const SizedBox(width: Insets.sm),
+                  Expanded(
+                      child: _DialogField(
+                          controller: fats, label: 'Fats', number: true)),
+                ],
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel',
+                style: AppTheme.body(14, color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              final parsedCalories = int.tryParse(calories.text.trim());
+              if (name.text.trim().isEmpty || parsedCalories == null) {
+                return;
+              }
+              Navigator.pop(
+                ctx,
+                Meal(
+                  id: 'custom-${DateTime.now().microsecondsSinceEpoch}',
+                  name: name.text.trim(),
+                  items: items.text.trim().isEmpty
+                      ? 'Custom meal'
+                      : items.text.trim(),
+                  calories: parsedCalories,
+                  protein: int.tryParse(protein.text.trim()) ?? 0,
+                  carbs: int.tryParse(carbs.text.trim()) ?? 0,
+                  fats: int.tryParse(fats.text.trim()) ?? 0,
+                  eaten: true,
+                ),
+              );
+            },
+            child: Text('Save',
+                style: AppTheme.body(14,
+                    weight: FontWeight.w700, color: AppColors.primary)),
+          ),
+        ],
+      ),
+    );
+    name.dispose();
+    items.dispose();
+    calories.dispose();
+    protein.dispose();
+    carbs.dispose();
+    fats.dispose();
+    if (meal != null) state.addMeal(meal);
+  }
+}
+
+class _DateSwitcher extends StatelessWidget {
+  final AppState state;
+  const _DateSwitcher({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = state.isTodayNutrition
+        ? 'Today'
+        : DateFormat('EEE, MMM d').format(state.nutritionDate);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+      child: Row(
+        children: [
+          HeaderIcon(Icons.chevron_left,
+              onTap: () => state.shiftNutritionDate(-1)),
+          Expanded(
+            child: Text(label,
+                textAlign: TextAlign.center,
+                style: AppTheme.body(13,
+                    weight: FontWeight.w800, color: AppColors.textSecondary)),
+          ),
+          HeaderIcon(Icons.chevron_right,
+              onTap: () => state.shiftNutritionDate(1)),
+        ],
+      ),
+    );
+  }
+}
+
+class _DialogField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final bool number;
+  const _DialogField({
+    required this.controller,
+    required this.label,
+    this.number = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Insets.md),
+      child: TextField(
+        controller: controller,
+        keyboardType: number ? TextInputType.number : TextInputType.text,
+        style: AppTheme.body(14),
+        cursorColor: AppColors.primary,
+        decoration: InputDecoration(
+          labelText: label,
+          focusedBorder: const UnderlineInputBorder(
+            borderSide: BorderSide(color: AppColors.primary),
+          ),
         ),
       ),
     );

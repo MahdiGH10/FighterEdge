@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:fighter_edge/models/meal.dart';
 import 'package:fighter_edge/state/app_state.dart';
 
 void main() {
@@ -44,6 +45,13 @@ void main() {
       final secondRead = s.weights.map((e) => e.date).toList();
       expect(secondRead, firstRead);
     });
+
+    test('calculates goal gap and average weight', () {
+      final s = AppState();
+      expect(s.goalWeightKg, 74);
+      expect(s.weightToGoal, closeTo(3.2, 0.001));
+      expect(s.sevenDayAverage, greaterThan(0));
+    });
   });
 
   group('AppState — nutrition', () {
@@ -77,6 +85,41 @@ void main() {
       expect(s.consumedProtein, 0);
       expect(s.consumedCarbs, 0);
       expect(s.consumedFats, 0);
+    });
+
+    test('custom meals are added to the selected day', () {
+      final s = AppState();
+      s.shiftNutritionDate(1);
+      expect(s.meals, isEmpty);
+
+      s.addMeal(Meal(
+        name: 'Post sparring',
+        items: 'Rice bowl',
+        calories: 720,
+        protein: 45,
+        carbs: 90,
+        fats: 14,
+        eaten: true,
+      ));
+
+      expect(s.meals.single.name, 'Post sparring');
+      expect(s.consumedCalories, 720);
+    });
+  });
+
+  group('AppState — sessions', () {
+    test('logging a session stores completion metadata and history', () {
+      final s = AppState();
+      final session = s.sessions.firstWhere((item) => !item.completed);
+
+      s.completeSession(session, rpe: 9, note: 'Hard rounds');
+
+      final logged = s.sessions.firstWhere((item) => item.id == session.id);
+      expect(logged.completed, isTrue);
+      expect(logged.completedAt, isNotNull);
+      expect(logged.rpe, 9);
+      expect(logged.note, 'Hard rounds');
+      expect(s.completedSessionsDesc.first.id, session.id);
     });
   });
 }
