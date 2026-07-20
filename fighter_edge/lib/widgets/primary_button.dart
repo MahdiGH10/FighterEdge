@@ -67,8 +67,8 @@ class _PrimaryButtonState extends State<PrimaryButton> {
               ? const [
                   BoxShadow(
                     color: AppColors.primaryGlow,
-                    blurRadius: 18,
-                    offset: Offset(0, 8),
+                    blurRadius: 12,
+                    offset: Offset(0, 6),
                   ),
                 ]
               : null,

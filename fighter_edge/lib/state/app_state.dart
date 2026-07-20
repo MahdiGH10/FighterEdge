@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/data_repository.dart';
 import '../data/mock_data.dart';
@@ -11,7 +12,10 @@ import '../models/weight_entry.dart';
 /// Holds the mutable state for the three interactive features:
 /// weight tracking and nutrition. (The round timer keeps local state.)
 class AppState extends ChangeNotifier {
-  AppState({DataRepository? dataRepository}) : _dataRepository = dataRepository;
+  AppState({DataRepository? dataRepository})
+      : _dataRepository = dataRepository {
+    unawaited(_loadSettings());
+  }
 
   final DataRepository? _dataRepository;
 
@@ -26,6 +30,10 @@ class AppState extends ChangeNotifier {
   bool _seededWeightsForCurrentUser = false;
   bool _seededMealsForCurrentUser = false;
   bool _seededSessionsForCurrentUser = false;
+  bool _useMetricUnits = true;
+  bool _timerHaptics = true;
+  bool _campReminders = false;
+  bool _safeCutGuidance = true;
 
   void setUser(String? userId) {
     if (_userId == userId) return;
@@ -115,6 +123,44 @@ class AppState extends ChangeNotifier {
       unawaited(repo.addWeight(userId, entry));
     }
     notifyListeners();
+  }
+
+  // ---- Settings ----
+  bool get useMetricUnits => _useMetricUnits;
+  bool get timerHaptics => _timerHaptics;
+  bool get campReminders => _campReminders;
+  bool get safeCutGuidance => _safeCutGuidance;
+
+  String get weightUnitLabel => _useMetricUnits ? 'kg' : 'lb';
+
+  double displayWeight(double kg) => _useMetricUnits ? kg : kg * 2.2046226218;
+
+  Future<void> setUseMetricUnits(bool value) async {
+    _useMetricUnits = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('settings.useMetricUnits', value);
+  }
+
+  Future<void> setTimerHaptics(bool value) async {
+    _timerHaptics = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('settings.timerHaptics', value);
+  }
+
+  Future<void> setCampReminders(bool value) async {
+    _campReminders = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('settings.campReminders', value);
+  }
+
+  Future<void> setSafeCutGuidance(bool value) async {
+    _safeCutGuidance = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('settings.safeCutGuidance', value);
   }
 
   // ---- Nutrition ----
@@ -251,5 +297,20 @@ class AppState extends ChangeNotifier {
       _meals = List.of(meals);
       notifyListeners();
     });
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _useMetricUnits = prefs.getBool('settings.useMetricUnits') ?? true;
+      _timerHaptics = prefs.getBool('settings.timerHaptics') ?? true;
+      _campReminders = prefs.getBool('settings.campReminders') ?? false;
+      _safeCutGuidance = prefs.getBool('settings.safeCutGuidance') ?? true;
+      notifyListeners();
+    } catch (_) {
+      // Pure unit tests may construct AppState before Flutter services are
+      // initialized. Keep safe defaults instead of making domain logic depend
+      // on platform storage.
+    }
   }
 }

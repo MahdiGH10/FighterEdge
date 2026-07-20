@@ -10,7 +10,7 @@ class AppColors {
   static const Color surface = Color(0xFF14141B);
   static const Color surfaceAlt = Color(0xFF191922);
   static const Color surfaceElevated = Color(0xFF21212B);
-  static const Color surfaceGlass = Color(0xD916161E);
+  static const Color surfaceGlass = Color(0xF216161E);
   static const Color border = Color(0xFF292933);
   static const Color borderStrong = Color(0xFF3A3A46);
 
@@ -25,7 +25,7 @@ class AppColors {
   // Text
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xFFAAAAB5);
-  static const Color textMuted = Color(0xFF777783);
+  static const Color textMuted = Color(0xFF8A8A96);
 
   // Semantic
   static const Color positive = Color(0xFF3FD07E);

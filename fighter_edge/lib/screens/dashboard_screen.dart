@@ -39,7 +39,13 @@ class DashboardScreen extends StatelessWidget {
             children: [
               AppHeader(
                 title: 'Dashboard',
-                actions: [HeaderIcon(Icons.notifications_none, onTap: () {})],
+                actions: [
+                  HeaderIcon(
+                    Icons.notifications_none,
+                    label: 'Notifications',
+                    onTap: () {},
+                  )
+                ],
               ),
               Expanded(
                 child: ListView(
@@ -54,6 +60,8 @@ class DashboardScreen extends StatelessWidget {
                       _EmailVerificationBanner(auth: auth),
                     ],
                     const SizedBox(height: Insets.lg),
+                    _TodayFocusCard(onNavigate: onNavigate),
+                    const SizedBox(height: Insets.xl),
                     SizedBox(
                       height: 126,
                       child: ListView(
@@ -63,8 +71,10 @@ class DashboardScreen extends StatelessWidget {
                             width: 142,
                             child: StatCard(
                               label: 'Weight',
-                              value: state.latestWeight.toStringAsFixed(1),
-                              unit: 'kg',
+                              value: state
+                                  .displayWeight(state.latestWeight)
+                                  .toStringAsFixed(1),
+                              unit: state.weightUnitLabel,
                               delta:
                                   '${weightDelta.abs().toStringAsFixed(1)} kg',
                               deltaColor: losing
@@ -79,15 +89,15 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: Insets.md),
-                          const SizedBox(
+                          SizedBox(
                             width: 142,
                             child: StatCard(
-                              label: 'Body Fat',
-                              value: '12.4',
-                              unit: '%',
-                              delta: '0.6 %',
+                              label: 'Sessions',
+                              value: '${state.completedSessionCount}',
+                              unit: '',
+                              delta: 'completed',
                               deltaColor: AppColors.positive,
-                              deltaIcon: Icons.arrow_downward,
+                              deltaIcon: Icons.check_circle_outline,
                             ),
                           ),
                           const SizedBox(width: Insets.md),
@@ -158,6 +168,155 @@ class DashboardScreen extends StatelessWidget {
 
   void _push(BuildContext context, Widget screen) {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  }
+}
+
+class _TodayFocusCard extends StatelessWidget {
+  final ValueChanged<int> onNavigate;
+  const _TodayFocusCard({required this.onNavigate});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final nextSession = state.sessions.where((s) => !s.completed).firstOrNull;
+    final caloriesLeft = (state.target.calories - state.consumedCalories)
+        .clamp(0, state.target.calories);
+
+    return AppCard(
+      accent: AppColors.primary,
+      elevated: true,
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF201416), Color(0xFF121218)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.flag_outlined,
+                    color: AppColors.primary, size: 22),
+              ),
+              const SizedBox(width: Insets.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Today\'s focus',
+                        style: AppTheme.display(20, spacing: .3)),
+                    const SizedBox(height: 2),
+                    Text(
+                      nextSession == null
+                          ? 'Camp work complete — protect recovery.'
+                          : '${nextSession.title} · ${nextSession.subtitle}',
+                      style: AppTheme.body(
+                        12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Insets.lg),
+          Row(
+            children: [
+              Expanded(
+                child: _FocusMetric(
+                  label: 'Fuel left',
+                  value: '$caloriesLeft kcal',
+                  icon: Icons.restaurant,
+                ),
+              ),
+              const SizedBox(width: Insets.sm),
+              Expanded(
+                child: _FocusMetric(
+                  label: 'Streak',
+                  value: '${state.currentStreakDays} days',
+                  icon: Icons.local_fire_department,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Insets.lg),
+          Row(
+            children: [
+              Expanded(
+                child: PrimaryButton(
+                  nextSession == null ? 'Open camp' : 'Start camp',
+                  icon: Icons.play_arrow,
+                  expand: true,
+                  onPressed: () => onNavigate(1),
+                ),
+              ),
+              const SizedBox(width: Insets.sm),
+              Expanded(
+                child: GhostButton(
+                  'Log meal',
+                  icon: Icons.add,
+                  expand: true,
+                  onPressed: () => onNavigate(3),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FocusMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  const _FocusMetric({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(Insets.md),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundRaised,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primary, size: 18),
+          const SizedBox(width: Insets.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label.toUpperCase(),
+                    style: AppTheme.body(
+                      9,
+                      weight: FontWeight.w800,
+                      color: AppColors.textMuted,
+                      spacing: .8,
+                    )),
+                const SizedBox(height: 2),
+                Text(value, style: AppTheme.body(13, weight: FontWeight.w800)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

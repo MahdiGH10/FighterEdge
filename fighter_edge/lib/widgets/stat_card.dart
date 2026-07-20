@@ -29,7 +29,7 @@ class AppCard extends StatelessWidget {
     final borderColor = accent?.withValues(alpha: .42) ?? AppColors.border;
     final content = Ink(
       decoration: BoxDecoration(
-        color: gradient == null ? color ?? AppColors.surfaceGlass : null,
+        color: gradient == null ? color ?? AppColors.surface : null,
         gradient: gradient,
         borderRadius: BorderRadius.circular(Radii.card),
         border: Border.all(color: borderColor),
@@ -37,8 +37,8 @@ class AppCard extends StatelessWidget {
             ? [
                 BoxShadow(
                   color: (accent ?? Colors.black).withValues(alpha: .16),
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
                 ),
               ]
             : null,

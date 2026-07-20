@@ -8,6 +8,7 @@ import '../widgets/stat_card.dart';
 import 'corner_coach_screen.dart';
 import 'profile_screen.dart';
 import 'round_timer_screen.dart';
+import 'settings_screen.dart';
 import 'weight_tracker_screen.dart';
 
 class MoreScreen extends StatelessWidget {
@@ -26,6 +27,8 @@ class MoreScreen extends StatelessWidget {
           'Recovery & mobility flows', const _MobilityScreen()),
       _MoreEntry(Icons.person_outline, 'Profile', 'Your fighter stats & goals',
           const ProfileScreen()),
+      _MoreEntry(Icons.settings_outlined, 'Settings',
+          'Units, reminders, safety, and account', const SettingsScreen()),
     ];
 
     return Scaffold(

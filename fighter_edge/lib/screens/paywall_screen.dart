@@ -11,10 +11,17 @@ import '../widgets/primary_button.dart';
 
 /// Upgrade screen. Payments are not wired yet, so this screen collects intent
 /// without granting paid entitlements from the client.
-class PaywallScreen extends StatelessWidget {
+class PaywallScreen extends StatefulWidget {
   /// Optional feature that triggered the paywall, highlighted at the top.
   final Feature? highlight;
   const PaywallScreen({super.key, this.highlight});
+
+  @override
+  State<PaywallScreen> createState() => _PaywallScreenState();
+}
+
+class _PaywallScreenState extends State<PaywallScreen> {
+  bool _annual = true;
 
   static const _benefits = [
     ('Corner Coach', 'Round-by-round AI game plan', Icons.record_voice_over),
@@ -70,7 +77,7 @@ class PaywallScreen extends StatelessWidget {
               title: b.$1,
               subtitle: b.$2,
               icon: b.$3,
-              highlighted: highlight?.title == b.$1,
+              highlighted: widget.highlight?.title == b.$1,
             ),
           const SizedBox(height: Insets.lg),
           if (isPro)
@@ -98,10 +105,41 @@ class PaywallScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text('\$9.99 / month', style: AppTheme.display(24)),
-                  const SizedBox(height: 2),
-                  Text('Cancel anytime',
-                      style: AppTheme.body(12, color: AppColors.textSecondary)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _PlanToggle(
+                          label: 'Monthly',
+                          price: '\$9.99',
+                          selected: !_annual,
+                          onTap: () => setState(() => _annual = false),
+                        ),
+                      ),
+                      const SizedBox(width: Insets.sm),
+                      Expanded(
+                        child: _PlanToggle(
+                          label: 'Yearly',
+                          price: '\$79.99',
+                          badge: 'Best value',
+                          selected: _annual,
+                          onTap: () => setState(() => _annual = true),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: Insets.md),
+                  const _ComparisonRow(
+                    free: 'Basic tracking',
+                    pro: 'Camp analytics + coach loops',
+                  ),
+                  const _ComparisonRow(
+                    free: 'Limited library',
+                    pro: 'Full technique progression',
+                  ),
+                  const _ComparisonRow(
+                    free: 'Manual progress',
+                    pro: 'Accountability dashboard',
+                  ),
                 ],
               ),
             ),
@@ -127,7 +165,109 @@ class PaywallScreen extends StatelessWidget {
             Text('No payment will be taken until store billing is connected.',
                 textAlign: TextAlign.center,
                 style: AppTheme.body(11, color: AppColors.textMuted)),
+            const SizedBox(height: Insets.md),
+            TextButton(
+              onPressed: auth.isBusy ? null : auth.refreshCurrentUser,
+              child: Text(
+                'Restore / refresh purchase status',
+                style: AppTheme.body(
+                  12,
+                  weight: FontWeight.w800,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PlanToggle extends StatelessWidget {
+  final String label;
+  final String price;
+  final String? badge;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _PlanToggle({
+    required this.label,
+    required this.price,
+    this.badge,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: MotionTokens.fast,
+        padding: const EdgeInsets.all(Insets.md),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primarySoft : AppColors.backgroundRaised,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Column(
+          children: [
+            if (badge != null) ...[
+              Text(
+                badge!.toUpperCase(),
+                style: AppTheme.body(
+                  9,
+                  weight: FontWeight.w900,
+                  color: AppColors.premium,
+                  spacing: .8,
+                ),
+              ),
+              const SizedBox(height: 2),
+            ],
+            Text(label, style: AppTheme.body(13, weight: FontWeight.w800)),
+            const SizedBox(height: 2),
+            Text(price, style: AppTheme.display(22)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ComparisonRow extends StatelessWidget {
+  final String free;
+  final String pro;
+
+  const _ComparisonRow({required this.free, required this.pro});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: Insets.sm),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              free,
+              style: AppTheme.body(11, color: AppColors.textMuted),
+            ),
+          ),
+          const Icon(Icons.arrow_forward, color: AppColors.primary, size: 16),
+          const SizedBox(width: Insets.sm),
+          Expanded(
+            child: Text(
+              pro,
+              style: AppTheme.body(
+                11,
+                weight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
         ],
       ),
     );

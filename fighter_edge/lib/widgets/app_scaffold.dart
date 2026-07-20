@@ -108,12 +108,14 @@ class _IconBtn extends StatelessWidget {
 class HeaderIcon extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
-  const HeaderIcon(this.icon, {super.key, this.onTap});
+  final String? label;
+  const HeaderIcon(this.icon, {super.key, this.onTap, this.label});
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: onTap != null,
+      label: label,
       child: InkWell(
         borderRadius: BorderRadius.circular(22),
         onTap: onTap,
