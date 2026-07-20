@@ -62,11 +62,13 @@ class FirebaseAuthRepository implements AuthRepository {
   /// Firestore. Falls back to a free-plan user if Firestore is unavailable.
   Future<AppUser> _hydrate(User user) async {
     Plan plan = Plan.free;
+    Map<String, dynamic> profileData = const {};
     try {
       final snap = await _doc(user.uid).get();
       if (snap.exists) {
+        profileData = snap.data() ?? const {};
         plan = Plan.values.firstWhere(
-          (p) => p.name == snap.data()?['plan'],
+          (p) => p.name == profileData['plan'],
           orElse: () => Plan.free,
         );
       } else {
@@ -88,6 +90,13 @@ class FirebaseAuthRepository implements AuthRepository {
       emailVerified: user.emailVerified,
       plan: plan,
       createdAt: user.metadata.creationTime ?? DateTime.now(),
+      onboardingComplete: (profileData['onboardingComplete'] as bool?) ?? false,
+      goal: (profileData['goal'] as String?) ?? '',
+      experienceLevel: (profileData['experienceLevel'] as String?) ?? '',
+      weightClass: (profileData['weightClass'] as String?) ?? '',
+      weeklyTrainingDays:
+          (profileData['weeklyTrainingDays'] as num?)?.toInt() ?? 4,
+      startingWeightKg: (profileData['startingWeightKg'] as num?)?.toDouble(),
     );
     _cached = appUser;
     return appUser;
@@ -203,6 +212,30 @@ class FirebaseAuthRepository implements AuthRepository {
     }
     await user.reload();
     return _hydrate(_auth.currentUser ?? user);
+  }
+
+  @override
+  Future<AppUser> completeOnboarding({
+    required String goal,
+    required String experienceLevel,
+    required String weightClass,
+    required int weeklyTrainingDays,
+    required double? startingWeightKg,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const AuthException('signed-out', 'Sign in before setup.');
+    }
+    await _doc(user.uid).set({
+      'goal': goal,
+      'experienceLevel': experienceLevel,
+      'weightClass': weightClass,
+      'weeklyTrainingDays': weeklyTrainingDays,
+      'startingWeightKg': startingWeightKg,
+      'onboardingComplete': true,
+      'onboardedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+    return _hydrate(user);
   }
 
   String _message(FirebaseAuthException e) {

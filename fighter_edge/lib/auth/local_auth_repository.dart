@@ -176,6 +176,30 @@ class LocalAuthRepository implements AuthRepository {
   @override
   Future<AppUser?> refreshCurrentUser() async => _current;
 
+  @override
+  Future<AppUser> completeOnboarding({
+    required String goal,
+    required String experienceLevel,
+    required String weightClass,
+    required int weeklyTrainingDays,
+    required double? startingWeightKg,
+  }) async {
+    final current = _current;
+    if (current == null) {
+      throw const AuthException('signed-out', 'Sign in before setup.');
+    }
+    final user = current.copyWith(
+      onboardingComplete: true,
+      goal: goal,
+      experienceLevel: experienceLevel,
+      weightClass: weightClass,
+      weeklyTrainingDays: weeklyTrainingDays,
+      startingWeightKg: startingWeightKg,
+    );
+    await _persistAccount(user, null);
+    return _completeSignIn(user);
+  }
+
   /// Test/dev-only entitlement seeding. Production UI must never call this.
   Future<AppUser> debugSetPlan(Plan plan) async {
     final current = _current;

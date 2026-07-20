@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -16,6 +17,7 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final bool autofocus;
   final TextCapitalization textCapitalization;
+  final List<TextInputFormatter> inputFormatters;
 
   const AppTextField({
     super.key,
@@ -30,6 +32,7 @@ class AppTextField extends StatelessWidget {
     this.onSubmitted,
     this.autofocus = false,
     this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters = const [],
   });
 
   @override
@@ -40,6 +43,7 @@ class AppTextField extends StatelessWidget {
       keyboardType: keyboardType,
       textCapitalization: textCapitalization,
       textInputAction: textInputAction,
+      inputFormatters: inputFormatters,
       onSubmitted: onSubmitted,
       autofocus: autofocus,
       style: AppTheme.body(15),

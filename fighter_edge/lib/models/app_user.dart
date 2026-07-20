@@ -9,6 +9,12 @@ class AppUser {
   final bool emailVerified;
   final Plan plan;
   final DateTime createdAt;
+  final bool onboardingComplete;
+  final String goal;
+  final String experienceLevel;
+  final String weightClass;
+  final int weeklyTrainingDays;
+  final double? startingWeightKg;
 
   const AppUser({
     required this.id,
@@ -17,6 +23,12 @@ class AppUser {
     required this.plan,
     required this.createdAt,
     this.emailVerified = false,
+    this.onboardingComplete = false,
+    this.goal = '',
+    this.experienceLevel = '',
+    this.weightClass = '',
+    this.weeklyTrainingDays = 4,
+    this.startingWeightKg,
   });
 
   bool get isPro => plan == Plan.pro;
@@ -25,6 +37,12 @@ class AppUser {
     String? displayName,
     bool? emailVerified,
     Plan? plan,
+    bool? onboardingComplete,
+    String? goal,
+    String? experienceLevel,
+    String? weightClass,
+    int? weeklyTrainingDays,
+    double? startingWeightKg,
   }) {
     return AppUser(
       id: id,
@@ -33,6 +51,12 @@ class AppUser {
       emailVerified: emailVerified ?? this.emailVerified,
       plan: plan ?? this.plan,
       createdAt: createdAt,
+      onboardingComplete: onboardingComplete ?? this.onboardingComplete,
+      goal: goal ?? this.goal,
+      experienceLevel: experienceLevel ?? this.experienceLevel,
+      weightClass: weightClass ?? this.weightClass,
+      weeklyTrainingDays: weeklyTrainingDays ?? this.weeklyTrainingDays,
+      startingWeightKg: startingWeightKg ?? this.startingWeightKg,
     );
   }
 
@@ -43,6 +67,12 @@ class AppUser {
         'emailVerified': emailVerified,
         'plan': plan.name,
         'createdAt': createdAt.toIso8601String(),
+        'onboardingComplete': onboardingComplete,
+        'goal': goal,
+        'experienceLevel': experienceLevel,
+        'weightClass': weightClass,
+        'weeklyTrainingDays': weeklyTrainingDays,
+        'startingWeightKg': startingWeightKg,
       };
 
   factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
@@ -56,5 +86,11 @@ class AppUser {
         ),
         createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
             DateTime.now(),
+        onboardingComplete: (json['onboardingComplete'] as bool?) ?? false,
+        goal: (json['goal'] as String?) ?? '',
+        experienceLevel: (json['experienceLevel'] as String?) ?? '',
+        weightClass: (json['weightClass'] as String?) ?? '',
+        weeklyTrainingDays: (json['weeklyTrainingDays'] as num?)?.toInt() ?? 4,
+        startingWeightKg: (json['startingWeightKg'] as num?)?.toDouble(),
       );
 }

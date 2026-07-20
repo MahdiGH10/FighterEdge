@@ -22,9 +22,9 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const f = MockData.fighter;
     final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
+    final user = auth.user;
     final weightDelta = state.weeklyDelta;
     final losing = weightDelta <= 0;
     final showVerificationBanner = auth.supportsEmailVerification &&
@@ -53,7 +53,14 @@ class DashboardScreen extends StatelessWidget {
                       Insets.lg, 0, Insets.lg, Insets.xxl),
                   children: [
                     PremiumReveal(
-                      child: _ProfileHeader(name: f.name, tagline: f.tagline),
+                      child: _ProfileHeader(
+                        name: (user?.displayName.isNotEmpty ?? false)
+                            ? user!.displayName
+                            : 'Fighter',
+                        tagline: user?.goal.isNotEmpty ?? false
+                            ? user!.goal
+                            : 'The Grind Never Lies.',
+                      ),
                     ),
                     if (showVerificationBanner) ...[
                       const SizedBox(height: Insets.lg),

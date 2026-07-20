@@ -18,6 +18,7 @@ const testName = 'Ayoub';
 Future<LocalAuthRepository> makeRepo({
   bool signedIn = false,
   Plan plan = Plan.free,
+  bool onboarded = false,
 }) async {
   SharedPreferences.setMockInitialValues({});
   final repo = LocalAuthRepository();
@@ -25,6 +26,15 @@ Future<LocalAuthRepository> makeRepo({
   if (signedIn) {
     await repo.signUpWithEmail(
         email: testEmail, password: testPassword, displayName: testName);
+    if (onboarded) {
+      await repo.completeOnboarding(
+        goal: 'Build fight-camp structure',
+        experienceLevel: 'Intermediate',
+        weightClass: 'Lightweight',
+        weeklyTrainingDays: 4,
+        startingWeightKg: 77.2,
+      );
+    }
     if (plan == Plan.pro) {
       await repo.debugSetPlan(Plan.pro);
     }

@@ -102,6 +102,21 @@ class AuthController extends ChangeNotifier {
         _onUserChanged(await _repo.refreshCurrentUser());
       });
 
+  Future<void> completeOnboarding({
+    required String goal,
+    required String experienceLevel,
+    required String weightClass,
+    required int weeklyTrainingDays,
+    required double? startingWeightKg,
+  }) =>
+      _apply(() => _repo.completeOnboarding(
+            goal: goal,
+            experienceLevel: experienceLevel,
+            weightClass: weightClass,
+            weeklyTrainingDays: weeklyTrainingDays,
+            startingWeightKg: startingWeightKg,
+          ));
+
   bool allows(Feature feature) => Entitlements.allows(plan, feature);
 
   /// DEV ONLY: with the local backend, returns the last simulated magic code so

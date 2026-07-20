@@ -35,6 +35,12 @@ void main() {
     await tester.tap(find.byType(PrimaryButton));
     await tester.pumpAndSettle();
 
+    // First-run setup creates a clean personal starting point.
+    expect(find.text('Set up your edge'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '77.2');
+    await tester.tap(find.text('START FRESH'));
+    await tester.pumpAndSettle();
+
     // Dashboard.
     expect(find.text('DASHBOARD'), findsOneWidget);
 

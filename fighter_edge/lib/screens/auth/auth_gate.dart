@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/brand_logo.dart';
 import '../../widgets/premium_effects.dart';
 import '../home_shell.dart';
+import '../onboarding_screen.dart';
 import 'login_screen.dart';
 
 /// Routes between the auth flow and the app based on [AuthController.status].
@@ -15,9 +16,12 @@ class AuthGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = context.watch<AuthController>().status;
+    final user = context.watch<AuthController>().user;
     return switch (status) {
       AuthStatus.unknown => const _Splash(),
-      AuthStatus.authenticated => const HomeShell(),
+      AuthStatus.authenticated => (user?.onboardingComplete ?? false)
+          ? const HomeShell()
+          : const OnboardingScreen(),
       AuthStatus.unauthenticated => const LoginScreen(),
     };
   }

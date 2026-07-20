@@ -49,6 +49,15 @@ void main() {
     final firstState = AppState(dataRepository: repo)..setUser('fighter-a');
     addTearDown(firstState.dispose);
     await Future<void>.delayed(Duration.zero);
+    firstState.addMeal(Meal(
+      name: 'Breakfast',
+      items: 'Oats, banana, whey',
+      calories: 620,
+      protein: 42,
+      carbs: 78,
+      fats: 14,
+      eaten: true,
+    ));
     final breakfast = firstState.meals.firstWhere((m) => m.name == 'Breakfast');
     firstState.toggleMeal(breakfast);
 

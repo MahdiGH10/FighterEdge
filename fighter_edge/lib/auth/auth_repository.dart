@@ -61,4 +61,14 @@ abstract class AuthRepository {
 
   /// Reload the current user and server-owned entitlement state.
   Future<AppUser?> refreshCurrentUser();
+
+  /// Stores first-run setup choices. This is account profile data, not a paid
+  /// entitlement, so the client may write it directly.
+  Future<AppUser> completeOnboarding({
+    required String goal,
+    required String experienceLevel,
+    required String weightClass,
+    required int weeklyTrainingDays,
+    required double? startingWeightKg,
+  });
 }

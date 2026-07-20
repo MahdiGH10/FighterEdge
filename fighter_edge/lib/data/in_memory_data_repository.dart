@@ -4,7 +4,6 @@ import '../models/meal.dart';
 import '../models/training_session.dart';
 import '../models/weight_entry.dart';
 import 'data_repository.dart';
-import 'mock_data.dart';
 
 class InMemoryDataRepository implements DataRepository {
   final Map<String, List<WeightEntry>> _weights = {};
@@ -98,10 +97,9 @@ class InMemoryDataRepository implements DataRepository {
   }
 
   void _ensureUser(String userId) {
-    _weights.putIfAbsent(userId, MockData.seedWeights);
-    _meals.putIfAbsent(
-        userId, () => {mealDateKey(DateTime.now()): MockData.seedMeals()});
-    _sessions.putIfAbsent(userId, () => List.of(MockData.week));
+    _weights.putIfAbsent(userId, () => []);
+    _meals.putIfAbsent(userId, () => {});
+    _sessions.putIfAbsent(userId, () => []);
   }
 
   List<WeightEntry> _sortedWeights(String userId) {
@@ -112,7 +110,7 @@ class InMemoryDataRepository implements DataRepository {
 
   List<Meal> _mealsForDate(String userId, DateTime date) {
     return List.unmodifiable(
-      _meals[userId]![mealDateKey(date)] ?? MockData.seedMeals(),
+      _meals[userId]![mealDateKey(date)] ?? const [],
     );
   }
 

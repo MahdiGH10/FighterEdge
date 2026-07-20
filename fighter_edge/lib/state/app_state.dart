@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/data_repository.dart';
@@ -27,9 +27,6 @@ class AppState extends ChangeNotifier {
   StreamSubscription<List<Meal>>? _mealSub;
   StreamSubscription<List<TrainingSession>>? _sessionSub;
   String? _userId;
-  bool _seededWeightsForCurrentUser = false;
-  bool _seededMealsForCurrentUser = false;
-  bool _seededSessionsForCurrentUser = false;
   bool _useMetricUnits = true;
   bool _timerHaptics = true;
   bool _campReminders = false;
@@ -38,9 +35,6 @@ class AppState extends ChangeNotifier {
   void setUser(String? userId) {
     if (_userId == userId) return;
     _userId = userId;
-    _seededWeightsForCurrentUser = false;
-    _seededMealsForCurrentUser = false;
-    _seededSessionsForCurrentUser = false;
     _weightSub?.cancel();
     _mealSub?.cancel();
     _sessionSub?.cancel();
@@ -55,13 +49,6 @@ class AppState extends ChangeNotifier {
     }
 
     _weightSub = repo.watchWeights(userId).listen((weights) {
-      if (weights.isEmpty && !_seededWeightsForCurrentUser) {
-        _seededWeightsForCurrentUser = true;
-        for (final entry in MockData.seedWeights()) {
-          unawaited(repo.addWeight(userId, entry));
-        }
-        return;
-      }
       _weights = List.of(weights);
       notifyListeners();
     });
@@ -69,13 +56,6 @@ class AppState extends ChangeNotifier {
     _watchMealsForCurrentDate(repo, userId);
 
     _sessionSub = repo.watchSessions(userId).listen((sessions) {
-      if (sessions.isEmpty && !_seededSessionsForCurrentUser) {
-        _seededSessionsForCurrentUser = true;
-        for (final session in MockData.week) {
-          unawaited(repo.saveSession(userId, session));
-        }
-        return;
-      }
       _sessions = List.of(sessions);
       notifyListeners();
     });
@@ -203,7 +183,6 @@ class AppState extends ChangeNotifier {
     _nutritionDate =
         DateTime(_nutritionDate.year, _nutritionDate.month, _nutritionDate.day)
             .add(Duration(days: days));
-    _seededMealsForCurrentUser = false;
     final repo = _dataRepository;
     final userId = _userId;
     if (repo == null || userId == null) {
@@ -275,6 +254,34 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> startFreshCamp({
+    required double? startingWeightKg,
+    required int weeklyTrainingDays,
+  }) async {
+    final repo = _dataRepository;
+    final userId = _userId;
+    final sessions = _freshPlan(weeklyTrainingDays);
+
+    _weights = [];
+    if (startingWeightKg != null && startingWeightKg > 0) {
+      final entry = WeightEntry(DateTime.now(), startingWeightKg);
+      _weights.add(entry);
+      if (repo != null && userId != null) {
+        unawaited(repo.addWeight(userId, entry));
+      }
+    }
+
+    _meals = [];
+    _sessions = sessions;
+    if (repo != null && userId != null) {
+      for (final session in sessions) {
+        unawaited(repo.saveSession(userId, session));
+      }
+      unawaited(repo.saveMealsForDate(userId, _nutritionDate, const []));
+    }
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _weightSub?.cancel();
@@ -285,15 +292,6 @@ class AppState extends ChangeNotifier {
 
   void _watchMealsForCurrentDate(DataRepository repo, String userId) {
     _mealSub = repo.watchMeals(userId, _nutritionDate).listen((meals) {
-      if (meals.isEmpty && isTodayNutrition && !_seededMealsForCurrentUser) {
-        _seededMealsForCurrentUser = true;
-        unawaited(repo.saveMealsForDate(
-          userId,
-          _nutritionDate,
-          MockData.seedMeals(),
-        ));
-        return;
-      }
       _meals = List.of(meals);
       notifyListeners();
     });
@@ -312,5 +310,53 @@ class AppState extends ChangeNotifier {
       // initialized. Keep safe defaults instead of making domain logic depend
       // on platform storage.
     }
+  }
+
+  List<TrainingSession> _freshPlan(int weeklyTrainingDays) {
+    final templates = [
+      const TrainingSession(
+        day: 'Mon',
+        title: 'Striking',
+        subtitle: 'Boxing fundamentals + combinations',
+        icon: Icons.sports_mma,
+        completed: false,
+      ),
+      const TrainingSession(
+        day: 'Tue',
+        title: 'Wrestling',
+        subtitle: 'Entries, finishes + control',
+        icon: Icons.sports_kabaddi,
+        completed: false,
+      ),
+      const TrainingSession(
+        day: 'Wed',
+        title: 'Conditioning',
+        subtitle: 'Intervals + core',
+        icon: Icons.bolt,
+        completed: false,
+      ),
+      const TrainingSession(
+        day: 'Thu',
+        title: 'BJJ',
+        subtitle: 'Guard, transitions + submissions',
+        icon: Icons.sports_martial_arts,
+        completed: false,
+      ),
+      const TrainingSession(
+        day: 'Fri',
+        title: 'Strength',
+        subtitle: 'Explosive upper/lower body',
+        icon: Icons.fitness_center,
+        completed: false,
+      ),
+      const TrainingSession(
+        day: 'Sat',
+        title: 'Recovery',
+        subtitle: 'Mobility + easy zone 2',
+        icon: Icons.spa,
+        completed: false,
+      ),
+    ];
+    return List.of(templates.take(weeklyTrainingDays.clamp(2, 6)));
   }
 }

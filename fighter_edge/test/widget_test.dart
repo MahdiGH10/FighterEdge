@@ -18,7 +18,8 @@ void main() {
 
   testWidgets('boots straight to the dashboard when a session exists',
       (tester) async {
-    final repo = await makeRepo(signedIn: true, plan: Plan.pro);
+    final repo =
+        await makeRepo(signedIn: true, plan: Plan.pro, onboarded: true);
     await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
     await tester.pump();
 
