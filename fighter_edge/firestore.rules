@@ -24,6 +24,14 @@ service cloud.firestore {
       match /sessions/{sessionId} {
         allow read, write: if isOwner(uid);
       }
+
+      match /nutritionProfile/{docId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /nutritionTargets/{docId} {
+        allow read, write: if isOwner(uid);
+      }
     }
 
     match /{document=**} {

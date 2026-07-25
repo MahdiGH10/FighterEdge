@@ -66,3 +66,14 @@ enum NutritionTargetStatus {
   /// qualified professional before an automated plan is generated.
   needsProfessionalReview,
 }
+
+/// Shared `enum.name` <-> string helpers so every model's toJson/fromJson
+/// uses the same convention instead of repeating `Values.firstWhere(...)`.
+T? enumFromName<T extends Enum>(List<T> values, Object? name) {
+  if (name is! String) return null;
+  for (final v in values) {
+    if (v.name == name) return v;
+  }
+  return null;
+}
+

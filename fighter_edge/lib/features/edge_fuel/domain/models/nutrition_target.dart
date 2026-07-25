@@ -77,4 +77,57 @@ class NutritionTarget {
     }
     return proteinGrams! * 4 + carbGrams! * 4 + fatGrams! * 9;
   }
+
+  Map<String, dynamic> toJson() => {
+        'status': status.name,
+        'policyVersion': policyVersion,
+        'calculatedAt': calculatedAt.toIso8601String(),
+        'reasons': reasons,
+        'warnings': warnings,
+        'estimatedRmrKcal': estimatedRmrKcal,
+        'maintenanceRangeLowKcal': maintenanceRangeLowKcal,
+        'maintenanceRangeHighKcal': maintenanceRangeHighKcal,
+        'targetCalories': targetCalories,
+        'proteinGrams': proteinGrams,
+        'fatGrams': fatGrams,
+        'carbGrams': carbGrams,
+        'fiberGramsLow': fiberGramsLow,
+        'fiberGramsHigh': fiberGramsHigh,
+        'proteinReferenceWeightKg': proteinReferenceWeightKg,
+        'equationProfileUsed': equationProfileUsed?.name,
+        'activityCoefficientUsed': activityCoefficientUsed,
+        'appliedGoalAdjustmentPercent': appliedGoalAdjustmentPercent,
+        'confidence': confidence?.name,
+      };
+
+  factory NutritionTarget.fromJson(Map<String, dynamic> json) {
+    return NutritionTarget(
+      status: enumFromName(NutritionTargetStatus.values, json['status']) ??
+          NutritionTargetStatus.needsMoreData,
+      policyVersion: (json['policyVersion'] as num?)?.toInt() ?? 0,
+      calculatedAt: DateTime.tryParse(json['calculatedAt'] as String? ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      reasons: List<String>.from(json['reasons'] as List? ?? const []),
+      warnings: List<String>.from(json['warnings'] as List? ?? const []),
+      estimatedRmrKcal: (json['estimatedRmrKcal'] as num?)?.toInt(),
+      maintenanceRangeLowKcal: (json['maintenanceRangeLowKcal'] as num?)?.toInt(),
+      maintenanceRangeHighKcal:
+          (json['maintenanceRangeHighKcal'] as num?)?.toInt(),
+      targetCalories: (json['targetCalories'] as num?)?.toInt(),
+      proteinGrams: (json['proteinGrams'] as num?)?.toInt(),
+      fatGrams: (json['fatGrams'] as num?)?.toInt(),
+      carbGrams: (json['carbGrams'] as num?)?.toInt(),
+      fiberGramsLow: (json['fiberGramsLow'] as num?)?.toInt(),
+      fiberGramsHigh: (json['fiberGramsHigh'] as num?)?.toInt(),
+      proteinReferenceWeightKg:
+          (json['proteinReferenceWeightKg'] as num?)?.toDouble(),
+      equationProfileUsed:
+          enumFromName(EquationProfile.values, json['equationProfileUsed']),
+      activityCoefficientUsed:
+          (json['activityCoefficientUsed'] as num?)?.toDouble(),
+      appliedGoalAdjustmentPercent:
+          (json['appliedGoalAdjustmentPercent'] as num?)?.toDouble(),
+      confidence: enumFromName(ConfidenceLabel.values, json['confidence']),
+    );
+  }
 }

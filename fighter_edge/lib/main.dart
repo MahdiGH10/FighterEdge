@@ -9,6 +9,10 @@ import 'auth/firebase_auth_repository.dart';
 import 'controllers/auth_controller.dart';
 import 'data/data_repository.dart';
 import 'data/firestore_data_repository.dart';
+import 'features/edge_fuel/data/edge_fuel_repository.dart';
+import 'features/edge_fuel/data/firestore_edge_fuel_repository.dart';
+import 'features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'firebase_options.dart';
 import 'screens/auth/auth_gate.dart';
 import 'state/app_state.dart';
@@ -36,16 +40,24 @@ Future<void> main() async {
   runApp(FighterEdgeApp(
     authRepo: authRepo,
     dataRepo: FirestoreDataRepository(),
+    edgeFuelRepo: FirestoreEdgeFuelRepository(),
   ));
 }
 
 class FighterEdgeApp extends StatelessWidget {
   final AuthRepository authRepo;
   final DataRepository? dataRepo;
-  const FighterEdgeApp({super.key, required this.authRepo, this.dataRepo});
+  final EdgeFuelRepository? edgeFuelRepo;
+  const FighterEdgeApp({
+    super.key,
+    required this.authRepo,
+    this.dataRepo,
+    this.edgeFuelRepo,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController(authRepo)),
@@ -55,6 +67,17 @@ class FighterEdgeApp extends StatelessWidget {
             final appState = state ?? AppState(dataRepository: dataRepo);
             appState.setUser(auth.user?.id);
             return appState;
+          },
+        ),
+        Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
+        ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
+          create: (_) =>
+              EdgeFuelController(repository: resolvedEdgeFuelRepo),
+          update: (_, auth, controller) {
+            final edgeFuel = controller ??
+                EdgeFuelController(repository: resolvedEdgeFuelRepo);
+            edgeFuel.setUser(auth.user?.id);
+            return edgeFuel;
           },
         ),
       ],

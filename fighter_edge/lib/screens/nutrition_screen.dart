@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
+import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../models/meal.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
@@ -225,6 +228,8 @@ class _TodayView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
+        const _EdgeFuelEntryCard(),
+        const SizedBox(height: Insets.lg),
         const SectionHeader('Calories'),
         AppCard(
           child: Column(
@@ -411,6 +416,64 @@ class _Check extends StatelessWidget {
             ? const Icon(Icons.check,
                 key: ValueKey('meal-check'), size: 16, color: Colors.white)
             : const SizedBox(key: ValueKey('meal-empty')),
+      ),
+    );
+  }
+}
+
+/// Entry point into EdgeFuel AI (master prompt §19 EF-1). Additive card at
+/// the top of Today — links to the Plan screen once setup is confirmed, or
+/// prompts to start setup otherwise. Does not change the rest of this
+/// screen's design.
+class _EdgeFuelEntryCard extends StatelessWidget {
+  const _EdgeFuelEntryCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final edgeFuel = context.watch<EdgeFuelController>();
+    final hasSetup = edgeFuel.hasCompletedSetup;
+    final target = edgeFuel.target;
+
+    return AppCard(
+      accent: AppColors.premium,
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => hasSetup
+              ? const EdgeFuelPlanScreen()
+              : const EdgeFuelSetupScreen(),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.primarySoft,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.bolt, color: AppColors.primary),
+          ),
+          const SizedBox(width: Insets.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('EdgeFuel AI',
+                    style: AppTheme.body(13, weight: FontWeight.w800)),
+                const SizedBox(height: 2),
+                Text(
+                  hasSetup && target != null && target.isSuccess
+                      ? 'Your plan: ${target.targetCalories} kcal · view details'
+                      : 'Get a personalized daily calorie and macro target',
+                  style: AppTheme.body(12,
+                      weight: FontWeight.w500, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: AppColors.textMuted),
+        ],
       ),
     );
   }

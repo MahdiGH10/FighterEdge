@@ -2,10 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/screens/nutrition_screen.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/screens/weight_tracker_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
+
+/// Nutrition screen now shows an EdgeFuel entry card, so it needs an
+/// [EdgeFuelController] in the tree alongside [AppState].
+Widget _wrapNutrition(AppState state) {
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider.value(value: state),
+      ChangeNotifierProvider(
+        create: (_) =>
+            EdgeFuelController(repository: InMemoryEdgeFuelRepository()),
+      ),
+    ],
+    child: const MaterialApp(home: NutritionScreen()),
+  );
+}
 
 /// Widget tests for the three interactive features.
 void main() {
@@ -46,14 +63,11 @@ void main() {
     testWidgets('toggling a meal recomputes calories', (tester) async {
       final state = AppState();
       final before = state.consumedCalories;
-      await tester.pumpWidget(
-        ChangeNotifierProvider.value(
-          value: state,
-          child: const MaterialApp(home: NutritionScreen()),
-        ),
-      );
+      await tester.pumpWidget(_wrapNutrition(state));
       await tester.pump();
 
+      await tester.scrollUntilVisible(find.text('Breakfast'), 300,
+          scrollable: find.byType(Scrollable).first);
       await tester.tap(find.text('Breakfast'));
       await tester.pump();
       expect(state.consumedCalories, before - 620);
@@ -61,12 +75,7 @@ void main() {
 
     testWidgets('tabs switch between Today, Meals and Analytics',
         (tester) async {
-      await tester.pumpWidget(
-        ChangeNotifierProvider(
-          create: (_) => AppState(),
-          child: const MaterialApp(home: NutritionScreen()),
-        ),
-      );
+      await tester.pumpWidget(_wrapNutrition(AppState()));
       await tester.pump();
 
       expect(find.text('CALORIES'), findsOneWidget);

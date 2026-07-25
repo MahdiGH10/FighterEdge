@@ -14,6 +14,7 @@ class AppTextField extends StatelessWidget {
   final TextInputAction textInputAction;
   final Widget? suffix;
   final String? errorText;
+  final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final bool autofocus;
   final TextCapitalization textCapitalization;
@@ -29,6 +30,7 @@ class AppTextField extends StatelessWidget {
     this.textInputAction = TextInputAction.next,
     this.suffix,
     this.errorText,
+    this.onChanged,
     this.onSubmitted,
     this.autofocus = false,
     this.textCapitalization = TextCapitalization.none,
@@ -44,6 +46,7 @@ class AppTextField extends StatelessWidget {
       textCapitalization: textCapitalization,
       textInputAction: textInputAction,
       inputFormatters: inputFormatters,
+      onChanged: onChanged,
       onSubmitted: onSubmitted,
       autofocus: autofocus,
       style: AppTheme.body(15),

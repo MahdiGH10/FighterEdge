@@ -140,4 +140,43 @@ class NutritionProfile {
       safetyFlags: safetyFlags ?? this.safetyFlags,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'schemaVersion': schemaVersion,
+        'goal': goal.name,
+        'ageYears': ageYears,
+        'heightCm': heightCm,
+        'currentWeightKg': currentWeightKg,
+        'targetWeightKg': targetWeightKg,
+        'equationProfile': equationProfile.name,
+        'activityLevel': activityLevel.name,
+        'goalPace': goalPace?.name,
+        'bodyFatPercent': bodyFatPercent,
+        'safetyFlags': safetyFlags.toJson(),
+      };
+
+  factory NutritionProfile.fromJson(Map<String, dynamic> json) {
+    return NutritionProfile(
+      schemaVersion:
+          (json['schemaVersion'] as num?)?.toInt() ?? currentSchemaVersion,
+      goal: enumFromName(NutritionGoal.values, json['goal']) ??
+          NutritionGoal.maintain,
+      ageYears: (json['ageYears'] as num).toInt(),
+      heightCm: (json['heightCm'] as num).toDouble(),
+      currentWeightKg: (json['currentWeightKg'] as num).toDouble(),
+      targetWeightKg: (json['targetWeightKg'] as num?)?.toDouble(),
+      equationProfile:
+          enumFromName(EquationProfile.values, json['equationProfile']) ??
+              EquationProfile.neutral,
+      activityLevel:
+          enumFromName(ActivityLevel.values, json['activityLevel']) ??
+              ActivityLevel.moderate,
+      goalPace: enumFromName(GoalPace.values, json['goalPace']),
+      bodyFatPercent: (json['bodyFatPercent'] as num?)?.toDouble(),
+      safetyFlags: json['safetyFlags'] is Map
+          ? NutritionSafetyFlags.fromJson(
+              Map<String, dynamic>.from(json['safetyFlags'] as Map))
+          : const NutritionSafetyFlags(),
+    );
+  }
 }
