@@ -33,7 +33,6 @@ Future<LocalAuthRepository> makeRepo({
       await repo.completeOnboarding(
         goal: 'Build fight-camp structure',
         experienceLevel: 'Intermediate',
-        weightClass: 'Lightweight',
         weeklyTrainingDays: 4,
         startingWeightKg: 77.2,
       );
@@ -59,8 +58,7 @@ Widget wrapApp(
       ChangeNotifierProvider(create: (_) => state ?? AppState()),
       Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
-        create: (_) =>
-            EdgeFuelController(repository: resolvedEdgeFuelRepo),
+        create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
         update: (_, auth, controller) {
           final edgeFuel = controller ??
               EdgeFuelController(repository: resolvedEdgeFuelRepo);

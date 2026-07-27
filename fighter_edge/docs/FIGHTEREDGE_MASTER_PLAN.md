@@ -21,7 +21,7 @@ The product should not compete as “another MMA content library.” Content is 
 
 The first paid promise should be measurable and recurring:
 
-- a real fight-camp plan tied to a date and weight class;
+- a real fight-camp plan tied to a date, current weight trend, and training goal;
 - fast session logging across MMA, boxing, Muay Thai, BJJ, wrestling, S&C, and mobility;
 - hands-free round timing with voice, sound, and haptics;
 - readiness and training-load trends that turn logs into decisions;
@@ -371,7 +371,7 @@ Collect only what changes the experience:
 4. Weekly availability and typical gym sessions.
 5. Equipment availability.
 6. Preferred units and language.
-7. Optional fight date and weight class.
+7. Optional fight date and target/current weight if relevant.
 
 Then generate a simple editable week. Do not ask for biography, record, height, macros, or notification permission before it is relevant.
 
@@ -412,7 +412,7 @@ Camp structure:
 
 - event name/date;
 - ruleset/discipline;
-- weight class and current trend;
+- current weight trend and optional target weight;
 - number of available weeks;
 - broad phases: base, build, specific, taper, fight week;
 - hard gym commitments;

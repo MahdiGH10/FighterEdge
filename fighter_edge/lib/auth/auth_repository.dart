@@ -67,7 +67,6 @@ abstract class AuthRepository {
   Future<AppUser> completeOnboarding({
     required String goal,
     required String experienceLevel,
-    required String weightClass,
     required int weeklyTrainingDays,
     required double? startingWeightKg,
   });

@@ -23,7 +23,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _weight = TextEditingController();
   String _goal = 'Build fight-camp structure';
   String _level = 'Beginner';
-  String _weightClass = 'Lightweight';
   int _days = 4;
   String? _error;
 
@@ -35,17 +34,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   static const _levels = ['Beginner', 'Intermediate', 'Advanced', 'Fighter'];
-
-  static const _classes = [
-    'Flyweight',
-    'Bantamweight',
-    'Featherweight',
-    'Lightweight',
-    'Welterweight',
-    'Middleweight',
-    'Light Heavyweight',
-    'Heavyweight',
-  ];
 
   @override
   void dispose() {
@@ -94,14 +82,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       values: _levels,
                       selected: _level,
                       onSelected: (value) => setState(() => _level = value),
-                    ),
-                    const SizedBox(height: Insets.lg),
-                    const _FieldLabel('Weight class'),
-                    _ChoiceWrap(
-                      values: _classes,
-                      selected: _weightClass,
-                      onSelected: (value) =>
-                          setState(() => _weightClass = value),
                     ),
                     const SizedBox(height: Insets.lg),
                     const _FieldLabel('Training days per week'),
@@ -163,7 +143,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       await auth.completeOnboarding(
         goal: _goal,
         experienceLevel: _level,
-        weightClass: _weightClass,
         weeklyTrainingDays: _days,
         startingWeightKg: parsed,
       );

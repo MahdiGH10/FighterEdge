@@ -180,7 +180,6 @@ class LocalAuthRepository implements AuthRepository {
   Future<AppUser> completeOnboarding({
     required String goal,
     required String experienceLevel,
-    required String weightClass,
     required int weeklyTrainingDays,
     required double? startingWeightKg,
   }) async {
@@ -192,7 +191,6 @@ class LocalAuthRepository implements AuthRepository {
       onboardingComplete: true,
       goal: goal,
       experienceLevel: experienceLevel,
-      weightClass: weightClass,
       weeklyTrainingDays: weeklyTrainingDays,
       startingWeightKg: startingWeightKg,
     );

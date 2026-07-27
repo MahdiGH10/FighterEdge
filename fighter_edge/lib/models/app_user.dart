@@ -12,7 +12,6 @@ class AppUser {
   final bool onboardingComplete;
   final String goal;
   final String experienceLevel;
-  final String weightClass;
   final int weeklyTrainingDays;
   final double? startingWeightKg;
 
@@ -26,7 +25,6 @@ class AppUser {
     this.onboardingComplete = false,
     this.goal = '',
     this.experienceLevel = '',
-    this.weightClass = '',
     this.weeklyTrainingDays = 4,
     this.startingWeightKg,
   });
@@ -40,7 +38,6 @@ class AppUser {
     bool? onboardingComplete,
     String? goal,
     String? experienceLevel,
-    String? weightClass,
     int? weeklyTrainingDays,
     double? startingWeightKg,
   }) {
@@ -54,7 +51,6 @@ class AppUser {
       onboardingComplete: onboardingComplete ?? this.onboardingComplete,
       goal: goal ?? this.goal,
       experienceLevel: experienceLevel ?? this.experienceLevel,
-      weightClass: weightClass ?? this.weightClass,
       weeklyTrainingDays: weeklyTrainingDays ?? this.weeklyTrainingDays,
       startingWeightKg: startingWeightKg ?? this.startingWeightKg,
     );
@@ -70,7 +66,6 @@ class AppUser {
         'onboardingComplete': onboardingComplete,
         'goal': goal,
         'experienceLevel': experienceLevel,
-        'weightClass': weightClass,
         'weeklyTrainingDays': weeklyTrainingDays,
         'startingWeightKg': startingWeightKg,
       };
@@ -89,7 +84,6 @@ class AppUser {
         onboardingComplete: (json['onboardingComplete'] as bool?) ?? false,
         goal: (json['goal'] as String?) ?? '',
         experienceLevel: (json['experienceLevel'] as String?) ?? '',
-        weightClass: (json['weightClass'] as String?) ?? '',
         weeklyTrainingDays: (json['weeklyTrainingDays'] as num?)?.toInt() ?? 4,
         startingWeightKg: (json['startingWeightKg'] as num?)?.toDouble(),
       );

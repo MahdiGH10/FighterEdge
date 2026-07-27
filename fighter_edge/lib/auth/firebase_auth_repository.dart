@@ -93,7 +93,6 @@ class FirebaseAuthRepository implements AuthRepository {
       onboardingComplete: (profileData['onboardingComplete'] as bool?) ?? false,
       goal: (profileData['goal'] as String?) ?? '',
       experienceLevel: (profileData['experienceLevel'] as String?) ?? '',
-      weightClass: (profileData['weightClass'] as String?) ?? '',
       weeklyTrainingDays:
           (profileData['weeklyTrainingDays'] as num?)?.toInt() ?? 4,
       startingWeightKg: (profileData['startingWeightKg'] as num?)?.toDouble(),
@@ -218,7 +217,6 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<AppUser> completeOnboarding({
     required String goal,
     required String experienceLevel,
-    required String weightClass,
     required int weeklyTrainingDays,
     required double? startingWeightKg,
   }) async {
@@ -229,7 +227,6 @@ class FirebaseAuthRepository implements AuthRepository {
     await _doc(user.uid).set({
       'goal': goal,
       'experienceLevel': experienceLevel,
-      'weightClass': weightClass,
       'weeklyTrainingDays': weeklyTrainingDays,
       'startingWeightKg': startingWeightKg,
       'onboardingComplete': true,

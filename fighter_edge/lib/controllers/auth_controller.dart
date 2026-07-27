@@ -105,14 +105,12 @@ class AuthController extends ChangeNotifier {
   Future<void> completeOnboarding({
     required String goal,
     required String experienceLevel,
-    required String weightClass,
     required int weeklyTrainingDays,
     required double? startingWeightKg,
   }) =>
       _apply(() => _repo.completeOnboarding(
             goal: goal,
             experienceLevel: experienceLevel,
-            weightClass: weightClass,
             weeklyTrainingDays: weeklyTrainingDays,
             startingWeightKg: startingWeightKg,
           ));
