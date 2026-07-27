@@ -9,6 +9,9 @@ import 'auth/firebase_auth_repository.dart';
 import 'controllers/auth_controller.dart';
 import 'data/data_repository.dart';
 import 'data/firestore_data_repository.dart';
+import 'features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
+import 'features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
+import 'features/edge_fuel/ai/firebase_edge_fuel_ai_gateway.dart';
 import 'features/edge_fuel/data/edge_fuel_repository.dart';
 import 'features/edge_fuel/data/firestore_edge_fuel_repository.dart';
 import 'features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
@@ -41,6 +44,7 @@ Future<void> main() async {
     authRepo: authRepo,
     dataRepo: FirestoreDataRepository(),
     edgeFuelRepo: FirestoreEdgeFuelRepository(),
+    edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
   ));
 }
 
@@ -48,16 +52,19 @@ class FighterEdgeApp extends StatelessWidget {
   final AuthRepository authRepo;
   final DataRepository? dataRepo;
   final EdgeFuelRepository? edgeFuelRepo;
+  final EdgeFuelAiGateway? edgeFuelAiGateway;
   const FighterEdgeApp({
     super.key,
     required this.authRepo,
     this.dataRepo,
     this.edgeFuelRepo,
+    this.edgeFuelAiGateway,
   });
 
   @override
   Widget build(BuildContext context) {
     final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
+    final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController(authRepo)),
@@ -70,6 +77,7 @@ class FighterEdgeApp extends StatelessWidget {
           },
         ),
         Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
+        Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
           create: (_) =>
               EdgeFuelController(repository: resolvedEdgeFuelRepo),

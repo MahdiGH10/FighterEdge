@@ -8,7 +8,10 @@ import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/empty_state.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../../widgets/stat_card.dart';
+import '../../ai/edge_fuel_ai_gateway.dart';
+import '../../ai/edge_fuel_ai_models.dart';
 import '../../domain/models/nutrition_target.dart';
+import '../controllers/edge_fuel_ai_controller.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../nutrition_copy.dart';
 import 'edge_fuel_setup_screen.dart';
@@ -24,12 +27,16 @@ class EdgeFuelPlanScreen extends StatelessWidget {
     final edgeFuel = context.watch<EdgeFuelController>();
     final target = edgeFuel.target;
 
-    return ScreenScaffold(
-      title: 'Your plan',
-      showBack: true,
-      body: target == null || !target.isSuccess
-          ? _EmptyPlan(target: target)
-          : _PlanBody(target: target),
+    return ChangeNotifierProvider(
+      create: (ctx) =>
+          EdgeFuelAiController(gateway: ctx.read<EdgeFuelAiGateway>()),
+      child: ScreenScaffold(
+        title: 'Your plan',
+        showBack: true,
+        body: target == null || !target.isSuccess
+            ? _EmptyPlan(target: target)
+            : _PlanBody(target: target, edgeFuel: edgeFuel),
+      ),
     );
   }
 }
@@ -68,7 +75,8 @@ class _EmptyPlan extends StatelessWidget {
 
 class _PlanBody extends StatelessWidget {
   final NutritionTarget target;
-  const _PlanBody({required this.target});
+  final EdgeFuelController edgeFuel;
+  const _PlanBody({required this.target, required this.edgeFuel});
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +172,8 @@ class _PlanBody extends StatelessWidget {
           ),
         ],
         const SizedBox(height: Insets.lg),
+        _AiCoachSection(target: target, edgeFuel: edgeFuel),
+        const SizedBox(height: Insets.lg),
         PrimaryButton(
           'Redo setup',
           icon: Icons.tune,
@@ -172,6 +182,178 @@ class _PlanBody extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const EdgeFuelSetupScreen()),
           ),
         ),
+      ],
+    );
+  }
+}
+
+/// "Ask EdgeFuel Coach" — the one AI surface in this release (master prompt
+/// §13.1: explain the already-calculated plan in plain language). Never
+/// calculates or overrides the target above; only explains it.
+class _AiCoachSection extends StatelessWidget {
+  final NutritionTarget target;
+  final EdgeFuelController edgeFuel;
+  const _AiCoachSection({required this.target, required this.edgeFuel});
+
+  @override
+  Widget build(BuildContext context) {
+    final ai = context.watch<EdgeFuelAiController>();
+
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: AppColors.premium, size: 18),
+              const SizedBox(width: Insets.sm),
+              Text('EDGEFUEL COACH',
+                  style: AppTheme.body(11,
+                      weight: FontWeight.w700,
+                      color: AppColors.textMuted,
+                      spacing: 0.8)),
+            ],
+          ),
+          const SizedBox(height: Insets.sm),
+          _AiCoachBody(ai: ai, target: target, edgeFuel: edgeFuel),
+        ],
+      ),
+    );
+  }
+}
+
+class _AiCoachBody extends StatelessWidget {
+  final EdgeFuelAiController ai;
+  final NutritionTarget target;
+  final EdgeFuelController edgeFuel;
+  const _AiCoachBody({
+    required this.ai,
+    required this.target,
+    required this.edgeFuel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (ai.isLoading) {
+      return const _AiCoachSkeleton();
+    }
+
+    final result = ai.lastResult;
+    if (result == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ask for a plain-language explanation of your plan. This sends your '
+            'target and food log to our server — never medical details beyond '
+            'what you already entered in setup.',
+            style: AppTheme.body(12, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: Insets.md),
+          GhostButton(
+            'Ask EdgeFuel Coach',
+            icon: Icons.chat_bubble_outline,
+            expand: true,
+            onPressed: () => ai.explainPlan(
+              target: target,
+              day: edgeFuel.day,
+              preferences: edgeFuel.draft,
+            ),
+          ),
+        ],
+      );
+    }
+
+    switch (result.status) {
+      case EdgeFuelAiStatus.quotaReached:
+        return Text(
+          "You've reached today's AI limit. Try again tomorrow.",
+          style: AppTheme.body(12, color: AppColors.textSecondary),
+        );
+      case EdgeFuelAiStatus.unavailable:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'EdgeFuel Coach is unavailable right now. Your plan above is still '
+              'accurate — this only affects the AI explanation.',
+              style: AppTheme.body(12, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: Insets.md),
+            GhostButton(
+              'Try again',
+              icon: Icons.refresh,
+              expand: true,
+              onPressed: () => ai.explainPlan(
+                target: target,
+                day: edgeFuel.day,
+                preferences: edgeFuel.draft,
+              ),
+            ),
+          ],
+        );
+      case EdgeFuelAiStatus.success:
+        final response = result.response!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (response.requiresProfessionalReview)
+              Padding(
+                padding: const EdgeInsets.only(bottom: Insets.sm),
+                child: Text(
+                  'Please speak with a qualified professional before acting on this.',
+                  style: AppTheme.body(12,
+                      weight: FontWeight.w700, color: AppColors.warning),
+                ),
+              ),
+            Text(response.summary,
+                style: AppTheme.body(13, weight: FontWeight.w500)),
+            for (final warning in response.warnings)
+              Padding(
+                padding: const EdgeInsets.only(top: Insets.xs),
+                child: Text('• $warning',
+                    style: AppTheme.body(12, color: AppColors.textSecondary)),
+              ),
+            const SizedBox(height: Insets.md),
+            GhostButton(
+              'Ask again',
+              icon: Icons.refresh,
+              expand: true,
+              onPressed: () => ai.explainPlan(
+                target: target,
+                day: edgeFuel.day,
+                preferences: edgeFuel.draft,
+              ),
+            ),
+          ],
+        );
+    }
+  }
+}
+
+class _AiCoachSkeleton extends StatelessWidget {
+  const _AiCoachSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget block(double height, {double widthFactor = 1}) => FractionallySizedBox(
+          widthFactor: widthFactor,
+          alignment: Alignment.centerLeft,
+          child: Container(
+            height: height,
+            margin: const EdgeInsets.only(bottom: Insets.sm),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceElevated,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        block(14),
+        block(14, widthFactor: 0.7),
+        block(14, widthFactor: 0.85),
       ],
     );
   }

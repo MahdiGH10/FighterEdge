@@ -2,8 +2,12 @@
 
 Provider: OpenRouter
 
-Status: selected for the EF-6 secure AI sprint. Do not implement direct calls
-from Flutter before EF-6.
+Status: implemented (Fast MVP scope — see `docs/edge_fuel/AI_DEPLOY.md`).
+Backend gateway lives in `functions/`; Flutter never calls OpenRouter
+directly. No App Check or server-owned Pro entitlement yet — every
+signed-in user shares one daily quota. See `AI_DEPLOY.md` for the exact
+steps still needed on your end (Blaze upgrade, secret, deploy) before this
+is live.
 
 ## Security rule
 

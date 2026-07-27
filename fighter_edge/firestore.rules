@@ -36,6 +36,21 @@ service cloud.firestore {
       match /nutritionDays/{dateKey} {
         allow read, write: if isOwner(uid);
       }
+
+      // Written only by the edgeFuelAiExplain Cloud Function (Admin SDK,
+      // bypasses these rules). Clients may read their own usage count but
+      // must never be able to reset or inflate their own quota.
+      match /aiUsage/{dateKey} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+    }
+
+    // Server-only feature flags (e.g. the EdgeFuel AI kill switch). Read by
+    // the Cloud Function via the Admin SDK, which bypasses these rules;
+    // clients never need direct access.
+    match /config/{docId} {
+      allow read, write: if false;
     }
 
     match /{document=**} {

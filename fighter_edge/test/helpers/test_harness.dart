@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/controllers/auth_controller.dart';
+import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
+import 'package:fighter_edge/features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/data/edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
@@ -50,13 +52,16 @@ Widget wrapApp(
   required LocalAuthRepository repo,
   AppState? state,
   EdgeFuelRepository? edgeFuelRepo,
+  EdgeFuelAiGateway? edgeFuelAiGateway,
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
+  final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
   return MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthController(repo)),
       ChangeNotifierProvider(create: (_) => state ?? AppState()),
       Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
+      Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
         create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
         update: (_, auth, controller) {
