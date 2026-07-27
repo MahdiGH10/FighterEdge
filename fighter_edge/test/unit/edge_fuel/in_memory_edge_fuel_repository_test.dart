@@ -1,9 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
+import 'package:fighter_edge/models/meal.dart';
 
 void main() {
   group('InMemoryEdgeFuelRepository', () {
@@ -84,6 +87,74 @@ void main() {
       expect(storedA!.goal, NutritionGoal.loseFat);
       expect(storedB!.goal, NutritionGoal.gainMuscle);
       expect(storedA.currentWeightKg, isNot(storedB.currentWeightKg));
+    });
+
+    test('watchNutritionDay emits an empty day before logging', () async {
+      final repo = InMemoryEdgeFuelRepository();
+      final day =
+          await repo.watchNutritionDay('u1', DateTime(2026, 7, 27)).first;
+
+      expect(day.localDate, '2026-07-27');
+      expect(day.entries, isEmpty);
+      expect(day.totals.calories, 0);
+    });
+
+    test('saveNutritionDay persists totals and notifies watchers', () async {
+      final repo = InMemoryEdgeFuelRepository();
+      final emissions = <NutritionDay>[];
+      final sub = repo
+          .watchNutritionDay('u1', DateTime(2026, 7, 27))
+          .listen(emissions.add);
+
+      final day = NutritionDay.empty(
+        localDate: '2026-07-27',
+        timeZone: 'local',
+        now: DateTime(2026, 7, 27),
+      ).copyWith(entries: [
+        FoodLogEntry(
+          id: 'food-1',
+          name: 'Eggs',
+          notes: 'Breakfast',
+          calories: 300,
+          proteinGrams: 24,
+          carbGrams: 2,
+          fatGrams: 20,
+          loggedAt: DateTime(2026, 7, 27, 8),
+        ),
+      ]);
+
+      await repo.saveNutritionDay('u1', day);
+      await Future<void>.delayed(Duration.zero);
+      await sub.cancel();
+
+      expect(emissions.last.entries.single.name, 'Eggs');
+      expect(emissions.last.totals.calories, 300);
+    });
+
+    test('legacy meals migrate once into nutrition day format', () async {
+      final repo = InMemoryEdgeFuelRepository();
+      await repo.seedLegacyMeals('u1', DateTime(2026, 7, 27), [
+        Meal(
+          id: 'breakfast',
+          name: 'Breakfast',
+          items: 'Eggs and toast',
+          calories: 620,
+          protein: 45,
+          carbs: 55,
+          fats: 20,
+          eaten: true,
+        ),
+      ]);
+
+      final first =
+          await repo.watchNutritionDay('u1', DateTime(2026, 7, 27)).first;
+      final second =
+          await repo.watchNutritionDay('u1', DateTime(2026, 7, 27)).first;
+
+      expect(first.migratedFromLegacyMeals, isTrue);
+      expect(first.entries.single.id, 'legacy-breakfast');
+      expect(first.totals.calories, 620);
+      expect(second.entries.length, 1);
     });
   });
 }

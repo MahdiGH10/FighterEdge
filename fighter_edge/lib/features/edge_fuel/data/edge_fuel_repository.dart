@@ -1,4 +1,5 @@
 import '../domain/models/nutrition_setup_draft.dart';
+import '../domain/models/nutrition_day.dart';
 import '../domain/models/nutrition_target.dart';
 
 /// Persistence boundary for EdgeFuel. Mirrors the existing `DataRepository`
@@ -13,4 +14,12 @@ abstract class EdgeFuelRepository {
   Stream<NutritionTarget?> watchTarget(String userId);
 
   Future<void> saveTarget(String userId, NutritionTarget target);
+
+  Stream<NutritionDay> watchNutritionDay(
+    String userId,
+    DateTime localDate, {
+    NutritionTarget? targetSnapshot,
+  });
+
+  Future<void> saveNutritionDay(String userId, NutritionDay day);
 }

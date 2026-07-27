@@ -32,6 +32,10 @@ service cloud.firestore {
       match /nutritionTargets/{docId} {
         allow read, write: if isOwner(uid);
       }
+
+      match /nutritionDays/{dateKey} {
+        allow read, write: if isOwner(uid);
+      }
     }
 
     match /{document=**} {

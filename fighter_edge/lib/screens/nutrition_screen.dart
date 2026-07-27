@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../features/edge_fuel/domain/models/food_log_entry.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
-import '../models/meal.dart';
-import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
@@ -28,10 +27,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final t = state.target;
-    final consumed = state.consumedCalories;
-    final ratio = consumed / t.calories;
+    final edgeFuel = context.watch<EdgeFuelController>();
+    final targetCalories = edgeFuel.targetCalories;
+    final ratio =
+        targetCalories == 0 ? 0.0 : edgeFuel.consumedCalories / targetCalories;
     final ringColor = ratio > 1 ? AppColors.negative : AppColors.positive;
 
     return Scaffold(
@@ -42,9 +41,11 @@ class _NutritionScreenState extends State<NutritionScreen> {
           children: [
             AppHeader(
               title: 'Nutrition',
-              actions: [HeaderIcon(Icons.add, onTap: () => _addMeal(state))],
+              actions: [
+                HeaderIcon(Icons.add, onTap: () => _editFood(edgeFuel)),
+              ],
             ),
-            _DateSwitcher(state: state),
+            _DateSwitcher(edgeFuel: edgeFuel),
             const SizedBox(height: Insets.md),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
@@ -60,8 +61,13 @@ class _NutritionScreenState extends State<NutritionScreen> {
               child: IndexedStack(
                 index: _tab,
                 children: [
-                  _TodayView(state: state, ratio: ratio, ringColor: ringColor),
-                  _MealsView(state: state),
+                  _TodayView(
+                    edgeFuel: edgeFuel,
+                    ratio: ratio,
+                    ringColor: ringColor,
+                    onEdit: _editFood,
+                  ),
+                  _MealsView(edgeFuel: edgeFuel, onEdit: _editFood),
                   const _AnalyticsView(),
                 ],
               ),
@@ -72,39 +78,53 @@ class _NutritionScreenState extends State<NutritionScreen> {
     );
   }
 
-  Future<void> _addMeal(AppState state) async {
-    final name = TextEditingController();
-    final items = TextEditingController();
-    final calories = TextEditingController();
-    final protein = TextEditingController();
-    final carbs = TextEditingController();
-    final fats = TextEditingController();
-    final meal = await showDialog<Meal>(
+  Future<void> _editFood(
+    EdgeFuelController edgeFuel, {
+    FoodLogEntry? existing,
+  }) async {
+    final name = TextEditingController(text: existing?.name ?? '');
+    final notes = TextEditingController(text: existing?.notes ?? '');
+    final calories =
+        TextEditingController(text: existing?.calories.toString() ?? '');
+    final protein =
+        TextEditingController(text: existing?.proteinGrams.toString() ?? '');
+    final carbs =
+        TextEditingController(text: existing?.carbGrams.toString() ?? '');
+    final fats =
+        TextEditingController(text: existing?.fatGrams.toString() ?? '');
+
+    final entry = await showDialog<FoodLogEntry>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('Add Meal', style: AppTheme.display(18)),
+        title: Text(
+          existing == null ? 'Add food' : 'Edit food',
+          style: AppTheme.display(18),
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _DialogField(controller: name, label: 'Meal name'),
-              _DialogField(controller: items, label: 'Items'),
+              _DialogField(controller: name, label: 'Food or meal name'),
+              _DialogField(controller: notes, label: 'Notes'),
               _DialogField(
                   controller: calories, label: 'Calories', number: true),
               Row(
                 children: [
                   Expanded(
-                      child: _DialogField(
-                          controller: protein, label: 'Protein', number: true)),
+                    child: _DialogField(
+                        controller: protein, label: 'Protein', number: true),
+                  ),
                   const SizedBox(width: Insets.sm),
                   Expanded(
-                      child: _DialogField(
-                          controller: carbs, label: 'Carbs', number: true)),
+                    child: _DialogField(
+                        controller: carbs, label: 'Carbs', number: true),
+                  ),
                   const SizedBox(width: Insets.sm),
                   Expanded(
-                      child: _DialogField(
-                          controller: fats, label: 'Fats', number: true)),
+                    child: _DialogField(
+                        controller: fats, label: 'Fats', number: true),
+                  ),
                 ],
               ),
             ],
@@ -119,22 +139,24 @@ class _NutritionScreenState extends State<NutritionScreen> {
           TextButton(
             onPressed: () {
               final parsedCalories = int.tryParse(calories.text.trim());
-              if (name.text.trim().isEmpty || parsedCalories == null) {
-                return;
-              }
+              if (name.text.trim().isEmpty || parsedCalories == null) return;
               Navigator.pop(
                 ctx,
-                Meal(
-                  id: 'custom-${DateTime.now().microsecondsSinceEpoch}',
+                FoodLogEntry(
+                  id: existing?.id ??
+                      'food-${DateTime.now().microsecondsSinceEpoch}',
                   name: name.text.trim(),
-                  items: items.text.trim().isEmpty
+                  notes: notes.text.trim().isEmpty
                       ? 'Custom meal'
-                      : items.text.trim(),
+                      : notes.text.trim(),
                   calories: parsedCalories,
-                  protein: int.tryParse(protein.text.trim()) ?? 0,
-                  carbs: int.tryParse(carbs.text.trim()) ?? 0,
-                  fats: int.tryParse(fats.text.trim()) ?? 0,
-                  eaten: true,
+                  proteinGrams: int.tryParse(protein.text.trim()) ?? 0,
+                  carbGrams: int.tryParse(carbs.text.trim()) ?? 0,
+                  fatGrams: int.tryParse(fats.text.trim()) ?? 0,
+                  consumed: existing?.consumed ?? true,
+                  saved: existing?.saved ?? false,
+                  source: existing?.source ?? FoodLogSource.manual,
+                  loggedAt: existing?.loggedAt ?? DateTime.now(),
                 ),
               );
             },
@@ -145,39 +167,46 @@ class _NutritionScreenState extends State<NutritionScreen> {
         ],
       ),
     );
+
     name.dispose();
-    items.dispose();
+    notes.dispose();
     calories.dispose();
     protein.dispose();
     carbs.dispose();
     fats.dispose();
-    if (meal != null) state.addMeal(meal);
+
+    if (entry == null) return;
+    if (existing == null) {
+      await edgeFuel.addEntry(entry);
+    } else {
+      await edgeFuel.updateEntry(entry);
+    }
   }
 }
 
 class _DateSwitcher extends StatelessWidget {
-  final AppState state;
-  const _DateSwitcher({required this.state});
+  final EdgeFuelController edgeFuel;
+  const _DateSwitcher({required this.edgeFuel});
 
   @override
   Widget build(BuildContext context) {
-    final label = state.isTodayNutrition
+    final label = edgeFuel.isToday
         ? 'Today'
-        : DateFormat('EEE, MMM d').format(state.nutritionDate);
+        : DateFormat('EEE, MMM d').format(edgeFuel.selectedDate);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
       child: Row(
         children: [
-          HeaderIcon(Icons.chevron_left,
-              onTap: () => state.shiftNutritionDate(-1)),
+          HeaderIcon(Icons.chevron_left, onTap: () => edgeFuel.shiftDate(-1)),
           Expanded(
-            child: Text(label,
-                textAlign: TextAlign.center,
-                style: AppTheme.body(13,
-                    weight: FontWeight.w800, color: AppColors.textSecondary)),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: AppTheme.body(13,
+                  weight: FontWeight.w800, color: AppColors.textSecondary),
+            ),
           ),
-          HeaderIcon(Icons.chevron_right,
-              onTap: () => state.shiftNutritionDate(1)),
+          HeaderIcon(Icons.chevron_right, onTap: () => edgeFuel.shiftDate(1)),
         ],
       ),
     );
@@ -214,22 +243,36 @@ class _DialogField extends StatelessWidget {
   }
 }
 
-/// Tab 0 — calorie ring, macros, and the meal checklist.
 class _TodayView extends StatelessWidget {
-  final AppState state;
+  final EdgeFuelController edgeFuel;
   final double ratio;
   final Color ringColor;
-  const _TodayView(
-      {required this.state, required this.ratio, required this.ringColor});
+  final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
+      onEdit;
+
+  const _TodayView({
+    required this.edgeFuel,
+    required this.ratio,
+    required this.ringColor,
+    required this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final t = state.target;
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
         const _EdgeFuelEntryCard(),
         const SizedBox(height: Insets.lg),
+        if (!edgeFuel.hasUsableTarget) ...[
+          const EmptyState(
+            icon: Icons.bolt,
+            title: 'Set your fuel target',
+            message:
+                'Complete EdgeFuel setup so your daily log can track against your own plan.',
+          ),
+          const SizedBox(height: Insets.lg),
+        ],
         const SectionHeader('Calories'),
         AppCard(
           child: Column(
@@ -243,23 +286,27 @@ class _TodayView extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('${state.consumedCalories}',
+                    Text('${edgeFuel.consumedCalories}',
                         style: AppTheme.display(38)),
-                    Text('/ ${t.calories} kcal',
-                        style: AppTheme.body(12,
-                            weight: FontWeight.w500,
-                            color: AppColors.textMuted)),
+                    Text(
+                      edgeFuel.hasUsableTarget
+                          ? '/ ${edgeFuel.targetCalories} kcal'
+                          : 'logged today',
+                      style: AppTheme.body(12,
+                          weight: FontWeight.w500, color: AppColors.textMuted),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: Insets.xl),
               Row(
                 children: [
-                  _Macro('Protein', state.consumedProtein, t.protein,
-                      AppColors.protein),
-                  _Macro(
-                      'Carbs', state.consumedCarbs, t.carbs, AppColors.carbs),
-                  _Macro('Fats', state.consumedFats, t.fats, AppColors.fats),
+                  _Macro('Protein', edgeFuel.consumedProtein,
+                      edgeFuel.targetProtein, AppColors.protein),
+                  _Macro('Carbs', edgeFuel.consumedCarbs, edgeFuel.targetCarbs,
+                      AppColors.carbs),
+                  _Macro('Fats', edgeFuel.consumedFats, edgeFuel.targetFats,
+                      AppColors.fats),
                 ],
               ),
             ],
@@ -267,33 +314,94 @@ class _TodayView extends StatelessWidget {
         ),
         const SizedBox(height: Insets.xl),
         const SectionHeader('Meals'),
-        for (final m in state.meals)
-          _MealRow(meal: m, onToggle: () => state.toggleMeal(m)),
+        if (edgeFuel.entries.isEmpty)
+          const EmptyState(
+            icon: Icons.restaurant,
+            title: 'No food logged',
+            message: 'Use + to log a meal, snack, or drink for this day.',
+          ),
+        for (final entry in edgeFuel.entries)
+          _FoodRow(
+            entry: entry,
+            onToggle: () => edgeFuel.toggleEntry(entry),
+            onEdit: () => onEdit(edgeFuel, existing: entry),
+            onDelete: () => edgeFuel.deleteEntry(entry),
+            onSaveToggle: () => edgeFuel.updateEntry(
+              entry.copyWith(saved: !entry.saved),
+            ),
+          ),
       ],
     );
   }
 }
 
-/// Tab 1 — focused meal log with running totals.
 class _MealsView extends StatelessWidget {
-  final AppState state;
-  const _MealsView({required this.state});
+  final EdgeFuelController edgeFuel;
+  final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
+      onEdit;
+
+  const _MealsView({required this.edgeFuel, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
-    final eaten = state.meals.where((m) => m.eaten).length;
+    final eaten = edgeFuel.entries.where((entry) => entry.consumed).length;
+    final quickAdds = [
+      ...edgeFuel.entries.where((entry) => entry.saved),
+      ...edgeFuel.recentEntries(),
+    ];
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
-        SectionHeader('Meals logged · $eaten/${state.meals.length}'),
-        for (final m in state.meals)
-          _MealRow(meal: m, onToggle: () => state.toggleMeal(m)),
+        if (quickAdds.isNotEmpty) ...[
+          const SectionHeader('Quick add'),
+          Wrap(
+            spacing: Insets.sm,
+            runSpacing: Insets.sm,
+            children: [
+              for (final entry in quickAdds.take(8))
+                ActionChip(
+                  label: Text(entry.name),
+                  avatar: Icon(entry.saved ? Icons.star : Icons.history,
+                      size: 16, color: AppColors.primary),
+                  onPressed: () => edgeFuel.addEntry(
+                    entry.copyWith(
+                      id: 'food-${DateTime.now().microsecondsSinceEpoch}',
+                      source: entry.saved
+                          ? FoodLogSource.savedMeal
+                          : FoodLogSource.recent,
+                      consumed: true,
+                      loggedAt: DateTime.now(),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: Insets.lg),
+        ],
+        SectionHeader('Meals logged · $eaten/${edgeFuel.entries.length}'),
+        if (edgeFuel.entries.isEmpty)
+          const EmptyState(
+            icon: Icons.restaurant_menu,
+            title: 'Fresh day',
+            message:
+                'No entries yet. Add food manually or quick-add a recent meal.',
+          ),
+        for (final entry in edgeFuel.entries)
+          _FoodRow(
+            entry: entry,
+            onToggle: () => edgeFuel.toggleEntry(entry),
+            onEdit: () => onEdit(edgeFuel, existing: entry),
+            onDelete: () => edgeFuel.deleteEntry(entry),
+            onSaveToggle: () => edgeFuel.updateEntry(
+              entry.copyWith(saved: !entry.saved),
+            ),
+          ),
       ],
     );
   }
 }
 
-/// Tab 2 — analytics placeholder until history logging lands.
 class _AnalyticsView extends StatelessWidget {
   const _AnalyticsView();
 
@@ -303,7 +411,7 @@ class _AnalyticsView extends StatelessWidget {
       icon: Icons.insights,
       title: 'Analytics',
       message:
-          'Weekly calorie and macro trends will appear here\nonce meal history is being logged.',
+          'Weekly calorie and macro trends will appear here once more EdgeFuel history is logged.',
     );
   }
 }
@@ -317,7 +425,8 @@ class _Macro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final over = value > target;
+    final over = target > 0 && value > target;
+    final progress = target <= 0 ? 0.0 : (value / target).clamp(0.0, 1.0);
     return Expanded(
       child: Column(
         children: [
@@ -326,7 +435,7 @@ class _Macro extends StatelessWidget {
                   weight: FontWeight.w600, color: AppColors.textMuted)),
           const SizedBox(height: Insets.sm),
           Text('$value g', style: AppTheme.display(18)),
-          Text('/ $target g',
+          Text(target <= 0 ? 'set target' : '/ $target g',
               style: AppTheme.body(11,
                   weight: FontWeight.w500,
                   color: over ? AppColors.negative : AppColors.textMuted)),
@@ -334,7 +443,7 @@ class _Macro extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(100),
             child: LinearProgressIndicator(
-              value: (value / target).clamp(0.0, 1.0),
+              value: progress,
               minHeight: 5,
               backgroundColor: AppColors.track,
               valueColor:
@@ -347,10 +456,20 @@ class _Macro extends StatelessWidget {
   }
 }
 
-class _MealRow extends StatelessWidget {
-  final Meal meal;
+class _FoodRow extends StatelessWidget {
+  final FoodLogEntry entry;
   final VoidCallback onToggle;
-  const _MealRow({required this.meal, required this.onToggle});
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final VoidCallback onSaveToggle;
+
+  const _FoodRow({
+    required this.entry,
+    required this.onToggle,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onSaveToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -365,21 +484,49 @@ class _MealRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(meal.name,
-                      style: AppTheme.body(15, weight: FontWeight.w700)),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(entry.name,
+                            style: AppTheme.body(15, weight: FontWeight.w700)),
+                      ),
+                      if (entry.saved) ...[
+                        const SizedBox(width: Insets.xs),
+                        const Icon(Icons.star,
+                            size: 14, color: AppColors.primary),
+                      ],
+                    ],
+                  ),
                   const SizedBox(height: 2),
-                  Text(meal.items,
+                  Text(entry.notes,
                       style: AppTheme.body(12,
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
                 ],
               ),
             ),
-            Text('${meal.calories} kcal',
+            Text('${entry.calories} kcal',
                 style: AppTheme.body(13,
                     weight: FontWeight.w600, color: AppColors.textSecondary)),
             const SizedBox(width: Insets.md),
-            _Check(checked: meal.eaten),
+            _Check(checked: entry.consumed),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
+              color: AppColors.surface,
+              onSelected: (value) {
+                if (value == 'edit') onEdit();
+                if (value == 'save') onSaveToggle();
+                if (value == 'delete') onDelete();
+              },
+              itemBuilder: (_) => [
+                const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                PopupMenuItem(
+                  value: 'save',
+                  child: Text(entry.saved ? 'Unsave' : 'Save meal'),
+                ),
+                const PopupMenuItem(value: 'delete', child: Text('Delete')),
+              ],
+            ),
           ],
         ),
       ),
@@ -421,10 +568,6 @@ class _Check extends StatelessWidget {
   }
 }
 
-/// Entry point into EdgeFuel AI (master prompt §19 EF-1). Additive card at
-/// the top of Today — links to the Plan screen once setup is confirmed, or
-/// prompts to start setup otherwise. Does not change the rest of this
-/// screen's design.
 class _EdgeFuelEntryCard extends StatelessWidget {
   const _EdgeFuelEntryCard();
 

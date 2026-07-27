@@ -2,27 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
-import 'package:fighter_edge/screens/nutrition_screen.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/screens/weight_tracker_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
-
-/// Nutrition screen now shows an EdgeFuel entry card, so it needs an
-/// [EdgeFuelController] in the tree alongside [AppState].
-Widget _wrapNutrition(AppState state) {
-  return MultiProvider(
-    providers: [
-      ChangeNotifierProvider.value(value: state),
-      ChangeNotifierProvider(
-        create: (_) =>
-            EdgeFuelController(repository: InMemoryEdgeFuelRepository()),
-      ),
-    ],
-    child: const MaterialApp(home: NutritionScreen()),
-  );
-}
 
 /// Widget tests for the three interactive features.
 void main() {
@@ -60,29 +45,48 @@ void main() {
   });
 
   group('Nutrition', () {
-    testWidgets('toggling a meal recomputes calories', (tester) async {
-      final state = AppState();
-      final before = state.consumedCalories;
-      await tester.pumpWidget(_wrapNutrition(state));
-      await tester.pump();
+    test('toggling a meal recomputes calories', () async {
+      final controller =
+          EdgeFuelController(repository: InMemoryEdgeFuelRepository())
+            ..setUser('u1');
+      await Future<void>.delayed(Duration.zero);
+      await controller.addEntry(FoodLogEntry(
+        id: 'breakfast',
+        name: 'Breakfast',
+        notes: 'Eggs and toast',
+        calories: 620,
+        proteinGrams: 45,
+        carbGrams: 55,
+        fatGrams: 20,
+        loggedAt: DateTime(2026, 7, 27, 8),
+      ));
+      final before = controller.consumedCalories;
 
-      await tester.scrollUntilVisible(find.text('Breakfast'), 300,
-          scrollable: find.byType(Scrollable).first);
-      await tester.tap(find.text('Breakfast'));
-      await tester.pump();
-      expect(state.consumedCalories, before - 620);
+      await controller.toggleEntry(controller.entries.single);
+      expect(controller.consumedCalories, before - 620);
+      controller.dispose();
     });
 
-    testWidgets('tabs switch between Today, Meals and Analytics',
-        (tester) async {
-      await tester.pumpWidget(_wrapNutrition(AppState()));
-      await tester.pump();
+    test('date switching keeps historical logs separate', () async {
+      final controller =
+          EdgeFuelController(repository: InMemoryEdgeFuelRepository())
+            ..setUser('u1');
+      await Future<void>.delayed(Duration.zero);
+      await controller.addEntry(FoodLogEntry(
+        id: 'today',
+        name: 'Today meal',
+        notes: '',
+        calories: 410,
+        proteinGrams: 30,
+        carbGrams: 38,
+        fatGrams: 12,
+        loggedAt: DateTime.now(),
+      ));
+      controller.shiftDate(-1);
+      await Future<void>.delayed(Duration.zero);
 
-      expect(find.text('CALORIES'), findsOneWidget);
-      await tester.tap(find.text('Analytics'));
-      await tester.pump();
-      expect(find.text('Analytics'), findsWidgets);
-      expect(find.text('CALORIES'), findsNothing);
+      expect(controller.entries, isEmpty);
+      controller.dispose();
     });
   });
 
