@@ -128,8 +128,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('Please check with a professional first'),
-          findsOneWidget);
+      expect(
+          find.text('Please check with a professional first'), findsOneWidget);
       expect(find.text('CONFIRM MY PLAN'), findsNothing);
     });
   });

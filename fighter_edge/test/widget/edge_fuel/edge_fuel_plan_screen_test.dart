@@ -29,7 +29,8 @@ NutritionTarget _successTarget() => NutritionTarget(
 
 void main() {
   group('EdgeFuelPlanScreen', () {
-    testWidgets('shows an empty state with a way to start setup when no plan exists',
+    testWidgets(
+        'shows an empty state with a way to start setup when no plan exists',
         (tester) async {
       final repo = await makeRepo(signedIn: true);
       await tester.pumpWidget(wrapApp(
@@ -94,13 +95,14 @@ void main() {
       await tester.pump(); // enter loading state
       await tester.pumpAndSettle();
 
-      expect(find.text('You are tracking well toward your goal.'),
-          findsOneWidget);
-      expect(find.textContaining('pace reduced to protect RMR'),
-          findsOneWidget);
+      expect(
+          find.text('You are tracking well toward your goal.'), findsOneWidget);
+      expect(
+          find.textContaining('pace reduced to protect RMR'), findsOneWidget);
     });
 
-    testWidgets('Ask EdgeFuel Coach shows an unavailable state without crashing',
+    testWidgets(
+        'Ask EdgeFuel Coach shows an unavailable state without crashing',
         (tester) async {
       final repo = await makeRepo(signedIn: true);
       final userId = repo.currentUser!.id;

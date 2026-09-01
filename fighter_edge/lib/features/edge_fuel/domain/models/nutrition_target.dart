@@ -110,7 +110,8 @@ class NutritionTarget {
       reasons: List<String>.from(json['reasons'] as List? ?? const []),
       warnings: List<String>.from(json['warnings'] as List? ?? const []),
       estimatedRmrKcal: (json['estimatedRmrKcal'] as num?)?.toInt(),
-      maintenanceRangeLowKcal: (json['maintenanceRangeLowKcal'] as num?)?.toInt(),
+      maintenanceRangeLowKcal:
+          (json['maintenanceRangeLowKcal'] as num?)?.toInt(),
       maintenanceRangeHighKcal:
           (json['maintenanceRangeHighKcal'] as num?)?.toInt(),
       targetCalories: (json['targetCalories'] as num?)?.toInt(),

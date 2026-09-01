@@ -73,19 +73,20 @@ class _FoodStepState extends State<FoodStep> {
           controller: _allergens,
           label: 'Allergens (comma-separated)',
           icon: Icons.warning_amber_outlined,
-          onChanged: (_) => _commitList(_allergens, (list) =>
-              controller.setFoodPreferences(allergens: list)),
+          onChanged: (_) => _commitList(_allergens,
+              (list) => controller.setFoodPreferences(allergens: list)),
         ),
         const SizedBox(height: Insets.md),
         AppTextField(
           controller: _dislikes,
           label: 'Disliked foods (comma-separated)',
           icon: Icons.thumb_down_outlined,
-          onChanged: (_) => _commitList(_dislikes, (list) =>
-              controller.setFoodPreferences(dislikedFoods: list)),
+          onChanged: (_) => _commitList(_dislikes,
+              (list) => controller.setFoodPreferences(dislikedFoods: list)),
         ),
         const SizedBox(height: Insets.lg),
-        Text('Meals per day', style: AppTheme.body(13, weight: FontWeight.w800)),
+        Text('Meals per day',
+            style: AppTheme.body(13, weight: FontWeight.w800)),
         const SizedBox(height: Insets.sm),
         Row(
           children: [
@@ -93,8 +94,8 @@ class _FoodStepState extends State<FoodStep> {
               icon: Icons.remove,
               onTap: mealsPerDay <= 2
                   ? null
-                  : () =>
-                      controller.setFoodPreferences(mealsPerDay: mealsPerDay - 1),
+                  : () => controller.setFoodPreferences(
+                      mealsPerDay: mealsPerDay - 1),
             ),
             SizedBox(
               width: 56,
@@ -105,8 +106,8 @@ class _FoodStepState extends State<FoodStep> {
               icon: Icons.add,
               onTap: mealsPerDay >= 6
                   ? null
-                  : () =>
-                      controller.setFoodPreferences(mealsPerDay: mealsPerDay + 1),
+                  : () => controller.setFoodPreferences(
+                      mealsPerDay: mealsPerDay + 1),
             ),
           ],
         ),
@@ -149,7 +150,9 @@ class _ChipRow extends StatelessWidget {
   final String? selected;
   final ValueChanged<String> onSelected;
   const _ChipRow(
-      {required this.options, required this.selected, required this.onSelected});
+      {required this.options,
+      required this.selected,
+      required this.onSelected});
 
   @override
   Widget build(BuildContext context) {

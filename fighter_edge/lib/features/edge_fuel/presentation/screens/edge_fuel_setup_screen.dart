@@ -79,8 +79,8 @@ class _EdgeFuelSetupBodyState extends State<_EdgeFuelSetupBody> {
       return const ScreenScaffold(
         title: 'Fuel setup',
         showBack: true,
-        body: Center(
-            child: CircularProgressIndicator(color: AppColors.primary)),
+        body:
+            Center(child: CircularProgressIndicator(color: AppColors.primary)),
       );
     }
 

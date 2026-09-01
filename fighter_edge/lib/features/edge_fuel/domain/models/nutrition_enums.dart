@@ -76,4 +76,3 @@ T? enumFromName<T extends Enum>(List<T> values, Object? name) {
   }
   return null;
 }
-

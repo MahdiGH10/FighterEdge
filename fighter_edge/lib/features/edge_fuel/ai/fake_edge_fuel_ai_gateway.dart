@@ -28,7 +28,12 @@ class FakeEdgeFuelAiGateway implements EdgeFuelAiGateway {
           'protein, ${target.carbGrams}g carbs, and ${target.fatGrams}g fat. This is a '
           'deterministic estimate, not a diagnosis.',
       warnings: target.warnings,
-      factsUsed: const ['targetCalories', 'proteinGrams', 'carbGrams', 'fatGrams'],
+      factsUsed: const [
+        'targetCalories',
+        'proteinGrams',
+        'carbGrams',
+        'fatGrams'
+      ],
       contentVersion: 'fake',
     ));
   }

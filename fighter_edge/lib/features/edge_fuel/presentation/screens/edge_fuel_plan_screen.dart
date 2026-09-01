@@ -49,7 +49,8 @@ class _EmptyPlan extends StatelessWidget {
   Widget build(BuildContext context) {
     final userId = context.read<AuthController>().user?.id;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, Insets.lg, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.lg, Insets.lg, Insets.xxl),
       children: [
         const EmptyState(
           icon: Icons.restaurant_menu,
@@ -81,7 +82,8 @@ class _PlanBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, Insets.lg, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.lg, Insets.lg, Insets.xxl),
       children: [
         AppCard(
           accent: AppColors.primary,
@@ -94,7 +96,8 @@ class _PlanBody extends StatelessWidget {
                       color: AppColors.textMuted,
                       spacing: 0.8)),
               const SizedBox(height: Insets.xs),
-              Text('${target.targetCalories} kcal', style: AppTheme.display(34)),
+              Text('${target.targetCalories} kcal',
+                  style: AppTheme.display(34)),
               const SizedBox(height: 2),
               Text(
                 'Maintenance range ${target.maintenanceRangeLowKcal}–${target.maintenanceRangeHighKcal} kcal',
@@ -205,7 +208,8 @@ class _AiCoachSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome, color: AppColors.premium, size: 18),
+              const Icon(Icons.auto_awesome,
+                  color: AppColors.premium, size: 18),
               const SizedBox(width: Insets.sm),
               Text('EDGEFUEL COACH',
                   style: AppTheme.body(11,
@@ -336,7 +340,8 @@ class _AiCoachSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget block(double height, {double widthFactor = 1}) => FractionallySizedBox(
+    Widget block(double height, {double widthFactor = 1}) =>
+        FractionallySizedBox(
           widthFactor: widthFactor,
           alignment: Alignment.centerLeft,
           child: Container(

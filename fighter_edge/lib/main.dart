@@ -64,7 +64,8 @@ class FighterEdgeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
-    final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
+    final resolvedAiGateway =
+        edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController(authRepo)),
@@ -79,8 +80,7 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
         Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
-          create: (_) =>
-              EdgeFuelController(repository: resolvedEdgeFuelRepo),
+          create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
           update: (_, auth, controller) {
             final edgeFuel = controller ??
                 EdgeFuelController(repository: resolvedEdgeFuelRepo);

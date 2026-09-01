@@ -62,7 +62,8 @@ class _BodyStepState extends State<BodyStep> {
   Widget build(BuildContext context) {
     final controller = widget.controller;
     final draft = controller.draft;
-    final needsTarget = draft.goal != null && draft.goal != NutritionGoal.maintain;
+    final needsTarget =
+        draft.goal != null && draft.goal != NutritionGoal.maintain;
     final flags = draft.safetyFlags;
 
     return ListView(
@@ -146,8 +147,8 @@ class _BodyStepState extends State<BodyStep> {
         _SafetyCheck(
           label: 'Pregnant or breastfeeding',
           value: flags.pregnantOrBreastfeeding,
-          onChanged: (v) => controller.setSafetyFlags(
-              flags.copyWith(pregnantOrBreastfeeding: v)),
+          onChanged: (v) => controller
+              .setSafetyFlags(flags.copyWith(pregnantOrBreastfeeding: v)),
         ),
         _SafetyCheck(
           label: 'Eating-disorder history or symptoms',
@@ -158,8 +159,8 @@ class _BodyStepState extends State<BodyStep> {
         _SafetyCheck(
           label: 'Diabetes requiring medication',
           value: flags.diabetesRequiringMedication,
-          onChanged: (v) => controller.setSafetyFlags(
-              flags.copyWith(diabetesRequiringMedication: v)),
+          onChanged: (v) => controller
+              .setSafetyFlags(flags.copyWith(diabetesRequiringMedication: v)),
         ),
         _SafetyCheck(
           label: 'Kidney disease',
@@ -170,8 +171,8 @@ class _BodyStepState extends State<BodyStep> {
         _SafetyCheck(
           label: 'Serious liver disease',
           value: flags.seriousLiverDisease,
-          onChanged: (v) => controller
-              .setSafetyFlags(flags.copyWith(seriousLiverDisease: v)),
+          onChanged: (v) =>
+              controller.setSafetyFlags(flags.copyWith(seriousLiverDisease: v)),
         ),
         _SafetyCheck(
           label: 'Another clinician-managed diet',
@@ -224,8 +225,7 @@ class _SafetyCheck extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         dense: true,
         activeColor: AppColors.primary,
-        title: Text(label,
-            style: AppTheme.body(13, weight: FontWeight.w600)),
+        title: Text(label, style: AppTheme.body(13, weight: FontWeight.w600)),
       ),
     );
   }

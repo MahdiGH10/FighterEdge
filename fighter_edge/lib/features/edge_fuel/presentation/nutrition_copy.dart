@@ -67,7 +67,8 @@ class NutritionCopy {
   static String paceDescription(GoalPace pace) => switch (pace) {
         GoalPace.gentle => '~0.25% body weight per week.',
         GoalPace.standard => '~0.5% body weight per week — recommended.',
-        GoalPace.upperLimit => '~0.75% body weight per week, the automated limit.',
+        GoalPace.upperLimit =>
+          '~0.75% body weight per week, the automated limit.',
         GoalPace.conservative => '~0.10–0.25% body weight per week.',
         GoalPace.gainStandard =>
           '~0.25–0.50% body weight per week — recommended.',

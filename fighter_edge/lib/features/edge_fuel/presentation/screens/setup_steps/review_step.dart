@@ -105,7 +105,8 @@ class _ReviewSuccess extends StatelessWidget {
                       color: AppColors.textMuted,
                       spacing: 0.8)),
               const SizedBox(height: Insets.xs),
-              Text('${target.targetCalories} kcal', style: AppTheme.display(34)),
+              Text('${target.targetCalories} kcal',
+                  style: AppTheme.display(34)),
               const SizedBox(height: 2),
               Text(
                 'Maintenance range ${target.maintenanceRangeLowKcal}–${target.maintenanceRangeHighKcal} kcal',
@@ -136,8 +137,7 @@ class _ReviewSuccess extends StatelessWidget {
                       spacing: 0.8)),
               const SizedBox(height: Insets.sm),
               if (draft.goal != null)
-                _Assumption(
-                    'Goal', NutritionCopy.goalLabel(draft.goal!)),
+                _Assumption('Goal', NutritionCopy.goalLabel(draft.goal!)),
               if (target.equationProfileUsed != null)
                 _Assumption('Equation',
                     NutritionCopy.equationLabel(target.equationProfileUsed!)),
@@ -150,8 +150,8 @@ class _ReviewSuccess extends StatelessWidget {
                 _Assumption('Protein based on',
                     '${target.proteinReferenceWeightKg!.toStringAsFixed(1)} kg'),
               if (target.confidence != null)
-                _Assumption(
-                    'Confidence', NutritionCopy.confidenceLabel(target.confidence!)),
+                _Assumption('Confidence',
+                    NutritionCopy.confidenceLabel(target.confidence!)),
               _Assumption('Fiber range',
                   '${target.fiberGramsLow}–${target.fiberGramsHigh} g'),
             ],
@@ -170,8 +170,7 @@ class _ReviewSuccess extends StatelessWidget {
                         color: AppColors.warning, size: 18),
                     const SizedBox(width: Insets.sm),
                     Text('Worth knowing',
-                        style:
-                            AppTheme.body(13, weight: FontWeight.w800)),
+                        style: AppTheme.body(13, weight: FontWeight.w800)),
                   ],
                 ),
                 const SizedBox(height: Insets.sm),
@@ -179,8 +178,8 @@ class _ReviewSuccess extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text('• ${NutritionCopy.warning(code)}',
-                        style: AppTheme.body(12,
-                            color: AppColors.textSecondary)),
+                        style:
+                            AppTheme.body(12, color: AppColors.textSecondary)),
                   ),
               ],
             ),
