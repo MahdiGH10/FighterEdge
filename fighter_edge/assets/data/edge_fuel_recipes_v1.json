@@ -1,0 +1,1187 @@
+{
+  "schemaVersion": 1,
+  "recipes": [
+    {
+      "schemaVersion": 1,
+      "id": "three-egg-veg-scramble",
+      "title": "Three-egg scramble with spinach",
+      "description": "A fast, protein-heavy scramble with spinach and peppers, ready before you have finished your coffee.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "egg-whole-raw",
+          "grams": 150,
+          "householdUnitLabel": "3 medium eggs"
+        },
+        {
+          "foodId": "spinach-raw",
+          "grams": 30
+        },
+        {
+          "foodId": "bell-pepper-raw",
+          "grams": 40
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 7,
+          "householdUnitLabel": "1/2 tbsp"
+        }
+      ],
+      "steps": [
+        "Whisk the eggs.",
+        "Saute the pepper and spinach in the olive oil until wilted.",
+        "Pour in the eggs and stir over low heat until just set.",
+        "Season and serve immediately."
+      ],
+      "substitutions": [],
+      "prepMinutes": 5,
+      "cookMinutes": 8,
+      "mealType": "breakfast",
+      "trainingTiming": "postTraining",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "overnight-oats-banana-peanut",
+      "title": "Overnight oats with banana and peanut butter",
+      "description": "Rolled oats soaked overnight with milk, banana and a spoon of peanut butter \u2014 no cooking required.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "oats-rolled",
+          "grams": 50
+        },
+        {
+          "foodId": "milk-skimmed",
+          "grams": 120
+        },
+        {
+          "foodId": "banana",
+          "grams": 60,
+          "householdUnitLabel": "1/2 medium banana"
+        },
+        {
+          "foodId": "peanut-butter",
+          "grams": 15,
+          "householdUnitLabel": "1 tbsp"
+        }
+      ],
+      "steps": [
+        "Stir the oats and milk together in a jar.",
+        "Slice the banana over the top and add the peanut butter.",
+        "Cover and refrigerate overnight.",
+        "Stir before eating."
+      ],
+      "substitutions": [],
+      "prepMinutes": 5,
+      "cookMinutes": 0,
+      "mealType": "breakfast",
+      "trainingTiming": "preTraining",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "greek-yogurt-berry-bowl",
+      "title": "Greek yogurt and berry bowl",
+      "description": "Nonfat Greek yogurt with mixed berries and a drizzle of honey \u2014 quick protein with no prep.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "greek-yogurt-nonfat",
+          "grams": 250
+        },
+        {
+          "foodId": "blueberries",
+          "grams": 50
+        },
+        {
+          "foodId": "strawberries",
+          "grams": 50
+        },
+        {
+          "foodId": "honey",
+          "grams": 10,
+          "householdUnitLabel": "1/2 tbsp"
+        }
+      ],
+      "steps": [
+        "Spoon the yogurt into a bowl.",
+        "Top with the berries and honey."
+      ],
+      "substitutions": [],
+      "prepMinutes": 3,
+      "cookMinutes": 0,
+      "mealType": "breakfast",
+      "trainingTiming": "postTraining",
+      "cuisineTags": [
+        "Mediterranean"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "protein-oat-pancakes",
+      "title": "Protein oat pancakes",
+      "description": "Blended oats, egg and whey isolate cooked into stacked pancakes.",
+      "servings": 2,
+      "ingredients": [
+        {
+          "foodId": "oats-rolled",
+          "grams": 60
+        },
+        {
+          "foodId": "egg-whole-raw",
+          "grams": 100,
+          "householdUnitLabel": "2 medium eggs"
+        },
+        {
+          "foodId": "whey-protein-isolate",
+          "grams": 30
+        },
+        {
+          "foodId": "milk-skimmed",
+          "grams": 80
+        },
+        {
+          "foodId": "banana",
+          "grams": 60
+        }
+      ],
+      "steps": [
+        "Blend all ingredients until smooth.",
+        "Cook small rounds in a lightly oiled nonstick pan, 2 minutes per side.",
+        "Stack and serve."
+      ],
+      "substitutions": [],
+      "prepMinutes": 5,
+      "cookMinutes": 12,
+      "mealType": "breakfast",
+      "trainingTiming": "postTraining",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "date-rice-cake-snack",
+      "title": "Rice cakes with dates and almond butter",
+      "description": "A light, fast-digesting snack for right before a session.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "rice-cakes",
+          "grams": 18,
+          "householdUnitLabel": "2 cakes"
+        },
+        {
+          "foodId": "dates",
+          "grams": 24,
+          "householdUnitLabel": "3 dates"
+        },
+        {
+          "foodId": "almonds",
+          "grams": 10
+        }
+      ],
+      "steps": [
+        "Chop the dates and almonds.",
+        "Top the rice cakes with the mixture."
+      ],
+      "substitutions": [],
+      "prepMinutes": 5,
+      "cookMinutes": 0,
+      "mealType": "snack",
+      "trainingTiming": "preTraining",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "wholemeal-toast-honey",
+      "title": "Wholemeal toast with honey and banana",
+      "description": "Simple carbohydrate-forward toast for topping up energy before training.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "wholemeal-bread",
+          "grams": 70,
+          "householdUnitLabel": "2 slices"
+        },
+        {
+          "foodId": "honey",
+          "grams": 15,
+          "householdUnitLabel": "3/4 tbsp"
+        },
+        {
+          "foodId": "banana",
+          "grams": 60,
+          "householdUnitLabel": "1/2 medium banana"
+        }
+      ],
+      "steps": [
+        "Toast the bread.",
+        "Spread with honey and top with sliced banana."
+      ],
+      "substitutions": [],
+      "prepMinutes": 4,
+      "cookMinutes": 2,
+      "mealType": "snack",
+      "trainingTiming": "preTraining",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "tunisian-chickpea-bread-bowl",
+      "title": "Tunisian chickpea and bread bowl",
+      "description": "A Tunisian-style chickpea stew with harissa, ladled over torn wholemeal bread.",
+      "servings": 2,
+      "ingredients": [
+        {
+          "foodId": "chickpeas-cooked",
+          "grams": 300
+        },
+        {
+          "foodId": "wholemeal-bread",
+          "grams": 70,
+          "householdUnitLabel": "2 slices"
+        },
+        {
+          "foodId": "tomato-raw",
+          "grams": 150
+        },
+        {
+          "foodId": "onion-raw",
+          "grams": 60
+        },
+        {
+          "foodId": "garlic-raw",
+          "grams": 6
+        },
+        {
+          "foodId": "harissa-paste",
+          "grams": 17,
+          "householdUnitLabel": "1 tbsp"
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 14,
+          "householdUnitLabel": "1 tbsp"
+        },
+        {
+          "foodId": "lemon",
+          "grams": 10
+        }
+      ],
+      "steps": [
+        "Soften the onion and garlic in the olive oil.",
+        "Add the tomato, chickpeas and harissa and simmer 10 minutes.",
+        "Tear the bread into a bowl and ladle the stew over it.",
+        "Finish with a squeeze of lemon."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 15,
+      "mealType": "lunch",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "Tunisian",
+        "Mediterranean"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "spiced-chicken-rice-bowl",
+      "title": "Spiced chicken and rice bowl",
+      "description": "Pan-seared chicken breast over brown rice with roasted vegetables.",
+      "servings": 2,
+      "ingredients": [
+        {
+          "foodId": "chicken-breast-raw",
+          "grams": 300
+        },
+        {
+          "foodId": "brown-rice-cooked",
+          "grams": 300
+        },
+        {
+          "foodId": "broccoli-cooked",
+          "grams": 200
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 14,
+          "householdUnitLabel": "1 tbsp"
+        }
+      ],
+      "steps": [
+        "Season and pan-sear the chicken until cooked through.",
+        "Slice and serve over the rice with the broccoli.",
+        "Drizzle with olive oil."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "mealType": "lunch",
+      "trainingTiming": "postTraining",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "tuna-white-bean-salad",
+      "title": "Tuna and white bean salad",
+      "description": "Canned tuna with kidney beans, tomato and olive oil \u2014 no cooking.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "tuna-canned-water",
+          "grams": 150
+        },
+        {
+          "foodId": "kidney-beans-cooked",
+          "grams": 150
+        },
+        {
+          "foodId": "tomato-raw",
+          "grams": 100
+        },
+        {
+          "foodId": "onion-raw",
+          "grams": 30
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 14,
+          "householdUnitLabel": "1 tbsp"
+        },
+        {
+          "foodId": "lemon",
+          "grams": 10
+        }
+      ],
+      "steps": [
+        "Drain the tuna and beans.",
+        "Toss everything together with the olive oil and lemon juice."
+      ],
+      "substitutions": [],
+      "prepMinutes": 8,
+      "cookMinutes": 0,
+      "mealType": "lunch",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "Mediterranean"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "turkey-quinoa-salad",
+      "title": "Turkey and quinoa salad",
+      "description": "Grilled turkey breast over quinoa with cucumber and feta.",
+      "servings": 2,
+      "ingredients": [
+        {
+          "foodId": "turkey-breast-raw",
+          "grams": 260
+        },
+        {
+          "foodId": "quinoa-cooked",
+          "grams": 300
+        },
+        {
+          "foodId": "cucumber-raw",
+          "grams": 100
+        },
+        {
+          "foodId": "feta-cheese",
+          "grams": 60
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 14,
+          "householdUnitLabel": "1 tbsp"
+        }
+      ],
+      "steps": [
+        "Grill or pan-cook the turkey until done, then slice.",
+        "Combine the quinoa, cucumber and feta.",
+        "Top with the turkey and a drizzle of olive oil."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 15,
+      "mealType": "lunch",
+      "trainingTiming": "postTraining",
+      "cuisineTags": [
+        "Mediterranean"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "hummus-veg-wrap",
+      "title": "Hummus and roasted vegetable wrap",
+      "description": "Wholemeal wrap filled with hummus, roasted vegetables and greens.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "wholemeal-bread",
+          "grams": 80,
+          "householdUnitLabel": "1 large flatbread",
+          "note": "or a wholemeal wrap"
+        },
+        {
+          "foodId": "hummus",
+          "grams": 60
+        },
+        {
+          "foodId": "bell-pepper-raw",
+          "grams": 60
+        },
+        {
+          "foodId": "zucchini-raw",
+          "grams": 60
+        },
+        {
+          "foodId": "lettuce-raw",
+          "grams": 20
+        }
+      ],
+      "steps": [
+        "Roast or pan-grill the pepper and zucchini until soft.",
+        "Spread the hummus over the bread.",
+        "Layer the vegetables and lettuce, then roll or fold."
+      ],
+      "substitutions": [],
+      "prepMinutes": 8,
+      "cookMinutes": 10,
+      "mealType": "lunch",
+      "trainingTiming": "preTraining",
+      "cuisineTags": [
+        "Mediterranean"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "red-lentil-veg-stew",
+      "title": "Red lentil and vegetable stew",
+      "description": "A warming, vegan lentil stew built for batch-cooking.",
+      "servings": 3,
+      "ingredients": [
+        {
+          "foodId": "red-lentils-cooked",
+          "grams": 450
+        },
+        {
+          "foodId": "carrot-raw",
+          "grams": 150
+        },
+        {
+          "foodId": "onion-raw",
+          "grams": 100
+        },
+        {
+          "foodId": "tomato-raw",
+          "grams": 200
+        },
+        {
+          "foodId": "garlic-raw",
+          "grams": 9
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 14,
+          "householdUnitLabel": "1 tbsp"
+        }
+      ],
+      "steps": [
+        "Soften the onion, carrot and garlic in the olive oil.",
+        "Add the tomato and lentils with a splash of water and simmer 15 minutes.",
+        "Season and serve."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "mealType": "dinner",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "Mediterranean"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "beef-steak-veg-plate",
+      "title": "Lean beef steak with roasted vegetables",
+      "description": "A straightforward high-protein dinner plate.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "beef-steak-lean-raw",
+          "grams": 180
+        },
+        {
+          "foodId": "broccoli-cooked",
+          "grams": 150
+        },
+        {
+          "foodId": "sweet-potato-cooked",
+          "grams": 200
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 7,
+          "householdUnitLabel": "1/2 tbsp"
+        }
+      ],
+      "steps": [
+        "Season and pan-sear the steak to preference.",
+        "Rest for a few minutes, then slice.",
+        "Serve with the roasted vegetables."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 25,
+      "mealType": "dinner",
+      "trainingTiming": "postTraining",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [
+        "Oven"
+      ],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "salmon-quinoa-greens",
+      "title": "Baked salmon with quinoa and greens",
+      "description": "Oven-baked salmon fillet with quinoa and steamed greens.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "salmon-raw",
+          "grams": 170
+        },
+        {
+          "foodId": "quinoa-cooked",
+          "grams": 180
+        },
+        {
+          "foodId": "spinach-cooked",
+          "grams": 100
+        },
+        {
+          "foodId": "lemon",
+          "grams": 10
+        }
+      ],
+      "steps": [
+        "Bake the salmon at 200C for 12-15 minutes.",
+        "Serve over the quinoa and greens with a squeeze of lemon."
+      ],
+      "substitutions": [],
+      "prepMinutes": 8,
+      "cookMinutes": 15,
+      "mealType": "dinner",
+      "trainingTiming": "postTraining",
+      "cuisineTags": [
+        "Mediterranean"
+      ],
+      "costBand": "low",
+      "equipment": [
+        "Oven"
+      ],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "shrimp-veg-stirfry",
+      "title": "Shrimp and vegetable stir-fry",
+      "description": "A fast wok dinner with shrimp, mixed vegetables and soy sauce.",
+      "servings": 2,
+      "ingredients": [
+        {
+          "foodId": "shrimp-raw",
+          "grams": 260
+        },
+        {
+          "foodId": "broccoli-raw",
+          "grams": 150
+        },
+        {
+          "foodId": "bell-pepper-raw",
+          "grams": 100
+        },
+        {
+          "foodId": "carrot-raw",
+          "grams": 80
+        },
+        {
+          "foodId": "soy-sauce",
+          "grams": 20,
+          "householdUnitLabel": "1 tbsp"
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 14,
+          "householdUnitLabel": "1 tbsp"
+        },
+        {
+          "foodId": "white-rice-cooked",
+          "grams": 250
+        }
+      ],
+      "steps": [
+        "Stir-fry the vegetables in the oil over high heat.",
+        "Add the shrimp and cook until opaque.",
+        "Stir through the soy sauce and serve over rice."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 10,
+      "mealType": "dinner",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "Asian"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "lamb-bulgur-plate",
+      "title": "Spiced lamb with bulgur",
+      "description": "Pan-seared lean lamb over bulgur wheat with a herb salad.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "lamb-lean-raw",
+          "grams": 160
+        },
+        {
+          "foodId": "bulgur-cooked",
+          "grams": 180
+        },
+        {
+          "foodId": "tomato-raw",
+          "grams": 80
+        },
+        {
+          "foodId": "onion-raw",
+          "grams": 30
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 7,
+          "householdUnitLabel": "1/2 tbsp"
+        }
+      ],
+      "steps": [
+        "Season and pan-sear the lamb to preference.",
+        "Rest and slice.",
+        "Serve over the bulgur with the tomato and onion."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 15,
+      "mealType": "dinner",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "Mediterranean"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "tofu-veg-stirfry",
+      "title": "Tofu and vegetable stir-fry",
+      "description": "A vegan stir-fry built around firm tofu and a soy-based sauce.",
+      "servings": 2,
+      "ingredients": [
+        {
+          "foodId": "tofu-firm",
+          "grams": 300
+        },
+        {
+          "foodId": "broccoli-raw",
+          "grams": 150
+        },
+        {
+          "foodId": "carrot-raw",
+          "grams": 100
+        },
+        {
+          "foodId": "soy-sauce",
+          "grams": 20,
+          "householdUnitLabel": "1 tbsp"
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 14,
+          "householdUnitLabel": "1 tbsp"
+        },
+        {
+          "foodId": "brown-rice-cooked",
+          "grams": 300
+        }
+      ],
+      "steps": [
+        "Pan-fry the tofu cubes until golden.",
+        "Add the vegetables and stir-fry until crisp-tender.",
+        "Stir through the soy sauce and serve over rice."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 15,
+      "mealType": "dinner",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "Asian"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "cod-potato-veg",
+      "title": "Baked cod with potatoes and green beans",
+      "description": "A light, oven-baked white fish dinner.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "cod-raw",
+          "grams": 180
+        },
+        {
+          "foodId": "potato-cooked",
+          "grams": 220
+        },
+        {
+          "foodId": "green-beans-cooked",
+          "grams": 120
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 7,
+          "householdUnitLabel": "1/2 tbsp"
+        },
+        {
+          "foodId": "lemon",
+          "grams": 10
+        }
+      ],
+      "steps": [
+        "Bake the cod at 190C for 12-15 minutes.",
+        "Serve with the potatoes and green beans.",
+        "Finish with lemon juice and olive oil."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 18,
+      "mealType": "dinner",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "Mediterranean"
+      ],
+      "costBand": "low",
+      "equipment": [
+        "Oven"
+      ],
+      "extraAllergens": [],
+      "isPremium": false,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "labneh-cucumber-olive-bowl",
+      "title": "Labneh bowl with cucumber and olives",
+      "description": "A Levantine-style mezze bowl \u2014 labneh, cucumber, olives and olive oil.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "labneh",
+          "grams": 150
+        },
+        {
+          "foodId": "cucumber-raw",
+          "grams": 100
+        },
+        {
+          "foodId": "olives-black",
+          "grams": 30
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 14,
+          "householdUnitLabel": "1 tbsp"
+        },
+        {
+          "foodId": "wholemeal-bread",
+          "grams": 35,
+          "householdUnitLabel": "1 slice"
+        }
+      ],
+      "steps": [
+        "Spread the labneh in a shallow bowl.",
+        "Top with sliced cucumber and olives.",
+        "Drizzle with olive oil and serve with the bread."
+      ],
+      "substitutions": [],
+      "prepMinutes": 6,
+      "cookMinutes": 0,
+      "mealType": "lunch",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "Mediterranean"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": true,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "cottage-cheese-fruit-bowl",
+      "title": "Cottage cheese and fruit bowl",
+      "description": "Low-fat cottage cheese with apple, walnuts and honey.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "cottage-cheese-lowfat",
+          "grams": 200
+        },
+        {
+          "foodId": "apple",
+          "grams": 90,
+          "householdUnitLabel": "1/2 medium apple"
+        },
+        {
+          "foodId": "walnuts",
+          "grams": 15
+        },
+        {
+          "foodId": "honey",
+          "grams": 10,
+          "householdUnitLabel": "1/2 tbsp"
+        }
+      ],
+      "steps": [
+        "Spoon the cottage cheese into a bowl.",
+        "Top with diced apple, walnuts and honey."
+      ],
+      "substitutions": [],
+      "prepMinutes": 4,
+      "cookMinutes": 0,
+      "mealType": "snack",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": true,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "edamame-quinoa-bowl",
+      "title": "Edamame and quinoa power bowl",
+      "description": "A vegan protein bowl built around edamame and quinoa.",
+      "servings": 2,
+      "ingredients": [
+        {
+          "foodId": "edamame",
+          "grams": 200
+        },
+        {
+          "foodId": "quinoa-cooked",
+          "grams": 300
+        },
+        {
+          "foodId": "carrot-raw",
+          "grams": 100
+        },
+        {
+          "foodId": "cucumber-raw",
+          "grams": 100
+        },
+        {
+          "foodId": "soy-sauce",
+          "grams": 20,
+          "householdUnitLabel": "1 tbsp"
+        },
+        {
+          "foodId": "sunflower-seeds",
+          "grams": 20
+        }
+      ],
+      "steps": [
+        "Combine the quinoa, edamame, carrot and cucumber.",
+        "Stir through the soy sauce and top with sunflower seeds."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 0,
+      "mealType": "lunch",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "Asian"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": true,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "almond-butter-protein-shake",
+      "title": "Almond butter protein shake bowl",
+      "description": "A thick, spoonable shake bowl for a fast post-session refuel.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "whey-protein-isolate",
+          "grams": 30
+        },
+        {
+          "foodId": "milk-skimmed",
+          "grams": 200
+        },
+        {
+          "foodId": "banana",
+          "grams": 60,
+          "householdUnitLabel": "1/2 medium banana"
+        },
+        {
+          "foodId": "almonds",
+          "grams": 15
+        }
+      ],
+      "steps": [
+        "Blend the whey, milk and banana until smooth and thick.",
+        "Pour into a bowl and top with chopped almonds."
+      ],
+      "substitutions": [],
+      "prepMinutes": 4,
+      "cookMinutes": 0,
+      "mealType": "snack",
+      "trainingTiming": "postTraining",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": true,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mushroom-spinach-omelette",
+      "title": "Mushroom and spinach omelette",
+      "description": "A two-egg omelette with mushroom and spinach, cheddar to finish.",
+      "servings": 1,
+      "ingredients": [
+        {
+          "foodId": "egg-whole-raw",
+          "grams": 100,
+          "householdUnitLabel": "2 medium eggs"
+        },
+        {
+          "foodId": "mushroom-raw",
+          "grams": 60
+        },
+        {
+          "foodId": "spinach-raw",
+          "grams": 30
+        },
+        {
+          "foodId": "cheddar-cheese",
+          "grams": 20
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 7,
+          "householdUnitLabel": "1/2 tbsp"
+        }
+      ],
+      "steps": [
+        "Saute the mushroom and spinach in the olive oil.",
+        "Pour in the whisked eggs and cook until nearly set.",
+        "Sprinkle with cheddar, fold and serve."
+      ],
+      "substitutions": [],
+      "prepMinutes": 5,
+      "cookMinutes": 8,
+      "mealType": "breakfast",
+      "trainingTiming": "any",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": true,
+      "contentVersion": 1,
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "beef-mince-bean-chili",
+      "title": "Lean beef and bean chili",
+      "description": "A batch-cookable chili with lean beef mince and kidney beans.",
+      "servings": 3,
+      "ingredients": [
+        {
+          "foodId": "beef-mince-lean-raw",
+          "grams": 360
+        },
+        {
+          "foodId": "kidney-beans-cooked",
+          "grams": 300
+        },
+        {
+          "foodId": "tomato-raw",
+          "grams": 300
+        },
+        {
+          "foodId": "onion-raw",
+          "grams": 90
+        },
+        {
+          "foodId": "garlic-raw",
+          "grams": 9
+        },
+        {
+          "foodId": "olive-oil",
+          "grams": 14,
+          "householdUnitLabel": "1 tbsp"
+        }
+      ],
+      "steps": [
+        "Brown the beef mince with the onion and garlic in the oil.",
+        "Add the tomato and beans and simmer 20 minutes.",
+        "Season to taste and serve."
+      ],
+      "substitutions": [],
+      "prepMinutes": 10,
+      "cookMinutes": 25,
+      "mealType": "dinner",
+      "trainingTiming": "postTraining",
+      "cuisineTags": [
+        "American"
+      ],
+      "costBand": "low",
+      "equipment": [],
+      "extraAllergens": [],
+      "isPremium": true,
+      "contentVersion": 1,
+      "status": "draft"
+    }
+  ]
+}

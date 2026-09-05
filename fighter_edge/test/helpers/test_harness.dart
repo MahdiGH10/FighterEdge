@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,7 +9,11 @@ import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/controllers/auth_controller.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
+import 'package:fighter_edge/features/edge_fuel/data/asset_food_catalog_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/data/asset_recipe_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/edge_fuel_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/data/food_catalog_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/data/recipe_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/state/app_state.dart';
@@ -30,7 +36,10 @@ Future<LocalAuthRepository> makeRepo({
   await repo.init();
   if (signedIn) {
     await repo.signUpWithEmail(
-        email: testEmail, password: testPassword, displayName: testName);
+      email: testEmail,
+      password: testPassword,
+      displayName: testName,
+    );
     if (onboarded) {
       await repo.completeOnboarding(
         goal: 'Build fight-camp structure',
@@ -53,19 +62,37 @@ Widget wrapApp(
   AppState? state,
   EdgeFuelRepository? edgeFuelRepo,
   EdgeFuelAiGateway? edgeFuelAiGateway,
+  FoodCatalogRepository? foodCatalogRepo,
+  RecipeCatalogRepository? recipeCatalogRepo,
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
   final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
+  // Widget tests have no asset bundle, so the catalogs default to reading the
+  // real JSON off disk. Tests get the shipped content unless they pass a fake.
+  final resolvedFoodCatalog =
+      foodCatalogRepo ??
+      AssetFoodCatalogRepository(
+        loadString: (path) => File(path).readAsString(),
+      );
+  final resolvedRecipeCatalog =
+      recipeCatalogRepo ??
+      AssetRecipeCatalogRepository(
+        foodCatalog: resolvedFoodCatalog,
+        loadString: (path) => File(path).readAsString(),
+      );
   return MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthController(repo)),
       ChangeNotifierProvider(create: (_) => state ?? AppState()),
       Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
       Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
+      Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
+      Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
         create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
         update: (_, auth, controller) {
-          final edgeFuel = controller ??
+          final edgeFuel =
+              controller ??
               EdgeFuelController(repository: resolvedEdgeFuelRepo);
           edgeFuel.setUser(auth.user?.id);
           return edgeFuel;

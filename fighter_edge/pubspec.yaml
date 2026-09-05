@@ -30,6 +30,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/login_background.png
+    - assets/data/
   fonts:
     - family: Oswald
       fonts:

@@ -8,14 +8,14 @@ enum Plan { free, pro }
 
 extension PlanInfo on Plan {
   String get label => switch (this) {
-        Plan.free => 'Free',
-        Plan.pro => 'Pro',
-      };
+    Plan.free => 'Free',
+    Plan.pro => 'Pro',
+  };
 
   Color get color => switch (this) {
-        Plan.free => AppColors.textSecondary,
-        Plan.pro => AppColors.primary,
-      };
+    Plan.free => AppColors.textSecondary,
+    Plan.pro => AppColors.primary,
+  };
 }
 
 /// The gate-able capabilities of the app.
@@ -25,17 +25,24 @@ enum Feature {
   unlimitedWeightHistory,
   nutritionAnalytics,
   fullTechniqueLibrary,
+
+  /// EdgeFuel premium recipes (master prompt §10). Deliberately distinct from
+  /// [nutritionAnalytics] rather than folded into one vague nutrition gate —
+  /// §10 requires separate entitlement cases so each can be reasoned about,
+  /// priced, and server-verified on its own.
+  edgeFuelPremiumRecipes,
 }
 
 extension FeatureInfo on Feature {
   /// Human-readable name shown on the paywall.
   String get title => switch (this) {
-        Feature.cornerCoach => 'Corner Coach',
-        Feature.advancedTimerStyles => 'All Timer Presets',
-        Feature.unlimitedWeightHistory => 'Unlimited Weight History',
-        Feature.nutritionAnalytics => 'Nutrition Analytics',
-        Feature.fullTechniqueLibrary => 'Full Technique Library',
-      };
+    Feature.cornerCoach => 'Corner Coach',
+    Feature.advancedTimerStyles => 'All Timer Presets',
+    Feature.unlimitedWeightHistory => 'Unlimited Weight History',
+    Feature.nutritionAnalytics => 'Nutrition Analytics',
+    Feature.fullTechniqueLibrary => 'Full Technique Library',
+    Feature.edgeFuelPremiumRecipes => 'Full Recipe Library',
+  };
 }
 
 /// Central entitlement rules. Free users get a usable but limited app;
@@ -50,6 +57,7 @@ class Entitlements {
     Feature.unlimitedWeightHistory,
     Feature.nutritionAnalytics,
     Feature.fullTechniqueLibrary,
+    Feature.edgeFuelPremiumRecipes,
   };
 
   /// Free-tier hard limits enforced in the UI/business logic.

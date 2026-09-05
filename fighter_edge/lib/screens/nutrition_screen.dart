@@ -4,13 +4,17 @@ import 'package:provider/provider.dart';
 
 import '../features/edge_fuel/domain/models/food_log_entry.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/edge_fuel/domain/models/food_enums.dart';
+import '../features/edge_fuel/presentation/controllers/recipe_library_controller.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
+import '../features/edge_fuel/presentation/screens/recipe_library_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/filter_chips.dart';
+import '../widgets/primary_button.dart';
 import '../widgets/progress_ring.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
@@ -29,8 +33,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
   Widget build(BuildContext context) {
     final edgeFuel = context.watch<EdgeFuelController>();
     final targetCalories = edgeFuel.targetCalories;
-    final ratio =
-        targetCalories == 0 ? 0.0 : edgeFuel.consumedCalories / targetCalories;
+    final ratio = targetCalories == 0
+        ? 0.0
+        : edgeFuel.consumedCalories / targetCalories;
     final ringColor = ratio > 1 ? AppColors.negative : AppColors.positive;
 
     return Scaffold(
@@ -50,7 +55,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
               child: FilterChips(
-                options: const ['Today', 'Meals', 'Analytics'],
+                options: const ['Today', 'Meals', 'Recipes', 'Analytics'],
                 selectedIndex: _tab,
                 onSelected: (i) => setState(() => _tab = i),
                 scrollable: false,
@@ -68,6 +73,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
                     onEdit: _editFood,
                   ),
                   _MealsView(edgeFuel: edgeFuel, onEdit: _editFood),
+                  const _RecipesTab(),
                   const _AnalyticsView(),
                 ],
               ),
@@ -84,14 +90,18 @@ class _NutritionScreenState extends State<NutritionScreen> {
   }) async {
     final name = TextEditingController(text: existing?.name ?? '');
     final notes = TextEditingController(text: existing?.notes ?? '');
-    final calories =
-        TextEditingController(text: existing?.calories.toString() ?? '');
-    final protein =
-        TextEditingController(text: existing?.proteinGrams.toString() ?? '');
-    final carbs =
-        TextEditingController(text: existing?.carbGrams.toString() ?? '');
-    final fats =
-        TextEditingController(text: existing?.fatGrams.toString() ?? '');
+    final calories = TextEditingController(
+      text: existing?.calories.toString() ?? '',
+    );
+    final protein = TextEditingController(
+      text: existing?.proteinGrams.toString() ?? '',
+    );
+    final carbs = TextEditingController(
+      text: existing?.carbGrams.toString() ?? '',
+    );
+    final fats = TextEditingController(
+      text: existing?.fatGrams.toString() ?? '',
+    );
 
     final entry = await showDialog<FoodLogEntry>(
       context: context,
@@ -108,22 +118,34 @@ class _NutritionScreenState extends State<NutritionScreen> {
               _DialogField(controller: name, label: 'Food or meal name'),
               _DialogField(controller: notes, label: 'Notes'),
               _DialogField(
-                  controller: calories, label: 'Calories', number: true),
+                controller: calories,
+                label: 'Calories',
+                number: true,
+              ),
               Row(
                 children: [
                   Expanded(
                     child: _DialogField(
-                        controller: protein, label: 'Protein', number: true),
+                      controller: protein,
+                      label: 'Protein',
+                      number: true,
+                    ),
                   ),
                   const SizedBox(width: Insets.sm),
                   Expanded(
                     child: _DialogField(
-                        controller: carbs, label: 'Carbs', number: true),
+                      controller: carbs,
+                      label: 'Carbs',
+                      number: true,
+                    ),
                   ),
                   const SizedBox(width: Insets.sm),
                   Expanded(
                     child: _DialogField(
-                        controller: fats, label: 'Fats', number: true),
+                      controller: fats,
+                      label: 'Fats',
+                      number: true,
+                    ),
                   ),
                 ],
               ),
@@ -133,8 +155,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: AppTheme.body(14, color: AppColors.textSecondary)),
+            child: Text(
+              'Cancel',
+              style: AppTheme.body(14, color: AppColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -143,7 +167,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
               Navigator.pop(
                 ctx,
                 FoodLogEntry(
-                  id: existing?.id ??
+                  id:
+                      existing?.id ??
                       'food-${DateTime.now().microsecondsSinceEpoch}',
                   name: name.text.trim(),
                   notes: notes.text.trim().isEmpty
@@ -160,9 +185,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 ),
               );
             },
-            child: Text('Save',
-                style: AppTheme.body(14,
-                    weight: FontWeight.w700, color: AppColors.primary)),
+            child: Text(
+              'Save',
+              style: AppTheme.body(
+                14,
+                weight: FontWeight.w700,
+                color: AppColors.primary,
+              ),
+            ),
           ),
         ],
       ),
@@ -202,8 +232,11 @@ class _DateSwitcher extends StatelessWidget {
             child: Text(
               label,
               textAlign: TextAlign.center,
-              style: AppTheme.body(13,
-                  weight: FontWeight.w800, color: AppColors.textSecondary),
+              style: AppTheme.body(
+                13,
+                weight: FontWeight.w800,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           HeaderIcon(Icons.chevron_right, onTap: () => edgeFuel.shiftDate(1)),
@@ -248,7 +281,7 @@ class _TodayView extends StatelessWidget {
   final double ratio;
   final Color ringColor;
   final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
-      onEdit;
+  onEdit;
 
   const _TodayView({
     required this.edgeFuel,
@@ -286,14 +319,19 @@ class _TodayView extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('${edgeFuel.consumedCalories}',
-                        style: AppTheme.display(38)),
+                    Text(
+                      '${edgeFuel.consumedCalories}',
+                      style: AppTheme.display(38),
+                    ),
                     Text(
                       edgeFuel.hasUsableTarget
                           ? '/ ${edgeFuel.targetCalories} kcal'
                           : 'logged today',
-                      style: AppTheme.body(12,
-                          weight: FontWeight.w500, color: AppColors.textMuted),
+                      style: AppTheme.body(
+                        12,
+                        weight: FontWeight.w500,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   ],
                 ),
@@ -301,12 +339,24 @@ class _TodayView extends StatelessWidget {
               const SizedBox(height: Insets.xl),
               Row(
                 children: [
-                  _Macro('Protein', edgeFuel.consumedProtein,
-                      edgeFuel.targetProtein, AppColors.protein),
-                  _Macro('Carbs', edgeFuel.consumedCarbs, edgeFuel.targetCarbs,
-                      AppColors.carbs),
-                  _Macro('Fats', edgeFuel.consumedFats, edgeFuel.targetFats,
-                      AppColors.fats),
+                  _Macro(
+                    'Protein',
+                    edgeFuel.consumedProtein,
+                    edgeFuel.targetProtein,
+                    AppColors.protein,
+                  ),
+                  _Macro(
+                    'Carbs',
+                    edgeFuel.consumedCarbs,
+                    edgeFuel.targetCarbs,
+                    AppColors.carbs,
+                  ),
+                  _Macro(
+                    'Fats',
+                    edgeFuel.consumedFats,
+                    edgeFuel.targetFats,
+                    AppColors.fats,
+                  ),
                 ],
               ),
             ],
@@ -326,11 +376,120 @@ class _TodayView extends StatelessWidget {
             onToggle: () => edgeFuel.toggleEntry(entry),
             onEdit: () => onEdit(edgeFuel, existing: entry),
             onDelete: () => edgeFuel.deleteEntry(entry),
-            onSaveToggle: () => edgeFuel.updateEntry(
-              entry.copyWith(saved: !entry.saved),
-            ),
+            onSaveToggle: () =>
+                edgeFuel.updateEntry(entry.copyWith(saved: !entry.saved)),
           ),
       ],
+    );
+  }
+}
+
+/// Entry point into the curated recipe catalog (EF-3).
+///
+/// A tab rather than a pushed screen so browsing recipes sits alongside the
+/// day's log, not away from it. The library itself is a full screen; this is
+/// the doorway, with a preview of what is inside so the tab is never a blank
+/// call-to-action.
+class _RecipesTab extends StatelessWidget {
+  const _RecipesTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      children: [
+        AppCard(
+          accent: AppColors.primary,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'RECIPE LIBRARY',
+                style: AppTheme.body(
+                  11,
+                  color: AppColors.textMuted,
+                  weight: FontWeight.w700,
+                  spacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: Insets.xs),
+              Text('Food you can actually cook', style: AppTheme.display(20)),
+              const SizedBox(height: Insets.sm),
+              Text(
+                'Fighter-focused recipes with the macros worked out, built '
+                'around what you have in the kitchen. Filter by training '
+                'timing, diet, cost and time.',
+                style: AppTheme.body(13, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: Insets.lg),
+              PrimaryButton(
+                'Browse recipes',
+                icon: Icons.menu_book_outlined,
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const RecipeLibraryScreen(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: Insets.md),
+        const Row(
+          children: [
+            Expanded(
+              child: _RecipeShortcut(
+                icon: Icons.bolt,
+                label: 'Before training',
+                filters: RecipeFilters(
+                  trainingTiming: TrainingTiming.preTraining,
+                ),
+              ),
+            ),
+            SizedBox(width: Insets.md),
+            Expanded(
+              child: _RecipeShortcut(
+                icon: Icons.restart_alt,
+                label: 'After training',
+                filters: RecipeFilters(
+                  trainingTiming: TrainingTiming.postTraining,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _RecipeShortcut extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final RecipeFilters filters;
+
+  const _RecipeShortcut({
+    required this.icon,
+    required this.label,
+    required this.filters,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => RecipeLibraryScreen(initialFilters: filters),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: AppColors.primary),
+          const SizedBox(height: Insets.sm),
+          Text(label, style: AppTheme.body(13, weight: FontWeight.w700)),
+        ],
+      ),
     );
   }
 }
@@ -338,7 +497,7 @@ class _TodayView extends StatelessWidget {
 class _MealsView extends StatelessWidget {
   final EdgeFuelController edgeFuel;
   final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
-      onEdit;
+  onEdit;
 
   const _MealsView({required this.edgeFuel, required this.onEdit});
 
@@ -362,8 +521,11 @@ class _MealsView extends StatelessWidget {
               for (final entry in quickAdds.take(8))
                 ActionChip(
                   label: Text(entry.name),
-                  avatar: Icon(entry.saved ? Icons.star : Icons.history,
-                      size: 16, color: AppColors.primary),
+                  avatar: Icon(
+                    entry.saved ? Icons.star : Icons.history,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
                   onPressed: () => edgeFuel.addEntry(
                     entry.copyWith(
                       id: 'food-${DateTime.now().microsecondsSinceEpoch}',
@@ -393,9 +555,8 @@ class _MealsView extends StatelessWidget {
             onToggle: () => edgeFuel.toggleEntry(entry),
             onEdit: () => onEdit(edgeFuel, existing: entry),
             onDelete: () => edgeFuel.deleteEntry(entry),
-            onSaveToggle: () => edgeFuel.updateEntry(
-              entry.copyWith(saved: !entry.saved),
-            ),
+            onSaveToggle: () =>
+                edgeFuel.updateEntry(entry.copyWith(saved: !entry.saved)),
           ),
       ],
     );
@@ -430,15 +591,24 @@ class _Macro extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Text(label.toUpperCase(),
-              style: AppTheme.body(10,
-                  weight: FontWeight.w600, color: AppColors.textMuted)),
+          Text(
+            label.toUpperCase(),
+            style: AppTheme.body(
+              10,
+              weight: FontWeight.w600,
+              color: AppColors.textMuted,
+            ),
+          ),
           const SizedBox(height: Insets.sm),
           Text('$value g', style: AppTheme.display(18)),
-          Text(target <= 0 ? 'set target' : '/ $target g',
-              style: AppTheme.body(11,
-                  weight: FontWeight.w500,
-                  color: over ? AppColors.negative : AppColors.textMuted)),
+          Text(
+            target <= 0 ? 'set target' : '/ $target g',
+            style: AppTheme.body(
+              11,
+              weight: FontWeight.w500,
+              color: over ? AppColors.negative : AppColors.textMuted,
+            ),
+          ),
           const SizedBox(height: Insets.sm),
           ClipRRect(
             borderRadius: BorderRadius.circular(100),
@@ -446,8 +616,9 @@ class _Macro extends StatelessWidget {
               value: progress,
               minHeight: 5,
               backgroundColor: AppColors.track,
-              valueColor:
-                  AlwaysStoppedAnimation(over ? AppColors.negative : color),
+              valueColor: AlwaysStoppedAnimation(
+                over ? AppColors.negative : color,
+              ),
             ),
           ),
         ],
@@ -487,27 +658,41 @@ class _FoodRow extends StatelessWidget {
                   Row(
                     children: [
                       Flexible(
-                        child: Text(entry.name,
-                            style: AppTheme.body(15, weight: FontWeight.w700)),
+                        child: Text(
+                          entry.name,
+                          style: AppTheme.body(15, weight: FontWeight.w700),
+                        ),
                       ),
                       if (entry.saved) ...[
                         const SizedBox(width: Insets.xs),
-                        const Icon(Icons.star,
-                            size: 14, color: AppColors.primary),
+                        const Icon(
+                          Icons.star,
+                          size: 14,
+                          color: AppColors.primary,
+                        ),
                       ],
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Text(entry.notes,
-                      style: AppTheme.body(12,
-                          weight: FontWeight.w500,
-                          color: AppColors.textSecondary)),
+                  Text(
+                    entry.notes,
+                    style: AppTheme.body(
+                      12,
+                      weight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             ),
-            Text('${entry.calories} kcal',
-                style: AppTheme.body(13,
-                    weight: FontWeight.w600, color: AppColors.textSecondary)),
+            Text(
+              '${entry.calories} kcal',
+              style: AppTheme.body(
+                13,
+                weight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
             const SizedBox(width: Insets.md),
             _Check(checked: entry.consumed),
             PopupMenuButton<String>(
@@ -560,8 +745,12 @@ class _Check extends StatelessWidget {
           return ScaleTransition(scale: animation, child: child);
         },
         child: checked
-            ? const Icon(Icons.check,
-                key: ValueKey('meal-check'), size: 16, color: Colors.white)
+            ? const Icon(
+                Icons.check,
+                key: ValueKey('meal-check'),
+                size: 16,
+                color: Colors.white,
+              )
             : const SizedBox(key: ValueKey('meal-empty')),
       ),
     );
@@ -602,15 +791,20 @@ class _EdgeFuelEntryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('EdgeFuel AI',
-                    style: AppTheme.body(13, weight: FontWeight.w800)),
+                Text(
+                  'EdgeFuel AI',
+                  style: AppTheme.body(13, weight: FontWeight.w800),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   hasSetup && target != null && target.isSuccess
                       ? 'Your plan: ${target.targetCalories} kcal · view details'
                       : 'Get a personalized daily calorie and macro target',
-                  style: AppTheme.body(12,
-                      weight: FontWeight.w500, color: AppColors.textSecondary),
+                  style: AppTheme.body(
+                    12,
+                    weight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),

@@ -1,0 +1,5 @@
+# Local Claude Code tooling — not part of the FighterEdge project
+.agents/
+.claude/
+graphify-out/
+skills-lock.json

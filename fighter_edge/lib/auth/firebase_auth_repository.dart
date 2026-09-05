@@ -109,14 +109,16 @@ class FirebaseAuthRepository implements AuthRepository {
   }) async {
     try {
       final cred = await _auth.createUserWithEmailAndPassword(
-          email: email.trim(), password: password);
+        email: email.trim(),
+        password: password,
+      );
       final user = cred.user!;
       if (displayName.trim().isNotEmpty) {
         await user.updateDisplayName(displayName.trim());
         await user.reload();
       }
       unawaited(user.sendEmailVerification().catchError((_) {}));
-      return _hydrate(_auth.currentUser ?? user);
+      return await _hydrate(_auth.currentUser ?? user);
     } on FirebaseAuthException catch (e) {
       throw AuthException(e.code, _message(e));
     }
@@ -129,8 +131,10 @@ class FirebaseAuthRepository implements AuthRepository {
   }) async {
     try {
       final cred = await _auth.signInWithEmailAndPassword(
-          email: email.trim(), password: password);
-      return _hydrate(cred.user!);
+        email: email.trim(),
+        password: password,
+      );
+      return await _hydrate(cred.user!);
     } on FirebaseAuthException catch (e) {
       throw AuthException(e.code, _message(e));
     }
@@ -150,7 +154,9 @@ class FirebaseAuthRepository implements AuthRepository {
     final user = _auth.currentUser;
     if (user == null) {
       throw const AuthException(
-          'signed-out', 'Sign in before requesting verification.');
+        'signed-out',
+        'Sign in before requesting verification.',
+      );
     }
     try {
       await user.sendEmailVerification();
@@ -176,7 +182,7 @@ class FirebaseAuthRepository implements AuthRepository {
       final cred = kIsWeb
           ? await _auth.signInWithPopup(provider)
           : await _auth.signInWithProvider(provider as OAuthProvider);
-      return _hydrate(cred.user!);
+      return await _hydrate(cred.user!);
     } on FirebaseAuthException catch (e) {
       throw AuthException(e.code, _message(e));
     }
@@ -186,8 +192,10 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<void> sendMagicLink(String email) async {
     // Firebase email-link sign-in returns a tapped link (not a 6-digit code),
     // which needs deep-link handling to complete. Not wired yet.
-    throw const AuthException('unsupported',
-        'Email-link sign-in isn\'t set up yet — use email & password or Google.');
+    throw const AuthException(
+      'unsupported',
+      'Email-link sign-in isn\'t set up yet — use email & password or Google.',
+    );
   }
 
   @override
@@ -196,7 +204,9 @@ class FirebaseAuthRepository implements AuthRepository {
     required String code,
   }) async {
     throw const AuthException(
-        'unsupported', 'Email-link sign-in isn\'t set up yet.');
+      'unsupported',
+      'Email-link sign-in isn\'t set up yet.',
+    );
   }
 
   @override
@@ -242,8 +252,7 @@ class FirebaseAuthRepository implements AuthRepository {
       'weak-password' => 'Password must be at least 6 characters.',
       'user-not-found' ||
       'wrong-password' ||
-      'invalid-credential' =>
-        'Incorrect email or password.',
+      'invalid-credential' => 'Incorrect email or password.',
       'network-request-failed' => 'Network error. Check your connection.',
       'popup-closed-by-user' || 'cancelled' => 'Sign-in cancelled.',
       _ => e.message ?? 'Authentication failed.',

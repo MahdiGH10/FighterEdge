@@ -91,6 +91,47 @@ Accessed 2026-07-25 for the values encoded in `NutritionPolicy`:
 - Current Dietary Guidelines for Americans —
   https://www.dietaryguidelines.gov/
 
+## Food catalog provenance (Sprint EF-3a)
+
+`assets/data/edge_fuel_foods_v1.json` — 94 foods, nutrients per 100 g of edible
+portion.
+
+- **Source:** USDA FoodData Central (https://fdc.nal.usda.gov/), which is in the
+  public domain and may be reproduced without permission. Values were
+  transcribed by hand for V1; a backend proxy to the FDC API is deferred to
+  V1.5 per master prompt §9.3.
+- **Exceptions**, carrying their own `source` field because no USDA record was
+  used: `labneh`, `harissa-paste` (typical commercial label values) and
+  `whey-protein-isolate` (typical manufacturer label). These are the least
+  reliable records in the table and should be first in line for review.
+- **Status:** every record ships as `draft`. A unit test asserts this, so
+  promoting any record to `reviewed` will fail CI until the promotion is
+  accompanied by a real reviewer credit here.
+- **No pork** is stocked, and meat is deliberately *not* tagged
+  `DietTag.halal` — halal status depends on certified slaughter, which a
+  nutrient table cannot establish. Only plant, dairy, egg and fish records
+  carry the halal tag.
+- **Allergen tags are a filtering aid, not a safety guarantee.** The catalog
+  tracks twelve widely regulated allergens; absence of a tag means "not one of
+  the tracked allergens in this record", never "safe to eat". Oats are not
+  tagged gluten (they are gluten-free by botany) despite common
+  cross-contamination in commercial supply — user-facing copy must not imply
+  the app can clear a food for someone with coeliac disease.
+
+### Automated integrity checks (not a substitute for review)
+
+`FoodCatalogValidator` runs in unit tests and in debug at startup. It catches
+transcription errors — duplicate ids, macros summing past 100 g/100 g, fibre
+exceeding carbohydrate, missing attribution, and stated energy drifting from
+macro-implied energy. Implied energy uses net carbohydrate at 4 kcal/g plus
+fibre at 2 kcal/g; scoring fibre at the full 4 kcal/g over-states high-fibre
+foods enough to false-flag correct records (raw spinach drifts 28% under the
+naive formula, 9% under this one). A record is only flagged when it breaches
+both a 25% relative and a 15 kcal absolute tolerance.
+
+**These checks cannot tell you a value is the wrong USDA figure.** Only a
+qualified reviewer can.
+
 ## Open items before public health claims are enabled
 
 - [ ] Qualified sports dietitian review of `NutritionPolicy` constants
@@ -99,3 +140,5 @@ Accessed 2026-07-25 for the values encoded in `NutritionPolicy`:
 - [ ] Qualified review of the BMI underweight guardrail for this population
 - [ ] Legal/privacy review of safety-flag storage (master prompt §17)
 - [ ] Contraindication copy review (master prompt §6, §17)
+- [ ] Qualified review of the EF-3a food catalog, especially the three
+      non-USDA records (`labneh`, `harissa-paste`, `whey-protein-isolate`)

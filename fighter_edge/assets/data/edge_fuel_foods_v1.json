@@ -1,0 +1,2059 @@
+{
+  "schemaVersion": 1,
+  "foods": [
+    {
+      "schemaVersion": 1,
+      "id": "chicken-breast-raw",
+      "name": "Chicken breast, skinless, raw",
+      "category": "protein",
+      "kcalPer100g": 113,
+      "proteinPer100g": 22.5,
+      "carbsPer100g": 0,
+      "fatPer100g": 2.6,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "171077"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "chicken-thigh-raw",
+      "name": "Chicken thigh, skinless, raw",
+      "category": "protein",
+      "kcalPer100g": 142,
+      "proteinPer100g": 20.1,
+      "carbsPer100g": 0,
+      "fatPer100g": 6.9,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "171081"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "turkey-breast-raw",
+      "name": "Turkey breast, skinless, raw",
+      "category": "protein",
+      "kcalPer100g": 105,
+      "proteinPer100g": 22.9,
+      "carbsPer100g": 0,
+      "fatPer100g": 1.5,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "171488"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "beef-mince-lean-raw",
+      "name": "Beef mince, 5% fat, raw",
+      "category": "protein",
+      "kcalPer100g": 131,
+      "proteinPer100g": 21.6,
+      "carbsPer100g": 0,
+      "fatPer100g": 5.0,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "174036"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "beef-steak-lean-raw",
+      "name": "Beef steak, lean, raw",
+      "category": "protein",
+      "kcalPer100g": 130,
+      "proteinPer100g": 22.2,
+      "carbsPer100g": 0,
+      "fatPer100g": 4.6,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "174712"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "lamb-lean-raw",
+      "name": "Lamb leg, lean, raw",
+      "category": "protein",
+      "kcalPer100g": 151,
+      "proteinPer100g": 20.6,
+      "carbsPer100g": 0,
+      "fatPer100g": 7.6,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "174034"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "salmon-raw",
+      "name": "Salmon fillet, raw",
+      "category": "protein",
+      "kcalPer100g": 202,
+      "proteinPer100g": 20.4,
+      "carbsPer100g": 0,
+      "fatPer100g": 13.4,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "fish"
+      ],
+      "dietTags": [
+        "pescatarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "175167"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "cod-raw",
+      "name": "Cod fillet, raw",
+      "category": "protein",
+      "kcalPer100g": 78,
+      "proteinPer100g": 17.8,
+      "carbsPer100g": 0,
+      "fatPer100g": 0.7,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "fish"
+      ],
+      "dietTags": [
+        "pescatarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "171998"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "tuna-canned-water",
+      "name": "Tuna, canned in water, drained",
+      "category": "protein",
+      "kcalPer100g": 109,
+      "proteinPer100g": 25.5,
+      "carbsPer100g": 0,
+      "fatPer100g": 0.8,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "fish"
+      ],
+      "dietTags": [
+        "pescatarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "175159"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "sardines-canned-oil",
+      "name": "Sardines, canned in oil, drained",
+      "category": "protein",
+      "kcalPer100g": 202,
+      "proteinPer100g": 24.6,
+      "carbsPer100g": 0,
+      "fatPer100g": 11.5,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "fish"
+      ],
+      "dietTags": [
+        "pescatarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "175139"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "white-fish-raw",
+      "name": "White fish fillet (basa/tilapia), raw",
+      "category": "protein",
+      "kcalPer100g": 93,
+      "proteinPer100g": 18.0,
+      "carbsPer100g": 0,
+      "fatPer100g": 2.3,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "fish"
+      ],
+      "dietTags": [
+        "pescatarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "173687"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "shrimp-raw",
+      "name": "Shrimp, raw",
+      "category": "protein",
+      "kcalPer100g": 88,
+      "proteinPer100g": 20.1,
+      "carbsPer100g": 0.9,
+      "fatPer100g": 0.5,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "shellfish"
+      ],
+      "dietTags": [
+        "pescatarian"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "175180"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "egg-whole-raw",
+      "name": "Egg, whole, raw",
+      "category": "protein",
+      "kcalPer100g": 139,
+      "proteinPer100g": 12.6,
+      "carbsPer100g": 0.7,
+      "fatPer100g": 9.5,
+      "fibrePer100g": 0,
+      "householdUnits": [
+        {
+          "label": "1 medium egg",
+          "grams": 50
+        }
+      ],
+      "allergens": [
+        "eggs"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "748967"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "egg-white-raw",
+      "name": "Egg white, raw",
+      "category": "protein",
+      "kcalPer100g": 48,
+      "proteinPer100g": 10.9,
+      "carbsPer100g": 0.7,
+      "fatPer100g": 0.2,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "eggs"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "748972"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "tofu-firm",
+      "name": "Tofu, firm",
+      "category": "protein",
+      "kcalPer100g": 148,
+      "proteinPer100g": 15.8,
+      "carbsPer100g": 2.3,
+      "fatPer100g": 8.7,
+      "fibrePer100g": 1.2,
+      "householdUnits": [],
+      "allergens": [
+        "soy"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "172476"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "tempeh",
+      "name": "Tempeh",
+      "category": "protein",
+      "kcalPer100g": 206,
+      "proteinPer100g": 20.3,
+      "carbsPer100g": 7.6,
+      "fatPer100g": 10.8,
+      "fibrePer100g": 1.4,
+      "householdUnits": [],
+      "allergens": [
+        "soy"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "174129"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "seitan",
+      "name": "Seitan (wheat gluten)",
+      "category": "protein",
+      "kcalPer100g": 132,
+      "proteinPer100g": 25.0,
+      "carbsPer100g": 4.0,
+      "fatPer100g": 1.9,
+      "fibrePer100g": 0.6,
+      "householdUnits": [],
+      "allergens": [
+        "gluten"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "soy-protein-isolate",
+      "name": "Soy protein isolate powder",
+      "category": "protein",
+      "kcalPer100g": 365,
+      "proteinPer100g": 80.7,
+      "carbsPer100g": 4.0,
+      "fatPer100g": 3.4,
+      "fibrePer100g": 2.0,
+      "householdUnits": [],
+      "allergens": [
+        "soy"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "174233"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "whey-protein-isolate",
+      "name": "Whey protein isolate powder",
+      "category": "protein",
+      "kcalPer100g": 346,
+      "proteinPer100g": 79.0,
+      "carbsPer100g": 4.0,
+      "fatPer100g": 1.5,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "Typical commercial label values",
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "greek-yogurt-nonfat",
+      "name": "Greek yogurt, nonfat, plain",
+      "category": "dairy",
+      "kcalPer100g": 59,
+      "proteinPer100g": 10.2,
+      "carbsPer100g": 3.6,
+      "fatPer100g": 0.4,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "330137"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "greek-yogurt-full-fat",
+      "name": "Greek yogurt, full-fat, plain",
+      "category": "dairy",
+      "kcalPer100g": 96,
+      "proteinPer100g": 8.8,
+      "carbsPer100g": 4.0,
+      "fatPer100g": 5.0,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "330138"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "cottage-cheese-lowfat",
+      "name": "Cottage cheese, low-fat",
+      "category": "dairy",
+      "kcalPer100g": 79,
+      "proteinPer100g": 11.1,
+      "carbsPer100g": 3.4,
+      "fatPer100g": 2.3,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "328841"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "milk-skimmed",
+      "name": "Milk, skimmed",
+      "category": "dairy",
+      "kcalPer100g": 35,
+      "proteinPer100g": 3.4,
+      "carbsPer100g": 5.0,
+      "fatPer100g": 0.2,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "746782"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "milk-whole",
+      "name": "Milk, whole",
+      "category": "dairy",
+      "kcalPer100g": 62,
+      "proteinPer100g": 3.2,
+      "carbsPer100g": 4.8,
+      "fatPer100g": 3.3,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "746776"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "cheddar-cheese",
+      "name": "Cheddar cheese",
+      "category": "dairy",
+      "kcalPer100g": 403,
+      "proteinPer100g": 24.9,
+      "carbsPer100g": 1.3,
+      "fatPer100g": 33.1,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "328637"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mozzarella-cheese",
+      "name": "Mozzarella cheese, part-skim",
+      "category": "dairy",
+      "kcalPer100g": 242,
+      "proteinPer100g": 21.6,
+      "carbsPer100g": 3.1,
+      "fatPer100g": 15.9,
+      "fibrePer100g": 0,
+      "householdUnits": [
+        {
+          "label": "1/4 cup shredded",
+          "grams": 28
+        }
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "328637"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "feta-cheese",
+      "name": "Feta cheese",
+      "category": "dairy",
+      "kcalPer100g": 265,
+      "proteinPer100g": 14.2,
+      "carbsPer100g": 4.1,
+      "fatPer100g": 21.3,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "labneh",
+      "name": "Labneh (strained yogurt)",
+      "category": "dairy",
+      "kcalPer100g": 127,
+      "proteinPer100g": 7.5,
+      "carbsPer100g": 4.0,
+      "fatPer100g": 9.0,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "Typical commercial label values",
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "oats-rolled",
+      "name": "Oats, rolled, dry",
+      "category": "grain",
+      "kcalPer100g": 374,
+      "proteinPer100g": 16.9,
+      "carbsPer100g": 66.3,
+      "fatPer100g": 6.9,
+      "fibrePer100g": 10.6,
+      "householdUnits": [
+        {
+          "label": "1 serving",
+          "grams": 40
+        }
+      ],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169705"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "brown-rice-cooked",
+      "name": "Brown rice, cooked",
+      "category": "grain",
+      "kcalPer100g": 119,
+      "proteinPer100g": 2.7,
+      "carbsPer100g": 25.6,
+      "fatPer100g": 1.0,
+      "fibrePer100g": 1.6,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169756"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "white-rice-cooked",
+      "name": "White rice, cooked",
+      "category": "grain",
+      "kcalPer100g": 126,
+      "proteinPer100g": 2.7,
+      "carbsPer100g": 28.2,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 0.4,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169756"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "quinoa-cooked",
+      "name": "Quinoa, cooked",
+      "category": "grain",
+      "kcalPer100g": 114,
+      "proteinPer100g": 4.4,
+      "carbsPer100g": 21.3,
+      "fatPer100g": 1.9,
+      "fibrePer100g": 2.8,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "168917"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "wholemeal-bread",
+      "name": "Wholemeal bread",
+      "category": "grain",
+      "kcalPer100g": 218,
+      "proteinPer100g": 9.0,
+      "carbsPer100g": 41.3,
+      "fatPer100g": 3.4,
+      "fibrePer100g": 6.9,
+      "householdUnits": [
+        {
+          "label": "1 slice",
+          "grams": 35
+        }
+      ],
+      "allergens": [
+        "gluten"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "172686"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "white-bread",
+      "name": "White bread",
+      "category": "grain",
+      "kcalPer100g": 258,
+      "proteinPer100g": 9.1,
+      "carbsPer100g": 49.4,
+      "fatPer100g": 3.2,
+      "fibrePer100g": 2.4,
+      "householdUnits": [
+        {
+          "label": "1 slice",
+          "grams": 30
+        }
+      ],
+      "allergens": [
+        "gluten"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "172688"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "couscous-cooked",
+      "name": "Couscous, cooked",
+      "category": "grain",
+      "kcalPer100g": 107,
+      "proteinPer100g": 3.8,
+      "carbsPer100g": 23.2,
+      "fatPer100g": 0.2,
+      "fibrePer100g": 1.4,
+      "householdUnits": [],
+      "allergens": [
+        "gluten"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169739"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "pasta-wholewheat-cooked",
+      "name": "Wholewheat pasta, cooked",
+      "category": "grain",
+      "kcalPer100g": 136,
+      "proteinPer100g": 5.3,
+      "carbsPer100g": 27.4,
+      "fatPer100g": 1.4,
+      "fibrePer100g": 3.9,
+      "householdUnits": [],
+      "allergens": [
+        "gluten"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "168927"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "bulgur-cooked",
+      "name": "Bulgur wheat, cooked",
+      "category": "grain",
+      "kcalPer100g": 80,
+      "proteinPer100g": 3.1,
+      "carbsPer100g": 18.6,
+      "fatPer100g": 0.2,
+      "fibrePer100g": 4.5,
+      "householdUnits": [],
+      "allergens": [
+        "gluten"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169728"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rice-cakes",
+      "name": "Rice cakes, plain",
+      "category": "grain",
+      "kcalPer100g": 374,
+      "proteinPer100g": 8.2,
+      "carbsPer100g": 81.0,
+      "fatPer100g": 2.8,
+      "fibrePer100g": 4.0,
+      "householdUnits": [
+        {
+          "label": "1 cake",
+          "grams": 9
+        }
+      ],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169756"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "chickpeas-cooked",
+      "name": "Chickpeas, cooked",
+      "category": "legume",
+      "kcalPer100g": 153,
+      "proteinPer100g": 8.9,
+      "carbsPer100g": 27.4,
+      "fatPer100g": 2.6,
+      "fibrePer100g": 7.6,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "173756"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "red-lentils-cooked",
+      "name": "Red lentils, cooked",
+      "category": "legume",
+      "kcalPer100g": 104,
+      "proteinPer100g": 9.0,
+      "carbsPer100g": 20.1,
+      "fatPer100g": 0.4,
+      "fibrePer100g": 7.9,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "172421"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "green-lentils-cooked",
+      "name": "Green lentils, cooked",
+      "category": "legume",
+      "kcalPer100g": 104,
+      "proteinPer100g": 9.0,
+      "carbsPer100g": 20.1,
+      "fatPer100g": 0.4,
+      "fibrePer100g": 7.9,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "172421"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "black-beans-cooked",
+      "name": "Black beans, cooked",
+      "category": "legume",
+      "kcalPer100g": 118,
+      "proteinPer100g": 8.9,
+      "carbsPer100g": 23.7,
+      "fatPer100g": 0.5,
+      "fibrePer100g": 8.7,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "173736"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "kidney-beans-cooked",
+      "name": "Kidney beans, cooked",
+      "category": "legume",
+      "kcalPer100g": 118,
+      "proteinPer100g": 8.7,
+      "carbsPer100g": 22.8,
+      "fatPer100g": 0.5,
+      "fibrePer100g": 6.4,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "173743"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "edamame",
+      "name": "Edamame, cooked",
+      "category": "legume",
+      "kcalPer100g": 120,
+      "proteinPer100g": 11.9,
+      "carbsPer100g": 8.9,
+      "fatPer100g": 5.2,
+      "fibrePer100g": 5.2,
+      "householdUnits": [],
+      "allergens": [
+        "soy"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "172478"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "hummus",
+      "name": "Hummus",
+      "category": "legume",
+      "kcalPer100g": 163,
+      "proteinPer100g": 7.9,
+      "carbsPer100g": 14.3,
+      "fatPer100g": 9.6,
+      "fibrePer100g": 6.0,
+      "householdUnits": [],
+      "allergens": [
+        "sesame"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "174197"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "spinach-raw",
+      "name": "Spinach, raw",
+      "category": "vegetable",
+      "kcalPer100g": 25,
+      "proteinPer100g": 2.9,
+      "carbsPer100g": 3.6,
+      "fatPer100g": 0.4,
+      "fibrePer100g": 2.2,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "168462"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "spinach-cooked",
+      "name": "Spinach, cooked, boiled, drained",
+      "category": "vegetable",
+      "kcalPer100g": 25,
+      "proteinPer100g": 3.0,
+      "carbsPer100g": 3.8,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 2.4,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "168463"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "broccoli-raw",
+      "name": "Broccoli, raw",
+      "category": "vegetable",
+      "kcalPer100g": 36,
+      "proteinPer100g": 2.8,
+      "carbsPer100g": 6.6,
+      "fatPer100g": 0.4,
+      "fibrePer100g": 2.6,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170379"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "broccoli-cooked",
+      "name": "Broccoli, cooked, boiled, drained",
+      "category": "vegetable",
+      "kcalPer100g": 35,
+      "proteinPer100g": 2.4,
+      "carbsPer100g": 7.2,
+      "fatPer100g": 0.4,
+      "fibrePer100g": 3.3,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169967"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "carrot-raw",
+      "name": "Carrot, raw",
+      "category": "vegetable",
+      "kcalPer100g": 38,
+      "proteinPer100g": 0.9,
+      "carbsPer100g": 9.6,
+      "fatPer100g": 0.2,
+      "fibrePer100g": 2.8,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170393"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "bell-pepper-raw",
+      "name": "Bell pepper, raw",
+      "category": "vegetable",
+      "kcalPer100g": 26,
+      "proteinPer100g": 1.0,
+      "carbsPer100g": 6.0,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 2.1,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170108"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "tomato-raw",
+      "name": "Tomato, raw",
+      "category": "vegetable",
+      "kcalPer100g": 19,
+      "proteinPer100g": 0.9,
+      "carbsPer100g": 3.9,
+      "fatPer100g": 0.2,
+      "fibrePer100g": 1.2,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170457"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "cucumber-raw",
+      "name": "Cucumber, raw",
+      "category": "vegetable",
+      "kcalPer100g": 17,
+      "proteinPer100g": 0.7,
+      "carbsPer100g": 3.6,
+      "fatPer100g": 0.1,
+      "fibrePer100g": 0.5,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "168409"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "onion-raw",
+      "name": "Onion, raw",
+      "category": "vegetable",
+      "kcalPer100g": 39,
+      "proteinPer100g": 1.1,
+      "carbsPer100g": 9.3,
+      "fatPer100g": 0.1,
+      "fibrePer100g": 1.7,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170000"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "zucchini-raw",
+      "name": "Zucchini, raw",
+      "category": "vegetable",
+      "kcalPer100g": 18,
+      "proteinPer100g": 1.2,
+      "carbsPer100g": 3.1,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 1.0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169291"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "sweet-potato-cooked",
+      "name": "Sweet potato, cooked, boiled",
+      "category": "vegetable",
+      "kcalPer100g": 84,
+      "proteinPer100g": 1.6,
+      "carbsPer100g": 20.7,
+      "fatPer100g": 0.1,
+      "fibrePer100g": 3.3,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "168483"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "potato-cooked",
+      "name": "Potato, cooked, boiled",
+      "category": "vegetable",
+      "kcalPer100g": 86,
+      "proteinPer100g": 2.0,
+      "carbsPer100g": 20.1,
+      "fatPer100g": 0.1,
+      "fibrePer100g": 1.8,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170093"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mushroom-raw",
+      "name": "Mushroom, raw",
+      "category": "vegetable",
+      "kcalPer100g": 26,
+      "proteinPer100g": 3.1,
+      "carbsPer100g": 3.3,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 1.0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169251"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "kale-raw",
+      "name": "Kale, raw",
+      "category": "vegetable",
+      "kcalPer100g": 59,
+      "proteinPer100g": 4.3,
+      "carbsPer100g": 8.8,
+      "fatPer100g": 1.5,
+      "fibrePer100g": 3.6,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "323505"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "green-beans-cooked",
+      "name": "Green beans, cooked, boiled",
+      "category": "vegetable",
+      "kcalPer100g": 35,
+      "proteinPer100g": 1.9,
+      "carbsPer100g": 7.9,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 3.4,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169968"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "cauliflower-raw",
+      "name": "Cauliflower, raw",
+      "category": "vegetable",
+      "kcalPer100g": 26,
+      "proteinPer100g": 1.9,
+      "carbsPer100g": 5.0,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 2.0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169986"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "lettuce-raw",
+      "name": "Lettuce, raw",
+      "category": "vegetable",
+      "kcalPer100g": 16,
+      "proteinPer100g": 1.4,
+      "carbsPer100g": 2.9,
+      "fatPer100g": 0.2,
+      "fibrePer100g": 1.3,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169247"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "garlic-raw",
+      "name": "Garlic, raw",
+      "category": "vegetable",
+      "kcalPer100g": 158,
+      "proteinPer100g": 6.4,
+      "carbsPer100g": 33.1,
+      "fatPer100g": 0.5,
+      "fibrePer100g": 2.1,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169230"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "celery-raw",
+      "name": "Celery, raw",
+      "category": "vegetable",
+      "kcalPer100g": 13,
+      "proteinPer100g": 0.7,
+      "carbsPer100g": 3.0,
+      "fatPer100g": 0.2,
+      "fibrePer100g": 1.6,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169988"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "olives-black",
+      "name": "Olives, black, pitted",
+      "category": "vegetable",
+      "kcalPer100g": 122,
+      "proteinPer100g": 0.8,
+      "carbsPer100g": 6.3,
+      "fatPer100g": 11.0,
+      "fibrePer100g": 2.5,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169094"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "banana",
+      "name": "Banana, raw",
+      "category": "fruit",
+      "kcalPer100g": 93,
+      "proteinPer100g": 1.1,
+      "carbsPer100g": 22.8,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 2.6,
+      "householdUnits": [
+        {
+          "label": "1 medium banana",
+          "grams": 118
+        }
+      ],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "173944"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "apple",
+      "name": "Apple, raw, with skin",
+      "category": "fruit",
+      "kcalPer100g": 53,
+      "proteinPer100g": 0.3,
+      "carbsPer100g": 13.8,
+      "fatPer100g": 0.2,
+      "fibrePer100g": 2.4,
+      "householdUnits": [
+        {
+          "label": "1 medium apple",
+          "grams": 182
+        }
+      ],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "171688"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "blueberries",
+      "name": "Blueberries, raw",
+      "category": "fruit",
+      "kcalPer100g": 59,
+      "proteinPer100g": 0.7,
+      "carbsPer100g": 14.5,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 2.4,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "171711"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "strawberries",
+      "name": "Strawberries, raw",
+      "category": "fruit",
+      "kcalPer100g": 32,
+      "proteinPer100g": 0.7,
+      "carbsPer100g": 7.7,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 2.0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "167762"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "orange",
+      "name": "Orange, raw",
+      "category": "fruit",
+      "kcalPer100g": 47,
+      "proteinPer100g": 0.9,
+      "carbsPer100g": 11.8,
+      "fatPer100g": 0.1,
+      "fibrePer100g": 2.4,
+      "householdUnits": [
+        {
+          "label": "1 medium orange",
+          "grams": 131
+        }
+      ],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169918"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "dates",
+      "name": "Dates, dried, pitted",
+      "category": "fruit",
+      "kcalPer100g": 298,
+      "proteinPer100g": 2.5,
+      "carbsPer100g": 75.0,
+      "fatPer100g": 0.4,
+      "fibrePer100g": 8.0,
+      "householdUnits": [
+        {
+          "label": "1 date",
+          "grams": 8
+        }
+      ],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "168191"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "avocado",
+      "name": "Avocado, raw",
+      "category": "fruit",
+      "kcalPer100g": 161,
+      "proteinPer100g": 2.0,
+      "carbsPer100g": 8.5,
+      "fatPer100g": 14.7,
+      "fibrePer100g": 6.7,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "171705"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "lemon",
+      "name": "Lemon, raw",
+      "category": "fruit",
+      "kcalPer100g": 39,
+      "proteinPer100g": 1.1,
+      "carbsPer100g": 9.3,
+      "fatPer100g": 0.3,
+      "fibrePer100g": 2.8,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "167746"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "raisins",
+      "name": "Raisins",
+      "category": "fruit",
+      "kcalPer100g": 326,
+      "proteinPer100g": 3.1,
+      "carbsPer100g": 79.2,
+      "fatPer100g": 0.5,
+      "fibrePer100g": 3.7,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169910"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "almonds",
+      "name": "Almonds, raw",
+      "category": "nutSeed",
+      "kcalPer100g": 595,
+      "proteinPer100g": 21.2,
+      "carbsPer100g": 21.6,
+      "fatPer100g": 49.9,
+      "fibrePer100g": 12.5,
+      "householdUnits": [],
+      "allergens": [
+        "treeNuts"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170567"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "walnuts",
+      "name": "Walnuts, raw",
+      "category": "nutSeed",
+      "kcalPer100g": 689,
+      "proteinPer100g": 15.2,
+      "carbsPer100g": 13.7,
+      "fatPer100g": 65.2,
+      "fibrePer100g": 6.7,
+      "householdUnits": [],
+      "allergens": [
+        "treeNuts"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170187"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "cashews",
+      "name": "Cashews, raw",
+      "category": "nutSeed",
+      "kcalPer100g": 582,
+      "proteinPer100g": 18.2,
+      "carbsPer100g": 30.2,
+      "fatPer100g": 43.9,
+      "fibrePer100g": 3.3,
+      "householdUnits": [],
+      "allergens": [
+        "treeNuts"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170162"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "peanut-butter",
+      "name": "Peanut butter, smooth",
+      "category": "nutSeed",
+      "kcalPer100g": 622,
+      "proteinPer100g": 25.1,
+      "carbsPer100g": 20.0,
+      "fatPer100g": 50.4,
+      "fibrePer100g": 6.0,
+      "householdUnits": [
+        {
+          "label": "1 tbsp",
+          "grams": 16
+        }
+      ],
+      "allergens": [
+        "peanuts"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "172470"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "peanuts-raw",
+      "name": "Peanuts, raw",
+      "category": "nutSeed",
+      "kcalPer100g": 593,
+      "proteinPer100g": 25.8,
+      "carbsPer100g": 16.1,
+      "fatPer100g": 49.2,
+      "fibrePer100g": 8.5,
+      "householdUnits": [],
+      "allergens": [
+        "peanuts"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "172430"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "chia-seeds",
+      "name": "Chia seeds",
+      "category": "nutSeed",
+      "kcalPer100g": 442,
+      "proteinPer100g": 16.5,
+      "carbsPer100g": 42.1,
+      "fatPer100g": 30.7,
+      "fibrePer100g": 34.4,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170554"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "flax-seeds",
+      "name": "Flaxseeds, ground",
+      "category": "nutSeed",
+      "kcalPer100g": 514,
+      "proteinPer100g": 18.3,
+      "carbsPer100g": 28.9,
+      "fatPer100g": 42.2,
+      "fibrePer100g": 27.3,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169414"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "tahini",
+      "name": "Tahini (sesame paste)",
+      "category": "nutSeed",
+      "kcalPer100g": 618,
+      "proteinPer100g": 17.0,
+      "carbsPer100g": 21.2,
+      "fatPer100g": 53.8,
+      "fibrePer100g": 9.3,
+      "householdUnits": [
+        {
+          "label": "1 tbsp",
+          "grams": 15
+        }
+      ],
+      "allergens": [
+        "sesame"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "172450"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "sunflower-seeds",
+      "name": "Sunflower seeds",
+      "category": "nutSeed",
+      "kcalPer100g": 610,
+      "proteinPer100g": 20.8,
+      "carbsPer100g": 20.0,
+      "fatPer100g": 51.5,
+      "fibrePer100g": 8.6,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170562"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "pumpkin-seeds",
+      "name": "Pumpkin seeds",
+      "category": "nutSeed",
+      "kcalPer100g": 594,
+      "proteinPer100g": 30.2,
+      "carbsPer100g": 10.7,
+      "fatPer100g": 49.1,
+      "fibrePer100g": 6.0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "170556"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "olive-oil",
+      "name": "Olive oil",
+      "category": "fat",
+      "kcalPer100g": 900,
+      "proteinPer100g": 0,
+      "carbsPer100g": 0,
+      "fatPer100g": 100,
+      "fibrePer100g": 0,
+      "householdUnits": [
+        {
+          "label": "1 tbsp",
+          "grams": 13.5
+        }
+      ],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "171413"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "butter",
+      "name": "Butter",
+      "category": "fat",
+      "kcalPer100g": 734,
+      "proteinPer100g": 0.9,
+      "carbsPer100g": 0.1,
+      "fatPer100g": 81.1,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [
+        "milk"
+      ],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "173430"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "coconut-oil",
+      "name": "Coconut oil",
+      "category": "fat",
+      "kcalPer100g": 900,
+      "proteinPer100g": 0,
+      "carbsPer100g": 0,
+      "fatPer100g": 100,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "171412"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "avocado-oil",
+      "name": "Avocado oil",
+      "category": "fat",
+      "kcalPer100g": 900,
+      "proteinPer100g": 0,
+      "carbsPer100g": 0,
+      "fatPer100g": 100,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "soy-sauce",
+      "name": "Soy sauce",
+      "category": "condiment",
+      "kcalPer100g": 54,
+      "proteinPer100g": 8.1,
+      "carbsPer100g": 5.6,
+      "fatPer100g": 0.1,
+      "fibrePer100g": 0.8,
+      "householdUnits": [],
+      "allergens": [
+        "soy",
+        "gluten"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "174278"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "harissa-paste",
+      "name": "Harissa paste",
+      "category": "condiment",
+      "kcalPer100g": 73,
+      "proteinPer100g": 2.5,
+      "carbsPer100g": 8.0,
+      "fatPer100g": 4.0,
+      "fibrePer100g": 2.5,
+      "householdUnits": [
+        {
+          "label": "1 tbsp",
+          "grams": 17
+        }
+      ],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "Typical commercial label values",
+      "status": "draft"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "honey",
+      "name": "Honey",
+      "category": "condiment",
+      "kcalPer100g": 330,
+      "proteinPer100g": 0.3,
+      "carbsPer100g": 82.4,
+      "fatPer100g": 0,
+      "fibrePer100g": 0.2,
+      "householdUnits": [
+        {
+          "label": "1 tbsp",
+          "grams": 21
+        }
+      ],
+      "allergens": [],
+      "dietTags": [
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "169640"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "balsamic-vinegar",
+      "name": "Balsamic vinegar",
+      "category": "condiment",
+      "kcalPer100g": 70,
+      "proteinPer100g": 0.5,
+      "carbsPer100g": 17.0,
+      "fatPer100g": 0,
+      "fibrePer100g": 0,
+      "householdUnits": [],
+      "allergens": [],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "173470"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "dijon-mustard",
+      "name": "Dijon mustard",
+      "category": "condiment",
+      "kcalPer100g": 71,
+      "proteinPer100g": 4.4,
+      "carbsPer100g": 5.3,
+      "fatPer100g": 4.0,
+      "fibrePer100g": 2.0,
+      "householdUnits": [],
+      "allergens": [
+        "mustard"
+      ],
+      "dietTags": [
+        "vegan",
+        "vegetarian",
+        "halal"
+      ],
+      "source": "USDA FoodData Central",
+      "status": "draft",
+      "sourceRef": "168518"
+    }
+  ]
+}
