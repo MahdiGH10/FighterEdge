@@ -252,7 +252,8 @@ class FirebaseAuthRepository implements AuthRepository {
       'weak-password' => 'Password must be at least 6 characters.',
       'user-not-found' ||
       'wrong-password' ||
-      'invalid-credential' => 'Incorrect email or password.',
+      'invalid-credential' =>
+        'Incorrect email or password.',
       'network-request-failed' => 'Network error. Check your connection.',
       'popup-closed-by-user' || 'cancelled' => 'Sign-in cancelled.',
       _ => e.message ?? 'Authentication failed.',

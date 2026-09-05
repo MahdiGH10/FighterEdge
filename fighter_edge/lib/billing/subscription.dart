@@ -8,14 +8,14 @@ enum Plan { free, pro }
 
 extension PlanInfo on Plan {
   String get label => switch (this) {
-    Plan.free => 'Free',
-    Plan.pro => 'Pro',
-  };
+        Plan.free => 'Free',
+        Plan.pro => 'Pro',
+      };
 
   Color get color => switch (this) {
-    Plan.free => AppColors.textSecondary,
-    Plan.pro => AppColors.primary,
-  };
+        Plan.free => AppColors.textSecondary,
+        Plan.pro => AppColors.primary,
+      };
 }
 
 /// The gate-able capabilities of the app.
@@ -36,13 +36,13 @@ enum Feature {
 extension FeatureInfo on Feature {
   /// Human-readable name shown on the paywall.
   String get title => switch (this) {
-    Feature.cornerCoach => 'Corner Coach',
-    Feature.advancedTimerStyles => 'All Timer Presets',
-    Feature.unlimitedWeightHistory => 'Unlimited Weight History',
-    Feature.nutritionAnalytics => 'Nutrition Analytics',
-    Feature.fullTechniqueLibrary => 'Full Technique Library',
-    Feature.edgeFuelPremiumRecipes => 'Full Recipe Library',
-  };
+        Feature.cornerCoach => 'Corner Coach',
+        Feature.advancedTimerStyles => 'All Timer Presets',
+        Feature.unlimitedWeightHistory => 'Unlimited Weight History',
+        Feature.nutritionAnalytics => 'Nutrition Analytics',
+        Feature.fullTechniqueLibrary => 'Full Technique Library',
+        Feature.edgeFuelPremiumRecipes => 'Full Recipe Library',
+      };
 }
 
 /// Central entitlement rules. Free users get a usable but limited app;

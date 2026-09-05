@@ -23,7 +23,7 @@ class AssetFoodCatalogRepository implements FoodCatalogRepository {
   Future<List<FoodItem>>? _inFlight;
 
   AssetFoodCatalogRepository({Future<String> Function(String path)? loadString})
-    : _loadString = loadString ?? rootBundle.loadString;
+      : _loadString = loadString ?? rootBundle.loadString;
 
   @override
   Future<List<FoodItem>> loadAll() {
@@ -94,8 +94,8 @@ class AssetFoodCatalogRepository implements FoodCatalogRepository {
     final matches = needle.isEmpty
         ? foods
         : foods
-              .where((food) => food.name.toLowerCase().contains(needle))
-              .toList(growable: false);
+            .where((food) => food.name.toLowerCase().contains(needle))
+            .toList(growable: false);
     if (limit <= 0 || matches.length <= limit) return matches;
     return matches.sublist(0, limit);
   }

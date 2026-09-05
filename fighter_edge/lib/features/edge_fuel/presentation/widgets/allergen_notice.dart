@@ -31,8 +31,8 @@ class AllergenFilterBanner extends StatelessWidget {
     final text = showingConflicts
         ? 'Showing recipes that contain your allergens.'
         : hiddenCount == 1
-        ? '1 recipe hidden by your allergen filter.'
-        : '$hiddenCount recipes hidden by your allergen filter.';
+            ? '1 recipe hidden by your allergen filter.'
+            : '$hiddenCount recipes hidden by your allergen filter.';
 
     return Container(
       margin: const EdgeInsets.only(bottom: Insets.md),

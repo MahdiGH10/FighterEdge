@@ -43,9 +43,8 @@ class _PressScaleState extends State<PressScale> {
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final enabled = widget.onTap != null;
-    final scale = (!enabled || reduceMotion || !_pressed)
-        ? 1.0
-        : widget.pressedScale;
+    final scale =
+        (!enabled || reduceMotion || !_pressed) ? 1.0 : widget.pressedScale;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,

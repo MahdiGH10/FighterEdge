@@ -10,45 +10,45 @@ class RecipeCopy {
   RecipeCopy._();
 
   static String mealTypeLabel(MealType type) => switch (type) {
-    MealType.breakfast => 'Breakfast',
-    MealType.snack => 'Snack',
-    MealType.lunch => 'Lunch',
-    MealType.dinner => 'Dinner',
-  };
+        MealType.breakfast => 'Breakfast',
+        MealType.snack => 'Snack',
+        MealType.lunch => 'Lunch',
+        MealType.dinner => 'Dinner',
+      };
 
   static String timingLabel(TrainingTiming timing) => switch (timing) {
-    TrainingTiming.any => 'Any time',
-    TrainingTiming.preTraining => 'Before training',
-    TrainingTiming.postTraining => 'After training',
-  };
+        TrainingTiming.any => 'Any time',
+        TrainingTiming.preTraining => 'Before training',
+        TrainingTiming.postTraining => 'After training',
+      };
 
   static String dietLabel(DietTag tag) => switch (tag) {
-    DietTag.vegan => 'Vegan',
-    DietTag.vegetarian => 'Vegetarian',
-    DietTag.pescatarian => 'Pescatarian',
-    DietTag.halal => 'Halal-friendly',
-  };
+        DietTag.vegan => 'Vegan',
+        DietTag.vegetarian => 'Vegetarian',
+        DietTag.pescatarian => 'Pescatarian',
+        DietTag.halal => 'Halal-friendly',
+      };
 
   static String costLabel(CostBand band) => switch (band) {
-    CostBand.low => 'Budget',
-    CostBand.medium => 'Mid',
-    CostBand.high => 'Pricey',
-  };
+        CostBand.low => 'Budget',
+        CostBand.medium => 'Mid',
+        CostBand.high => 'Pricey',
+      };
 
   static String allergenLabel(Allergen allergen) => switch (allergen) {
-    Allergen.milk => 'Milk',
-    Allergen.eggs => 'Eggs',
-    Allergen.fish => 'Fish',
-    Allergen.shellfish => 'Shellfish',
-    Allergen.treeNuts => 'Tree nuts',
-    Allergen.peanuts => 'Peanuts',
-    Allergen.gluten => 'Gluten',
-    Allergen.soy => 'Soy',
-    Allergen.sesame => 'Sesame',
-    Allergen.mustard => 'Mustard',
-    Allergen.celery => 'Celery',
-    Allergen.sulphites => 'Sulphites',
-  };
+        Allergen.milk => 'Milk',
+        Allergen.eggs => 'Eggs',
+        Allergen.fish => 'Fish',
+        Allergen.shellfish => 'Shellfish',
+        Allergen.treeNuts => 'Tree nuts',
+        Allergen.peanuts => 'Peanuts',
+        Allergen.gluten => 'Gluten',
+        Allergen.soy => 'Soy',
+        Allergen.sesame => 'Sesame',
+        Allergen.mustard => 'Mustard',
+        Allergen.celery => 'Celery',
+        Allergen.sulphites => 'Sulphites',
+      };
 
   static String allergenList(Iterable<Allergen> allergens) {
     final labels = allergens.map(allergenLabel).toList()..sort();

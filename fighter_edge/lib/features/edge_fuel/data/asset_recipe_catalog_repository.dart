@@ -27,8 +27,8 @@ class AssetRecipeCatalogRepository implements RecipeCatalogRepository {
   AssetRecipeCatalogRepository({
     required FoodCatalogRepository foodCatalog,
     Future<String> Function(String path)? loadString,
-  }) : _foods = foodCatalog,
-       _loadString = loadString ?? rootBundle.loadString;
+  })  : _foods = foodCatalog,
+        _loadString = loadString ?? rootBundle.loadString;
 
   @override
   Future<List<Recipe>> loadAll() {

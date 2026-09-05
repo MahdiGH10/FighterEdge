@@ -69,13 +69,11 @@ Widget wrapApp(
   final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
   // Widget tests have no asset bundle, so the catalogs default to reading the
   // real JSON off disk. Tests get the shipped content unless they pass a fake.
-  final resolvedFoodCatalog =
-      foodCatalogRepo ??
+  final resolvedFoodCatalog = foodCatalogRepo ??
       AssetFoodCatalogRepository(
         loadString: (path) => File(path).readAsString(),
       );
-  final resolvedRecipeCatalog =
-      recipeCatalogRepo ??
+  final resolvedRecipeCatalog = recipeCatalogRepo ??
       AssetRecipeCatalogRepository(
         foodCatalog: resolvedFoodCatalog,
         loadString: (path) => File(path).readAsString(),
@@ -91,8 +89,7 @@ Widget wrapApp(
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
         create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
         update: (_, auth, controller) {
-          final edgeFuel =
-              controller ??
+          final edgeFuel = controller ??
               EdgeFuelController(repository: resolvedEdgeFuelRepo);
           edgeFuel.setUser(auth.user?.id);
           return edgeFuel;

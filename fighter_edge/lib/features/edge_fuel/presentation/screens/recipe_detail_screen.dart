@@ -252,13 +252,13 @@ class _Meta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, size: 14, color: AppColors.textMuted),
-      const SizedBox(width: Insets.xs),
-      Text(text, style: AppTheme.body(12, color: AppColors.textSecondary)),
-    ],
-  );
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppColors.textMuted),
+          const SizedBox(width: Insets.xs),
+          Text(text, style: AppTheme.body(12, color: AppColors.textSecondary)),
+        ],
+      );
 }
 
 class _ServingsCard extends StatelessWidget {
@@ -325,25 +325,25 @@ class _Macro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-    child: Column(
-      children: [
-        AnimatedMacroValue(
-          value: grams,
-          suffix: 'g',
-          style: AppTheme.display(18, color: color),
+        child: Column(
+          children: [
+            AnimatedMacroValue(
+              value: grams,
+              suffix: 'g',
+              style: AppTheme.display(18, color: color),
+            ),
+            Text(
+              label,
+              style: AppTheme.body(
+                10,
+                color: AppColors.textMuted,
+                weight: FontWeight.w700,
+                spacing: 0.8,
+              ),
+            ),
+          ],
         ),
-        Text(
-          label,
-          style: AppTheme.body(
-            10,
-            color: AppColors.textMuted,
-            weight: FontWeight.w700,
-            spacing: 0.8,
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -352,14 +352,14 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-    text,
-    style: AppTheme.body(
-      11,
-      color: AppColors.textMuted,
-      weight: FontWeight.w700,
-      spacing: 0.8,
-    ),
-  );
+        text,
+        style: AppTheme.body(
+          11,
+          color: AppColors.textMuted,
+          weight: FontWeight.w700,
+          spacing: 0.8,
+        ),
+      );
 }
 
 class _IngredientRow extends StatelessWidget {
@@ -432,30 +432,30 @@ class _StepRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: Insets.md),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 26,
-          child: Text(
-            '$number',
-            style: AppTheme.display(15, color: AppColors.primary),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            text,
-            style: AppTheme.body(
-              13.5,
-              color: AppColors.textSecondary,
-              weight: FontWeight.w400,
+        padding: const EdgeInsets.only(bottom: Insets.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 26,
+              child: Text(
+                '$number',
+                style: AppTheme.display(15, color: AppColors.primary),
+              ),
             ),
-          ),
+            Expanded(
+              child: Text(
+                text,
+                style: AppTheme.body(
+                  13.5,
+                  color: AppColors.textSecondary,
+                  weight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 class _SubstitutionRow extends StatelessWidget {
@@ -471,21 +471,21 @@ class _SubstitutionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: Insets.sm),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Icon(Icons.swap_horiz, size: 15, color: AppColors.textMuted),
-        const SizedBox(width: Insets.sm),
-        Expanded(
-          child: Text(
-            reason.isEmpty ? '$from → $to' : '$from → $to  ·  $reason',
-            style: AppTheme.body(12.5, color: AppColors.textSecondary),
-          ),
+        padding: const EdgeInsets.only(bottom: Insets.sm),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.swap_horiz, size: 15, color: AppColors.textMuted),
+            const SizedBox(width: Insets.sm),
+            Expanded(
+              child: Text(
+                reason.isEmpty ? '$from → $to' : '$from → $to  ·  $reason',
+                style: AppTheme.body(12.5, color: AppColors.textSecondary),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 class _Provenance extends StatelessWidget {
@@ -493,7 +493,7 @@ class _Provenance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-    RecipeCopy.draftNotice,
-    style: AppTheme.body(11.5, color: AppColors.textMuted),
-  );
+        RecipeCopy.draftNotice,
+        style: AppTheme.body(11.5, color: AppColors.textMuted),
+      );
 }

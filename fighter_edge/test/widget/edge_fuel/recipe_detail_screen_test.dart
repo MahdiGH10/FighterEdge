@@ -160,9 +160,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final userId = repo.currentUser!.id;
-    final day = await edgeFuelRepo
-        .watchNutritionDay(userId, DateTime.now())
-        .first;
+    final day =
+        await edgeFuelRepo.watchNutritionDay(userId, DateTime.now()).first;
     expect(day.entries, hasLength(1));
     final entry = day.entries.single;
     expect(entry.name, 'Three-egg scramble with spinach');

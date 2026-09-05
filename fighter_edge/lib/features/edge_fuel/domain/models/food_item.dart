@@ -117,29 +117,28 @@ class FoodItem {
   }
 
   Map<String, dynamic> toJson() => {
-    'schemaVersion': schemaVersion,
-    'id': id,
-    'name': name,
-    'category': category.name,
-    'kcalPer100g': kcalPer100g,
-    'proteinPer100g': proteinPer100g,
-    'carbsPer100g': carbsPer100g,
-    'fatPer100g': fatPer100g,
-    'fibrePer100g': fibrePer100g,
-    'householdUnits': householdUnits.map((u) => u.toJson()).toList(),
-    'allergens': allergens.map((a) => a.name).toList(),
-    'dietTags': dietTags.map((d) => d.name).toList(),
-    'source': source,
-    if (sourceRef != null) 'sourceRef': sourceRef,
-    'status': status.name,
-  };
+        'schemaVersion': schemaVersion,
+        'id': id,
+        'name': name,
+        'category': category.name,
+        'kcalPer100g': kcalPer100g,
+        'proteinPer100g': proteinPer100g,
+        'carbsPer100g': carbsPer100g,
+        'fatPer100g': fatPer100g,
+        'fibrePer100g': fibrePer100g,
+        'householdUnits': householdUnits.map((u) => u.toJson()).toList(),
+        'allergens': allergens.map((a) => a.name).toList(),
+        'dietTags': dietTags.map((d) => d.name).toList(),
+        'source': source,
+        if (sourceRef != null) 'sourceRef': sourceRef,
+        'status': status.name,
+      };
 
   factory FoodItem.fromJson(Map<String, dynamic> json) {
     return FoodItem(
       id: (json['id'] as String? ?? '').trim(),
       name: (json['name'] as String? ?? '').trim(),
-      category:
-          enumFromName(FoodCategory.values, json['category']) ??
+      category: enumFromName(FoodCategory.values, json['category']) ??
           FoodCategory.other,
       kcalPer100g: positiveDouble(json['kcalPer100g']),
       proteinPer100g: positiveDouble(json['proteinPer100g']),
@@ -154,8 +153,7 @@ class FoodItem {
       dietTags: _tagSet(json['dietTags'], DietTag.values),
       source: (json['source'] as String? ?? 'USDA FoodData Central').trim(),
       sourceRef: (json['sourceRef'] as String?)?.trim(),
-      status:
-          enumFromName(ContentStatus.values, json['status']) ??
+      status: enumFromName(ContentStatus.values, json['status']) ??
           ContentStatus.draft,
     );
   }

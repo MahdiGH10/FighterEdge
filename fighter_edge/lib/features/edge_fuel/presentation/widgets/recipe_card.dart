@@ -28,11 +28,11 @@ class RecipeCard extends StatelessWidget {
   });
 
   Color get _accent => switch (listing.recipe.mealType) {
-    MealType.breakfast => AppColors.carbs,
-    MealType.snack => AppColors.fats,
-    MealType.lunch => AppColors.protein,
-    MealType.dinner => AppColors.primary,
-  };
+        MealType.breakfast => AppColors.carbs,
+        MealType.snack => AppColors.fats,
+        MealType.lunch => AppColors.protein,
+        MealType.dinner => AppColors.primary,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -165,13 +165,13 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-    text,
-    style: AppTheme.body(
-      12,
-      color: AppColors.textSecondary,
-      weight: FontWeight.w600,
-    ),
-  );
+        text,
+        style: AppTheme.body(
+          12,
+          color: AppColors.textSecondary,
+          weight: FontWeight.w600,
+        ),
+      );
 }
 
 class _Tag extends StatelessWidget {
@@ -181,21 +181,21 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: Insets.sm, vertical: 2),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: .14),
-      borderRadius: BorderRadius.circular(Radii.chip),
-    ),
-    child: Text(
-      text,
-      // Small text takes slightly positive tracking for legibility
-      // (apple-design §15); the display titles above take negative.
-      style: AppTheme.body(
-        10.5,
-        color: color,
-        weight: FontWeight.w700,
-        spacing: 0.3,
-      ),
-    ),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: Insets.sm, vertical: 2),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: .14),
+          borderRadius: BorderRadius.circular(Radii.chip),
+        ),
+        child: Text(
+          text,
+          // Small text takes slightly positive tracking for legibility
+          // (apple-design §15); the display titles above take negative.
+          style: AppTheme.body(
+            10.5,
+            color: color,
+            weight: FontWeight.w700,
+            spacing: 0.3,
+          ),
+        ),
+      );
 }

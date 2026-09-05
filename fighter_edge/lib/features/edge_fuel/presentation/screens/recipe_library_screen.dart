@@ -64,23 +64,23 @@ class _RecipeLibraryViewState extends State<_RecipeLibraryView> {
   Widget build(BuildContext context) {
     final controller = context.watch<RecipeLibraryController>();
     final isPro = context.watch<AuthController>().allows(
-      Feature.edgeFuelPremiumRecipes,
-    );
+          Feature.edgeFuelPremiumRecipes,
+        );
 
     return ScreenScaffold(
       title: 'Recipes',
       showBack: true,
       body: switch (true) {
         _ when controller.isLoading => const Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
-        ),
-        _ when controller.error != null => Center(
-          child: EmptyState(
-            icon: Icons.error_outline,
-            title: 'Recipes unavailable',
-            message: controller.error!,
+            child: CircularProgressIndicator(color: AppColors.primary),
           ),
-        ),
+        _ when controller.error != null => Center(
+            child: EmptyState(
+              icon: Icons.error_outline,
+              title: 'Recipes unavailable',
+              message: controller.error!,
+            ),
+          ),
         _ => _Body(controller: controller, isPro: isPro, search: _search),
       },
     );
@@ -167,8 +167,8 @@ class _Body extends StatelessWidget {
                           builder: (_) => RecipeDetailScreen(
                             listing: listing,
                             foodsById: controller.foodsById,
-                            conflictingAllergens: controller
-                                .conflictingAllergens(listing),
+                            conflictingAllergens:
+                                controller.conflictingAllergens(listing),
                             locked: locked,
                           ),
                         ),
@@ -218,7 +218,7 @@ class _EmptyResults extends StatelessWidget {
           title: 'Nothing matches',
           message: hiddenByAllergens > 0
               ? 'Every recipe matching these filters contains one of your '
-                    'allergens.'
+                  'allergens.'
               : 'Try clearing a filter or searching for something else.',
         ),
         const SizedBox(height: Insets.lg),

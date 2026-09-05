@@ -82,8 +82,7 @@ class FighterEdgeApp extends StatelessWidget {
     // They stay injectable so tests can supply fixtures without an asset
     // bundle.
     final resolvedFoodCatalog = foodCatalogRepo ?? AssetFoodCatalogRepository();
-    final resolvedRecipeCatalog =
-        recipeCatalogRepo ??
+    final resolvedRecipeCatalog = recipeCatalogRepo ??
         AssetRecipeCatalogRepository(foodCatalog: resolvedFoodCatalog);
     return MultiProvider(
       providers: [
@@ -103,8 +102,7 @@ class FighterEdgeApp extends StatelessWidget {
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
           create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
           update: (_, auth, controller) {
-            final edgeFuel =
-                controller ??
+            final edgeFuel = controller ??
                 EdgeFuelController(repository: resolvedEdgeFuelRepo);
             edgeFuel.setUser(auth.user?.id);
             return edgeFuel;

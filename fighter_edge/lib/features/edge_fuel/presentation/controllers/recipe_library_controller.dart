@@ -68,9 +68,8 @@ class RecipeFilters {
     return RecipeFilters(
       query: query ?? this.query,
       mealType: clearMealType ? null : (mealType ?? this.mealType),
-      trainingTiming: clearTrainingTiming
-          ? null
-          : (trainingTiming ?? this.trainingTiming),
+      trainingTiming:
+          clearTrainingTiming ? null : (trainingTiming ?? this.trainingTiming),
       dietTag: clearDietTag ? null : (dietTag ?? this.dietTag),
       costBand: clearCostBand ? null : (costBand ?? this.costBand),
       maxMinutes: clearMaxMinutes ? null : (maxMinutes ?? this.maxMinutes),
@@ -102,8 +101,8 @@ class RecipeLibraryController extends ChangeNotifier {
   RecipeLibraryController({
     required RecipeCatalogRepository recipeCatalog,
     required FoodCatalogRepository foodCatalog,
-  }) : _recipes = recipeCatalog,
-       _foods = foodCatalog;
+  })  : _recipes = recipeCatalog,
+        _foods = foodCatalog;
 
   bool _loading = false;
   String? _error;
@@ -173,12 +172,13 @@ class RecipeLibraryController extends ChangeNotifier {
   void setQuery(String query) => setFilters(_filters.copyWith(query: query));
 
   void toggleAllergenConflicts() => setFilters(
-    _filters.copyWith(showAllergenConflicts: !_filters.showAllergenConflicts),
-  );
+        _filters.copyWith(
+            showAllergenConflicts: !_filters.showAllergenConflicts),
+      );
 
   void clearFilters() => setFilters(
-    RecipeFilters(showAllergenConflicts: _filters.showAllergenConflicts),
-  );
+        RecipeFilters(showAllergenConflicts: _filters.showAllergenConflicts),
+      );
 
   /// True when this recipe contains one of the user's declared allergens.
   bool conflictsWithAllergens(RecipeListing listing) =>

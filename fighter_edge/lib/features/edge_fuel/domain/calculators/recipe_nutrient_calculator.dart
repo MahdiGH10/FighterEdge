@@ -19,20 +19,20 @@ class RecipeNutrients {
   });
 
   RecipeNutrients operator +(RecipeNutrients other) => RecipeNutrients(
-    kcal: kcal + other.kcal,
-    proteinGrams: proteinGrams + other.proteinGrams,
-    carbGrams: carbGrams + other.carbGrams,
-    fatGrams: fatGrams + other.fatGrams,
-    fibreGrams: fibreGrams + other.fibreGrams,
-  );
+        kcal: kcal + other.kcal,
+        proteinGrams: proteinGrams + other.proteinGrams,
+        carbGrams: carbGrams + other.carbGrams,
+        fatGrams: fatGrams + other.fatGrams,
+        fibreGrams: fibreGrams + other.fibreGrams,
+      );
 
   RecipeNutrients scaled(double factor) => RecipeNutrients(
-    kcal: kcal * factor,
-    proteinGrams: proteinGrams * factor,
-    carbGrams: carbGrams * factor,
-    fatGrams: fatGrams * factor,
-    fibreGrams: fibreGrams * factor,
-  );
+        kcal: kcal * factor,
+        proteinGrams: proteinGrams * factor,
+        carbGrams: carbGrams * factor,
+        fatGrams: fatGrams * factor,
+        fibreGrams: fibreGrams * factor,
+      );
 
   /// Rounded for display and for writing into a food log, which stores ints.
   /// Rounding happens once, at the boundary — never mid-aggregation, where it
@@ -44,8 +44,7 @@ class RecipeNutrients {
   int get fibreRounded => fibreGrams.round();
 
   @override
-  String toString() =>
-      '$kcalRounded kcal / P$proteinRounded '
+  String toString() => '$kcalRounded kcal / P$proteinRounded '
       'C$carbsRounded F$fatRounded';
 }
 

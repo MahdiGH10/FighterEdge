@@ -33,9 +33,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
   Widget build(BuildContext context) {
     final edgeFuel = context.watch<EdgeFuelController>();
     final targetCalories = edgeFuel.targetCalories;
-    final ratio = targetCalories == 0
-        ? 0.0
-        : edgeFuel.consumedCalories / targetCalories;
+    final ratio =
+        targetCalories == 0 ? 0.0 : edgeFuel.consumedCalories / targetCalories;
     final ringColor = ratio > 1 ? AppColors.negative : AppColors.positive;
 
     return Scaffold(
@@ -167,8 +166,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
               Navigator.pop(
                 ctx,
                 FoodLogEntry(
-                  id:
-                      existing?.id ??
+                  id: existing?.id ??
                       'food-${DateTime.now().microsecondsSinceEpoch}',
                   name: name.text.trim(),
                   notes: notes.text.trim().isEmpty
@@ -281,7 +279,7 @@ class _TodayView extends StatelessWidget {
   final double ratio;
   final Color ringColor;
   final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
-  onEdit;
+      onEdit;
 
   const _TodayView({
     required this.edgeFuel,
@@ -497,7 +495,7 @@ class _RecipeShortcut extends StatelessWidget {
 class _MealsView extends StatelessWidget {
   final EdgeFuelController edgeFuel;
   final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
-  onEdit;
+      onEdit;
 
   const _MealsView({required this.edgeFuel, required this.onEdit});
 

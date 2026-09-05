@@ -314,9 +314,8 @@ void main() {
     });
 
     test('carries enough vegan foods to build the required vegan recipes', () {
-      final vegan = foods
-          .where((f) => f.dietTags.contains(DietTag.vegan))
-          .toList();
+      final vegan =
+          foods.where((f) => f.dietTags.contains(DietTag.vegan)).toList();
       expect(vegan.length, greaterThanOrEqualTo(40));
     });
 

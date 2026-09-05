@@ -32,12 +32,13 @@ class RecipeIngredient {
   });
 
   Map<String, dynamic> toJson() => {
-    'foodId': foodId,
-    'grams': grams,
-    if (householdUnitLabel != null) 'householdUnitLabel': householdUnitLabel,
-    if (optional) 'optional': true,
-    if (note.isNotEmpty) 'note': note,
-  };
+        'foodId': foodId,
+        'grams': grams,
+        if (householdUnitLabel != null)
+          'householdUnitLabel': householdUnitLabel,
+        if (optional) 'optional': true,
+        if (note.isNotEmpty) 'note': note,
+      };
 
   factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
     return RecipeIngredient(
@@ -63,10 +64,10 @@ class RecipeSubstitution {
   });
 
   Map<String, dynamic> toJson() => {
-    'forFoodId': forFoodId,
-    'useFoodId': useFoodId,
-    if (reason.isNotEmpty) 'reason': reason,
-  };
+        'forFoodId': forFoodId,
+        'useFoodId': useFoodId,
+        if (reason.isNotEmpty) 'reason': reason,
+      };
 
   factory RecipeSubstitution.fromJson(Map<String, dynamic> json) {
     return RecipeSubstitution(
@@ -158,29 +159,29 @@ class Recipe {
       equipment.any((e) => e.toLowerCase().contains('oven'));
 
   Map<String, dynamic> toJson() => {
-    'schemaVersion': schemaVersion,
-    'id': id,
-    'title': title,
-    'description': description,
-    'servings': servings,
-    'ingredients': ingredients.map((i) => i.toJson()).toList(),
-    'steps': steps,
-    'substitutions': substitutions.map((s) => s.toJson()).toList(),
-    'prepMinutes': prepMinutes,
-    'cookMinutes': cookMinutes,
-    'mealType': mealType.name,
-    'trainingTiming': trainingTiming.name,
-    'cuisineTags': cuisineTags.toList(),
-    'costBand': costBand.name,
-    'equipment': equipment,
-    'extraAllergens': extraAllergens.map((a) => a.name).toList(),
-    if (imageAsset != null) 'imageAsset': imageAsset,
-    'isPremium': isPremium,
-    'contentVersion': contentVersion,
-    if (reviewerCredit != null) 'reviewerCredit': reviewerCredit,
-    if (reviewedAt != null) 'reviewedAt': reviewedAt!.toIso8601String(),
-    'status': status.name,
-  };
+        'schemaVersion': schemaVersion,
+        'id': id,
+        'title': title,
+        'description': description,
+        'servings': servings,
+        'ingredients': ingredients.map((i) => i.toJson()).toList(),
+        'steps': steps,
+        'substitutions': substitutions.map((s) => s.toJson()).toList(),
+        'prepMinutes': prepMinutes,
+        'cookMinutes': cookMinutes,
+        'mealType': mealType.name,
+        'trainingTiming': trainingTiming.name,
+        'cuisineTags': cuisineTags.toList(),
+        'costBand': costBand.name,
+        'equipment': equipment,
+        'extraAllergens': extraAllergens.map((a) => a.name).toList(),
+        if (imageAsset != null) 'imageAsset': imageAsset,
+        'isPremium': isPremium,
+        'contentVersion': contentVersion,
+        if (reviewerCredit != null) 'reviewerCredit': reviewerCredit,
+        if (reviewedAt != null) 'reviewedAt': reviewedAt!.toIso8601String(),
+        'status': status.name,
+      };
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
@@ -207,7 +208,7 @@ class Recipe {
           enumFromName(MealType.values, json['mealType']) ?? MealType.lunch,
       trainingTiming:
           enumFromName(TrainingTiming.values, json['trainingTiming']) ??
-          TrainingTiming.any,
+              TrainingTiming.any,
       cuisineTags: (json['cuisineTags'] as List<dynamic>? ?? const [])
           .whereType<String>()
           .map((s) => s.trim())
@@ -225,8 +226,7 @@ class Recipe {
       contentVersion: _positiveInt(json['contentVersion'], fallback: 1),
       reviewerCredit: (json['reviewerCredit'] as String?)?.trim(),
       reviewedAt: DateTime.tryParse(json['reviewedAt'] as String? ?? ''),
-      status:
-          enumFromName(ContentStatus.values, json['status']) ??
+      status: enumFromName(ContentStatus.values, json['status']) ??
           ContentStatus.draft,
     );
   }

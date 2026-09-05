@@ -128,8 +128,7 @@ void main() {
       expect(
         controller.filters.showAllergenConflicts,
         isTrue,
-        reason:
-            'clearing filters must not silently re-hide allergens the '
+        reason: 'clearing filters must not silently re-hide allergens the '
             'user deliberately chose to see',
       );
     });

@@ -77,16 +77,16 @@ void main() {
 }
 
 String _plainName(Allergen allergen) => switch (allergen) {
-  Allergen.milk => 'milk',
-  Allergen.eggs => 'eggs',
-  Allergen.fish => 'fish',
-  Allergen.shellfish => 'shellfish',
-  Allergen.treeNuts => 'tree nuts',
-  Allergen.peanuts => 'peanuts',
-  Allergen.gluten => 'gluten',
-  Allergen.soy => 'soy',
-  Allergen.sesame => 'sesame',
-  Allergen.mustard => 'mustard',
-  Allergen.celery => 'celery',
-  Allergen.sulphites => 'sulphites',
-};
+      Allergen.milk => 'milk',
+      Allergen.eggs => 'eggs',
+      Allergen.fish => 'fish',
+      Allergen.shellfish => 'shellfish',
+      Allergen.treeNuts => 'tree nuts',
+      Allergen.peanuts => 'peanuts',
+      Allergen.gluten => 'gluten',
+      Allergen.soy => 'soy',
+      Allergen.sesame => 'sesame',
+      Allergen.mustard => 'mustard',
+      Allergen.celery => 'celery',
+      Allergen.sulphites => 'sulphites',
+    };
