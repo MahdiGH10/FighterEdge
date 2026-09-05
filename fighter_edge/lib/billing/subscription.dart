@@ -31,6 +31,11 @@ enum Feature {
   /// §10 requires separate entitlement cases so each can be reasoned about,
   /// priced, and server-verified on its own.
   edgeFuelPremiumRecipes,
+
+  /// "Ask EdgeFuel Coach" (master prompt §13.1). The one AI surface in this
+  /// release — gated like every other Pro feature rather than given away
+  /// free, which is also what keeps per-user AI spend bounded.
+  edgeFuelAiCoach,
 }
 
 extension FeatureInfo on Feature {
@@ -42,6 +47,7 @@ extension FeatureInfo on Feature {
         Feature.nutritionAnalytics => 'Nutrition Analytics',
         Feature.fullTechniqueLibrary => 'Full Technique Library',
         Feature.edgeFuelPremiumRecipes => 'Full Recipe Library',
+        Feature.edgeFuelAiCoach => 'AI Plan Coach',
       };
 }
 
@@ -58,6 +64,7 @@ class Entitlements {
     Feature.nutritionAnalytics,
     Feature.fullTechniqueLibrary,
     Feature.edgeFuelPremiumRecipes,
+    Feature.edgeFuelAiCoach,
   };
 
   /// Free-tier hard limits enforced in the UI/business logic.

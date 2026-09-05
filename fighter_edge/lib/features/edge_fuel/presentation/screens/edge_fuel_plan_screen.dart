@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../billing/subscription.dart';
 import '../../../../controllers/auth_controller.dart';
+import '../../../../screens/paywall_screen.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../widgets/app_scaffold.dart';
@@ -201,6 +203,8 @@ class _AiCoachSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ai = context.watch<EdgeFuelAiController>();
+    final isPro =
+        context.watch<AuthController>().allows(Feature.edgeFuelAiCoach);
 
     return AppCard(
       child: Column(
@@ -219,9 +223,46 @@ class _AiCoachSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Insets.sm),
-          _AiCoachBody(ai: ai, target: target, edgeFuel: edgeFuel),
+          if (isPro)
+            _AiCoachBody(ai: ai, target: target, edgeFuel: edgeFuel)
+          else
+            const _AiCoachLocked(),
         ],
       ),
+    );
+  }
+}
+
+/// Shown to free users in place of the coach — never the explanation itself.
+/// The Ask/Ask-again request must not fire for a free account (master prompt
+/// §13.1 pairs with the server quota — this is the client half of "gate the
+/// AI behind Pro").
+class _AiCoachLocked extends StatelessWidget {
+  const _AiCoachLocked();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Get a plain-language explanation of your plan, and why it is set '
+          'the way it is.',
+          style: AppTheme.body(12, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: Insets.md),
+        GhostButton(
+          'See Pro',
+          icon: Icons.lock_outline,
+          expand: true,
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) =>
+                  const PaywallScreen(highlight: Feature.edgeFuelAiCoach),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

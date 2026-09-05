@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_models.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
@@ -69,7 +70,7 @@ void main() {
 
     testWidgets('Ask EdgeFuel Coach shows the AI explanation on success',
         (tester) async {
-      final repo = await makeRepo(signedIn: true);
+      final repo = await makeRepo(signedIn: true, plan: Plan.pro);
       final userId = repo.currentUser!.id;
       final edgeFuelRepo = InMemoryEdgeFuelRepository();
       await edgeFuelRepo.saveTarget(userId, _successTarget());
@@ -104,7 +105,7 @@ void main() {
     testWidgets(
         'Ask EdgeFuel Coach shows an unavailable state without crashing',
         (tester) async {
-      final repo = await makeRepo(signedIn: true);
+      final repo = await makeRepo(signedIn: true, plan: Plan.pro);
       final userId = repo.currentUser!.id;
       final edgeFuelRepo = InMemoryEdgeFuelRepository();
       await edgeFuelRepo.saveTarget(userId, _successTarget());
@@ -128,6 +129,26 @@ void main() {
         find.textContaining('EdgeFuel Coach is unavailable right now'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('a free account sees a lock instead of the coach',
+        (tester) async {
+      final repo = await makeRepo(signedIn: true, plan: Plan.free);
+      final userId = repo.currentUser!.id;
+      final edgeFuelRepo = InMemoryEdgeFuelRepository();
+      await edgeFuelRepo.saveTarget(userId, _successTarget());
+
+      await tester.pumpWidget(wrapApp(
+        const EdgeFuelPlanScreen(),
+        repo: repo,
+        edgeFuelRepo: edgeFuelRepo,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(find.text('SEE PRO'), 300,
+          scrollable: find.byType(Scrollable).first);
+      expect(find.text('SEE PRO'), findsOneWidget);
+      expect(find.text('ASK EDGEFUEL COACH'), findsNothing);
     });
   });
 }
