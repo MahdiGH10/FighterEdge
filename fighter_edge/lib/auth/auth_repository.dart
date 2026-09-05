@@ -59,6 +59,10 @@ abstract class AuthRepository {
 
   Future<void> signOut();
 
+  /// Permanently deletes the signed-in user's account and all of their data.
+  /// Irreversible. Signs the user out as part of completing.
+  Future<void> deleteAccount();
+
   /// Reload the current user and server-owned entitlement state.
   Future<AppUser?> refreshCurrentUser();
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
@@ -211,6 +212,28 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() => _auth.signOut();
+
+  @override
+  Future<void> deleteAccount() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const AuthException('signed-out', 'Sign in before deleting.');
+    }
+    try {
+      // Runs server-side with the Admin SDK — Firestore rules deliberately
+      // block a client from deleting `users/{uid}` itself (billing state is
+      // server-owned), and this also sidesteps Firebase's "requires a
+      // recent sign-in" client-side re-auth requirement entirely.
+      await FirebaseFunctions.instance.httpsCallable('deleteAccount').call();
+    } on FirebaseFunctionsException catch (e) {
+      throw AuthException(
+        e.code,
+        'Could not delete your account. Please try again.',
+      );
+    }
+    _cached = null;
+    await _auth.signOut();
+  }
 
   @override
   Future<AppUser?> refreshCurrentUser() async {

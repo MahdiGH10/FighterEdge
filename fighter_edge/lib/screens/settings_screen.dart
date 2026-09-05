@@ -124,7 +124,7 @@ class SettingsScreen extends StatelessWidget {
             onTap: () => _showInfo(
               context,
               'Security',
-              'Password reset is already supported from the login screen. In-app password change and account deletion should be added before public launch.',
+              'Password reset is already supported from the login screen. In-app password change should be added before public launch.',
             ),
           ),
           _SettingsRow(
@@ -136,6 +136,12 @@ class SettingsScreen extends StatelessWidget {
               'Legal readiness',
               'Before launch, connect real Terms, Privacy Policy, billing terms, and a non-medical training/nutrition disclaimer.',
             ),
+          ),
+          _SettingsRow(
+            icon: Icons.delete_outline,
+            title: 'Delete account',
+            subtitle: 'Permanently erase your account and all of your data',
+            onTap: auth.isBusy ? null : () => _confirmDeleteAccount(context),
           ),
           const SizedBox(height: Insets.lg),
           GhostButton(
@@ -177,6 +183,85 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _confirmDeleteAccount(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const _DeleteAccountDialog(),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await context.read<AuthController>().deleteAccount();
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+    }
+  }
+}
+
+/// Requires typing DELETE before the button enables — a deliberate speed
+/// bump for an irreversible action, not just a yes/no tap.
+class _DeleteAccountDialog extends StatefulWidget {
+  const _DeleteAccountDialog();
+
+  @override
+  State<_DeleteAccountDialog> createState() => _DeleteAccountDialogState();
+}
+
+class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
+  final _controller = TextEditingController();
+  bool _confirmed = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.surface,
+      title: const Text('Delete your account?'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'This permanently erases your account, weight history, training '
+            'sessions, and nutrition data. This cannot be undone.',
+            style: AppTheme.body(13, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: Insets.md),
+          Text(
+            'Type DELETE to confirm.',
+            style: AppTheme.body(12, weight: FontWeight.w700),
+          ),
+          const SizedBox(height: Insets.sm),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            textCapitalization: TextCapitalization.characters,
+            onChanged: (v) => setState(() => _confirmed = v.trim() == 'DELETE'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: _confirmed ? () => Navigator.of(context).pop(true) : null,
+          style: TextButton.styleFrom(foregroundColor: AppColors.negative),
+          child: const Text('Delete forever'),
+        ),
+      ],
     );
   }
 }
@@ -235,7 +320,7 @@ class _SettingsRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _SettingsRow({
     required this.icon,

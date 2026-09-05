@@ -87,6 +87,12 @@ class AuthController extends ChangeNotifier {
         _onUserChanged(null);
       });
 
+  /// Permanently deletes the account and all of its data. Irreversible.
+  Future<void> deleteAccount() => _run(() async {
+        await _repo.deleteAccount();
+        _onUserChanged(null);
+      });
+
   /// Starts the Pro purchase flow.
   ///
   /// This intentionally does not change the user's plan. Paid entitlements must

@@ -76,6 +76,26 @@ void main() {
       await repo.signOut();
       expect(repo.currentUser, isNull);
     });
+
+    test('delete account signs out and removes the account for good', () async {
+      await repo.signUpWithEmail(
+          email: 'a@b.com', password: 'secret1', displayName: 'A');
+      await repo.deleteAccount();
+      expect(repo.currentUser, isNull);
+
+      expect(
+        () => repo.signInWithEmail(email: 'a@b.com', password: 'secret1'),
+        throwsA(isA<AuthException>()),
+        reason: 'the account must be gone, not just signed out of',
+      );
+    });
+
+    test('delete account without a signed-in user throws', () async {
+      expect(
+        () => repo.deleteAccount(),
+        throwsA(isA<AuthException>()),
+      );
+    });
   });
 
   group('passwordless (magic code)', () {

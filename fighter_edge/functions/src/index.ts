@@ -12,6 +12,8 @@ import { parseModelJson, validateResponse } from "./validate";
 
 initializeApp();
 
+export { deleteAccount } from "./accountDeletion";
+
 const OPENROUTER_API_KEY = defineSecret("OPENROUTER_API_KEY");
 const ALLOWED_TASKS: readonly AiTaskType[] = ["explainPlan", "summarizeTrend"];
 
