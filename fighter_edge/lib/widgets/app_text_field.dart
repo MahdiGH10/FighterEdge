@@ -54,7 +54,12 @@ class AppTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: AppTheme.body(14, color: AppColors.textMuted),
-        floatingLabelStyle: AppTheme.body(13, color: AppColors.primary),
+        floatingLabelStyle: WidgetStateTextStyle.resolveWith((states) {
+          final color = states.contains(WidgetState.error)
+              ? AppColors.negative
+              : AppColors.primary;
+          return AppTheme.body(13, color: color);
+        }),
         prefixIcon: Icon(icon, color: AppColors.textMuted, size: 20),
         suffixIcon: suffix,
         errorText: errorText,

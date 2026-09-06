@@ -30,7 +30,7 @@ class AppColors {
   // Semantic
   static const Color positive = Color(0xFF3FD07E);
   static const Color warning = Color(0xFFF5A623);
-  static const Color negative = Color(0xFFE63328);
+  static const Color negative = Color(0xFFFF3B5C);
 
   // Chart helpers
   static const Color track = Color(0xFF2A2A2E);

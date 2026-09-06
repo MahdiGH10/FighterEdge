@@ -65,6 +65,7 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.primary,
         surface: AppColors.surface,
+        error: AppColors.negative,
       ),
       textTheme: base.textTheme
           .apply(
