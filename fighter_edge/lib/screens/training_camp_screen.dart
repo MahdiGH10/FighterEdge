@@ -8,7 +8,6 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
-import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
 import 'round_timer_screen.dart';
 
@@ -210,9 +209,13 @@ class _SessionRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(s.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTheme.body(14, weight: FontWeight.w700)),
                   const SizedBox(height: 2),
                   Text(s.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTheme.body(12,
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
@@ -222,8 +225,7 @@ class _SessionRow extends StatelessWidget {
             if (s.completed)
               _CompletionDot(completed: s.completed)
             else
-              PrimaryButton('Start',
-                  icon: Icons.play_arrow, onPressed: onStart),
+              _StartIconButton(label: s.title, onTap: onStart),
             const SizedBox(width: Insets.sm),
             HeaderIcon(
               s.completed ? Icons.edit_note : Icons.check_circle_outline,
@@ -259,6 +261,32 @@ class _CompletionDot extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: AppColors.border, width: 2),
+      ),
+    );
+  }
+}
+
+class _StartIconButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _StartIconButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Start $label',
+      child: Material(
+        color: AppColors.primary,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: const SizedBox.square(
+            dimension: 40,
+            child: Icon(Icons.play_arrow, color: Colors.white, size: 22),
+          ),
+        ),
       ),
     );
   }
