@@ -26,4 +26,20 @@ void main() {
     expect(find.text('DASHBOARD'), findsOneWidget);
     expect(find.text('Welcome back'), findsNothing);
   });
+
+  testWidgets('primary navigation exposes only working MVP areas',
+      (tester) async {
+    final repo =
+        await makeRepo(signedIn: true, plan: Plan.free, onboarded: true);
+    await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
+    await tester.pump();
+
+    expect(find.text('Technique'), findsNothing);
+    expect(find.text('Fuel'), findsOneWidget);
+
+    await tester.tap(find.text('Fuel'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('NUTRITION'), findsOneWidget);
+  });
 }

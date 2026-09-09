@@ -54,7 +54,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
               child: FilterChips(
-                options: const ['Today', 'Meals', 'Recipes', 'Analytics'],
+                options: const ['Today', 'Meals', 'Recipes'],
                 selectedIndex: _tab,
                 onSelected: (i) => setState(() => _tab = i),
                 scrollable: false,
@@ -73,7 +73,6 @@ class _NutritionScreenState extends State<NutritionScreen> {
                   ),
                   _MealsView(edgeFuel: edgeFuel, onEdit: _editFood),
                   const _RecipesTab(),
-                  const _AnalyticsView(),
                 ],
               ),
             ),
@@ -557,20 +556,6 @@ class _MealsView extends StatelessWidget {
                 edgeFuel.updateEntry(entry.copyWith(saved: !entry.saved)),
           ),
       ],
-    );
-  }
-}
-
-class _AnalyticsView extends StatelessWidget {
-  const _AnalyticsView();
-
-  @override
-  Widget build(BuildContext context) {
-    return const EmptyState(
-      icon: Icons.insights,
-      title: 'Analytics',
-      message:
-          'Weekly calorie and macro trends will appear here once more EdgeFuel history is logged.',
     );
   }
 }

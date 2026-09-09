@@ -44,29 +44,28 @@ void main() {
     // Dashboard.
     expect(find.text('DASHBOARD'), findsOneWidget);
 
-    // More -> Corner Coach (Pro-gated).
+    // More -> Settings -> paid upgrade entry point.
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Corner Coach'));
+    await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
-    expect(find.text('Corner Coach is Pro'), findsOneWidget);
-
-    // Checkout intent via paywall. Billing is not wired yet, so this must not
-    // grant Pro from the client.
-    await tester.tap(find.byType(PrimaryButton)); // Unlock with Pro.
+    await tester.tap(find.text('Upgrade to Pro'));
     await tester.pumpAndSettle();
     expect(find.text('Unlock your full edge'), findsOneWidget);
+
+    // Billing is not wired yet, so checkout intent must not grant Pro from
+    // the client.
     await tester.tap(find.byType(PrimaryButton)); // Join Pro Waitlist.
     await tester.pumpAndSettle();
     expect(find.textContaining('Payments are not active yet'), findsOneWidget);
 
-    // Corner Coach remains locked until a trusted billing backend grants Pro.
+    // Pro remains locked until a trusted billing backend grants it.
     expect(repo.currentUser!.isPro, isFalse);
 
     // Sign out from Profile -> back to login.
-    await tester.tap(find.byIcon(Icons.chevron_left)); // Paywall -> lock.
+    await tester.tap(find.byIcon(Icons.chevron_left)); // Paywall -> Settings.
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.chevron_left)); // Lock -> More.
+    await tester.tap(find.byIcon(Icons.chevron_left)); // Settings -> More.
     await tester.pumpAndSettle();
     await tester.tap(find.text('Profile'));
     await tester.pumpAndSettle();

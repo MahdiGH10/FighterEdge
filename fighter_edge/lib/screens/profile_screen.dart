@@ -25,7 +25,6 @@ class ProfileScreen extends StatelessWidget {
     return ScreenScaffold(
       title: 'Profile',
       showBack: true,
-      actions: [HeaderIcon(Icons.edit, onTap: () {})],
       body: ListView(
         padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
         children: [

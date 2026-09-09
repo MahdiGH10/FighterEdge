@@ -30,15 +30,11 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppHeader(
-              title: 'Training Camp',
-              showBack: false,
-              actions: [HeaderIcon(Icons.calendar_month, onTap: () {})],
-            ),
+            const AppHeader(title: 'Training Camp', showBack: false),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
               child: FilterChips(
-                options: const ['Week', 'Month', 'Plan'],
+                options: const ['Week', 'History'],
                 selectedIndex: _tab,
                 onSelected: (i) => setState(() => _tab = i),
                 scrollable: false,
@@ -51,7 +47,6 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
                 children: const [
                   _WeekView(),
                   _HistoryView(),
-                  _PlaceholderView('Full fight-camp plan coming soon'),
                 ],
               ),
             ),

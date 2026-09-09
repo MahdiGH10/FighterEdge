@@ -158,7 +158,6 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
     return ScreenScaffold(
       title: 'Round Timer',
       showBack: true,
-      actions: [HeaderIcon(Icons.settings_outlined, onTap: () {})],
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
         child: Column(

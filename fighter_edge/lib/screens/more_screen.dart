@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
-import '../widgets/empty_state.dart';
 import '../widgets/stat_card.dart';
-import 'corner_coach_screen.dart';
 import 'profile_screen.dart';
 import 'round_timer_screen.dart';
 import 'settings_screen.dart';
@@ -21,10 +19,6 @@ class MoreScreen extends StatelessWidget {
           'Interval timer for your rounds', const RoundTimerScreen()),
       _MoreEntry(Icons.monitor_weight_outlined, 'Weight Tracker',
           'Log weigh-ins and track progress', const WeightTrackerScreen()),
-      _MoreEntry(Icons.record_voice_over_outlined, 'Corner Coach',
-          'Round-by-round game plan', const CornerCoachScreen()),
-      _MoreEntry(Icons.self_improvement, 'Mobility',
-          'Recovery & mobility flows', const _MobilityScreen()),
       _MoreEntry(Icons.person_outline, 'Profile', 'Your fighter stats & goals',
           const ProfileScreen()),
       _MoreEntry(Icons.settings_outlined, 'Settings',
@@ -112,25 +106,6 @@ class _MoreRow extends StatelessWidget {
             const Icon(Icons.chevron_right, color: AppColors.textMuted),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Lightweight placeholder for the not-yet-built Mobility area.
-class _MobilityScreen extends StatelessWidget {
-  const _MobilityScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return const ScreenScaffold(
-      title: 'Mobility',
-      showBack: true,
-      body: EmptyState(
-        icon: Icons.self_improvement,
-        title: 'Mobility Flows',
-        message:
-            'Guided recovery and mobility routines\nare coming in a future update.',
       ),
     );
   }

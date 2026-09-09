@@ -37,16 +37,7 @@ class DashboardScreen extends StatelessWidget {
           bottom: false,
           child: Column(
             children: [
-              AppHeader(
-                title: 'Dashboard',
-                actions: [
-                  HeaderIcon(
-                    Icons.notifications_none,
-                    label: 'Notifications',
-                    onTap: () {},
-                  )
-                ],
-              ),
+              const AppHeader(title: 'Dashboard'),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(
@@ -271,7 +262,7 @@ class _TodayFocusCard extends StatelessWidget {
                   'Log meal',
                   icon: Icons.add,
                   expand: true,
-                  onPressed: () => onNavigate(3),
+                  onPressed: () => onNavigate(2),
                 ),
               ),
             ],

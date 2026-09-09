@@ -31,7 +31,6 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
     return ScreenScaffold(
       title: 'Weight Tracker',
       showBack: true,
-      actions: [HeaderIcon(Icons.calendar_month, onTap: () {})],
       floatingActionButton: _tab == 0
           ? FloatingActionButton(
               backgroundColor: AppColors.primary,

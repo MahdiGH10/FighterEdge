@@ -4,7 +4,6 @@ import '../widgets/bottom_nav.dart';
 import 'dashboard_screen.dart';
 import 'more_screen.dart';
 import 'nutrition_screen.dart';
-import 'technique_library_screen.dart';
 import 'training_camp_screen.dart';
 
 /// Root scaffold that owns the persistent bottom navigation and
@@ -22,8 +21,7 @@ class _HomeShellState extends State<HomeShell> {
   static const _navItems = [
     NavItem(Icons.home_filled, 'Home'),
     NavItem(Icons.calendar_today, 'Camp'),
-    NavItem(Icons.sports_martial_arts, 'Technique'),
-    NavItem(Icons.restaurant, 'Nutrition'),
+    NavItem(Icons.restaurant, 'Fuel'),
     NavItem(Icons.menu, 'More'),
   ];
 
@@ -34,7 +32,6 @@ class _HomeShellState extends State<HomeShell> {
     final pages = [
       DashboardScreen(onNavigate: _goToTab),
       const TrainingCampScreen(),
-      const TechniqueLibraryScreen(),
       const NutritionScreen(),
       const MoreScreen(),
     ];

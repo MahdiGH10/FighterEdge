@@ -66,6 +66,9 @@ class _Chip extends StatelessWidget {
           child: Center(
             child: Text(
               label,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
               style: AppTheme.body(13,
                   weight: FontWeight.w600,
                   color: selected ? Colors.white : AppColors.textSecondary),
