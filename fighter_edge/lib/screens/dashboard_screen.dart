@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
-import '../data/mock_data.dart';
+import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../models/training_session.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
@@ -27,6 +27,18 @@ class DashboardScreen extends StatelessWidget {
     final user = auth.user;
     final weightDelta = state.weeklyDelta;
     final losing = weightDelta <= 0;
+    final nextSession = state.sessions.where((s) => !s.completed).firstOrNull;
+    const dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    const dayNames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    final completedDays = {
+      for (final session in state.sessions.where((s) => s.completed))
+        session.day.trim().toLowerCase(),
+    };
+    final weeklyProgress = [
+      for (final day in dayNames)
+        completedDays.any((completed) => completed.startsWith(day)) ? 1.0 : 0.0,
+    ];
+    final recentSessions = state.completedSessionsDesc.take(3).toList();
     final showVerificationBanner = auth.supportsEmailVerification &&
         auth.user != null &&
         !auth.user!.emailVerified;
@@ -69,12 +81,15 @@ class DashboardScreen extends StatelessWidget {
                             width: 142,
                             child: StatCard(
                               label: 'Weight',
-                              value: state
-                                  .displayWeight(state.latestWeight)
-                                  .toStringAsFixed(1),
+                              value: state.latestWeight == 0
+                                  ? '—'
+                                  : state
+                                      .displayWeight(state.latestWeight)
+                                      .toStringAsFixed(1),
                               unit: state.weightUnitLabel,
-                              delta:
-                                  '${weightDelta.abs().toStringAsFixed(1)} kg',
+                              delta: state.weights.length < 2
+                                  ? 'Add weigh-in'
+                                  : '${state.displayWeight(weightDelta).abs().toStringAsFixed(1)} ${state.weightUnitLabel}',
                               deltaColor: losing
                                   ? AppColors.positive
                                   : AppColors.primary,
@@ -118,19 +133,19 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: Insets.xl),
                     const SectionHeader('Weekly Overview'),
-                    const PremiumReveal(
-                      duration: Duration(milliseconds: 500),
+                    PremiumReveal(
+                      duration: const Duration(milliseconds: 500),
                       child: AppCard(
                         elevated: true,
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [Color(0xFF1B1B25), Color(0xFF121218)],
                         ),
                         child: WeeklyOverview(
-                          dayLetters: MockData.weekDayLetters,
-                          progress: MockData.weeklyProgress,
-                          todayIndex: MockData.todayIndex,
+                          dayLetters: dayLetters,
+                          progress: weeklyProgress,
+                          todayIndex: DateTime.now().weekday - 1,
                         ),
                       ),
                     ),
@@ -139,7 +154,14 @@ class DashboardScreen extends StatelessWidget {
                     PremiumReveal(
                       duration: const Duration(milliseconds: 580),
                       child: _NextSessionCard(
-                        onStart: () => _push(context, const RoundTimerScreen()),
+                        session: nextSession,
+                        onOpenCamp: () => onNavigate(1),
+                        onStart: nextSession == null
+                            ? null
+                            : () => _push(
+                                  context,
+                                  RoundTimerScreen(session: nextSession),
+                                ),
                       ),
                     ),
                     const SizedBox(height: Insets.xl),
@@ -153,7 +175,11 @@ class DashboardScreen extends StatelessWidget {
                                 color: AppColors.primary)),
                       ),
                     ),
-                    for (final a in MockData.recentActivity) _ActivityRow(a),
+                    if (recentSessions.isEmpty)
+                      const _NoRecentActivity()
+                    else
+                      for (final session in recentSessions)
+                        _ActivityRow(session),
                   ],
                 ),
               ),
@@ -176,9 +202,12 @@ class _TodayFocusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final edgeFuel = context.watch<EdgeFuelController>();
     final nextSession = state.sessions.where((s) => !s.completed).firstOrNull;
-    final caloriesLeft = (state.target.calories - state.consumedCalories)
-        .clamp(0, state.target.calories);
+    final caloriesLeft = edgeFuel.hasUsableTarget
+        ? (edgeFuel.targetCalories - edgeFuel.consumedCalories)
+            .clamp(0, edgeFuel.targetCalories)
+        : null;
 
     return AppCard(
       accent: AppColors.primary,
@@ -231,7 +260,9 @@ class _TodayFocusCard extends StatelessWidget {
               Expanded(
                 child: _FocusMetric(
                   label: 'Fuel left',
-                  value: '$caloriesLeft kcal',
+                  value: caloriesLeft == null
+                      ? 'Set target'
+                      : '$caloriesLeft kcal',
                   icon: Icons.restaurant,
                 ),
               ),
@@ -419,8 +450,14 @@ class _EmailVerificationBanner extends StatelessWidget {
 }
 
 class _NextSessionCard extends StatelessWidget {
-  final VoidCallback onStart;
-  const _NextSessionCard({required this.onStart});
+  final TrainingSession? session;
+  final VoidCallback? onStart;
+  final VoidCallback onOpenCamp;
+  const _NextSessionCard({
+    required this.session,
+    required this.onStart,
+    required this.onOpenCamp,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -441,24 +478,30 @@ class _NextSessionCard extends StatelessWidget {
               color: AppColors.primarySoft,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.sports_mma, color: AppColors.primary),
+            child:
+                Icon(session?.icon ?? Icons.task_alt, color: AppColors.primary),
           ),
           const SizedBox(width: Insets.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Fight Camp',
+                Text(session?.title ?? 'Week complete',
                     style: AppTheme.body(15, weight: FontWeight.w700)),
                 const SizedBox(height: 2),
-                Text('Striking · 60 min',
+                Text(session?.subtitle ?? 'Review your completed sessions',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTheme.body(12,
                         weight: FontWeight.w500,
                         color: AppColors.textSecondary)),
               ],
             ),
           ),
-          PrimaryButton('Start', onPressed: onStart),
+          PrimaryButton(
+            session == null ? 'View' : 'Start',
+            onPressed: onStart ?? onOpenCamp,
+          ),
         ],
       ),
     );
@@ -466,8 +509,8 @@ class _NextSessionCard extends StatelessWidget {
 }
 
 class _ActivityRow extends StatelessWidget {
-  final ActivityEntry a;
-  const _ActivityRow(this.a);
+  final TrainingSession session;
+  const _ActivityRow(this.session);
 
   @override
   Widget build(BuildContext context) {
@@ -484,24 +527,30 @@ class _ActivityRow extends StatelessWidget {
                 color: AppColors.surfaceElevated,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(a.icon, size: 20, color: AppColors.textSecondary),
+              child:
+                  Icon(session.icon, size: 20, color: AppColors.textSecondary),
             ),
             const SizedBox(width: Insets.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(a.title,
+                  Text(session.title,
                       style: AppTheme.body(14, weight: FontWeight.w600)),
                   const SizedBox(height: 2),
-                  Text(a.subtitle,
+                  Text(
+                      session.rpe > 0
+                          ? '${session.subtitle} · RPE ${session.rpe}'
+                          : session.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTheme.body(12,
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
                 ],
               ),
             ),
-            Text(a.when,
+            Text(_relativeDate(session.completedAt),
                 style: AppTheme.body(11,
                     weight: FontWeight.w500, color: AppColors.textMuted)),
           ],
@@ -509,6 +558,40 @@ class _ActivityRow extends StatelessWidget {
       ),
     );
   }
+}
+
+class _NoRecentActivity extends StatelessWidget {
+  const _NoRecentActivity();
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppCard(
+      padding: EdgeInsets.all(Insets.lg),
+      child: Row(
+        children: [
+          Icon(Icons.history, color: AppColors.textMuted),
+          SizedBox(width: Insets.md),
+          Expanded(
+            child: Text(
+              'Complete your first session to start your history.',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _relativeDate(DateTime? completedAt) {
+  if (completedAt == null) return 'Logged';
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final date = DateTime(completedAt.year, completedAt.month, completedAt.day);
+  final days = today.difference(date).inDays;
+  if (days <= 0) return 'Today';
+  if (days == 1) return 'Yesterday';
+  return '$days days ago';
 }
 
 /// Simple monogram avatar (no network image needed for the prototype).

@@ -133,9 +133,18 @@ class StatCard extends StatelessWidget {
                 if (deltaIcon != null)
                   Icon(deltaIcon, size: 12, color: deltaColor),
                 const SizedBox(width: 2),
-                Text(delta!,
-                    style: AppTheme.body(11,
-                        weight: FontWeight.w600, color: deltaColor)),
+                Expanded(
+                  child: Text(
+                    delta!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTheme.body(
+                      11,
+                      weight: FontWeight.w600,
+                      color: deltaColor,
+                    ),
+                  ),
+                ),
               ],
             ),
           ],

@@ -1,9 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/models/meal.dart';
 import 'package:fighter_edge/state/app_state.dart';
 
 void main() {
+  test('repository-backed state starts empty instead of flashing demo data',
+      () {
+    final repository = InMemoryDataRepository();
+    final state = AppState(dataRepository: repository);
+
+    expect(state.weights, isEmpty);
+    expect(state.meals, isEmpty);
+    expect(state.sessions, isEmpty);
+
+    state.dispose();
+    repository.dispose();
+  });
+
   group('AppState — weight', () {
     test('seed exposes latest weight and weekly delta', () {
       final s = AppState();

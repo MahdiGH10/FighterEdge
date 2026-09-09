@@ -13,15 +13,18 @@ import '../models/weight_entry.dart';
 /// weight tracking and nutrition. (The round timer keeps local state.)
 class AppState extends ChangeNotifier {
   AppState({DataRepository? dataRepository})
-      : _dataRepository = dataRepository {
+      : _dataRepository = dataRepository,
+        _weights = dataRepository == null ? MockData.seedWeights() : [],
+        _meals = dataRepository == null ? MockData.seedMeals() : [],
+        _sessions = dataRepository == null ? List.of(MockData.week) : [] {
     unawaited(_loadSettings());
   }
 
   final DataRepository? _dataRepository;
 
-  List<WeightEntry> _weights = MockData.seedWeights();
-  List<Meal> _meals = MockData.seedMeals();
-  List<TrainingSession> _sessions = List.of(MockData.week);
+  List<WeightEntry> _weights;
+  List<Meal> _meals;
+  List<TrainingSession> _sessions;
   DateTime _nutritionDate = DateTime.now();
   StreamSubscription<List<WeightEntry>>? _weightSub;
   StreamSubscription<List<Meal>>? _mealSub;
