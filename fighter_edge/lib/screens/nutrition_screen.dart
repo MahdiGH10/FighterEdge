@@ -39,6 +39,16 @@ class _NutritionScreenState extends State<NutritionScreen> {
     final ratio =
         targetCalories == 0 ? 0.0 : edgeFuel.consumedCalories / targetCalories;
     final ringColor = ratio > 1 ? AppColors.negative : AppColors.positive;
+    final activeTab = switch (_tab) {
+      0 => _TodayView(
+          edgeFuel: edgeFuel,
+          ratio: ratio,
+          ringColor: ringColor,
+          onEdit: _editFood,
+        ),
+      1 => _MealsView(edgeFuel: edgeFuel, onEdit: _editFood),
+      _ => const _RecipesTab(),
+    };
 
     return ScreenScaffold.tab(
       title: 'Nutrition',
@@ -59,21 +69,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
             ),
           ),
           const SizedBox(height: Insets.lg),
-          Expanded(
-            child: IndexedStack(
-              index: _tab,
-              children: [
-                _TodayView(
-                  edgeFuel: edgeFuel,
-                  ratio: ratio,
-                  ringColor: ringColor,
-                  onEdit: _editFood,
-                ),
-                _MealsView(edgeFuel: edgeFuel, onEdit: _editFood),
-                const _RecipesTab(),
-              ],
-            ),
-          ),
+          Expanded(child: activeTab),
         ],
       ),
     );
@@ -386,6 +382,22 @@ class _RecipesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final largeText = MediaQuery.textScalerOf(context).scale(14) / 14 >= 1.4;
+    const beforeTraining = _RecipeShortcut(
+      icon: Icons.bolt,
+      label: 'Before training',
+      filters: RecipeFilters(
+        trainingTiming: TrainingTiming.preTraining,
+      ),
+    );
+    const afterTraining = _RecipeShortcut(
+      icon: Icons.restart_alt,
+      label: 'After training',
+      filters: RecipeFilters(
+        trainingTiming: TrainingTiming.postTraining,
+      ),
+    );
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
@@ -425,29 +437,18 @@ class _RecipesTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: Insets.md),
-        const Row(
-          children: [
-            Expanded(
-              child: _RecipeShortcut(
-                icon: Icons.bolt,
-                label: 'Before training',
-                filters: RecipeFilters(
-                  trainingTiming: TrainingTiming.preTraining,
-                ),
-              ),
-            ),
-            SizedBox(width: Insets.md),
-            Expanded(
-              child: _RecipeShortcut(
-                icon: Icons.restart_alt,
-                label: 'After training',
-                filters: RecipeFilters(
-                  trainingTiming: TrainingTiming.postTraining,
-                ),
-              ),
-            ),
-          ],
-        ),
+        if (largeText) ...[
+          beforeTraining,
+          const SizedBox(height: Insets.md),
+          afterTraining,
+        ] else
+          const Row(
+            children: [
+              Expanded(child: beforeTraining),
+              SizedBox(width: Insets.md),
+              Expanded(child: afterTraining),
+            ],
+          ),
       ],
     );
   }

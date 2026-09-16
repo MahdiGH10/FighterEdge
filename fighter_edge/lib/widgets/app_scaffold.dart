@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -147,7 +148,10 @@ class _CollapsingTabHeader extends StatelessWidget {
                             displayTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: AppType.title2(spacing: 1.5),
+                            style: AppAccessibility.adjustStyle(
+                              context,
+                              AppType.title2(spacing: 1.5),
+                            ),
                           ),
                         ),
                       ),
@@ -168,7 +172,10 @@ class _CollapsingTabHeader extends StatelessWidget {
                           displayTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppType.largeTitle(spacing: 1.2),
+                          style: AppAccessibility.adjustStyle(
+                            context,
+                            AppType.largeTitle(spacing: 1.2),
+                          ),
                         ),
                       ),
                     ),
@@ -215,7 +222,10 @@ class AppHeader extends StatelessWidget {
             child: Text(
               title.toUpperCase(),
               textAlign: TextAlign.center,
-              style: AppType.title2(spacing: 1.5),
+              style: AppAccessibility.adjustStyle(
+                context,
+                AppType.title2(spacing: 1.5),
+              ),
             ),
           ),
           if (actions.isEmpty && showBack) const SizedBox(width: 38),
@@ -264,7 +274,8 @@ class HeaderIcon extends StatelessWidget {
         pressedScale: 0.9,
         child: SizedBox.square(
           dimension: 44,
-          child: Icon(icon, color: AppColors.textSecondary, size: 22),
+          child: Icon(icon,
+              color: AppAccessibility.textSecondary(context), size: 22),
         ),
       ),
     );

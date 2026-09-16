@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
@@ -182,8 +183,8 @@ class AppTheme {
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: _FighterEdgePageTransitionsBuilder(),
-          TargetPlatform.iOS: _FighterEdgePageTransitionsBuilder(),
-          TargetPlatform.macOS: _FighterEdgePageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
           TargetPlatform.windows: _FighterEdgePageTransitionsBuilder(),
           TargetPlatform.linux: _FighterEdgePageTransitionsBuilder(),
         },

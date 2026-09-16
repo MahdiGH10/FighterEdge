@@ -6,8 +6,7 @@ import 'nutrition_screen.dart';
 import 'profile_screen.dart';
 import 'training_camp_screen.dart';
 
-/// Root scaffold that owns the persistent bottom navigation and
-/// keeps each tab alive via an IndexedStack.
+/// Root scaffold that owns the persistent bottom navigation.
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -29,15 +28,15 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      DashboardScreen(onNavigate: _goToTab),
-      const TrainingCampScreen(),
-      const NutritionScreen(),
-      const ProfileScreen(asTab: true),
-    ];
+    final activePage = switch (_index) {
+      0 => DashboardScreen(onNavigate: _goToTab),
+      1 => const TrainingCampScreen(),
+      2 => const NutritionScreen(),
+      _ => const ProfileScreen(asTab: true),
+    };
 
     return Scaffold(
-      body: IndexedStack(index: _index, children: pages),
+      body: activePage,
       bottomNavigationBar: AppBottomNav(
         items: _navItems,
         currentIndex: _index,

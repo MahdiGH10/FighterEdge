@@ -153,9 +153,15 @@ Corner Coach is kept as a Pro value surface in the Train `Coach` segment.
 
 ### Phase 5 — Accessibility & polish
 
-Dynamic Type end to end (verify at 200%, no clipping), bold-text/high-contrast
-support, branded cold start with Firebase off the boot-blocking path, and the
-low-end-device blur profiling flagged above if it wasn't done earlier.
+Done in Phase 5. The app now has `AppAccessibility` as the app-level
+accessibility layer, a 200% text/bold/high-contrast smoke test for the primary
+tabs, direct active-tab rendering instead of hidden `IndexedStack` layout in the
+main shell / Train / Fuel, timer-only hero numeral scaling, responsive Train and
+Profile rows, and a branded bootstrap that renders before Firebase finishes.
+
+Still not physically verified: low-end Android blur/gradient/list-jank
+profiling. The code now avoids laying out hidden tabs, which reduces risk, but a
+real low-end device or emulator should still be used before adding more blur.
 
 ## Open decisions — blocking Phase 4, not yet answered
 

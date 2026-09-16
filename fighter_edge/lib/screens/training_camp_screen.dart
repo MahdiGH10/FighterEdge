@@ -29,6 +29,12 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final activeTab = switch (_tab) {
+      0 => const _WeekView(),
+      1 => const _HistoryView(),
+      2 => const TechniqueLibraryScreen(embedded: true),
+      _ => const CornerCoachScreen(embedded: true),
+    };
     return ScreenScaffold.tab(
       title: 'Train',
       body: Column(
@@ -40,21 +46,10 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
               options: const ['Week', 'History', 'Library', 'Coach'],
               selectedIndex: _tab,
               onSelected: (i) => setState(() => _tab = i),
-              scrollable: false,
             ),
           ),
           const SizedBox(height: Insets.lg),
-          Expanded(
-            child: IndexedStack(
-              index: _tab,
-              children: const [
-                _WeekView(),
-                _HistoryView(),
-                TechniqueLibraryScreen(embedded: true),
-                CornerCoachScreen(embedded: true),
-              ],
-            ),
-          ),
+          Expanded(child: activeTab),
         ],
       ),
     );
@@ -70,11 +65,12 @@ class _WeekView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+        Wrap(
+          spacing: Insets.sm,
+          runSpacing: Insets.xs,
+          crossAxisAlignment: WrapCrossAlignment.end,
           children: [
             Text('WEEK 4', style: AppType.title1()),
-            const SizedBox(width: Insets.sm),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
@@ -178,61 +174,89 @@ class _SessionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final largeText = MediaQuery.textScalerOf(context).scale(14) / 14 >= 1.4;
+    final leading = Row(
+      children: [
+        SizedBox(
+          width: 38,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              s.day.toUpperCase(),
+              style: AppType.subhead(
+                  weight: FontWeight.w700, color: AppColors.textMuted),
+            ),
+          ),
+        ),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(s.icon,
+              size: 20,
+              color: s.completed ? AppColors.primary : AppColors.textSecondary),
+        ),
+        const SizedBox(width: Insets.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(s.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppType.callout(weight: FontWeight.w700)),
+              const SizedBox(height: Insets.xxs),
+              Text(s.subtitle,
+                  maxLines: largeText ? 3 : 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppType.subhead(
+                      weight: FontWeight.w500, color: AppColors.textSecondary)),
+            ],
+          ),
+        ),
+      ],
+    );
+    final actions = Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment:
+          largeText ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: [
+        if (s.completed)
+          _CompletionDot(completed: s.completed)
+        else
+          _StartIconButton(label: s.title, onTap: onStart),
+        const SizedBox(width: Insets.sm),
+        HeaderIcon(
+          s.completed ? Icons.edit_note : Icons.check_circle_outline,
+          onTap: onLog,
+        ),
+      ],
+    );
+
     return Padding(
       padding: const EdgeInsets.only(bottom: Insets.md),
       child: AppCard(
         padding: const EdgeInsets.all(Insets.md),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 38,
-              child: Text(s.day.toUpperCase(),
-                  style: AppType.subhead(
-                      weight: FontWeight.w700, color: AppColors.textMuted)),
-            ),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(s.icon,
-                  size: 20,
-                  color: s.completed
-                      ? AppColors.primary
-                      : AppColors.textSecondary),
-            ),
-            const SizedBox(width: Insets.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: largeText
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(s.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppType.callout(weight: FontWeight.w700)),
-                  const SizedBox(height: Insets.xxs),
-                  Text(s.subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppType.subhead(
-                          weight: FontWeight.w500,
-                          color: AppColors.textSecondary)),
+                  leading,
+                  const SizedBox(height: Insets.md),
+                  actions,
+                ],
+              )
+            : Row(
+                children: [
+                  Expanded(child: leading),
+                  const SizedBox(width: Insets.sm),
+                  actions,
                 ],
               ),
-            ),
-            if (s.completed)
-              _CompletionDot(completed: s.completed)
-            else
-              _StartIconButton(label: s.title, onTap: onStart),
-            const SizedBox(width: Insets.sm),
-            HeaderIcon(
-              s.completed ? Icons.edit_note : Icons.check_circle_outline,
-              onTap: onLog,
-            ),
-          ],
-        ),
       ),
     );
   }

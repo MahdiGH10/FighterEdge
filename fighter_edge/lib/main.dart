@@ -23,10 +23,14 @@ import 'features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'firebase_options.dart';
 import 'routing/app_router.dart';
 import 'state/app_state.dart';
+import 'theme/app_accessibility.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
+import 'widgets/brand_logo.dart';
+import 'widgets/premium_effects.dart';
+import 'widgets/primary_button.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -35,6 +39,48 @@ Future<void> main() async {
     ),
   );
 
+  runApp(const FighterEdgeBootstrap());
+}
+
+class FighterEdgeBootstrap extends StatefulWidget {
+  const FighterEdgeBootstrap({super.key});
+
+  @override
+  State<FighterEdgeBootstrap> createState() => _FighterEdgeBootstrapState();
+}
+
+class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
+  late Future<_AppDependencies> _boot = _initializeProductionDependencies();
+
+  void _retry() {
+    setState(() => _boot = _initializeProductionDependencies());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<_AppDependencies>(
+      future: _boot,
+      builder: (context, snapshot) {
+        final dependencies = snapshot.data;
+        if (dependencies != null) {
+          return FighterEdgeApp(
+            authRepo: dependencies.authRepo,
+            dataRepo: dependencies.dataRepo,
+            edgeFuelRepo: dependencies.edgeFuelRepo,
+            edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
+          );
+        }
+
+        return _BootMaterialApp(
+          error: snapshot.hasError ? snapshot.error : null,
+          onRetry: _retry,
+        );
+      },
+    );
+  }
+}
+
+Future<_AppDependencies> _initializeProductionDependencies() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
@@ -45,14 +91,26 @@ Future<void> main() async {
   final AuthRepository authRepo = FirebaseAuthRepository();
   await authRepo.init();
 
-  runApp(
-    FighterEdgeApp(
-      authRepo: authRepo,
-      dataRepo: FirestoreDataRepository(),
-      edgeFuelRepo: FirestoreEdgeFuelRepository(),
-      edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
-    ),
+  return _AppDependencies(
+    authRepo: authRepo,
+    dataRepo: FirestoreDataRepository(),
+    edgeFuelRepo: FirestoreEdgeFuelRepository(),
+    edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
   );
+}
+
+class _AppDependencies {
+  final AuthRepository authRepo;
+  final DataRepository dataRepo;
+  final EdgeFuelRepository edgeFuelRepo;
+  final EdgeFuelAiGateway edgeFuelAiGateway;
+
+  const _AppDependencies({
+    required this.authRepo,
+    required this.dataRepo,
+    required this.edgeFuelRepo,
+    required this.edgeFuelAiGateway,
+  });
 }
 
 class FighterEdgeApp extends StatelessWidget {
@@ -133,6 +191,96 @@ class _FighterEdgeMaterialAppState extends State<_FighterEdgeMaterialApp> {
       theme: AppTheme.dark(),
       color: AppColors.background,
       routerConfig: _router,
+      builder: AppAccessibility.builder,
+    );
+  }
+}
+
+class _BootMaterialApp extends StatelessWidget {
+  final Object? error;
+  final VoidCallback onRetry;
+
+  const _BootMaterialApp({required this.error, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Fighter Edge',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark(),
+      color: AppColors.background,
+      builder: AppAccessibility.builder,
+      home: error == null
+          ? const _BrandedBootScreen()
+          : _BootFailureScreen(onRetry: onRetry),
+    );
+  }
+}
+
+class _BrandedBootScreen extends StatelessWidget {
+  const _BrandedBootScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: AppColors.background,
+      body: PremiumBackground(
+        child: Center(
+          child: PremiumReveal(
+            child: BrandLogo(scale: 1.15),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BootFailureScreen extends StatelessWidget {
+  final VoidCallback onRetry;
+
+  const _BootFailureScreen({required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: PremiumBackground(
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(Insets.xl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const BrandLogo(scale: 1),
+                  const SizedBox(height: Insets.xl),
+                  Text(
+                    'Could not start Fighter Edge',
+                    textAlign: TextAlign.center,
+                    style: AppAccessibility.adjustStyle(
+                      context,
+                      Theme.of(context).textTheme.titleLarge!,
+                    ),
+                  ),
+                  const SizedBox(height: Insets.sm),
+                  Text(
+                    'Check your connection and try again.',
+                    textAlign: TextAlign.center,
+                    style: AppAccessibility.adjustStyle(
+                      context,
+                      Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color: AppAccessibility.textSecondary(context),
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: Insets.xl),
+                  PrimaryButton('Retry', onPressed: onRetry),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

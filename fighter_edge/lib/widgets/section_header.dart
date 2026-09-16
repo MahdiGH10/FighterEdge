@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
+import '../theme/app_accessibility.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 
@@ -16,14 +16,24 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title.toUpperCase(),
-            style: AppType.subhead(
-                weight: FontWeight.w700,
-                color: AppColors.textSecondary,
-                spacing: 1.4),
+          Expanded(
+            child: Text(
+              title.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppAccessibility.adjustStyle(
+                context,
+                AppType.subhead(
+                    weight: FontWeight.w700,
+                    color: AppAccessibility.textSecondary(context),
+                    spacing: 1.4),
+              ),
+            ),
           ),
-          if (trailing != null) trailing!,
+          if (trailing != null) ...[
+            const SizedBox(width: Insets.md),
+            trailing!,
+          ],
         ],
       ),
     );

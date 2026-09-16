@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -50,25 +51,29 @@ class AppTextField extends StatelessWidget {
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       autofocus: autofocus,
-      style: AppType.callout(),
+      style: AppAccessibility.adjustStyle(context, AppType.callout()),
       cursorColor: AppColors.primary,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: AppType.callout(color: AppColors.textMuted),
+        labelStyle: AppAccessibility.adjustStyle(
+          context,
+          AppType.callout(color: AppAccessibility.textMuted(context)),
+        ),
         floatingLabelStyle: WidgetStateTextStyle.resolveWith((states) {
           final color = states.contains(WidgetState.error)
               ? AppColors.negative
               : AppColors.primary;
           return AppType.subhead(color: color);
         }),
-        prefixIcon: Icon(icon, color: AppColors.textMuted, size: 20),
+        prefixIcon:
+            Icon(icon, color: AppAccessibility.textMuted(context), size: 20),
         suffixIcon: suffix,
         errorText: errorText,
         filled: true,
         fillColor: AppColors.surface,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(Radii.button),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppAccessibility.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(Radii.button),

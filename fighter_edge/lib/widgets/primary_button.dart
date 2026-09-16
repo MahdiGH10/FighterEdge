@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
@@ -38,8 +39,11 @@ class PrimaryButton extends StatelessWidget {
             label.toUpperCase(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppType.subhead(
-                weight: FontWeight.w700, color: Colors.white, spacing: 0.8),
+            style: AppAccessibility.adjustStyle(
+              context,
+              AppType.subhead(
+                  weight: FontWeight.w700, color: Colors.white, spacing: 0.8),
+            ),
           ),
         ),
       ],
@@ -111,6 +115,7 @@ class GhostButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surfaceElevated,
             borderRadius: BorderRadius.circular(Radii.button),
+            border: Border.all(color: AppAccessibility.border(context)),
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 48),
@@ -129,10 +134,14 @@ class GhostButton extends StatelessWidget {
                       label.toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppType.subhead(
+                      style: AppAccessibility.adjustStyle(
+                        context,
+                        AppType.subhead(
                           weight: FontWeight.w700,
                           color: AppColors.textPrimary,
-                          spacing: 0.8),
+                          spacing: 0.8,
+                        ),
+                      ),
                     ),
                   ),
                 ],

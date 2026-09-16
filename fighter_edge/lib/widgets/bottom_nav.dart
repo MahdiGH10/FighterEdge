@@ -3,6 +3,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_accessibility.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -92,7 +93,9 @@ class _NavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // accentText rather than primary: the label is 11pt, and small accent text
     // needs the brighter tone to clear AA on this surface.
-    final color = selected ? AppColors.accentText : AppColors.textMuted;
+    final color = selected
+        ? AppAccessibility.accentText(context)
+        : AppAccessibility.textMuted(context);
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     return Semantics(
       button: true,
@@ -128,9 +131,13 @@ class _NavButton extends StatelessWidget {
                   child: Text(
                     item.label,
                     maxLines: 1,
-                    style: AppType.micro(
+                    style: AppAccessibility.adjustStyle(
+                      context,
+                      AppType.micro(
                         weight: selected ? FontWeight.w700 : FontWeight.w500,
-                        color: color),
+                        color: color,
+                      ),
+                    ),
                   ),
                 ),
               ),

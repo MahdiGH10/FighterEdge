@@ -30,30 +30,58 @@ class ProfileScreen extends StatelessWidget {
     const f = MockData.fighter;
     final weight = context.watch<AppState>().latestWeight;
     final auth = context.watch<AuthController>();
+    final largeText = MediaQuery.textScalerOf(context).scale(14) / 14 >= 1.4;
+    final details = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(f.name, style: AppType.title1()),
+        const SizedBox(height: Insets.xxs),
+        Text(f.division,
+            style: AppType.subhead(
+                weight: FontWeight.w500, color: AppColors.textSecondary)),
+        const SizedBox(height: Insets.xxs),
+        Text('${f.heightCm} cm · ${weight.toStringAsFixed(1)} kg',
+            style: AppType.subhead(
+                weight: FontWeight.w500, color: AppColors.textMuted)),
+      ],
+    );
     final body = ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
-        Row(
-          children: [
-            const FighterAvatar(size: 64),
-            const SizedBox(width: Insets.lg),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(f.name, style: AppType.title1()),
-                const SizedBox(height: Insets.xxs),
-                Text(f.division,
-                    style: AppType.subhead(
-                        weight: FontWeight.w500,
-                        color: AppColors.textSecondary)),
-                const SizedBox(height: Insets.xxs),
-                Text('${f.heightCm} cm · ${weight.toStringAsFixed(1)} kg',
-                    style: AppType.subhead(
-                        weight: FontWeight.w500, color: AppColors.textMuted)),
-              ],
-            ),
-          ],
-        ),
+        if (largeText)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const FighterAvatar(size: 64),
+              const SizedBox(height: Insets.md),
+              details,
+            ],
+          )
+        else
+          Row(
+            children: [
+              const FighterAvatar(size: 64),
+              const SizedBox(width: Insets.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(f.name, style: AppType.title1()),
+                    const SizedBox(height: Insets.xxs),
+                    Text(f.division,
+                        style: AppType.subhead(
+                            weight: FontWeight.w500,
+                            color: AppColors.textSecondary)),
+                    const SizedBox(height: Insets.xxs),
+                    Text('${f.heightCm} cm · ${weight.toStringAsFixed(1)} kg',
+                        style: AppType.subhead(
+                            weight: FontWeight.w500,
+                            color: AppColors.textMuted)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         const SizedBox(height: Insets.xl),
         const SectionHeader('Subscription'),
         _SubscriptionCard(auth: auth),

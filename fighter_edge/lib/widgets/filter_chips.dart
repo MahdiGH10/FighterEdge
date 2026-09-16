@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
@@ -23,6 +24,8 @@ class FilterChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    final largeText = textScaler.scale(14) / 14 >= 1.4;
     final chips = <Widget>[
       for (int i = 0; i < options.length; i++)
         Padding(
@@ -36,7 +39,7 @@ class FilterChips extends StatelessWidget {
         ),
     ];
 
-    if (scrollable) {
+    if (scrollable || largeText) {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(children: chips),
@@ -76,6 +79,11 @@ class _Chip extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : AppColors.surfaceAlt,
             borderRadius: BorderRadius.circular(Radii.chip),
+            border: Border.all(
+              color: selected
+                  ? AppColors.primaryBright.withValues(alpha: .48)
+                  : AppAccessibility.border(context),
+            ),
           ),
           padding: const EdgeInsets.symmetric(
               horizontal: Insets.lg, vertical: Insets.sm + 2),
@@ -86,9 +94,15 @@ class _Chip extends StatelessWidget {
                 maxLines: 1,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
-                style: AppType.subhead(
+                style: AppAccessibility.adjustStyle(
+                  context,
+                  AppType.subhead(
                     weight: FontWeight.w600,
-                    color: selected ? Colors.white : AppColors.textSecondary),
+                    color: selected
+                        ? Colors.white
+                        : AppAccessibility.textSecondary(context),
+                  ),
+                ),
               ),
             ),
           ),

@@ -364,11 +364,27 @@ _Added component goldens before the Phase 4 screen pass._
 
 ### Phase 5 — Accessibility & polish
 
-- [ ] Dynamic Type support end to end; clamp scaling only on `heroNumeral`
-- [ ] Verify at 200% text size — no clipping, no overflow
-- [ ] Respect `MediaQuery.boldTextOf` and `highContrastOf`
-- [ ] Branded cold-start; Firebase init moved off the boot-blocking path
-- [ ] Profile on a low-end Android: blur regions, gradient repaints, list jank
+- [x] Dynamic Type support end to end; clamp scaling only on `heroNumeral`
+      — added an app accessibility layer, context-aware shared components,
+      direct active-tab rendering instead of hidden `IndexedStack` layout, and
+      a timer-only `heroNumeral` scaler so the round clock stays usable.
+- [x] Verify at 200% text size — no clipping, no overflow
+      — added `test/accessibility/large_text_test.dart`, covering Home / Train /
+      Fuel / Profile at 200% text with bold text, high contrast and disabled
+      animations. Fixed Train week headers/session rows, Fuel tab layout, shared
+      section headers, large-text chips and Profile identity layout.
+- [x] Respect `MediaQuery.boldTextOf` and `highContrastOf`
+      — `AppAccessibility` now adjusts theme text, shared explicit text styles,
+      muted/secondary colors, borders and accent text in high-contrast contexts.
+- [x] Branded cold-start; Firebase init moved off the boot-blocking path
+      — `main()` now renders a branded Flutter first frame immediately, boots
+      Firebase/auth/repositories behind it, and shows a retryable branded error
+      state if startup fails.
+- [~] Profile on a low-end Android: blur regions, gradient repaints, list jank
+      — no physical low-end Android device/emulator was available. Code-side
+      mitigation shipped: main/nested tabs render active content only, reducing
+      hidden layout/repaint work. Physical profiling remains required before
+      adding more blur or animated gradients.
 
 ---
 

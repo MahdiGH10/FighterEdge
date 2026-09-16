@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -28,7 +29,8 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = accent?.withValues(alpha: .42) ?? AppColors.border;
+    final borderColor =
+        accent?.withValues(alpha: .42) ?? AppAccessibility.border(context);
     final content = DecoratedBox(
       decoration: BoxDecoration(
         color: gradient == null ? color ?? AppColors.surface : null,
@@ -94,10 +96,14 @@ class StatCard extends StatelessWidget {
           children: [
             Text(
               label.toUpperCase(),
-              style: AppType.micro(
+              style: AppAccessibility.adjustStyle(
+                context,
+                AppType.micro(
                   weight: FontWeight.w600,
-                  color: AppColors.textMuted,
-                  spacing: 0.8),
+                  color: AppAccessibility.textMuted(context),
+                  spacing: 0.8,
+                ),
+              ),
             ),
             const SizedBox(height: Insets.sm),
             FittedBox(
@@ -114,9 +120,12 @@ class StatCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 3),
                       child: Text(unit,
-                          style: AppType.micro(
-                              weight: FontWeight.w600,
-                              color: AppColors.textMuted)),
+                          style: AppAccessibility.adjustStyle(
+                            context,
+                            AppType.micro(
+                                weight: FontWeight.w600,
+                                color: AppAccessibility.textMuted(context)),
+                          )),
                     ),
                   ],
                 ],
@@ -159,7 +168,10 @@ class _AnimatedMetricValue extends StatelessWidget {
   Widget build(BuildContext context) {
     final numeric = double.tryParse(value);
     if (numeric == null || MediaQuery.disableAnimationsOf(context)) {
-      return Text(value, style: AppType.title1());
+      return Text(
+        value,
+        style: AppAccessibility.adjustStyle(context, AppType.title1()),
+      );
     }
 
     final decimals = value.contains('.') ? value.split('.').last.length : 0;
@@ -168,8 +180,10 @@ class _AnimatedMetricValue extends StatelessWidget {
       duration: MotionTokens.standard,
       curve: MotionTokens.emphasized,
       builder: (context, animated, _) {
-        return Text(animated.toStringAsFixed(decimals),
-            style: AppType.title1());
+        return Text(
+          animated.toStringAsFixed(decimals),
+          style: AppAccessibility.adjustStyle(context, AppType.title1()),
+        );
       },
     );
   }

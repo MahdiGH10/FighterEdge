@@ -7,6 +7,7 @@ import '../data/mock_data.dart';
 import '../models/coach_cue.dart';
 import '../models/training_session.dart';
 import '../state/app_state.dart';
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
@@ -177,18 +178,20 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
             ),
             const SizedBox(height: Insets.xxl),
             Text('Round',
-                style: AppType.subhead(
-                    weight: FontWeight.w600, color: AppColors.textSecondary)),
+                style: AppAccessibility.adjustStyle(
+                  context,
+                  AppType.subhead(
+                      weight: FontWeight.w600,
+                      color: AppAccessibility.textSecondary(context)),
+                )),
             const SizedBox(height: Insets.xxs),
             Text('$_round / ${_style.rounds}', style: AppType.title1()),
             const SizedBox(height: Insets.xl),
             TweenAnimationBuilder<double>(
               key: ValueKey(urgent ? _secondsLeft : _phaseLabel),
               tween: Tween(begin: urgent ? 1.035 : 1.0, end: 1.0),
-              duration: reduceMotion
-                  ? Duration.zero
-                  : const Duration(milliseconds: 420),
-              curve: Curves.easeOutCubic,
+              duration: reduceMotion ? Duration.zero : MotionTokens.reveal,
+              curve: MotionTokens.settle,
               builder: (context, scale, child) {
                 return Transform.scale(scale: scale, child: child);
               },
@@ -207,6 +210,8 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(_clock,
+                          textScaler:
+                              AppAccessibility.heroNumeralScaler(context),
                           style: AppType.heroNumeral(
                               color: AppColors.textPrimary)),
                       const SizedBox(height: Insets.xs),
@@ -220,8 +225,12 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
             ),
             const SizedBox(height: Insets.xl),
             Text('Next: $_nextLabel',
-                style: AppType.subhead(
-                    weight: FontWeight.w500, color: AppColors.textSecondary)),
+                style: AppAccessibility.adjustStyle(
+                  context,
+                  AppType.subhead(
+                      weight: FontWeight.w500,
+                      color: AppAccessibility.textSecondary(context)),
+                )),
             const SizedBox(height: Insets.xxs),
             Text(_fmt(_nextSeconds), style: AppType.title1()),
             const SizedBox(height: Insets.xxl),
