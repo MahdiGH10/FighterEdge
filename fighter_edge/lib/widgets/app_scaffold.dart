@@ -15,6 +15,7 @@ class ScreenScaffold extends StatelessWidget {
   final bool showBack;
   final Widget? floatingActionButton;
   final Widget? bottomNav;
+  final bool includeScaffold;
 
   const ScreenScaffold({
     super.key,
@@ -24,25 +25,39 @@ class ScreenScaffold extends StatelessWidget {
     this.showBack = false,
     this.floatingActionButton,
     this.bottomNav,
-  });
+  }) : includeScaffold = true;
+
+  const ScreenScaffold.tab({
+    super.key,
+    required this.title,
+    required this.body,
+    this.actions = const [],
+  })  : showBack = false,
+        floatingActionButton = null,
+        bottomNav = null,
+        includeScaffold = false;
 
   @override
   Widget build(BuildContext context) {
+    final content = PremiumBackground(
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            AppHeader(title: title, actions: actions, showBack: showBack),
+            Expanded(child: body),
+          ],
+        ),
+      ),
+    );
+    if (!includeScaffold && Scaffold.maybeOf(context) != null) {
+      return content;
+    }
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNav,
-      body: PremiumBackground(
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              AppHeader(title: title, actions: actions, showBack: showBack),
-              Expanded(child: body),
-            ],
-          ),
-        ),
-      ),
+      body: content,
     );
   }
 }

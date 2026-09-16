@@ -26,32 +26,24 @@ class MoreScreen extends StatelessWidget {
           'Units, reminders, safety, and account', const SettingsScreen()),
     ];
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            const AppHeader(title: 'More'),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(
-                    Insets.lg, 0, Insets.lg, Insets.xxl),
-                children: [
-                  for (final e in entries) _MoreRow(e),
-                  const SizedBox(height: Insets.xl),
-                  Center(
-                    child: Text('FIGHTER EDGE · v1.0',
-                        style: AppType.micro(
-                            weight: FontWeight.w600,
-                            color: AppColors.textMuted,
-                            spacing: 1)),
-                  ),
-                ],
+    return ScreenScaffold.tab(
+      title: 'More',
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+        children: [
+          for (final entry in entries) _MoreRow(entry),
+          const SizedBox(height: Insets.xl),
+          Center(
+            child: Text(
+              'FIGHTER EDGE v1.0',
+              style: AppType.micro(
+                weight: FontWeight.w600,
+                color: AppColors.textMuted,
+                spacing: 1,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

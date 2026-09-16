@@ -44,150 +44,130 @@ class DashboardScreen extends StatelessWidget {
     final showVerificationBanner = auth.supportsEmailVerification &&
         auth.user != null &&
         !auth.user!.emailVerified;
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: PremiumBackground(
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              const AppHeader(title: 'Dashboard'),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                      Insets.lg, 0, Insets.lg, Insets.xxl),
-                  children: [
-                    PremiumReveal(
-                      child: _ProfileHeader(
-                        name: (user?.displayName.isNotEmpty ?? false)
-                            ? user!.displayName
-                            : 'Fighter',
-                        tagline: user?.goal.isNotEmpty ?? false
-                            ? user!.goal
-                            : 'The Grind Never Lies.',
-                      ),
-                    ),
-                    if (showVerificationBanner) ...[
-                      const SizedBox(height: Insets.lg),
-                      _EmailVerificationBanner(auth: auth),
-                    ],
-                    const SizedBox(height: Insets.lg),
-                    _TodayFocusCard(onNavigate: onNavigate),
-                    const SizedBox(height: Insets.xl),
-                    SizedBox(
-                      height: 126,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          SizedBox(
-                            width: 142,
-                            child: StatCard(
-                              label: 'Weight',
-                              value: state.latestWeight == 0
-                                  ? '—'
-                                  : state
-                                      .displayWeight(state.latestWeight)
-                                      .toStringAsFixed(1),
-                              unit: state.weightUnitLabel,
-                              delta: state.weights.length < 2
-                                  ? 'Add weigh-in'
-                                  : '${state.displayWeight(weightDelta).abs().toStringAsFixed(1)} ${state.weightUnitLabel}',
-                              deltaColor: losing
-                                  ? AppColors.positive
-                                  : AppColors.primary,
-                              deltaIcon: losing
-                                  ? Icons.arrow_downward
-                                  : Icons.arrow_upward,
-                              onTap: () =>
-                                  _push(context, const WeightTrackerScreen()),
-                              accent: AppColors.primary,
-                            ),
-                          ),
-                          const SizedBox(width: Insets.md),
-                          SizedBox(
-                            width: 142,
-                            child: StatCard(
-                              label: 'Sessions',
-                              value: '${state.completedSessionCount}',
-                              unit: '',
-                              delta: 'completed',
-                              deltaColor: AppColors.positive,
-                              deltaIcon: Icons.check_circle_outline,
-                            ),
-                          ),
-                          const SizedBox(width: Insets.md),
-                          SizedBox(
-                            width: 142,
-                            child: StatCard(
-                              label: 'Streak',
-                              value: '${state.currentStreakDays}',
-                              unit: 'days',
-                              delta: state.currentStreakDays > 0
-                                  ? 'On fire'
-                                  : 'Log today',
-                              deltaColor: AppColors.warning,
-                              deltaIcon: Icons.local_fire_department,
-                              accent: AppColors.warning,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: Insets.xl),
-                    const SectionHeader('Weekly Overview'),
-                    PremiumReveal(
-                      index: 1,
-                      child: AppCard(
-                        elevated: true,
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFF1B1B25), Color(0xFF121218)],
-                        ),
-                        child: WeeklyOverview(
-                          dayLetters: dayLetters,
-                          progress: weeklyProgress,
-                          todayIndex: DateTime.now().weekday - 1,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: Insets.xl),
-                    const SectionHeader('Next Session'),
-                    PremiumReveal(
-                      index: 2,
-                      child: _NextSessionCard(
-                        session: nextSession,
-                        onOpenCamp: () => onNavigate(1),
-                        onStart: nextSession == null
-                            ? null
-                            : () => _push(
-                                  context,
-                                  RoundTimerScreen(session: nextSession),
-                                ),
-                      ),
-                    ),
-                    const SizedBox(height: Insets.xl),
-                    SectionHeader(
-                      'Recent Activity',
-                      trailing: PressScale(
-                        onTap: () => onNavigate(1),
-                        child: Text('See all',
-                            style: AppType.subhead(
-                                weight: FontWeight.w600,
-                                color: AppColors.accentText)),
-                      ),
-                    ),
-                    if (recentSessions.isEmpty)
-                      const _NoRecentActivity()
-                    else
-                      for (final session in recentSessions)
-                        _ActivityRow(session),
-                  ],
-                ),
-              ),
-            ],
+    return ScreenScaffold.tab(
+      title: 'Dashboard',
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+        children: [
+          PremiumReveal(
+            child: _ProfileHeader(
+              name: (user?.displayName.isNotEmpty ?? false)
+                  ? user!.displayName
+                  : 'Fighter',
+              tagline: user?.goal.isNotEmpty ?? false
+                  ? user!.goal
+                  : 'The Grind Never Lies.',
+            ),
           ),
-        ),
+          if (showVerificationBanner) ...[
+            const SizedBox(height: Insets.lg),
+            _EmailVerificationBanner(auth: auth),
+          ],
+          const SizedBox(height: Insets.lg),
+          _TodayFocusCard(onNavigate: onNavigate),
+          const SizedBox(height: Insets.xl),
+          SizedBox(
+            height: 126,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                SizedBox(
+                  width: 142,
+                  child: StatCard(
+                    label: 'Weight',
+                    value: state.latestWeight == 0
+                        ? '—'
+                        : state
+                            .displayWeight(state.latestWeight)
+                            .toStringAsFixed(1),
+                    unit: state.weightUnitLabel,
+                    delta: state.weights.length < 2
+                        ? 'Add weigh-in'
+                        : '${state.displayWeight(weightDelta).abs().toStringAsFixed(1)} ${state.weightUnitLabel}',
+                    deltaColor: losing ? AppColors.positive : AppColors.primary,
+                    deltaIcon:
+                        losing ? Icons.arrow_downward : Icons.arrow_upward,
+                    onTap: () => _push(context, const WeightTrackerScreen()),
+                    accent: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: Insets.md),
+                SizedBox(
+                  width: 142,
+                  child: StatCard(
+                    label: 'Sessions',
+                    value: '${state.completedSessionCount}',
+                    unit: '',
+                    delta: 'completed',
+                    deltaColor: AppColors.positive,
+                    deltaIcon: Icons.check_circle_outline,
+                  ),
+                ),
+                const SizedBox(width: Insets.md),
+                SizedBox(
+                  width: 142,
+                  child: StatCard(
+                    label: 'Streak',
+                    value: '${state.currentStreakDays}',
+                    unit: 'days',
+                    delta:
+                        state.currentStreakDays > 0 ? 'On fire' : 'Log today',
+                    deltaColor: AppColors.warning,
+                    deltaIcon: Icons.local_fire_department,
+                    accent: AppColors.warning,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: Insets.xl),
+          const SectionHeader('Weekly Overview'),
+          PremiumReveal(
+            index: 1,
+            child: AppCard(
+              elevated: true,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF1B1B25), Color(0xFF121218)],
+              ),
+              child: WeeklyOverview(
+                dayLetters: dayLetters,
+                progress: weeklyProgress,
+                todayIndex: DateTime.now().weekday - 1,
+              ),
+            ),
+          ),
+          const SizedBox(height: Insets.xl),
+          const SectionHeader('Next Session'),
+          PremiumReveal(
+            index: 2,
+            child: _NextSessionCard(
+              session: nextSession,
+              onOpenCamp: () => onNavigate(1),
+              onStart: nextSession == null
+                  ? null
+                  : () => _push(
+                        context,
+                        RoundTimerScreen(session: nextSession),
+                      ),
+            ),
+          ),
+          const SizedBox(height: Insets.xl),
+          SectionHeader(
+            'Recent Activity',
+            trailing: PressScale(
+              onTap: () => onNavigate(1),
+              child: Text('See all',
+                  style: AppType.subhead(
+                      weight: FontWeight.w600, color: AppColors.accentText)),
+            ),
+          ),
+          if (recentSessions.isEmpty)
+            const _NoRecentActivity()
+          else
+            for (final session in recentSessions) _ActivityRow(session),
+        ],
       ),
     );
   }

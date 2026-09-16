@@ -26,35 +26,31 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const AppHeader(title: 'Training Camp', showBack: false),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
-              child: FilterChips(
-                options: const ['Week', 'History'],
-                selectedIndex: _tab,
-                onSelected: (i) => setState(() => _tab = i),
-                scrollable: false,
-              ),
+    return ScreenScaffold.tab(
+      title: 'Training Camp',
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+            child: FilterChips(
+              options: const ['Week', 'History'],
+              selectedIndex: _tab,
+              onSelected: (i) => setState(() => _tab = i),
+              scrollable: false,
             ),
-            const SizedBox(height: Insets.lg),
-            Expanded(
-              child: IndexedStack(
-                index: _tab,
-                children: const [
-                  _WeekView(),
-                  _HistoryView(),
-                ],
-              ),
+          ),
+          const SizedBox(height: Insets.lg),
+          Expanded(
+            child: IndexedStack(
+              index: _tab,
+              children: const [
+                _WeekView(),
+                _HistoryView(),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

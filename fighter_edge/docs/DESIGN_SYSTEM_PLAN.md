@@ -328,7 +328,11 @@ _Added component goldens before the Phase 4 screen pass._
 
 ### Phase 4 — Screens
 
-- [ ] Move `dashboard`, `nutrition`, `training_camp`, `more` onto `ScreenScaffold`
+- [x] Move `dashboard`, `nutrition`, `training_camp`, `more` onto `ScreenScaffold`
+      — started 2026-09-16 with `ScreenScaffold.tab`, so tab pages share the
+      premium background/header without nesting another full scaffold inside
+      `HomeShell`. The helper falls back to a local `Scaffold` when a tab
+      screen is rendered standalone in widget tests.
 - [ ] Collapsing large-title header, applied to all tab screens
 - [ ] Dashboard: one loud element (Today's Focus), everything else quieted; kill the
       fixed 126/142 sizes so it survives Dynamic Type

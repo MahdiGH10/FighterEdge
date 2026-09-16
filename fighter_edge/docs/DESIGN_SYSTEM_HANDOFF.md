@@ -111,13 +111,18 @@ point of Phases 1–2 was to make this the only vocabulary in the app.
 Keep the gallery and golden baselines updated when shared components change.
 CI already runs `flutter test`, so golden diffs fail the normal Flutter job.
 
-### Phase 4 — Screens (18 screens, behind Phase 3's goldens)
+### Phase 4 — Screens (in progress)
 
-Full checklist in the plan. The headline items: move `dashboard`,
-`nutrition`, `training_camp`, `more` onto `ScreenScaffold`; collapsing
-large-title header everywhere; re-IA the tabs to Home/Train/Fuel/Profile with
-the technique library wired in; `go_router` + `CupertinoPage` to restore
-iOS swipe-back; reduce the dashboard to one loud element.
+First slice is done: `dashboard`, `nutrition`, `training_camp`, and `more`
+now use `ScreenScaffold.tab`, which keeps the shared premium background/header
+without adding nested app chrome inside `HomeShell`. `ScreenScaffold.tab` still
+falls back to a local `Scaffold` when a tab screen is rendered standalone in
+widget tests, so SnackBars and secondary screen tests keep working.
+
+Remaining headline items: collapsing large-title header everywhere; reduce the
+dashboard to one loud element; re-IA the tabs to Home/Train/Fuel/Profile with
+the technique library wired in; `go_router` + `CupertinoPage` to restore iOS
+swipe-back.
 
 **This phase is blocked on decisions only Mahdi can make** (see below) — don't
 guess at the Corner Coach question or the tab rename and build around a guess.

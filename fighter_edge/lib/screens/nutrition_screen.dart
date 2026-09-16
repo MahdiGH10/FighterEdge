@@ -38,47 +38,41 @@ class _NutritionScreenState extends State<NutritionScreen> {
         targetCalories == 0 ? 0.0 : edgeFuel.consumedCalories / targetCalories;
     final ringColor = ratio > 1 ? AppColors.negative : AppColors.positive;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            AppHeader(
-              title: 'Nutrition',
-              actions: [
-                HeaderIcon(Icons.add, onTap: () => _editFood(edgeFuel)),
+    return ScreenScaffold.tab(
+      title: 'Nutrition',
+      actions: [
+        HeaderIcon(Icons.add, onTap: () => _editFood(edgeFuel)),
+      ],
+      body: Column(
+        children: [
+          _DateSwitcher(edgeFuel: edgeFuel),
+          const SizedBox(height: Insets.md),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+            child: FilterChips(
+              options: const ['Today', 'Meals', 'Recipes'],
+              selectedIndex: _tab,
+              onSelected: (i) => setState(() => _tab = i),
+              scrollable: false,
+            ),
+          ),
+          const SizedBox(height: Insets.lg),
+          Expanded(
+            child: IndexedStack(
+              index: _tab,
+              children: [
+                _TodayView(
+                  edgeFuel: edgeFuel,
+                  ratio: ratio,
+                  ringColor: ringColor,
+                  onEdit: _editFood,
+                ),
+                _MealsView(edgeFuel: edgeFuel, onEdit: _editFood),
+                const _RecipesTab(),
               ],
             ),
-            _DateSwitcher(edgeFuel: edgeFuel),
-            const SizedBox(height: Insets.md),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
-              child: FilterChips(
-                options: const ['Today', 'Meals', 'Recipes'],
-                selectedIndex: _tab,
-                onSelected: (i) => setState(() => _tab = i),
-                scrollable: false,
-              ),
-            ),
-            const SizedBox(height: Insets.lg),
-            Expanded(
-              child: IndexedStack(
-                index: _tab,
-                children: [
-                  _TodayView(
-                    edgeFuel: edgeFuel,
-                    ratio: ratio,
-                    ringColor: ringColor,
-                    onEdit: _editFood,
-                  ),
-                  _MealsView(edgeFuel: edgeFuel, onEdit: _editFood),
-                  const _RecipesTab(),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
