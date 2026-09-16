@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +10,7 @@ import 'auth/firebase_auth_repository.dart';
 import 'controllers/auth_controller.dart';
 import 'data/data_repository.dart';
 import 'data/firestore_data_repository.dart';
+import 'debug/component_gallery_screen.dart';
 import 'features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
 import 'features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
 import 'features/edge_fuel/ai/firebase_edge_fuel_ai_gateway.dart';
@@ -115,6 +117,11 @@ class FighterEdgeApp extends StatelessWidget {
         theme: AppTheme.dark(),
         color: AppColors.background,
         home: const AuthGate(),
+        routes: kDebugMode
+            ? {
+                '/gallery': (_) => const ComponentGalleryScreen(),
+              }
+            : const {},
       ),
     );
   }

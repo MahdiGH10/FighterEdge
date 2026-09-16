@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/main.dart';
+import 'package:fighter_edge/widgets/bottom_nav.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
 
 import '../helpers/test_harness.dart';
@@ -45,7 +46,11 @@ void main() {
     expect(find.text('DASHBOARD'), findsOneWidget);
 
     // More -> Settings -> paid upgrade entry point.
-    await tester.tap(find.text('More'));
+    final navRect = tester.getRect(find.byType(AppBottomNav));
+    await tester.tapAt(Offset(
+      navRect.left + navRect.width * .875,
+      navRect.center.dy,
+    ));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();

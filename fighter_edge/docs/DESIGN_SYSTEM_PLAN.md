@@ -307,11 +307,24 @@ _49 files changed, 255/255 tests green, analyzer clean._
       plan (small, static, tightly clipped) but its frame cost is unverified. Do this
       before Phase 4 ships more blur anywhere else.
 
-### Phase 3 — Safety net (before touching screens)
+### Phase 3 — Safety net (before touching screens) ✅ DONE 2026-09-16
 
-- [ ] Golden tests for every shared component, light + dark + 2 text scales
-- [ ] A `/gallery` debug route (or Widgetbook) rendering every component in every state
-- [ ] CI fails on golden diff — this is the visual-regression guard for the screen pass
+_Added component goldens before the Phase 4 screen pass._
+
+- [x] Golden tests for shared primitives through
+      `test/golden/component_gallery_golden_test.dart`: `AppCard`, `PrimaryButton`,
+      `GhostButton`, `FilterChips`, `StatCard`, `PressScale`, `ProgressRing`,
+      `PremiumBadge`, and `AppBottomNav`
+- [x] Dark-only baselines captured at default text scale and 1.6x text scale. The
+      original "light + dark" note was reduced because dark-only was already
+      decided; adding fake light goldens would protect no real product surface.
+- [x] A debug-only `/gallery` route renders the same component gallery used by
+      the goldens, without adding Widgetbook or another dependency to the MVP
+- [x] CI fails on golden diff through the existing `flutter test` job, because
+      golden assertions are part of the normal test suite
+- [x] The first golden run caught a real bottom-nav overflow. `AppBottomNav`
+      now keeps labels inside the reserved tab height by fitting long or scaled
+      labels instead of clipping.
 
 ### Phase 4 — Screens
 

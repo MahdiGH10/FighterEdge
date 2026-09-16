@@ -120,11 +120,20 @@ class _NavButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(item.icon, size: 22, color: color),
-              const SizedBox(height: 3),
-              Text(item.label,
-                  style: AppType.micro(
-                      weight: selected ? FontWeight.w700 : FontWeight.w500,
-                      color: color)),
+              const SizedBox(height: 2),
+              SizedBox(
+                height: 14,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    item.label,
+                    maxLines: 1,
+                    style: AppType.micro(
+                        weight: selected ? FontWeight.w700 : FontWeight.w500,
+                        color: color),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

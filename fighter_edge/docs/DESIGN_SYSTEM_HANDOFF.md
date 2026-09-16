@@ -1,15 +1,14 @@
-# DESIGN SYSTEM HANDOFF — for whichever agent picks up Phase 3
+# DESIGN SYSTEM HANDOFF — after Phase 3
 
-Written 2026-09-16, by the session that did Phases 1 and 2. Read this, then
+Written 2026-09-16, by the sessions that did Phases 1, 2, and 3. Read this, then
 `docs/DESIGN_SYSTEM_PLAN.md` for the actual task list — this doc is the
 situational knowledge that plan file doesn't carry: what's already true in the
 code, what to reuse instead of reinventing, and what looks like a bug but isn't.
 
 This project's own house rule (`docs/START_HERE.md` PART 0) applies here too:
 **one phase at a time, run the Definition of Done, commit, stop.** Phases 1 and
-2 were each done and pushed as one commit before starting the next. Do Phase 3
-before touching any screen in Phase 4 — it exists specifically so Phase 4
-doesn't regress silently.
+2 were each done and pushed as one commit before starting the next. Phase 3 is
+now the visual safety net for Phase 4: keep it green before touching screens.
 
 ---
 
@@ -23,7 +22,9 @@ doesn't regress silently.
   this work** and shouldn't be touched or committed as part of it:
   `.playwright-mcp/` (tool scratch) and `docs/SESSION_HANDOFF.md` (a different,
   earlier handoff — unrelated content, don't merge or overwrite it).
-- 255/255 tests green, `flutter analyze` clean, as of `40f0fec`.
+- Phase 3 adds component goldens and may raise the test count above the old
+  255/255 baseline. Trust the latest `flutter test` result over this historical
+  number.
 
 ## Environment
 
@@ -47,11 +48,11 @@ doesn't regress silently.
   clipped) but its real frame cost is **unverified**. If you have a low-end
   Android available, profile it before Phase 4 adds blur anywhere else.
 
-## What Phase 1 and 2 actually did (summary — full detail is in the plan file)
+## What Phase 1–3 actually did (summary — full detail is in the plan file)
 
-Both phases are marked `✅ DONE` in `docs/DESIGN_SYSTEM_PLAN.md` with complete
+Phases 1–3 are marked `✅ DONE` in `docs/DESIGN_SYSTEM_PLAN.md` with complete
 task lists, deviations, and reasoning. Read those sections, not just this
-summary, before starting Phase 3. Highlights that change how you should write
+summary, before starting Phase 4. Highlights that change how you should write
 new code:
 
 **Phase 1 — chassis.** The app now has a real type scale. Both variable fonts
@@ -64,6 +65,13 @@ Material's `InkWell`/ripple — `splashFactory: NoSplash` is set globally, so an
 `InkWell` anywhere now gives **zero** feedback, not a ripple. `AppHaptics` is
 the single vocabulary for physical feedback. `Semantics` coverage went 6→20
 sites but is still not exhaustive.
+
+**Phase 3 — safety net.** `lib/debug/component_gallery_screen.dart` renders the
+shared component gallery used by `test/golden/component_gallery_golden_test.dart`.
+The app exposes it through `/gallery` in debug builds only. Goldens cover the
+default text scale, 1.6x text scale, and a pressed `PressScale` state. The first
+run caught and fixed a real `AppBottomNav` overflow, so do not delete these
+tests when they feel inconvenient; they are already paying rent.
 
 ## The vocabulary you must reuse — do not reinvent any of this
 
@@ -98,24 +106,10 @@ point of Phases 1–2 was to make this the only vocabulary in the app.
 
 ## What's next
 
-### Phase 3 — Safety net (do this before any Phase 4 screen work)
+### Phase 3 — Safety net ✅ DONE
 
-From the plan:
-- [ ] Golden tests for every shared component — `AppCard`, `PrimaryButton`,
-  `GhostButton`, `FilterChips`, `StatCard`, `PressScale`'s pressed state,
-  `AppBottomNav` — across light/dark (the app is dark-only per the decision
-  log below, so this may reduce to "dark, at 2+ text scales") and at least two
-  `MediaQuery` text-scale factors, since Phase 4 explicitly claims Dynamic
-  Type support and nothing has verified layout survives it yet.
-- [ ] A `/gallery` debug route or Widgetbook rendering every component in
-  every state (enabled/disabled/selected/pressed) reachable without
-  navigating the real app to find it.
-- [ ] Wire golden-diff failure into whatever CI runs (`.github/workflows/` —
-  check what's already there before adding a parallel job).
-
-This phase is non-negotiable per the plan: 18 screens change in Phase 4, and
-without goldens there is no way to review that diff for regressions. Do not
-skip ahead because Phase 4 "looks straightforward."
+Keep the gallery and golden baselines updated when shared components change.
+CI already runs `flutter test`, so golden diffs fail the normal Flutter job.
 
 ### Phase 4 — Screens (18 screens, behind Phase 3's goldens)
 

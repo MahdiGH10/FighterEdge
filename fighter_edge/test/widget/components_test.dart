@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/theme/app_theme.dart';
+import 'package:fighter_edge/widgets/bottom_nav.dart';
 import 'package:fighter_edge/widgets/filter_chips.dart';
 import 'package:fighter_edge/widgets/progress_ring.dart';
 import 'package:fighter_edge/widgets/stat_card.dart';
@@ -55,6 +56,25 @@ void main() {
       )));
       expect(find.text('GO'), findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('AppBottomNav', () {
+    testWidgets('reports the tapped tab index', (tester) async {
+      int? picked;
+      await tester.pumpWidget(host(AppBottomNav(
+        currentIndex: 0,
+        onTap: (index) => picked = index,
+        items: const [
+          NavItem(Icons.home_rounded, 'Home'),
+          NavItem(Icons.fitness_center_rounded, 'Train'),
+          NavItem(Icons.local_fire_department_rounded, 'Fuel'),
+          NavItem(Icons.menu_rounded, 'More'),
+        ],
+      )));
+
+      await tester.tap(find.text('More'));
+      expect(picked, 3);
     });
   });
 }
