@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../routing/app_navigation.dart';
+import '../routing/app_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -16,14 +18,26 @@ class MoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final entries = <_MoreEntry>[
-      _MoreEntry(Icons.timer_outlined, 'Round Timer',
-          'Interval timer for your rounds', const RoundTimerScreen()),
-      _MoreEntry(Icons.monitor_weight_outlined, 'Weight Tracker',
-          'Log weigh-ins and track progress', const WeightTrackerScreen()),
+      _MoreEntry(
+          Icons.timer_outlined,
+          'Round Timer',
+          'Interval timer for your rounds',
+          AppRoutes.roundTimer,
+          const RoundTimerScreen()),
+      _MoreEntry(
+          Icons.monitor_weight_outlined,
+          'Weight Tracker',
+          'Log weigh-ins and track progress',
+          AppRoutes.weightTracker,
+          const WeightTrackerScreen()),
       _MoreEntry(Icons.person_outline, 'Profile', 'Your fighter stats & goals',
-          const ProfileScreen()),
-      _MoreEntry(Icons.settings_outlined, 'Settings',
-          'Units, reminders, safety, and account', const SettingsScreen()),
+          AppRoutes.profile, const ProfileScreen()),
+      _MoreEntry(
+          Icons.settings_outlined,
+          'Settings',
+          'Units, reminders, safety, and account',
+          AppRoutes.settings,
+          const SettingsScreen()),
     ];
 
     return ScreenScaffold.tab(
@@ -53,8 +67,9 @@ class _MoreEntry {
   final IconData icon;
   final String title;
   final String subtitle;
+  final String route;
   final Widget? screen;
-  _MoreEntry(this.icon, this.title, this.subtitle, this.screen);
+  _MoreEntry(this.icon, this.title, this.subtitle, this.route, this.screen);
 }
 
 class _MoreRow extends StatelessWidget {
@@ -68,8 +83,11 @@ class _MoreRow extends StatelessWidget {
       child: AppCard(
         onTap: e.screen == null
             ? null
-            : () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => e.screen!)),
+            : () => AppNavigation.push(
+                  context,
+                  e.route,
+                  fallbackBuilder: (_) => e.screen!,
+                ),
         child: Row(
           children: [
             Container(

@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../controllers/auth_controller.dart';
 import '../data/mock_data.dart';
 import '../models/fighter.dart';
+import '../routing/app_navigation.dart';
+import '../routing/app_router.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -111,8 +113,11 @@ class _SubscriptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPro = auth.isPro;
     return AppCard(
-      onTap: () => Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => const PaywallScreen())),
+      onTap: () => AppNavigation.push(
+        context,
+        AppRoutes.paywall,
+        fallbackBuilder: (_) => const PaywallScreen(),
+      ),
       child: Row(
         children: [
           Container(

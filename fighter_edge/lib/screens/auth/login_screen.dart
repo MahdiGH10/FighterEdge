@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/auth_controller.dart';
+import '../../routing/app_navigation.dart';
+import '../../routing/app_router.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_typography.dart';
@@ -125,10 +127,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (_) =>
-                                      const ForgotPasswordScreen())),
+                          onPressed: () => AppNavigation.push(
+                            context,
+                            AppRoutes.forgotPassword,
+                            fallbackBuilder: (_) =>
+                                const ForgotPasswordScreen(),
+                          ),
                           child: Text('Forgot password?',
                               style: AppType.subhead(
                                   weight: FontWeight.w600,
@@ -171,10 +175,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             label: 'Email me a sign-in code',
                             onPressed: auth.isBusy
                                 ? null
-                                : () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (_) =>
-                                            const MagicLinkScreen())),
+                                : () => AppNavigation.push(
+                                      context,
+                                      AppRoutes.magicLink,
+                                      fallbackBuilder: (_) =>
+                                          const MagicLinkScreen(),
+                                    ),
                           ),
                       ],
                       const SizedBox(height: Insets.xl),
@@ -185,9 +191,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: AppType.subhead(
                                   color: AppColors.textSecondary)),
                           PressScale(
-                            onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (_) => const SignupScreen())),
+                            onTap: () => AppNavigation.push(
+                              context,
+                              AppRoutes.signup,
+                              fallbackBuilder: (_) => const SignupScreen(),
+                            ),
                             child: Text('Create account',
                                 style: AppType.subhead(
                                     weight: FontWeight.w700,

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -166,7 +167,7 @@ class _Body extends StatelessWidget {
                         listing,
                       ),
                       onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
+                        CupertinoPageRoute(
                           builder: (_) => RecipeDetailScreen(
                             listing: listing,
                             foodsById: controller.foodsById,

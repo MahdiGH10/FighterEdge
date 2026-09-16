@@ -126,9 +126,17 @@ fixed 126px height or 142px cards; it adapts between a three-column row and
 stacked cards for narrow or larger-text layouts, leaving Today's Focus as the
 only loud dashboard element.
 
+Routing slice is done too: `FighterEdgeApp` now uses `MaterialApp.router` with
+a central `go_router` config and `CupertinoPage` pages. Static routes are named
+for auth subpages, paywall, More tools, and EdgeFuel plan/setup/recipes. The
+`AppNavigation` helper keeps isolated widget tests and direct screen previews
+working by falling back to `CupertinoPageRoute` when no router exists. Routes
+that carry live runtime objects (selected training session, selected recipe
+listing) intentionally remain imperative, but now use `CupertinoPageRoute`
+instead of `MaterialPageRoute`.
+
 Remaining headline items: re-IA the tabs to Home/Train/Fuel/Profile with the
-technique library wired in; `go_router` + `CupertinoPage` to restore iOS
-swipe-back.
+technique library wired in.
 
 **This phase is blocked on decisions only Mahdi can make** (see below) — don't
 guess at the Corner Coach question or the tab rename and build around a guess.

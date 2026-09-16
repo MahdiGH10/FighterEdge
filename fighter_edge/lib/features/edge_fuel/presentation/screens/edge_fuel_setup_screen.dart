@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../controllers/auth_controller.dart';
+import '../../../../routing/app_navigation.dart';
+import '../../../../routing/app_router.dart';
 import '../../../../state/app_state.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
@@ -177,8 +179,10 @@ class _EdgeFuelSetupBodyState extends State<_EdgeFuelSetupBody> {
     final ok = await controller.confirm();
     _confirming = false;
     if (!mounted || !ok) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const EdgeFuelPlanScreen()),
+    AppNavigation.replace(
+      context,
+      AppRoutes.fuelPlan,
+      fallbackBuilder: (_) => const EdgeFuelPlanScreen(),
     );
   }
 }

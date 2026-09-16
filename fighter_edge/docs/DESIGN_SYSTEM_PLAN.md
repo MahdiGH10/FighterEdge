@@ -343,7 +343,11 @@ _Added component goldens before the Phase 4 screen pass._
       instead of living inside a fixed-height horizontal rail.
 - [ ] Re-IA the tabs to Home / Train / Fuel / Profile; wire the technique library in
 - [ ] Decide and act on `CornerCoachScreen`
-- [ ] Adopt `go_router`; restore iOS swipe-back via `CupertinoPage`
+- [x] Adopt `go_router`; restore iOS swipe-back via `CupertinoPage`
+      — app shell now uses `MaterialApp.router` with named `go_router` routes
+      backed by `CupertinoPage`. Static routes (auth subpages, paywall, More
+      tools, EdgeFuel plan/setup/recipes) use named routes with test-safe
+      fallback navigation; object-carrying detail routes use `CupertinoPageRoute`.
 - [ ] Onboarding: one question per screen, skippable, progress visible
 - [ ] Paywall: value before price, honest trial framing, single primary action
 

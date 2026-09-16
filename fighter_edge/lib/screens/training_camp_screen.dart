@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -90,7 +91,7 @@ class _WeekView extends StatelessWidget {
         for (final s in state.sessions)
           _SessionRow(
             s,
-            onStart: () => Navigator.of(context).push(MaterialPageRoute(
+            onStart: () => Navigator.of(context).push(CupertinoPageRoute(
               builder: (_) => RoundTimerScreen(session: s),
             )),
             onLog: () => _logSession(context, state, s),

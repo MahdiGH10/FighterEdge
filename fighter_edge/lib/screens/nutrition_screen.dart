@@ -9,6 +9,8 @@ import '../features/edge_fuel/presentation/controllers/recipe_library_controller
 import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../features/edge_fuel/presentation/screens/recipe_library_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
+import '../routing/app_navigation.dart';
+import '../routing/app_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -413,10 +415,10 @@ class _RecipesTab extends StatelessWidget {
               PrimaryButton(
                 'Browse recipes',
                 icon: Icons.menu_book_outlined,
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const RecipeLibraryScreen(),
-                  ),
+                onPressed: () => AppNavigation.push(
+                  context,
+                  AppRoutes.fuelRecipes,
+                  fallbackBuilder: (_) => const RecipeLibraryScreen(),
                 ),
               ),
             ],
@@ -465,10 +467,11 @@ class _RecipeShortcut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => RecipeLibraryScreen(initialFilters: filters),
-        ),
+      onTap: () => AppNavigation.push(
+        context,
+        AppRoutes.fuelRecipes,
+        extra: filters,
+        fallbackBuilder: (_) => RecipeLibraryScreen(initialFilters: filters),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -738,12 +741,11 @@ class _EdgeFuelEntryCard extends StatelessWidget {
 
     return AppCard(
       accent: AppColors.premium,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => hasSetup
-              ? const EdgeFuelPlanScreen()
-              : const EdgeFuelSetupScreen(),
-        ),
+      onTap: () => AppNavigation.push(
+        context,
+        hasSetup ? AppRoutes.fuelPlan : AppRoutes.fuelSetup,
+        fallbackBuilder: (_) =>
+            hasSetup ? const EdgeFuelPlanScreen() : const EdgeFuelSetupScreen(),
       ),
       child: Row(
         children: [

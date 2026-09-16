@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../../../billing/subscription.dart';
 import '../../../../controllers/auth_controller.dart';
+import '../../../../routing/app_navigation.dart';
+import '../../../../routing/app_router.dart';
 import '../../../../screens/paywall_screen.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
@@ -67,9 +69,10 @@ class _EmptyPlan extends StatelessWidget {
           expand: true,
           onPressed: userId == null
               ? null
-              : () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (_) => const EdgeFuelSetupScreen()),
+              : () => AppNavigation.push(
+                    context,
+                    AppRoutes.fuelSetup,
+                    fallbackBuilder: (_) => const EdgeFuelSetupScreen(),
                   ),
         ),
       ],
@@ -183,8 +186,10 @@ class _PlanBody extends StatelessWidget {
           'Redo setup',
           icon: Icons.tune,
           expand: true,
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const EdgeFuelSetupScreen()),
+          onPressed: () => AppNavigation.push(
+            context,
+            AppRoutes.fuelSetup,
+            fallbackBuilder: (_) => const EdgeFuelSetupScreen(),
           ),
         ),
       ],
@@ -255,11 +260,12 @@ class _AiCoachLocked extends StatelessWidget {
           'See Pro',
           icon: Icons.lock_outline,
           expand: true,
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) =>
-                  const PaywallScreen(highlight: Feature.edgeFuelAiCoach),
-            ),
+          onPressed: () => AppNavigation.push(
+            context,
+            AppRoutes.paywall,
+            extra: Feature.edgeFuelAiCoach,
+            fallbackBuilder: (_) =>
+                const PaywallScreen(highlight: Feature.edgeFuelAiCoach),
           ),
         ),
       ],

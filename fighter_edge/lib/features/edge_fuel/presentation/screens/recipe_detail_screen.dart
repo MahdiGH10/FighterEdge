@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../billing/subscription.dart';
+import '../../../../routing/app_navigation.dart';
+import '../../../../routing/app_router.dart';
 import '../../../../screens/paywall_screen.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
@@ -204,11 +206,12 @@ class _LockedRecipe extends StatelessWidget {
             PrimaryButton(
               'See Pro',
               icon: Icons.bolt,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const PaywallScreen(
-                    highlight: Feature.edgeFuelPremiumRecipes,
-                  ),
+              onPressed: () => AppNavigation.push(
+                context,
+                AppRoutes.paywall,
+                extra: Feature.edgeFuelPremiumRecipes,
+                fallbackBuilder: (_) => const PaywallScreen(
+                  highlight: Feature.edgeFuelPremiumRecipes,
                 ),
               ),
             ),

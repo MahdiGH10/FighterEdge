@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +9,6 @@ import 'auth/firebase_auth_repository.dart';
 import 'controllers/auth_controller.dart';
 import 'data/data_repository.dart';
 import 'data/firestore_data_repository.dart';
-import 'debug/component_gallery_screen.dart';
 import 'features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
 import 'features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
 import 'features/edge_fuel/ai/firebase_edge_fuel_ai_gateway.dart';
@@ -23,7 +21,7 @@ import 'features/edge_fuel/data/firestore_edge_fuel_repository.dart';
 import 'features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'firebase_options.dart';
-import 'screens/auth/auth_gate.dart';
+import 'routing/app_router.dart';
 import 'state/app_state.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
@@ -111,18 +109,30 @@ class FighterEdgeApp extends StatelessWidget {
           },
         ),
       ],
-      child: MaterialApp(
-        title: 'Fighter Edge',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark(),
-        color: AppColors.background,
-        home: const AuthGate(),
-        routes: kDebugMode
-            ? {
-                '/gallery': (_) => const ComponentGalleryScreen(),
-              }
-            : const {},
-      ),
+      child: const _FighterEdgeMaterialApp(),
+    );
+  }
+}
+
+class _FighterEdgeMaterialApp extends StatefulWidget {
+  const _FighterEdgeMaterialApp();
+
+  @override
+  State<_FighterEdgeMaterialApp> createState() =>
+      _FighterEdgeMaterialAppState();
+}
+
+class _FighterEdgeMaterialAppState extends State<_FighterEdgeMaterialApp> {
+  late final _router = createAppRouter();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'Fighter Edge',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark(),
+      color: AppColors.background,
+      routerConfig: _router,
     );
   }
 }

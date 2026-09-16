@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../models/training_session.dart';
+import '../routing/app_navigation.dart';
+import '../routing/app_router.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -81,7 +84,11 @@ class DashboardScreen extends StatelessWidget {
                     : '${state.displayWeight(weightDelta).abs().toStringAsFixed(1)} ${state.weightUnitLabel}',
                 deltaColor: losing ? AppColors.positive : AppColors.primary,
                 deltaIcon: losing ? Icons.arrow_downward : Icons.arrow_upward,
-                onTap: () => _push(context, const WeightTrackerScreen()),
+                onTap: () => AppNavigation.push(
+                  context,
+                  AppRoutes.weightTracker,
+                  fallbackBuilder: (_) => const WeightTrackerScreen(),
+                ),
                 accent: AppColors.primary,
               ),
               StatCard(
@@ -156,7 +163,7 @@ class DashboardScreen extends StatelessWidget {
   }
 
   void _push(BuildContext context, Widget screen) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+    Navigator.of(context).push(CupertinoPageRoute(builder: (_) => screen));
   }
 }
 

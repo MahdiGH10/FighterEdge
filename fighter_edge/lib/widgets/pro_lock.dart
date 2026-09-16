@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
+import '../routing/app_navigation.dart';
+import '../routing/app_router.dart';
 import '../screens/paywall_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -58,8 +60,12 @@ class ProLock extends StatelessWidget {
             PrimaryButton(
               'Unlock with Pro',
               icon: Icons.bolt,
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => PaywallScreen(highlight: feature))),
+              onPressed: () => AppNavigation.push(
+                context,
+                AppRoutes.paywall,
+                extra: feature,
+                fallbackBuilder: (_) => PaywallScreen(highlight: feature),
+              ),
             ),
           ],
         ),
