@@ -145,11 +145,11 @@ pricing, removes the fake-feeling plan toggle while billing is disconnected,
 states planned pricing as a founding preview, says "no payment today", and
 keeps a single primary CTA (`Join Pro Waitlist`).
 
-Remaining headline items: re-IA the tabs to Home/Train/Fuel/Profile with the
-technique library wired in.
-
-**This phase is blocked on decisions only Mahdi can make** (see below) — don't
-guess at the Corner Coach question or the tab rename and build around a guess.
+Re-IA slice is done by product decision: the main tabs are now Home / Train /
+Fuel / Profile. Use `Train` in the nav because it is clearer for new users;
+keep "camp" language inside the product where it adds MMA flavor. Profile is
+now the account/tools hub. Technique Library is discoverable inside Train, and
+Corner Coach is kept as a Pro value surface in the Train `Coach` segment.
 
 ### Phase 5 — Accessibility & polish
 
@@ -159,7 +159,11 @@ low-end-device blur profiling flagged above if it wasn't done earlier.
 
 ## Open decisions — blocking Phase 4, not yet answered
 
-Ask Mahdi before building around any of these:
+Resolved by product direction: do not ask Mahdi about these again unless he
+explicitly reopens the IA. The shipped direction is Train nav, embedded Library,
+and embedded Pro Coach.
+
+Historical questions that are now answered:
 
 1. **`CornerCoachScreen`** — wire it into the new Train tab, or delete it?
    It has had zero inbound navigation for at least two phases now.

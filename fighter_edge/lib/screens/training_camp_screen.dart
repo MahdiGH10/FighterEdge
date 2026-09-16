@@ -11,7 +11,9 @@ import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/stat_card.dart';
+import 'corner_coach_screen.dart';
 import 'round_timer_screen.dart';
+import 'technique_library_screen.dart';
 import '../theme/app_haptics.dart';
 import '../widgets/press_scale.dart';
 
@@ -28,14 +30,14 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
   @override
   Widget build(BuildContext context) {
     return ScreenScaffold.tab(
-      title: 'Training Camp',
+      title: 'Train',
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
             child: FilterChips(
-              options: const ['Week', 'History'],
+              options: const ['Week', 'History', 'Library', 'Coach'],
               selectedIndex: _tab,
               onSelected: (i) => setState(() => _tab = i),
               scrollable: false,
@@ -48,6 +50,8 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
               children: const [
                 _WeekView(),
                 _HistoryView(),
+                TechniqueLibraryScreen(embedded: true),
+                CornerCoachScreen(embedded: true),
               ],
             ),
           ),

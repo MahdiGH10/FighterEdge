@@ -27,15 +27,28 @@ void main() {
     expect(find.text('Welcome back'), findsNothing);
   });
 
-  testWidgets('primary navigation exposes only working MVP areas',
+  testWidgets('primary navigation exposes the core product areas',
       (tester) async {
     final repo =
         await makeRepo(signedIn: true, plan: Plan.free, onboarded: true);
     await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
     await tester.pump();
 
-    expect(find.text('Technique'), findsNothing);
+    expect(find.text('Train'), findsOneWidget);
     expect(find.text('Fuel'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+
+    await tester.tap(find.text('Train'));
+    await tester.pumpAndSettle();
+    expect(find.text('TRAIN'), findsOneWidget);
+
+    await tester.tap(find.text('Library'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jab Fundamentals'), findsOneWidget);
+
+    await tester.tap(find.text('Coach'));
+    await tester.pumpAndSettle();
+    expect(find.text('Corner Coach is Pro'), findsOneWidget);
 
     await tester.tap(find.text('Fuel'));
     await tester.pumpAndSettle();

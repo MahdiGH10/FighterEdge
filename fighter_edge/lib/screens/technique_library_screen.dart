@@ -10,7 +10,8 @@ import '../widgets/filter_chips.dart';
 import '../widgets/stat_card.dart';
 
 class TechniqueLibraryScreen extends StatefulWidget {
-  const TechniqueLibraryScreen({super.key});
+  final bool embedded;
+  const TechniqueLibraryScreen({super.key, this.embedded = false});
 
   @override
   State<TechniqueLibraryScreen> createState() => _TechniqueLibraryScreenState();
@@ -36,6 +37,54 @@ class _TechniqueLibraryScreenState extends State<TechniqueLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+          child: _SearchField(onChanged: (v) => setState(() => _query = v)),
+        ),
+        const SizedBox(height: Insets.md),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+          child: FilterChips(
+            options: MockData.disciplines,
+            selectedIndex: _filter,
+            onSelected: (i) => setState(() => _filter = i),
+          ),
+        ),
+        const SizedBox(height: Insets.lg),
+        Expanded(
+          child: _visible.isEmpty
+              ? Center(
+                  child: Text('No techniques found',
+                      style: AppType.callout(color: AppColors.textMuted)),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(
+                      Insets.lg, 0, Insets.lg, Insets.xxl),
+                  itemCount: _visible.length,
+                  itemBuilder: (_, i) {
+                    final technique = _visible[i];
+                    return _TechniqueCard(
+                      technique,
+                      favorite: _favorites.contains(technique.id),
+                      progress: _progress[technique.id] ?? 0,
+                      onFavorite: () => setState(() {
+                        if (!_favorites.remove(technique.id)) {
+                          _favorites.add(technique.id);
+                        }
+                      }),
+                      onOpen: () => _openTechnique(technique),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+
+    if (widget.embedded) return body;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -47,46 +96,7 @@ class _TechniqueLibraryScreenState extends State<TechniqueLibraryScreen> {
               title: 'Technique Library',
               actions: [HeaderIcon(Icons.search, onTap: () {})],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
-              child: _SearchField(onChanged: (v) => setState(() => _query = v)),
-            ),
-            const SizedBox(height: Insets.md),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
-              child: FilterChips(
-                options: MockData.disciplines,
-                selectedIndex: _filter,
-                onSelected: (i) => setState(() => _filter = i),
-              ),
-            ),
-            const SizedBox(height: Insets.lg),
-            Expanded(
-              child: _visible.isEmpty
-                  ? Center(
-                      child: Text('No techniques found',
-                          style: AppType.callout(color: AppColors.textMuted)),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(
-                          Insets.lg, 0, Insets.lg, Insets.xxl),
-                      itemCount: _visible.length,
-                      itemBuilder: (_, i) {
-                        final technique = _visible[i];
-                        return _TechniqueCard(
-                          technique,
-                          favorite: _favorites.contains(technique.id),
-                          progress: _progress[technique.id] ?? 0,
-                          onFavorite: () => setState(() {
-                            if (!_favorites.remove(technique.id)) {
-                              _favorites.add(technique.id);
-                            }
-                          }),
-                          onOpen: () => _openTechnique(technique),
-                        );
-                      },
-                    ),
-            ),
+            Expanded(child: body),
           ],
         ),
       ),

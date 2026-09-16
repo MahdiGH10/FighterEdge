@@ -341,8 +341,13 @@ _Added component goldens before the Phase 4 screen pass._
       fixed 126/142 sizes so it survives Dynamic Type
       — stat cards now adapt between a three-column row and stacked cards
       instead of living inside a fixed-height horizontal rail.
-- [ ] Re-IA the tabs to Home / Train / Fuel / Profile; wire the technique library in
-- [ ] Decide and act on `CornerCoachScreen`
+- [x] Re-IA the tabs to Home / Train / Fuel / Profile; wire the technique library in
+      — CEO/design decision: use plain `Train` in the main nav for clarity,
+      keep fight-camp language inside the product, make `Profile` the account
+      and tools hub, and expose Technique Library inside Train.
+- [x] Decide and act on `CornerCoachScreen`
+      — kept as a Pro value surface and wired into Train as the `Coach` segment
+      instead of deleting it.
 - [x] Adopt `go_router`; restore iOS swipe-back via `CupertinoPage`
       — app shell now uses `MaterialApp.router` with named `go_router` routes
       backed by `CupertinoPage`. Static routes (auth subpages, paywall, More

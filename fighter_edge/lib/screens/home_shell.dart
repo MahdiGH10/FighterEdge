@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../widgets/bottom_nav.dart';
 import 'dashboard_screen.dart';
-import 'more_screen.dart';
 import 'nutrition_screen.dart';
+import 'profile_screen.dart';
 import 'training_camp_screen.dart';
 
 /// Root scaffold that owns the persistent bottom navigation and
@@ -20,9 +20,9 @@ class _HomeShellState extends State<HomeShell> {
 
   static const _navItems = [
     NavItem(Icons.home_filled, 'Home'),
-    NavItem(Icons.calendar_today, 'Camp'),
+    NavItem(Icons.fitness_center, 'Train'),
     NavItem(Icons.restaurant, 'Fuel'),
-    NavItem(Icons.menu, 'More'),
+    NavItem(Icons.person, 'Profile'),
   ];
 
   void _goToTab(int i) => setState(() => _index = i);
@@ -33,7 +33,7 @@ class _HomeShellState extends State<HomeShell> {
       DashboardScreen(onNavigate: _goToTab),
       const TrainingCampScreen(),
       const NutritionScreen(),
-      const MoreScreen(),
+      const ProfileScreen(asTab: true),
     ];
 
     return Scaffold(

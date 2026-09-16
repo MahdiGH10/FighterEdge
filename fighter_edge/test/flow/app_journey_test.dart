@@ -54,16 +54,14 @@ void main() {
     // Dashboard.
     expect(find.text('DASHBOARD'), findsOneWidget);
 
-    // More -> Settings -> paid upgrade entry point.
+    // Profile -> paid upgrade entry point.
     final navRect = tester.getRect(find.byType(AppBottomNav));
     await tester.tapAt(Offset(
       navRect.left + navRect.width * .875,
       navRect.center.dy,
     ));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Upgrade to Pro'));
+    await tester.tap(find.text('UPGRADE'));
     await tester.pumpAndSettle();
     expect(find.text('Unlock your full edge'), findsOneWidget);
 
@@ -77,11 +75,7 @@ void main() {
     expect(repo.currentUser!.isPro, isFalse);
 
     // Sign out from Profile -> back to login.
-    await tester.tap(find.byIcon(Icons.chevron_left)); // Paywall -> Settings.
-    await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.chevron_left)); // Settings -> More.
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Profile'));
+    await tester.tap(find.byIcon(Icons.chevron_left)); // Paywall -> Profile.
     await tester.pumpAndSettle();
     final signOut = find.byType(GhostButton);
     await tester.scrollUntilVisible(signOut, 300,

@@ -12,96 +12,191 @@ import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
+import '../widgets/press_scale.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
 import 'dashboard_screen.dart';
 import 'paywall_screen.dart';
+import 'round_timer_screen.dart';
+import 'settings_screen.dart';
+import 'weight_tracker_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final bool asTab;
+  const ProfileScreen({super.key, this.asTab = false});
 
   @override
   Widget build(BuildContext context) {
     const f = MockData.fighter;
     final weight = context.watch<AppState>().latestWeight;
     final auth = context.watch<AuthController>();
-    return ScreenScaffold(
-      title: 'Profile',
-      showBack: true,
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
-        children: [
-          Row(
+    final body = ListView(
+      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      children: [
+        Row(
+          children: [
+            const FighterAvatar(size: 64),
+            const SizedBox(width: Insets.lg),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(f.name, style: AppType.title1()),
+                const SizedBox(height: Insets.xxs),
+                Text(f.division,
+                    style: AppType.subhead(
+                        weight: FontWeight.w500,
+                        color: AppColors.textSecondary)),
+                const SizedBox(height: Insets.xxs),
+                Text('${f.heightCm} cm · ${weight.toStringAsFixed(1)} kg',
+                    style: AppType.subhead(
+                        weight: FontWeight.w500, color: AppColors.textMuted)),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: Insets.xl),
+        const SectionHeader('Subscription'),
+        _SubscriptionCard(auth: auth),
+        const SizedBox(height: Insets.xl),
+        const SectionHeader('Tools'),
+        const AppCard(
+          padding: EdgeInsets.zero,
+          child: Column(
             children: [
-              const FighterAvatar(size: 64),
-              const SizedBox(width: Insets.lg),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(f.name, style: AppType.title1()),
-                  const SizedBox(height: Insets.xxs),
-                  Text(f.division,
-                      style: AppType.subhead(
-                          weight: FontWeight.w500,
-                          color: AppColors.textSecondary)),
-                  const SizedBox(height: Insets.xxs),
-                  Text('${f.heightCm} cm · ${weight.toStringAsFixed(1)} kg',
-                      style: AppType.subhead(
-                          weight: FontWeight.w500, color: AppColors.textMuted)),
-                ],
+              _ToolRow(
+                icon: Icons.timer_outlined,
+                title: 'Round Timer',
+                subtitle: 'Open intervals for sparring, MMA, boxing or BJJ',
+                route: AppRoutes.roundTimer,
+                screen: RoundTimerScreen(),
+              ),
+              Divider(height: 1, thickness: 1, color: AppColors.border),
+              _ToolRow(
+                icon: Icons.monitor_weight_outlined,
+                title: 'Weight Tracker',
+                subtitle: 'Log weigh-ins and monitor the cut or gain',
+                route: AppRoutes.weightTracker,
+                screen: WeightTrackerScreen(),
+              ),
+              Divider(height: 1, thickness: 1, color: AppColors.border),
+              _ToolRow(
+                icon: Icons.settings_outlined,
+                title: 'Settings',
+                subtitle: 'Units, safety, reminders and account controls',
+                route: AppRoutes.settings,
+                screen: SettingsScreen(),
               ),
             ],
           ),
-          const SizedBox(height: Insets.xl),
-          const SectionHeader('Subscription'),
-          _SubscriptionCard(auth: auth),
-          const SizedBox(height: Insets.xl),
-          const SectionHeader('Stats'),
-          AppCard(
-            padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                _StatRow('Training Days', '${f.trainingDays}'),
-                _divider(),
-                _StatRow('Total Workouts', '${f.totalWorkouts}'),
-                _divider(),
-                _StatRow('Win / Loss', '${f.wins} - ${f.losses}'),
-                _divider(),
-                _StatRow('Current Streak', '${f.currentStreak} days'),
+        ),
+        const SizedBox(height: Insets.xl),
+        const SectionHeader('Stats'),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              _StatRow('Training Days', '${f.trainingDays}'),
+              _divider(),
+              _StatRow('Total Workouts', '${f.totalWorkouts}'),
+              _divider(),
+              _StatRow('Win / Loss', '${f.wins} - ${f.losses}'),
+              _divider(),
+              _StatRow('Current Streak', '${f.currentStreak} days'),
+            ],
+          ),
+        ),
+        const SizedBox(height: Insets.xl),
+        const SectionHeader('Goals'),
+        AppCard(
+          child: Column(
+            children: [
+              for (int i = 0; i < f.goals.length; i++) ...[
+                if (i > 0) const SizedBox(height: Insets.lg),
+                _GoalRow(f.goals[i]),
               ],
-            ),
+            ],
           ),
-          const SizedBox(height: Insets.xl),
-          const SectionHeader('Goals'),
-          AppCard(
-            child: Column(
-              children: [
-                for (int i = 0; i < f.goals.length; i++) ...[
-                  if (i > 0) const SizedBox(height: Insets.lg),
-                  _GoalRow(f.goals[i]),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: Insets.xl),
-          GhostButton(
-            'Sign Out',
-            icon: Icons.logout,
-            expand: true,
-            onPressed: () async {
-              await auth.signOut();
-              if (context.mounted) {
-                Navigator.of(context).popUntil((r) => r.isFirst);
-              }
-            },
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: Insets.xl),
+        GhostButton(
+          'Sign Out',
+          icon: Icons.logout,
+          expand: true,
+          onPressed: () async {
+            await auth.signOut();
+            if (context.mounted) {
+              Navigator.of(context).popUntil((r) => r.isFirst);
+            }
+          },
+        ),
+      ],
     );
+    if (asTab) {
+      return ScreenScaffold.tab(title: 'Profile', body: body);
+    }
+    return ScreenScaffold(title: 'Profile', showBack: true, body: body);
   }
 
   static Widget _divider() =>
       const Divider(height: 1, thickness: 1, color: AppColors.border);
+}
+
+class _ToolRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String route;
+  final Widget screen;
+
+  const _ToolRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.route,
+    required this.screen,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PressScale(
+      onTap: () => AppNavigation.push(
+        context,
+        route,
+        fallbackBuilder: (_) => screen,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(Insets.lg),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceElevated,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(icon, color: AppColors.primary, size: 21),
+            ),
+            const SizedBox(width: Insets.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppType.callout(weight: FontWeight.w800)),
+                  const SizedBox(height: Insets.xxs),
+                  Text(
+                    subtitle,
+                    style: AppType.subhead(color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.textMuted),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Plan badge + upgrade/manage entry point.

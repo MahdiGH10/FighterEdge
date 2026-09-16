@@ -12,7 +12,8 @@ import '../widgets/pro_lock.dart';
 import '../widgets/stat_card.dart';
 
 class CornerCoachScreen extends StatefulWidget {
-  const CornerCoachScreen({super.key});
+  final bool embedded;
+  const CornerCoachScreen({super.key, this.embedded = false});
 
   @override
   State<CornerCoachScreen> createState() => _CornerCoachScreenState();
@@ -31,37 +32,39 @@ class _CornerCoachScreenState extends State<CornerCoachScreen> {
   @override
   Widget build(BuildContext context) {
     final pep = _pep[(_round - 1) % _pep.length];
+    final body = ProGate(
+      feature: Feature.cornerCoach,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+        children: [
+          const SizedBox(height: Insets.md),
+          Center(
+            child: Text('ROUND $_round',
+                style:
+                    AppType.largeTitle(color: AppColors.primary, spacing: 1)),
+          ),
+          const SizedBox(height: Insets.sm),
+          Text(pep,
+              textAlign: TextAlign.center,
+              style: AppType.callout(
+                  weight: FontWeight.w500, color: AppColors.textSecondary)),
+          const SizedBox(height: Insets.xl),
+          for (final c in MockData.coachCues) _CueCard(c),
+          const SizedBox(height: Insets.md),
+          PrimaryButton(
+            'Next Round',
+            expand: true,
+            onPressed: () => setState(() => _round++),
+          ),
+        ],
+      ),
+    );
+    if (widget.embedded) return body;
+
     return ScreenScaffold(
       title: 'Corner Coach',
       showBack: true,
-      body: ProGate(
-        feature: Feature.cornerCoach,
-        child: ListView(
-          padding:
-              const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
-          children: [
-            const SizedBox(height: Insets.md),
-            Center(
-              child: Text('ROUND $_round',
-                  style:
-                      AppType.largeTitle(color: AppColors.primary, spacing: 1)),
-            ),
-            const SizedBox(height: Insets.sm),
-            Text(pep,
-                textAlign: TextAlign.center,
-                style: AppType.callout(
-                    weight: FontWeight.w500, color: AppColors.textSecondary)),
-            const SizedBox(height: Insets.xl),
-            for (final c in MockData.coachCues) _CueCard(c),
-            const SizedBox(height: Insets.md),
-            PrimaryButton(
-              'Next Round',
-              expand: true,
-              onPressed: () => setState(() => _round++),
-            ),
-          ],
-        ),
-      ),
+      body: body,
     );
   }
 }
