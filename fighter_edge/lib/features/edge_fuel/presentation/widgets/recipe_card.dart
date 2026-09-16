@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_typography.dart';
 import '../../domain/models/food_enums.dart';
 import '../controllers/recipe_library_controller.dart';
 import '../recipe_copy.dart';
@@ -79,7 +80,7 @@ class RecipeCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 recipe.title,
-                                style: AppTheme.display(17, spacing: -0.2),
+                                style: AppType.title2(spacing: -0.2),
                               ),
                             ),
                             if (locked) ...[
@@ -97,8 +98,7 @@ class RecipeCard extends StatelessWidget {
                           recipe.description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTheme.body(
-                            12.5,
+                          style: AppType.subhead(
                             color: AppColors.textMuted,
                             weight: FontWeight.w400,
                           ),
@@ -137,8 +137,7 @@ class RecipeCard extends StatelessWidget {
                                 child: Text(
                                   'Contains '
                                   '${RecipeCopy.allergenList(conflictingAllergens)}',
-                                  style: AppTheme.body(
-                                    11.5,
+                                  style: AppType.subhead(
                                     color: AppColors.warning,
                                   ),
                                 ),
@@ -166,8 +165,7 @@ class _Stat extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: AppTheme.body(
-          12,
+        style: AppType.subhead(
           color: AppColors.textSecondary,
           weight: FontWeight.w600,
         ),
@@ -190,8 +188,7 @@ class _Tag extends StatelessWidget {
           text,
           // Small text takes slightly positive tracking for legibility
           // (apple-design §15); the display titles above take negative.
-          style: AppTheme.body(
-            10.5,
+          style: AppType.micro(
             color: color,
             weight: FontWeight.w700,
             spacing: 0.3,

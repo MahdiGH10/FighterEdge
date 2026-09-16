@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../theme/app_colors.dart';
 import '../../../../../theme/app_theme.dart';
+import '../../../../../theme/app_typography.dart';
 import '../../../domain/models/nutrition_enums.dart';
 import '../../controllers/edge_fuel_setup_controller.dart';
 import '../../nutrition_copy.dart';
@@ -47,12 +48,12 @@ class _TrainingStepState extends State<TrainingStep> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('Your training week', style: AppTheme.display(22)),
+        Text('Your training week', style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
           'Fighter Edge sessions per week — used so we never double-count '
           'training inside your activity level.',
-          style: AppTheme.body(13, color: AppColors.textSecondary),
+          style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
         Row(
@@ -66,9 +67,9 @@ class _TrainingStepState extends State<TrainingStep> {
             Expanded(
               child: Column(
                 children: [
-                  Text('$days', style: AppTheme.display(30)),
+                  Text('$days', style: AppType.largeTitle()),
                   Text(days == 1 ? 'day / week' : 'days / week',
-                      style: AppTheme.body(11, color: AppColors.textMuted)),
+                      style: AppType.micro(color: AppColors.textMuted)),
                 ],
               ),
             ),
@@ -82,7 +83,7 @@ class _TrainingStepState extends State<TrainingStep> {
         ),
         if (paces.isNotEmpty) ...[
           const SizedBox(height: Insets.xl),
-          Text('How fast?', style: AppTheme.display(16)),
+          Text('How fast?', style: AppType.title2()),
           const SizedBox(height: Insets.md),
           for (final pace in paces)
             ChoiceCard(

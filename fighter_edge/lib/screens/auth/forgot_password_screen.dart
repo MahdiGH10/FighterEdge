@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../controllers/auth_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/app_typography.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
@@ -52,14 +53,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 size: 48, color: AppColors.primary),
             const SizedBox(height: Insets.lg),
             Text(_sent ? 'Check your inbox' : 'Forgot your password?',
-                textAlign: TextAlign.center, style: AppTheme.display(20)),
+                textAlign: TextAlign.center, style: AppType.title1()),
             const SizedBox(height: Insets.sm),
             Text(
               _sent
                   ? 'If an account exists for ${_email.text.trim()}, a reset link is on its way.'
                   : 'Enter your email and we\'ll send you a link to reset it.',
               textAlign: TextAlign.center,
-              style: AppTheme.body(13, color: AppColors.textSecondary),
+              style: AppType.subhead(color: AppColors.textSecondary),
             ),
             const SizedBox(height: Insets.xl),
             if (!_sent) ...[

@@ -5,6 +5,7 @@ import '../../../../billing/subscription.dart';
 import '../../../../screens/paywall_screen.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_typography.dart';
 import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../domain/calculators/recipe_nutrient_calculator.dart';
@@ -71,7 +72,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         children: [
           Text(
             recipe.description,
-            style: AppTheme.body(13.5, color: AppColors.textSecondary),
+            style: AppType.callout(color: AppColors.textSecondary),
           ),
           const SizedBox(height: Insets.md),
           _MetaRow(listing: widget.listing),
@@ -151,7 +152,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       SnackBar(
         content: Text(
           '${recipe.title} added — ${nutrients.kcalRounded} kcal',
-          style: AppTheme.body(13),
+          style: AppType.subhead(),
         ),
         backgroundColor: AppColors.surfaceElevated,
         behavior: SnackBarBehavior.floating,
@@ -190,14 +191,14 @@ class _LockedRecipe extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: AppTheme.display(20),
+              style: AppType.title1(),
             ),
             const SizedBox(height: Insets.sm),
             Text(
               'This one is part of the Pro recipe library. Everything you have '
               'already unlocked stays free.',
               textAlign: TextAlign.center,
-              style: AppTheme.body(13, color: AppColors.textMuted),
+              style: AppType.subhead(color: AppColors.textMuted),
             ),
             const SizedBox(height: Insets.xl),
             PrimaryButton(
@@ -256,7 +257,7 @@ class _Meta extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: AppColors.textMuted),
           const SizedBox(width: Insets.xs),
-          Text(text, style: AppTheme.body(12, color: AppColors.textSecondary)),
+          Text(text, style: AppType.subhead(color: AppColors.textSecondary)),
         ],
       );
 }
@@ -292,12 +293,11 @@ class _ServingsCard extends StatelessWidget {
                   children: [
                     AnimatedMacroValue(
                       value: nutrients.kcalRounded,
-                      style: AppTheme.display(30, spacing: -0.5),
+                      style: AppType.largeTitle(spacing: -0.5),
                     ),
                     Text(
                       'KCAL',
-                      style: AppTheme.body(
-                        10,
+                      style: AppType.micro(
                         color: AppColors.textMuted,
                         weight: FontWeight.w700,
                         spacing: 0.8,
@@ -330,12 +330,11 @@ class _Macro extends StatelessWidget {
             AnimatedMacroValue(
               value: grams,
               suffix: 'g',
-              style: AppTheme.display(18, color: color),
+              style: AppType.title2(color: color),
             ),
             Text(
               label,
-              style: AppTheme.body(
-                10,
+              style: AppType.micro(
                 color: AppColors.textMuted,
                 weight: FontWeight.w700,
                 spacing: 0.8,
@@ -353,8 +352,7 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: AppTheme.body(
-          11,
+        style: AppType.micro(
           color: AppColors.textMuted,
           weight: FontWeight.w700,
           spacing: 0.8,
@@ -389,8 +387,7 @@ class _IngredientRow extends StatelessWidget {
             width: 64,
             child: Text(
               '${grams.round()} g',
-              style: AppTheme.body(
-                13,
+              style: AppType.subhead(
                 weight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
@@ -402,7 +399,7 @@ class _IngredientRow extends StatelessWidget {
               children: [
                 Text(
                   food?.name ?? ingredient.foodId,
-                  style: AppTheme.body(13, color: AppColors.textSecondary),
+                  style: AppType.subhead(color: AppColors.textSecondary),
                 ),
                 if (label != null || note.isNotEmpty || optional)
                   Text(
@@ -414,7 +411,7 @@ class _IngredientRow extends StatelessWidget {
                       if (note.isNotEmpty) note,
                       if (optional) 'optional',
                     ].join(' · '),
-                    style: AppTheme.body(11.5, color: AppColors.textMuted),
+                    style: AppType.subhead(color: AppColors.textMuted),
                   ),
               ],
             ),
@@ -440,14 +437,13 @@ class _StepRow extends StatelessWidget {
               width: 26,
               child: Text(
                 '$number',
-                style: AppTheme.display(15, color: AppColors.primary),
+                style: AppType.title2(color: AppColors.primary),
               ),
             ),
             Expanded(
               child: Text(
                 text,
-                style: AppTheme.body(
-                  13.5,
+                style: AppType.callout(
                   color: AppColors.textSecondary,
                   weight: FontWeight.w400,
                 ),
@@ -480,7 +476,7 @@ class _SubstitutionRow extends StatelessWidget {
             Expanded(
               child: Text(
                 reason.isEmpty ? '$from → $to' : '$from → $to  ·  $reason',
-                style: AppTheme.body(12.5, color: AppColors.textSecondary),
+                style: AppType.subhead(color: AppColors.textSecondary),
               ),
             ),
           ],
@@ -494,6 +490,6 @@ class _Provenance extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         RecipeCopy.draftNotice,
-        style: AppTheme.body(11.5, color: AppColors.textMuted),
+        style: AppType.subhead(color: AppColors.textMuted),
       );
 }

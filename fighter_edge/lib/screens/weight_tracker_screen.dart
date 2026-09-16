@@ -7,6 +7,7 @@ import '../models/weight_entry.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/filter_chips.dart';
@@ -82,12 +83,12 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('Add Weigh-In', style: AppTheme.display(18)),
+        title: Text('Add Weigh-In', style: AppType.title2()),
         content: TextField(
           controller: controller,
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          style: AppTheme.body(16),
+          style: AppType.body(),
           cursorColor: AppColors.primary,
           decoration: const InputDecoration(
             suffixText: 'kg',
@@ -100,14 +101,14 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text('Cancel',
-                style: AppTheme.body(14, color: AppColors.textSecondary)),
+                style: AppType.callout(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () =>
                 Navigator.pop(ctx, double.tryParse(controller.text.trim())),
             child: Text('Save',
-                style: AppTheme.body(14,
-                    weight: FontWeight.w700, color: AppColors.primary)),
+                style: AppType.callout(
+                    weight: FontWeight.w700, color: AppColors.accentText)),
           ),
         ],
       ),
@@ -140,12 +141,12 @@ class _WeightView extends StatelessWidget {
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(state.latestWeight.toStringAsFixed(1),
-                      style: AppTheme.display(52)),
-                  const SizedBox(width: 4),
+                      style: AppType.display()),
+                  const SizedBox(width: Insets.xs),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text('kg',
-                        style: AppTheme.body(16,
+                        style: AppType.body(
                             weight: FontWeight.w600,
                             color: AppColors.textMuted)),
                   ),
@@ -160,7 +161,7 @@ class _WeightView extends StatelessWidget {
                       color: losing ? AppColors.positive : AppColors.primary),
                   const SizedBox(width: 3),
                   Text('${delta.abs().toStringAsFixed(1)} kg vs last weigh-in',
-                      style: AppTheme.body(13,
+                      style: AppType.subhead(
                           weight: FontWeight.w600,
                           color:
                               losing ? AppColors.positive : AppColors.primary)),
@@ -235,7 +236,7 @@ class _WeightChart extends StatelessWidget {
     if (entries.length < 2) {
       return Center(
         child: Text('Add more weigh-ins to see a trend',
-            style: AppTheme.body(13, color: AppColors.textMuted)),
+            style: AppType.subhead(color: AppColors.textMuted)),
       );
     }
     final spots = <FlSpot>[
@@ -270,7 +271,7 @@ class _WeightChart extends StatelessWidget {
               reservedSize: 32,
               interval: ((maxY - minY) / 4).clamp(0.5, 100),
               getTitlesWidget: (v, _) => Text(v.toStringAsFixed(0),
-                  style: AppTheme.body(10, color: AppColors.textMuted)),
+                  style: AppType.micro(color: AppColors.textMuted)),
             ),
           ),
           bottomTitles: AxisTitles(
@@ -286,7 +287,7 @@ class _WeightChart extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(DateFormat('M/d').format(entries[i].date),
-                      style: AppTheme.body(9, color: AppColors.textMuted)),
+                      style: AppType.micro(color: AppColors.textMuted)),
                 );
               },
             ),
@@ -332,7 +333,7 @@ class _WeightChart extends StatelessWidget {
               label: HorizontalLineLabel(
                 show: true,
                 alignment: Alignment.topRight,
-                style: AppTheme.body(10,
+                style: AppType.micro(
                     weight: FontWeight.w700, color: AppColors.warning),
                 labelResolver: (_) => 'Goal ${goalWeightKg.toStringAsFixed(0)}',
               ),
@@ -357,10 +358,10 @@ class _HistoryRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(DateFormat('MMM d, yyyy').format(entry.date),
-              style: AppTheme.body(14,
+              style: AppType.callout(
                   weight: FontWeight.w500, color: AppColors.textSecondary)),
           Text('${entry.kg.toStringAsFixed(1)} kg',
-              style: AppTheme.body(15, weight: FontWeight.w700)),
+              style: AppType.callout(weight: FontWeight.w700)),
         ],
       ),
     );

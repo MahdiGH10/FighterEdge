@@ -7,6 +7,7 @@ import '../models/training_session.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/premium_effects.dart';
@@ -170,9 +171,9 @@ class DashboardScreen extends StatelessWidget {
                       trailing: GestureDetector(
                         onTap: () => onNavigate(1),
                         child: Text('See all',
-                            style: AppTheme.body(12,
+                            style: AppType.subhead(
                                 weight: FontWeight.w600,
-                                color: AppColors.primary)),
+                                color: AppColors.accentText)),
                       ),
                     ),
                     if (recentSessions.isEmpty)
@@ -237,15 +238,13 @@ class _TodayFocusCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Today\'s focus',
-                        style: AppTheme.display(20, spacing: .3)),
-                    const SizedBox(height: 2),
+                    Text('Today\'s focus', style: AppType.title1(spacing: .3)),
+                    const SizedBox(height: Insets.xxs),
                     Text(
                       nextSession == null
                           ? 'Camp work complete — protect recovery.'
                           : '${nextSession.title} · ${nextSession.subtitle}',
-                      style: AppTheme.body(
-                        12,
+                      style: AppType.subhead(
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -332,14 +331,13 @@ class _FocusMetric extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label.toUpperCase(),
-                    style: AppTheme.body(
-                      9,
+                    style: AppType.micro(
                       weight: FontWeight.w800,
                       color: AppColors.textMuted,
                       spacing: .8,
                     )),
-                const SizedBox(height: 2),
-                Text(value, style: AppTheme.body(13, weight: FontWeight.w800)),
+                const SizedBox(height: Insets.xxs),
+                Text(value, style: AppType.subhead(weight: FontWeight.w800)),
               ],
             ),
           ),
@@ -364,10 +362,10 @@ class _ProfileHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(name, style: AppTheme.display(24)),
-              const SizedBox(height: 2),
+              Text(name, style: AppType.title1()),
+              const SizedBox(height: Insets.xxs),
               Text(tagline,
-                  style: AppTheme.body(13,
+                  style: AppType.subhead(
                       weight: FontWeight.w500, color: AppColors.textSecondary)),
             ],
           ),
@@ -405,10 +403,10 @@ class _EmailVerificationBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Verify your email',
-                    style: AppTheme.body(14, weight: FontWeight.w800)),
-                const SizedBox(height: 2),
+                    style: AppType.callout(weight: FontWeight.w800)),
+                const SizedBox(height: Insets.xxs),
                 Text('Secure your account before fight camp gets serious.',
-                    style: AppTheme.body(12,
+                    style: AppType.subhead(
                         weight: FontWeight.w500,
                         color: AppColors.textSecondary)),
               ],
@@ -430,7 +428,7 @@ class _EmailVerificationBanner extends StatelessWidget {
                     }
                   },
             child: Text('Resend',
-                style: AppTheme.body(12,
+                style: AppType.subhead(
                     weight: FontWeight.w800, color: AppColors.warning)),
           ),
         ],
@@ -443,8 +441,7 @@ class _EmailVerificationBanner extends StatelessWidget {
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
         backgroundColor: AppColors.surfaceElevated,
-        content:
-            Text(message, style: AppTheme.body(13, weight: FontWeight.w600)),
+        content: Text(message, style: AppType.subhead(weight: FontWeight.w600)),
       ));
   }
 }
@@ -487,12 +484,12 @@ class _NextSessionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(session?.title ?? 'Week complete',
-                    style: AppTheme.body(15, weight: FontWeight.w700)),
-                const SizedBox(height: 2),
+                    style: AppType.callout(weight: FontWeight.w700)),
+                const SizedBox(height: Insets.xxs),
                 Text(session?.subtitle ?? 'Review your completed sessions',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTheme.body(12,
+                    style: AppType.subhead(
                         weight: FontWeight.w500,
                         color: AppColors.textSecondary)),
               ],
@@ -536,22 +533,22 @@ class _ActivityRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(session.title,
-                      style: AppTheme.body(14, weight: FontWeight.w600)),
-                  const SizedBox(height: 2),
+                      style: AppType.callout(weight: FontWeight.w600)),
+                  const SizedBox(height: Insets.xxs),
                   Text(
                       session.rpe > 0
                           ? '${session.subtitle} · RPE ${session.rpe}'
                           : session.subtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTheme.body(12,
+                      style: AppType.subhead(
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
                 ],
               ),
             ),
             Text(_relativeDate(session.completedAt),
-                style: AppTheme.body(11,
+                style: AppType.micro(
                     weight: FontWeight.w500, color: AppColors.textMuted)),
           ],
         ),

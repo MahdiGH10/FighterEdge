@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 
 /// The FIGHTER EDGE wordmark used on auth screens.
 class BrandLogo extends StatelessWidget {
@@ -45,8 +45,8 @@ class BrandLogo extends StatelessWidget {
                 ),
               ),
               Text('FE',
-                  style: AppTheme.display(22 * scale,
-                      weight: FontWeight.w800, spacing: .4)),
+                  style: AppType.scaledDisplay(22 * scale,
+                      weight: FontWeight.w700, spacing: .4)),
             ],
           ),
         ),
@@ -56,10 +56,10 @@ class BrandLogo extends StatelessWidget {
             children: [
               TextSpan(
                   text: 'FIGHTER ',
-                  style: AppTheme.display(28 * scale, spacing: 1.5)),
+                  style: AppType.scaledDisplay(28 * scale, spacing: 1.5)),
               TextSpan(
                   text: 'EDGE',
-                  style: AppTheme.display(28 * scale,
+                  style: AppType.scaledDisplay(28 * scale,
                       color: AppColors.primary, spacing: 1.5)),
             ],
           ),
@@ -67,7 +67,7 @@ class BrandLogo extends StatelessWidget {
         if (showTagline) ...[
           SizedBox(height: 4 * scale),
           Text('YOUR EDGE. EVERY DAY.',
-              style: AppTheme.body(11 * scale,
+              style: AppType.scaledBody(11 * scale,
                   weight: FontWeight.w600,
                   color: AppColors.textMuted,
                   spacing: 2)),

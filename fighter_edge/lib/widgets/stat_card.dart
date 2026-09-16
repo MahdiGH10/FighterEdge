@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 
 /// Reusable dark card container.
 class AppCard extends StatelessWidget {
@@ -98,7 +99,7 @@ class StatCard extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: AppTheme.body(10,
+            style: AppType.micro(
                 weight: FontWeight.w600,
                 color: AppColors.textMuted,
                 spacing: 0.8),
@@ -118,7 +119,7 @@ class StatCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 3),
                     child: Text(unit,
-                        style: AppTheme.body(11,
+                        style: AppType.micro(
                             weight: FontWeight.w600,
                             color: AppColors.textMuted)),
                   ),
@@ -132,14 +133,13 @@ class StatCard extends StatelessWidget {
               children: [
                 if (deltaIcon != null)
                   Icon(deltaIcon, size: 12, color: deltaColor),
-                const SizedBox(width: 2),
+                const SizedBox(width: Insets.xxs),
                 Expanded(
                   child: Text(
                     delta!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTheme.body(
-                      11,
+                    style: AppType.micro(
                       weight: FontWeight.w600,
                       color: deltaColor,
                     ),
@@ -163,7 +163,7 @@ class _AnimatedMetricValue extends StatelessWidget {
   Widget build(BuildContext context) {
     final numeric = double.tryParse(value);
     if (numeric == null || MediaQuery.disableAnimationsOf(context)) {
-      return Text(value, style: AppTheme.display(24));
+      return Text(value, style: AppType.title1());
     }
 
     final decimals = value.contains('.') ? value.split('.').last.length : 0;
@@ -173,7 +173,7 @@ class _AnimatedMetricValue extends StatelessWidget {
       curve: MotionTokens.emphasized,
       builder: (context, animated, _) {
         return Text(animated.toStringAsFixed(decimals),
-            style: AppTheme.display(24));
+            style: AppType.title1());
       },
     );
   }

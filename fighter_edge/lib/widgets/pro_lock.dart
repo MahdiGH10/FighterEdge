@@ -6,6 +6,7 @@ import '../controllers/auth_controller.dart';
 import '../screens/paywall_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import 'primary_button.dart';
 
 /// Gates [child] behind a Pro entitlement. Free users see a lock CTA that
@@ -48,11 +49,11 @@ class ProLock extends StatelessWidget {
             ),
             const SizedBox(height: Insets.lg),
             Text('${feature.title} is Pro',
-                textAlign: TextAlign.center, style: AppTheme.display(20)),
+                textAlign: TextAlign.center, style: AppType.title1()),
             const SizedBox(height: Insets.sm),
             Text('Upgrade to FighterEdge Pro to unlock this feature.',
                 textAlign: TextAlign.center,
-                style: AppTheme.body(13, color: AppColors.textMuted)),
+                style: AppType.subhead(color: AppColors.textMuted)),
             const SizedBox(height: Insets.xl),
             PrimaryButton(
               'Unlock with Pro',

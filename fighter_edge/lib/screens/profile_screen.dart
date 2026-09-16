@@ -7,6 +7,7 @@ import '../models/fighter.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/section_header.dart';
@@ -35,15 +36,15 @@ class ProfileScreen extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(f.name, style: AppTheme.display(24)),
-                  const SizedBox(height: 2),
+                  Text(f.name, style: AppType.title1()),
+                  const SizedBox(height: Insets.xxs),
                   Text(f.division,
-                      style: AppTheme.body(13,
+                      style: AppType.subhead(
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: Insets.xxs),
                   Text('${f.heightCm} cm · ${weight.toStringAsFixed(1)} kg',
-                      style: AppTheme.body(12,
+                      style: AppType.subhead(
                           weight: FontWeight.w500, color: AppColors.textMuted)),
                 ],
               ),
@@ -130,13 +131,13 @@ class _SubscriptionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(isPro ? 'FighterEdge Pro' : 'Free Plan',
-                    style: AppTheme.body(15, weight: FontWeight.w700)),
-                const SizedBox(height: 2),
+                    style: AppType.callout(weight: FontWeight.w700)),
+                const SizedBox(height: Insets.xxs),
                 Text(
                     isPro
                         ? 'All features unlocked'
                         : 'Upgrade to unlock everything',
-                    style: AppTheme.body(12, color: AppColors.textSecondary)),
+                    style: AppType.subhead(color: AppColors.textSecondary)),
               ],
             ),
           ),
@@ -149,7 +150,7 @@ class _SubscriptionCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(Radii.chip),
               ),
               child: Text('UPGRADE',
-                  style: AppTheme.body(11,
+                  style: AppType.micro(
                       weight: FontWeight.w700, color: Colors.white)),
             )
           else
@@ -174,9 +175,9 @@ class _StatRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label,
-              style: AppTheme.body(14,
+              style: AppType.callout(
                   weight: FontWeight.w500, color: AppColors.textSecondary)),
-          Text(value, style: AppTheme.body(15, weight: FontWeight.w700)),
+          Text(value, style: AppType.callout(weight: FontWeight.w700)),
         ],
       ),
     );
@@ -195,10 +196,10 @@ class _GoalRow extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(goal.label, style: AppTheme.body(14, weight: FontWeight.w600)),
+            Text(goal.label, style: AppType.callout(weight: FontWeight.w600)),
             Text('${(goal.progress * 100).round()}%',
-                style: AppTheme.body(13,
-                    weight: FontWeight.w700, color: AppColors.primary)),
+                style: AppType.subhead(
+                    weight: FontWeight.w700, color: AppColors.accentText)),
           ],
         ),
         const SizedBox(height: Insets.sm),

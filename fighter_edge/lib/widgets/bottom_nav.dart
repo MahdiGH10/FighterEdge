@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 
 class NavItem {
   final IconData icon;
@@ -99,7 +100,7 @@ class _NavButton extends StatelessWidget {
               Icon(item.icon, size: 22, color: color),
               const SizedBox(height: 3),
               Text(item.label,
-                  style: AppTheme.body(10,
+                  style: AppType.micro(
                       weight: selected ? FontWeight.w700 : FontWeight.w500,
                       color: color)),
             ],

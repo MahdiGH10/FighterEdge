@@ -5,6 +5,7 @@ import '../controllers/auth_controller.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
@@ -50,13 +51,12 @@ class SettingsScreen extends StatelessWidget {
                         (user?.displayName.isNotEmpty ?? false)
                             ? user!.displayName
                             : 'Fighter',
-                        style: AppTheme.body(16, weight: FontWeight.w800),
+                        style: AppType.body(weight: FontWeight.w800),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: Insets.xxs),
                       Text(
                         user?.email ?? 'Signed in',
-                        style: AppTheme.body(
-                          12,
+                        style: AppType.subhead(
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -168,11 +168,11 @@ class SettingsScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: AppTheme.display(22)),
+            Text(title, style: AppType.title1()),
             const SizedBox(height: Insets.sm),
             Text(
               message,
-              style: AppTheme.body(13, color: AppColors.textSecondary),
+              style: AppType.subhead(color: AppColors.textSecondary),
             ),
             const SizedBox(height: Insets.lg),
             PrimaryButton(
@@ -235,12 +235,12 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
           Text(
             'This permanently erases your account, weight history, training '
             'sessions, and nutrition data. This cannot be undone.',
-            style: AppTheme.body(13, color: AppColors.textSecondary),
+            style: AppType.subhead(color: AppColors.textSecondary),
           ),
           const SizedBox(height: Insets.md),
           Text(
             'Type DELETE to confirm.',
-            style: AppTheme.body(12, weight: FontWeight.w700),
+            style: AppType.subhead(weight: FontWeight.w700),
           ),
           const SizedBox(height: Insets.sm),
           TextField(
@@ -284,8 +284,7 @@ class _PlanPill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: AppTheme.body(
-          11,
+        style: AppType.micro(
           weight: FontWeight.w900,
           color: label == 'PRO' ? AppColors.premium : AppColors.primary,
           spacing: 1.1,
@@ -305,8 +304,7 @@ class _SectionLabel extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: Insets.sm),
       child: Text(
         label.toUpperCase(),
-        style: AppTheme.body(
-          11,
+        style: AppType.micro(
           weight: FontWeight.w800,
           color: AppColors.textMuted,
           spacing: 1,
@@ -415,11 +413,11 @@ class _RowText extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: AppTheme.body(14, weight: FontWeight.w800)),
+        Text(title, style: AppType.callout(weight: FontWeight.w800)),
         const SizedBox(height: 3),
         Text(
           subtitle,
-          style: AppTheme.body(12, color: AppColors.textSecondary),
+          style: AppType.subhead(color: AppColors.textSecondary),
         ),
       ],
     );
@@ -442,7 +440,7 @@ class _TrustCard extends StatelessWidget {
           Expanded(
             child: Text(
               'Fighter Edge should guide training decisions, not replace a coach, doctor, or licensed nutrition professional. Keep this visible before public launch.',
-              style: AppTheme.body(12, color: AppColors.textSecondary),
+              style: AppType.subhead(color: AppColors.textSecondary),
             ),
           ),
         ],

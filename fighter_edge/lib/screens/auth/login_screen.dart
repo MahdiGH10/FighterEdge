@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../controllers/auth_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/app_typography.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/brand_logo.dart';
 import '../../widgets/primary_button.dart';
@@ -89,13 +90,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       const BrandLogo(scale: 1.1),
                       const SizedBox(height: Insets.xxl),
                       Text('Welcome back',
-                          textAlign: TextAlign.center,
-                          style: AppTheme.display(22)),
+                          textAlign: TextAlign.center, style: AppType.title1()),
                       const SizedBox(height: Insets.xs),
                       Text('Sign in to continue your camp',
                           textAlign: TextAlign.center,
-                          style: AppTheme.body(13,
-                              color: AppColors.textSecondary)),
+                          style:
+                              AppType.subhead(color: AppColors.textSecondary)),
                       const SizedBox(height: Insets.xl),
                       AppTextField(
                         controller: _email,
@@ -129,9 +129,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   builder: (_) =>
                                       const ForgotPasswordScreen())),
                           child: Text('Forgot password?',
-                              style: AppTheme.body(12,
+                              style: AppType.subhead(
                                   weight: FontWeight.w600,
-                                  color: AppColors.primary)),
+                                  color: AppColors.accentText)),
                         ),
                       ),
                       const SizedBox(height: Insets.sm),
@@ -181,16 +181,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text("New here? ",
-                              style: AppTheme.body(13,
+                              style: AppType.subhead(
                                   color: AppColors.textSecondary)),
                           GestureDetector(
                             onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
                                     builder: (_) => const SignupScreen())),
                             child: Text('Create account',
-                                style: AppTheme.body(13,
+                                style: AppType.subhead(
                                     weight: FontWeight.w700,
-                                    color: AppColors.primary)),
+                                    color: AppColors.accentText)),
                           ),
                         ],
                       ),

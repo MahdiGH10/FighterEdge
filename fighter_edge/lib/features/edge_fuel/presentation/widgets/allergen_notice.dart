@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_typography.dart';
 import '../../domain/models/food_enums.dart';
 import '../recipe_copy.dart';
 
@@ -55,15 +56,14 @@ class AllergenFilterBanner extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: AppTheme.body(12, color: AppColors.textSecondary),
+              style: AppType.subhead(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
             onPressed: onToggle,
             child: Text(
               showingConflicts ? 'Hide' : 'Show',
-              style: AppTheme.body(
-                12.5,
+              style: AppType.subhead(
                 color: AppColors.warning,
                 weight: FontWeight.w700,
               ),
@@ -106,7 +106,7 @@ class UnmatchedAllergenNotice extends StatelessWidget {
             child: Text(
               "We don't filter on ${terms.join(', ')} — check ingredients "
               'yourself for those.',
-              style: AppTheme.body(12, color: AppColors.textMuted),
+              style: AppType.subhead(color: AppColors.textMuted),
             ),
           ),
         ],
@@ -157,8 +157,7 @@ class AllergenStatement extends StatelessWidget {
               const SizedBox(width: Insets.sm),
               Text(
                 'ALLERGENS',
-                style: AppTheme.body(
-                  11,
+                style: AppType.micro(
                   color: hasConflict ? AppColors.warning : AppColors.textMuted,
                   weight: FontWeight.w700,
                   spacing: 0.8,
@@ -171,8 +170,7 @@ class AllergenStatement extends StatelessWidget {
             Text(
               'Contains ${RecipeCopy.allergenList(conflicting)}, which you '
               'told us to avoid.',
-              style: AppTheme.body(
-                13,
+              style: AppType.subhead(
                 color: AppColors.warning,
                 weight: FontWeight.w600,
               ),
@@ -180,17 +178,17 @@ class AllergenStatement extends StatelessWidget {
           else if (allergens.isEmpty)
             Text(
               'None of the allergens we track.',
-              style: AppTheme.body(13, color: AppColors.textSecondary),
+              style: AppType.subhead(color: AppColors.textSecondary),
             )
           else
             Text(
               'Contains ${RecipeCopy.allergenList(allergens)}.',
-              style: AppTheme.body(13, color: AppColors.textSecondary),
+              style: AppType.subhead(color: AppColors.textSecondary),
             ),
           const SizedBox(height: Insets.sm),
           Text(
             RecipeCopy.allergenDisclaimer,
-            style: AppTheme.body(11.5, color: AppColors.textMuted),
+            style: AppType.subhead(color: AppColors.textMuted),
           ),
         ],
       ),

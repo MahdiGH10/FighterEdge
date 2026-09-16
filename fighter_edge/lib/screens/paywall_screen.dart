@@ -6,6 +6,7 @@ import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 
@@ -60,17 +61,16 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 border: Border.all(color: AppColors.primary),
               ),
               child: Text('PRO',
-                  style: AppTheme.display(16,
-                      color: AppColors.primary, spacing: 2)),
+                  style: AppType.title2(color: AppColors.primary, spacing: 2)),
             ),
           ),
           const SizedBox(height: Insets.lg),
           Text('Unlock your full edge',
-              textAlign: TextAlign.center, style: AppTheme.display(24)),
+              textAlign: TextAlign.center, style: AppType.title1()),
           const SizedBox(height: Insets.xs),
           Text('Everything you need to train like a pro.',
               textAlign: TextAlign.center,
-              style: AppTheme.body(13, color: AppColors.textSecondary)),
+              style: AppType.subhead(color: AppColors.textSecondary)),
           const SizedBox(height: Insets.xl),
           for (final b in _benefits)
             _BenefitRow(
@@ -86,7 +86,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 const Icon(Icons.verified, color: AppColors.positive, size: 32),
                 const SizedBox(height: Insets.sm),
                 Text('You\'re on Pro',
-                    style: AppTheme.display(18, color: AppColors.positive)),
+                    style: AppType.title2(color: AppColors.positive)),
                 const SizedBox(height: Insets.lg),
                 GhostButton(
                   'Refresh Status',
@@ -164,14 +164,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
             const SizedBox(height: Insets.sm),
             Text('No payment will be taken until store billing is connected.',
                 textAlign: TextAlign.center,
-                style: AppTheme.body(11, color: AppColors.textMuted)),
+                style: AppType.micro(color: AppColors.textMuted)),
             const SizedBox(height: Insets.md),
             TextButton(
               onPressed: auth.isBusy ? null : auth.refreshCurrentUser,
               child: Text(
                 'Restore / refresh purchase status',
-                style: AppTheme.body(
-                  12,
+                style: AppType.subhead(
                   weight: FontWeight.w800,
                   color: AppColors.textSecondary,
                 ),
@@ -219,18 +218,17 @@ class _PlanToggle extends StatelessWidget {
             if (badge != null) ...[
               Text(
                 badge!.toUpperCase(),
-                style: AppTheme.body(
-                  9,
+                style: AppType.micro(
                   weight: FontWeight.w900,
                   color: AppColors.premium,
                   spacing: .8,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: Insets.xxs),
             ],
-            Text(label, style: AppTheme.body(13, weight: FontWeight.w800)),
-            const SizedBox(height: 2),
-            Text(price, style: AppTheme.display(22)),
+            Text(label, style: AppType.subhead(weight: FontWeight.w800)),
+            const SizedBox(height: Insets.xxs),
+            Text(price, style: AppType.title1()),
           ],
         ),
       ),
@@ -253,7 +251,7 @@ class _ComparisonRow extends StatelessWidget {
           Expanded(
             child: Text(
               free,
-              style: AppTheme.body(11, color: AppColors.textMuted),
+              style: AppType.micro(color: AppColors.textMuted),
             ),
           ),
           const Icon(Icons.arrow_forward, color: AppColors.primary, size: 16),
@@ -261,8 +259,7 @@ class _ComparisonRow extends StatelessWidget {
           Expanded(
             child: Text(
               pro,
-              style: AppTheme.body(
-                11,
+              style: AppType.micro(
                 weight: FontWeight.w800,
                 color: AppColors.textPrimary,
               ),
@@ -305,10 +302,10 @@ class _BenefitRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTheme.body(14, weight: FontWeight.w700)),
-                const SizedBox(height: 2),
+                Text(title, style: AppType.callout(weight: FontWeight.w700)),
+                const SizedBox(height: Insets.xxs),
                 Text(subtitle,
-                    style: AppTheme.body(12, color: AppColors.textSecondary)),
+                    style: AppType.subhead(color: AppColors.textSecondary)),
               ],
             ),
           ),

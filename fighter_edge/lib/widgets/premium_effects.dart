@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 
 /// A restrained fight-night backdrop inspired by animated web gradients,
 /// implemented as native Flutter decoration so it stays fast on mobile.
@@ -151,8 +152,7 @@ class PremiumBadge extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             label.toUpperCase(),
-            style: AppTheme.body(
-              10,
+            style: AppType.micro(
               weight: FontWeight.w800,
               color: AppColors.primaryBright,
               spacing: .8,

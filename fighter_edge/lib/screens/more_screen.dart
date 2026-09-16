@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/stat_card.dart';
 import 'profile_screen.dart';
@@ -41,7 +42,7 @@ class MoreScreen extends StatelessWidget {
                   const SizedBox(height: Insets.xl),
                   Center(
                     child: Text('FIGHTER EDGE · v1.0',
-                        style: AppTheme.body(11,
+                        style: AppType.micro(
                             weight: FontWeight.w600,
                             color: AppColors.textMuted,
                             spacing: 1)),
@@ -94,10 +95,10 @@ class _MoreRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(e.title,
-                      style: AppTheme.body(15, weight: FontWeight.w700)),
-                  const SizedBox(height: 2),
+                      style: AppType.callout(weight: FontWeight.w700)),
+                  const SizedBox(height: Insets.xxs),
                   Text(e.subtitle,
-                      style: AppTheme.body(12,
+                      style: AppType.subhead(
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
                 ],

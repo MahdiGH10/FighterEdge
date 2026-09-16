@@ -5,6 +5,7 @@ import '../data/mock_data.dart';
 import '../models/coach_cue.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/pro_lock.dart';
@@ -42,13 +43,13 @@ class _CornerCoachScreenState extends State<CornerCoachScreen> {
             const SizedBox(height: Insets.md),
             Center(
               child: Text('ROUND $_round',
-                  style: AppTheme.display(30,
-                      color: AppColors.primary, spacing: 1)),
+                  style:
+                      AppType.largeTitle(color: AppColors.primary, spacing: 1)),
             ),
             const SizedBox(height: Insets.sm),
             Text(pep,
                 textAlign: TextAlign.center,
-                style: AppTheme.body(14,
+                style: AppType.callout(
                     weight: FontWeight.w500, color: AppColors.textSecondary)),
             const SizedBox(height: Insets.xl),
             for (final c in MockData.coachCues) _CueCard(c),
@@ -91,11 +92,11 @@ class _CueCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(cue.label,
-                      style: AppTheme.body(12,
+                      style: AppType.subhead(
                           weight: FontWeight.w700, spacing: 0.5)),
                   const SizedBox(height: 3),
                   Text(cue.message,
-                      style: AppTheme.body(13,
+                      style: AppType.subhead(
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
                 ],

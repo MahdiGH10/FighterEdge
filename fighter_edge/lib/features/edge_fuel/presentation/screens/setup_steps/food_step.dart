@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../theme/app_colors.dart';
 import '../../../../../theme/app_theme.dart';
+import '../../../../../theme/app_typography.dart';
 import '../../../../../widgets/app_text_field.dart';
 import '../../controllers/edge_fuel_setup_controller.dart';
 
@@ -54,14 +55,14 @@ class _FoodStepState extends State<FoodStep> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('Food preferences', style: AppTheme.display(22)),
+        Text('Food preferences', style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
           "Optional now — shapes meal suggestions once recipes launch.",
-          style: AppTheme.body(13, color: AppColors.textSecondary),
+          style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
-        Text('Diet type', style: AppTheme.body(13, weight: FontWeight.w800)),
+        Text('Diet type', style: AppType.subhead(weight: FontWeight.w800)),
         const SizedBox(height: Insets.sm),
         _ChipRow(
           options: _diets,
@@ -85,8 +86,7 @@ class _FoodStepState extends State<FoodStep> {
               (list) => controller.setFoodPreferences(dislikedFoods: list)),
         ),
         const SizedBox(height: Insets.lg),
-        Text('Meals per day',
-            style: AppTheme.body(13, weight: FontWeight.w800)),
+        Text('Meals per day', style: AppType.subhead(weight: FontWeight.w800)),
         const SizedBox(height: Insets.sm),
         Row(
           children: [
@@ -100,7 +100,7 @@ class _FoodStepState extends State<FoodStep> {
             SizedBox(
               width: 56,
               child: Text('$mealsPerDay',
-                  textAlign: TextAlign.center, style: AppTheme.display(22)),
+                  textAlign: TextAlign.center, style: AppType.title1()),
             ),
             _StepButton(
               icon: Icons.add,
@@ -112,7 +112,7 @@ class _FoodStepState extends State<FoodStep> {
           ],
         ),
         const SizedBox(height: Insets.lg),
-        Text('Budget', style: AppTheme.body(13, weight: FontWeight.w800)),
+        Text('Budget', style: AppType.subhead(weight: FontWeight.w800)),
         const SizedBox(height: Insets.sm),
         _ChipRow(
           options: _budgets,
@@ -121,7 +121,7 @@ class _FoodStepState extends State<FoodStep> {
         ),
         const SizedBox(height: Insets.lg),
         Text('Cooking time available',
-            style: AppTheme.body(13, weight: FontWeight.w800)),
+            style: AppType.subhead(weight: FontWeight.w800)),
         const SizedBox(height: Insets.sm),
         _ChipRow(
           options: _cookingTimes,
@@ -170,8 +170,7 @@ class _ChipRow extends StatelessWidget {
             side: BorderSide(
               color: value == selected ? AppColors.primary : AppColors.border,
             ),
-            labelStyle: AppTheme.body(
-              12,
+            labelStyle: AppType.subhead(
               weight: FontWeight.w800,
               color: value == selected
                   ? AppColors.textPrimary

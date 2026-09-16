@@ -5,6 +5,7 @@ import '../../../../controllers/auth_controller.dart';
 import '../../../../state/app_state.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_typography.dart';
 import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../data/edge_fuel_repository.dart';
@@ -197,7 +198,7 @@ class _StepProgress extends StatelessWidget {
           Row(
             children: [
               for (var i = 0; i < titles.length; i++) ...[
-                if (i > 0) const SizedBox(width: 4),
+                if (i > 0) const SizedBox(width: Insets.xs),
                 Expanded(
                   child: AnimatedContainer(
                     duration: MotionTokens.standard,
@@ -215,7 +216,7 @@ class _StepProgress extends StatelessWidget {
           const SizedBox(height: Insets.sm),
           Text(
             'Step ${step + 1} of ${titles.length} · ${titles[step]}',
-            style: AppTheme.body(12,
+            style: AppType.subhead(
                 weight: FontWeight.w700, color: AppColors.textSecondary),
           ),
         ],

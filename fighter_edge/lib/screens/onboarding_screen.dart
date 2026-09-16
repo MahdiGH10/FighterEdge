@@ -6,6 +6,7 @@ import '../controllers/auth_controller.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/brand_logo.dart';
 import '../widgets/premium_effects.dart';
@@ -58,11 +59,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: BrandLogo(scale: .7),
               ),
               const SizedBox(height: Insets.xxl),
-              Text('Set up your edge', style: AppTheme.display(30)),
+              Text('Set up your edge', style: AppType.largeTitle()),
               const SizedBox(height: Insets.sm),
               Text(
                 'Fresh account, fresh camp. Answer a few basics and Fighter Edge will start clean around your goals.',
-                style: AppTheme.body(14, color: AppColors.textSecondary),
+                style: AppType.callout(color: AppColors.textSecondary),
               ),
               const SizedBox(height: Insets.xl),
               AppCard(
@@ -120,7 +121,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               Text(
                 'You can change units, reminders, and safety preferences later in Settings.',
                 textAlign: TextAlign.center,
-                style: AppTheme.body(11, color: AppColors.textMuted),
+                style: AppType.micro(color: AppColors.textMuted),
               ),
             ],
           ),
@@ -167,7 +168,7 @@ class _FieldLabel extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: Insets.sm),
       child: Text(
         label,
-        style: AppTheme.body(13, weight: FontWeight.w800),
+        style: AppType.subhead(weight: FontWeight.w800),
       ),
     );
   }
@@ -200,8 +201,7 @@ class _ChoiceWrap extends StatelessWidget {
             side: BorderSide(
               color: value == selected ? AppColors.primary : AppColors.border,
             ),
-            labelStyle: AppTheme.body(
-              12,
+            labelStyle: AppType.subhead(
               weight: FontWeight.w800,
               color: value == selected
                   ? AppColors.textPrimary
@@ -230,10 +230,10 @@ class _DayStepper extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              Text('$value', style: AppTheme.display(30)),
+              Text('$value', style: AppType.largeTitle()),
               Text(
                 value == 1 ? 'day' : 'days',
-                style: AppTheme.body(11, color: AppColors.textMuted),
+                style: AppType.micro(color: AppColors.textMuted),
               ),
             ],
           ),
@@ -300,7 +300,7 @@ class _PreviewCard extends StatelessWidget {
           Expanded(
             child: Text(
               '$days-day $level plan · $goal',
-              style: AppTheme.body(13, weight: FontWeight.w800),
+              style: AppType.subhead(weight: FontWeight.w800),
             ),
           ),
         ],

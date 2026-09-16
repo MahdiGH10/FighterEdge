@@ -11,6 +11,7 @@ import '../features/edge_fuel/presentation/screens/recipe_library_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/filter_chips.dart';
@@ -107,7 +108,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
         backgroundColor: AppColors.surface,
         title: Text(
           existing == null ? 'Add food' : 'Edit food',
-          style: AppTheme.display(18),
+          style: AppType.title2(),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -155,7 +156,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Cancel',
-              style: AppTheme.body(14, color: AppColors.textSecondary),
+              style: AppType.callout(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -184,10 +185,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
             },
             child: Text(
               'Save',
-              style: AppTheme.body(
-                14,
+              style: AppType.callout(
                 weight: FontWeight.w700,
-                color: AppColors.primary,
+                color: AppColors.accentText,
               ),
             ),
           ),
@@ -229,8 +229,7 @@ class _DateSwitcher extends StatelessWidget {
             child: Text(
               label,
               textAlign: TextAlign.center,
-              style: AppTheme.body(
-                13,
+              style: AppType.subhead(
                 weight: FontWeight.w800,
                 color: AppColors.textSecondary,
               ),
@@ -260,7 +259,7 @@ class _DialogField extends StatelessWidget {
       child: TextField(
         controller: controller,
         keyboardType: number ? TextInputType.number : TextInputType.text,
-        style: AppTheme.body(14),
+        style: AppType.callout(),
         cursorColor: AppColors.primary,
         decoration: InputDecoration(
           labelText: label,
@@ -318,14 +317,13 @@ class _TodayView extends StatelessWidget {
                   children: [
                     Text(
                       '${edgeFuel.consumedCalories}',
-                      style: AppTheme.display(38),
+                      style: AppType.largeTitle(),
                     ),
                     Text(
                       edgeFuel.hasUsableTarget
                           ? '/ ${edgeFuel.targetCalories} kcal'
                           : 'logged today',
-                      style: AppTheme.body(
-                        12,
+                      style: AppType.subhead(
                         weight: FontWeight.w500,
                         color: AppColors.textMuted,
                       ),
@@ -402,21 +400,20 @@ class _RecipesTab extends StatelessWidget {
             children: [
               Text(
                 'RECIPE LIBRARY',
-                style: AppTheme.body(
-                  11,
+                style: AppType.micro(
                   color: AppColors.textMuted,
                   weight: FontWeight.w700,
                   spacing: 0.8,
                 ),
               ),
               const SizedBox(height: Insets.xs),
-              Text('Food you can actually cook', style: AppTheme.display(20)),
+              Text('Food you can actually cook', style: AppType.title1()),
               const SizedBox(height: Insets.sm),
               Text(
                 'Fighter-focused recipes with the macros worked out, built '
                 'around what you have in the kitchen. Filter by training '
                 'timing, diet, cost and time.',
-                style: AppTheme.body(13, color: AppColors.textSecondary),
+                style: AppType.subhead(color: AppColors.textSecondary),
               ),
               const SizedBox(height: Insets.lg),
               PrimaryButton(
@@ -484,7 +481,7 @@ class _RecipeShortcut extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(height: Insets.sm),
-          Text(label, style: AppTheme.body(13, weight: FontWeight.w700)),
+          Text(label, style: AppType.subhead(weight: FontWeight.w700)),
         ],
       ),
     );
@@ -576,18 +573,16 @@ class _Macro extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: AppTheme.body(
-              10,
+            style: AppType.micro(
               weight: FontWeight.w600,
               color: AppColors.textMuted,
             ),
           ),
           const SizedBox(height: Insets.sm),
-          Text('$value g', style: AppTheme.display(18)),
+          Text('$value g', style: AppType.title2()),
           Text(
             target <= 0 ? 'set target' : '/ $target g',
-            style: AppTheme.body(
-              11,
+            style: AppType.micro(
               weight: FontWeight.w500,
               color: over ? AppColors.negative : AppColors.textMuted,
             ),
@@ -643,7 +638,7 @@ class _FoodRow extends StatelessWidget {
                       Flexible(
                         child: Text(
                           entry.name,
-                          style: AppTheme.body(15, weight: FontWeight.w700),
+                          style: AppType.callout(weight: FontWeight.w700),
                         ),
                       ),
                       if (entry.saved) ...[
@@ -656,11 +651,10 @@ class _FoodRow extends StatelessWidget {
                       ],
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: Insets.xxs),
                   Text(
                     entry.notes,
-                    style: AppTheme.body(
-                      12,
+                    style: AppType.subhead(
                       weight: FontWeight.w500,
                       color: AppColors.textSecondary,
                     ),
@@ -670,8 +664,7 @@ class _FoodRow extends StatelessWidget {
             ),
             Text(
               '${entry.calories} kcal',
-              style: AppTheme.body(
-                13,
+              style: AppType.subhead(
                 weight: FontWeight.w600,
                 color: AppColors.textSecondary,
               ),
@@ -776,15 +769,14 @@ class _EdgeFuelEntryCard extends StatelessWidget {
               children: [
                 Text(
                   'EdgeFuel AI',
-                  style: AppTheme.body(13, weight: FontWeight.w800),
+                  style: AppType.subhead(weight: FontWeight.w800),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: Insets.xxs),
                 Text(
                   hasSetup && target != null && target.isSuccess
                       ? 'Your plan: ${target.targetCalories} kcal · view details'
                       : 'Get a personalized daily calorie and macro target',
-                  style: AppTheme.body(
-                    12,
+                  style: AppType.subhead(
                     weight: FontWeight.w500,
                     color: AppColors.textSecondary,
                   ),

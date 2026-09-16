@@ -6,6 +6,7 @@ import '../../../../controllers/auth_controller.dart';
 import '../../../../screens/paywall_screen.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_typography.dart';
 import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/empty_state.dart';
 import '../../../../widgets/primary_button.dart';
@@ -93,17 +94,17 @@ class _PlanBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('DAILY TARGET',
-                  style: AppTheme.body(11,
+                  style: AppType.micro(
                       weight: FontWeight.w700,
                       color: AppColors.textMuted,
                       spacing: 0.8)),
               const SizedBox(height: Insets.xs),
               Text('${target.targetCalories} kcal',
-                  style: AppTheme.display(34)),
-              const SizedBox(height: 2),
+                  style: AppType.largeTitle()),
+              const SizedBox(height: Insets.xxs),
               Text(
                 'Maintenance range ${target.maintenanceRangeLowKcal}–${target.maintenanceRangeHighKcal} kcal',
-                style: AppTheme.body(12, color: AppColors.textSecondary),
+                style: AppType.subhead(color: AppColors.textSecondary),
               ),
             ],
           ),
@@ -124,7 +125,7 @@ class _PlanBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('HOW THIS WAS CALCULATED',
-                  style: AppTheme.body(11,
+                  style: AppType.micro(
                       weight: FontWeight.w700,
                       color: AppColors.textMuted,
                       spacing: 0.8)),
@@ -134,15 +135,15 @@ class _PlanBody extends StatelessWidget {
                 '(Mifflin–St Jeor, ${target.equationProfileUsed != null ? NutritionCopy.equationLabel(target.equationProfileUsed!) : 'midpoint'}). '
                 'Multiplied by your activity factor, then adjusted for your goal pace. '
                 'This is an estimate, not a diagnosis — recalculate any time by revisiting setup.',
-                style: AppTheme.body(12,
+                style: AppType.subhead(
                     weight: FontWeight.w500, color: AppColors.textSecondary),
               ),
               if (target.confidence != null) ...[
                 const SizedBox(height: Insets.sm),
                 Text(
                   NutritionCopy.confidenceLabel(target.confidence!),
-                  style: AppTheme.body(11,
-                      weight: FontWeight.w700, color: AppColors.primary),
+                  style: AppType.micro(
+                      weight: FontWeight.w700, color: AppColors.accentText),
                 ),
               ],
             ],
@@ -161,7 +162,7 @@ class _PlanBody extends StatelessWidget {
                         color: AppColors.warning, size: 18),
                     const SizedBox(width: Insets.sm),
                     Text('Worth knowing',
-                        style: AppTheme.body(13, weight: FontWeight.w800)),
+                        style: AppType.subhead(weight: FontWeight.w800)),
                   ],
                 ),
                 const SizedBox(height: Insets.sm),
@@ -169,8 +170,7 @@ class _PlanBody extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text('• ${NutritionCopy.warning(code)}',
-                        style:
-                            AppTheme.body(12, color: AppColors.textSecondary)),
+                        style: AppType.subhead(color: AppColors.textSecondary)),
                   ),
               ],
             ),
@@ -216,7 +216,7 @@ class _AiCoachSection extends StatelessWidget {
                   color: AppColors.premium, size: 18),
               const SizedBox(width: Insets.sm),
               Text('EDGEFUEL COACH',
-                  style: AppTheme.body(11,
+                  style: AppType.micro(
                       weight: FontWeight.w700,
                       color: AppColors.textMuted,
                       spacing: 0.8)),
@@ -248,7 +248,7 @@ class _AiCoachLocked extends StatelessWidget {
         Text(
           'Get a plain-language explanation of your plan, and why it is set '
           'the way it is.',
-          style: AppTheme.body(12, color: AppColors.textSecondary),
+          style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.md),
         GhostButton(
@@ -292,7 +292,7 @@ class _AiCoachBody extends StatelessWidget {
             'Ask for a plain-language explanation of your plan. This sends your '
             'target and food log to our server — never medical details beyond '
             'what you already entered in setup.',
-            style: AppTheme.body(12, color: AppColors.textSecondary),
+            style: AppType.subhead(color: AppColors.textSecondary),
           ),
           const SizedBox(height: Insets.md),
           GhostButton(
@@ -313,7 +313,7 @@ class _AiCoachBody extends StatelessWidget {
       case EdgeFuelAiStatus.quotaReached:
         return Text(
           "You've reached today's AI limit. Try again tomorrow.",
-          style: AppTheme.body(12, color: AppColors.textSecondary),
+          style: AppType.subhead(color: AppColors.textSecondary),
         );
       case EdgeFuelAiStatus.unavailable:
         return Column(
@@ -322,7 +322,7 @@ class _AiCoachBody extends StatelessWidget {
             Text(
               'EdgeFuel Coach is unavailable right now. Your plan above is still '
               'accurate — this only affects the AI explanation.',
-              style: AppTheme.body(12, color: AppColors.textSecondary),
+              style: AppType.subhead(color: AppColors.textSecondary),
             ),
             const SizedBox(height: Insets.md),
             GhostButton(
@@ -347,17 +347,17 @@ class _AiCoachBody extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: Insets.sm),
                 child: Text(
                   'Please speak with a qualified professional before acting on this.',
-                  style: AppTheme.body(12,
+                  style: AppType.subhead(
                       weight: FontWeight.w700, color: AppColors.warning),
                 ),
               ),
             Text(response.summary,
-                style: AppTheme.body(13, weight: FontWeight.w500)),
+                style: AppType.subhead(weight: FontWeight.w500)),
             for (final warning in response.warnings)
               Padding(
                 padding: const EdgeInsets.only(top: Insets.xs),
                 child: Text('• $warning',
-                    style: AppTheme.body(12, color: AppColors.textSecondary)),
+                    style: AppType.subhead(color: AppColors.textSecondary)),
               ),
             const SizedBox(height: Insets.md),
             GhostButton(
@@ -425,9 +425,9 @@ class _MacroChip extends StatelessWidget {
               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(height: Insets.xs),
-            Text('${grams ?? 0} g', style: AppTheme.display(16)),
+            Text('${grams ?? 0} g', style: AppType.title2()),
             Text(label.toUpperCase(),
-                style: AppTheme.body(9,
+                style: AppType.micro(
                     weight: FontWeight.w700, color: AppColors.textMuted)),
           ],
         ),

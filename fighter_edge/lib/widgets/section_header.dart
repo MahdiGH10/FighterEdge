@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -17,7 +18,7 @@ class SectionHeader extends StatelessWidget {
         children: [
           Text(
             title.toUpperCase(),
-            style: AppTheme.body(12,
+            style: AppType.subhead(
                 weight: FontWeight.w700,
                 color: AppColors.textSecondary,
                 spacing: 1.4),

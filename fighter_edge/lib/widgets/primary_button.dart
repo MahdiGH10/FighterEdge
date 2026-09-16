@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 
 /// Solid red call-to-action button used across the app.
 class PrimaryButton extends StatefulWidget {
@@ -42,7 +43,7 @@ class _PrimaryButtonState extends State<PrimaryButton> {
             widget.label.toUpperCase(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTheme.body(13,
+            style: AppType.subhead(
                 weight: FontWeight.w700, color: Colors.white, spacing: 0.8),
           ),
         ),
@@ -136,7 +137,7 @@ class GhostButton extends StatelessWidget {
                     label.toUpperCase(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTheme.body(13,
+                    style: AppType.subhead(
                         weight: FontWeight.w700,
                         color: AppColors.textPrimary,
                         spacing: 0.8),

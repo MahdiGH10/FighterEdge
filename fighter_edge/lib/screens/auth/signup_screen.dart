@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../controllers/auth_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/app_typography.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
@@ -58,10 +59,10 @@ class _SignupScreenState extends State<SignupScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: Insets.sm),
-            Text('Start your camp', style: AppTheme.display(22)),
+            Text('Start your camp', style: AppType.title1()),
             const SizedBox(height: Insets.xs),
             Text('Track training, weight, nutrition and more.',
-                style: AppTheme.body(13, color: AppColors.textSecondary)),
+                style: AppType.subhead(color: AppColors.textSecondary)),
             const SizedBox(height: Insets.xl),
             AppTextField(
               controller: _name,
@@ -100,7 +101,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 Expanded(
                   child: Text('I agree to the Terms & Privacy Policy',
-                      style: AppTheme.body(12, color: AppColors.textSecondary)),
+                      style: AppType.subhead(color: AppColors.textSecondary)),
                 ),
               ],
             ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../../theme/app_colors.dart';
 import '../../../../../theme/app_theme.dart';
+import '../../../../../theme/app_typography.dart';
 import '../../../../../widgets/app_text_field.dart';
 import '../../../domain/models/nutrition_enums.dart';
 import '../../controllers/edge_fuel_setup_controller.dart';
@@ -69,11 +70,11 @@ class _BodyStepState extends State<BodyStep> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('Tell us about your body', style: AppTheme.display(22)),
+        Text('Tell us about your body', style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
           'Used only to estimate your energy needs — never shown publicly.',
-          style: AppTheme.body(13, color: AppColors.textSecondary),
+          style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
         AppTextField(
@@ -120,12 +121,12 @@ class _BodyStepState extends State<BodyStep> {
           ),
         ],
         const SizedBox(height: Insets.xl),
-        Text('Which equation should we use?', style: AppTheme.display(16)),
+        Text('Which equation should we use?', style: AppType.title2()),
         const SizedBox(height: Insets.xs),
         Text(
           "Mifflin–St Jeor uses two published offsets — this isn't a social question, "
           "it's about which formula fits your physiology best.",
-          style: AppTheme.body(12, color: AppColors.textSecondary),
+          style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.md),
         for (final profile in EquationProfile.values)
@@ -136,12 +137,12 @@ class _BodyStepState extends State<BodyStep> {
             onTap: () => controller.setBodyInputs(equationProfile: profile),
           ),
         const SizedBox(height: Insets.xl),
-        Text('Quick health check', style: AppTheme.display(16)),
+        Text('Quick health check', style: AppType.title2()),
         const SizedBox(height: Insets.xs),
         Text(
           "We store only yes/no flags, never details. If any apply, we'll ask you "
           "to check with a qualified professional before showing an automated plan.",
-          style: AppTheme.body(12, color: AppColors.textSecondary),
+          style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.sm),
         _SafetyCheck(
@@ -225,7 +226,7 @@ class _SafetyCheck extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         dense: true,
         activeColor: AppColors.primary,
-        title: Text(label, style: AppTheme.body(13, weight: FontWeight.w600)),
+        title: Text(label, style: AppType.subhead(weight: FontWeight.w600)),
       ),
     );
   }

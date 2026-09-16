@@ -10,6 +10,7 @@ import '../models/training_session.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/primary_button.dart';
@@ -170,10 +171,10 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
             ),
             const SizedBox(height: Insets.xxl),
             Text('Round',
-                style: AppTheme.body(12,
+                style: AppType.subhead(
                     weight: FontWeight.w600, color: AppColors.textSecondary)),
-            const SizedBox(height: 2),
-            Text('$_round / ${_style.rounds}', style: AppTheme.display(22)),
+            const SizedBox(height: Insets.xxs),
+            Text('$_round / ${_style.rounds}', style: AppType.title1()),
             const SizedBox(height: Insets.xl),
             TweenAnimationBuilder<double>(
               key: ValueKey(urgent ? _secondsLeft : _phaseLabel),
@@ -200,12 +201,12 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(_clock,
-                          style: AppTheme.display(64,
+                          style: AppType.heroNumeral(
                               color: AppColors.textPrimary)),
                       const SizedBox(height: Insets.xs),
                       Text(_phaseLabel,
-                          style: AppTheme.display(18,
-                              color: _phaseColor, spacing: 3)),
+                          style:
+                              AppType.title2(color: _phaseColor, spacing: 3)),
                     ],
                   ),
                 ),
@@ -213,10 +214,10 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
             ),
             const SizedBox(height: Insets.xl),
             Text('Next: $_nextLabel',
-                style: AppTheme.body(13,
+                style: AppType.subhead(
                     weight: FontWeight.w500, color: AppColors.textSecondary)),
-            const SizedBox(height: 2),
-            Text(_fmt(_nextSeconds), style: AppTheme.display(20)),
+            const SizedBox(height: Insets.xxs),
+            Text(_fmt(_nextSeconds), style: AppType.title1()),
             const SizedBox(height: Insets.xxl),
             Row(
               children: [

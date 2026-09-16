@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../theme/app_colors.dart';
 import '../../../../../theme/app_theme.dart';
+import '../../../../../theme/app_typography.dart';
 import '../../../../../widgets/primary_button.dart';
 import '../../../../../widgets/stat_card.dart';
 import '../../../domain/models/nutrition_enums.dart';
@@ -87,11 +88,11 @@ class _ReviewSuccess extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('Your plan', style: AppTheme.display(22)),
+        Text('Your plan', style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
           'An estimate, not a diagnosis. You can revisit this any time.',
-          style: AppTheme.body(13, color: AppColors.textSecondary),
+          style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
         AppCard(
@@ -100,17 +101,17 @@ class _ReviewSuccess extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('DAILY TARGET',
-                  style: AppTheme.body(11,
+                  style: AppType.micro(
                       weight: FontWeight.w700,
                       color: AppColors.textMuted,
                       spacing: 0.8)),
               const SizedBox(height: Insets.xs),
               Text('${target.targetCalories} kcal',
-                  style: AppTheme.display(34)),
-              const SizedBox(height: 2),
+                  style: AppType.largeTitle()),
+              const SizedBox(height: Insets.xxs),
               Text(
                 'Maintenance range ${target.maintenanceRangeLowKcal}–${target.maintenanceRangeHighKcal} kcal',
-                style: AppTheme.body(12, color: AppColors.textSecondary),
+                style: AppType.subhead(color: AppColors.textSecondary),
               ),
             ],
           ),
@@ -131,7 +132,7 @@ class _ReviewSuccess extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('ASSUMPTIONS',
-                  style: AppTheme.body(11,
+                  style: AppType.micro(
                       weight: FontWeight.w700,
                       color: AppColors.textMuted,
                       spacing: 0.8)),
@@ -170,7 +171,7 @@ class _ReviewSuccess extends StatelessWidget {
                         color: AppColors.warning, size: 18),
                     const SizedBox(width: Insets.sm),
                     Text('Worth knowing',
-                        style: AppTheme.body(13, weight: FontWeight.w800)),
+                        style: AppType.subhead(weight: FontWeight.w800)),
                   ],
                 ),
                 const SizedBox(height: Insets.sm),
@@ -178,8 +179,7 @@ class _ReviewSuccess extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text('• ${NutritionCopy.warning(code)}',
-                        style:
-                            AppTheme.body(12, color: AppColors.textSecondary)),
+                        style: AppType.subhead(color: AppColors.textSecondary)),
                   ),
               ],
             ),
@@ -197,7 +197,7 @@ class _ReviewSuccess extends StatelessWidget {
           'You can hide calorie numbers and use meal tracking only, or adjust '
           'these targets later in Fuel settings.',
           textAlign: TextAlign.center,
-          style: AppTheme.body(11, color: AppColors.textMuted),
+          style: AppType.micro(color: AppColors.textMuted),
         ),
       ],
     );
@@ -224,9 +224,9 @@ class _MacroChip extends StatelessWidget {
               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(height: Insets.xs),
-            Text('${grams ?? 0} g', style: AppTheme.display(16)),
+            Text('${grams ?? 0} g', style: AppType.title2()),
             Text(label.toUpperCase(),
-                style: AppTheme.body(9,
+                style: AppType.micro(
                     weight: FontWeight.w700, color: AppColors.textMuted)),
           ],
         ),
@@ -248,9 +248,9 @@ class _Assumption extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label,
-              style: AppTheme.body(12,
+              style: AppType.subhead(
                   weight: FontWeight.w500, color: AppColors.textSecondary)),
-          Text(value, style: AppTheme.body(12, weight: FontWeight.w700)),
+          Text(value, style: AppType.subhead(weight: FontWeight.w700)),
         ],
       ),
     );
@@ -307,12 +307,11 @@ class _Message extends StatelessWidget {
               child: Icon(icon, size: 28, color: tone),
             ),
             const SizedBox(height: Insets.lg),
-            Text(title,
-                textAlign: TextAlign.center, style: AppTheme.display(18)),
+            Text(title, textAlign: TextAlign.center, style: AppType.title2()),
             const SizedBox(height: Insets.sm),
             Text(message,
                 textAlign: TextAlign.center,
-                style: AppTheme.body(13,
+                style: AppType.subhead(
                     weight: FontWeight.w500, color: AppColors.textMuted)),
           ],
         ),

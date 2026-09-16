@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_typography.dart';
 import '../recipe_copy.dart';
 
 /// Serving control for the recipe detail screen.
@@ -66,7 +67,7 @@ class _ServingStepperState extends State<ServingStepper> {
             // [AnimatedMacroValue].
             child: Text(
               RecipeCopy.servingsLabel(widget.servings),
-              style: AppTheme.display(18),
+              style: AppType.title2(),
             ),
           ),
         ),

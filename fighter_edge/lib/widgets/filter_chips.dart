@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 
 /// Horizontal pill selector (filter chips / segmented tabs).
 class FilterChips extends StatelessWidget {
@@ -69,7 +70,7 @@ class _Chip extends StatelessWidget {
               maxLines: 1,
               softWrap: false,
               overflow: TextOverflow.ellipsis,
-              style: AppTheme.body(13,
+              style: AppType.subhead(
                   weight: FontWeight.w600,
                   color: selected ? Colors.white : AppColors.textSecondary),
             ),

@@ -4,6 +4,7 @@ import '../data/mock_data.dart';
 import '../models/technique.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/stat_card.dart';
@@ -64,7 +65,7 @@ class _TechniqueLibraryScreenState extends State<TechniqueLibraryScreen> {
               child: _visible.isEmpty
                   ? Center(
                       child: Text('No techniques found',
-                          style: AppTheme.body(14, color: AppColors.textMuted)),
+                          style: AppType.callout(color: AppColors.textMuted)),
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(
@@ -104,10 +105,10 @@ class _TechniqueLibraryScreenState extends State<TechniqueLibraryScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(technique.title, style: AppTheme.display(22)),
+            Text(technique.title, style: AppType.title1()),
             const SizedBox(height: Insets.xs),
             Text('${technique.category} · ${technique.videoCount} lessons',
-                style: AppTheme.body(13, color: AppColors.textSecondary)),
+                style: AppType.subhead(color: AppColors.textSecondary)),
             const SizedBox(height: Insets.lg),
             AppCard(
               padding: const EdgeInsets.all(Insets.lg),
@@ -119,7 +120,7 @@ class _TechniqueLibraryScreenState extends State<TechniqueLibraryScreen> {
                   Expanded(
                     child: Text(
                       'Video playback unlocks once real sources are connected.',
-                      style: AppTheme.body(13,
+                      style: AppType.subhead(
                           weight: FontWeight.w600,
                           color: AppColors.textSecondary),
                     ),
@@ -129,7 +130,7 @@ class _TechniqueLibraryScreenState extends State<TechniqueLibraryScreen> {
             ),
             const SizedBox(height: Insets.lg),
             Text(technique.focus,
-                style: AppTheme.body(14, color: AppColors.textPrimary)),
+                style: AppType.callout(color: AppColors.textPrimary)),
             const SizedBox(height: Insets.lg),
             Row(
               children: [
@@ -174,11 +175,11 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       onChanged: onChanged,
-      style: AppTheme.body(14),
+      style: AppType.callout(),
       cursorColor: AppColors.primary,
       decoration: InputDecoration(
         hintText: 'Search techniques',
-        hintStyle: AppTheme.body(14, color: AppColors.textMuted),
+        hintStyle: AppType.callout(color: AppColors.textMuted),
         prefixIcon:
             const Icon(Icons.search, color: AppColors.textMuted, size: 20),
         filled: true,
@@ -240,16 +241,16 @@ class _TechniqueCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(t.category,
-                      style: AppTheme.body(10,
+                      style: AppType.micro(
                           weight: FontWeight.w700,
-                          color: AppColors.primary,
+                          color: AppColors.accentText,
                           spacing: 0.8)),
                   const SizedBox(height: 3),
                   Text(t.title,
-                      style: AppTheme.body(15, weight: FontWeight.w700)),
+                      style: AppType.callout(weight: FontWeight.w700)),
                   const SizedBox(height: 3),
                   Text('${t.videoCount} videos',
-                      style: AppTheme.body(12,
+                      style: AppType.subhead(
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
                   const SizedBox(height: Insets.sm),

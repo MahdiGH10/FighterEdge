@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 
 /// Dark, brand-styled text input used across the auth screens.
 class AppTextField extends StatelessWidget {
@@ -49,16 +50,16 @@ class AppTextField extends StatelessWidget {
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       autofocus: autofocus,
-      style: AppTheme.body(15),
+      style: AppType.callout(),
       cursorColor: AppColors.primary,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: AppTheme.body(14, color: AppColors.textMuted),
+        labelStyle: AppType.callout(color: AppColors.textMuted),
         floatingLabelStyle: WidgetStateTextStyle.resolveWith((states) {
           final color = states.contains(WidgetState.error)
               ? AppColors.negative
               : AppColors.primary;
-          return AppTheme.body(13, color: color);
+          return AppType.subhead(color: color);
         }),
         prefixIcon: Icon(icon, color: AppColors.textMuted, size: 20),
         suffixIcon: suffix,

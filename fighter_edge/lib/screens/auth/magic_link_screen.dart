@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../controllers/auth_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/app_typography.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
@@ -65,14 +66,14 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
                 size: 48, color: AppColors.primary),
             const SizedBox(height: Insets.lg),
             Text(_codeSent ? 'Enter your code' : 'Passwordless sign-in',
-                textAlign: TextAlign.center, style: AppTheme.display(20)),
+                textAlign: TextAlign.center, style: AppType.title1()),
             const SizedBox(height: Insets.sm),
             Text(
               _codeSent
                   ? 'We sent a 6-digit code to ${_email.text.trim()}.'
                   : 'We\'ll email you a one-time code — no password needed.',
               textAlign: TextAlign.center,
-              style: AppTheme.body(13, color: AppColors.textSecondary),
+              style: AppType.subhead(color: AppColors.textSecondary),
             ),
             const SizedBox(height: Insets.xl),
             if (!_codeSent) ...[
@@ -110,7 +111,7 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
                   ),
                   child: Text('Demo mode — your code is $hint',
                       textAlign: TextAlign.center,
-                      style: AppTheme.body(12,
+                      style: AppType.subhead(
                           weight: FontWeight.w600,
                           color: AppColors.textSecondary)),
                 ),
@@ -125,8 +126,8 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
               TextButton(
                 onPressed: () => setState(() => _codeSent = false),
                 child: Text('Use a different email',
-                    style: AppTheme.body(12,
-                        weight: FontWeight.w600, color: AppColors.primary)),
+                    style: AppType.subhead(
+                        weight: FontWeight.w600, color: AppColors.accentText)),
               ),
             ],
           ],

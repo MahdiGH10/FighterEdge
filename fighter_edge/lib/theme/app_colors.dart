@@ -17,6 +17,14 @@ class AppColors {
   // Brand
   static const Color primary = Color(0xFFE63328);
   static const Color primaryBright = Color(0xFFFF4C42);
+
+  /// Accent for *small* text (below 18pt, or 14pt bold).
+  ///
+  /// [primary] measures 3.70:1 on [surfaceElevated] — under the 4.5:1 WCAG AA
+  /// floor for normal-sized text. This is the same hue at 4.83:1. Use [primary]
+  /// for fills and large display type; use this anywhere the accent is set on
+  /// body-sized text.
+  static const Color accentText = primaryBright;
   static const Color primaryDark = Color(0xFFC22A20);
   static const Color primarySoft = Color(0x22E63328);
   static const Color primaryGlow = Color(0x38E63328);

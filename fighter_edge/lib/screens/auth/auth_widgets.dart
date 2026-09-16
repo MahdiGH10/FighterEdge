@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../auth/auth_repository.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/app_typography.dart';
 
 /// Shows a branded error snackbar for an auth failure.
 void showAuthError(BuildContext context, Object error) {
@@ -23,8 +24,8 @@ void showAuthMessage(BuildContext context, String message) {
           const Icon(Icons.error_outline, color: AppColors.primary, size: 20),
           const SizedBox(width: Insets.md),
           Expanded(
-            child: Text(message,
-                style: AppTheme.body(13, weight: FontWeight.w500)),
+            child:
+                Text(message, style: AppType.subhead(weight: FontWeight.w500)),
           ),
         ],
       ),
@@ -43,7 +44,7 @@ class OrDivider extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: Insets.md),
           child: Text('OR',
-              style: AppTheme.body(11,
+              style: AppType.micro(
                   weight: FontWeight.w600, color: AppColors.textMuted)),
         ),
         const Expanded(child: Divider(color: AppColors.border)),
@@ -79,7 +80,7 @@ class SocialButton extends StatelessWidget {
             children: [
               Icon(icon, size: 20, color: AppColors.textPrimary),
               const SizedBox(width: Insets.md),
-              Text(label, style: AppTheme.body(14, weight: FontWeight.w600)),
+              Text(label, style: AppType.callout(weight: FontWeight.w600)),
             ],
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import 'premium_effects.dart';
 
 /// Standard screen scaffold: dark header with title + optional actions,
@@ -72,7 +73,7 @@ class AppHeader extends StatelessWidget {
             child: Text(
               title.toUpperCase(),
               textAlign: TextAlign.center,
-              style: AppTheme.display(18, spacing: 1.5),
+              style: AppType.title2(spacing: 1.5),
             ),
           ),
           if (actions.isEmpty && showBack) const SizedBox(width: 38),

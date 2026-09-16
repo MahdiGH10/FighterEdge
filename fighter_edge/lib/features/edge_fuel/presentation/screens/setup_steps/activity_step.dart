@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../theme/app_colors.dart';
 import '../../../../../theme/app_theme.dart';
+import '../../../../../theme/app_typography.dart';
 import '../../../domain/models/nutrition_enums.dart';
 import '../../controllers/edge_fuel_setup_controller.dart';
 import '../../nutrition_copy.dart';
@@ -19,12 +20,12 @@ class ActivityStep extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('Your normal activity', style: AppTheme.display(22)),
+        Text('Your normal activity', style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
           "Day-to-day movement outside training — Fighter Edge sessions are "
           "counted separately next.",
-          style: AppTheme.body(13, color: AppColors.textSecondary),
+          style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
         for (final level in ActivityLevel.values)

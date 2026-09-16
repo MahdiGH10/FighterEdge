@@ -6,6 +6,7 @@ import '../models/training_session.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/stat_card.dart';
@@ -69,7 +70,7 @@ class _WeekView extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('WEEK 4', style: AppTheme.display(20)),
+            Text('WEEK 4', style: AppType.title1()),
             const SizedBox(width: Insets.sm),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -78,14 +79,14 @@ class _WeekView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text('PEAK',
-                  style: AppTheme.body(11,
-                      weight: FontWeight.w700, color: AppColors.primary)),
+                  style: AppType.micro(
+                      weight: FontWeight.w700, color: AppColors.accentText)),
             ),
           ],
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: Insets.xxs),
         Text('May 20 – May 26',
-            style: AppTheme.body(12,
+            style: AppType.subhead(
                 weight: FontWeight.w500, color: AppColors.textSecondary)),
         const SizedBox(height: Insets.lg),
         for (final s in state.sessions)
@@ -112,13 +113,13 @@ class _WeekView extends StatelessWidget {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           backgroundColor: AppColors.surface,
-          title: Text('Log ${session.title}', style: AppTheme.display(18)),
+          title: Text('Log ${session.title}', style: AppType.title2()),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text('RPE $rpe / 10',
-                  style: AppTheme.body(13,
+                  style: AppType.subhead(
                       weight: FontWeight.w700, color: AppColors.textSecondary)),
               Slider(
                 value: rpe.toDouble(),
@@ -132,7 +133,7 @@ class _WeekView extends StatelessWidget {
                 controller: note,
                 minLines: 2,
                 maxLines: 3,
-                style: AppTheme.body(14),
+                style: AppType.callout(),
                 cursorColor: AppColors.primary,
                 decoration: const InputDecoration(
                   hintText: 'Quick reflection',
@@ -147,13 +148,13 @@ class _WeekView extends StatelessWidget {
             TextButton(
               onPressed: () => Navigator.pop(ctx),
               child: Text('Cancel',
-                  style: AppTheme.body(14, color: AppColors.textSecondary)),
+                  style: AppType.callout(color: AppColors.textSecondary)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, (rpe: rpe, note: note.text)),
               child: Text('Save',
-                  style: AppTheme.body(14,
-                      weight: FontWeight.w700, color: AppColors.primary)),
+                  style: AppType.callout(
+                      weight: FontWeight.w700, color: AppColors.accentText)),
             ),
           ],
         ),
@@ -182,7 +183,7 @@ class _SessionRow extends StatelessWidget {
             SizedBox(
               width: 38,
               child: Text(s.day.toUpperCase(),
-                  style: AppTheme.body(12,
+                  style: AppType.subhead(
                       weight: FontWeight.w700, color: AppColors.textMuted)),
             ),
             Container(
@@ -206,12 +207,12 @@ class _SessionRow extends StatelessWidget {
                   Text(s.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTheme.body(14, weight: FontWeight.w700)),
-                  const SizedBox(height: 2),
+                      style: AppType.callout(weight: FontWeight.w700)),
+                  const SizedBox(height: Insets.xxs),
                   Text(s.subtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTheme.body(12,
+                      style: AppType.subhead(
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
                 ],
@@ -300,7 +301,7 @@ class _HistoryView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
-        Text('SESSION HISTORY', style: AppTheme.display(20)),
+        Text('SESSION HISTORY', style: AppType.title1()),
         const SizedBox(height: Insets.lg),
         for (final session in sessions) _HistoryRow(session),
       ],
@@ -328,25 +329,24 @@ class _HistoryRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(session.title,
-                      style: AppTheme.body(14, weight: FontWeight.w700)),
-                  const SizedBox(height: 2),
+                      style: AppType.callout(weight: FontWeight.w700)),
+                  const SizedBox(height: Insets.xxs),
                   Text(
                     completedAt == null
                         ? 'Logged'
                         : DateFormat('MMM d, h:mm a').format(completedAt),
-                    style: AppTheme.body(12, color: AppColors.textSecondary),
+                    style: AppType.subhead(color: AppColors.textSecondary),
                   ),
                   if (session.note.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: Insets.xs),
                     Text(session.note,
-                        style:
-                            AppTheme.body(12, color: AppColors.textSecondary)),
+                        style: AppType.subhead(color: AppColors.textSecondary)),
                   ],
                 ],
               ),
             ),
             Text('RPE ${session.rpe}',
-                style: AppTheme.body(12,
+                style: AppType.subhead(
                     weight: FontWeight.w800, color: AppColors.warning)),
           ],
         ),
@@ -366,7 +366,7 @@ class _PlaceholderView extends StatelessWidget {
         padding: const EdgeInsets.all(Insets.xl),
         child: Text(message,
             textAlign: TextAlign.center,
-            style: AppTheme.body(14,
+            style: AppType.callout(
                 weight: FontWeight.w500, color: AppColors.textMuted)),
       ),
     );

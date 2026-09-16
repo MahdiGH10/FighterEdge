@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 
 /// Honest "not built yet / no data" placeholder so a selectable tab never
 /// looks silently broken.
@@ -35,12 +36,11 @@ class EmptyState extends StatelessWidget {
               child: Icon(icon, size: 28, color: AppColors.textMuted),
             ),
             const SizedBox(height: Insets.lg),
-            Text(title,
-                textAlign: TextAlign.center, style: AppTheme.display(18)),
+            Text(title, textAlign: TextAlign.center, style: AppType.title2()),
             const SizedBox(height: Insets.sm),
             Text(message,
                 textAlign: TextAlign.center,
-                style: AppTheme.body(13,
+                style: AppType.subhead(
                     weight: FontWeight.w500, color: AppColors.textMuted)),
           ],
         ),

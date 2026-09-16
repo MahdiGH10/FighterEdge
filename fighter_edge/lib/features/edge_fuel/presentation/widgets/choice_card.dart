@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_typography.dart';
 import '../../../../widgets/stat_card.dart';
 
 /// Selectable card with a title, an explanatory description, and a
@@ -37,11 +38,10 @@ class ChoiceCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: AppTheme.body(14, weight: FontWeight.w800)),
-                  const SizedBox(height: 2),
+                  Text(title, style: AppType.callout(weight: FontWeight.w800)),
+                  const SizedBox(height: Insets.xxs),
                   Text(description,
-                      style: AppTheme.body(12,
+                      style: AppType.subhead(
                           weight: FontWeight.w500,
                           color: AppColors.textSecondary)),
                 ],

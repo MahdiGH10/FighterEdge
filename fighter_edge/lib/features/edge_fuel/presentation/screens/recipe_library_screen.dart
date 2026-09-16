@@ -5,6 +5,7 @@ import '../../../../billing/subscription.dart';
 import '../../../../controllers/auth_controller.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_typography.dart';
 import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/empty_state.dart';
 import '../../../../widgets/filter_chips.dart';
@@ -114,10 +115,10 @@ class _Body extends StatelessWidget {
           child: TextField(
             controller: search,
             onChanged: controller.setQuery,
-            style: AppTheme.body(14),
+            style: AppType.callout(),
             decoration: InputDecoration(
               hintText: 'Search recipes',
-              hintStyle: AppTheme.body(14, color: AppColors.textMuted),
+              hintStyle: AppType.callout(color: AppColors.textMuted),
               prefixIcon: const Icon(
                 Icons.search,
                 size: 20,
@@ -227,9 +228,8 @@ class _EmptyResults extends StatelessWidget {
             onPressed: controller.clearFilters,
             child: Text(
               'Clear filters',
-              style: AppTheme.body(
-                13,
-                color: AppColors.primary,
+              style: AppType.subhead(
+                color: AppColors.accentText,
                 weight: FontWeight.w700,
               ),
             ),
@@ -391,8 +391,7 @@ class _Toggle extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: AppTheme.body(
-                12.5,
+              style: AppType.subhead(
                 weight: FontWeight.w600,
                 color: selected
                     ? AppColors.primaryBright
