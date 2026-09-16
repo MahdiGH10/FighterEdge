@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../theme/app_colors.dart';
+import '../../../../theme/app_haptics.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_typography.dart';
+import '../../../../widgets/press_scale.dart';
 import '../recipe_copy.dart';
 
 /// Serving control for the recipe detail screen.
@@ -45,7 +46,7 @@ class _ServingStepperState extends State<ServingStepper> {
     if ((next - widget.servings).abs() < 1e-9) return;
     // Haptic fires on the value actually changing, not on the tap — causality
     // (apple-design §13): the feedback must match what happened.
-    HapticFeedback.selectionClick();
+    AppHaptics.selection();
     widget.onChanged(double.parse(next.toStringAsFixed(2)));
   }
 
@@ -99,12 +100,18 @@ class _StepButton extends StatelessWidget {
       button: true,
       enabled: enabled,
       label: semanticLabel,
-      child: Material(
-        color: enabled ? AppColors.surfaceElevated : AppColors.surfaceAlt,
-        borderRadius: BorderRadius.circular(Radii.button),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(Radii.button),
-          onTap: onPressed,
+      child: PressScale(
+        onTap: onPressed,
+        // _change() below already fires AppHaptics.selection() itself, and
+        // only when the value actually moves — PressScale's own default
+        // would fire a second, unconditional haptic on every tap and break
+        // the causality rule this control is built around.
+        haptic: null,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: enabled ? AppColors.surfaceElevated : AppColors.surfaceAlt,
+            borderRadius: BorderRadius.circular(Radii.button),
+          ),
           child: SizedBox(
             // 44px minimum touch target, per the project's standing
             // accessibility rule in ROADMAP.md.

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import 'press_scale.dart';
 
 /// Horizontal pill selector (filter chips / segmented tabs).
 class FilterChips extends StatelessWidget {
@@ -55,24 +57,39 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: selected ? AppColors.primary : AppColors.surfaceAlt,
-      borderRadius: BorderRadius.circular(Radii.chip),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(Radii.chip),
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: PressScale(
         onTap: onTap,
-        child: Padding(
+        // Moving between filters commits nothing — it deserves the lightest
+        // tick, not the impact a button gets.
+        haptic: AppHaptics.selection,
+        child: AnimatedContainer(
+          duration: reduceMotion ? Duration.zero : MotionTokens.fast,
+          curve: MotionTokens.snap,
+          // The app's most-used segmented control had no floor at all — text
+          // plus padding alone landed around 37px, well under the 44pt target.
+          constraints: const BoxConstraints(minHeight: 44),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.primary : AppColors.surfaceAlt,
+            borderRadius: BorderRadius.circular(Radii.chip),
+          ),
           padding: const EdgeInsets.symmetric(
               horizontal: Insets.lg, vertical: Insets.sm + 2),
           child: Center(
-            child: Text(
-              label,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-              style: AppType.subhead(
-                  weight: FontWeight.w600,
-                  color: selected ? Colors.white : AppColors.textSecondary),
+            child: ExcludeSemantics(
+              child: Text(
+                label,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                style: AppType.subhead(
+                    weight: FontWeight.w600,
+                    color: selected ? Colors.white : AppColors.textSecondary),
+              ),
             ),
           ),
         ),

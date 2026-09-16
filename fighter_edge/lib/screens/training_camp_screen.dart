@@ -11,6 +11,8 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/stat_card.dart';
 import 'round_timer_screen.dart';
+import '../theme/app_haptics.dart';
+import '../widgets/press_scale.dart';
 
 class TrainingCampScreen extends StatefulWidget {
   const TrainingCampScreen({super.key});
@@ -163,6 +165,7 @@ class _WeekView extends StatelessWidget {
     note.dispose();
     if (result == null) return;
     state.completeSession(session, rpe: result.rpe, note: result.note);
+    AppHaptics.success();
   }
 }
 
@@ -272,14 +275,16 @@ class _StartIconButton extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'Start $label',
-      child: Material(
-        color: AppColors.primary,
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          child: const SizedBox.square(
-            dimension: 40,
+      child: PressScale(
+        onTap: onTap,
+        haptic: AppHaptics.commit,
+        child: const DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            shape: BoxShape.circle,
+          ),
+          child: SizedBox.square(
+            dimension: 44,
             child: Icon(Icons.play_arrow, color: Colors.white, size: 22),
           ),
         ),

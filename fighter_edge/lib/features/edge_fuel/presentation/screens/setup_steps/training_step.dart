@@ -7,6 +7,7 @@ import '../../../domain/models/nutrition_enums.dart';
 import '../../controllers/edge_fuel_setup_controller.dart';
 import '../../nutrition_copy.dart';
 import '../../widgets/choice_card.dart';
+import '../../../../../widgets/press_scale.dart';
 
 /// Step 4 of 6 — weekly training load and goal pace (master prompt §6.4).
 /// Maintenance has no pace: the adjustment is always 0%.
@@ -60,6 +61,7 @@ class _TrainingStepState extends State<TrainingStep> {
           children: [
             _StepButton(
               icon: Icons.remove,
+              semanticLabel: 'Fewer training days per week',
               onTap: days <= 0
                   ? null
                   : () => controller.setTraining(weeklyTrainingDays: days - 1),
@@ -75,6 +77,7 @@ class _TrainingStepState extends State<TrainingStep> {
             ),
             _StepButton(
               icon: Icons.add,
+              semanticLabel: 'More training days per week',
               onTap: days >= 7
                   ? null
                   : () => controller.setTraining(weeklyTrainingDays: days + 1),
@@ -101,21 +104,30 @@ class _TrainingStepState extends State<TrainingStep> {
 class _StepButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
-  const _StepButton({required this.icon, this.onTap});
+  final String semanticLabel;
+  const _StepButton(
+      {required this.icon, this.onTap, required this.semanticLabel});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surfaceElevated,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+    final enabled = onTap != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: semanticLabel,
+      child: PressScale(
         onTap: onTap,
-        child: SizedBox.square(
-          dimension: 44,
-          child: Icon(
-            icon,
-            color: onTap == null ? AppColors.textMuted : AppColors.textPrimary,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: SizedBox.square(
+            dimension: 44,
+            child: Icon(
+              icon,
+              color: enabled ? AppColors.textPrimary : AppColors.textMuted,
+            ),
           ),
         ),
       ),

@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import 'premium_effects.dart';
+import 'press_scale.dart';
 
 /// Standard screen scaffold: dark header with title + optional actions,
 /// then a scrollable body. Used by the secondary (non-tab) screens.
@@ -94,9 +95,9 @@ class _IconBtn extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'Back',
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+      child: PressScale(
         onTap: onTap,
+        pressedScale: 0.9,
         child: SizedBox.square(
           dimension: 44,
           child: Icon(icon, color: AppColors.textPrimary, size: 26),
@@ -117,9 +118,9 @@ class HeaderIcon extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       label: label,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(22),
+      child: PressScale(
         onTap: onTap,
+        pressedScale: 0.9,
         child: SizedBox.square(
           dimension: 44,
           child: Icon(icon, color: AppColors.textSecondary, size: 22),

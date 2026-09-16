@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/weight_entry.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
@@ -115,6 +116,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
     );
     if (value != null && value > 0) {
       state.addWeight(DateTime.now(), value);
+      AppHaptics.commit();
     }
   }
 }

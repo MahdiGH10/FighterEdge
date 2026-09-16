@@ -9,6 +9,8 @@ import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
+import '../theme/app_haptics.dart';
+import '../widgets/press_scale.dart';
 
 /// Upgrade screen. Payments are not wired yet, so this screen collects intent
 /// without granting paid entitlements from the client.
@@ -200,36 +202,44 @@ class _PlanToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: MotionTokens.fast,
-        padding: const EdgeInsets.all(Insets.md),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primarySoft : AppColors.backgroundRaised,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected ? AppColors.primary : AppColors.border,
-          ),
-        ),
-        child: Column(
-          children: [
-            if (badge != null) ...[
-              Text(
-                badge!.toUpperCase(),
-                style: AppType.micro(
-                  weight: FontWeight.w900,
-                  color: AppColors.premium,
-                  spacing: .8,
-                ),
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: [label, price, if (badge != null) badge].join(', '),
+      child: PressScale(
+        onTap: onTap,
+        haptic: AppHaptics.selection,
+        child: ExcludeSemantics(
+          child: AnimatedContainer(
+            duration: MotionTokens.fast,
+            padding: const EdgeInsets.all(Insets.md),
+            decoration: BoxDecoration(
+              color:
+                  selected ? AppColors.primarySoft : AppColors.backgroundRaised,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: selected ? AppColors.primary : AppColors.border,
               ),
-              const SizedBox(height: Insets.xxs),
-            ],
-            Text(label, style: AppType.subhead(weight: FontWeight.w800)),
-            const SizedBox(height: Insets.xxs),
-            Text(price, style: AppType.title1()),
-          ],
+            ),
+            child: Column(
+              children: [
+                if (badge != null) ...[
+                  Text(
+                    badge!.toUpperCase(),
+                    style: AppType.micro(
+                      weight: FontWeight.w900,
+                      color: AppColors.premium,
+                      spacing: .8,
+                    ),
+                  ),
+                  const SizedBox(height: Insets.xxs),
+                ],
+                Text(label, style: AppType.subhead(weight: FontWeight.w800)),
+                const SizedBox(height: Insets.xxs),
+                Text(price, style: AppType.title1()),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -172,7 +172,12 @@ class AppTheme {
         space: 1,
         thickness: 1,
       ),
-      splashColor: AppColors.primarySoft,
+      // The ink ripple is a Material signature, and on dark premium surfaces it
+      // reads as an Android tell. Every tappable surface in the app now answers
+      // with PressScale (press-down scale + haptic) instead, so the ripple is
+      // switched off globally rather than fought widget by widget.
+      splashFactory: NoSplash.splashFactory,
+      splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {

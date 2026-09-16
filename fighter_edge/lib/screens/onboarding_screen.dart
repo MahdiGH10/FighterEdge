@@ -12,6 +12,7 @@ import '../widgets/brand_logo.dart';
 import '../widgets/premium_effects.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
+import '../widgets/press_scale.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -225,6 +226,7 @@ class _DayStepper extends StatelessWidget {
       children: [
         _StepButton(
           icon: Icons.remove,
+          semanticLabel: 'Fewer days',
           onTap: value <= 2 ? null : () => onChanged(value - 1),
         ),
         Expanded(
@@ -240,6 +242,7 @@ class _DayStepper extends StatelessWidget {
         ),
         _StepButton(
           icon: Icons.add,
+          semanticLabel: 'More days',
           onTap: value >= 6 ? null : () => onChanged(value + 1),
         ),
       ],
@@ -250,21 +253,30 @@ class _DayStepper extends StatelessWidget {
 class _StepButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
-  const _StepButton({required this.icon, this.onTap});
+  final String semanticLabel;
+  const _StepButton(
+      {required this.icon, this.onTap, required this.semanticLabel});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surfaceElevated,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+    final enabled = onTap != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: semanticLabel,
+      child: PressScale(
         onTap: onTap,
-        child: SizedBox.square(
-          dimension: 44,
-          child: Icon(
-            icon,
-            color: onTap == null ? AppColors.textMuted : AppColors.textPrimary,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: SizedBox.square(
+            dimension: 44,
+            child: Icon(
+              icon,
+              color: enabled ? AppColors.textPrimary : AppColors.textMuted,
+            ),
           ),
         ),
       ),

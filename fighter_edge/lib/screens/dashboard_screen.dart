@@ -11,6 +11,7 @@ import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/premium_effects.dart';
+import '../widgets/press_scale.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/weekly_overview.dart';
@@ -135,7 +136,7 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(height: Insets.xl),
                     const SectionHeader('Weekly Overview'),
                     PremiumReveal(
-                      duration: const Duration(milliseconds: 500),
+                      index: 1,
                       child: AppCard(
                         elevated: true,
                         gradient: const LinearGradient(
@@ -153,7 +154,7 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(height: Insets.xl),
                     const SectionHeader('Next Session'),
                     PremiumReveal(
-                      duration: const Duration(milliseconds: 580),
+                      index: 2,
                       child: _NextSessionCard(
                         session: nextSession,
                         onOpenCamp: () => onNavigate(1),
@@ -168,7 +169,7 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(height: Insets.xl),
                     SectionHeader(
                       'Recent Activity',
-                      trailing: GestureDetector(
+                      trailing: PressScale(
                         onTap: () => onNavigate(1),
                         child: Text('See all',
                             style: AppType.subhead(

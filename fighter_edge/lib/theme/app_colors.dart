@@ -10,7 +10,13 @@ class AppColors {
   static const Color surface = Color(0xFF14141B);
   static const Color surfaceAlt = Color(0xFF191922);
   static const Color surfaceElevated = Color(0xFF21212B);
-  static const Color surfaceGlass = Color(0xF216161E);
+
+  /// Tint laid over a `BackdropFilter` blur (see `AppBottomNav`).
+  ///
+  /// Deliberately translucent: at the old 95% opacity the blur behind it was
+  /// invisible and the "glass" was just paint. 72% lets content register
+  /// through the bar while keeping label contrast on a dark ground.
+  static const Color surfaceGlass = Color(0xB816161E);
   static const Color border = Color(0xFF292933);
   static const Color borderStrong = Color(0xFF3A3A46);
 

@@ -260,16 +260,52 @@ _46 files changed, 255/255 tests green, analyzer clean._
 **Left for Phase 4 (each moves pixels, so they want goldens first):** the 11 remaining
 off-grid spacing values (3, 5, 14, 38), and raising the dense 13pt tier for generosity.
 
-### Phase 2 — Components
+### Phase 2 — Components ✅ DONE 2026-09-16
 
-- [ ] Promote `PressScale` to `lib/widgets/`; apply to `AppCard`, `PrimaryButton`, nav, chips
-- [ ] Remove Material ripple app-wide (`splashFactory: NoSplash`) now that press-scale exists
-- [ ] Add `Haptics` facade; wire the five events in §2.4
-- [ ] Add spring motion tokens; fix the `PremiumReveal` stagger to delay-based
-- [ ] Give the bottom nav a real `BackdropFilter`; profile on a low-end device
-- [ ] Add `Semantics` labels to every `AppCard` tap and remaining raw tap targets
-- [ ] Audit all tap targets to 44pt minimum
-- [ ] Reduce the 55 bespoke `BoxDecoration`s — target under 20, all justified
+_49 files changed, 255/255 tests green, analyzer clean._
+
+- [x] Promote `PressScale` to `lib/widgets/` (from `edge_fuel/`); apply everywhere a
+      surface is tappable — `AppCard`, `PrimaryButton`, `GhostButton`, nav, both chip
+      widgets, every auth/setup/onboarding icon button, the recipe card, the paywall
+      plan toggle
+- [x] Remove Material ripple app-wide: `splashFactory: NoSplash.splashFactory` in
+      `AppTheme.dark()`, and **every** `InkWell`/`GestureDetector` in `lib/` converted to
+      `PressScale` first (12 call sites) — setting `NoSplash` alone would have made any
+      surviving `InkWell` give zero feedback, worse than the ripple it replaced
+- [x] Add `AppHaptics` facade (`lib/theme/app_haptics.dart`) with the five events; wired
+      at every `PressScale` call site plus the real commit/success moments the plan
+      named — logging a weigh-in, completing a session (both the round-timer and the
+      manual camp-screen path), and the round timer's own phase alerts, which were
+      raw `HapticFeedback.heavyImpact()`/`mediumImpact()` calls now routed through the
+      facade (heavyImpact was actually the session-complete *success* case misusing the
+      warning weight — fixed to `AppHaptics.success()`'s two-beat pattern)
+- [x] Add spring motion tokens (shipped in Phase 1); `PremiumReveal` now takes an
+      `index` and delays by `index × MotionTokens.stagger` instead of varying duration
+- [x] Give the bottom nav a real `BackdropFilter` (`ImageFilter.blur`, clipped to the
+      bar's own rounded bounds) — also fixed `surfaceGlass` from 95% to 72% opacity,
+      since at the old value the blur behind it was invisible and the "glass" was
+      just paint
+- [x] Add `Semantics` to every tap target found missing one: 6 → 20 `Semantics(`
+      sites. Notably `RecipeCard` (title + description + 3 macros + allergen warning
+      were 6+ separate fragments to a screen reader on every list item), `StatCard`
+      (merged so "Weight, 184.2 lbs, 1.2 lbs" reads as one measurement), the paywall
+      plan toggle (now announces selected state), and three icon-only +/- steppers
+      that had no accessible name at all (food/training setup, onboarding day-picker)
+- [x] Audit tap targets to 44pt: fixed the camp screen's circular start button
+      (40→44) and, more significantly, found the **app's most-used segmented
+      control** (`FilterChips`, driving technique-library/weight-tracker/round-timer
+      tabs) had no minimum height at all — text + padding alone landed near 37px
+- [ ] **BoxDecoration count deferred, and the number moved the wrong way on paper:**
+      65 now vs 55 at audit time. Converting `Material(color:) + InkWell` to
+      `DecoratedBox(decoration: BoxDecoration(color:))` is mechanically one
+      `BoxDecoration` literal where a bare color prop stood before — a side effect of
+      killing the ripple, not the "surface soup" the audit meant. The actual
+      consolidation (fewer *bespoke, one-off* surfaces bypassing `AppCard`) is
+      unstarted and stays a Phase 4 job behind goldens, since it moves pixels.
+- [ ] **Low-end-device blur profiling not done.** No physical device or emulator was
+      available this session — the nav's `BackdropFilter` is implemented per the
+      plan (small, static, tightly clipped) but its frame cost is unverified. Do this
+      before Phase 4 ships more blur anywhere else.
 
 ### Phase 3 — Safety net (before touching screens)
 

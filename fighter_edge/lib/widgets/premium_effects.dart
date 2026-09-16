@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
@@ -98,31 +100,68 @@ class GradientText extends StatelessWidget {
 }
 
 /// Small entrance motion with an accessibility-safe static path.
-class PremiumReveal extends StatelessWidget {
+///
+/// A stagger is one shared [duration] with an offset *start* per item — set
+/// [index] and each item waits `index * MotionTokens.stagger` before moving.
+/// Varying the duration instead (the app's previous approach) starts everything
+/// at once and merely finishes raggedly, which reads as jitter rather than
+/// sequence.
+class PremiumReveal extends StatefulWidget {
   final Widget child;
   final Duration duration;
   final double distance;
+
+  /// Position in a staggered group. 0 starts immediately.
+  final int index;
 
   const PremiumReveal({
     super.key,
     required this.child,
     this.duration = MotionTokens.reveal,
     this.distance = 12,
+    this.index = 0,
   });
 
   @override
+  State<PremiumReveal> createState() => _PremiumRevealState();
+}
+
+class _PremiumRevealState extends State<PremiumReveal> {
+  bool _started = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    final delay = MotionTokens.stagger * widget.index;
+    if (delay == Duration.zero) {
+      _started = true;
+    } else {
+      _timer = Timer(delay, () {
+        if (mounted) setState(() => _started = true);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (MediaQuery.disableAnimationsOf(context)) return child;
+    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
 
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: duration,
-      curve: MotionTokens.emphasized,
-      child: child,
+      tween: Tween(begin: 0, end: _started ? 1.0 : 0.0),
+      duration: widget.duration,
+      curve: MotionTokens.settle,
+      child: widget.child,
       builder: (context, value, builtChild) => Opacity(
         opacity: value,
         child: Transform.translate(
-          offset: Offset(0, distance * (1 - value)),
+          offset: Offset(0, widget.distance * (1 - value)),
           child: builtChild,
         ),
       ),

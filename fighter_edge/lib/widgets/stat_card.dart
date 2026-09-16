@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import 'press_scale.dart';
 
 /// Reusable dark card container.
 class AppCard extends StatelessWidget {
@@ -28,7 +29,7 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor = accent?.withValues(alpha: .42) ?? AppColors.border;
-    final content = Ink(
+    final content = DecoratedBox(
       decoration: BoxDecoration(
         color: gradient == null ? color ?? AppColors.surface : null,
         gradient: gradient,
@@ -49,16 +50,7 @@ class AppCard extends StatelessWidget {
     if (onTap == null) return content;
     return Semantics(
       button: true,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(Radii.card),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(Radii.card),
-          onTap: onTap,
-          child: content,
-        ),
-      ),
+      child: PressScale(onTap: onTap, child: content),
     );
   }
 }
@@ -93,62 +85,66 @@ class StatCard extends StatelessWidget {
       accent: accent,
       padding: const EdgeInsets.symmetric(
           horizontal: Insets.md, vertical: Insets.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: AppType.micro(
-                weight: FontWeight.w600,
-                color: AppColors.textMuted,
-                spacing: 0.8),
-          ),
-          const SizedBox(height: Insets.sm),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                _AnimatedMetricValue(value: value),
-                if (unit.isNotEmpty) ...[
-                  const SizedBox(width: 3),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 3),
-                    child: Text(unit,
-                        style: AppType.micro(
-                            weight: FontWeight.w600,
-                            color: AppColors.textMuted)),
-                  ),
-                ],
-              ],
+      // Merged so the card reads as one measurement rather than four
+      // disconnected fragments — "Weight", "184.2", "lbs", "1.2 lbs".
+      child: MergeSemantics(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label.toUpperCase(),
+              style: AppType.micro(
+                  weight: FontWeight.w600,
+                  color: AppColors.textMuted,
+                  spacing: 0.8),
             ),
-          ),
-          if (delta != null) ...[
-            const SizedBox(height: Insets.xs),
-            Row(
-              children: [
-                if (deltaIcon != null)
-                  Icon(deltaIcon, size: 12, color: deltaColor),
-                const SizedBox(width: Insets.xxs),
-                Expanded(
-                  child: Text(
-                    delta!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppType.micro(
-                      weight: FontWeight.w600,
-                      color: deltaColor,
+            const SizedBox(height: Insets.sm),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  _AnimatedMetricValue(value: value),
+                  if (unit.isNotEmpty) ...[
+                    const SizedBox(width: 3),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 3),
+                      child: Text(unit,
+                          style: AppType.micro(
+                              weight: FontWeight.w600,
+                              color: AppColors.textMuted)),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (delta != null) ...[
+              const SizedBox(height: Insets.xs),
+              Row(
+                children: [
+                  if (deltaIcon != null)
+                    Icon(deltaIcon, size: 12, color: deltaColor),
+                  const SizedBox(width: Insets.xxs),
+                  Expanded(
+                    child: Text(
+                      delta!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppType.micro(
+                        weight: FontWeight.w600,
+                        color: deltaColor,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

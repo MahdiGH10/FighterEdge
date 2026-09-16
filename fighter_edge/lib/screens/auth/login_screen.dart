@@ -7,6 +7,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/brand_logo.dart';
+import '../../widgets/press_scale.dart';
 import '../../widgets/primary_button.dart';
 import 'auth_widgets.dart';
 import 'forgot_password_screen.dart';
@@ -183,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Text("New here? ",
                               style: AppType.subhead(
                                   color: AppColors.textSecondary)),
-                          GestureDetector(
+                          PressScale(
                             onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
                                     builder: (_) => const SignupScreen())),

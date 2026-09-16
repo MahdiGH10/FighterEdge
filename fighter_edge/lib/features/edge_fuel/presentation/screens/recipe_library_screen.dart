@@ -17,6 +17,8 @@ import '../controllers/recipe_library_controller.dart';
 import '../widgets/allergen_notice.dart';
 import '../widgets/recipe_card.dart';
 import 'recipe_detail_screen.dart';
+import '../../../../theme/app_haptics.dart';
+import '../../../../widgets/press_scale.dart';
 
 /// Browse and filter the curated catalog (master prompt §5.3).
 class RecipeLibraryScreen extends StatelessWidget {
@@ -370,32 +372,39 @@ class _Toggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: Insets.sm),
-      child: Material(
-        color: selected ? AppColors.primarySoft : AppColors.surfaceAlt,
-        borderRadius: BorderRadius.circular(Radii.chip),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(Radii.chip),
+      child: Semantics(
+        button: true,
+        selected: selected,
+        child: PressScale(
           onTap: onTap,
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 36),
-            padding: const EdgeInsets.symmetric(
-              horizontal: Insets.lg,
-              vertical: Insets.sm,
-            ),
-            alignment: Alignment.center,
+          haptic: AppHaptics.selection,
+          child: DecoratedBox(
             decoration: BoxDecoration(
+              color: selected ? AppColors.primarySoft : AppColors.surfaceAlt,
               borderRadius: BorderRadius.circular(Radii.chip),
-              border: Border.all(
-                color: selected ? AppColors.primary : Colors.transparent,
-              ),
             ),
-            child: Text(
-              label,
-              style: AppType.subhead(
-                weight: FontWeight.w600,
-                color: selected
-                    ? AppColors.primaryBright
-                    : AppColors.textSecondary,
+            child: Container(
+              // 44pt floor, not the visually-driven 36 this used to be.
+              constraints: const BoxConstraints(minHeight: 44),
+              padding: const EdgeInsets.symmetric(
+                horizontal: Insets.lg,
+                vertical: Insets.sm,
+              ),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(Radii.chip),
+                border: Border.all(
+                  color: selected ? AppColors.primary : Colors.transparent,
+                ),
+              ),
+              child: Text(
+                label,
+                style: AppType.subhead(
+                  weight: FontWeight.w600,
+                  color: selected
+                      ? AppColors.primaryBright
+                      : AppColors.textSecondary,
+                ),
               ),
             ),
           ),

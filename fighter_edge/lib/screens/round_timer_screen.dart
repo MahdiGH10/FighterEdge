@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/mock_data.dart';
@@ -9,6 +8,7 @@ import '../models/coach_cue.dart';
 import '../models/training_session.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
@@ -94,7 +94,10 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
           _running = false;
           _ticker?.cancel();
           _secondsLeft = 0;
-          HapticFeedback.heavyImpact();
+          // The goal landed — this is exactly the "session completed" success
+          // moment, not a warning; heavyImpact was borrowed for lack of a
+          // facade at the time.
+          AppHaptics.success();
           final session = widget.session;
           if (session != null) {
             context.read<AppState>().completeSession(
@@ -106,14 +109,17 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
         } else {
           _phase = _Phase.rest;
           _secondsLeft = _style.restSeconds;
-          HapticFeedback.mediumImpact();
+          // A phase alert, not a user commit — reuses commit's medium weight
+          // since both mean "something happened, pay attention" rather than
+          // introducing a sixth pattern into the vocabulary for one call site.
+          AppHaptics.commit();
         }
       } else {
         // rest -> next work round
         _round++;
         _phase = _Phase.work;
         _secondsLeft = _style.workSeconds;
-        HapticFeedback.mediumImpact();
+        AppHaptics.commit();
       }
     });
   }

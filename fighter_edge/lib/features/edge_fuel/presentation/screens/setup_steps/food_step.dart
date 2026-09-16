@@ -5,6 +5,7 @@ import '../../../../../theme/app_theme.dart';
 import '../../../../../theme/app_typography.dart';
 import '../../../../../widgets/app_text_field.dart';
 import '../../controllers/edge_fuel_setup_controller.dart';
+import '../../../../../widgets/press_scale.dart';
 
 /// Step 5 of 6 — food preferences (master prompt §6.5). Nothing here is
 /// consumed by the deterministic engine or by EF-1 — it's captured now so
@@ -92,6 +93,7 @@ class _FoodStepState extends State<FoodStep> {
           children: [
             _StepButton(
               icon: Icons.remove,
+              semanticLabel: 'Fewer meals per day',
               onTap: mealsPerDay <= 2
                   ? null
                   : () => controller.setFoodPreferences(
@@ -104,6 +106,7 @@ class _FoodStepState extends State<FoodStep> {
             ),
             _StepButton(
               icon: Icons.add,
+              semanticLabel: 'More meals per day',
               onTap: mealsPerDay >= 6
                   ? null
                   : () => controller.setFoodPreferences(
@@ -189,21 +192,30 @@ class _ChipRow extends StatelessWidget {
 class _StepButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
-  const _StepButton({required this.icon, this.onTap});
+  final String semanticLabel;
+  const _StepButton(
+      {required this.icon, this.onTap, required this.semanticLabel});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surfaceElevated,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+    final enabled = onTap != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: semanticLabel,
+      child: PressScale(
         onTap: onTap,
-        child: SizedBox.square(
-          dimension: 44,
-          child: Icon(
-            icon,
-            color: onTap == null ? AppColors.textMuted : AppColors.textPrimary,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: SizedBox.square(
+            dimension: 44,
+            child: Icon(
+              icon,
+              color: enabled ? AppColors.textPrimary : AppColors.textMuted,
+            ),
           ),
         ),
       ),

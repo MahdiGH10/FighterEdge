@@ -9,6 +9,7 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/food_item.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/recipe_library_controller.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/recipe_detail_screen.dart';
+import 'package:fighter_edge/widgets/press_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -126,11 +127,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('0.5 servings'), findsOneWidget);
 
-    final decrease = tester.widget<InkWell>(
+    final decrease = tester.widget<PressScale>(
       find
           .ancestor(
             of: find.byIcon(Icons.remove),
-            matching: find.byType(InkWell),
+            matching: find.byType(PressScale),
           )
           .first,
     );

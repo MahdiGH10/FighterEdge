@@ -4,6 +4,7 @@ import '../../auth/auth_repository.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_typography.dart';
+import '../../widgets/press_scale.dart';
 
 /// Shows a branded error snackbar for an auth failure.
 void showAuthError(BuildContext context, Object error) {
@@ -63,25 +64,30 @@ class SocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(Radii.button),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(Radii.button),
+    return Semantics(
+      button: true,
+      enabled: onPressed != null,
+      child: PressScale(
         onTap: onPressed,
-        child: Container(
-          height: 52,
+        child: DecoratedBox(
           decoration: BoxDecoration(
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(Radii.button),
-            border: Border.all(color: AppColors.border),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 20, color: AppColors.textPrimary),
-              const SizedBox(width: Insets.md),
-              Text(label, style: AppType.callout(weight: FontWeight.w600)),
-            ],
+          child: Container(
+            height: 52,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(Radii.button),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 20, color: AppColors.textPrimary),
+                const SizedBox(width: Insets.md),
+                Text(label, style: AppType.callout(weight: FontWeight.w600)),
+              ],
+            ),
           ),
         ),
       ),
