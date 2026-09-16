@@ -333,9 +333,14 @@ _Added component goldens before the Phase 4 screen pass._
       premium background/header without nesting another full scaffold inside
       `HomeShell`. The helper falls back to a local `Scaffold` when a tab
       screen is rendered standalone in widget tests.
-- [ ] Collapsing large-title header, applied to all tab screens
-- [ ] Dashboard: one loud element (Today's Focus), everything else quieted; kill the
+- [x] Collapsing large-title header, applied to all tab screens
+      — implemented in `ScreenScaffold.tab` as a shared tab-only header that
+      listens to vertical scroll notifications and collapses from the large
+      brand title to the compact header.
+- [x] Dashboard: one loud element (Today's Focus), everything else quieted; kill the
       fixed 126/142 sizes so it survives Dynamic Type
+      — stat cards now adapt between a three-column row and stacked cards
+      instead of living inside a fixed-height horizontal rail.
 - [ ] Re-IA the tabs to Home / Train / Fuel / Profile; wire the technique library in
 - [ ] Decide and act on `CornerCoachScreen`
 - [ ] Adopt `go_router`; restore iOS swipe-back via `CupertinoPage`

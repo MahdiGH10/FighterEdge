@@ -8,7 +8,7 @@ import 'press_scale.dart';
 
 /// Standard screen scaffold: dark header with title + optional actions,
 /// then a scrollable body. Used by the secondary (non-tab) screens.
-class ScreenScaffold extends StatelessWidget {
+class ScreenScaffold extends StatefulWidget {
   final String title;
   final Widget body;
   final List<Widget> actions;
@@ -16,6 +16,7 @@ class ScreenScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final Widget? bottomNav;
   final bool includeScaffold;
+  final bool collapsingHeader;
 
   const ScreenScaffold({
     super.key,
@@ -25,7 +26,8 @@ class ScreenScaffold extends StatelessWidget {
     this.showBack = false,
     this.floatingActionButton,
     this.bottomNav,
-  }) : includeScaffold = true;
+  })  : includeScaffold = true,
+        collapsingHeader = false;
 
   const ScreenScaffold.tab({
     super.key,
@@ -35,29 +37,153 @@ class ScreenScaffold extends StatelessWidget {
   })  : showBack = false,
         floatingActionButton = null,
         bottomNav = null,
-        includeScaffold = false;
+        includeScaffold = false,
+        collapsingHeader = true;
+
+  @override
+  State<ScreenScaffold> createState() => _ScreenScaffoldState();
+}
+
+class _ScreenScaffoldState extends State<ScreenScaffold> {
+  double _scrollOffset = 0;
+
+  bool _handleScroll(ScrollNotification notification) {
+    if (!widget.collapsingHeader ||
+        notification.metrics.axis != Axis.vertical ||
+        notification.depth > 1) {
+      return false;
+    }
+
+    final nextOffset = notification.metrics.pixels.clamp(0.0, 80.0);
+    if ((nextOffset - _scrollOffset).abs() >= 0.5) {
+      setState(() => _scrollOffset = nextOffset);
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final header = widget.collapsingHeader
+        ? _CollapsingTabHeader(
+            title: widget.title,
+            actions: widget.actions,
+            scrollOffset: _scrollOffset,
+          )
+        : AppHeader(
+            title: widget.title,
+            actions: widget.actions,
+            showBack: widget.showBack,
+          );
     final content = PremiumBackground(
       child: SafeArea(
         bottom: false,
-        child: Column(
-          children: [
-            AppHeader(title: title, actions: actions, showBack: showBack),
-            Expanded(child: body),
-          ],
+        child: NotificationListener<ScrollNotification>(
+          onNotification: _handleScroll,
+          child: Column(
+            children: [
+              header,
+              Expanded(child: widget.body),
+            ],
+          ),
         ),
       ),
     );
-    if (!includeScaffold && Scaffold.maybeOf(context) != null) {
+    if (!widget.includeScaffold && Scaffold.maybeOf(context) != null) {
       return content;
     }
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: floatingActionButton,
-      bottomNavigationBar: bottomNav,
+      floatingActionButton: widget.floatingActionButton,
+      bottomNavigationBar: widget.bottomNav,
       body: content,
+    );
+  }
+}
+
+class _CollapsingTabHeader extends StatelessWidget {
+  static const _expandedHeight = 96.0;
+  static const _collapsedHeight = 56.0;
+  static const _collapseDistance = 64.0;
+
+  final String title;
+  final List<Widget> actions;
+  final double scrollOffset;
+
+  const _CollapsingTabHeader({
+    required this.title,
+    required this.actions,
+    required this.scrollOffset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = (scrollOffset / _collapseDistance).clamp(0.0, 1.0);
+    final height =
+        _expandedHeight + ((_collapsedHeight - _expandedHeight) * progress);
+    final largeOpacity = 1 - progress;
+    final compactOpacity = progress;
+    final displayTitle = title.toUpperCase();
+
+    return Semantics(
+      container: true,
+      header: true,
+      label: displayTitle,
+      child: SizedBox(
+        height: height,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+          child: Stack(
+            children: [
+              if (compactOpacity > 0.01)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    height: _collapsedHeight,
+                    child: Center(
+                      child: ExcludeSemantics(
+                        child: Opacity(
+                          opacity: compactOpacity,
+                          child: Text(
+                            displayTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppType.title2(spacing: 1.5),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              if (largeOpacity > 0.01)
+                Positioned(
+                  left: 0,
+                  right: actions.isEmpty ? 0 : 56,
+                  bottom: Insets.md * (1 - progress),
+                  child: ExcludeSemantics(
+                    child: Opacity(
+                      opacity: largeOpacity,
+                      child: Transform.translate(
+                        offset: Offset(0, -8 * progress),
+                        child: Text(
+                          displayTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppType.largeTitle(spacing: 1.2),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              if (actions.isNotEmpty)
+                Positioned(
+                  top: Insets.xs,
+                  right: 0,
+                  child: Row(mainAxisSize: MainAxisSize.min, children: actions),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

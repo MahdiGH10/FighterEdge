@@ -119,9 +119,15 @@ without adding nested app chrome inside `HomeShell`. `ScreenScaffold.tab` still
 falls back to a local `Scaffold` when a tab screen is rendered standalone in
 widget tests, so SnackBars and secondary screen tests keep working.
 
-Remaining headline items: collapsing large-title header everywhere; reduce the
-dashboard to one loud element; re-IA the tabs to Home/Train/Fuel/Profile with
-the technique library wired in; `go_router` + `CupertinoPage` to restore iOS
+The next safe slice is also done: `ScreenScaffold.tab` owns a shared
+large-title tab header that collapses from the large brand title to the compact
+header as vertical content scrolls. The dashboard stat rail no longer uses a
+fixed 126px height or 142px cards; it adapts between a three-column row and
+stacked cards for narrow or larger-text layouts, leaving Today's Focus as the
+only loud dashboard element.
+
+Remaining headline items: re-IA the tabs to Home/Train/Fuel/Profile with the
+technique library wired in; `go_router` + `CupertinoPage` to restore iOS
 swipe-back.
 
 **This phase is blocked on decisions only Mahdi can make** (see below) — don't

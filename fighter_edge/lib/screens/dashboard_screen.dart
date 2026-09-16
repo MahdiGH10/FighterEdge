@@ -66,59 +66,42 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: Insets.lg),
           _TodayFocusCard(onNavigate: onNavigate),
           const SizedBox(height: Insets.xl),
-          SizedBox(
-            height: 126,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                SizedBox(
-                  width: 142,
-                  child: StatCard(
-                    label: 'Weight',
-                    value: state.latestWeight == 0
-                        ? '—'
-                        : state
-                            .displayWeight(state.latestWeight)
-                            .toStringAsFixed(1),
-                    unit: state.weightUnitLabel,
-                    delta: state.weights.length < 2
-                        ? 'Add weigh-in'
-                        : '${state.displayWeight(weightDelta).abs().toStringAsFixed(1)} ${state.weightUnitLabel}',
-                    deltaColor: losing ? AppColors.positive : AppColors.primary,
-                    deltaIcon:
-                        losing ? Icons.arrow_downward : Icons.arrow_upward,
-                    onTap: () => _push(context, const WeightTrackerScreen()),
-                    accent: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(width: Insets.md),
-                SizedBox(
-                  width: 142,
-                  child: StatCard(
-                    label: 'Sessions',
-                    value: '${state.completedSessionCount}',
-                    unit: '',
-                    delta: 'completed',
-                    deltaColor: AppColors.positive,
-                    deltaIcon: Icons.check_circle_outline,
-                  ),
-                ),
-                const SizedBox(width: Insets.md),
-                SizedBox(
-                  width: 142,
-                  child: StatCard(
-                    label: 'Streak',
-                    value: '${state.currentStreakDays}',
-                    unit: 'days',
-                    delta:
-                        state.currentStreakDays > 0 ? 'On fire' : 'Log today',
-                    deltaColor: AppColors.warning,
-                    deltaIcon: Icons.local_fire_department,
-                    accent: AppColors.warning,
-                  ),
-                ),
-              ],
-            ),
+          _DashboardStats(
+            cards: [
+              StatCard(
+                label: 'Weight',
+                value: state.latestWeight == 0
+                    ? '—'
+                    : state
+                        .displayWeight(state.latestWeight)
+                        .toStringAsFixed(1),
+                unit: state.weightUnitLabel,
+                delta: state.weights.length < 2
+                    ? 'Add weigh-in'
+                    : '${state.displayWeight(weightDelta).abs().toStringAsFixed(1)} ${state.weightUnitLabel}',
+                deltaColor: losing ? AppColors.positive : AppColors.primary,
+                deltaIcon: losing ? Icons.arrow_downward : Icons.arrow_upward,
+                onTap: () => _push(context, const WeightTrackerScreen()),
+                accent: AppColors.primary,
+              ),
+              StatCard(
+                label: 'Sessions',
+                value: '${state.completedSessionCount}',
+                unit: '',
+                delta: 'completed',
+                deltaColor: AppColors.positive,
+                deltaIcon: Icons.check_circle_outline,
+              ),
+              StatCard(
+                label: 'Streak',
+                value: '${state.currentStreakDays}',
+                unit: 'days',
+                delta: state.currentStreakDays > 0 ? 'On fire' : 'Log today',
+                deltaColor: AppColors.warning,
+                deltaIcon: Icons.local_fire_department,
+                accent: AppColors.warning,
+              ),
+            ],
           ),
           const SizedBox(height: Insets.xl),
           const SectionHeader('Weekly Overview'),
@@ -174,6 +157,43 @@ class DashboardScreen extends StatelessWidget {
 
   void _push(BuildContext context, Widget screen) {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  }
+}
+
+class _DashboardStats extends StatelessWidget {
+  final List<StatCard> cards;
+
+  const _DashboardStats({required this.cards});
+
+  @override
+  Widget build(BuildContext context) {
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final shouldStack = constraints.maxWidth < 340 || textScale >= 1.3;
+        if (shouldStack) {
+          return Column(
+            children: [
+              for (var i = 0; i < cards.length; i++) ...[
+                cards[i],
+                if (i != cards.length - 1) const SizedBox(height: Insets.md),
+              ],
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var i = 0; i < cards.length; i++) ...[
+              Expanded(child: cards[i]),
+              if (i != cards.length - 1) const SizedBox(width: Insets.md),
+            ],
+          ],
+        );
+      },
+    );
   }
 }
 
