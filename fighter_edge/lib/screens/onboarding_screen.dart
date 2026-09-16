@@ -23,6 +23,7 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final _weight = TextEditingController();
+  int _step = 0;
   String _goal = 'Build fight-camp structure';
   String _level = 'Beginner';
   int _days = 4;
@@ -36,6 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   static const _levels = ['Beginner', 'Intermediate', 'Advanced', 'Fighter'];
+  static const _stepCount = 4;
 
   @override
   void dispose() {
@@ -46,6 +48,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
+    final step = _OnboardingStep.fromIndex(
+      index: _step,
+      goal: _goal,
+      level: _level,
+      days: _days,
+      weight: _weight,
+      error: _error,
+      goals: _goals,
+      levels: _levels,
+      onGoal: (value) => setState(() => _goal = value),
+      onLevel: (value) => setState(() => _level = value),
+      onDays: (value) => setState(() => _days = value),
+    );
+    final isLastStep = _step == _stepCount - 1;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -59,70 +75,56 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 alignment: Alignment.centerLeft,
                 child: BrandLogo(scale: .7),
               ),
-              const SizedBox(height: Insets.xxl),
-              Text('Set up your edge', style: AppType.largeTitle()),
-              const SizedBox(height: Insets.sm),
-              Text(
-                'Fresh account, fresh camp. Answer a few basics and Fighter Edge will start clean around your goals.',
-                style: AppType.callout(color: AppColors.textSecondary),
-              ),
               const SizedBox(height: Insets.xl),
-              AppCard(
-                accent: AppColors.primary,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const _FieldLabel('Main goal'),
-                    _ChoiceWrap(
-                      values: _goals,
-                      selected: _goal,
-                      onSelected: (value) => setState(() => _goal = value),
-                    ),
-                    const SizedBox(height: Insets.lg),
-                    const _FieldLabel('Experience'),
-                    _ChoiceWrap(
-                      values: _levels,
-                      selected: _level,
-                      onSelected: (value) => setState(() => _level = value),
-                    ),
-                    const SizedBox(height: Insets.lg),
-                    const _FieldLabel('Training days per week'),
-                    _DayStepper(
-                      value: _days,
-                      onChanged: (value) => setState(() => _days = value),
-                    ),
-                    const SizedBox(height: Insets.lg),
-                    AppTextField(
-                      controller: _weight,
-                      label: 'Starting weight in kg',
-                      icon: Icons.monitor_weight_outlined,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      textInputAction: TextInputAction.done,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d{0,1}'),
-                        ),
-                      ],
-                      errorText: _error,
-                    ),
-                  ],
+              _ProgressHeader(step: _step, stepCount: _stepCount),
+              const SizedBox(height: Insets.xxl),
+              AnimatedSwitcher(
+                duration: MotionTokens.standard,
+                switchInCurve: MotionTokens.settle,
+                switchOutCurve: MotionTokens.snap,
+                child: _QuestionStep(
+                  key: ValueKey(_step),
+                  eyebrow: step.eyebrow,
+                  title: step.title,
+                  subtitle: step.subtitle,
+                  child: step.child,
                 ),
               ),
-              const SizedBox(height: Insets.lg),
+              const SizedBox(height: Insets.xl),
               _PreviewCard(goal: _goal, level: _level, days: _days),
               const SizedBox(height: Insets.xl),
               PrimaryButton(
-                auth.isBusy ? 'Creating your camp...' : 'Start fresh',
-                icon: Icons.flag,
+                auth.isBusy
+                    ? 'Creating your camp...'
+                    : isLastStep
+                        ? 'Start fresh'
+                        : 'Continue',
+                icon: isLastStep ? Icons.flag : Icons.arrow_forward,
                 expand: true,
-                onPressed: auth.isBusy ? null : _submit,
+                onPressed: auth.isBusy ? null : _continue,
               ),
+              if (_step > 0) ...[
+                const SizedBox(height: Insets.sm),
+                GhostButton(
+                  'Back',
+                  expand: true,
+                  onPressed: auth.isBusy ? null : _back,
+                ),
+              ],
               const SizedBox(height: Insets.md),
-              Text(
-                'You can change units, reminders, and safety preferences later in Settings.',
-                textAlign: TextAlign.center,
-                style: AppType.micro(color: AppColors.textMuted),
+              PressScale(
+                onTap: auth.isBusy ? null : () => _submit(skipWeight: true),
+                child: Padding(
+                  padding: const EdgeInsets.all(Insets.sm),
+                  child: Text(
+                    isLastStep ? 'Skip weight for now' : 'Skip setup for now',
+                    textAlign: TextAlign.center,
+                    style: AppType.subhead(
+                      weight: FontWeight.w700,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -131,9 +133,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Future<void> _submit() async {
-    final parsed = double.tryParse(_weight.text.trim());
-    if (parsed == null || parsed < 35 || parsed > 180) {
+  void _continue() {
+    if (_step < _stepCount - 1) {
+      setState(() => _step += 1);
+      return;
+    }
+    _submit();
+  }
+
+  void _back() {
+    if (_step == 0) return;
+    setState(() => _step -= 1);
+  }
+
+  Future<void> _submit({bool skipWeight = false}) async {
+    final weightText = _weight.text.trim();
+    final parsed =
+        skipWeight || weightText.isEmpty ? null : double.tryParse(weightText);
+    if (!skipWeight &&
+        weightText.isNotEmpty &&
+        (parsed == null || parsed < 35 || parsed > 180)) {
+      setState(() {
+        _step = _stepCount - 1;
+        _error = 'Enter a realistic starting weight, or skip it for now.';
+      });
+      return;
+    }
+
+    if (parsed != null && (parsed < 35 || parsed > 180)) {
       setState(() => _error = 'Enter a realistic starting weight.');
       return;
     }
@@ -159,17 +186,152 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-class _FieldLabel extends StatelessWidget {
-  final String label;
-  const _FieldLabel(this.label);
+class _OnboardingStep {
+  final String eyebrow;
+  final String title;
+  final String subtitle;
+  final Widget child;
+
+  const _OnboardingStep({
+    required this.eyebrow,
+    required this.title,
+    required this.subtitle,
+    required this.child,
+  });
+
+  factory _OnboardingStep.fromIndex({
+    required int index,
+    required String goal,
+    required String level,
+    required int days,
+    required TextEditingController weight,
+    required String? error,
+    required List<String> goals,
+    required List<String> levels,
+    required ValueChanged<String> onGoal,
+    required ValueChanged<String> onLevel,
+    required ValueChanged<int> onDays,
+  }) {
+    return switch (index) {
+      0 => _OnboardingStep(
+          eyebrow: 'Fresh account',
+          title: 'What are you training for?',
+          subtitle:
+              'Pick the outcome that should shape your first Fighter Edge camp.',
+          child: _ChoiceWrap(
+            values: goals,
+            selected: goal,
+            onSelected: onGoal,
+          ),
+        ),
+      1 => _OnboardingStep(
+          eyebrow: 'Experience',
+          title: 'Where are you starting from?',
+          subtitle:
+              'This keeps the app from pushing beginner athletes like pros, or boring experienced fighters.',
+          child: _ChoiceWrap(
+            values: levels,
+            selected: level,
+            onSelected: onLevel,
+          ),
+        ),
+      2 => _OnboardingStep(
+          eyebrow: 'Weekly rhythm',
+          title: 'How many days can you train?',
+          subtitle:
+              'Choose a realistic week. Consistency beats an impossible plan.',
+          child: _DayStepper(value: days, onChanged: onDays),
+        ),
+      _ => _OnboardingStep(
+          eyebrow: 'Optional',
+          title: 'Add a starting weight?',
+          subtitle:
+              'Useful for progress tracking, but you can skip it and add a weigh-in later.',
+          child: AppTextField(
+            controller: weight,
+            label: 'Starting weight in kg',
+            icon: Icons.monitor_weight_outlined,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            textInputAction: TextInputAction.done,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(
+                RegExp(r'^\d*\.?\d{0,1}'),
+              ),
+            ],
+            errorText: error,
+          ),
+        ),
+    };
+  }
+}
+
+class _ProgressHeader extends StatelessWidget {
+  final int step;
+  final int stepCount;
+  const _ProgressHeader({required this.step, required this.stepCount});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.sm),
-      child: Text(
-        label,
-        style: AppType.subhead(weight: FontWeight.w800),
+    final current = step + 1;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Step $current of $stepCount',
+          style: AppType.micro(color: AppColors.textMuted),
+        ),
+        const SizedBox(height: Insets.sm),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(Radii.chip),
+          child: LinearProgressIndicator(
+            value: current / stepCount,
+            minHeight: 6,
+            backgroundColor: AppColors.surfaceElevated,
+            color: AppColors.primary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuestionStep extends StatelessWidget {
+  final String eyebrow;
+  final String title;
+  final String subtitle;
+  final Widget child;
+
+  const _QuestionStep({
+    super.key,
+    required this.eyebrow,
+    required this.title,
+    required this.subtitle,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      accent: AppColors.primary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            eyebrow.toUpperCase(),
+            style: AppType.micro(
+              weight: FontWeight.w800,
+              color: AppColors.primary,
+              spacing: 1,
+            ),
+          ),
+          const SizedBox(height: Insets.sm),
+          Text(title, style: AppType.title1()),
+          const SizedBox(height: Insets.sm),
+          Text(subtitle,
+              style: AppType.callout(color: AppColors.textSecondary)),
+          const SizedBox(height: Insets.xl),
+          child,
+        ],
       ),
     );
   }

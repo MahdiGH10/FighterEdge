@@ -348,7 +348,10 @@ _Added component goldens before the Phase 4 screen pass._
       backed by `CupertinoPage`. Static routes (auth subpages, paywall, More
       tools, EdgeFuel plan/setup/recipes) use named routes with test-safe
       fallback navigation; object-carrying detail routes use `CupertinoPageRoute`.
-- [ ] Onboarding: one question per screen, skippable, progress visible
+- [x] Onboarding: one question per screen, skippable, progress visible
+      — global account onboarding is now a four-step flow with visible progress,
+      one focused question per step, back navigation, and skip paths that start
+      a fresh camp without forcing a starting weigh-in.
 - [ ] Paywall: value before price, honest trial framing, single primary action
 
 ### Phase 5 — Accessibility & polish

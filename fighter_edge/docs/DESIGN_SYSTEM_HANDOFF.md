@@ -135,6 +135,11 @@ that carry live runtime objects (selected training session, selected recipe
 listing) intentionally remain imperative, but now use `CupertinoPageRoute`
 instead of `MaterialPageRoute`.
 
+Onboarding slice is done: the global account onboarding is now a four-step,
+one-question-per-screen flow with a visible progress bar, back navigation, and
+skip paths. Starting weight is optional; skipping it still creates a fresh camp
+and weekly sessions, just without a first weigh-in.
+
 Remaining headline items: re-IA the tabs to Home/Train/Fuel/Profile with the
 technique library wired in.
 
