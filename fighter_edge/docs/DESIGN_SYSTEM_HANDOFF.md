@@ -140,6 +140,11 @@ one-question-per-screen flow with a visible progress bar, back navigation, and
 skip paths. Starting weight is optional; skipping it still creates a fresh camp
 and weekly sessions, just without a first weigh-in.
 
+Paywall slice is done: the upgrade screen now leads with outcomes/value before
+pricing, removes the fake-feeling plan toggle while billing is disconnected,
+states planned pricing as a founding preview, says "no payment today", and
+keeps a single primary CTA (`Join Pro Waitlist`).
+
 Remaining headline items: re-IA the tabs to Home/Train/Fuel/Profile with the
 technique library wired in.
 

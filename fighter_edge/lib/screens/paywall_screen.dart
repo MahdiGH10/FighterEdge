@@ -9,8 +9,7 @@ import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
-import '../theme/app_haptics.dart';
-import '../widgets/press_scale.dart';
+import '../widgets/stat_card.dart';
 
 /// Upgrade screen. Payments are not wired yet, so this screen collects intent
 /// without granting paid entitlements from the client.
@@ -24,20 +23,26 @@ class PaywallScreen extends StatefulWidget {
 }
 
 class _PaywallScreenState extends State<PaywallScreen> {
-  bool _annual = true;
-
   static const _benefits = [
-    ('Corner Coach', 'Round-by-round AI game plan', Icons.record_voice_over),
-    ('All Timer Presets', 'Boxing, MMA & BJJ interval sets', Icons.timer),
+    (
+      'Corner Coach',
+      'Round-by-round plans and post-session feedback',
+      Icons.record_voice_over
+    ),
+    ('All Timer Presets', 'Boxing, MMA and BJJ interval sets', Icons.timer),
     (
       'Unlimited Weight History',
-      'Full trend history & analytics',
+      'Full trend history without deleting your past',
       Icons.show_chart
     ),
-    ('Nutrition Analytics', 'Weekly macro & calorie insights', Icons.insights),
+    (
+      'Nutrition Analytics',
+      'Weekly macro trends and plan explanations',
+      Icons.insights
+    ),
     (
       'Full Technique Library',
-      'Every discipline, unlocked',
+      'Every discipline and progression path unlocked',
       Icons.sports_martial_arts
     ),
   ];
@@ -53,27 +58,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
         padding: const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, Insets.xxl),
         children: [
           const SizedBox(height: Insets.sm),
-          Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: Insets.lg, vertical: Insets.sm),
-              decoration: BoxDecoration(
-                color: AppColors.primarySoft,
-                borderRadius: BorderRadius.circular(Radii.chip),
-                border: Border.all(color: AppColors.primary),
-              ),
-              child: Text('PRO',
-                  style: AppType.title2(color: AppColors.primary, spacing: 2)),
-            ),
-          ),
-          const SizedBox(height: Insets.lg),
           Text('Unlock your full edge',
               textAlign: TextAlign.center, style: AppType.title1()),
           const SizedBox(height: Insets.xs),
-          Text('Everything you need to train like a pro.',
+          Text(
+              'Sharper coaching, deeper history, and fuel decisions that make sense.',
               textAlign: TextAlign.center,
               style: AppType.subhead(color: AppColors.textSecondary)),
           const SizedBox(height: Insets.xl),
+          if (widget.highlight != null) ...[
+            _TriggeredFeatureCard(feature: widget.highlight!),
+            const SizedBox(height: Insets.lg),
+          ],
+          const _ValueStack(),
+          const SizedBox(height: Insets.lg),
           for (final b in _benefits)
             _BenefitRow(
               title: b.$1,
@@ -98,56 +96,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
               ],
             )
           else ...[
-            Container(
-              padding: const EdgeInsets.all(Insets.lg),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(Radii.card),
-                border: Border.all(color: AppColors.primary),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _PlanToggle(
-                          label: 'Monthly',
-                          price: '\$9.99',
-                          selected: !_annual,
-                          onTap: () => setState(() => _annual = false),
-                        ),
-                      ),
-                      const SizedBox(width: Insets.sm),
-                      Expanded(
-                        child: _PlanToggle(
-                          label: 'Yearly',
-                          price: '\$79.99',
-                          badge: 'Best value',
-                          selected: _annual,
-                          onTap: () => setState(() => _annual = true),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: Insets.md),
-                  const _ComparisonRow(
-                    free: 'Basic tracking',
-                    pro: 'Camp analytics + coach loops',
-                  ),
-                  const _ComparisonRow(
-                    free: 'Limited library',
-                    pro: 'Full technique progression',
-                  ),
-                  const _ComparisonRow(
-                    free: 'Manual progress',
-                    pro: 'Accountability dashboard',
-                  ),
-                ],
-              ),
-            ),
+            const _LaunchTermsCard(),
             const SizedBox(height: Insets.lg),
             PrimaryButton(
-              auth.isBusy ? 'Opening checkout...' : 'Join Pro Waitlist',
+              auth.isBusy ? 'Saving interest...' : 'Join Pro Waitlist',
               icon: Icons.bolt,
               expand: true,
               onPressed: auth.isBusy
@@ -164,7 +116,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     },
             ),
             const SizedBox(height: Insets.sm),
-            Text('No payment will be taken until store billing is connected.',
+            Text('No payment today. We will ask again before any charge.',
                 textAlign: TextAlign.center,
                 style: AppType.micro(color: AppColors.textMuted)),
             const SizedBox(height: Insets.md),
@@ -185,95 +137,146 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 }
 
-class _PlanToggle extends StatelessWidget {
-  final String label;
-  final String price;
-  final String? badge;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _PlanToggle({
-    required this.label,
-    required this.price,
-    this.badge,
-    required this.selected,
-    required this.onTap,
-  });
+class _TriggeredFeatureCard extends StatelessWidget {
+  final Feature feature;
+  const _TriggeredFeatureCard({required this.feature});
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: [label, price, if (badge != null) badge].join(', '),
-      child: PressScale(
-        onTap: onTap,
-        haptic: AppHaptics.selection,
-        child: ExcludeSemantics(
-          child: AnimatedContainer(
-            duration: MotionTokens.fast,
-            padding: const EdgeInsets.all(Insets.md),
+    return AppCard(
+      accent: AppColors.primary,
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              color:
-                  selected ? AppColors.primarySoft : AppColors.backgroundRaised,
+              color: AppColors.primarySoft,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: selected ? AppColors.primary : AppColors.border,
-              ),
             ),
+            child: const Icon(Icons.lock_open, color: AppColors.primary),
+          ),
+          const SizedBox(width: Insets.md),
+          Expanded(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (badge != null) ...[
-                  Text(
-                    badge!.toUpperCase(),
-                    style: AppType.micro(
-                      weight: FontWeight.w900,
-                      color: AppColors.premium,
-                      spacing: .8,
-                    ),
-                  ),
-                  const SizedBox(height: Insets.xxs),
-                ],
-                Text(label, style: AppType.subhead(weight: FontWeight.w800)),
+                Text('You found a Pro feature', style: AppType.title2()),
                 const SizedBox(height: Insets.xxs),
-                Text(price, style: AppType.title1()),
+                Text(
+                  '${feature.title} is part of the full Fighter Edge system.',
+                  style: AppType.subhead(color: AppColors.textSecondary),
+                ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-class _ComparisonRow extends StatelessWidget {
-  final String free;
-  final String pro;
+class _ValueStack extends StatelessWidget {
+  const _ValueStack();
 
-  const _ComparisonRow({required this.free, required this.pro});
+  static const _items = [
+    (
+      Icons.track_changes,
+      'Know what matters today',
+      'Focus on the session, habit, or recovery signal that moves the week.'
+    ),
+    (
+      Icons.query_stats,
+      'See trends, not noise',
+      'Keep the full history behind weight, camp, and nutrition progress.'
+    ),
+    (
+      Icons.psychology_alt,
+      'Get explanations',
+      'Pro surfaces explain why the plan says what it says, not just numbers.'
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      elevated: true,
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF201416), Color(0xFF121218)],
+      ),
+      child: Column(
+        children: [
+          for (final item in _items) _ValueRow(item.$1, item.$2, item.$3),
+        ],
+      ),
+    );
+  }
+}
+
+class _ValueRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String body;
+
+  const _ValueRow(this.icon, this.title, this.body);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: Insets.sm),
+      padding: const EdgeInsets.only(bottom: Insets.md),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Icon(icon, color: AppColors.primary, size: 20),
+          const SizedBox(width: Insets.md),
           Expanded(
-            child: Text(
-              free,
-              style: AppType.micro(color: AppColors.textMuted),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppType.callout(weight: FontWeight.w800)),
+                const SizedBox(height: Insets.xxs),
+                Text(
+                  body,
+                  style: AppType.subhead(color: AppColors.textSecondary),
+                ),
+              ],
             ),
           ),
-          const Icon(Icons.arrow_forward, color: AppColors.primary, size: 16),
-          const SizedBox(width: Insets.sm),
-          Expanded(
-            child: Text(
-              pro,
-              style: AppType.micro(
-                weight: FontWeight.w800,
-                color: AppColors.textPrimary,
-              ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LaunchTermsCard extends StatelessWidget {
+  const _LaunchTermsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      accent: AppColors.premium,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'FOUNDING PRO PREVIEW',
+            style: AppType.micro(
+              weight: FontWeight.w900,
+              color: AppColors.premium,
+              spacing: 0.8,
             ),
+          ),
+          const SizedBox(height: Insets.sm),
+          Text('Planned pricing: \$9.99/mo or \$79.99/yr',
+              style: AppType.title2()),
+          const SizedBox(height: Insets.sm),
+          Text(
+            'Billing is not active yet. Joining the waitlist records interest '
+            'only; checkout will require a separate confirmation when store '
+            'payments are connected.',
+            style: AppType.subhead(color: AppColors.textSecondary),
           ),
         ],
       ),

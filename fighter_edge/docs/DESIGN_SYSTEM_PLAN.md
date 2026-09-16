@@ -352,7 +352,10 @@ _Added component goldens before the Phase 4 screen pass._
       — global account onboarding is now a four-step flow with visible progress,
       one focused question per step, back navigation, and skip paths that start
       a fresh camp without forcing a starting weigh-in.
-- [ ] Paywall: value before price, honest trial framing, single primary action
+- [x] Paywall: value before price, honest trial framing, single primary action
+      — paywall now leads with outcomes and unlocked value, shows planned
+      pricing as a founding preview with explicit "no payment today" language,
+      and keeps one primary CTA while billing is not connected.
 
 ### Phase 5 — Accessibility & polish
 
