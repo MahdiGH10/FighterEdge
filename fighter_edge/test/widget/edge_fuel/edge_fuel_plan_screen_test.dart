@@ -91,8 +91,11 @@ void main() {
         ),
       ));
       await tester.pumpAndSettle();
-
-      await tester.ensureVisible(find.text('ASK EDGEFUEL COACH'));
+      await tester.scrollUntilVisible(
+        find.text('ASK EDGEFUEL COACH'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('ASK EDGEFUEL COACH'));
       await tester.pump(); // enter loading state
@@ -102,6 +105,37 @@ void main() {
           find.text('You are tracking well toward your goal.'), findsOneWidget);
       expect(
           find.textContaining('pace reduced to protect RMR'), findsOneWidget);
+    });
+
+    testWidgets('Pro can generate and read the full Fighter Brief',
+        (tester) async {
+      final repo = await makeRepo(signedIn: true, plan: Plan.pro);
+      final userId = repo.currentUser!.id;
+      final edgeFuelRepo = InMemoryEdgeFuelRepository();
+      await edgeFuelRepo.saveTarget(userId, _successTarget());
+
+      await tester.pumpWidget(wrapApp(
+        const EdgeFuelPlanScreen(),
+        repo: repo,
+        edgeFuelRepo: edgeFuelRepo,
+        edgeFuelAiGateway: const FakeEdgeFuelAiGateway(),
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('GENERATE FULL FIGHTER BRIEF'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.text('GENERATE FULL FIGHTER BRIEF'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('GENERATE FULL FIGHTER BRIEF'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('NEXT ACTION'), findsOneWidget);
+      expect(find.text('MEAL SUGGESTION'), findsOneWidget);
+      expect(find.text('TRAINING TIMING'), findsOneWidget);
+      expect(find.text('WEEKLY ADJUSTMENT'), findsOneWidget);
     });
 
     testWidgets(
@@ -122,7 +156,11 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text('ASK EDGEFUEL COACH'));
+      await tester.scrollUntilVisible(
+        find.text('ASK EDGEFUEL COACH'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('ASK EDGEFUEL COACH'));
       await tester.pumpAndSettle();

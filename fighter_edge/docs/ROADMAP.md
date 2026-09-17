@@ -27,7 +27,8 @@ not drift apart:
 - Phase 7A: a pure-Dart Fighter Brief preview with honest no-data states and
   nutrient-gap prioritization.
 - Phase 7B: a server-backed `fighterBrief` task with entitlement-before-quota,
-  strict response validation, safety rejection, and typed client states.
+  a versioned four-section response, strict validation, safety rejection, and
+  typed client states.
 - Phase 7C foundation: RevenueCat purchase/restore adapter, server webhook
   idempotency and ordering, pending-sync paywall state, and protected billing
   fields in Firestore rules.
@@ -39,8 +40,7 @@ not drift apart:
 
 1. Deploy Functions/rules and exercise the server-backed premium flow with a
    real RevenueCat sandbox account.
-2. Finish the explicit Fighter Brief response sections and wire the Pro action
-   into the Plan screen without exposing unverifiable recipe claims.
+2. Add privacy-safe funnel events and production AI/billing observability.
 3. Configure store products and complete the purchase, restore, cancellation,
    expiry, billing-issue, and refund matrix on Android and iOS.
 4. Profile Android, remove measured rebuild/memory hotspots, then produce a

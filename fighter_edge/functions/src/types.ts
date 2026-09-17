@@ -35,11 +35,19 @@ export interface AiAction {
 }
 
 export interface AiResponse {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
   summary: string;
   actions: AiAction[];
   warnings: string[];
   requiresProfessionalReview: boolean;
   factsUsed: string[];
   contentVersion: string;
+  brief?: FighterBriefSections;
+}
+
+export interface FighterBriefSections {
+  nextAction: string;
+  mealSuggestion: string;
+  trainingTiming: string;
+  weeklyAdjustment: string;
 }

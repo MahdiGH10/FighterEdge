@@ -65,6 +65,19 @@ void main() {
       expect(controller.lastResult?.status, EdgeFuelAiStatus.unavailable);
     });
 
+    test('keeps the premium Fighter Brief result separate from the coach',
+        () async {
+      final controller = EdgeFuelAiController(
+        gateway: const FakeEdgeFuelAiGateway(),
+      );
+
+      await controller.generateFighterBrief(target: _successTarget());
+
+      expect(controller.lastResult, isNull);
+      expect(controller.lastBriefResult?.status, EdgeFuelAiStatus.success);
+      expect(controller.lastBriefResult?.response?.brief, isNotNull);
+    });
+
     test('turns a thrown timeout into a recoverable unavailable state',
         () async {
       final controller = EdgeFuelAiController(gateway: _ThrowingGateway());

@@ -43,10 +43,28 @@ class FakeEdgeFuelAiGateway implements EdgeFuelAiGateway {
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
-  }) =>
-      explainPlan(
-        target: target,
-        day: day,
-        preferences: preferences,
-      );
+  }) async {
+    if (nextResult != null) return nextResult!();
+    if (!target.isSuccess) return const EdgeFuelAiResult.unavailable();
+
+    return const EdgeFuelAiResult.success(EdgeFuelAiResponse(
+      summary: 'Your Fighter Brief is ready for today.',
+      brief: FighterBriefSections(
+        nextAction: 'Log your next meal so the brief can stay specific.',
+        mealSuggestion:
+            'Anchor the next meal around a reliable protein source.',
+        trainingTiming:
+            'Keep your usual training schedule and fuel consistently.',
+        weeklyAdjustment:
+            'Keep this target steady until you have a full week of data.',
+      ),
+      factsUsed: [
+        'targetCalories',
+        'proteinGrams',
+        'carbGrams',
+        'fatGrams',
+      ],
+      contentVersion: 'fake-brief',
+    ));
+  }
 }

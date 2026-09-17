@@ -46,6 +46,30 @@ class AiAction {
   }
 }
 
+/// Version-2 sections returned only by the premium Fighter Brief task.
+class FighterBriefSections {
+  final String nextAction;
+  final String mealSuggestion;
+  final String trainingTiming;
+  final String weeklyAdjustment;
+
+  const FighterBriefSections({
+    required this.nextAction,
+    required this.mealSuggestion,
+    required this.trainingTiming,
+    required this.weeklyAdjustment,
+  });
+
+  factory FighterBriefSections.fromJson(Map<String, dynamic> json) {
+    return FighterBriefSections(
+      nextAction: json['nextAction'] as String? ?? '',
+      mealSuggestion: json['mealSuggestion'] as String? ?? '',
+      trainingTiming: json['trainingTiming'] as String? ?? '',
+      weeklyAdjustment: json['weeklyAdjustment'] as String? ?? '',
+    );
+  }
+}
+
 class EdgeFuelAiResponse {
   final String summary;
   final List<AiAction> actions;
@@ -53,6 +77,7 @@ class EdgeFuelAiResponse {
   final bool requiresProfessionalReview;
   final List<String> factsUsed;
   final String contentVersion;
+  final FighterBriefSections? brief;
 
   const EdgeFuelAiResponse({
     required this.summary,
@@ -61,6 +86,7 @@ class EdgeFuelAiResponse {
     this.requiresProfessionalReview = false,
     this.factsUsed = const [],
     this.contentVersion = '',
+    this.brief,
   });
 
   factory EdgeFuelAiResponse.fromJson(Map<String, dynamic> json) {
@@ -75,6 +101,11 @@ class EdgeFuelAiResponse {
           json['requiresProfessionalReview'] as bool? ?? false,
       factsUsed: List<String>.from(json['factsUsed'] as List? ?? const []),
       contentVersion: json['contentVersion'] as String? ?? '',
+      brief: json['brief'] is Map
+          ? FighterBriefSections.fromJson(
+              Map<String, dynamic>.from(json['brief'] as Map),
+            )
+          : null,
     );
   }
 }

@@ -1,4 +1,10 @@
-import { AiAction, AiActionType, AiResponse } from "./types";
+import {
+  AiAction,
+  AiActionType,
+  AiResponse,
+  AiTaskType,
+  FighterBriefSections,
+} from "./types";
 
 /**
  * Response validation gate (master prompt §13.3). The model's raw output is
@@ -33,6 +39,7 @@ const MAX_SUMMARY_CHARS = 800;
 const MAX_ACTIONS = 6;
 const MAX_ACTION_TITLE_CHARS = 80;
 const MAX_ACTION_REASON_CHARS = 200;
+const MAX_BRIEF_SECTION_CHARS = 280;
 
 export interface ValidationResult {
   ok: boolean;
@@ -72,12 +79,39 @@ function isValidAction(value: unknown): value is AiAction {
   return true;
 }
 
+function isValidBriefSections(value: unknown): value is FighterBriefSections {
+  if (typeof value !== "object" || value === null) return false;
+  const brief = value as Record<string, unknown>;
+  return [
+    "nextAction",
+    "mealSuggestion",
+    "trainingTiming",
+    "weeklyAdjustment",
+  ].every((key) => {
+    const section = brief[key];
+    return (
+      typeof section === "string" &&
+      section.length > 0 &&
+      section.length <= MAX_BRIEF_SECTION_CHARS
+    );
+  });
+}
+
 /** Structural shape check — matches master prompt §13.3's schema exactly. */
-export function isWellFormedResponse(value: unknown): value is AiResponse {
+export function isWellFormedResponse(
+  value: unknown,
+  task: AiTaskType = "explainPlan",
+): value is AiResponse {
   if (typeof value !== "object" || value === null) return false;
   const response = value as Record<string, unknown>;
 
-  if (response.schemaVersion !== 1) return false;
+  if (task === "fighterBrief") {
+    if (response.schemaVersion !== 2 || !isValidBriefSections(response.brief)) {
+      return false;
+    }
+  } else if (response.schemaVersion !== 1) {
+    return false;
+  }
   if (typeof response.summary !== "string" || response.summary.length === 0) return false;
   if (response.summary.length > MAX_SUMMARY_CHARS) return false;
   if (!Array.isArray(response.actions) || response.actions.length > MAX_ACTIONS) return false;
@@ -95,6 +129,14 @@ function containsProhibitedContent(response: AiResponse): boolean {
     response.summary,
     ...response.warnings,
     ...response.actions.flatMap((a) => [a.title, a.reason]),
+    ...(response.brief
+      ? [
+          response.brief.nextAction,
+          response.brief.mealSuggestion,
+          response.brief.trainingTiming,
+          response.brief.weeklyAdjustment,
+        ]
+      : []),
   ].join(" \n ");
   return PROHIBITED_PATTERNS.some((pattern) => pattern.test(text));
 }
@@ -110,15 +152,27 @@ function containsFabricatedNumbers(
   suppliedFacts: string,
 ): boolean {
   const suppliedNumbers = new Set(suppliedFacts.match(/\d{3,}/g) ?? []);
-  const summaryNumbers = response.summary.match(/\d{3,}/g) ?? [];
-  return summaryNumbers.some((n) => !suppliedNumbers.has(n));
+  const content = [
+    response.summary,
+    ...(response.brief
+      ? [
+          response.brief.nextAction,
+          response.brief.mealSuggestion,
+          response.brief.trainingTiming,
+          response.brief.weeklyAdjustment,
+        ]
+      : []),
+  ].join(" ");
+  const contentNumbers = content.match(/\d{3,}/g) ?? [];
+  return contentNumbers.some((n) => !suppliedNumbers.has(n));
 }
 
 export function validateResponse(
   parsed: unknown,
   suppliedFactsJson: string,
+  task: AiTaskType = "explainPlan",
 ): ValidationResult {
-  if (!isWellFormedResponse(parsed)) {
+  if (!isWellFormedResponse(parsed, task)) {
     return { ok: false, reason: "malformed_schema" };
   }
   if (containsProhibitedContent(parsed)) {

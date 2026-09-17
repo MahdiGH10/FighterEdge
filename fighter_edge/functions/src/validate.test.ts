@@ -20,6 +20,25 @@ function goodResponse(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function goodBriefResponse(overrides: Record<string, unknown> = {}) {
+  return {
+    schemaVersion: 2,
+    summary: "Your Fighter Brief is ready for today.",
+    brief: {
+      nextAction: "Log your next meal so the plan stays specific.",
+      mealSuggestion: "Anchor your next meal around a reliable protein source.",
+      trainingTiming: "Keep your usual training schedule and fuel consistently.",
+      weeklyAdjustment: "Keep this target steady until you have a full week of data.",
+    },
+    actions: [],
+    warnings: [],
+    requiresProfessionalReview: false,
+    factsUsed: ["targetCalories", "proteinGrams"],
+    contentVersion: "sp2",
+    ...overrides,
+  };
+}
+
 test("parseModelJson returns null for invalid JSON instead of throwing", () => {
   assert.equal(parseModelJson("not json"), null);
 });
@@ -101,4 +120,47 @@ test("allows numbers that are present in the supplied facts", () => {
   });
   const result = validateResponse(response, suppliedFacts);
   assert.equal(result.ok, true);
+});
+
+test("accepts a complete version-2 Fighter Brief", () => {
+  const result = validateResponse(goodBriefResponse(), suppliedFacts, "fighterBrief");
+  assert.equal(result.ok, true);
+});
+
+test("rejects a Fighter Brief missing a required section", () => {
+  const response = goodBriefResponse();
+  delete (response.brief as Record<string, unknown>).trainingTiming;
+  const result = validateResponse(response, suppliedFacts, "fighterBrief");
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "malformed_schema");
+});
+
+test("rejects prohibited language inside a Fighter Brief section", () => {
+  const result = validateResponse(
+    goodBriefResponse({
+      brief: {
+        ...goodBriefResponse().brief,
+        mealSuggestion: "Dehydrate before training to make weight.",
+      },
+    }),
+    suppliedFacts,
+    "fighterBrief",
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "prohibited_content");
+});
+
+test("rejects fabricated numbers inside a Fighter Brief section", () => {
+  const result = validateResponse(
+    goodBriefResponse({
+      brief: {
+        ...goodBriefResponse().brief,
+        weeklyAdjustment: "Raise tomorrow's target to 4200 kcal.",
+      },
+    }),
+    suppliedFacts,
+    "fighterBrief",
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "fabricated_numbers");
 });

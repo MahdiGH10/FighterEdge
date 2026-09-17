@@ -67,13 +67,15 @@ The first 7B/7C slice is now shipped:
 
 - `fighterBrief` is a distinct server task and premium tasks verify
   `users/{uid}.plan == 'pro'` before consuming AI quota.
-- OpenRouter output still passes schema, fabricated-number, and safety-language
-  validation before reaching Flutter.
-- Flutter has typed entitlement-required, quota, unavailable, and success states.
+- OpenRouter output now uses a version-2 Fighter Brief schema with explicit
+  next action, meal suggestion, training timing, and weekly adjustment sections.
+- The server validates every section, scans it for unsafe language and
+  fabricated numbers, and rejects the whole response on any failure.
+- Flutter parses and renders the four premium sections with typed
+  entitlement-required, quota, unavailable, and success states.
 - The paywall supports configured monthly/annual products, restore, pending
   server sync, and store management links, with a safe local waitlist fallback.
 
-The next 7B slice is to expand the response into explicit brief sections
-(next action, timing, and weekly adjustment) while keeping the schema versioned
-and backward-compatible. The full brief should only appear after the server
-confirms the entitlement.
+The next 7B/7D slice is privacy-safe funnel measurement and production
+observability. The full brief still only appears after the server confirms the
+entitlement; the deterministic free preview remains available offline.

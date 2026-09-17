@@ -286,9 +286,224 @@ class _FighterBriefPreviewSection extends StatelessWidget {
                     const PaywallScreen(highlight: Feature.edgeFuelAiCoach),
               ),
             ),
+          ] else ...[
+            const SizedBox(height: Insets.md),
+            _PremiumBriefBody(
+              ai: context.watch<EdgeFuelAiController>(),
+              target: target,
+              edgeFuel: edgeFuel,
+            ),
           ],
         ],
       ),
+    );
+  }
+}
+
+class _PremiumBriefBody extends StatelessWidget {
+  final EdgeFuelAiController ai;
+  final NutritionTarget target;
+  final EdgeFuelController edgeFuel;
+
+  const _PremiumBriefBody({
+    required this.ai,
+    required this.target,
+    required this.edgeFuel,
+  });
+
+  Future<void> _generate() => ai.generateFighterBrief(
+        target: target,
+        day: edgeFuel.day,
+        preferences: edgeFuel.draft,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    if (ai.isLoading && ai.lastBriefResult == null) {
+      return const _PremiumBriefSkeleton();
+    }
+
+    final result = ai.lastBriefResult;
+    if (result == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Turn today\'s target and log into one focused next move, meal cue, '
+            'training timing note, and weekly adjustment.',
+            style: AppType.subhead(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: Insets.md),
+          PrimaryButton(
+            'Generate full Fighter Brief',
+            icon: Icons.auto_awesome,
+            expand: true,
+            onPressed: ai.isLoading ? null : _generate,
+          ),
+        ],
+      );
+    }
+
+    switch (result.status) {
+      case EdgeFuelAiStatus.quotaReached:
+        return Text(
+          'You\'ve reached today\'s AI limit. Your deterministic preview remains available; try again tomorrow.',
+          style: AppType.subhead(color: AppColors.textSecondary),
+        );
+      case EdgeFuelAiStatus.entitlementRequired:
+        return Text(
+          'Pro access is still syncing. Refresh your account status and try again.',
+          style: AppType.subhead(color: AppColors.textSecondary),
+        );
+      case EdgeFuelAiStatus.unavailable:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Your free preview is still accurate. The full brief is temporarily unavailable.',
+              style: AppType.subhead(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: Insets.md),
+            GhostButton(
+              'Try again',
+              icon: Icons.refresh,
+              expand: true,
+              onPressed: ai.isLoading ? null : _generate,
+            ),
+          ],
+        );
+      case EdgeFuelAiStatus.success:
+        final response = result.response!;
+        final brief = response.brief;
+        if (brief == null) {
+          return Text(
+            'The brief needs a newer server response. Try again in a moment.',
+            style: AppType.subhead(color: AppColors.textSecondary),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (response.requiresProfessionalReview)
+              Padding(
+                padding: const EdgeInsets.only(bottom: Insets.sm),
+                child: Text(
+                  'Please speak with a qualified professional before acting on this.',
+                  style: AppType.subhead(
+                    weight: FontWeight.w700,
+                    color: AppColors.warning,
+                  ),
+                ),
+              ),
+            Text(response.summary,
+                style: AppType.callout(weight: FontWeight.w800)),
+            const SizedBox(height: Insets.md),
+            _BriefSection(
+              icon: Icons.flag_outlined,
+              label: 'NEXT ACTION',
+              value: brief.nextAction,
+            ),
+            _BriefSection(
+              icon: Icons.restaurant_outlined,
+              label: 'MEAL SUGGESTION',
+              value: brief.mealSuggestion,
+            ),
+            _BriefSection(
+              icon: Icons.schedule_outlined,
+              label: 'TRAINING TIMING',
+              value: brief.trainingTiming,
+            ),
+            _BriefSection(
+              icon: Icons.calendar_month_outlined,
+              label: 'WEEKLY ADJUSTMENT',
+              value: brief.weeklyAdjustment,
+            ),
+            for (final warning in response.warnings)
+              Padding(
+                padding: const EdgeInsets.only(top: Insets.xs),
+                child: Text(
+                  '• $warning',
+                  style: AppType.micro(color: AppColors.textMuted),
+                ),
+              ),
+            const SizedBox(height: Insets.sm),
+            GhostButton(
+              'Refresh brief',
+              icon: Icons.refresh,
+              expand: true,
+              onPressed: ai.isLoading ? null : _generate,
+            ),
+          ],
+        );
+    }
+  }
+}
+
+class _BriefSection extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _BriefSection({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: Insets.sm),
+      padding: const EdgeInsets.all(Insets.sm),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundRaised,
+        borderRadius: BorderRadius.circular(Radii.card),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppColors.premium, size: 18),
+          const SizedBox(width: Insets.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: AppType.micro(
+                    weight: FontWeight.w800,
+                    color: AppColors.textMuted,
+                    spacing: .6,
+                  ),
+                ),
+                const SizedBox(height: Insets.xxs),
+                Text(value, style: AppType.subhead()),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PremiumBriefSkeleton extends StatelessWidget {
+  const _PremiumBriefSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const LinearProgressIndicator(minHeight: 2),
+        const SizedBox(height: Insets.md),
+        Text(
+          'Building your brief from your confirmed plan and logged context…',
+          style: AppType.subhead(color: AppColors.textSecondary),
+        ),
+      ],
     );
   }
 }

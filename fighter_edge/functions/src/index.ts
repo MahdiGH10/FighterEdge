@@ -76,27 +76,49 @@ export const edgeFuelAiExplain = onCall(
     };
     const suppliedFactsJson = JSON.stringify(suppliedFacts);
 
+    const responseShape =
+      data.task === "fighterBrief"
+        ? {
+            schemaVersion: 2,
+            summary: "string",
+            brief: {
+              nextAction: "string",
+              mealSuggestion: "string",
+              trainingTiming: "string",
+              weeklyAdjustment: "string",
+            },
+            actions: [],
+            warnings: ["string"],
+            requiresProfessionalReview: false,
+            factsUsed: ["fact-name-from-supplied-facts"],
+            contentVersion: "string",
+          }
+        : {
+            schemaVersion: 1,
+            summary: "string",
+            actions: [
+              {
+                type: "meal|recipe|timing|shopping|logging|recovery",
+                title: "string",
+                reason: "string",
+                recipeIds: [],
+                mealSlot: "optional string",
+              },
+            ],
+            warnings: ["string"],
+            requiresProfessionalReview: false,
+            factsUsed: ["fact-name-from-supplied-facts"],
+            contentVersion: "string",
+          };
+
     const userContent = [
       "Task:", data.task,
       "\nSupplied facts (JSON):", suppliedFactsJson,
       "\nRespond with exactly one JSON object matching this shape:",
-      JSON.stringify({
-        schemaVersion: 1,
-        summary: "string",
-        actions: [
-          {
-            type: "meal|recipe|timing|shopping|logging|recovery",
-            title: "string",
-            reason: "string",
-            recipeIds: [],
-            mealSlot: "optional string",
-          },
-        ],
-        warnings: ["string"],
-        requiresProfessionalReview: false,
-        factsUsed: ["fact-name-from-supplied-facts"],
-        contentVersion: "string",
-      }),
+      JSON.stringify(responseShape),
+      data.task === "fighterBrief"
+        ? "For Fighter Brief, make each brief section specific, concise, and grounded only in the supplied facts."
+        : "",
       "\nThis deployment has no recipe catalog yet — recipeIds must always be an empty array.",
     ].join(" ");
 
@@ -119,7 +141,7 @@ export const edgeFuelAiExplain = onCall(
     }
 
     const parsed = parseModelJson(rawContent);
-    const validation = validateResponse(parsed, suppliedFactsJson);
+    const validation = validateResponse(parsed, suppliedFactsJson, data.task);
     if (!validation.ok) {
       logger.warn("ai_response_rejected", {
         uid,

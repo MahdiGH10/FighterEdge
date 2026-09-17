@@ -48,5 +48,23 @@ void main() {
 
       expect(response.actions.single.type, AiActionType.logging);
     });
+
+    test('parses version-2 premium Fighter Brief sections', () {
+      final response = EdgeFuelAiResponse.fromJson({
+        'summary': 'Your brief is ready.',
+        'brief': {
+          'nextAction': 'Log your next meal.',
+          'mealSuggestion': 'Anchor it around protein.',
+          'trainingTiming': 'Keep your planned session time.',
+          'weeklyAdjustment': 'Hold this target for the week.',
+        },
+      });
+
+      expect(response.brief?.nextAction, 'Log your next meal.');
+      expect(response.brief?.mealSuggestion, 'Anchor it around protein.');
+      expect(response.brief?.trainingTiming, 'Keep your planned session time.');
+      expect(
+          response.brief?.weeklyAdjustment, 'Hold this target for the week.');
+    });
   });
 }

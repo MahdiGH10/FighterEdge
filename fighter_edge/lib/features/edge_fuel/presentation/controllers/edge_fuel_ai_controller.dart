@@ -19,9 +19,11 @@ class EdgeFuelAiController extends ChangeNotifier {
 
   EdgeFuelAiRequestState _state = EdgeFuelAiRequestState.idle;
   EdgeFuelAiResult? _lastResult;
+  EdgeFuelAiResult? _lastBriefResult;
 
   EdgeFuelAiRequestState get state => _state;
   EdgeFuelAiResult? get lastResult => _lastResult;
+  EdgeFuelAiResult? get lastBriefResult => _lastBriefResult;
   bool get isLoading => _state == EdgeFuelAiRequestState.loading;
 
   Future<void> explainPlan({
@@ -30,23 +32,53 @@ class EdgeFuelAiController extends ChangeNotifier {
     NutritionSetupDraft? preferences,
   }) async {
     if (isLoading) return;
+    await _run(
+      () => _gateway.explainPlan(
+        target: target,
+        day: day,
+        preferences: preferences,
+      ),
+      saveBrief: false,
+    );
+  }
+
+  Future<void> generateFighterBrief({
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  }) async {
+    if (isLoading) return;
+    await _run(
+      () => _gateway.generateFighterBrief(
+        target: target,
+        day: day,
+        preferences: preferences,
+      ),
+      saveBrief: true,
+    );
+  }
+
+  Future<void> _run(
+    Future<EdgeFuelAiResult> Function() request, {
+    required bool saveBrief,
+  }) async {
     _state = EdgeFuelAiRequestState.loading;
     notifyListeners();
 
     EdgeFuelAiResult result;
     try {
-      result = await _gateway.explainPlan(
-        target: target,
-        day: day,
-        preferences: preferences,
-      );
+      result = await request();
     } catch (_) {
       // A timeout/provider outage must release the button and render the
       // recoverable unavailable state instead of leaving the screen spinning.
       result = const EdgeFuelAiResult.unavailable();
     }
 
-    _lastResult = result;
+    if (saveBrief) {
+      _lastBriefResult = result;
+    } else {
+      _lastResult = result;
+    }
     _state = EdgeFuelAiRequestState.done;
     notifyListeners();
   }
