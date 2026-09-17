@@ -11,6 +11,25 @@ flutter test
 cd functions && npm test && npm run build
 ```
 
+## Current validation snapshot
+
+The latest hardening pass is green in the local Flutter and Functions suites:
+
+- `flutter analyze`: clean
+- `dart format --set-exit-if-changed .`: clean
+- `flutter test`: 267 tests passed
+- `functions/npm test`: 10 tests passed
+- `functions/npm run build`: clean
+
+Two device-level checks still require machine setup and cannot be faked by a
+headless test:
+
+- Windows integration tests need Developer Mode enabled for Flutter plugin
+  symlinks, then run `flutter test integration_test/app_flow_test.dart -d windows`.
+- Android builds need the configured SDK licenses accepted (including the NDK
+  version selected by the project), then run `flutter build apk --debug` before
+  attempting a signed release build.
+
 Release builds must also be verified on a physical Android device and later on
 iOS TestFlight. A passing widget suite is not a substitute for store builds.
 
