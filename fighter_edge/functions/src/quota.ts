@@ -1,9 +1,9 @@
 import { Firestore } from "firebase-admin/firestore";
 
 /**
- * Per-user daily quota (master prompt §13.4). Fast-MVP scope: no
- * server-owned Pro entitlement exists yet, so every signed-in user shares
- * the same generous daily cap rather than being gated by plan.
+ * Per-user daily quota (master prompt §13.4). The quota is deliberately
+ * conservative and applies after the server-owned entitlement gate. Premium
+ * users can be given a higher tier later without moving this trust boundary.
  */
 export const DAILY_QUOTA = 20;
 

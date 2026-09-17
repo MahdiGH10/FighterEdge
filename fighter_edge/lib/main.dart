@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 
 import 'auth/auth_repository.dart';
 import 'auth/firebase_auth_repository.dart';
+import 'billing/billing_gateway.dart';
+import 'billing/revenuecat_billing_gateway.dart';
 import 'controllers/auth_controller.dart';
 import 'data/data_repository.dart';
 import 'data/firestore_data_repository.dart';
@@ -68,6 +70,7 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
             dataRepo: dependencies.dataRepo,
             edgeFuelRepo: dependencies.edgeFuelRepo,
             edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
+            billingGateway: dependencies.billingGateway,
           );
         }
 
@@ -96,6 +99,7 @@ Future<_AppDependencies> _initializeProductionDependencies() async {
     dataRepo: FirestoreDataRepository(),
     edgeFuelRepo: FirestoreEdgeFuelRepository(),
     edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
+    billingGateway: RevenueCatBillingGateway(),
   );
 }
 
@@ -104,12 +108,14 @@ class _AppDependencies {
   final DataRepository dataRepo;
   final EdgeFuelRepository edgeFuelRepo;
   final EdgeFuelAiGateway edgeFuelAiGateway;
+  final BillingGateway billingGateway;
 
   const _AppDependencies({
     required this.authRepo,
     required this.dataRepo,
     required this.edgeFuelRepo,
     required this.edgeFuelAiGateway,
+    required this.billingGateway,
   });
 }
 
@@ -120,6 +126,7 @@ class FighterEdgeApp extends StatelessWidget {
   final EdgeFuelAiGateway? edgeFuelAiGateway;
   final FoodCatalogRepository? foodCatalogRepo;
   final RecipeCatalogRepository? recipeCatalogRepo;
+  final BillingGateway? billingGateway;
   const FighterEdgeApp({
     super.key,
     required this.authRepo,
@@ -128,6 +135,7 @@ class FighterEdgeApp extends StatelessWidget {
     this.edgeFuelAiGateway,
     this.foodCatalogRepo,
     this.recipeCatalogRepo,
+    this.billingGateway,
   });
 
   @override
@@ -144,7 +152,12 @@ class FighterEdgeApp extends StatelessWidget {
         AssetRecipeCatalogRepository(foodCatalog: resolvedFoodCatalog);
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthController(authRepo)),
+        ChangeNotifierProvider(
+          create: (_) => AuthController(
+            authRepo,
+            billingGateway: billingGateway,
+          ),
+        ),
         ChangeNotifierProxyProvider<AuthController, AppState>(
           create: (_) => AppState(dataRepository: dataRepo),
           update: (_, auth, state) {

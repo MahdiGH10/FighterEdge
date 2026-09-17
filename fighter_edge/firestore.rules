@@ -62,8 +62,19 @@ service cloud.firestore {
     }
 
     function isFreeProfileCreate() {
-      return !('plan' in request.resource.data) ||
-        request.resource.data.plan == 'free';
+      return (!('plan' in request.resource.data) ||
+          request.resource.data.plan == 'free') &&
+        !request.resource.data.keys().hasAny([
+          'entitlement',
+          'entitlements',
+          'billing',
+          'billingProvider',
+          'customerId',
+          'subscriptionId',
+          'productId',
+          'expiresAt',
+          'gracePeriodEndsAt',
+        ]);
     }
 
     function billingFieldsUnchanged() {

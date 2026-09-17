@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../auth/auth_repository.dart';
+import '../billing/billing_gateway.dart';
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
 import '../theme/app_colors.dart';
@@ -11,8 +13,8 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
 
-/// Upgrade screen. Payments are not wired yet, so this screen collects intent
-/// without granting paid entitlements from the client.
+/// Upgrade screen. Store purchases are initiated here, but paid entitlements
+/// are granted only after the server webhook updates the account profile.
 class PaywallScreen extends StatefulWidget {
   /// Optional feature that triggered the paywall, highlighted at the top.
   final Feature? highlight;
@@ -46,6 +48,55 @@ class _PaywallScreenState extends State<PaywallScreen> {
       Icons.sports_martial_arts
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<AuthController>().loadBillingProducts();
+    });
+  }
+
+  Future<void> _purchase(BillingProduct product) async {
+    final auth = context.read<AuthController>();
+    try {
+      await auth.startProCheckout(product);
+      if (!mounted) return;
+      final message = auth.isPro
+          ? 'Pro is active on your account.'
+          : 'Purchase received. We are confirming your Pro access securely.';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+      ));
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
+  }
+
+  Future<void> _restore() async {
+    final auth = context.read<AuthController>();
+    try {
+      await auth.restorePurchases();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(auth.isPro
+            ? 'Your Pro access is restored.'
+            : 'No active Pro access was found yet.'),
+        behavior: SnackBarBehavior.floating,
+      ));
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,40 +147,77 @@ class _PaywallScreenState extends State<PaywallScreen> {
               ],
             )
           else ...[
-            const _LaunchTermsCard(),
-            const SizedBox(height: Insets.lg),
-            PrimaryButton(
-              auth.isBusy ? 'Saving interest...' : 'Join Pro Waitlist',
-              icon: Icons.bolt,
-              expand: true,
-              onPressed: auth.isBusy
-                  ? null
-                  : () async {
-                      try {
-                        await auth.startProCheckout();
-                      } on AuthException catch (e) {
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.message)),
-                        );
-                      }
-                    },
-            ),
+            if (auth.billingState.isPro) const _BillingSyncNotice(),
+            if (auth.billingAvailable && auth.billingProducts.isNotEmpty) ...[
+              const _LaunchTermsCard(billingActive: true),
+              const SizedBox(height: Insets.lg),
+              for (final product in auth.billingProducts) ...[
+                PrimaryButton(
+                  '${product.period == BillingProductPeriod.annual ? 'Annual' : 'Monthly'} · ${product.priceString}',
+                  icon: Icons.lock_open,
+                  expand: true,
+                  onPressed: auth.isBusy ? null : () => _purchase(product),
+                ),
+                const SizedBox(height: Insets.sm),
+              ],
+            ] else if (auth.billingAvailable && auth.isBusy) ...[
+              const _BillingLoadingNotice(),
+            ] else ...[
+              const _LaunchTermsCard(billingActive: false),
+              const SizedBox(height: Insets.lg),
+              PrimaryButton(
+                auth.isBusy ? 'Saving interest...' : 'Join Pro Waitlist',
+                icon: Icons.bolt,
+                expand: true,
+                onPressed: auth.isBusy
+                    ? null
+                    : () async {
+                        try {
+                          await auth.startProCheckout();
+                        } on AuthException catch (e) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.message)),
+                          );
+                        }
+                      },
+              ),
+            ],
             const SizedBox(height: Insets.sm),
-            Text('No payment today. We will ask again before any charge.',
+            Text(
+                auth.billingAvailable
+                    ? 'Your store receipt is verified before Pro is activated.'
+                    : 'No payment today. We will ask again before any charge.',
                 textAlign: TextAlign.center,
                 style: AppType.micro(color: AppColors.textMuted)),
             const SizedBox(height: Insets.md),
             TextButton(
-              onPressed: auth.isBusy ? null : auth.refreshCurrentUser,
+              onPressed: auth.isBusy
+                  ? null
+                  : auth.billingAvailable
+                      ? _restore
+                      : auth.refreshCurrentUser,
               child: Text(
-                'Restore / refresh purchase status',
+                auth.billingAvailable
+                    ? 'Restore purchases'
+                    : 'Refresh purchase status',
                 style: AppType.subhead(
                   weight: FontWeight.w800,
                   color: AppColors.textSecondary,
                 ),
               ),
             ),
+            if (auth.billingManagementUrl case final managementUrl?)
+              TextButton(
+                onPressed: () => launchUrl(Uri.parse(managementUrl)),
+                child: Text(
+                  'Manage or cancel subscription',
+                  style: AppType.subhead(
+                    weight: FontWeight.w800,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
           ],
         ],
       ),
@@ -251,7 +339,9 @@ class _ValueRow extends StatelessWidget {
 }
 
 class _LaunchTermsCard extends StatelessWidget {
-  const _LaunchTermsCard();
+  final bool billingActive;
+
+  const _LaunchTermsCard({required this.billingActive});
 
   @override
   Widget build(BuildContext context) {
@@ -269,15 +359,67 @@ class _LaunchTermsCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: Insets.sm),
-          Text('Planned pricing: \$9.99/mo or \$79.99/yr',
-              style: AppType.title2()),
+          Text(
+            billingActive
+                ? 'Secure store checkout'
+                : 'Planned pricing: \$9.99/mo or \$79.99/yr',
+            style: AppType.title2(),
+          ),
           const SizedBox(height: Insets.sm),
           Text(
-            'Billing is not active yet. Joining the waitlist records interest '
-            'only; checkout will require a separate confirmation when store '
-            'payments are connected.',
+            billingActive
+                ? 'Subscriptions are processed by Apple or Google. Your '
+                    'receipt is verified before Pro access is activated, and '
+                    'you can restore or manage it any time.'
+                : 'Billing is not active on this build yet. Joining the '
+                    'waitlist records interest only; no payment is taken.',
             style: AppType.subhead(color: AppColors.textSecondary),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BillingSyncNotice extends StatelessWidget {
+  const _BillingSyncNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      accent: AppColors.primary,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.sync, color: AppColors.primary),
+          const SizedBox(width: Insets.md),
+          Expanded(
+            child: Text(
+              'Your store purchase is recognized. Pro unlocks after the secure account sync completes.',
+              style: AppType.subhead(color: AppColors.textSecondary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BillingLoadingNotice extends StatelessWidget {
+  const _BillingLoadingNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppCard(
+      child: Row(
+        children: [
+          SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          SizedBox(width: Insets.md),
+          Expanded(child: Text('Loading store plans…')),
         ],
       ),
     );

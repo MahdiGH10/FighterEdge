@@ -4,7 +4,7 @@
  * lib/features/edge_fuel/ai/edge_fuel_ai_models.dart — keep both in sync.
  */
 
-export type AiTaskType = "explainPlan" | "summarizeTrend";
+export type AiTaskType = "explainPlan" | "fighterBrief" | "summarizeTrend";
 
 /** Minimum-necessary context sent from Flutter — never raw user PII beyond this. */
 export interface AiRequest {

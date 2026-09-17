@@ -312,15 +312,15 @@ plan in plain language via OpenRouter.
 
 **Explicit, user-approved scope cuts (not oversights — documented decisions):**
 - No App Check on the AI endpoint yet.
-- No server-owned Pro entitlement check — every signed-in user shares one
-  daily quota (20 requests/day), regardless of plan. This is inconsistent
-  with the rest of the app's `Entitlements` model (which is otherwise
-  Pro-gated) — the AI feature is currently free for everyone.
-- Only two AI task types exist (`explainPlan`, `summarizeTrend` — and only
-  `explainPlan` has a UI). Recipe/meal-plan/substitution/grocery-list
-  actions are all explicitly disabled (`recipeIds` must always be empty)
-  because no recipe catalog exists yet (that's EF-3 in the master prompt,
-  not built).
+- The server-owned Pro entitlement check is now enforced for premium tasks;
+  the transactional daily quota remains 20 requests/day per user.
+- Three backend task types exist (`explainPlan`, `fighterBrief`, and
+  `summarizeTrend`). The current screen exposes the explanation and the
+  deterministic free Fighter Brief preview; the full premium brief sections
+  are the next UI slice.
+- Recipe/meal-plan/substitution/grocery-list actions are all explicitly
+  disabled (`recipeIds` must always be empty) because no recipe catalog exists
+  yet (that's EF-3 in the master prompt, not built).
 - Response caching, cost dashboards, and prompt-response logging (beyond a
   bare quota counter) don't exist.
 

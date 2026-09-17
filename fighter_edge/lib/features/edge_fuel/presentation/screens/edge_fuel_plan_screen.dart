@@ -468,6 +468,11 @@ class _AiCoachBody extends StatelessWidget {
           "You've reached today's AI limit. Try again tomorrow.",
           style: AppType.subhead(color: AppColors.textSecondary),
         );
+      case EdgeFuelAiStatus.entitlementRequired:
+        return Text(
+          'Pro access is still syncing. Refresh your account status and try again.',
+          style: AppType.subhead(color: AppColors.textSecondary),
+        );
       case EdgeFuelAiStatus.unavailable:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

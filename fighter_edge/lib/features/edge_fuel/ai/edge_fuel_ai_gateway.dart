@@ -14,4 +14,12 @@ abstract class EdgeFuelAiGateway {
     NutritionDay? day,
     NutritionSetupDraft? preferences,
   });
+
+  /// Premium structured brief. It uses the same server safety pipeline as the
+  /// explanation call but has its own task name for quota and analytics.
+  Future<EdgeFuelAiResult> generateFighterBrief({
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  });
 }

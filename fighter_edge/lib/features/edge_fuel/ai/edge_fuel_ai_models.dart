@@ -4,13 +4,18 @@
 /// here stays defensive (never crash on an unexpected value).
 library;
 
-enum AiTaskType { explainPlan, summarizeTrend }
+enum AiTaskType { explainPlan, fighterBrief, summarizeTrend }
 
 enum AiActionType { meal, recipe, timing, shopping, logging, recovery }
 
 /// Discriminates the gateway call's outcome so the UI can show the right
 /// state (master prompt §14: "AI unavailable", "AI quota reached").
-enum EdgeFuelAiStatus { success, quotaReached, unavailable }
+enum EdgeFuelAiStatus {
+  success,
+  quotaReached,
+  entitlementRequired,
+  unavailable,
+}
 
 class AiAction {
   final AiActionType type;
@@ -85,6 +90,10 @@ class EdgeFuelAiResult {
 
   const EdgeFuelAiResult.quotaReached()
       : status = EdgeFuelAiStatus.quotaReached,
+        response = null;
+
+  const EdgeFuelAiResult.entitlementRequired()
+      : status = EdgeFuelAiStatus.entitlementRequired,
         response = null;
 
   const EdgeFuelAiResult.unavailable()

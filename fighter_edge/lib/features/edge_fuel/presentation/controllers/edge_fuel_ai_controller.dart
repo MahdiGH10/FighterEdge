@@ -33,11 +33,18 @@ class EdgeFuelAiController extends ChangeNotifier {
     _state = EdgeFuelAiRequestState.loading;
     notifyListeners();
 
-    final result = await _gateway.explainPlan(
-      target: target,
-      day: day,
-      preferences: preferences,
-    );
+    EdgeFuelAiResult result;
+    try {
+      result = await _gateway.explainPlan(
+        target: target,
+        day: day,
+        preferences: preferences,
+      );
+    } catch (_) {
+      // A timeout/provider outage must release the button and render the
+      // recoverable unavailable state instead of leaving the screen spinning.
+      result = const EdgeFuelAiResult.unavailable();
+    }
 
     _lastResult = result;
     _state = EdgeFuelAiRequestState.done;

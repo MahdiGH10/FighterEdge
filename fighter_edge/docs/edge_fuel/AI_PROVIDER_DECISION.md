@@ -2,12 +2,11 @@
 
 Provider: OpenRouter
 
-Status: implemented (Fast MVP scope — see `docs/edge_fuel/AI_DEPLOY.md`).
-Backend gateway lives in `functions/`; Flutter never calls OpenRouter
-directly. No App Check or server-owned Pro entitlement yet — every
-signed-in user shares one daily quota. See `AI_DEPLOY.md` for the exact
-steps still needed on your end (Blaze upgrade, secret, deploy) before this
-is live.
+Status: implemented behind a Firebase callable boundary (see
+`docs/edge_fuel/AI_DEPLOY.md`). Backend gateway lives in `functions/`; Flutter
+never calls OpenRouter directly. Premium tasks require the server-owned
+`pro` entitlement before quota is consumed. App Check and production
+observability are still deployment follow-ups.
 
 ## Security rule
 

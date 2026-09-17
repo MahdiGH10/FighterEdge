@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/billing/subscription.dart';
+import 'package:fighter_edge/billing/fake_billing_gateway.dart';
 import 'package:fighter_edge/controllers/auth_controller.dart';
 
 void main() {
@@ -55,6 +56,19 @@ void main() {
     expect(auth.isPro, isFalse);
     expect(auth.allows(Feature.cornerCoach), isFalse);
     expect(auth.isBusy, isFalse);
+  });
+
+  test('store purchase waits for the trusted server entitlement', () async {
+    final billing = FakeBillingGateway();
+    final auth = AuthController(repo, billingGateway: billing);
+    await auth.signUp('a@b.com', 'secret1', 'A');
+    await Future<void>.delayed(Duration.zero);
+
+    await auth.startProCheckout(billing.products.first);
+
+    expect(billing.purchaseCount, 1);
+    expect(auth.isPro, isFalse);
+    expect(auth.billingState.isPro, isTrue);
   });
 
   test('sign-out returns to unauthenticated', () async {

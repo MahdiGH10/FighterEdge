@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/auth/local_auth_repository.dart';
+import 'package:fighter_edge/billing/billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/controllers/auth_controller.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
@@ -64,6 +65,7 @@ Widget wrapApp(
   EdgeFuelAiGateway? edgeFuelAiGateway,
   FoodCatalogRepository? foodCatalogRepo,
   RecipeCatalogRepository? recipeCatalogRepo,
+  BillingGateway? billingGateway,
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
   final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
@@ -80,7 +82,9 @@ Widget wrapApp(
       );
   return MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => AuthController(repo)),
+      ChangeNotifierProvider(
+        create: (_) => AuthController(repo, billingGateway: billingGateway),
+      ),
       ChangeNotifierProvider(create: (_) => state ?? AppState()),
       Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
       Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),

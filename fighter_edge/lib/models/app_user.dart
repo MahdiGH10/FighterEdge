@@ -8,6 +8,14 @@ class AppUser {
   final String displayName;
   final bool emailVerified;
   final Plan plan;
+
+  /// Server-owned subscription metadata. The client never writes these fields
+  /// in production; they are mirrored from RevenueCat webhooks for UX and
+  /// offline display only.
+  final DateTime? planExpiresAt;
+  final bool planWillRenew;
+  final String? billingProvider;
+  final String? billingManagementUrl;
   final DateTime createdAt;
   final bool onboardingComplete;
   final String goal;
@@ -21,6 +29,10 @@ class AppUser {
     required this.displayName,
     required this.plan,
     required this.createdAt,
+    this.planExpiresAt,
+    this.planWillRenew = false,
+    this.billingProvider,
+    this.billingManagementUrl,
     this.emailVerified = false,
     this.onboardingComplete = false,
     this.goal = '',
@@ -35,6 +47,10 @@ class AppUser {
     String? displayName,
     bool? emailVerified,
     Plan? plan,
+    DateTime? planExpiresAt,
+    bool? planWillRenew,
+    String? billingProvider,
+    String? billingManagementUrl,
     bool? onboardingComplete,
     String? goal,
     String? experienceLevel,
@@ -48,6 +64,10 @@ class AppUser {
       emailVerified: emailVerified ?? this.emailVerified,
       plan: plan ?? this.plan,
       createdAt: createdAt,
+      planExpiresAt: planExpiresAt ?? this.planExpiresAt,
+      planWillRenew: planWillRenew ?? this.planWillRenew,
+      billingProvider: billingProvider ?? this.billingProvider,
+      billingManagementUrl: billingManagementUrl ?? this.billingManagementUrl,
       onboardingComplete: onboardingComplete ?? this.onboardingComplete,
       goal: goal ?? this.goal,
       experienceLevel: experienceLevel ?? this.experienceLevel,
@@ -62,6 +82,10 @@ class AppUser {
         'displayName': displayName,
         'emailVerified': emailVerified,
         'plan': plan.name,
+        'planExpiresAt': planExpiresAt?.toIso8601String(),
+        'planWillRenew': planWillRenew,
+        'billingProvider': billingProvider,
+        'billingManagementUrl': billingManagementUrl,
         'createdAt': createdAt.toIso8601String(),
         'onboardingComplete': onboardingComplete,
         'goal': goal,
@@ -81,6 +105,11 @@ class AppUser {
         ),
         createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
             DateTime.now(),
+        planExpiresAt:
+            DateTime.tryParse(json['planExpiresAt'] as String? ?? ''),
+        planWillRenew: (json['planWillRenew'] as bool?) ?? false,
+        billingProvider: json['billingProvider'] as String?,
+        billingManagementUrl: json['billingManagementUrl'] as String?,
         onboardingComplete: (json['onboardingComplete'] as bool?) ?? false,
         goal: (json['goal'] as String?) ?? '',
         experienceLevel: (json['experienceLevel'] as String?) ?? '',

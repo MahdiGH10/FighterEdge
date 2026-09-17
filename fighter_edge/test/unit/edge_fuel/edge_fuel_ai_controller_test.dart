@@ -1,8 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_models.dart';
+import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_ai_controller.dart';
 
@@ -62,6 +65,16 @@ void main() {
       expect(controller.lastResult?.status, EdgeFuelAiStatus.unavailable);
     });
 
+    test('turns a thrown timeout into a recoverable unavailable state',
+        () async {
+      final controller = EdgeFuelAiController(gateway: _ThrowingGateway());
+
+      await controller.explainPlan(target: _successTarget());
+
+      expect(controller.state, EdgeFuelAiRequestState.done);
+      expect(controller.lastResult?.status, EdgeFuelAiStatus.unavailable);
+    });
+
     test('ignores a second call while one is already loading', () async {
       var callCount = 0;
       final gateway = FakeEdgeFuelAiGateway(
@@ -81,4 +94,24 @@ void main() {
       expect(callCount, 1);
     });
   });
+}
+
+class _ThrowingGateway implements EdgeFuelAiGateway {
+  @override
+  Future<EdgeFuelAiResult> explainPlan({
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  }) async {
+    throw StateError('timeout');
+  }
+
+  @override
+  Future<EdgeFuelAiResult> generateFighterBrief({
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  }) async {
+    throw StateError('timeout');
+  }
 }

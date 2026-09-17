@@ -60,3 +60,20 @@ AI prompt content in event parameters.
 - No premium request can bypass entitlement or quota checks.
 - The feature works offline with a deterministic fallback preview.
 - Domain, widget, flow, integration, performance, and accessibility tests pass.
+
+## Implementation status — September 2026
+
+The first 7B/7C slice is now shipped:
+
+- `fighterBrief` is a distinct server task and premium tasks verify
+  `users/{uid}.plan == 'pro'` before consuming AI quota.
+- OpenRouter output still passes schema, fabricated-number, and safety-language
+  validation before reaching Flutter.
+- Flutter has typed entitlement-required, quota, unavailable, and success states.
+- The paywall supports configured monthly/annual products, restore, pending
+  server sync, and store management links, with a safe local waitlist fallback.
+
+The next 7B slice is to expand the response into explicit brief sections
+(next action, timing, and weekly adjustment) while keeping the schema versioned
+and backward-compatible. The full brief should only appear after the server
+confirms the entitlement.

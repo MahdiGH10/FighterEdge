@@ -1,8 +1,9 @@
 # Deploying EdgeFuel AI (backend)
 
-This is the part I can't do for you — enabling billing and setting a secret
-are account-level actions. Everything else (code) is already built and
-tested. Follow these steps in order.
+This is the part I can't do for you — enabling billing, setting secrets, and
+deploying to your Firebase project are account-level actions. The backend
+boundary, subscription webhook, entitlement gate, and tests are in the repo.
+Follow these steps in order.
 
 ## 1. Upgrade the Firebase project to Blaze
 
@@ -28,7 +29,20 @@ assistant, a commit, or any file in this repo.
    It will prompt you to paste the key — that's the only place it should
    ever be typed.
 
-## 3. (Optional) Pick a different model
+## 3. Set the subscription webhook secret
+
+Run this in your own terminal and use the same value for the RevenueCat
+webhook Authorization header:
+
+```bash
+firebase functions:secrets:set REVENUECAT_WEBHOOK_AUTH
+```
+
+The app also needs the RevenueCat products and `pro` entitlement configured.
+See `docs/BILLING_IMPLEMENTATION.md` for the dashboard checklist and sandbox
+test matrix.
+
+## 4. (Optional) Pick a different model
 
 The default is `openai/gpt-4o-mini` (cheap, supports JSON mode). To use a
 different OpenRouter model:
@@ -38,7 +52,7 @@ firebase functions:config:set openrouter.model="some/other-model"
 Or set the `OPENROUTER_MODEL` environment variable in the Cloud Functions
 console after first deploy. No code change needed either way.
 
-## 4. Deploy
+## 5. Deploy
 
 ```bash
 cd fighter_edge
@@ -47,7 +61,7 @@ firebase deploy --only functions,firestore:rules
 
 The predeploy hook runs `npm run build` (TypeScript compile) automatically.
 
-## 5. Verify
+## 6. Verify
 
 - In the app, open Fuel → your Plan → "Ask EdgeFuel Coach". You should get a
   plain-language explanation within a few seconds.
@@ -64,13 +78,14 @@ The predeploy hook runs `npm run build` (TypeScript compile) automatically.
 Per your "Fast MVP" choice, this deploy has:
 
 - Firebase-authenticated calls only (no App Check yet).
-- One shared daily quota (20 requests/user/day) — no Pro-only gating, since
-  there's no server-owned entitlement system yet.
-- Only two AI tasks: explaining the already-calculated plan, and (wiring
-  exists, UI doesn't yet) summarizing a trend. No recipe/meal-plan/grocery
-  actions — those need the recipe catalog (EF-3) to validate against first.
+- One transactional daily quota (20 requests/user/day). Premium AI tasks are
+  authorized against `users/{uid}.plan == 'pro'` before consuming quota.
+- Three backend task names: plan explanation, premium Fighter Brief, and
+  trend summarization. The existing screen still exposes the plan explanation;
+  the full Fighter Brief response sections are the next UI slice.
+- No recipe/meal-plan/grocery actions — those need the recipe catalog (EF-3)
+  to validate against first.
 
-Follow-up hardening (do this before a public launch, not before a personal
-test): App Check, real Pro-entitlement gating, response caching, cost
-dashboards. These are EF-7 territory per the master prompt, not blockers for
-you trying this yourself first.
+Follow-up hardening before a public launch: App Check, response caching,
+cost dashboards, and explicit Fighter Brief analytics. These are deployment
+and EF-7 follow-ups, not reasons to bypass the current trust boundary.

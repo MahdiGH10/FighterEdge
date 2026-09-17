@@ -16,6 +16,7 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
       : _functions = functions ?? FirebaseFunctions.instance;
 
   final FirebaseFunctions _functions;
+  static const _requestTimeout = Duration(seconds: 20);
 
   @override
   Future<EdgeFuelAiResult> explainPlan({
@@ -23,10 +24,38 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
     NutritionDay? day,
     NutritionSetupDraft? preferences,
   }) async {
+    return _call(
+      task: 'explainPlan',
+      target: target,
+      day: day,
+      preferences: preferences,
+    );
+  }
+
+  @override
+  Future<EdgeFuelAiResult> generateFighterBrief({
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  }) {
+    return _call(
+      task: 'fighterBrief',
+      target: target,
+      day: day,
+      preferences: preferences,
+    );
+  }
+
+  Future<EdgeFuelAiResult> _call({
+    required String task,
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  }) async {
     try {
       final callable = _functions.httpsCallable('edgeFuelAiExplain');
       final result = await callable.call<Map<String, dynamic>>({
-        'task': 'explainPlan',
+        'task': task,
         'target': target.toJson(),
         'day': day?.toJson(),
         if (preferences != null)
@@ -35,7 +64,7 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
             'allergens': preferences.allergens,
             'dislikedFoods': preferences.dislikedFoods,
           },
-      });
+      }).timeout(_requestTimeout);
 
       final data = Map<String, dynamic>.from(result.data as Map);
       switch (data['status']) {
@@ -45,6 +74,8 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
           ));
         case 'quotaReached':
           return const EdgeFuelAiResult.quotaReached();
+        case 'entitlementRequired':
+          return const EdgeFuelAiResult.entitlementRequired();
         default:
           return const EdgeFuelAiResult.unavailable();
       }

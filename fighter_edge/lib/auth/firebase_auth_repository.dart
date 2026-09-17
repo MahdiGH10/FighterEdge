@@ -64,10 +64,14 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<AppUser> _hydrate(User user) async {
     Plan plan = Plan.free;
     Map<String, dynamic> profileData = const {};
+    Map<String, dynamic> billingData = const {};
     try {
       final snap = await _doc(user.uid).get();
       if (snap.exists) {
         profileData = snap.data() ?? const {};
+        billingData = Map<String, dynamic>.from(
+          (profileData['billing'] as Map?) ?? const <String, dynamic>{},
+        );
         plan = Plan.values.firstWhere(
           (p) => p.name == profileData['plan'],
           orElse: () => Plan.free,
@@ -90,6 +94,9 @@ class FirebaseAuthRepository implements AuthRepository {
           user.displayName ?? (user.email?.split('@').first ?? 'Fighter'),
       emailVerified: user.emailVerified,
       plan: plan,
+      planExpiresAt: _parseBillingDate(billingData['expiresAtMs']),
+      planWillRenew: (billingData['willRenew'] as bool?) ?? false,
+      billingProvider: billingData['provider'] as String?,
       createdAt: user.metadata.creationTime ?? DateTime.now(),
       onboardingComplete: (profileData['onboardingComplete'] as bool?) ?? false,
       goal: (profileData['goal'] as String?) ?? '',
@@ -281,5 +288,14 @@ class FirebaseAuthRepository implements AuthRepository {
       'popup-closed-by-user' || 'cancelled' => 'Sign-in cancelled.',
       _ => e.message ?? 'Authentication failed.',
     };
+  }
+
+  DateTime? _parseBillingDate(Object? value) {
+    if (value is num && value > 0) {
+      return DateTime.fromMillisecondsSinceEpoch(value.toInt(), isUtc: true);
+    }
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 }

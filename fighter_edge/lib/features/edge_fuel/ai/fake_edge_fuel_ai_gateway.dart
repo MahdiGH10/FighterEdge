@@ -37,4 +37,16 @@ class FakeEdgeFuelAiGateway implements EdgeFuelAiGateway {
       contentVersion: 'fake',
     ));
   }
+
+  @override
+  Future<EdgeFuelAiResult> generateFighterBrief({
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  }) =>
+      explainPlan(
+        target: target,
+        day: day,
+        preferences: preferences,
+      );
 }

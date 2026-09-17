@@ -1,8 +1,9 @@
 # FIGHTER EDGE — Product Roadmap
 
-_Last updated: July 2026. Status: working prototype — 8 screens, real Firebase auth
-(email/password + Google), Free/Pro gating (demo), 53 tests green, CI on GitHub,
-APK shipped to first tester._
+_Last updated: September 2026. Status: production-hardening MVP — Firebase auth,
+personalized EdgeFuel, server-gated AI, RevenueCat-ready subscriptions, 270
+Flutter tests plus 15 Functions tests. Store and cloud deployment are still
+account-level setup work._
 
 **Guiding order: make it real → make it feel great → make it earn.**
 Data persistence comes before animations; server-side entitlements come before payments.
@@ -15,7 +16,9 @@ not drift apart:
 
 - [Product and monetization strategy](PRODUCT_MONETIZATION_STRATEGY.md)
 - [Phase 7: Premium Fighter Brief](PHASE_7_PREMIUM_FIGHTER_BRIEF.md)
+- [Billing implementation handoff](BILLING_IMPLEMENTATION.md)
 - [Release quality and test strategy](RELEASE_QUALITY_AND_TEST_STRATEGY.md)
+- [Performance and release plan](PERFORMANCE_AND_RELEASE_PLAN.md)
 
 ### Delivered in the current slice
 
@@ -23,17 +26,25 @@ not drift apart:
   value framing.
 - Phase 7A: a pure-Dart Fighter Brief preview with honest no-data states and
   nutrient-gap prioritization.
-- Widget and unit coverage for the new preview; full suite remains green at 267
-  Flutter tests plus 10 Functions tests.
+- Phase 7B: a server-backed `fighterBrief` task with entitlement-before-quota,
+  strict response validation, safety rejection, and typed client states.
+- Phase 7C foundation: RevenueCat purchase/restore adapter, server webhook
+  idempotency and ordering, pending-sync paywall state, and protected billing
+  fields in Firestore rules.
+- Phase 7D foundation: Android frame-timing smoke test and a release/performance
+  checklist; device profiling is intentionally still pending.
+- Full suite remains green at 270 Flutter tests plus 15 Functions tests.
 
 ### Next implementation order
 
-1. Phase 7B: server-backed, schema-validated premium brief with quota and safety
-   enforcement.
-2. Phase 7C: real subscription state (RevenueCat or store billing), restore,
-   cancellation, and trusted entitlement sync.
-3. Phase 7D: event measurement, performance profiling, and release hardening on
-   a physical Android device before TestFlight work.
+1. Deploy Functions/rules and exercise the server-backed premium flow with a
+   real RevenueCat sandbox account.
+2. Finish the explicit Fighter Brief response sections and wire the Pro action
+   into the Plan screen without exposing unverifiable recipe claims.
+3. Configure store products and complete the purchase, restore, cancellation,
+   expiry, billing-issue, and refund matrix on Android and iOS.
+4. Profile Android, remove measured rebuild/memory hotspots, then produce a
+   signed release build before TestFlight work.
 
 ---
 
