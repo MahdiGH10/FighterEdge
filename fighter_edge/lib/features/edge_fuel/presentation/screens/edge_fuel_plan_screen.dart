@@ -15,6 +15,8 @@ import '../../../../widgets/primary_button.dart';
 import '../../../../widgets/stat_card.dart';
 import '../../ai/edge_fuel_ai_gateway.dart';
 import '../../ai/edge_fuel_ai_models.dart';
+import '../../domain/calculators/fighter_brief_calculator.dart';
+import '../../domain/models/fighter_brief_preview.dart';
 import '../../domain/models/nutrition_target.dart';
 import '../controllers/edge_fuel_ai_controller.dart';
 import '../controllers/edge_fuel_controller.dart';
@@ -180,6 +182,8 @@ class _PlanBody extends StatelessWidget {
           ),
         ],
         const SizedBox(height: Insets.lg),
+        _FighterBriefPreviewSection(target: target, edgeFuel: edgeFuel),
+        const SizedBox(height: Insets.lg),
         _AiCoachSection(target: target, edgeFuel: edgeFuel),
         const SizedBox(height: Insets.lg),
         PrimaryButton(
@@ -193,6 +197,149 @@ class _PlanBody extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _FighterBriefPreviewSection extends StatelessWidget {
+  final NutritionTarget target;
+  final EdgeFuelController edgeFuel;
+
+  const _FighterBriefPreviewSection({
+    required this.target,
+    required this.edgeFuel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final preview = FighterBriefCalculator.calculate(
+      target: target,
+      day: edgeFuel.day,
+    );
+    final isPro = context.watch<AuthController>().allows(
+          Feature.edgeFuelAiCoach,
+        );
+
+    return AppCard(
+      accent: AppColors.premium,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome,
+                  color: AppColors.premium, size: 18),
+              const SizedBox(width: Insets.sm),
+              Expanded(
+                child: Text(
+                  'FIGHTER BRIEF',
+                  style: AppType.micro(
+                    weight: FontWeight.w800,
+                    color: AppColors.textMuted,
+                    spacing: .8,
+                  ),
+                ),
+              ),
+              if (!isPro)
+                Text(
+                  'FREE PREVIEW',
+                  style: AppType.micro(
+                    weight: FontWeight.w800,
+                    color: AppColors.premium,
+                    spacing: .6,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: Insets.sm),
+          Text(
+            preview.summary,
+            style: AppType.callout(weight: FontWeight.w800),
+          ),
+          const SizedBox(height: Insets.xs),
+          Text(
+            preview.nextAction,
+            style: AppType.subhead(color: AppColors.textSecondary),
+          ),
+          if (preview.isReady) ...[
+            const SizedBox(height: Insets.md),
+            _BriefRemainingRow(preview: preview),
+          ],
+          if (!isPro) ...[
+            const SizedBox(height: Insets.md),
+            Text(
+              preview.isReady
+                  ? 'Pro adds an exact meal, training timing, and tomorrow\'s adjustment.'
+                  : 'Log your first meal in Fuel to unlock this personalized preview. Pro adds the full plan and explanation.',
+              style: AppType.micro(color: AppColors.textMuted),
+            ),
+            const SizedBox(height: Insets.md),
+            PrimaryButton(
+              'Unlock my Fighter Brief',
+              icon: Icons.lock_open_outlined,
+              expand: true,
+              onPressed: () => AppNavigation.push(
+                context,
+                AppRoutes.paywall,
+                extra: Feature.edgeFuelAiCoach,
+                fallbackBuilder: (_) =>
+                    const PaywallScreen(highlight: Feature.edgeFuelAiCoach),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _BriefRemainingRow extends StatelessWidget {
+  final FighterBriefPreview preview;
+
+  const _BriefRemainingRow({required this.preview});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: Insets.sm,
+      runSpacing: Insets.sm,
+      children: [
+        _BriefMetric(
+            label: 'Calories left', value: '${preview.caloriesRemaining} kcal'),
+        _BriefMetric(
+            label: 'Protein left', value: '${preview.proteinRemaining}g'),
+        _BriefMetric(
+            label: 'Carbs left', value: '${preview.carbohydratesRemaining}g'),
+      ],
+    );
+  }
+}
+
+class _BriefMetric extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _BriefMetric({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Insets.sm,
+        vertical: Insets.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundRaised,
+        borderRadius: BorderRadius.circular(Radii.chip),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Text(
+        '$label · $value',
+        style: AppType.micro(
+          weight: FontWeight.w700,
+          color: AppColors.textSecondary,
+        ),
+      ),
     );
   }
 }

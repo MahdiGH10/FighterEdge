@@ -5,7 +5,9 @@ import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_models.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 
@@ -90,8 +92,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(find.text('ASK EDGEFUEL COACH'), 300,
-          scrollable: find.byType(Scrollable).first);
+      await tester.ensureVisible(find.text('ASK EDGEFUEL COACH'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('ASK EDGEFUEL COACH'));
       await tester.pump(); // enter loading state
       await tester.pumpAndSettle();
@@ -120,8 +122,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(find.text('ASK EDGEFUEL COACH'), 300,
-          scrollable: find.byType(Scrollable).first);
+      await tester.ensureVisible(find.text('ASK EDGEFUEL COACH'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('ASK EDGEFUEL COACH'));
       await tester.pumpAndSettle();
 
@@ -149,6 +151,48 @@ void main() {
           scrollable: find.byType(Scrollable).first);
       expect(find.text('SEE PRO'), findsOneWidget);
       expect(find.text('ASK EDGEFUEL COACH'), findsNothing);
+    });
+
+    testWidgets('a free account sees a personalized Fighter Brief preview',
+        (tester) async {
+      final repo = await makeRepo(signedIn: true, plan: Plan.free);
+      final userId = repo.currentUser!.id;
+      final edgeFuelRepo = InMemoryEdgeFuelRepository();
+      await edgeFuelRepo.saveTarget(userId, _successTarget());
+      final today = DateTime.now();
+      final entry = FoodLogEntry(
+        id: 'meal-1',
+        name: 'Chicken and rice',
+        notes: 'test fixture',
+        calories: 650,
+        proteinGrams: 35,
+        carbGrams: 70,
+        fatGrams: 12,
+        loggedAt: today,
+      );
+      await edgeFuelRepo.saveNutritionDay(
+        userId,
+        NutritionDay.empty(
+          localDate: today.toIso8601String().substring(0, 10),
+          timeZone: 'UTC',
+          now: today,
+          targetSnapshot: _successTarget(),
+        ).copyWith(entries: [entry]),
+      );
+
+      await tester.pumpWidget(wrapApp(
+        const EdgeFuelPlanScreen(),
+        repo: repo,
+        edgeFuelRepo: edgeFuelRepo,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('FIGHTER BRIEF'), findsOneWidget);
+      expect(find.text('Protein is the main gap in today\'s target.'),
+          findsOneWidget);
+      expect(find.text('UNLOCK MY FIGHTER BRIEF'), findsOneWidget);
+      expect(find.text('Log a meal to unlock your personalized next step.'),
+          findsNothing);
     });
   });
 }
