@@ -7,7 +7,11 @@ import '../features/edge_fuel/data/edge_fuel_repository.dart';
 import '../features/edge_fuel/domain/calculators/nutrition_target_calculator.dart';
 import '../features/edge_fuel/domain/models/nutrition_enums.dart';
 import '../features/edge_fuel/domain/models/nutrition_setup_draft.dart';
+import '../features/edge_fuel/domain/models/nutrition_target.dart';
+import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../features/edge_fuel/presentation/nutrition_copy.dart';
+import '../routing/app_navigation.dart';
+import '../routing/app_router.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -40,6 +44,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ActivityLevel _activity = ActivityLevel.moderate;
   EquationProfile _equationProfile = EquationProfile.neutral;
   String? _error;
+  _CompletedOnboardingPlan? _completedPlan;
 
   static const _campGoals = [
     'Build fight-camp structure',
@@ -64,6 +69,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
+    final completedPlan = _completedPlan;
+    if (completedPlan != null) {
+      return _PlanReadyView(
+        plan: completedPlan,
+        isBusy: auth.isBusy,
+        onOpenDashboard: _finishOnboarding,
+        onViewFuelPlan: () => _finishOnboarding(openFuelPlan: true),
+      );
+    }
     final step = _OnboardingStep.fromIndex(
       index: _step,
       campGoal: _campGoal,
@@ -214,9 +228,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         : _optionalStartingWeight();
 
     try {
+      NutritionTarget? nutritionTarget;
       if (createNutritionTarget && userId != null) {
-        final savedNutrition = await _saveInitialEdgeFuelPlan(userId);
-        if (!savedNutrition) return;
+        nutritionTarget = await _saveInitialEdgeFuelPlan(userId);
+        if (nutritionTarget == null) return;
+      }
+
+      await state.startFreshCamp(
+        startingWeightKg: currentWeight,
+        weeklyTrainingDays: _days,
+      );
+
+      if (createNutritionTarget) {
+        if (!mounted) return;
+        setState(() {
+          _completedPlan = _CompletedOnboardingPlan(
+            target: nutritionTarget,
+            nutritionGoal: _nutritionGoal,
+            campGoal: _campGoal,
+            level: _level,
+            days: _days,
+          );
+        });
+        return;
       }
 
       await auth.completeOnboarding(
@@ -225,22 +259,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         weeklyTrainingDays: _days,
         startingWeightKg: currentWeight,
       );
-      await state.startFreshCamp(
-        startingWeightKg: currentWeight,
-        weeklyTrainingDays: _days,
-      );
     } catch (_) {
       if (!mounted) return;
       setState(() => _error = 'Could not save setup. Try again.');
     }
   }
 
-  Future<bool> _saveInitialEdgeFuelPlan(String userId) async {
+  Future<NutritionTarget?> _saveInitialEdgeFuelPlan(String userId) async {
     final profileDraft = _buildConfirmedNutritionDraft();
     final profile = profileDraft.toProfile();
     if (profile == null) {
       setState(() => _error = 'Complete your body details first.');
-      return false;
+      return null;
     }
 
     final target = NutritionTargetCalculator.calculate(
@@ -252,13 +282,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ? 'These details need review before we create a target.'
           : NutritionCopy.reason(target.reasons.first);
       setState(() => _error = reason);
-      return false;
+      return null;
     }
 
     final repo = context.read<EdgeFuelRepository>();
     await repo.saveProfileDraft(userId, profileDraft);
     await repo.saveTarget(userId, target);
-    return true;
+    return target;
+  }
+
+  Future<void> _finishOnboarding({bool openFuelPlan = false}) async {
+    final plan = _completedPlan;
+    if (plan == null) return;
+
+    final auth = context.read<AuthController>();
+    final currentWeight = _parseDouble(_currentWeight.text);
+
+    try {
+      await auth.completeOnboarding(
+        goal: plan.campGoal,
+        experienceLevel: plan.level,
+        weeklyTrainingDays: plan.days,
+        startingWeightKg: currentWeight,
+      );
+      if (!openFuelPlan || !mounted) return;
+      AppNavigation.replace(
+        context,
+        AppRoutes.fuelPlan,
+        fallbackBuilder: (_) => const EdgeFuelPlanScreen(),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _error = 'Could not open your plan. Try again.');
+    }
   }
 
   NutritionSetupDraft _buildConfirmedNutritionDraft() {
@@ -354,6 +410,206 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   double _defaultTargetWeight(double currentWeight) {
     final multiplier = _nutritionGoal == NutritionGoal.loseFat ? 0.95 : 1.05;
     return double.parse((currentWeight * multiplier).toStringAsFixed(1));
+  }
+}
+
+class _CompletedOnboardingPlan {
+  final NutritionTarget? target;
+  final NutritionGoal nutritionGoal;
+  final String campGoal;
+  final String level;
+  final int days;
+
+  const _CompletedOnboardingPlan({
+    required this.target,
+    required this.nutritionGoal,
+    required this.campGoal,
+    required this.level,
+    required this.days,
+  });
+}
+
+class _PlanReadyView extends StatelessWidget {
+  final _CompletedOnboardingPlan plan;
+  final bool isBusy;
+  final VoidCallback onOpenDashboard;
+  final VoidCallback onViewFuelPlan;
+
+  const _PlanReadyView({
+    required this.plan,
+    required this.isBusy,
+    required this.onOpenDashboard,
+    required this.onViewFuelPlan,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final target = plan.target;
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: PremiumBackground(
+        child: SafeArea(
+          child: ListView(
+            padding:
+                const EdgeInsets.fromLTRB(Insets.lg, Insets.lg, Insets.lg, 36),
+            children: [
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: BrandLogo(scale: .7),
+              ),
+              const SizedBox(height: Insets.xxl),
+              AppCard(
+                accent: AppColors.positive,
+                elevated: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: AppColors.positive.withValues(alpha: .14),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(Icons.check_rounded,
+                          color: AppColors.positive, size: 26),
+                    ),
+                    const SizedBox(height: Insets.lg),
+                    Text('Your first Fighter Edge plan is ready',
+                        style: AppType.largeTitle()),
+                    const SizedBox(height: Insets.sm),
+                    Text(
+                      'A simple starting point for ${NutritionCopy.goalLabel(plan.nutritionGoal).toLowerCase()}. You can adjust it as your training changes.',
+                      style: AppType.callout(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: Insets.xl),
+                    if (target?.isSuccess == true) ...[
+                      _PlanMetric(
+                        label: 'Daily fuel',
+                        value: '${target!.targetCalories} kcal',
+                        icon: Icons.bolt,
+                      ),
+                      const SizedBox(height: Insets.sm),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _PlanMetric(
+                              label: 'Protein',
+                              value: '${target.proteinGrams}g',
+                              icon: Icons.fitness_center,
+                            ),
+                          ),
+                          const SizedBox(width: Insets.sm),
+                          Expanded(
+                            child: _PlanMetric(
+                              label: 'Carbs',
+                              value: '${target.carbGrams}g',
+                              icon: Icons.flash_on,
+                            ),
+                          ),
+                          const SizedBox(width: Insets.sm),
+                          Expanded(
+                            child: _PlanMetric(
+                              label: 'Fats',
+                              value: '${target.fatGrams}g',
+                              icon: Icons.opacity,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else
+                      Text(
+                        'Your training rhythm is ready. Add body details later to unlock a personalized EdgeFuel target.',
+                        style: AppType.callout(color: AppColors.textSecondary),
+                      ),
+                    const SizedBox(height: Insets.lg),
+                    _PlanRhythm(days: plan.days, level: plan.level),
+                  ],
+                ),
+              ),
+              const SizedBox(height: Insets.xl),
+              PrimaryButton(
+                isBusy ? 'Opening your dashboard...' : 'Open dashboard',
+                icon: Icons.dashboard_outlined,
+                expand: true,
+                onPressed: isBusy ? null : onOpenDashboard,
+              ),
+              const SizedBox(height: Insets.sm),
+              GhostButton(
+                'View fuel plan',
+                icon: Icons.restaurant_outlined,
+                expand: true,
+                onPressed: isBusy ? null : onViewFuelPlan,
+              ),
+              const SizedBox(height: Insets.md),
+              Text(
+                'Targets are estimates, not medical advice. Review your inputs anytime in EdgeFuel.',
+                textAlign: TextAlign.center,
+                style: AppType.micro(color: AppColors.textMuted),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _PlanMetric({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(Insets.md),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundRaised,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppColors.primary, size: 18),
+          const SizedBox(height: Insets.sm),
+          Text(value,
+              style: AppType.title2().copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: Insets.xxs),
+          Text(label, style: AppType.micro(color: AppColors.textMuted)),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlanRhythm extends StatelessWidget {
+  final int days;
+  final String level;
+
+  const _PlanRhythm({required this.days, required this.level});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.sports_mma, color: AppColors.primary, size: 20),
+        const SizedBox(width: Insets.sm),
+        Expanded(
+          child: Text(
+            '$days training days · $level level · fresh camp week',
+            style: AppType.subhead(weight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
   }
 }
 

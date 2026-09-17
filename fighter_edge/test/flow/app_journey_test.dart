@@ -59,6 +59,12 @@ void main() {
     await tester.tap(find.text('START MY PLAN'));
     await tester.pumpAndSettle();
 
+    // Activation moment: the saved target is explained before entering the app.
+    expect(find.text('Your first Fighter Edge plan is ready'), findsOneWidget);
+    expect(find.textContaining('kcal'), findsWidgets);
+    await tester.tap(find.text('OPEN DASHBOARD'));
+    await tester.pumpAndSettle();
+
     // Dashboard.
     expect(find.text('DASHBOARD'), findsOneWidget);
 

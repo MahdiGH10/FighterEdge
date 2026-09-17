@@ -258,12 +258,14 @@ class _TodayFocusCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Insets.lg),
-          if (edgeFuel.hasUsableTarget)
+          if (edgeFuel.hasUsableTarget) ...[
             _FuelTargetSnapshot(
               edgeFuel: edgeFuel,
               streakDays: state.currentStreakDays,
-            )
-          else
+            ),
+            const SizedBox(height: Insets.md),
+            const _FuelWhyCard(),
+          ] else
             Row(
               children: [
                 const Expanded(
@@ -400,6 +402,58 @@ class _FuelTargetSnapshot extends StatelessWidget {
                 color: AppColors.warning,
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FuelWhyCard extends StatelessWidget {
+  const _FuelWhyCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Why this target matters',
+            style: AppType.subhead(weight: FontWeight.w800)),
+        const SizedBox(height: Insets.sm),
+        const _FuelWhyRow(
+          icon: Icons.track_changes,
+          text: 'Calories keep the goal honest.',
+        ),
+        const _FuelWhyRow(
+          icon: Icons.favorite_border,
+          text: 'Protein supports recovery and muscle.',
+        ),
+        const _FuelWhyRow(
+          icon: Icons.flash_on,
+          text: 'Carbs protect hard rounds.',
+        ),
+      ],
+    );
+  }
+}
+
+class _FuelWhyRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _FuelWhyRow({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Insets.xs),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: AppColors.primary),
+          const SizedBox(width: Insets.sm),
+          Expanded(
+            child: Text(text,
+                style: AppType.subhead(color: AppColors.textSecondary)),
           ),
         ],
       ),

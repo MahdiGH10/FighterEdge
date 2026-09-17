@@ -33,6 +33,22 @@ The first moment of value should be:
 - “These are my calories and macros.”
 - “This app understands my goal.”
 
+### Phase 6C — implemented
+
+- Added a plan-ready activation screen after a user completes the detailed setup.
+- The activation screen explains the saved daily calories, protein, carbohydrates,
+  fats, and training rhythm before entering the main app.
+- Added explicit Dashboard and Fuel Plan next steps so the user can choose the
+  most useful first destination.
+- Dashboard now explains the job of each headline nutrition target in plain
+  language: calories support the goal, protein supports recovery, and carbs
+  support hard rounds.
+- Fuel empty states now include realistic quick-add meals and a direct recipe
+  library path, so a new user can take a useful first action without learning
+  the manual logger first.
+- Quick-add meals use the existing EdgeFuel controller and repository, so they
+  persist like manually logged meals and immediately update the daily totals.
+
 ## Next Phase 6 tasks
 
 ### Phase 6B — implemented

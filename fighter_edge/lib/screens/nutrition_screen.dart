@@ -19,6 +19,7 @@ import '../widgets/empty_state.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/progress_ring.dart';
+import '../widgets/press_scale.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
 
@@ -351,12 +352,7 @@ class _TodayView extends StatelessWidget {
         ),
         const SizedBox(height: Insets.xl),
         const SectionHeader('Meals'),
-        if (edgeFuel.entries.isEmpty)
-          const EmptyState(
-            icon: Icons.restaurant,
-            title: 'No food logged',
-            message: 'Use + to log a meal, snack, or drink for this day.',
-          ),
+        if (edgeFuel.entries.isEmpty) _QuickStartMeals(edgeFuel: edgeFuel),
         for (final entry in edgeFuel.entries)
           _FoodRow(
             entry: entry,
@@ -367,6 +363,169 @@ class _TodayView extends StatelessWidget {
                 edgeFuel.updateEntry(entry.copyWith(saved: !entry.saved)),
           ),
       ],
+    );
+  }
+}
+
+class _QuickStartMeals extends StatelessWidget {
+  final EdgeFuelController edgeFuel;
+
+  const _QuickStartMeals({required this.edgeFuel});
+
+  static const _meals = [
+    _QuickMeal(
+      name: 'Greek yogurt + oats',
+      notes: 'Fast breakfast · add fruit if available',
+      calories: 420,
+      protein: 28,
+      carbs: 52,
+      fats: 10,
+      icon: Icons.breakfast_dining,
+    ),
+    _QuickMeal(
+      name: 'Chicken rice bowl',
+      notes: 'Simple post-training meal',
+      calories: 610,
+      protein: 46,
+      carbs: 72,
+      fats: 14,
+      icon: Icons.rice_bowl,
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      accent: AppColors.primary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Start with something simple', style: AppType.title2()),
+          const SizedBox(height: Insets.xs),
+          Text(
+            'Log a realistic meal now and your target becomes useful immediately.',
+            style: AppType.subhead(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: Insets.md),
+          for (final meal in _meals) ...[
+            _QuickMealTile(
+              meal: meal,
+              onTap: () => _addMeal(context, meal),
+            ),
+            if (meal != _meals.last) const SizedBox(height: Insets.sm),
+          ],
+          const SizedBox(height: Insets.md),
+          GhostButton(
+            'Browse recipes',
+            icon: Icons.menu_book_outlined,
+            expand: true,
+            onPressed: () => AppNavigation.push(
+              context,
+              AppRoutes.fuelRecipes,
+              fallbackBuilder: (_) => const RecipeLibraryScreen(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _addMeal(BuildContext context, _QuickMeal meal) async {
+    await edgeFuel.addEntry(
+      FoodLogEntry(
+        id: 'quick-${DateTime.now().microsecondsSinceEpoch}',
+        name: meal.name,
+        notes: meal.notes,
+        calories: meal.calories,
+        proteinGrams: meal.protein,
+        carbGrams: meal.carbs,
+        fatGrams: meal.fats,
+        source: FoodLogSource.manual,
+        loggedAt: DateTime.now(),
+      ),
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${meal.name} added to today')),
+    );
+  }
+}
+
+class _QuickMeal {
+  final String name;
+  final String notes;
+  final int calories;
+  final int protein;
+  final int carbs;
+  final int fats;
+  final IconData icon;
+
+  const _QuickMeal({
+    required this.name,
+    required this.notes,
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+    required this.fats,
+    required this.icon,
+  });
+}
+
+class _QuickMealTile extends StatelessWidget {
+  final _QuickMeal meal;
+  final VoidCallback onTap;
+
+  const _QuickMealTile({required this.meal, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return PressScale(
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.backgroundRaised,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(Insets.md),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(meal.icon, color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: Insets.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(meal.name,
+                        style: AppType.callout(weight: FontWeight.w800)),
+                    const SizedBox(height: Insets.xxs),
+                    Text(meal.notes,
+                        style: AppType.micro(color: AppColors.textMuted)),
+                    const SizedBox(height: Insets.xs),
+                    Text(
+                      '${meal.calories} kcal · ${meal.protein}g protein · ${meal.carbs}g carbs',
+                      style: AppType.micro(
+                          color: AppColors.textSecondary,
+                          weight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: Insets.sm),
+              const Icon(Icons.add_circle_outline, color: AppColors.primary),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -534,13 +693,7 @@ class _MealsView extends StatelessWidget {
           const SizedBox(height: Insets.lg),
         ],
         SectionHeader('Meals logged - $eaten/${edgeFuel.entries.length}'),
-        if (edgeFuel.entries.isEmpty)
-          const EmptyState(
-            icon: Icons.restaurant_menu,
-            title: 'Fresh day',
-            message:
-                'No entries yet. Add food manually or quick-add a recent meal.',
-          ),
+        if (edgeFuel.entries.isEmpty) _QuickStartMeals(edgeFuel: edgeFuel),
         for (final entry in edgeFuel.entries)
           _FoodRow(
             entry: entry,
