@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
-import '../data/mock_data.dart';
-import '../models/fighter.dart';
+import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -27,22 +27,44 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const f = MockData.fighter;
-    final weight = context.watch<AppState>().latestWeight;
+    final state = context.watch<AppState>();
+    final weight = state.latestWeight;
     final auth = context.watch<AuthController>();
+    final user = auth.user;
+    // Height lives in the EdgeFuel setup draft — it is the only place the app
+    // actually asks for it. Absent until the user completes nutrition setup.
+    final heightCm = context.watch<EdgeFuelController>().draft?.heightCm;
     final largeText = MediaQuery.textScalerOf(context).scale(14) / 14 >= 1.4;
+
+    final displayName =
+        (user?.displayName.isNotEmpty ?? false) ? user!.displayName : 'Fighter';
+    // The camp goal replaces the old hard-coded weight-class division: weight
+    // class was deliberately removed from the product, so it must not reappear
+    // as an identity label here.
+    final goalLine = (user?.goal.isNotEmpty ?? false) ? user!.goal : null;
+    final measurements = [
+      if (heightCm != null) '${heightCm.round()} cm',
+      if (weight > 0) '${weight.toStringAsFixed(1)} ${state.weightUnitLabel}',
+    ].join(' · ');
+
     final details = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(f.name, style: AppType.title1()),
-        const SizedBox(height: Insets.xxs),
-        Text(f.division,
-            style: AppType.subhead(
-                weight: FontWeight.w500, color: AppColors.textSecondary)),
-        const SizedBox(height: Insets.xxs),
-        Text('${f.heightCm} cm · ${weight.toStringAsFixed(1)} kg',
-            style: AppType.subhead(
-                weight: FontWeight.w500, color: AppColors.textMuted)),
+        Text(displayName, style: AppType.title1()),
+        if (goalLine != null) ...[
+          const SizedBox(height: Insets.xxs),
+          Text(goalLine,
+              style: AppType.subhead(
+                  weight: FontWeight.w500,
+                  color: AppAccessibility.textSecondary(context))),
+        ],
+        if (measurements.isNotEmpty) ...[
+          const SizedBox(height: Insets.xxs),
+          Text(measurements,
+              style: AppType.subhead(
+                  weight: FontWeight.w500,
+                  color: AppAccessibility.textMuted(context))),
+        ],
       ],
     );
     final body = ListView(
@@ -62,24 +84,7 @@ class ProfileScreen extends StatelessWidget {
             children: [
               const FighterAvatar(size: 64),
               const SizedBox(width: Insets.lg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(f.name, style: AppType.title1()),
-                    const SizedBox(height: Insets.xxs),
-                    Text(f.division,
-                        style: AppType.subhead(
-                            weight: FontWeight.w500,
-                            color: AppColors.textSecondary)),
-                    const SizedBox(height: Insets.xxs),
-                    Text('${f.heightCm} cm · ${weight.toStringAsFixed(1)} kg',
-                        style: AppType.subhead(
-                            weight: FontWeight.w500,
-                            color: AppColors.textMuted)),
-                  ],
-                ),
-              ),
+              Expanded(child: details),
             ],
           ),
         const SizedBox(height: Insets.xl),
@@ -123,25 +128,12 @@ class ProfileScreen extends StatelessWidget {
           padding: EdgeInsets.zero,
           child: Column(
             children: [
-              _StatRow('Training Days', '${f.trainingDays}'),
+              _StatRow('Sessions Completed', '${state.completedSessionCount}'),
               _divider(),
-              _StatRow('Total Workouts', '${f.totalWorkouts}'),
+              _StatRow('Current Streak', '${state.currentStreakDays} days'),
               _divider(),
-              _StatRow('Win / Loss', '${f.wins} - ${f.losses}'),
-              _divider(),
-              _StatRow('Current Streak', '${f.currentStreak} days'),
-            ],
-          ),
-        ),
-        const SizedBox(height: Insets.xl),
-        const SectionHeader('Goals'),
-        AppCard(
-          child: Column(
-            children: [
-              for (int i = 0; i < f.goals.length; i++) ...[
-                if (i > 0) const SizedBox(height: Insets.lg),
-                _GoalRow(f.goals[i]),
-              ],
+              _StatRow(
+                  'Training Days / Week', '${user?.weeklyTrainingDays ?? 0}'),
             ],
           ),
         ),
@@ -308,39 +300,6 @@ class _StatRow extends StatelessWidget {
           Text(value, style: AppType.callout(weight: FontWeight.w700)),
         ],
       ),
-    );
-  }
-}
-
-class _GoalRow extends StatelessWidget {
-  final Goal goal;
-  const _GoalRow(this.goal);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(goal.label, style: AppType.callout(weight: FontWeight.w600)),
-            Text('${(goal.progress * 100).round()}%',
-                style: AppType.subhead(
-                    weight: FontWeight.w700, color: AppColors.accentText)),
-          ],
-        ),
-        const SizedBox(height: Insets.sm),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(100),
-          child: LinearProgressIndicator(
-            value: goal.progress,
-            minHeight: 7,
-            backgroundColor: AppColors.track,
-            valueColor: const AlwaysStoppedAnimation(AppColors.primary),
-          ),
-        ),
-      ],
     );
   }
 }

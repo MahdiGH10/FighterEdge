@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../controllers/auth_controller.dart';
 import '../models/training_session.dart';
 import '../state/app_state.dart';
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -62,31 +64,30 @@ class _WeekView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final campStart = context.watch<AuthController>().user?.createdAt;
+    final now = DateTime.now();
+    // The camp begins when the account does — onboarding seeds a fresh camp,
+    // and there is no separate camp-start model yet. Week 1 is the first
+    // calendar week of the account, not a fixed number.
+    final weekNumber =
+        campStart == null ? 1 : (now.difference(campStart).inDays ~/ 7) + 1;
+    // Monday-to-Sunday range for the current week.
+    final weekStart = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - DateTime.monday));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    final rangeFormat = DateFormat('MMM d');
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
-        Wrap(
-          spacing: Insets.sm,
-          runSpacing: Insets.xs,
-          crossAxisAlignment: WrapCrossAlignment.end,
-          children: [
-            Text('WEEK 4', style: AppType.title1()),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: AppColors.primarySoft,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text('PEAK',
-                  style: AppType.micro(
-                      weight: FontWeight.w700, color: AppColors.accentText)),
-            ),
-          ],
-        ),
+        Text('WEEK $weekNumber', style: AppType.title1()),
         const SizedBox(height: Insets.xxs),
-        Text('May 20 – May 26',
-            style: AppType.subhead(
-                weight: FontWeight.w500, color: AppColors.textSecondary)),
+        Text(
+          '${rangeFormat.format(weekStart)} – ${rangeFormat.format(weekEnd)}',
+          style: AppType.subhead(
+              weight: FontWeight.w500,
+              color: AppAccessibility.textSecondary(context)),
+        ),
         const SizedBox(height: Insets.lg),
         for (final s in state.sessions)
           _SessionRow(
