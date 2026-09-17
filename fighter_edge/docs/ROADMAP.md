@@ -7,6 +7,34 @@ APK shipped to first tester._
 **Guiding order: make it real → make it feel great → make it earn.**
 Data persistence comes before animations; server-side entitlements come before payments.
 
+## Current execution track
+
+The historical phases below remain the long-range product map. The active work is
+tracked in these implementation documents so product, design, and engineering do
+not drift apart:
+
+- [Product and monetization strategy](PRODUCT_MONETIZATION_STRATEGY.md)
+- [Phase 7: Premium Fighter Brief](PHASE_7_PREMIUM_FIGHTER_BRIEF.md)
+- [Release quality and test strategy](RELEASE_QUALITY_AND_TEST_STRATEGY.md)
+
+### Delivered in the current slice
+
+- Phase 6C activation polish: target explanation, meal empty state, and premium
+  value framing.
+- Phase 7A: a pure-Dart Fighter Brief preview with honest no-data states and
+  nutrient-gap prioritization.
+- Widget and unit coverage for the new preview; full suite remains green at 267
+  Flutter tests plus 10 Functions tests.
+
+### Next implementation order
+
+1. Phase 7B: server-backed, schema-validated premium brief with quota and safety
+   enforcement.
+2. Phase 7C: real subscription state (RevenueCat or store billing), restore,
+   cancellation, and trusted entitlement sync.
+3. Phase 7D: event measurement, performance profiling, and release hardening on
+   a physical Android device before TestFlight work.
+
 ---
 
 ## Phase 1 — Make it real (per-user cloud data) 🎯 NEXT
