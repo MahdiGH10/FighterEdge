@@ -90,9 +90,16 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
 
 Future<_AppDependencies> _initializeProductionDependencies() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  final errorReporter =
-      kIsWeb ? const NoopErrorReporter() : FirebaseErrorReporter();
-  installProductionErrorHandlers(errorReporter);
+  final crashlyticsSupported = !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS);
+  final errorReporter = crashlyticsSupported
+      ? FirebaseErrorReporter()
+      : const NoopErrorReporter();
+  if (crashlyticsSupported) {
+    installProductionErrorHandlers(errorReporter);
+  }
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
   );
