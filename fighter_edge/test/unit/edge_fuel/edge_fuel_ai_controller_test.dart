@@ -8,6 +8,7 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_ai_controller.dart';
+import 'package:fighter_edge/observability/telemetry.dart';
 
 NutritionTarget _successTarget() => NutritionTarget(
       status: NutritionTargetStatus.success,
@@ -76,6 +77,23 @@ void main() {
       expect(controller.lastResult, isNull);
       expect(controller.lastBriefResult?.status, EdgeFuelAiStatus.success);
       expect(controller.lastBriefResult?.response?.brief, isNotNull);
+    });
+
+    test('records only the typed task and result status', () async {
+      final telemetry = MemoryTelemetry();
+      final controller = EdgeFuelAiController(
+        gateway: const FakeEdgeFuelAiGateway(),
+        telemetry: telemetry,
+      );
+
+      await controller.generateFighterBrief(target: _successTarget());
+
+      expect(telemetry.records, hasLength(1));
+      expect(telemetry.records.single.event, TelemetryEvent.aiRequestResult);
+      expect(
+        telemetry.records.single.parameters,
+        {'task': 'fighter_brief', 'status': 'success'},
+      );
     });
 
     test('turns a thrown timeout into a recoverable unavailable state',

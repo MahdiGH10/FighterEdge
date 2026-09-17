@@ -13,6 +13,7 @@ import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/empty_state.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../../widgets/stat_card.dart';
+import '../../../../observability/telemetry.dart';
 import '../../ai/edge_fuel_ai_gateway.dart';
 import '../../ai/edge_fuel_ai_models.dart';
 import '../../domain/calculators/fighter_brief_calculator.dart';
@@ -35,8 +36,10 @@ class EdgeFuelPlanScreen extends StatelessWidget {
     final target = edgeFuel.target;
 
     return ChangeNotifierProvider(
-      create: (ctx) =>
-          EdgeFuelAiController(gateway: ctx.read<EdgeFuelAiGateway>()),
+      create: (ctx) => EdgeFuelAiController(
+        gateway: ctx.read<EdgeFuelAiGateway>(),
+        telemetry: Telemetry.fromContext(ctx),
+      ),
       child: ScreenScaffold(
         title: 'Your plan',
         showBack: true,
@@ -201,7 +204,7 @@ class _PlanBody extends StatelessWidget {
   }
 }
 
-class _FighterBriefPreviewSection extends StatelessWidget {
+class _FighterBriefPreviewSection extends StatefulWidget {
   final NutritionTarget target;
   final EdgeFuelController edgeFuel;
 
@@ -211,10 +214,49 @@ class _FighterBriefPreviewSection extends StatelessWidget {
   });
 
   @override
+  State<_FighterBriefPreviewSection> createState() =>
+      _FighterBriefPreviewSectionState();
+}
+
+class _FighterBriefPreviewSectionState
+    extends State<_FighterBriefPreviewSection> {
+  late final Telemetry _telemetry;
+
+  @override
+  void initState() {
+    super.initState();
+    _telemetry = Telemetry.fromContext(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final isPro = context.read<AuthController>().allows(
+            Feature.edgeFuelAiCoach,
+          );
+      _telemetry.track(
+        TelemetryEvent.fighterBriefPreviewViewed,
+        parameters: {'access': isPro ? 'pro' : 'free'},
+      );
+    });
+  }
+
+  void _openPaywall() {
+    _telemetry.track(
+      TelemetryEvent.premiumCtaTapped,
+      parameters: {'surface': 'fighter_brief_preview'},
+    );
+    AppNavigation.push(
+      context,
+      AppRoutes.paywall,
+      extra: Feature.edgeFuelAiCoach,
+      fallbackBuilder: (_) =>
+          const PaywallScreen(highlight: Feature.edgeFuelAiCoach),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final preview = FighterBriefCalculator.calculate(
-      target: target,
-      day: edgeFuel.day,
+      target: widget.target,
+      day: widget.edgeFuel.day,
     );
     final isPro = context.watch<AuthController>().allows(
           Feature.edgeFuelAiCoach,
@@ -278,20 +320,14 @@ class _FighterBriefPreviewSection extends StatelessWidget {
               'Unlock my Fighter Brief',
               icon: Icons.lock_open_outlined,
               expand: true,
-              onPressed: () => AppNavigation.push(
-                context,
-                AppRoutes.paywall,
-                extra: Feature.edgeFuelAiCoach,
-                fallbackBuilder: (_) =>
-                    const PaywallScreen(highlight: Feature.edgeFuelAiCoach),
-              ),
+              onPressed: _openPaywall,
             ),
           ] else ...[
             const SizedBox(height: Insets.md),
             _PremiumBriefBody(
               ai: context.watch<EdgeFuelAiController>(),
-              target: target,
-              edgeFuel: edgeFuel,
+              target: widget.target,
+              edgeFuel: widget.edgeFuel,
             ),
           ],
         ],

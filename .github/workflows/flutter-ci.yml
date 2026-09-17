@@ -44,7 +44,7 @@ jobs:
         run: flutter analyze
 
       - name: Run tests
-        run: flutter test --coverage --reporter compact
+        run: flutter test --exclude-tags golden --coverage --reporter compact
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -52,9 +52,28 @@ jobs:
           name: flutter-coverage
           path: fighter_edge/coverage/lcov.info
 
+  golden-tests:
+    name: Golden tests (Windows renderer)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run golden tests
+        run: flutter test --tags golden --reporter compact
+
   android-release:
     name: Android release build
-    needs: analyze-and-test
+    needs: [analyze-and-test, golden-tests]
     runs-on: ubuntu-latest
     defaults:
       run:

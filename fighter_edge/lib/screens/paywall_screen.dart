@@ -6,6 +6,7 @@ import '../auth/auth_repository.dart';
 import '../billing/billing_gateway.dart';
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
+import '../observability/telemetry.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -53,6 +54,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Telemetry.fromContext(context).track(
+        TelemetryEvent.paywallViewed,
+        parameters: {
+          'feature': widget.highlight?.name ?? 'direct',
+        },
+      );
       if (mounted) context.read<AuthController>().loadBillingProducts();
     });
   }

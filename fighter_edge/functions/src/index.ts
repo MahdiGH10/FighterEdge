@@ -65,8 +65,16 @@ export const edgeFuelAiExplain = onCall(
 
     const quota = await consumeQuota(db, uid, new Date());
     if (!quota.allowed) {
+      logger.info("ai_request_blocked", {
+        task: data.task,
+        reason: "quota_reached",
+      });
       return { status: "quotaReached" as const };
     }
+    logger.info("ai_request_started", {
+      task: data.task,
+      remainingQuota: quota.remaining,
+    });
 
     const suppliedFacts = {
       task: data.task,
@@ -133,7 +141,6 @@ export const edgeFuelAiExplain = onCall(
     } catch (error) {
       // Never expose raw provider errors to the client (master prompt §13.3).
       logger.error("openrouter_call_failed", {
-        uid,
         task: data.task,
         error: error instanceof OpenRouterError ? error.message : "unknown",
       });
@@ -144,13 +151,19 @@ export const edgeFuelAiExplain = onCall(
     const validation = validateResponse(parsed, suppliedFactsJson, data.task);
     if (!validation.ok) {
       logger.warn("ai_response_rejected", {
-        uid,
         task: data.task,
         reason: validation.reason,
       });
       return { status: "unavailable" as const };
     }
 
+    logger.info("ai_request_completed", {
+      task: data.task,
+      status: "success",
+      requiresProfessionalReview:
+        (parsed as { requiresProfessionalReview?: unknown })
+          .requiresProfessionalReview === true,
+    });
     return {
       status: "success" as const,
       response: {
@@ -194,6 +207,9 @@ export const revenueCatWebhook = onRequest(
     // TEST, TRANSFER, and unknown events are acknowledged but do not mutate
     // entitlements. RevenueCat retries any non-2xx response.
     if (!mutation) {
+      logger.info("revenuecat_webhook_ignored", {
+        reason: "unsupported_or_test_event",
+      });
       response.status(200).json({ status: "ignored" });
       return;
     }
@@ -264,13 +280,18 @@ export const revenueCatWebhook = onRequest(
     } catch (error) {
       logger.error("revenuecat_webhook_failed", {
         eventId: mutation.providerEventId,
-        userId: mutation.userId,
         error: String(error),
       });
       response.status(500).send("Retry later");
       return;
     }
 
+    logger.info("revenuecat_webhook_processed", {
+      eventType: mutation.providerEventType,
+      store: mutation.store ?? "unknown",
+      environment: mutation.environment ?? "unknown",
+      plan: mutation.plan,
+    });
     response.status(200).json({ status: "processed" });
   },
 );

@@ -5,6 +5,7 @@ import '../../ai/edge_fuel_ai_models.dart';
 import '../../domain/models/nutrition_day.dart';
 import '../../domain/models/nutrition_setup_draft.dart';
 import '../../domain/models/nutrition_target.dart';
+import '../../../../observability/telemetry.dart';
 
 enum EdgeFuelAiRequestState { idle, loading, done }
 
@@ -12,10 +13,14 @@ enum EdgeFuelAiRequestState { idle, loading, done }
 /// stream subscriptions — it's a one-shot request/response per tap, scoped
 /// to whichever screen creates it.
 class EdgeFuelAiController extends ChangeNotifier {
-  EdgeFuelAiController({required EdgeFuelAiGateway gateway})
-      : _gateway = gateway;
+  EdgeFuelAiController({
+    required EdgeFuelAiGateway gateway,
+    Telemetry? telemetry,
+  })  : _gateway = gateway,
+        _telemetry = telemetry ?? const NoopTelemetry();
 
   final EdgeFuelAiGateway _gateway;
+  final Telemetry _telemetry;
 
   EdgeFuelAiRequestState _state = EdgeFuelAiRequestState.idle;
   EdgeFuelAiResult? _lastResult;
@@ -76,10 +81,31 @@ class EdgeFuelAiController extends ChangeNotifier {
 
     if (saveBrief) {
       _lastBriefResult = result;
+      _telemetry.track(
+        TelemetryEvent.aiRequestResult,
+        parameters: {
+          'task': 'fighter_brief',
+          'status': _statusName(result.status),
+        },
+      );
     } else {
       _lastResult = result;
+      _telemetry.track(
+        TelemetryEvent.aiRequestResult,
+        parameters: {
+          'task': 'explain_plan',
+          'status': _statusName(result.status),
+        },
+      );
     }
     _state = EdgeFuelAiRequestState.done;
     notifyListeners();
   }
 }
+
+String _statusName(EdgeFuelAiStatus status) => switch (status) {
+      EdgeFuelAiStatus.success => 'success',
+      EdgeFuelAiStatus.quotaReached => 'quota_reached',
+      EdgeFuelAiStatus.entitlementRequired => 'entitlement_required',
+      EdgeFuelAiStatus.unavailable => 'unavailable',
+    };

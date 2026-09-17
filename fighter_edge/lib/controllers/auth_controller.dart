@@ -8,6 +8,8 @@ import '../billing/subscription.dart';
 import '../billing/billing_gateway.dart';
 import '../billing/unavailable_billing_gateway.dart';
 import '../models/app_user.dart';
+import '../observability/error_reporter.dart';
+import '../observability/telemetry.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
@@ -16,6 +18,8 @@ enum AuthStatus { unknown, authenticated, unauthenticated }
 class AuthController extends ChangeNotifier {
   final AuthRepository _repo;
   final BillingGateway _billing;
+  final Telemetry _telemetry;
+  final ErrorReporter _errorReporter;
   StreamSubscription<AppUser?>? _sub;
 
   AuthStatus _status = AuthStatus.unknown;
@@ -25,8 +29,14 @@ class AuthController extends ChangeNotifier {
   BillingCustomerState _billingState = const BillingCustomerState.free();
   int _billingSession = 0;
 
-  AuthController(this._repo, {BillingGateway? billingGateway})
-      : _billing = billingGateway ?? const UnavailableBillingGateway() {
+  AuthController(
+    this._repo, {
+    BillingGateway? billingGateway,
+    Telemetry? telemetry,
+    ErrorReporter? errorReporter,
+  })  : _billing = billingGateway ?? const UnavailableBillingGateway(),
+        _telemetry = telemetry ?? const NoopTelemetry(),
+        _errorReporter = errorReporter ?? const NoopErrorReporter() {
     // Seed status synchronously from the current snapshot: a broadcast stream
     // will not replay the initial event emitted before this subscription.
     _user = _repo.currentUser;
@@ -143,12 +153,35 @@ class AuthController extends ChangeNotifier {
               'Payments are not active yet. Connect the store products before purchasing.',
             );
           }
+          _telemetry.track(
+            TelemetryEvent.subscriptionCheckoutStarted,
+            parameters: {
+              'billing_period': selected.period.name,
+            },
+          );
           _billingState = await _billing.purchase(selected);
+          _telemetry.track(
+            TelemetryEvent.subscriptionPurchaseResult,
+            parameters: {
+              'status': _billingState.isPro ? 'active' : 'pending',
+              'billing_period': selected.period.name,
+            },
+          );
           notifyListeners();
           await _refreshServerEntitlement();
         } on BillingException catch (e) {
+          _errorReporter.report(
+            e,
+            StackTrace.current,
+            reason: 'billing_purchase_failed',
+          );
           throw AuthException(e.code, e.message);
-        } catch (_) {
+        } catch (error, stack) {
+          _errorReporter.report(
+            error,
+            stack,
+            reason: 'billing_purchase_failed',
+          );
           throw const AuthException(
             'billing-failed',
             'The store could not complete that purchase. Please try again.',
@@ -159,11 +192,25 @@ class AuthController extends ChangeNotifier {
   Future<void> restorePurchases() => _run(() async {
         try {
           _billingState = await _billing.restorePurchases();
+          _telemetry.track(
+            TelemetryEvent.purchaseRestoreResult,
+            parameters: {'status': _billingState.isPro ? 'active' : 'none'},
+          );
           notifyListeners();
           await _refreshServerEntitlement();
         } on BillingException catch (e) {
+          _errorReporter.report(
+            e,
+            StackTrace.current,
+            reason: 'billing_restore_failed',
+          );
           throw AuthException(e.code, e.message);
-        } catch (_) {
+        } catch (error, stack) {
+          _errorReporter.report(
+            error,
+            stack,
+            reason: 'billing_restore_failed',
+          );
           throw const AuthException(
             'billing-failed',
             'The store could not restore purchases. Please try again.',

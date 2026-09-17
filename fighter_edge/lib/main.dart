@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,8 @@ import 'features/edge_fuel/data/firestore_edge_fuel_repository.dart';
 import 'features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'firebase_options.dart';
+import 'observability/error_reporter.dart';
+import 'observability/telemetry.dart';
 import 'routing/app_router.dart';
 import 'state/app_state.dart';
 import 'theme/app_accessibility.dart';
@@ -71,6 +74,8 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
             edgeFuelRepo: dependencies.edgeFuelRepo,
             edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
             billingGateway: dependencies.billingGateway,
+            telemetry: dependencies.telemetry,
+            errorReporter: dependencies.errorReporter,
           );
         }
 
@@ -85,6 +90,9 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
 
 Future<_AppDependencies> _initializeProductionDependencies() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  final errorReporter =
+      kIsWeb ? const NoopErrorReporter() : FirebaseErrorReporter();
+  installProductionErrorHandlers(errorReporter);
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
   );
@@ -100,6 +108,8 @@ Future<_AppDependencies> _initializeProductionDependencies() async {
     edgeFuelRepo: FirestoreEdgeFuelRepository(),
     edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
     billingGateway: RevenueCatBillingGateway(),
+    telemetry: kIsWeb ? const NoopTelemetry() : FirebaseTelemetry(),
+    errorReporter: errorReporter,
   );
 }
 
@@ -109,6 +119,8 @@ class _AppDependencies {
   final EdgeFuelRepository edgeFuelRepo;
   final EdgeFuelAiGateway edgeFuelAiGateway;
   final BillingGateway billingGateway;
+  final Telemetry telemetry;
+  final ErrorReporter errorReporter;
 
   const _AppDependencies({
     required this.authRepo,
@@ -116,6 +128,8 @@ class _AppDependencies {
     required this.edgeFuelRepo,
     required this.edgeFuelAiGateway,
     required this.billingGateway,
+    required this.telemetry,
+    required this.errorReporter,
   });
 }
 
@@ -127,6 +141,8 @@ class FighterEdgeApp extends StatelessWidget {
   final FoodCatalogRepository? foodCatalogRepo;
   final RecipeCatalogRepository? recipeCatalogRepo;
   final BillingGateway? billingGateway;
+  final Telemetry? telemetry;
+  final ErrorReporter? errorReporter;
   const FighterEdgeApp({
     super.key,
     required this.authRepo,
@@ -136,6 +152,8 @@ class FighterEdgeApp extends StatelessWidget {
     this.foodCatalogRepo,
     this.recipeCatalogRepo,
     this.billingGateway,
+    this.telemetry,
+    this.errorReporter,
   });
 
   @override
@@ -152,10 +170,16 @@ class FighterEdgeApp extends StatelessWidget {
         AssetRecipeCatalogRepository(foodCatalog: resolvedFoodCatalog);
     return MultiProvider(
       providers: [
+        Provider<Telemetry>.value(value: telemetry ?? const NoopTelemetry()),
+        Provider<ErrorReporter>.value(
+          value: errorReporter ?? const NoopErrorReporter(),
+        ),
         ChangeNotifierProvider(
           create: (_) => AuthController(
             authRepo,
             billingGateway: billingGateway,
+            telemetry: telemetry,
+            errorReporter: errorReporter,
           ),
         ),
         ChangeNotifierProxyProvider<AuthController, AppState>(

@@ -62,16 +62,17 @@ void main() {
       find.byType(ComponentGalleryScreen),
       matchesGoldenFile('goldens/component_gallery_default.png'),
     );
-  });
+  }, tags: 'golden');
 
-  testWidgets('component gallery survives large text scale', (tester) async {
+  testWidgets('component gallery survives large text scale',
+      (tester) async {
     await pumpGallery(tester, textScale: 1.6);
 
     await expectLater(
       find.byType(ComponentGalleryScreen),
       matchesGoldenFile('goldens/component_gallery_large_text.png'),
     );
-  });
+  }, tags: 'golden');
 
   testWidgets('PressScale pressed state matches baseline', (tester) async {
     await pumpGallery(tester, textScale: 1);
@@ -86,7 +87,7 @@ void main() {
     );
 
     await gesture.up();
-  });
+  }, tags: 'golden');
 }
 
 Future<ByteData> _loadMaterialIconsFont() async {
