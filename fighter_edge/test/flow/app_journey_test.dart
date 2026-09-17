@@ -37,18 +37,26 @@ void main() {
     await tester.pumpAndSettle();
 
     // First-run setup creates a clean personal starting point.
-    expect(find.text('What are you training for?'), findsOneWidget);
+    expect(find.text('What should Fighter Edge build first?'), findsOneWidget);
     await tester.tap(find.text('CONTINUE'));
     await tester.pumpAndSettle();
-    expect(find.text('Where are you starting from?'), findsOneWidget);
+    expect(find.text('What should EdgeFuel optimize for?'), findsOneWidget);
+    await tester.tap(find.text('CONTINUE'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tell us your starting point.'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).at(0), '28');
+    await tester.enterText(find.byType(TextField).at(1), '178');
+    await tester.enterText(find.byType(TextField).at(2), '77.2');
+    await tester.tap(find.text('CONTINUE'));
+    await tester.pumpAndSettle();
+    expect(find.text('Outside the gym, how active are you?'), findsOneWidget);
     await tester.tap(find.text('CONTINUE'));
     await tester.pumpAndSettle();
     expect(find.text('How many days can you train?'), findsOneWidget);
     await tester.tap(find.text('CONTINUE'));
     await tester.pumpAndSettle();
-    expect(find.text('Add a starting weight?'), findsOneWidget);
-    await tester.enterText(find.byType(TextField), '77.2');
-    await tester.tap(find.text('START FRESH'));
+    expect(find.text('Your first plan is ready.'), findsOneWidget);
+    await tester.tap(find.text('START MY PLAN'));
     await tester.pumpAndSettle();
 
     // Dashboard.

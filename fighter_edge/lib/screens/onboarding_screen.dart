@@ -3,6 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
+import '../features/edge_fuel/data/edge_fuel_repository.dart';
+import '../features/edge_fuel/domain/calculators/nutrition_target_calculator.dart';
+import '../features/edge_fuel/domain/models/nutrition_enums.dart';
+import '../features/edge_fuel/domain/models/nutrition_setup_draft.dart';
+import '../features/edge_fuel/presentation/nutrition_copy.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -10,9 +15,9 @@ import '../theme/app_typography.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/brand_logo.dart';
 import '../widgets/premium_effects.dart';
+import '../widgets/press_scale.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
-import '../widgets/press_scale.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -22,26 +27,37 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final _weight = TextEditingController();
+  final _age = TextEditingController();
+  final _height = TextEditingController();
+  final _currentWeight = TextEditingController();
+  final _targetWeight = TextEditingController();
+
   int _step = 0;
-  String _goal = 'Build fight-camp structure';
+  String _campGoal = 'Build fight-camp structure';
+  NutritionGoal _nutritionGoal = NutritionGoal.maintain;
   String _level = 'Beginner';
   int _days = 4;
+  ActivityLevel _activity = ActivityLevel.moderate;
+  EquationProfile _equationProfile = EquationProfile.neutral;
   String? _error;
 
-  static const _goals = [
+  static const _campGoals = [
     'Build fight-camp structure',
-    'Cut weight safely',
+    'Lose weight safely',
+    'Gain muscle',
     'Improve technique',
     'Get competition ready',
   ];
 
   static const _levels = ['Beginner', 'Intermediate', 'Advanced', 'Fighter'];
-  static const _stepCount = 4;
+  static const _stepCount = 6;
 
   @override
   void dispose() {
-    _weight.dispose();
+    _age.dispose();
+    _height.dispose();
+    _currentWeight.dispose();
+    _targetWeight.dispose();
     super.dispose();
   }
 
@@ -50,16 +66,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final auth = context.watch<AuthController>();
     final step = _OnboardingStep.fromIndex(
       index: _step,
-      goal: _goal,
+      campGoal: _campGoal,
+      nutritionGoal: _nutritionGoal,
       level: _level,
       days: _days,
-      weight: _weight,
+      activity: _activity,
+      equationProfile: _equationProfile,
+      age: _age,
+      height: _height,
+      currentWeight: _currentWeight,
+      targetWeight: _targetWeight,
       error: _error,
-      goals: _goals,
+      campGoals: _campGoals,
       levels: _levels,
-      onGoal: (value) => setState(() => _goal = value),
+      onCampGoal: (value) => setState(() {
+        _campGoal = value;
+        _syncNutritionGoalFromCampGoal(value);
+      }),
+      onNutritionGoal: (value) => setState(() {
+        _nutritionGoal = value;
+        _error = null;
+      }),
       onLevel: (value) => setState(() => _level = value),
       onDays: (value) => setState(() => _days = value),
+      onActivity: (value) => setState(() => _activity = value),
+      onEquationProfile: (value) => setState(() => _equationProfile = value),
     );
     final isLastStep = _step == _stepCount - 1;
 
@@ -91,13 +122,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ),
               const SizedBox(height: Insets.xl),
-              _PreviewCard(goal: _goal, level: _level, days: _days),
+              _PreviewCard(
+                campGoal: _campGoal,
+                nutritionGoal: _nutritionGoal,
+                level: _level,
+                days: _days,
+              ),
               const SizedBox(height: Insets.xl),
               PrimaryButton(
                 auth.isBusy
-                    ? 'Creating your camp...'
+                    ? 'Creating your plan...'
                     : isLastStep
-                        ? 'Start fresh'
+                        ? 'Start my plan'
                         : 'Continue',
                 icon: isLastStep ? Icons.flag : Icons.arrow_forward,
                 expand: true,
@@ -113,11 +149,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ],
               const SizedBox(height: Insets.md),
               PressScale(
-                onTap: auth.isBusy ? null : () => _submit(skipWeight: true),
+                onTap: auth.isBusy ? null : _skipDetailedNutrition,
                 child: Padding(
                   padding: const EdgeInsets.all(Insets.sm),
                   child: Text(
-                    isLastStep ? 'Skip weight for now' : 'Skip setup for now',
+                    'Skip detailed target for now',
                     textAlign: TextAlign.center,
                     style: AppType.subhead(
                       weight: FontWeight.w700,
@@ -134,55 +170,190 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _continue() {
+    if (!_validateCurrentStep()) return;
     if (_step < _stepCount - 1) {
-      setState(() => _step += 1);
+      setState(() {
+        _step += 1;
+        _error = null;
+      });
       return;
     }
-    _submit();
+    _submit(createNutritionTarget: true);
   }
 
   void _back() {
     if (_step == 0) return;
-    setState(() => _step -= 1);
+    setState(() {
+      _step -= 1;
+      _error = null;
+    });
   }
 
-  Future<void> _submit({bool skipWeight = false}) async {
-    final weightText = _weight.text.trim();
-    final parsed =
-        skipWeight || weightText.isEmpty ? null : double.tryParse(weightText);
-    if (!skipWeight &&
-        weightText.isNotEmpty &&
-        (parsed == null || parsed < 35 || parsed > 180)) {
-      setState(() {
-        _step = _stepCount - 1;
-        _error = 'Enter a realistic starting weight, or skip it for now.';
-      });
-      return;
+  void _syncNutritionGoalFromCampGoal(String value) {
+    if (value == 'Lose weight safely') {
+      _nutritionGoal = NutritionGoal.loseFat;
+    } else if (value == 'Gain muscle') {
+      _nutritionGoal = NutritionGoal.gainMuscle;
     }
+    _error = null;
+  }
 
-    if (parsed != null && (parsed < 35 || parsed > 180)) {
-      setState(() => _error = 'Enter a realistic starting weight.');
-      return;
-    }
+  Future<void> _skipDetailedNutrition() async {
+    await _submit(createNutritionTarget: false);
+  }
+
+  Future<void> _submit({required bool createNutritionTarget}) async {
+    if (createNutritionTarget && !_validateAll()) return;
 
     setState(() => _error = null);
     final auth = context.read<AuthController>();
     final state = context.read<AppState>();
+    final userId = auth.user?.id;
+    final currentWeight = createNutritionTarget
+        ? _parseDouble(_currentWeight.text)
+        : _optionalStartingWeight();
+
     try {
+      if (createNutritionTarget && userId != null) {
+        final savedNutrition = await _saveInitialEdgeFuelPlan(userId);
+        if (!savedNutrition) return;
+      }
+
       await auth.completeOnboarding(
-        goal: _goal,
+        goal: _campGoal,
         experienceLevel: _level,
         weeklyTrainingDays: _days,
-        startingWeightKg: parsed,
+        startingWeightKg: currentWeight,
       );
       await state.startFreshCamp(
-        startingWeightKg: parsed,
+        startingWeightKg: currentWeight,
         weeklyTrainingDays: _days,
       );
     } catch (_) {
       if (!mounted) return;
       setState(() => _error = 'Could not save setup. Try again.');
     }
+  }
+
+  Future<bool> _saveInitialEdgeFuelPlan(String userId) async {
+    final profileDraft = _buildConfirmedNutritionDraft();
+    final profile = profileDraft.toProfile();
+    if (profile == null) {
+      setState(() => _error = 'Complete your body details first.');
+      return false;
+    }
+
+    final target = NutritionTargetCalculator.calculate(
+      profile,
+      now: DateTime.now(),
+    );
+    if (!target.isSuccess) {
+      final reason = target.reasons.isEmpty
+          ? 'These details need review before we create a target.'
+          : NutritionCopy.reason(target.reasons.first);
+      setState(() => _error = reason);
+      return false;
+    }
+
+    final repo = context.read<EdgeFuelRepository>();
+    await repo.saveProfileDraft(userId, profileDraft);
+    await repo.saveTarget(userId, target);
+    return true;
+  }
+
+  NutritionSetupDraft _buildConfirmedNutritionDraft() {
+    final currentWeight = _parseDouble(_currentWeight.text)!;
+    final explicitTarget = _parseDouble(_targetWeight.text);
+    final targetWeight = _nutritionGoal == NutritionGoal.maintain
+        ? null
+        : explicitTarget ?? _defaultTargetWeight(currentWeight);
+    final goalPace = switch (_nutritionGoal) {
+      NutritionGoal.loseFat => GoalPace.standard,
+      NutritionGoal.gainMuscle => GoalPace.gainStandard,
+      NutritionGoal.maintain => null,
+    };
+
+    return NutritionSetupDraft(
+      currentStep: 5,
+      confirmed: true,
+      goal: _nutritionGoal,
+      ageYears: int.parse(_age.text.trim()),
+      heightCm: _parseDouble(_height.text)!,
+      currentWeightKg: currentWeight,
+      targetWeightKg: targetWeight,
+      equationProfile: _equationProfile,
+      normalActivityLevel: _activity,
+      weeklyTrainingDays: _days,
+      goalPace: goalPace,
+      mealsPerDay: 3,
+    );
+  }
+
+  bool _validateCurrentStep() {
+    final error = switch (_step) {
+      2 => _bodyError(),
+      _ => null,
+    };
+    if (error == null) return true;
+    setState(() => _error = error);
+    return false;
+  }
+
+  bool _validateAll() {
+    final bodyError = _bodyError();
+    if (bodyError == null) return true;
+    setState(() {
+      _step = 2;
+      _error = bodyError;
+    });
+    return false;
+  }
+
+  String? _bodyError() {
+    final age = int.tryParse(_age.text.trim());
+    final height = _parseDouble(_height.text);
+    final currentWeight = _parseDouble(_currentWeight.text);
+    final targetWeight = _parseDouble(_targetWeight.text);
+
+    if (age == null || age < 18 || age > 90) {
+      return 'Enter an age from 18 to 90 for automated targets.';
+    }
+    if (height == null || height < 120 || height > 230) {
+      return 'Enter height in cm, for example 178.';
+    }
+    if (currentWeight == null || currentWeight < 35 || currentWeight > 220) {
+      return 'Enter current weight in kg, for example 78.';
+    }
+    if (_targetWeight.text.trim().isEmpty) return null;
+    if (targetWeight == null || targetWeight < 35 || targetWeight > 220) {
+      return 'Target weight should be a realistic kg value.';
+    }
+    if (_nutritionGoal == NutritionGoal.loseFat &&
+        targetWeight >= currentWeight) {
+      return 'For weight loss, target weight should be below current weight.';
+    }
+    if (_nutritionGoal == NutritionGoal.gainMuscle &&
+        targetWeight <= currentWeight) {
+      return 'For weight gain, target weight should be above current weight.';
+    }
+    return null;
+  }
+
+  double? _parseDouble(String value) {
+    final normalized = value.trim().replaceAll(',', '.');
+    if (normalized.isEmpty) return null;
+    return double.tryParse(normalized);
+  }
+
+  double? _optionalStartingWeight() {
+    final weight = _parseDouble(_currentWeight.text);
+    if (weight == null || weight < 35 || weight > 220) return null;
+    return weight;
+  }
+
+  double _defaultTargetWeight(double currentWeight) {
+    final multiplier = _nutritionGoal == NutritionGoal.loseFat ? 0.95 : 1.05;
+    return double.parse((currentWeight * multiplier).toStringAsFixed(1));
   }
 }
 
@@ -201,64 +372,124 @@ class _OnboardingStep {
 
   factory _OnboardingStep.fromIndex({
     required int index,
-    required String goal,
+    required String campGoal,
+    required NutritionGoal nutritionGoal,
     required String level,
     required int days,
-    required TextEditingController weight,
+    required ActivityLevel activity,
+    required EquationProfile equationProfile,
+    required TextEditingController age,
+    required TextEditingController height,
+    required TextEditingController currentWeight,
+    required TextEditingController targetWeight,
     required String? error,
-    required List<String> goals,
+    required List<String> campGoals,
     required List<String> levels,
-    required ValueChanged<String> onGoal,
+    required ValueChanged<String> onCampGoal,
+    required ValueChanged<NutritionGoal> onNutritionGoal,
     required ValueChanged<String> onLevel,
     required ValueChanged<int> onDays,
+    required ValueChanged<ActivityLevel> onActivity,
+    required ValueChanged<EquationProfile> onEquationProfile,
   }) {
     return switch (index) {
       0 => _OnboardingStep(
           eyebrow: 'Fresh account',
-          title: 'What are you training for?',
+          title: 'What should Fighter Edge build first?',
           subtitle:
-              'Pick the outcome that should shape your first Fighter Edge camp.',
+              'Pick the outcome that should shape your first training camp.',
           child: _ChoiceWrap(
-            values: goals,
-            selected: goal,
-            onSelected: onGoal,
+            values: campGoals,
+            selected: campGoal,
+            onSelected: onCampGoal,
           ),
         ),
       1 => _OnboardingStep(
-          eyebrow: 'Experience',
-          title: 'Where are you starting from?',
+          eyebrow: 'Nutrition goal',
+          title: 'What should EdgeFuel optimize for?',
           subtitle:
-              'This keeps the app from pushing beginner athletes like pros, or boring experienced fighters.',
-          child: _ChoiceWrap(
-            values: levels,
-            selected: level,
-            onSelected: onLevel,
+              'This creates your first calorie and macro target. You can edit it later.',
+          child: Column(
+            children: [
+              for (final goal in NutritionGoal.values)
+                _SelectCard<NutritionGoal>(
+                  value: goal,
+                  selected: nutritionGoal,
+                  title: NutritionCopy.goalLabel(goal),
+                  description: NutritionCopy.goalDescription(goal),
+                  icon: switch (goal) {
+                    NutritionGoal.loseFat => Icons.trending_down,
+                    NutritionGoal.maintain => Icons.balance,
+                    NutritionGoal.gainMuscle => Icons.trending_up,
+                  },
+                  onSelected: onNutritionGoal,
+                ),
+            ],
           ),
         ),
       2 => _OnboardingStep(
-          eyebrow: 'Weekly rhythm',
+          eyebrow: 'Body basics',
+          title: 'Tell us your starting point.',
+          subtitle:
+              'No weight class needed. Use normal body details so your target is personal.',
+          child: _BodyInputs(
+            age: age,
+            height: height,
+            currentWeight: currentWeight,
+            targetWeight: targetWeight,
+            nutritionGoal: nutritionGoal,
+            equationProfile: equationProfile,
+            onEquationProfile: onEquationProfile,
+            error: error,
+          ),
+        ),
+      3 => _OnboardingStep(
+          eyebrow: 'Daily activity',
+          title: 'Outside the gym, how active are you?',
+          subtitle:
+              'This is separate from training days so calories are not double-counted.',
+          child: Column(
+            children: [
+              for (final level in ActivityLevel.values)
+                _SelectCard<ActivityLevel>(
+                  value: level,
+                  selected: activity,
+                  title: NutritionCopy.activityLabel(level),
+                  description: NutritionCopy.activityDescription(level),
+                  icon: Icons.directions_walk,
+                  onSelected: onActivity,
+                ),
+            ],
+          ),
+        ),
+      4 => _OnboardingStep(
+          eyebrow: 'Training rhythm',
           title: 'How many days can you train?',
           subtitle:
               'Choose a realistic week. Consistency beats an impossible plan.',
-          child: _DayStepper(value: days, onChanged: onDays),
+          child: Column(
+            children: [
+              _ChoiceWrap(
+                values: levels,
+                selected: level,
+                onSelected: onLevel,
+              ),
+              const SizedBox(height: Insets.xl),
+              _DayStepper(value: days, onChanged: onDays),
+            ],
+          ),
         ),
       _ => _OnboardingStep(
-          eyebrow: 'Optional',
-          title: 'Add a starting weight?',
+          eyebrow: 'Review',
+          title: 'Your first plan is ready.',
           subtitle:
-              'Useful for progress tracking, but you can skip it and add a weigh-in later.',
-          child: AppTextField(
-            controller: weight,
-            label: 'Starting weight in kg',
-            icon: Icons.monitor_weight_outlined,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            textInputAction: TextInputAction.done,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(
-                RegExp(r'^\d*\.?\d{0,1}'),
-              ),
-            ],
-            errorText: error,
+              'Fighter Edge will start you fresh: clean dashboard, training week, and an EdgeFuel target.',
+          child: _ReviewSummary(
+            campGoal: campGoal,
+            nutritionGoal: nutritionGoal,
+            level: level,
+            days: days,
+            activity: activity,
           ),
         ),
     };
@@ -337,6 +568,117 @@ class _QuestionStep extends StatelessWidget {
   }
 }
 
+class _BodyInputs extends StatelessWidget {
+  final TextEditingController age;
+  final TextEditingController height;
+  final TextEditingController currentWeight;
+  final TextEditingController targetWeight;
+  final NutritionGoal nutritionGoal;
+  final EquationProfile equationProfile;
+  final ValueChanged<EquationProfile> onEquationProfile;
+  final String? error;
+
+  const _BodyInputs({
+    required this.age,
+    required this.height,
+    required this.currentWeight,
+    required this.targetWeight,
+    required this.nutritionGoal,
+    required this.equationProfile,
+    required this.onEquationProfile,
+    required this.error,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final showTarget = nutritionGoal != NutritionGoal.maintain;
+    final targetLabel = nutritionGoal == NutritionGoal.loseFat
+        ? 'Target milestone in kg'
+        : 'Gain milestone in kg';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: AppTextField(
+                controller: age,
+                label: 'Age',
+                icon: Icons.cake_outlined,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+            ),
+            const SizedBox(width: Insets.md),
+            Expanded(
+              child: AppTextField(
+                controller: height,
+                label: 'Height cm',
+                icon: Icons.straighten,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [_decimalInput],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: Insets.md),
+        AppTextField(
+          controller: currentWeight,
+          label: 'Current weight kg',
+          icon: Icons.monitor_weight_outlined,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [_decimalInput],
+        ),
+        if (showTarget) ...[
+          const SizedBox(height: Insets.md),
+          AppTextField(
+            controller: targetWeight,
+            label: targetLabel,
+            icon: nutritionGoal == NutritionGoal.loseFat
+                ? Icons.south_east
+                : Icons.north_east,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [_decimalInput],
+          ),
+          const SizedBox(height: Insets.sm),
+          Text(
+            'Optional: leave blank and Fighter Edge starts with a safe 5% milestone.',
+            style: AppType.subhead(
+              weight: FontWeight.w500,
+              color: AppColors.textMuted,
+            ),
+          ),
+        ],
+        const SizedBox(height: Insets.xl),
+        Text('Calorie equation',
+            style: AppType.callout(weight: FontWeight.w800)),
+        const SizedBox(height: Insets.sm),
+        for (final profile in EquationProfile.values)
+          _SelectCard<EquationProfile>(
+            value: profile,
+            selected: equationProfile,
+            title: NutritionCopy.equationLabel(profile),
+            description: NutritionCopy.equationDescription(profile),
+            icon: Icons.calculate_outlined,
+            onSelected: onEquationProfile,
+          ),
+        if (error != null) ...[
+          const SizedBox(height: Insets.md),
+          Text(
+            error!,
+            style: AppType.subhead(
+              weight: FontWeight.w700,
+              color: AppColors.negative,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 class _ChoiceWrap extends StatelessWidget {
   final List<String> values;
   final String selected;
@@ -377,6 +719,80 @@ class _ChoiceWrap extends StatelessWidget {
   }
 }
 
+class _SelectCard<T> extends StatelessWidget {
+  final T value;
+  final T selected;
+  final String title;
+  final String description;
+  final IconData icon;
+  final ValueChanged<T> onSelected;
+
+  const _SelectCard({
+    required this.value,
+    required this.selected,
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final active = value == selected;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Insets.sm),
+      child: AppCard(
+        onTap: () => onSelected(value),
+        padding: const EdgeInsets.all(Insets.md),
+        accent: active ? AppColors.primary : null,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: active ? AppColors.primarySoft : AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: active ? AppColors.primary : AppColors.border,
+                ),
+              ),
+              child: Icon(
+                icon,
+                color: active ? AppColors.primary : AppColors.textMuted,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: Insets.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppType.callout(weight: FontWeight.w800)),
+                  const SizedBox(height: Insets.xxs),
+                  Text(
+                    description,
+                    style: AppType.subhead(
+                      weight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: Insets.sm),
+            Icon(
+              active ? Icons.check_circle : Icons.circle_outlined,
+              color: active ? AppColors.primary : AppColors.textMuted,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _DayStepper extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
@@ -396,7 +812,7 @@ class _DayStepper extends StatelessWidget {
             children: [
               Text('$value', style: AppType.largeTitle()),
               Text(
-                value == 1 ? 'day' : 'days',
+                value == 1 ? 'day per week' : 'days per week',
                 style: AppType.micro(color: AppColors.textMuted),
               ),
             ],
@@ -416,8 +832,11 @@ class _StepButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
   final String semanticLabel;
-  const _StepButton(
-      {required this.icon, this.onTap, required this.semanticLabel});
+  const _StepButton({
+    required this.icon,
+    this.onTap,
+    required this.semanticLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -447,11 +866,14 @@ class _StepButton extends StatelessWidget {
 }
 
 class _PreviewCard extends StatelessWidget {
-  final String goal;
+  final String campGoal;
+  final NutritionGoal nutritionGoal;
   final String level;
   final int days;
+
   const _PreviewCard({
-    required this.goal,
+    required this.campGoal,
+    required this.nutritionGoal,
     required this.level,
     required this.days,
   });
@@ -473,7 +895,7 @@ class _PreviewCard extends StatelessWidget {
           const SizedBox(width: Insets.md),
           Expanded(
             child: Text(
-              '$days-day $level plan · $goal',
+              '$days-day $level camp - ${NutritionCopy.goalLabel(nutritionGoal)} - $campGoal',
               style: AppType.subhead(weight: FontWeight.w800),
             ),
           ),
@@ -482,3 +904,79 @@ class _PreviewCard extends StatelessWidget {
     );
   }
 }
+
+class _ReviewSummary extends StatelessWidget {
+  final String campGoal;
+  final NutritionGoal nutritionGoal;
+  final String level;
+  final int days;
+  final ActivityLevel activity;
+
+  const _ReviewSummary({
+    required this.campGoal,
+    required this.nutritionGoal,
+    required this.level,
+    required this.days,
+    required this.activity,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _SummaryRow('Camp', campGoal, Icons.flag_outlined),
+        _SummaryRow('Nutrition', NutritionCopy.goalLabel(nutritionGoal),
+            Icons.restaurant),
+        _SummaryRow('Experience', level, Icons.workspace_premium_outlined),
+        _SummaryRow('Training', '$days days per week', Icons.sports_mma),
+        _SummaryRow(
+          'Daily activity',
+          NutritionCopy.activityLabel(activity),
+          Icons.directions_walk,
+        ),
+      ],
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _SummaryRow(this.label, this.value, this.icon);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Insets.sm),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primary, size: 20),
+          const SizedBox(width: Insets.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  style: AppType.micro(
+                    color: AppColors.textMuted,
+                    weight: FontWeight.w800,
+                    spacing: .8,
+                  ),
+                ),
+                const SizedBox(height: Insets.xxs),
+                Text(value, style: AppType.callout(weight: FontWeight.w800)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+final _decimalInput = FilteringTextInputFormatter.allow(
+  RegExp(r'^\d*[\.,]?\d{0,1}'),
+);
