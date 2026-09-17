@@ -54,40 +54,50 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('component gallery matches baseline at default text scale',
-      (tester) async {
-    await pumpGallery(tester, textScale: 1);
+  testWidgets(
+    'component gallery matches baseline at default text scale',
+    (tester) async {
+      await pumpGallery(tester, textScale: 1);
 
-    await expectLater(
-      find.byType(ComponentGalleryScreen),
-      matchesGoldenFile('goldens/component_gallery_default.png'),
-    );
-  }, tags: 'golden');
+      await expectLater(
+        find.byType(ComponentGalleryScreen),
+        matchesGoldenFile('goldens/component_gallery_default.png'),
+      );
+    },
+    tags: 'golden',
+  );
 
-  testWidgets('component gallery survives large text scale',
-      (tester) async {
-    await pumpGallery(tester, textScale: 1.6);
+  testWidgets(
+    'component gallery survives large text scale',
+    (tester) async {
+      await pumpGallery(tester, textScale: 1.6);
 
-    await expectLater(
-      find.byType(ComponentGalleryScreen),
-      matchesGoldenFile('goldens/component_gallery_large_text.png'),
-    );
-  }, tags: 'golden');
+      await expectLater(
+        find.byType(ComponentGalleryScreen),
+        matchesGoldenFile('goldens/component_gallery_large_text.png'),
+      );
+    },
+    tags: 'golden',
+  );
 
-  testWidgets('PressScale pressed state matches baseline', (tester) async {
-    await pumpGallery(tester, textScale: 1);
+  testWidgets(
+    'PressScale pressed state matches baseline',
+    (tester) async {
+      await pumpGallery(tester, textScale: 1);
 
-    final gesture = await tester
-        .startGesture(tester.getCenter(find.byType(PressScale).last));
-    await tester.pump(MotionTokens.press);
+      final gesture = await tester
+          .startGesture(tester.getCenter(find.byType(PressScale).last));
+      await tester.pump(MotionTokens.press);
 
-    await expectLater(
-      find.byType(ComponentGalleryScreen),
-      matchesGoldenFile('goldens/component_gallery_pressed.png'),
-    );
+      await expectLater(
+        find.byType(ComponentGalleryScreen),
+        matchesGoldenFile('goldens/component_gallery_pressed.png'),
+      );
 
-    await gesture.up();
-  }, tags: 'golden');
+      await gesture.up();
+    },
+    tags: 'golden',
+  );
 }
 
 Future<ByteData> _loadMaterialIconsFont() async {

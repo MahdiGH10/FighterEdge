@@ -63,7 +63,9 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
+          # Windows cache post-cleanup can hold the job open after the tests
+          # have passed; the golden gate is small enough to run uncached.
+          cache: false
 
       - name: Install dependencies
         run: flutter pub get
