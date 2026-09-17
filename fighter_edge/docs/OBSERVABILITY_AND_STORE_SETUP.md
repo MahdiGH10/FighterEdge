@@ -62,6 +62,22 @@ gcloud secrets list --project=fighter-edge-app --format="value(name)"
 7. Send RevenueCat's test webhook. It should return HTTP 200 with `ignored` and
    must not grant an account Pro access.
 
+The Flutter client also needs the two **public** RevenueCat SDK keys at build
+time (these are not the webhook secret):
+
+```powershell
+flutter build apk --release `
+  --dart-define=REVENUECAT_ANDROID_PUBLIC_KEY=your_public_android_key
+
+flutter build ipa --release `
+  --dart-define=REVENUECAT_IOS_PUBLIC_KEY=your_public_ios_key
+```
+
+Use CI/release secret variables for those values; never commit them to Dart or
+put them in a public issue. A build without the matching platform key correctly
+shows the waitlist/restore-status state instead of pretending payments are
+active.
+
 ## Deploy
 
 After the webhook secret exists:
