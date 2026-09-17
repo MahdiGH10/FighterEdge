@@ -16,6 +16,7 @@ import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import '../widgets/animated_count.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/brand_logo.dart';
 import '../widgets/premium_effects.dart';
@@ -486,7 +487,8 @@ class _PlanReadyView extends StatelessWidget {
                     if (target?.isSuccess == true) ...[
                       _PlanMetric(
                         label: 'Daily fuel',
-                        value: '${target!.targetCalories} kcal',
+                        amount: target!.targetCalories,
+                        suffix: ' kcal',
                         icon: Icons.bolt,
                       ),
                       const SizedBox(height: Insets.sm),
@@ -495,7 +497,8 @@ class _PlanReadyView extends StatelessWidget {
                           Expanded(
                             child: _PlanMetric(
                               label: 'Protein',
-                              value: '${target.proteinGrams}g',
+                              amount: target.proteinGrams,
+                              suffix: 'g',
                               icon: Icons.fitness_center,
                             ),
                           ),
@@ -503,7 +506,8 @@ class _PlanReadyView extends StatelessWidget {
                           Expanded(
                             child: _PlanMetric(
                               label: 'Carbs',
-                              value: '${target.carbGrams}g',
+                              amount: target.carbGrams,
+                              suffix: 'g',
                               icon: Icons.flash_on,
                             ),
                           ),
@@ -511,7 +515,8 @@ class _PlanReadyView extends StatelessWidget {
                           Expanded(
                             child: _PlanMetric(
                               label: 'Fats',
-                              value: '${target.fatGrams}g',
+                              amount: target.fatGrams,
+                              suffix: 'g',
                               icon: Icons.opacity,
                             ),
                           ),
@@ -557,12 +562,17 @@ class _PlanReadyView extends StatelessWidget {
 
 class _PlanMetric extends StatelessWidget {
   final String label;
-  final String value;
+
+  /// Null when the calculator could not produce this figure. Rendered as a
+  /// dash rather than coerced to 0 — a target of "0 kcal" would be a lie.
+  final int? amount;
+  final String suffix;
   final IconData icon;
 
   const _PlanMetric({
     required this.label,
-    required this.value,
+    required this.amount,
+    required this.suffix,
     required this.icon,
   });
 
@@ -580,8 +590,18 @@ class _PlanMetric extends StatelessWidget {
         children: [
           Icon(icon, color: AppColors.primary, size: 18),
           const SizedBox(height: Insets.sm),
-          Text(value,
-              style: AppType.title2().copyWith(fontWeight: FontWeight.w800)),
+          // This is the moment the plan becomes real to the user — the number
+          // arriving *is* the event, so it counts rather than appearing.
+          if (amount case final value?)
+            AnimatedCount(
+              value: value.toDouble(),
+              from: 0,
+              formatter: (v) => '${v.round()}$suffix',
+              style: AppType.title2().copyWith(fontWeight: FontWeight.w800),
+            )
+          else
+            Text('—',
+                style: AppType.title2().copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: Insets.xxs),
           Text(label, style: AppType.micro(color: AppColors.textMuted)),
         ],

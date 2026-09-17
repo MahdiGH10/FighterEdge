@@ -17,6 +17,7 @@ import '../screens/profile_screen.dart';
 import '../screens/round_timer_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/weight_tracker_screen.dart';
+import 'app_page_transitions.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -73,7 +74,9 @@ GoRouter createAppRouter() {
         pageBuilder: (context, state) {
           final highlight =
               state.extra is Feature ? state.extra as Feature : null;
-          return _appPage(
+          // A decision interrupting the current thread, not a step deeper into
+          // it — so it rises rather than slides in from the side.
+          return AppPageTransitions.modal(
             state: state,
             child: PaywallScreen(highlight: highlight),
           );
@@ -145,14 +148,11 @@ GoRouter createAppRouter() {
   );
 }
 
+/// Forward navigation within a thread — the default for every route that is a
+/// step deeper rather than a peer or an interruption. Delegates to
+/// [AppPageTransitions.push] so "how does a push look" has one definition.
 Page<void> _appPage({
   required GoRouterState state,
   required Widget child,
-}) {
-  return CupertinoPage<void>(
-    key: state.pageKey,
-    name: state.name,
-    restorationId: state.pageKey.value,
-    child: child,
-  );
-}
+}) =>
+    AppPageTransitions.push(state: state, child: child);

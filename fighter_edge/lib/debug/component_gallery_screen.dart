@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import '../widgets/animated_count.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/premium_effects.dart';
@@ -279,6 +280,14 @@ class _MotionStates extends StatelessWidget {
               child: Text('Press state target', style: AppType.subhead()),
             ),
           ),
+        ),
+        // Renders as its settled value here: the gallery golden disables
+        // animations, which is exactly the reduced-motion path this must honour.
+        AnimatedCount(
+          value: 2750,
+          from: 0,
+          formatter: (v) => '${v.round()} kcal',
+          style: AppType.title2().copyWith(fontWeight: FontWeight.w800),
         ),
       ],
     );
