@@ -90,26 +90,29 @@ void main() {
 }
 
 Future<ByteData> _loadMaterialIconsFont() async {
+  const relativeFontPaths = [
+    // Flutter's artifact name is case-sensitive on Linux runners. Windows
+    // accepts both spellings, which previously masked this CI-only failure.
+    'bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
+    'bin/cache/artifacts/material_fonts/materialicons-regular.otf',
+  ];
+
   final candidates = [
     if (Platform.environment['FLUTTER_ROOT'] case final root?)
-      _joinPath([
-        root,
-        'bin',
-        'cache',
-        'artifacts',
-        'material_fonts',
-        'materialicons-regular.otf',
+      ...relativeFontPaths.map(
+        (relativePath) => _joinPath([
+          root,
+          ...relativePath.split('/'),
+        ]),
+      ),
+    ...relativeFontPaths.map(
+      (relativePath) => _joinPath([
+        'C:',
+        'src',
+        'flutter',
+        ...relativePath.split('/'),
       ]),
-    _joinPath([
-      'C:',
-      'src',
-      'flutter',
-      'bin',
-      'cache',
-      'artifacts',
-      'material_fonts',
-      'materialicons-regular.otf',
-    ]),
+    ),
   ];
 
   for (final candidate in candidates) {
