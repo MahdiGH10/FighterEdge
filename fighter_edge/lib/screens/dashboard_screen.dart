@@ -213,10 +213,6 @@ class _TodayFocusCard extends StatelessWidget {
     final state = context.watch<AppState>();
     final edgeFuel = context.watch<EdgeFuelController>();
     final nextSession = state.sessions.where((s) => !s.completed).firstOrNull;
-    final caloriesLeft = edgeFuel.hasUsableTarget
-        ? (edgeFuel.targetCalories - edgeFuel.consumedCalories)
-            .clamp(0, edgeFuel.targetCalories)
-        : null;
 
     return AppCard(
       accent: AppColors.primary,
@@ -262,27 +258,31 @@ class _TodayFocusCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Insets.lg),
-          Row(
-            children: [
-              Expanded(
-                child: _FocusMetric(
-                  label: 'Fuel left',
-                  value: caloriesLeft == null
-                      ? 'Set target'
-                      : '$caloriesLeft kcal',
-                  icon: Icons.restaurant,
+          if (edgeFuel.hasUsableTarget)
+            _FuelTargetSnapshot(
+              edgeFuel: edgeFuel,
+              streakDays: state.currentStreakDays,
+            )
+          else
+            Row(
+              children: [
+                const Expanded(
+                  child: _FocusMetric(
+                    label: 'Fuel target',
+                    value: 'Set target',
+                    icon: Icons.restaurant,
+                  ),
                 ),
-              ),
-              const SizedBox(width: Insets.sm),
-              Expanded(
-                child: _FocusMetric(
-                  label: 'Streak',
-                  value: '${state.currentStreakDays} days',
-                  icon: Icons.local_fire_department,
+                const SizedBox(width: Insets.sm),
+                Expanded(
+                  child: _FocusMetric(
+                    label: 'Streak',
+                    value: '${state.currentStreakDays} days',
+                    icon: Icons.local_fire_department,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
           const SizedBox(height: Insets.lg),
           Row(
             children: [
@@ -304,6 +304,145 @@ class _TodayFocusCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FuelTargetSnapshot extends StatelessWidget {
+  final EdgeFuelController edgeFuel;
+  final int streakDays;
+
+  const _FuelTargetSnapshot({
+    required this.edgeFuel,
+    required this.streakDays,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final target = edgeFuel.targetCalories;
+    final consumed = edgeFuel.consumedCalories;
+    final remaining = (target - consumed).clamp(0, target);
+    final progress = target <= 0 ? 0.0 : (consumed / target).clamp(0.0, 1.0);
+    final overTarget = target > 0 && consumed > target;
+
+    return Container(
+      padding: const EdgeInsets.all(Insets.md),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundRaised,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.bolt, color: AppColors.primary, size: 18),
+              const SizedBox(width: Insets.sm),
+              Expanded(
+                child: Text(
+                  'EdgeFuel target',
+                  style: AppType.callout(weight: FontWeight.w800),
+                ),
+              ),
+              Text(
+                overTarget ? 'Over target' : '$remaining kcal left',
+                style: AppType.subhead(
+                  weight: FontWeight.w800,
+                  color: overTarget ? AppColors.negative : AppColors.positive,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Insets.sm),
+          Text(
+            '$consumed / $target kcal',
+            style: AppType.title2().copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: Insets.sm),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: AppColors.track,
+              valueColor: AlwaysStoppedAnimation(
+                overTarget ? AppColors.negative : AppColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(height: Insets.md),
+          Wrap(
+            spacing: Insets.sm,
+            runSpacing: Insets.sm,
+            children: [
+              _TargetPill(
+                label: 'Protein',
+                value: '${edgeFuel.targetProtein}g',
+                color: AppColors.protein,
+              ),
+              _TargetPill(
+                label: 'Carbs',
+                value: '${edgeFuel.targetCarbs}g',
+                color: AppColors.carbs,
+              ),
+              _TargetPill(
+                label: 'Fats',
+                value: '${edgeFuel.targetFats}g',
+                color: AppColors.fats,
+              ),
+              _TargetPill(
+                label: 'Streak',
+                value: '${streakDays}d',
+                color: AppColors.warning,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TargetPill extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _TargetPill({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: Insets.sm, vertical: Insets.xs),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(Radii.chip),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: Insets.xs),
+          Text(
+            '$label $value',
+            style: AppType.micro(
+              weight: FontWeight.w800,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),

@@ -35,19 +35,34 @@ The first moment of value should be:
 
 ## Next Phase 6 tasks
 
-1. Run the full Flutter validation once Flutter is available:
+### Phase 6B — implemented
+
+- Dashboard now shows a clear EdgeFuel target snapshot when a target exists.
+- Dashboard now shows consumed calories, target calories, remaining calories, macro targets, and streak in one glance.
+- Fuel now opens with a stronger “Today’s EdgeFuel target” card instead of a small plan teaser.
+- Fuel now shows target calories, logged calories, remaining/over-target status, progress, and macro targets before the meal log.
+
+## Next Phase 6 tasks
+
+1. Test the new target cards on a real emulator/device:
+
+   ```powershell
+   flutter run
+   ```
+
+2. Re-run validation before every handoff:
 
    ```powershell
    flutter analyze
    flutter test
    ```
 
-2. Add widget tests for the new onboarding flow:
+3. Add focused widget tests for the new onboarding/target surface:
    - validation blocks empty body details
    - “Start my plan” saves EdgeFuel target
    - “Skip detailed target” completes onboarding without target
-
-3. Make Dashboard more explicitly show the calculated EdgeFuel target after onboarding.
+   - Dashboard shows the EdgeFuel target after onboarding
+   - Fuel shows today’s personalized target after onboarding
 
 4. Add a premium paywall moment after the free personalized target:
    - free users get basic targets

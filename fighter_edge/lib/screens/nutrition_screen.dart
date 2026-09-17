@@ -283,7 +283,7 @@ class _TodayView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
-        const _EdgeFuelEntryCard(),
+        _EdgeFuelEntryCard(edgeFuel: edgeFuel),
         const SizedBox(height: Insets.lg),
         if (!edgeFuel.hasUsableTarget) ...[
           const EmptyState(
@@ -533,7 +533,7 @@ class _MealsView extends StatelessWidget {
           ),
           const SizedBox(height: Insets.lg),
         ],
-        SectionHeader('Meals logged · $eaten/${edgeFuel.entries.length}'),
+        SectionHeader('Meals logged - $eaten/${edgeFuel.entries.length}'),
         if (edgeFuel.entries.isEmpty)
           const EmptyState(
             icon: Icons.restaurant_menu,
@@ -732,13 +732,21 @@ class _Check extends StatelessWidget {
 }
 
 class _EdgeFuelEntryCard extends StatelessWidget {
-  const _EdgeFuelEntryCard();
+  final EdgeFuelController edgeFuel;
+
+  const _EdgeFuelEntryCard({required this.edgeFuel});
 
   @override
   Widget build(BuildContext context) {
-    final edgeFuel = context.watch<EdgeFuelController>();
     final hasSetup = edgeFuel.hasCompletedSetup;
     final target = edgeFuel.target;
+    final hasTarget = hasSetup && target != null && target.isSuccess;
+    final consumed = edgeFuel.consumedCalories;
+    final targetCalories = edgeFuel.targetCalories;
+    final remaining = (targetCalories - consumed).clamp(0, targetCalories);
+    final progress =
+        targetCalories <= 0 ? 0.0 : (consumed / targetCalories).clamp(0.0, 1.0);
+    final overTarget = targetCalories > 0 && consumed > targetCalories;
 
     return AppCard(
       accent: AppColors.premium,
@@ -748,40 +756,153 @@ class _EdgeFuelEntryCard extends StatelessWidget {
         fallbackBuilder: (_) =>
             hasSetup ? const EdgeFuelPlanScreen() : const EdgeFuelSetupScreen(),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.bolt, color: AppColors.primary),
-          ),
-          const SizedBox(width: Insets.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'EdgeFuel AI',
-                  style: AppType.subhead(weight: FontWeight.w800),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(height: Insets.xxs),
+                child: const Icon(Icons.bolt, color: AppColors.primary),
+              ),
+              const SizedBox(width: Insets.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hasTarget ? 'Today\'s EdgeFuel target' : 'EdgeFuel AI',
+                      style: AppType.subhead(weight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: Insets.xxs),
+                    Text(
+                      hasTarget
+                          ? 'Personalized calories and macros for this day.'
+                          : 'Get a personalized daily calorie and macro target.',
+                      style: AppType.subhead(
+                        weight: FontWeight.w500,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: AppColors.textMuted),
+            ],
+          ),
+          if (hasTarget) ...[
+            const SizedBox(height: Insets.lg),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Text(
+                    '$targetCalories kcal',
+                    style: AppType.largeTitle(),
+                  ),
+                ),
+                const SizedBox(width: Insets.md),
                 Text(
-                  hasSetup && target != null && target.isSuccess
-                      ? 'Your plan: ${target.targetCalories} kcal · view details'
-                      : 'Get a personalized daily calorie and macro target',
-                  style: AppType.subhead(
-                    weight: FontWeight.w500,
-                    color: AppColors.textSecondary,
+                  overTarget ? 'Over target' : '$remaining left',
+                  style: AppType.callout(
+                    weight: FontWeight.w800,
+                    color: overTarget ? AppColors.negative : AppColors.positive,
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: Insets.xs),
+            Text(
+              '$consumed kcal logged',
+              style: AppType.subhead(
+                weight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: Insets.md),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(100),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 6,
+                backgroundColor: AppColors.track,
+                valueColor: AlwaysStoppedAnimation(
+                  overTarget ? AppColors.negative : AppColors.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: Insets.md),
+            Wrap(
+              spacing: Insets.sm,
+              runSpacing: Insets.sm,
+              children: [
+                _TargetMacroChip(
+                  label: 'Protein',
+                  value: '${edgeFuel.targetProtein}g',
+                  color: AppColors.protein,
+                ),
+                _TargetMacroChip(
+                  label: 'Carbs',
+                  value: '${edgeFuel.targetCarbs}g',
+                  color: AppColors.carbs,
+                ),
+                _TargetMacroChip(
+                  label: 'Fats',
+                  value: '${edgeFuel.targetFats}g',
+                  color: AppColors.fats,
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TargetMacroChip extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _TargetMacroChip({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: Insets.sm, vertical: Insets.xs),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundRaised,
+        borderRadius: BorderRadius.circular(Radii.chip),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.textMuted),
+          const SizedBox(width: Insets.xs),
+          Text(
+            '$label $value',
+            style: AppType.micro(
+              weight: FontWeight.w800,
+              color: AppColors.textSecondary,
+            ),
+          ),
         ],
       ),
     );
