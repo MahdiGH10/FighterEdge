@@ -104,7 +104,7 @@ jobs:
       - name: Generate release plugin configuration
         # Flutter 3.47 can leave integration_test (a dev-only plugin) in the
         # release registrant. The config-only pass regenerates it correctly.
-        run: flutter build --config-only
+        run: flutter build apk --config-only
 
       - name: Build release APK
         # Dependencies were resolved in the preceding step. Avoid a second
