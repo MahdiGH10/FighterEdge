@@ -3,7 +3,7 @@
 **Verified:** 2026-09-18
 **Repository:** `MahdiGH10/FighterEdge`  
 **Branch:** `main`  
-**Latest feature commit:** `4d4b50b feat: connect plan reveal to premium value`
+**Latest feature commit:** `aac4b0a feat: retention loop — streak freeze and training-day reminders`
 **Purpose:** Give a new Claude Code session enough context to continue the
 application without rebuilding work that already exists or claiming that
 account-level setup is complete when it is not.
@@ -17,41 +17,76 @@ this document before changing scope.
 
 ---
 
-## Continuation update — 2026-09-18
+## Continuation update — 2026-09-18 (retention + re-verify)
 
-The previous Claude Code session reached its limit after the auth, first-run,
-tab-motion, and premium-UI work had landed. The current repository is already
-past those phases; do not rebuild them.
+The prior handoff ended at `4d4b50b` (monetization/paywall slice) with
+retention and a final re-verification pass still open. Both are now done; the
+original nine-step UX workflow (skills/audit → design foundation → auth →
+auth polish → first-run → tab motion → monetization → retention → re-verify)
+is complete. Do not rebuild any of it.
 
-The latest local slice is committed as `4d4b50b`:
+The latest local slice is committed as `aac4b0a`:
 
-- The onboarding plan reveal now has a clear, optional Pro continuation. The
-  free dashboard and fuel path remain available.
-- The paywall leads with the annual store product, shows an honest monthly
-  equivalent only when the provider supplies a numeric price, and keeps the
-  monthly option available as a secondary action.
-- Pro value copy now includes the AI Fighter Brief and premium fuel library.
-- The onboarding and paywall CTAs record only the surface/access pair in
-  `premium_cta_tapped`; no identity, measurements, or subscription data is
-  sent through this event.
-- RevenueCat receipts and server-owned entitlements are unchanged. This is a
-  presentation and conversion slice, not a client-side entitlement change.
+- **Streak freeze.** `StreakEngine` (pure) + `StreakController` (persisted
+  per user via `SharedPreferences`) replace `AppState.currentStreakDays`,
+  which had a real bug: it zeroed the streak the instant "today" had nothing
+  logged yet, even with a full week behind it. The corrected formula only
+  breaks on a day that has actually passed empty. A free account earns one
+  freeze for a week with 3+ training days logged (two for Pro), capped at
+  2/4 banked. When the streak is one missed day from breaking, the dashboard
+  shows an at-risk banner (spend a freeze to protect yesterday, or a "Log
+  now" nudge with none banked); Profile's streak stat reads the same
+  freeze-aware count.
+- **Training-day reminders.** New `ReminderGateway` abstraction
+  (`LocalReminderGateway` on `flutter_local_notifications` + `timezone`,
+  `UnavailableReminderGateway` for web/desktop/tests), mirroring the billing
+  gateway pattern. Schedules one weekly notification per training day with
+  `inexactAllowWhileIdle`, so it never needs `SCHEDULE_EXACT_ALARM`. Settings'
+  "Camp reminders" switch and the first-win sheet's "Remind me" now actually
+  request permission and schedule, instead of only saving a preference; a
+  denied permission flips the switch back off with an explanation. Android
+  manifest updated with `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, and
+  the plugin's boot/alarm receivers so reminders survive a reboot.
+- **Re-verification.** All ten numbered findings plus both minor/cosmetic
+  items in `docs/VISUAL_AUDIT_20260917.md` (untracked; ask the user before
+  committing it) were re-checked against the current code and confirmed
+  resolved — including the two that were easy to miss: the password field's
+  premature red label (fixed as a side effect of the step 4b validation
+  rewrite) and the post-delete Settings residue (fixed by the auth-aware
+  router reset also from step 4b). The paywall's monthly-equivalent pricing
+  (finding 9) was verified against its real test fixture: a $59.99 annual
+  product renders "About $5.00 / month", not a hardcoded string.
 
 Validation at this handoff:
 
+- `dart format --output=none --set-exit-if-changed .` — clean.
 - `flutter analyze` — clean.
-- `flutter test --exclude-tags golden` — 362 tests passed.
+- `flutter test --exclude-tags golden` — 406 tests passed.
 - `flutter test --tags golden` — 3 golden tests passed.
-- `functions`: `npm test` — build plus 19 tests passed.
+- `functions`: `npm run build && npm test` — build plus 19 tests passed.
+- `flutter pub get` after adding `flutter_local_notifications`, `timezone`,
+  and `flutter_timezone` — purely additive; no existing dependency was
+  bumped. Verified against the actual installed plugin sources (package
+  names, method signatures, receiver class names) rather than assumed.
+- Not verified: the reminder plugin on a real Android device (no device/
+  emulator available in this environment). The gateway abstraction,
+  permission-denied handling, and scheduling call are covered by widget
+  tests against a fake gateway; the manifest additions were checked for
+  well-formed XML and cross-referenced against the installed plugin's own
+  source, but an actual notification firing after a reboot has not been
+  seen. Worth a real-device smoke test before shipping this to production.
 
-The remaining production blocker is account configuration, not this UI slice:
-the RevenueCat webhook deployment still needs the Firebase secret
-`REVENUECAT_WEBHOOK_AUTH`, followed by real App Store/Play sandbox purchase and
-restore tests. Never put that secret in source control or in Flutter config.
+The remaining production blocker is unchanged and is account configuration,
+not application code: the RevenueCat webhook deployment still needs the
+Firebase secret `REVENUECAT_WEBHOOK_AUTH`, followed by real App Store/Play
+sandbox purchase and restore tests. Never put that secret in source control
+or in Flutter config.
 
-The next bounded engineering slice should be retention or release readiness:
-first choose one, inspect current code/status, add tests, then commit locally.
-Do not push without the user's explicit request.
+With the original nine-step workflow complete, the next bounded engineering
+slice should come from section 9 below (`Slice A` — unblocking the hosted
+backend — is the natural next step, since it is the one blocker every other
+slice is waiting on). Confirm with the user before starting a new slice; add
+tests; commit locally; do not push without the user's explicit request.
 
 ## 1. Product in one paragraph
 
@@ -182,7 +217,11 @@ the user explicitly asks for that cleanup.
   `users/{uid}/weights/{entryId}`.
 - Training sessions persist under `users/{uid}/sessions/{sessionId}`.
 - Training Camp supports weekly sessions, completion, RPE, notes, history, and
-  computed current streak days.
+  a computed current streak (`StreakEngine`), with a per-account streak-freeze
+  bank (`StreakController`) that can bridge exactly one missed day.
+- Training-day reminders are real (`ReminderGateway` /
+  `LocalReminderGateway`), wired from Settings and the first-win sheet; not
+  yet smoke-tested on a physical/emulated Android device.
 - Round Timer has MMA, boxing, and BJJ-style presets with work/rest phases.
 - Timer haptics and training settings are persisted locally with
   `SharedPreferences`.
@@ -393,7 +432,7 @@ rules for webhook, quota, and deletion work.
 | Magic link | Hidden/unsupported in production Firebase adapter |
 | Onboarding | Real fresh-account flow, including EdgeFuel inputs |
 | Weight tracking | Real Firestore persistence |
-| Training sessions/streak | Real Firestore persistence and local computation |
+| Training sessions/streak | Real Firestore persistence, corrected streak math, and a persisted streak-freeze bank |
 | Round timer | Real local timer; device haptics need device verification |
 | EdgeFuel target | Real deterministic engine and Firestore persistence |
 | Daily food logging | Real EdgeFuel path and persistence |
@@ -405,9 +444,9 @@ rules for webhook, quota, and deletion work.
 | Technique Library | UI exists, but real video playback/content is not shipped |
 | Corner Coach | Static/pro-gated cues, not personalized AI coaching yet |
 | Mobility | Placeholder/not MVP |
-| Profile stats | Some values still come from `MockData`; replace with real aggregates before launch |
+| Profile stats | Real aggregates from the signed-in account; no `MockData` reference remains in Profile, Dashboard, or Train |
 | Legacy meal API | Still in `AppState`/`DataRepository`; current Fuel UI uses EdgeFuel. Safe cleanup is pending |
-| Settings | Local units/haptics/reminders/safety toggles and account deletion exist; legal pages and password change are placeholders |
+| Settings | Local units/haptics/safety toggles and account deletion exist; camp reminders actually request permission and schedule; password change is a real reauthenticate-then-change flow; Terms/Privacy are real in-app routes whose text is still a placeholder pending publication |
 | Payments | RevenueCat adapter and server webhook code exist; real store products/sandbox not configured |
 | Crash reporting | Mobile Crashlytics adapter exists; real production crash test is pending |
 | App icon/native splash | Not fully store-polished/verified |
@@ -423,13 +462,17 @@ hardening MVP candidate with account/store deployment work still outstanding.
 ### Verified locally at this handoff
 
 ```text
-dart format --output=none --set-exit-if-changed .  → clean (153 files)
+dart format --output=none --set-exit-if-changed .  → clean (195 files)
 flutter analyze                                      → No issues found
-flutter test --exclude-tags golden                  → 271 tests passed
-functions: npm test                                 → build + 19 tests passed
+flutter test --exclude-tags golden                  → 406 tests passed
+flutter test --tags golden                          → 3 golden tests passed
+functions: npm run build && npm test                → build + 19 tests passed
 ```
 
-The latest green GitHub Actions run also passed:
+The counts above are current as of `aac4b0a`; the GitHub Actions status below
+is from the last time this handoff confirmed a green hosted run (`da7dd4f`)
+and has not been re-checked against `aac4b0a` — CI was not run for this
+local-only slice. Re-run it before trusting these lines for a new commit:
 
 - Analyze and non-golden Flutter tests with coverage.
 - Windows renderer golden tests.
@@ -578,13 +621,18 @@ Do these in order. Each item is a bounded slice with its own tests and commit.
 
 ### Slice D — remove launch-blocking fake data and debt
 
-1. Replace Profile's `MockData.fighter` and hard-coded goal weight with real
-   user/profile aggregates.
+1. ~~Replace Profile's `MockData.fighter` and hard-coded goal weight with real
+   user/profile aggregates.~~ Done — Profile, Dashboard, and Train read real
+   account/session data; the goal weight comes from the EdgeFuel target.
 2. Decide whether to remove the legacy `Meal` API from `AppState` and
    `DataRepository`; preserve only the migration adapter needed by EdgeFuel.
 3. Make settings sync to Firestore if cross-device behavior is promised.
 4. Implement real legal pages/URLs, billing terms, medical disclaimer, and
-   support contact.
+   support contact. Partly done — Terms and Privacy are now real in-app
+   routes reachable from signup and Settings (not dead links), and each
+   states plainly that the full text is still a draft pending publication;
+   the actual legal text, externally hosted URLs, billing terms, and a
+   support contact channel are all still outstanding.
 5. Verify email-verification banner, Android Google sign-in fingerprints,
    App Check, and deletion behavior on deployed Functions.
 
@@ -608,10 +656,12 @@ Only after the above is reliable:
 - personalized Corner Coach based on recent training/nutrition data;
 - weekly nutrition analytics and trends;
 - workout logging and richer camp planning;
-- mobility routines and local reminders;
+- mobility routines (training-day reminders are done — see the retention
+  update above);
 - safe educational articles and tutorials;
 - richer premium recipe/meal-plan content;
-- referral, retention, and subscription win-back experiments.
+- referral and subscription win-back experiments (the streak-freeze
+  retention loop is done — see the retention update above).
 
 ---
 
