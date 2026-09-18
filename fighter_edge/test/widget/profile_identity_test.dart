@@ -1,6 +1,7 @@
 import 'package:fighter_edge/screens/profile_screen.dart';
 import 'package:fighter_edge/screens/training_camp_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
+import 'package:fighter_edge/state/streak_engine.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -101,7 +102,9 @@ void main() {
 
       expect(find.text('Sessions Completed'), findsOneWidget);
       expect(find.text('${state.completedSessionCount}'), findsWidgets);
-      expect(find.text('${state.currentStreakDays} days'), findsOneWidget);
+      final streakDays = StreakEngine.streakDays(
+          StreakEngine.completedDateKeys(state.sessions));
+      expect(find.text('$streakDays days'), findsOneWidget);
       // Straight from the onboarding answer, not a constant.
       expect(find.text('Training Days / Week'), findsOneWidget);
       expect(find.text('6'), findsOneWidget);

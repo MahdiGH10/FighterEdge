@@ -1,4 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Camp reminders (flutter_local_notifications). POST_NOTIFICATIONS is
+         the Android 13+ runtime permission the app requests before
+         scheduling; below API 33 it is granted automatically and this is a
+         no-op. Scheduling uses inexactAllowWhileIdle deliberately, so it
+         never needs SCHEDULE_EXACT_ALARM. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Android clears all scheduled alarms on reboot; this lets the plugin's
+         own receiver re-arm the ones it had persisted. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <application
         android:label="Fighter Edge"
         android:name="${applicationName}"
@@ -30,6 +39,24 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- flutter_local_notifications: re-arms scheduled reminders after a
+             reboot or app update, and delivers the alarm broadcast to a
+             scheduled notification. Neither is exported — nothing outside
+             this app can trigger them. -->
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"/>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

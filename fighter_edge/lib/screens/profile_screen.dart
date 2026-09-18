@@ -6,6 +6,8 @@ import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
+import '../state/streak_controller.dart';
+import '../state/streak_engine.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -28,6 +30,11 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final streak = context.watch<StreakController>();
+    final streakDays = StreakEngine.streakDays(
+      StreakEngine.completedDateKeys(state.sessions),
+      protectedDateKeys: streak.protectedDateKeys,
+    );
     final weight = state.latestWeight;
     final auth = context.watch<AuthController>();
     final user = auth.user;
@@ -130,7 +137,7 @@ class ProfileScreen extends StatelessWidget {
             children: [
               _StatRow('Sessions Completed', '${state.completedSessionCount}'),
               _divider(),
-              _StatRow('Current Streak', '${state.currentStreakDays} days'),
+              _StatRow('Current Streak', '$streakDays days'),
               _divider(),
               _StatRow(
                   'Training Days / Week', '${user?.weeklyTrainingDays ?? 0}'),

@@ -215,19 +215,12 @@ class AppState extends ChangeNotifier {
     return List.unmodifiable(completed);
   }
 
-  int get currentStreakDays {
-    final completedDays = {
-      for (final session in _sessions.where((s) => s.completed))
-        mealDateKey(session.completedAt ?? DateTime.now()),
-    };
-    var streak = 0;
-    var cursor = DateTime.now();
-    while (completedDays.contains(mealDateKey(cursor))) {
-      streak++;
-      cursor = cursor.subtract(const Duration(days: 1));
-    }
-    return streak;
-  }
+  // Streak counting itself moved to StreakEngine.streakDays, which — unlike
+  // the count this getter used to return — does not zero out the instant
+  // "today" has nothing logged yet; that correction is what makes a streak
+  // freeze (StreakController) meaningful in the first place. Kept here as a
+  // pointer rather than silently removed, since several screens used to read
+  // this directly.
 
   void toggleSession(TrainingSession session) {
     final index = _sessions.indexWhere((item) => item.id == session.id);

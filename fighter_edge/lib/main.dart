@@ -25,11 +25,15 @@ import 'features/edge_fuel/data/firestore_edge_fuel_repository.dart';
 import 'features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'firebase_options.dart';
+import 'notifications/local_reminder_gateway.dart';
+import 'notifications/reminder_gateway.dart';
+import 'notifications/unavailable_reminder_gateway.dart';
 import 'observability/error_reporter.dart';
 import 'observability/telemetry.dart';
 import 'routing/app_router.dart';
 import 'state/app_state.dart';
 import 'state/first_run_controller.dart';
+import 'state/streak_controller.dart';
 import 'theme/app_accessibility.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
@@ -117,6 +121,7 @@ Future<_AppDependencies> _initializeProductionDependencies() async {
     edgeFuelRepo: FirestoreEdgeFuelRepository(),
     edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
     billingGateway: RevenueCatBillingGateway(),
+    reminderGateway: LocalReminderGateway(),
     telemetry: kIsWeb ? const NoopTelemetry() : FirebaseTelemetry(),
     errorReporter: errorReporter,
   );
@@ -128,6 +133,7 @@ class _AppDependencies {
   final EdgeFuelRepository edgeFuelRepo;
   final EdgeFuelAiGateway edgeFuelAiGateway;
   final BillingGateway billingGateway;
+  final ReminderGateway reminderGateway;
   final Telemetry telemetry;
   final ErrorReporter errorReporter;
 
@@ -137,6 +143,7 @@ class _AppDependencies {
     required this.edgeFuelRepo,
     required this.edgeFuelAiGateway,
     required this.billingGateway,
+    required this.reminderGateway,
     required this.telemetry,
     required this.errorReporter,
   });
@@ -150,6 +157,7 @@ class FighterEdgeApp extends StatelessWidget {
   final FoodCatalogRepository? foodCatalogRepo;
   final RecipeCatalogRepository? recipeCatalogRepo;
   final BillingGateway? billingGateway;
+  final ReminderGateway? reminderGateway;
   final Telemetry? telemetry;
   final ErrorReporter? errorReporter;
   const FighterEdgeApp({
@@ -161,6 +169,7 @@ class FighterEdgeApp extends StatelessWidget {
     this.foodCatalogRepo,
     this.recipeCatalogRepo,
     this.billingGateway,
+    this.reminderGateway,
     this.telemetry,
     this.errorReporter,
   });
@@ -182,6 +191,9 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<Telemetry>.value(value: telemetry ?? const NoopTelemetry()),
         Provider<ErrorReporter>.value(
           value: errorReporter ?? const NoopErrorReporter(),
+        ),
+        Provider<ReminderGateway>.value(
+          value: reminderGateway ?? const UnavailableReminderGateway(),
         ),
         ChangeNotifierProvider(
           create: (_) => AuthController(
@@ -207,6 +219,11 @@ class FighterEdgeApp extends StatelessWidget {
           create: (_) => FirstRunController(),
           update: (_, auth, firstRun) =>
               (firstRun ?? FirstRunController())..setUser(auth.user?.id),
+        ),
+        ChangeNotifierProxyProvider<AuthController, StreakController>(
+          create: (_) => StreakController(),
+          update: (_, auth, streak) =>
+              (streak ?? StreakController())..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
           create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),

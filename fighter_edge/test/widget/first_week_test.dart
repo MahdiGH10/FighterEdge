@@ -41,8 +41,11 @@ void main() {
     final repo = await makeRepo(signedIn: true, onboarded: true);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('fe_first_run.${repo.currentUser!.id}.active', true);
+    final reminders = FakeReminderGateway();
 
-    await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
+    await tester.pumpWidget(
+      FighterEdgeApp(authRepo: repo, reminderGateway: reminders),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Your first week'), findsOneWidget);
 
@@ -68,6 +71,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('First meal logged.'), findsNothing);
     expect(shell.read<AppState>().campReminders, isTrue);
+    expect(reminders.permissionRequests, 1);
+    expect(reminders.scheduledWeekdays, isNotNull);
 
     // Later meals are just meals.
     await shell.read<EdgeFuelController>().addEntry(meal('m2'));

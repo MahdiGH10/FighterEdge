@@ -9,9 +9,12 @@ import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
 import '../state/first_run_controller.dart';
+import '../state/streak_controller.dart';
+import '../state/streak_engine.dart';
 import '../auth/verification_gate.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/animated_count.dart';
@@ -48,10 +51,20 @@ class DashboardScreen extends StatelessWidget {
     final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
     final firstRun = context.watch<FirstRunController>();
+    final streak = context.watch<StreakController>();
     final user = auth.user;
     final weightDelta = state.weeklyDelta;
     final losing = weightDelta <= 0;
     final nextSession = state.sessions.where((s) => !s.completed).firstOrNull;
+    final streakCompletedDays = StreakEngine.completedDateKeys(state.sessions);
+    final streakDays = StreakEngine.streakDays(
+      streakCompletedDays,
+      protectedDateKeys: streak.protectedDateKeys,
+    );
+    final streakAtRisk = StreakEngine.isAtRisk(
+      streakCompletedDays,
+      protectedDateKeys: streak.protectedDateKeys,
+    );
     const dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     const dayNames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
     final completedDays = {
@@ -94,6 +107,10 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: Insets.lg),
             _EmailVerificationBanner(auth: auth),
           ],
+          if (streakAtRisk) ...[
+            const SizedBox(height: Insets.lg),
+            _StreakFreezeBanner(streak: streak, onNavigate: onNavigate),
+          ],
           const SizedBox(height: Insets.lg),
           _TodayFocusCard(onNavigate: onNavigate),
           const SizedBox(height: Insets.xl),
@@ -130,12 +147,19 @@ class DashboardScreen extends StatelessWidget {
               ),
               StatCard(
                 label: 'Streak',
-                value: '${state.currentStreakDays}',
-                unit: state.currentStreakDays == 1 ? 'day' : 'days',
-                delta: state.currentStreakDays > 0 ? 'On fire' : 'Log today',
-                deltaColor: AppColors.warning,
-                deltaIcon: Icons.local_fire_department,
-                accent: AppColors.warning,
+                value: '$streakDays',
+                unit: streakDays == 1 ? 'day' : 'days',
+                delta: streakAtRisk
+                    ? 'At risk'
+                    : streakDays > 0
+                        ? 'On fire'
+                        : 'Log today',
+                deltaColor:
+                    streakAtRisk ? AppColors.negative : AppColors.warning,
+                deltaIcon: streakAtRisk
+                    ? Icons.warning_amber_rounded
+                    : Icons.local_fire_department,
+                accent: streakAtRisk ? AppColors.negative : AppColors.warning,
               ),
             ],
           ),
@@ -241,7 +265,12 @@ class _TodayFocusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final edgeFuel = context.watch<EdgeFuelController>();
+    final streak = context.watch<StreakController>();
     final nextSession = state.sessions.where((s) => !s.completed).firstOrNull;
+    final streakDays = StreakEngine.streakDays(
+      StreakEngine.completedDateKeys(state.sessions),
+      protectedDateKeys: streak.protectedDateKeys,
+    );
 
     return AppCard(
       accent: AppColors.primary,
@@ -290,7 +319,7 @@ class _TodayFocusCard extends StatelessWidget {
           if (edgeFuel.hasUsableTarget) ...[
             _FuelTargetSnapshot(
               edgeFuel: edgeFuel,
-              streakDays: state.currentStreakDays,
+              streakDays: streakDays,
             ),
             const SizedBox(height: Insets.md),
             const _FuelWhyCard(),
@@ -308,9 +337,7 @@ class _TodayFocusCard extends StatelessWidget {
                 Expanded(
                   child: _FocusMetric(
                     label: 'Streak',
-                    value: state.currentStreakDays == 1
-                        ? '1 day'
-                        : '${state.currentStreakDays} days',
+                    value: streakDays == 1 ? '1 day' : '$streakDays days',
                     icon: Icons.local_fire_department,
                   ),
                 ),
@@ -668,6 +695,77 @@ class _EmailVerificationBanner extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Shown when the streak is one missed day from breaking: yesterday has
+/// nothing logged and today hasn't happened yet. A freeze is spent on
+/// yesterday specifically, not "today" — the whole point is to cover the day
+/// that has already passed, before it costs the streak.
+class _StreakFreezeBanner extends StatelessWidget {
+  final StreakController streak;
+  final ValueChanged<int> onNavigate;
+
+  const _StreakFreezeBanner({required this.streak, required this.onNavigate});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasFreeze = streak.freezesAvailable > 0;
+    return AppCard(
+      accent: AppColors.negative,
+      padding: const EdgeInsets.all(Insets.md),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.negative.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child:
+                const Icon(Icons.ac_unit, color: AppColors.negative, size: 21),
+          ),
+          const SizedBox(width: Insets.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Streak at risk',
+                    style: AppType.callout(weight: FontWeight.w800)),
+                const SizedBox(height: Insets.xxs),
+                Text(
+                  hasFreeze
+                      ? 'Yesterday is unlogged. Use a freeze to protect it '
+                          '(${streak.freezesAvailable} left).'
+                      : 'Yesterday is unlogged and no freeze is banked. Log '
+                          'something today to keep it going.',
+                  style: AppType.subhead(
+                      weight: FontWeight.w500,
+                      color: AppAccessibility.textSecondary(context)),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: Insets.sm),
+          if (hasFreeze)
+            GhostButton('Freeze', onPressed: () => _useFreeze(context))
+          else
+            GhostButton('Log now', onPressed: () => onNavigate(1)),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _useFreeze(BuildContext context) async {
+    final used = await streak.useFreezeForYesterday();
+    if (!context.mounted) return;
+    if (used) {
+      AppHaptics.success();
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Freeze used — yesterday is protected.'),
+      ));
+    }
   }
 }
 

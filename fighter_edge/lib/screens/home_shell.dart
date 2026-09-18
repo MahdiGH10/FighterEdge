@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../state/app_state.dart';
 import '../state/first_run_controller.dart';
+import '../state/streak_controller.dart';
+import '../state/streak_engine.dart';
 import '../theme/app_haptics.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/coach_marks.dart';
@@ -45,19 +49,37 @@ class _HomeShellState extends State<HomeShell> {
 
   late final EdgeFuelController _fuel;
   late final FirstRunController _firstRun;
+  late final StreakController _streak;
 
   @override
   void initState() {
     super.initState();
     _fuel = context.read<EdgeFuelController>()..addListener(_checkFirstWin);
     _firstRun = context.read<FirstRunController>()..addListener(_checkFirstWin);
+    _streak = context.read<StreakController>()..addListener(_syncStreakEarn);
+    // The controller loads its persisted state asynchronously; this first
+    // call is usually a no-op that the load's own notify (above) retries.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncStreakEarn());
   }
 
   @override
   void dispose() {
     _fuel.removeListener(_checkFirstWin);
     _firstRun.removeListener(_checkFirstWin);
+    _streak.removeListener(_syncStreakEarn);
     super.dispose();
+  }
+
+  /// Banks a freeze for last week if it qualified. Cheap and idempotent —
+  /// [StreakController.syncWeeklyEarn] only does real work once per week.
+  void _syncStreakEarn() {
+    if (!mounted) return;
+    final sessions = context.read<AppState>().sessions;
+    final isPro = context.read<AuthController>().isPro;
+    _streak.syncWeeklyEarn(
+      completedDateKeys: StreakEngine.completedDateKeys(sessions),
+      isPro: isPro,
+    );
   }
 
   void _goToTab(int i) => setState(() => _index = i);

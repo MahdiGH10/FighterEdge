@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../notifications/reminder_gateway.dart';
+import '../../notifications/training_reminder_schedule.dart';
 import '../../state/app_state.dart';
 import '../../state/first_run_controller.dart';
 import '../../theme/app_accessibility.dart';
@@ -35,8 +39,12 @@ class FirstWinSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final firstRun = context.read<FirstRunController>();
-    // Someone who already switched reminders on in Settings has answered.
-    final askReminders = !state.campReminders && !firstRun.remindersAsked;
+    final reminders = context.read<ReminderGateway>();
+    // Someone who already switched reminders on in Settings has answered,
+    // and there is nothing useful to offer where reminders cannot fire.
+    final askReminders = !state.campReminders &&
+        !firstRun.remindersAsked &&
+        reminders.isAvailable;
     final secondary = AppAccessibility.textSecondary(context);
 
     void close({required bool remind}) {
@@ -44,7 +52,12 @@ class FirstWinSheet extends StatelessWidget {
         firstRun.markRemindersAsked();
         if (remind) {
           AppHaptics.commit();
-          state.setCampReminders(true);
+          unawaited(state.setCampReminders(true));
+          // Fired after the sheet is already closing: a system permission
+          // prompt appearing over the sheet is fine, and a denial here has
+          // nothing left in this sheet to update — Settings offers the same
+          // switch with a clear explanation if the user wants to retry.
+          unawaited(_enableReminders(state, reminders));
         }
       }
       Navigator.of(context).pop();
@@ -106,6 +119,15 @@ class FirstWinSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _enableReminders(AppState state, ReminderGateway reminders) async {
+  final granted = await reminders.requestPermission();
+  if (!granted) return;
+  await reminders.scheduleTrainingReminders(
+    weekdays: TrainingReminderSchedule.weekdaysFor(state.sessions),
+    time: TrainingReminderSchedule.defaultTime,
+  );
 }
 
 class _WinBadge extends StatelessWidget {

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
+import '../notifications/reminder_gateway.dart';
+import '../notifications/training_reminder_schedule.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
@@ -22,6 +24,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
+    final reminders = context.watch<ReminderGateway>();
     final user = auth.user;
 
     // Signing out or deleting the account makes the router take this page
@@ -118,10 +121,16 @@ class SettingsScreen extends StatelessWidget {
           _SwitchRow(
             icon: Icons.notifications_active_outlined,
             title: 'Camp reminders',
-            subtitle:
-                'Reminder preference is saved; notification delivery comes next',
+            subtitle: !reminders.isAvailable
+                ? 'Not available on this device'
+                : state.campReminders
+                    ? 'A nudge on the days you train, around '
+                        '${TrainingReminderSchedule.defaultTime.format(context)}'
+                    : 'Get a nudge on the days you train',
             value: state.campReminders,
-            onChanged: state.setCampReminders,
+            onChanged: reminders.isAvailable
+                ? (value) => _setCampReminders(context, state, reminders, value)
+                : null,
           ),
           const SizedBox(height: Insets.xl),
           const _SectionLabel('Safety & Trust'),
@@ -170,6 +179,39 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Turning reminders on asks for permission first — a switch that looks
+  /// on while the OS is silently refusing every notification would be worse
+  /// than not offering the feature. Denied permission flips the switch back
+  /// off rather than leaving it lit with nothing behind it.
+  Future<void> _setCampReminders(
+    BuildContext context,
+    AppState state,
+    ReminderGateway reminders,
+    bool enabled,
+  ) async {
+    if (!enabled) {
+      await state.setCampReminders(false);
+      await reminders.cancelAll();
+      return;
+    }
+    final granted = await reminders.requestPermission();
+    if (!granted) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+          'Notifications are turned off for Fighter Edge. Enable them in '
+          'your device settings to get camp reminders.',
+        ),
+      ));
+      return;
+    }
+    await state.setCampReminders(true);
+    await reminders.scheduleTrainingReminders(
+      weekdays: TrainingReminderSchedule.weekdaysFor(state.sessions),
+      time: TrainingReminderSchedule.defaultTime,
     );
   }
 
@@ -396,7 +438,7 @@ class _SwitchRow extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
 
   const _SwitchRow({
     required this.icon,
