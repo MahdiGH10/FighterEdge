@@ -1,17 +1,34 @@
-# fighter_edge
+# Fighter Edge Flutter package
 
-A new Flutter project.
+This directory contains the Flutter application. Start with the repository
+guide at [`../README.md`](../README.md), then read
+[`docs/CLAUDE_CODE_HANDOFF.md`](docs/CLAUDE_CODE_HANDOFF.md) for the verified
+implementation state.
 
-## Getting Started
+## Run locally
 
-This project is a starting point for a Flutter application.
+```powershell
+flutter pub get
+flutter run -d chrome
+```
 
-A few resources to get you started if this is your first Flutter project:
+## Verify changes
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```powershell
+dart format --output=none --set-exit-if-changed .
+flutter analyze
+flutter test --exclude-tags golden --coverage --reporter compact
+flutter test --tags golden --reporter compact
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The Firebase Cloud Functions backend has its own package and checks:
+
+```powershell
+cd functions
+npm ci
+npm test
+```
+
+Production setup, payments, Firebase secrets, and release requirements are
+documented in the repository-level README and `docs/` handoffs. Do not add
+provider secrets to this package or commit generated build/coverage output.
