@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/theme/app_theme.dart';
 import 'package:fighter_edge/widgets/bottom_nav.dart';
 import 'package:fighter_edge/widgets/filter_chips.dart';
+import 'package:fighter_edge/widgets/primary_button.dart';
 import 'package:fighter_edge/widgets/progress_ring.dart';
 import 'package:fighter_edge/widgets/stat_card.dart';
 
@@ -75,6 +77,46 @@ void main() {
 
       await tester.tap(find.text('More'));
       expect(picked, 3);
+    });
+  });
+
+  group('Buttons', () {
+    testWidgets('keep their whole label when two share a phone-width row',
+        (tester) async {
+      // The dashboard's START CAMP / LOG MEAL pair, at a 390pt screen minus
+      // the card and page gutters.
+      await tester.pumpWidget(host(Center(
+        child: SizedBox(
+          width: 326,
+          child: Row(
+            children: [
+              Expanded(
+                child: PrimaryButton('Start camp',
+                    icon: Icons.play_arrow, expand: true, onPressed: () {}),
+              ),
+              const SizedBox(width: Insets.sm),
+              Expanded(
+                child: GhostButton('Log meal',
+                    icon: Icons.restaurant, expand: true, onPressed: () {}),
+              ),
+            ],
+          ),
+        ),
+      )));
+
+      for (final label in ['START CAMP', 'LOG MEAL']) {
+        final paragraph =
+            tester.renderObject<RenderParagraph>(find.text(label));
+        expect(paragraph.didExceedMaxLines, isFalse, reason: label);
+      }
+      // Tight on room, the icons give way before the words do.
+      expect(find.byIcon(Icons.play_arrow), findsNothing);
+    });
+
+    testWidgets('keep their icon when there is room', (tester) async {
+      await tester.pumpWidget(host(PrimaryButton('Start camp',
+          icon: Icons.play_arrow, expand: true, onPressed: () {})));
+      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
     });
   });
 }

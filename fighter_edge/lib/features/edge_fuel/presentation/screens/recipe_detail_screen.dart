@@ -6,6 +6,7 @@ import '../../../../routing/app_navigation.dart';
 import '../../../../routing/app_router.dart';
 import '../../../../screens/paywall_screen.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../theme/app_haptics.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_typography.dart';
 import '../../../../widgets/app_scaffold.dart';
@@ -147,6 +148,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
 
     await edgeFuel.addEntry(entry);
+    AppHaptics.commit();
     if (!mounted) return;
     setState(() => _adding = false);
 

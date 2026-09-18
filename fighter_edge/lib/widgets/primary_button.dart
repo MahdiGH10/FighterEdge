@@ -26,29 +26,6 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final child = Row(
-      mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (icon != null) ...[
-          Icon(icon, size: 18, color: Colors.white),
-          const SizedBox(width: Insets.sm),
-        ],
-        Flexible(
-          child: Text(
-            label.toUpperCase(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppAccessibility.adjustStyle(
-              context,
-              AppType.subhead(
-                  weight: FontWeight.w700, color: Colors.white, spacing: 0.8),
-            ),
-          ),
-        ),
-      ],
-    );
-
     final enabled = onPressed != null;
 
     return Semantics(
@@ -83,9 +60,11 @@ class PrimaryButton extends StatelessWidget {
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 48),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Insets.xl),
-              child: Center(widthFactor: expand ? null : 1, child: child),
+            child: _ButtonContent(
+              label: label,
+              icon: icon,
+              color: Colors.white,
+              expand: expand,
             ),
           ),
         ),
@@ -119,37 +98,79 @@ class GhostButton extends StatelessWidget {
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 48),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Insets.xl),
-              child: Row(
-                mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 18, color: AppColors.textPrimary),
-                    const SizedBox(width: Insets.sm),
-                  ],
-                  Flexible(
-                    child: Text(
-                      label.toUpperCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppAccessibility.adjustStyle(
-                        context,
-                        AppType.subhead(
-                          weight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                          spacing: 0.8,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            child: _ButtonContent(
+              label: label,
+              icon: icon,
+              color: AppColors.textPrimary,
+              expand: expand,
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Label and icon shared by both buttons, sized to the room they get.
+///
+/// Two buttons side by side on a 390pt phone leave each about 150pt; with
+/// full padding and an icon, a label like "START CAMP" was cut to "START CA…".
+/// Below [_compactWidth] the button drops its icon and tightens its padding,
+/// because the words are the part the user has to read.
+class _ButtonContent extends StatelessWidget {
+  final String label;
+  final IconData? icon;
+  final Color color;
+  final bool expand;
+
+  const _ButtonContent({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.expand,
+  });
+
+  static const double _compactWidth = 168;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < _compactWidth;
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? Insets.sm : Insets.xl,
+          ),
+          child: Center(
+            widthFactor: expand ? null : 1,
+            child: Row(
+              mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null && !compact) ...[
+                  Icon(icon, size: 18, color: color),
+                  const SizedBox(width: Insets.sm),
+                ],
+                Flexible(
+                  child: Text(
+                    label.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppAccessibility.adjustStyle(
+                      context,
+                      AppType.subhead(
+                        weight: FontWeight.w700,
+                        color: color,
+                        spacing: 0.8,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

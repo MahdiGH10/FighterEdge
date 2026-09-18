@@ -8,6 +8,7 @@ import '../../../../state/app_state.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_typography.dart';
+import '../../../../widgets/skeleton.dart';
 import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../data/edge_fuel_repository.dart';
@@ -82,8 +83,7 @@ class _EdgeFuelSetupBodyState extends State<_EdgeFuelSetupBody> {
       return const ScreenScaffold(
         title: 'Fuel setup',
         showBack: true,
-        body:
-            Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body: _SetupSkeleton(),
       );
     }
 
@@ -260,6 +260,39 @@ class _NavBar extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Stands in for a setup step while the saved draft loads: progress, a
+/// question, and a column of choices.
+class _SetupSkeleton extends StatelessWidget {
+  const _SetupSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Skeleton(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(Insets.lg, Insets.sm, Insets.lg, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SkeletonBox.line(width: 120),
+            SizedBox(height: Insets.sm),
+            SkeletonBox(height: Insets.xs + Insets.xxs, radius: Radii.chip),
+            SizedBox(height: Insets.xxl),
+            SkeletonBox(width: 240, height: Insets.xxl),
+            SizedBox(height: Insets.md),
+            SkeletonBox.line(),
+            SizedBox(height: Insets.xl),
+            SkeletonBox(height: 72, radius: Radii.card),
+            SizedBox(height: Insets.sm),
+            SkeletonBox(height: 72, radius: Radii.card),
+            SizedBox(height: Insets.sm),
+            SkeletonBox(height: 72, radius: Radii.card),
+          ],
+        ),
       ),
     );
   }

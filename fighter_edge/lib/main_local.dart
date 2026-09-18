@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'auth/local_auth_repository.dart';
+import 'data/in_memory_data_repository.dart';
 import 'main.dart';
 
 /// Offline entry point: the whole app on the on-device auth backend, with no
@@ -15,5 +16,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final repo = LocalAuthRepository();
   await repo.init();
-  runApp(FighterEdgeApp(authRepo: repo));
+  // An empty in-memory store rather than none: with no repository AppState
+  // falls back to demo seed data, which would make a brand-new account look
+  // like it had already trained. Training and weight data reset on reload.
+  runApp(FighterEdgeApp(authRepo: repo, dataRepo: InMemoryDataRepository()));
 }

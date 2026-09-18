@@ -4,6 +4,7 @@ import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import 'number_hero.dart';
 import 'press_scale.dart';
 
 /// Reusable dark card container.
@@ -68,6 +69,10 @@ class StatCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Color? accent;
 
+  /// Set when tapping the card opens a screen that features this same value,
+  /// so the number flies there instead of reappearing.
+  final Object? heroTag;
+
   const StatCard({
     super.key,
     required this.label,
@@ -78,6 +83,7 @@ class StatCard extends StatelessWidget {
     this.deltaIcon,
     this.onTap,
     this.accent,
+    this.heroTag,
   });
 
   @override
@@ -114,7 +120,16 @@ class StatCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  _AnimatedMetricValue(value: value),
+                  if (heroTag case final tag?)
+                    NumberHero(
+                      tag: tag,
+                      text: value,
+                      style: AppAccessibility.adjustStyle(
+                          context, AppType.title1()),
+                      child: _AnimatedMetricValue(value: value),
+                    )
+                  else
+                    _AnimatedMetricValue(value: value),
                   if (unit.isNotEmpty) ...[
                     const SizedBox(width: 3),
                     Padding(

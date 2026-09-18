@@ -83,11 +83,6 @@ class AppState extends ChangeNotifier {
   List<WeightEntry> get weightHistoryDesc =>
       [..._weights]..sort((a, b) => b.date.compareTo(a.date));
 
-  double get goalWeightKg => 74;
-
-  double get weightToGoal =>
-      latestWeight == 0 ? 0 : latestWeight - goalWeightKg;
-
   double get sevenDayAverage {
     final cutoff = DateTime.now().subtract(const Duration(days: 7));
     final recent = _weights.where((w) => !w.date.isBefore(cutoff)).toList();
@@ -116,7 +111,14 @@ class AppState extends ChangeNotifier {
 
   String get weightUnitLabel => _useMetricUnits ? 'kg' : 'lb';
 
-  double displayWeight(double kg) => _useMetricUnits ? kg : kg * 2.2046226218;
+  static const double _lbPerKg = 2.2046226218;
+
+  /// Kilograms (how weight is stored) into the unit the user reads in.
+  double displayWeight(double kg) => _useMetricUnits ? kg : kg * _lbPerKg;
+
+  /// The reverse: a number the user typed, in their unit, back into kg.
+  double weightToKg(double displayed) =>
+      _useMetricUnits ? displayed : displayed / _lbPerKg;
 
   Future<void> setUseMetricUnits(bool value) async {
     _useMetricUnits = value;

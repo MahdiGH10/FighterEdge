@@ -14,6 +14,7 @@ import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import '../widgets/animated_count.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/premium_effects.dart';
@@ -117,6 +118,7 @@ class DashboardScreen extends StatelessWidget {
                   fallbackBuilder: (_) => const WeightTrackerScreen(),
                 ),
                 accent: AppColors.primary,
+                heroTag: state.latestWeight == 0 ? null : weightHeroTag,
               ),
               StatCard(
                 label: 'Sessions',
@@ -129,7 +131,7 @@ class DashboardScreen extends StatelessWidget {
               StatCard(
                 label: 'Streak',
                 value: '${state.currentStreakDays}',
-                unit: 'days',
+                unit: state.currentStreakDays == 1 ? 'day' : 'days',
                 delta: state.currentStreakDays > 0 ? 'On fire' : 'Log today',
                 deltaColor: AppColors.warning,
                 deltaIcon: Icons.local_fire_department,
@@ -306,7 +308,9 @@ class _TodayFocusCard extends StatelessWidget {
                 Expanded(
                   child: _FocusMetric(
                     label: 'Streak',
-                    value: '${state.currentStreakDays} days',
+                    value: state.currentStreakDays == 1
+                        ? '1 day'
+                        : '${state.currentStreakDays} days',
                     icon: Icons.local_fire_department,
                   ),
                 ),
@@ -377,8 +381,10 @@ class _FuelTargetSnapshot extends StatelessWidget {
                   style: AppType.callout(weight: FontWeight.w800),
                 ),
               ),
-              Text(
-                overTarget ? 'Over target' : '$remaining kcal left',
+              AnimatedCount(
+                value: remaining.toDouble(),
+                formatter: (v) =>
+                    overTarget ? 'Over target' : '${v.round()} kcal left',
                 style: AppType.subhead(
                   weight: FontWeight.w800,
                   color: overTarget ? AppColors.negative : AppColors.positive,
@@ -387,8 +393,9 @@ class _FuelTargetSnapshot extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Insets.sm),
-          Text(
-            '$consumed / $target kcal',
+          AnimatedCount(
+            value: consumed.toDouble(),
+            formatter: (v) => '${v.round()} / $target kcal',
             style: AppType.title2().copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: Insets.sm),

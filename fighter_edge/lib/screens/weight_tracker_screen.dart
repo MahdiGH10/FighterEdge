@@ -3,16 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../models/weight_entry.dart';
+import '../routing/app_navigation.dart';
+import '../routing/app_router.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import '../widgets/animated_count.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/filter_chips.dart';
+import '../widgets/number_hero.dart';
 import '../widgets/stat_card.dart';
+
+/// Shared with the dashboard's weight card, so the current weight flies here.
+const weightHeroTag = 'weight-current';
 
 class WeightTrackerScreen extends StatefulWidget {
   const WeightTrackerScreen({super.key});
@@ -27,6 +36,9 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    // The goal is the target weight the user set in EdgeFuel. There is no
+    // other source of truth for it, so without one there is no goal to show.
+    final goalKg = context.watch<EdgeFuelController>().draft?.targetWeightKg;
     final delta = state.weeklyDelta;
     final losing = delta <= 0;
 
@@ -56,7 +68,12 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
             child: IndexedStack(
               index: _tab,
               children: [
-                _WeightView(state: state, delta: delta, losing: losing),
+                _WeightView(
+                  state: state,
+                  delta: delta,
+                  losing: losing,
+                  goalKg: goalKg,
+                ),
                 const EmptyState(
                   icon: Icons.percent,
                   title: 'Body Fat',
@@ -78,8 +95,12 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
   }
 
   Future<void> _addWeighIn(BuildContext context, AppState state) async {
-    final controller =
-        TextEditingController(text: state.latestWeight.toStringAsFixed(1));
+    // Typed in the user's unit, stored in kg.
+    final controller = TextEditingController(
+      text: state.latestWeight == 0
+          ? ''
+          : state.displayWeight(state.latestWeight).toStringAsFixed(1),
+    );
     final value = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -91,9 +112,9 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           style: AppType.body(),
           cursorColor: AppColors.primary,
-          decoration: const InputDecoration(
-            suffixText: 'kg',
-            focusedBorder: UnderlineInputBorder(
+          decoration: InputDecoration(
+            suffixText: state.weightUnitLabel,
+            focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: AppColors.primary),
             ),
           ),
@@ -105,8 +126,10 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                 style: AppType.callout(color: AppColors.textSecondary)),
           ),
           TextButton(
-            onPressed: () =>
-                Navigator.pop(ctx, double.tryParse(controller.text.trim())),
+            onPressed: () => Navigator.pop(
+              ctx,
+              double.tryParse(controller.text.trim().replaceAll(',', '.')),
+            ),
             child: Text('Save',
                 style: AppType.callout(
                     weight: FontWeight.w700, color: AppColors.accentText)),
@@ -115,7 +138,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
       ),
     );
     if (value != null && value > 0) {
-      state.addWeight(DateTime.now(), value);
+      state.addWeight(DateTime.now(), state.weightToKg(value));
       AppHaptics.commit();
     }
   }
@@ -126,8 +149,15 @@ class _WeightView extends StatelessWidget {
   final AppState state;
   final double delta;
   final bool losing;
-  const _WeightView(
-      {required this.state, required this.delta, required this.losing});
+  final double? goalKg;
+  const _WeightView({
+    required this.state,
+    required this.delta,
+    required this.losing,
+    required this.goalKg,
+  });
+
+  String _fmt(double kg) => state.displayWeight(kg).toStringAsFixed(1);
 
   @override
   Widget build(BuildContext context) {
@@ -142,12 +172,24 @@ class _WeightView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text(state.latestWeight.toStringAsFixed(1),
-                      style: AppType.display()),
+                  if (state.latestWeight == 0)
+                    Text('—', style: AppType.display())
+                  else
+                    NumberHero(
+                      tag: weightHeroTag,
+                      text: _fmt(state.latestWeight),
+                      style: AppType.display(),
+                      // Counts when a new weigh-in lands; static otherwise.
+                      child: AnimatedCount(
+                        value: state.displayWeight(state.latestWeight),
+                        formatter: (v) => v.toStringAsFixed(1),
+                        style: AppType.display(),
+                      ),
+                    ),
                   const SizedBox(width: Insets.xs),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: Text('kg',
+                    child: Text(state.weightUnitLabel,
                         style: AppType.body(
                             weight: FontWeight.w600,
                             color: AppColors.textMuted)),
@@ -162,7 +204,9 @@ class _WeightView extends StatelessWidget {
                       size: 14,
                       color: losing ? AppColors.positive : AppColors.primary),
                   const SizedBox(width: 3),
-                  Text('${delta.abs().toStringAsFixed(1)} kg vs last weigh-in',
+                  Text(
+                      '${_fmt(delta.abs())} ${state.weightUnitLabel} '
+                      'vs last weigh-in',
                       style: AppType.subhead(
                           weight: FontWeight.w600,
                           color:
@@ -178,35 +222,19 @@ class _WeightView extends StatelessWidget {
             Expanded(
               child: StatCard(
                 label: '7-day avg',
-                value: state.sevenDayAverage.toStringAsFixed(1),
-                unit: 'kg',
+                value: _fmt(state.sevenDayAverage),
+                unit: state.weightUnitLabel,
               ),
             ),
             const SizedBox(width: Insets.md),
-            Expanded(
-              child: StatCard(
-                label: 'Goal gap',
-                value: state.weightToGoal.abs().toStringAsFixed(1),
-                unit: 'kg',
-                delta: state.weightToGoal <= 0 ? 'At goal' : 'To 74 kg',
-                deltaColor: state.weightToGoal <= 0
-                    ? AppColors.positive
-                    : AppColors.warning,
-                deltaIcon: state.weightToGoal <= 0
-                    ? Icons.check_circle
-                    : Icons.flag_outlined,
-              ),
-            ),
+            Expanded(child: _GoalCard(state: state, goalKg: goalKg)),
           ],
         ),
         const SizedBox(height: Insets.xl),
         AppCard(
           child: SizedBox(
             height: 200,
-            child: _WeightChart(
-              entries: state.weights,
-              goalWeightKg: state.goalWeightKg,
-            ),
+            child: _WeightChart(state: state, goalKg: goalKg),
           ),
         ),
         const SizedBox(height: Insets.xl),
@@ -218,7 +246,11 @@ class _WeightView extends StatelessWidget {
                 if (i > 0)
                   const Divider(
                       height: 1, thickness: 1, color: AppColors.border),
-                _HistoryRow(state.weightHistoryDesc[i]),
+                _HistoryRow(
+                  entry: state.weightHistoryDesc[i],
+                  display: _fmt(state.weightHistoryDesc[i].kg),
+                  unit: state.weightUnitLabel,
+                ),
               ],
             ],
           ),
@@ -229,12 +261,14 @@ class _WeightView extends StatelessWidget {
 }
 
 class _WeightChart extends StatelessWidget {
-  final List<WeightEntry> entries;
-  final double goalWeightKg;
-  const _WeightChart({required this.entries, required this.goalWeightKg});
+  final AppState state;
+  final double? goalKg;
+  const _WeightChart({required this.state, required this.goalKg});
 
   @override
   Widget build(BuildContext context) {
+    final entries = state.weights;
+    final goal = goalKg == null ? null : state.displayWeight(goalKg!);
     if (entries.length < 2) {
       return Center(
         child: Text('Add more weigh-ins to see a trend',
@@ -243,11 +277,11 @@ class _WeightChart extends StatelessWidget {
     }
     final spots = <FlSpot>[
       for (int i = 0; i < entries.length; i++)
-        FlSpot(i.toDouble(), entries[i].kg),
+        FlSpot(i.toDouble(), state.displayWeight(entries[i].kg)),
     ];
-    final values = entries.map((e) => e.kg).toList();
-    final minValue = [...values, goalWeightKg].reduce((a, b) => a < b ? a : b);
-    final maxValue = [...values, goalWeightKg].reduce((a, b) => a > b ? a : b);
+    final values = [for (final spot in spots) spot.y, if (goal != null) goal];
+    final minValue = values.reduce((a, b) => a < b ? a : b);
+    final maxValue = values.reduce((a, b) => a > b ? a : b);
     final minY = (minValue - 1).floorToDouble();
     final maxY = (maxValue + 1).ceilToDouble();
 
@@ -327,19 +361,20 @@ class _WeightChart extends StatelessWidget {
         ],
         extraLinesData: ExtraLinesData(
           horizontalLines: [
-            HorizontalLine(
-              y: goalWeightKg,
-              color: AppColors.warning.withValues(alpha: .82),
-              strokeWidth: 1.5,
-              dashArray: [6, 5],
-              label: HorizontalLineLabel(
-                show: true,
-                alignment: Alignment.topRight,
-                style: AppType.micro(
-                    weight: FontWeight.w700, color: AppColors.warning),
-                labelResolver: (_) => 'Goal ${goalWeightKg.toStringAsFixed(0)}',
+            if (goal != null)
+              HorizontalLine(
+                y: goal,
+                color: AppColors.warning.withValues(alpha: .82),
+                strokeWidth: 1.5,
+                dashArray: [6, 5],
+                label: HorizontalLineLabel(
+                  show: true,
+                  alignment: Alignment.topRight,
+                  style: AppType.micro(
+                      weight: FontWeight.w700, color: AppColors.warning),
+                  labelResolver: (_) => 'Goal ${goal.toStringAsFixed(0)}',
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -349,7 +384,13 @@ class _WeightChart extends StatelessWidget {
 
 class _HistoryRow extends StatelessWidget {
   final WeightEntry entry;
-  const _HistoryRow(this.entry);
+  final String display;
+  final String unit;
+  const _HistoryRow({
+    required this.entry,
+    required this.display,
+    required this.unit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -362,10 +403,51 @@ class _HistoryRow extends StatelessWidget {
           Text(DateFormat('MMM d, yyyy').format(entry.date),
               style: AppType.callout(
                   weight: FontWeight.w500, color: AppColors.textSecondary)),
-          Text('${entry.kg.toStringAsFixed(1)} kg',
+          Text('$display $unit',
               style: AppType.callout(weight: FontWeight.w700)),
         ],
       ),
+    );
+  }
+}
+
+/// Distance to the EdgeFuel target weight — or, with no target set, the way
+/// to set one rather than a made-up number.
+class _GoalCard extends StatelessWidget {
+  final AppState state;
+  final double? goalKg;
+  const _GoalCard({required this.state, required this.goalKg});
+
+  @override
+  Widget build(BuildContext context) {
+    final goal = goalKg;
+    if (goal == null || state.latestWeight == 0) {
+      return StatCard(
+        label: 'Goal',
+        value: '—',
+        delta: 'Set in EdgeFuel',
+        deltaColor: AppColors.accentText,
+        deltaIcon: Icons.flag_outlined,
+        onTap: () => AppNavigation.push(
+          context,
+          AppRoutes.fuelSetup,
+          fallbackBuilder: (_) => const EdgeFuelSetupScreen(),
+        ),
+      );
+    }
+    final gap = state.latestWeight - goal;
+    // Within a tenth of the unit counts as there; a scale is not that precise.
+    final atGoal = state.displayWeight(gap.abs()) < 0.1;
+    final unit = state.weightUnitLabel;
+    return StatCard(
+      label: 'Goal gap',
+      value: state.displayWeight(gap.abs()).toStringAsFixed(1),
+      unit: unit,
+      delta: atGoal
+          ? 'At goal'
+          : 'To ${state.displayWeight(goal).toStringAsFixed(1)} $unit',
+      deltaColor: atGoal ? AppColors.positive : AppColors.warning,
+      deltaIcon: atGoal ? Icons.check_circle : Icons.flag_outlined,
     );
   }
 }

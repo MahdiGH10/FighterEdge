@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/models/meal.dart';
@@ -60,11 +61,25 @@ void main() {
       expect(secondRead, firstRead);
     });
 
-    test('calculates goal gap and average weight', () {
+    test('calculates the average weight', () {
       final s = AppState();
-      expect(s.goalWeightKg, 74);
-      expect(s.weightToGoal, closeTo(3.2, 0.001));
       expect(s.sevenDayAverage, greaterThan(0));
+    });
+
+    test('converts between kg and the display unit both ways', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences.setMockInitialValues({});
+      final s = AppState();
+      // Let the saved settings load first, or the load lands after the toggle
+      // below and quietly undoes it.
+      await pumpEventQueue();
+      expect(s.displayWeight(80), 80);
+      expect(s.weightToKg(80), 80);
+
+      await s.setUseMetricUnits(false);
+      expect(s.weightUnitLabel, 'lb');
+      expect(s.displayWeight(80), closeTo(176.37, 0.01));
+      expect(s.weightToKg(s.displayWeight(80)), closeTo(80, 1e-9));
     });
   });
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
@@ -91,14 +93,27 @@ void main() {
   });
 
   group('Weight tracker', () {
+    // Unit preference persists; one test switching to pounds must not leak
+    // into the next.
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    Widget trackerHost(AppState state, {EdgeFuelController? fuel}) =>
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: state),
+            ChangeNotifierProvider.value(
+              value: fuel ??
+                  EdgeFuelController(
+                    repository: InMemoryEdgeFuelRepository(),
+                  ),
+            ),
+          ],
+          child: const MaterialApp(home: WeightTrackerScreen()),
+        );
+
     testWidgets('adding a weigh-in updates the number and history',
         (tester) async {
-      await tester.pumpWidget(
-        ChangeNotifierProvider(
-          create: (_) => AppState(),
-          child: const MaterialApp(home: WeightTrackerScreen()),
-        ),
-      );
+      await tester.pumpWidget(trackerHost(AppState()));
       await tester.pump();
       expect(find.text('77.2'), findsWidgets);
 
@@ -116,12 +131,7 @@ void main() {
 
     testWidgets('non-weight tabs show an empty state and hide the FAB',
         (tester) async {
-      await tester.pumpWidget(
-        ChangeNotifierProvider(
-          create: (_) => AppState(),
-          child: const MaterialApp(home: WeightTrackerScreen()),
-        ),
-      );
+      await tester.pumpWidget(trackerHost(AppState()));
       await tester.pump();
       expect(find.byType(FloatingActionButton), findsOneWidget);
 
@@ -129,6 +139,54 @@ void main() {
       await tester.pumpAndSettle(); // let the FAB exit animation finish
       expect(find.text('Body Fat'), findsWidgets);
       expect(find.byType(FloatingActionButton), findsNothing);
+    });
+
+    testWidgets('reads and records in pounds when metric is off',
+        (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final state = AppState();
+      await tester.pump(); // let saved settings load before changing one
+      await state.setUseMetricUnits(false);
+
+      await tester.pumpWidget(trackerHost(state));
+      await tester.pump();
+      // The seed's latest 77.2 kg, shown as pounds with the pound label.
+      expect(find.text('170.2'), findsWidgets);
+      expect(find.text('lb'), findsWidgets);
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      expect(find.text('lb'), findsWidgets); // the input's suffix
+      await tester.enterText(find.byType(TextField), '165.0');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      // Stored in kg, whatever the user typed in.
+      expect(state.latestWeight, closeTo(74.84, 0.01));
+    });
+
+    testWidgets('measures the gap to the EdgeFuel target weight',
+        (tester) async {
+      final repo = InMemoryEdgeFuelRepository();
+      await repo.saveProfileDraft(
+          'u1', const NutritionSetupDraft(targetWeightKg: 72));
+      final fuel = EdgeFuelController(repository: repo)..setUser('u1');
+
+      await tester.pumpWidget(trackerHost(AppState(), fuel: fuel));
+      await tester.pumpAndSettle(); // the draft arrives on a stream
+      // Seed latest is 77.2 kg: 5.2 to go, to the user's own 72.
+      expect(find.text('GOAL GAP'), findsOneWidget);
+      expect(find.text('5.2'), findsOneWidget);
+      expect(find.text('To 72.0 kg'), findsOneWidget);
+    });
+
+    testWidgets('has no goal until one is set in EdgeFuel', (tester) async {
+      await tester.pumpWidget(trackerHost(AppState()));
+      await tester.pump();
+      expect(find.text('Set in EdgeFuel'), findsOneWidget);
+      // The old made-up 74 kg goal is gone.
+      expect(find.text('GOAL GAP'), findsNothing);
+      expect(find.text('To 74 kg'), findsNothing);
     });
   });
 }

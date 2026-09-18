@@ -12,8 +12,10 @@ import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import '../widgets/animated_count.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/filter_chips.dart';
@@ -198,6 +200,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
     if (entry == null) return;
     if (existing == null) {
       await edgeFuel.addEntry(entry);
+      AppHaptics.commit();
     } else {
       await edgeFuel.updateEntry(entry);
     }
@@ -287,11 +290,17 @@ class _TodayView extends StatelessWidget {
         _EdgeFuelEntryCard(edgeFuel: edgeFuel),
         const SizedBox(height: Insets.lg),
         if (!edgeFuel.hasUsableTarget) ...[
-          const EmptyState(
+          EmptyState(
             icon: Icons.bolt,
             title: 'Set your fuel target',
             message:
                 'Complete EdgeFuel setup so your daily log can track against your own plan.',
+            actionLabel: 'Set up EdgeFuel',
+            onAction: () => AppNavigation.push(
+              context,
+              AppRoutes.fuelSetup,
+              fallbackBuilder: (_) => const EdgeFuelSetupScreen(),
+            ),
           ),
           const SizedBox(height: Insets.lg),
         ],
@@ -308,8 +317,11 @@ class _TodayView extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      '${edgeFuel.consumedCalories}',
+                    // Counts when a meal lands: the number moving is the
+                    // meal you just logged, arriving.
+                    AnimatedCount(
+                      value: edgeFuel.consumedCalories.toDouble(),
+                      formatter: (v) => '${v.round()}',
                       style: AppType.largeTitle(),
                     ),
                     Text(
@@ -431,6 +443,7 @@ class _QuickStartMeals extends StatelessWidget {
   }
 
   Future<void> _addMeal(BuildContext context, _QuickMeal meal) async {
+    AppHaptics.commit();
     await edgeFuel.addEntry(
       FoodLogEntry(
         id: 'quick-${DateTime.now().microsecondsSinceEpoch}',
@@ -677,16 +690,19 @@ class _MealsView extends StatelessWidget {
                     size: 16,
                     color: AppColors.primary,
                   ),
-                  onPressed: () => edgeFuel.addEntry(
-                    entry.copyWith(
-                      id: 'food-${DateTime.now().microsecondsSinceEpoch}',
-                      source: entry.saved
-                          ? FoodLogSource.savedMeal
-                          : FoodLogSource.recent,
-                      consumed: true,
-                      loggedAt: DateTime.now(),
-                    ),
-                  ),
+                  onPressed: () {
+                    AppHaptics.commit();
+                    edgeFuel.addEntry(
+                      entry.copyWith(
+                        id: 'food-${DateTime.now().microsecondsSinceEpoch}',
+                        source: entry.saved
+                            ? FoodLogSource.savedMeal
+                            : FoodLogSource.recent,
+                        consumed: true,
+                        loggedAt: DateTime.now(),
+                      ),
+                    );
+                  },
                 ),
             ],
           ),
@@ -961,8 +977,10 @@ class _EdgeFuelEntryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: Insets.md),
-                Text(
-                  overTarget ? 'Over target' : '$remaining left',
+                AnimatedCount(
+                  value: remaining.toDouble(),
+                  formatter: (v) =>
+                      overTarget ? 'Over target' : '${v.round()} left',
                   style: AppType.callout(
                     weight: FontWeight.w800,
                     color: overTarget ? AppColors.negative : AppColors.positive,
@@ -971,8 +989,9 @@ class _EdgeFuelEntryCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: Insets.xs),
-            Text(
-              '$consumed kcal logged',
+            AnimatedCount(
+              value: consumed.toDouble(),
+              formatter: (v) => '${v.round()} kcal logged',
               style: AppType.subhead(
                 weight: FontWeight.w600,
                 color: AppColors.textSecondary,

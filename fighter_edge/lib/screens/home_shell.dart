@@ -6,6 +6,7 @@ import '../state/first_run_controller.dart';
 import '../theme/app_haptics.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/coach_marks.dart';
+import '../widgets/fade_through.dart';
 import 'dashboard_screen.dart';
 import 'first_run/first_win_sheet.dart';
 import 'nutrition_screen.dart';
@@ -117,7 +118,8 @@ class _HomeShellState extends State<HomeShell> {
     };
 
     return Scaffold(
-      body: activePage,
+      // Tabs are peers: nothing slides, because nothing moved.
+      body: FadeThrough(switchKey: _index, child: activePage),
       bottomNavigationBar: AppBottomNav(
         items: _navItems,
         currentIndex: _index,

@@ -7,6 +7,7 @@ import '../../../../controllers/auth_controller.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_typography.dart';
+import '../../../../widgets/skeleton.dart';
 import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/empty_state.dart';
 import '../../../../widgets/filter_chips.dart';
@@ -75,9 +76,7 @@ class _RecipeLibraryViewState extends State<_RecipeLibraryView> {
       title: 'Recipes',
       showBack: true,
       body: switch (true) {
-        _ when controller.isLoading => const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          ),
+        _ when controller.isLoading => const _LibrarySkeleton(),
         _ when controller.error != null => Center(
             child: EmptyState(
               icon: Icons.error_outline,
@@ -410,6 +409,44 @@ class _Toggle extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Stands in for the library while the catalog loads: search, filters, and
+/// a few recipe cards in the shape they will arrive in.
+class _LibrarySkeleton extends StatelessWidget {
+  const _LibrarySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Skeleton(
+      child: ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(Insets.lg, Insets.sm, Insets.lg, 0),
+        children: [
+          const SkeletonBox(height: 48),
+          const SizedBox(height: Insets.md),
+          const Row(
+            children: [
+              SkeletonBox(width: 72, height: 32, radius: Radii.chip),
+              SizedBox(width: Insets.sm),
+              SkeletonBox(width: 88, height: 32, radius: Radii.chip),
+              SizedBox(width: Insets.sm),
+              SkeletonBox(width: 64, height: 32, radius: Radii.chip),
+            ],
+          ),
+          const SizedBox(height: Insets.lg),
+          for (var i = 0; i < 3; i++) ...const [
+            SkeletonBox(height: 120, radius: Radii.card),
+            SizedBox(height: Insets.sm),
+            SkeletonBox.line(width: 200),
+            SizedBox(height: Insets.xs),
+            SkeletonBox.line(width: 140),
+            SizedBox(height: Insets.lg),
+          ],
+        ],
       ),
     );
   }
