@@ -8,7 +8,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/brand_logo.dart';
 import '../../widgets/premium_effects.dart';
 import '../home_shell.dart';
-import '../onboarding_screen.dart';
+import '../onboarding/onboarding_screen.dart';
 import 'login_screen.dart';
 import 'verify_email_screen.dart';
 

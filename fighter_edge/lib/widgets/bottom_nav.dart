@@ -21,11 +21,16 @@ class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
+  /// Optional keys, one per item, so something outside the bar (the coach
+  /// marks) can find where each tab sits on screen.
+  final List<GlobalKey>? itemKeys;
+
   const AppBottomNav({
     super.key,
     required this.items,
     required this.currentIndex,
     required this.onTap,
+    this.itemKeys,
   });
 
   @override
@@ -65,10 +70,13 @@ class AppBottomNav extends StatelessWidget {
                   children: [
                     for (int i = 0; i < items.length; i++)
                       Expanded(
-                        child: _NavButton(
-                          item: items[i],
-                          selected: i == currentIndex,
-                          onTap: () => onTap(i),
+                        child: KeyedSubtree(
+                          key: itemKeys?[i],
+                          child: _NavButton(
+                            item: items[i],
+                            selected: i == currentIndex,
+                            onTap: () => onTap(i),
+                          ),
                         ),
                       ),
                   ],

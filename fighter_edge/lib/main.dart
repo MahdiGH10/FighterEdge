@@ -29,6 +29,7 @@ import 'observability/error_reporter.dart';
 import 'observability/telemetry.dart';
 import 'routing/app_router.dart';
 import 'state/app_state.dart';
+import 'state/first_run_controller.dart';
 import 'theme/app_accessibility.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
@@ -202,6 +203,11 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
         Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
         Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
+        ChangeNotifierProxyProvider<AuthController, FirstRunController>(
+          create: (_) => FirstRunController(),
+          update: (_, auth, firstRun) =>
+              (firstRun ?? FirstRunController())..setUser(auth.user?.id),
+        ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
           create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
           update: (_, auth, controller) {

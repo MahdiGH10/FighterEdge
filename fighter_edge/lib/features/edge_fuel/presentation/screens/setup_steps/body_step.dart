@@ -121,11 +121,10 @@ class _BodyStepState extends State<BodyStep> {
           ),
         ],
         const SizedBox(height: Insets.xl),
-        Text('Which equation should we use?', style: AppType.title2()),
+        Text('Which formula fits your body?', style: AppType.title2()),
         const SizedBox(height: Insets.xs),
         Text(
-          "Mifflin–St Jeor uses two published offsets — this isn't a social question, "
-          "it's about which formula fits your physiology best.",
+          NutritionCopy.equationExplainer,
           style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.md),

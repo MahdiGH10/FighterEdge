@@ -37,7 +37,7 @@ void main() {
       await tester.enterText(textFields.at(1), '180'); // height
       await tester.enterText(textFields.at(2), '80'); // current weight
       await tester.pump();
-      await tester.tap(find.text('Equation A'));
+      await tester.tap(find.text('Male physiology'));
       await tester.pump();
       await tester.tap(find.text('NEXT'));
       await tester.pumpAndSettle();

@@ -8,6 +8,7 @@ import '../models/training_session.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
+import '../state/first_run_controller.dart';
 import '../auth/verification_gate.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
@@ -21,17 +22,31 @@ import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/weekly_overview.dart';
 import 'auth/verify_email_screen.dart';
+import 'first_run/first_week_checklist.dart';
 import 'round_timer_screen.dart';
 import 'weight_tracker_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final ValueChanged<int> onNavigate;
-  const DashboardScreen({super.key, required this.onNavigate});
+
+  /// Lets the tour point at the first-week checklist.
+  final GlobalKey? checklistKey;
+
+  /// Starts the app tour. Null hides the checklist's tour item's action.
+  final VoidCallback? onStartTour;
+
+  const DashboardScreen({
+    super.key,
+    required this.onNavigate,
+    this.checklistKey,
+    this.onStartTour,
+  });
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
+    final firstRun = context.watch<FirstRunController>();
     final user = auth.user;
     final weightDelta = state.weeklyDelta;
     final losing = weightDelta <= 0;
@@ -65,6 +80,15 @@ class DashboardScreen extends StatelessWidget {
                   : 'The Grind Never Lies.',
             ),
           ),
+          if (firstRun.isActive) ...[
+            const SizedBox(height: Insets.lg),
+            FirstWeekChecklist(
+              key: checklistKey,
+              onStartTour: onStartTour ?? () {},
+              onLogMeal: () => onNavigate(2),
+              onTrain: () => onNavigate(1),
+            ),
+          ],
           if (showVerificationBanner) ...[
             const SizedBox(height: Insets.lg),
             _EmailVerificationBanner(auth: auth),

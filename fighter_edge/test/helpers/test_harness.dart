@@ -18,6 +18,7 @@ import 'package:fighter_edge/features/edge_fuel/data/recipe_catalog_repository.d
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/state/app_state.dart';
+import 'package:fighter_edge/state/first_run_controller.dart';
 
 /// Shared test utilities. (No `_test.dart` suffix so the runner ignores it.)
 
@@ -90,6 +91,11 @@ Widget wrapApp(
       Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
       Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
       Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
+      ChangeNotifierProxyProvider<AuthController, FirstRunController>(
+        create: (_) => FirstRunController(),
+        update: (_, auth, firstRun) =>
+            (firstRun ?? FirstRunController())..setUser(auth.user?.id),
+      ),
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
         create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
         update: (_, auth, controller) {

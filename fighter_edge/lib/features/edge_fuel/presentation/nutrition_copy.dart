@@ -22,19 +22,31 @@ class NutritionCopy {
           'Build muscle with a controlled calorie surplus.',
       };
 
+  // Mifflin–St Jeor has one constant for male physiology (+5) and one for
+  // female physiology (−161). The labels say that plainly instead of hiding it
+  // behind "Equation A/B" — a user cannot choose between options they cannot
+  // understand.
   static String equationLabel(EquationProfile profile) => switch (profile) {
-        EquationProfile.higherOffset => 'Equation A',
-        EquationProfile.lowerOffset => 'Equation B',
-        EquationProfile.neutral => 'Prefer not to answer',
+        EquationProfile.higherOffset => 'Male physiology',
+        EquationProfile.lowerOffset => 'Female physiology',
+        EquationProfile.neutral => 'Prefer not to say',
       };
 
   static String equationDescription(EquationProfile profile) =>
       switch (profile) {
-        EquationProfile.higherOffset => 'Uses the "+5" published offset.',
-        EquationProfile.lowerOffset => 'Uses the "−161" published offset.',
+        EquationProfile.higherOffset => 'The standard formula for male bodies.',
+        EquationProfile.lowerOffset =>
+          'The standard formula for female bodies.',
         EquationProfile.neutral =>
-          "We'll use the midpoint of both, mark confidence lower, and show a wider range.",
+          "We'll use the midpoint and show a slightly wider range.",
       };
+
+  /// Why the question is asked at all. The two formulas sit about 83 kcal a
+  /// day either side of the midpoint, so this is a fine-tune, not a gate.
+  static const equationExplainer =
+      'Calorie formulas differ slightly between male and female physiology — '
+      'about 80 kcal a day either way. It only fine-tunes your estimate, so '
+      "skip it if you'd rather.";
 
   static String activityLabel(ActivityLevel level) => switch (level) {
         ActivityLevel.veryLow => 'Very low',

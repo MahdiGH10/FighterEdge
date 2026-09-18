@@ -37,6 +37,17 @@ void main() {
     await tester.tap(find.byType(PrimaryButton));
     await tester.pumpAndSettle();
 
+    // The value pages come before any questions.
+    expect(find.text('Your camp, organised.'), findsOneWidget);
+    await tester.tap(find.text('CONTINUE'));
+    await tester.pumpAndSettle();
+    expect(find.text('Fuel that matches the work.'), findsOneWidget);
+    await tester.tap(find.text('CONTINUE'));
+    await tester.pumpAndSettle();
+    expect(find.text('Watch the edge build.'), findsOneWidget);
+    await tester.tap(find.text('BUILD MY PLAN'));
+    await tester.pumpAndSettle();
+
     // First-run setup creates a clean personal starting point.
     expect(find.text('What should Fighter Edge build first?'), findsOneWidget);
     await tester.tap(find.text('CONTINUE'));
@@ -48,6 +59,9 @@ void main() {
     await tester.enterText(find.byType(TextField).at(0), '28');
     await tester.enterText(find.byType(TextField).at(1), '178');
     await tester.enterText(find.byType(TextField).at(2), '77.2');
+    await tester.tap(find.text('CONTINUE'));
+    await tester.pumpAndSettle();
+    expect(find.text('Which formula fits your body?'), findsOneWidget);
     await tester.tap(find.text('CONTINUE'));
     await tester.pumpAndSettle();
     expect(find.text('Outside the gym, how active are you?'), findsOneWidget);
@@ -66,8 +80,9 @@ void main() {
     await tester.tap(find.text('OPEN DASHBOARD'));
     await tester.pumpAndSettle();
 
-    // Dashboard.
+    // Dashboard, with the first-week checklist a new account starts with.
     expect(find.text('DASHBOARD'), findsOneWidget);
+    expect(find.text('Your first week'), findsOneWidget);
 
     // Profile -> paid upgrade entry point.
     final navRect = tester.getRect(find.byType(AppBottomNav));

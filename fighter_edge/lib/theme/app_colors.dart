@@ -41,6 +41,11 @@ class AppColors {
   /// invisible and the "glass" was just paint. 72% lets content register
   /// through the bar while keeping label contrast on a dark ground.
   static const Color surfaceGlass = Color(0xB816161E);
+
+  /// Dims everything except what a coach mark is pointing at. Dark enough
+  /// that the lit target is unmistakably the subject, light enough that the
+  /// user still sees where they are.
+  static const Color scrim = Color(0xC7050508);
   static const Color border = Color(0xFF292933);
   static const Color borderStrong = Color(0xFF3A3A46);
 
