@@ -30,7 +30,8 @@ void main() {
     // Create the account.
     await tester.enterText(find.byType(TextField).at(0), 'Ayoub');
     await tester.enterText(find.byType(TextField).at(1), 'journey@test.com');
-    await tester.enterText(find.byType(TextField).at(2), 'secret1');
+    await tester.enterText(find.byType(TextField).at(2), 'journey-pass-1');
+    await tester.enterText(find.byType(TextField).at(3), 'journey-pass-1');
     await tester.tap(find.byType(Checkbox));
     await tester.pump();
     await tester.tap(find.byType(PrimaryButton));

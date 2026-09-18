@@ -12,6 +12,10 @@ import 'app_colors.dart';
 class AppAccessibility {
   AppAccessibility._();
 
+  /// The smallest tappable area, per HIG. Wrap small visuals to reach it
+  /// rather than shrinking the target.
+  static const double minTouchTarget = 44;
+
   static Widget builder(BuildContext context, Widget? child) {
     final media = MediaQuery.maybeOf(context);
     final boldText = media?.boldText ?? false;

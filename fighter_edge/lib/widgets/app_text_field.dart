@@ -21,6 +21,8 @@ class AppTextField extends StatelessWidget {
   final bool autofocus;
   final TextCapitalization textCapitalization;
   final List<TextInputFormatter> inputFormatters;
+  final FocusNode? focusNode;
+  final Iterable<String>? autofillHints;
 
   const AppTextField({
     super.key,
@@ -37,12 +39,16 @@ class AppTextField extends StatelessWidget {
     this.autofocus = false,
     this.textCapitalization = TextCapitalization.none,
     this.inputFormatters = const [],
+    this.focusNode,
+    this.autofillHints,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      focusNode: focusNode,
+      autofillHints: autofillHints,
       obscureText: obscure,
       keyboardType: keyboardType,
       textCapitalization: textCapitalization,

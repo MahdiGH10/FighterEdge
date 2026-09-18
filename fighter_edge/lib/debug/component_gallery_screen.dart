@@ -6,6 +6,7 @@ import '../theme/app_typography.dart';
 import '../widgets/animated_count.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/filter_chips.dart';
+import '../widgets/password_strength_meter.dart';
 import '../widgets/premium_effects.dart';
 import '../widgets/press_scale.dart';
 import '../widgets/primary_button.dart';
@@ -52,6 +53,11 @@ class ComponentGalleryCanvas extends StatelessWidget {
               _GallerySection(
                 title: 'Selectors',
                 child: _SelectorStates(),
+              ),
+              SizedBox(height: Insets.lg),
+              _GallerySection(
+                title: 'Password Strength',
+                child: _PasswordStrengthStates(),
               ),
               SizedBox(height: Insets.lg),
               _GallerySection(
@@ -247,6 +253,23 @@ class _SelectorStates extends StatelessWidget {
           selectedIndex: 0,
           onSelected: (_) {},
         ),
+      ],
+    );
+  }
+}
+
+class _PasswordStrengthStates extends StatelessWidget {
+  const _PasswordStrengthStates();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PasswordStrengthMeter(password: 'jab'),
+        PasswordStrengthMeter(password: 'password'),
+        PasswordStrengthMeter(password: 'southpaw1234'),
+        PasswordStrengthMeter(password: 'Southpaw-Jab-42'),
       ],
     );
   }

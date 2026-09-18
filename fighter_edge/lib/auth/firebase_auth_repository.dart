@@ -158,6 +158,44 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  bool get canChangePassword =>
+      _auth.currentUser?.providerData
+          .any((p) => p.providerId == EmailAuthProvider.PROVIDER_ID) ??
+      false;
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = _auth.currentUser;
+    final email = user?.email;
+    if (user == null || email == null) {
+      throw const AuthException('signed-out', 'Sign in before changing it.');
+    }
+    try {
+      await user.reauthenticateWithCredential(
+        EmailAuthProvider.credential(email: email, password: currentPassword),
+      );
+    } on FirebaseAuthException catch (e) {
+      // At this step a credential failure can only mean the current password
+      // was wrong — the email is the account's own.
+      if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+        throw const AuthException(
+          'wrong-password',
+          'Your current password is incorrect.',
+        );
+      }
+      throw AuthException(e.code, _message(e));
+    }
+    try {
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(e.code, _message(e));
+    }
+  }
+
+  @override
   Future<void> sendEmailVerification() async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -284,6 +322,9 @@ class FirebaseAuthRepository implements AuthRepository {
       'wrong-password' ||
       'invalid-credential' =>
         'Incorrect email or password.',
+      'too-many-requests' => 'Too many attempts. Wait a minute and try again.',
+      'requires-recent-login' =>
+        'For your security, sign in again to make this change.',
       'network-request-failed' => 'Network error. Check your connection.',
       'popup-closed-by-user' || 'cancelled' => 'Sign-in cancelled.',
       _ => e.message ?? 'Authentication failed.',

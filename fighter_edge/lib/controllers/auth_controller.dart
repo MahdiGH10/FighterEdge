@@ -61,6 +61,7 @@ class AuthController extends ChangeNotifier {
   bool get supportsApple => _repo.supportsApple;
   bool get supportsMagicLink => _repo.supportsMagicLink;
   bool get supportsEmailVerification => _repo.supportsEmailVerification;
+  bool get canChangePassword => _repo.canChangePassword;
   bool get billingAvailable => _billing.isAvailable;
   List<BillingProduct> get billingProducts => _billingProducts;
   BillingCustomerState get billingState => _billingState;
@@ -177,6 +178,15 @@ class AuthController extends ChangeNotifier {
 
   Future<void> sendPasswordReset(String email) =>
       _run(() => _repo.sendPasswordReset(email));
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) =>
+      _run(() => _repo.changePassword(
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+          ));
 
   Future<void> sendEmailVerification() => _run(() async {
         await _repo.sendEmailVerification();

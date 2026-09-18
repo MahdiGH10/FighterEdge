@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'auth/auth_repository.dart';
@@ -225,7 +226,23 @@ class _FighterEdgeMaterialApp extends StatefulWidget {
 }
 
 class _FighterEdgeMaterialAppState extends State<_FighterEdgeMaterialApp> {
-  late final _router = createAppRouter();
+  late final GoRouter _router;
+  late final VoidCallback _stopSessionReset;
+
+  @override
+  void initState() {
+    super.initState();
+    final auth = context.read<AuthController>();
+    _router = createAppRouter(auth: auth);
+    _stopSessionReset = resetStackOnSessionChange(_router, auth);
+  }
+
+  @override
+  void dispose() {
+    _stopSessionReset();
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

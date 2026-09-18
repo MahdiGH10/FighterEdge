@@ -131,6 +131,33 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
+  bool get canChangePassword {
+    final current = _current;
+    if (current == null) return false;
+    final account = _accounts()[current.email] as Map<String, dynamic>?;
+    return account?['passwordHash'] != null;
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final current = _current;
+    if (current == null) {
+      throw const AuthException('signed-out', 'Sign in before changing it.');
+    }
+    final account = _accounts()[current.email] as Map<String, dynamic>?;
+    if (account?['passwordHash'] != _hash(currentPassword)) {
+      throw const AuthException(
+        'wrong-password',
+        'Your current password is incorrect.',
+      );
+    }
+    await _persistAccount(current, newPassword);
+  }
+
+  @override
   Future<void> sendEmailVerification() async {
     // Simulated local backend: production Firebase sends the real email.
     debugPrint('[auth] verification email sent to ${_current?.email}');

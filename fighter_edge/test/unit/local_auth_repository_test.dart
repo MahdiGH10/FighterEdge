@@ -149,4 +149,45 @@ void main() {
     expect(events.contains(true), isTrue);
     expect(events.last, isFalse);
   });
+
+  group('password change', () {
+    test('replaces the password after checking the current one', () async {
+      await repo.signUpWithEmail(
+          email: 'a@b.com', password: 'secret1', displayName: 'A');
+      expect(repo.canChangePassword, isTrue);
+
+      await repo.changePassword(
+          currentPassword: 'secret1', newPassword: 'new-secret-2');
+      await repo.signOut();
+
+      await expectLater(
+        repo.signInWithEmail(email: 'a@b.com', password: 'secret1'),
+        throwsA(isA<AuthException>()),
+      );
+      final u = await repo.signInWithEmail(
+          email: 'a@b.com', password: 'new-secret-2');
+      expect(u.email, 'a@b.com');
+    });
+
+    test('refuses a wrong current password and keeps the old one', () async {
+      await repo.signUpWithEmail(
+          email: 'a@b.com', password: 'secret1', displayName: 'A');
+
+      await expectLater(
+        repo.changePassword(
+            currentPassword: 'guess', newPassword: 'new-secret-2'),
+        throwsA(isA<AuthException>()
+            .having((e) => e.code, 'code', 'wrong-password')),
+      );
+      await repo.signOut();
+      final u =
+          await repo.signInWithEmail(email: 'a@b.com', password: 'secret1');
+      expect(u.email, 'a@b.com');
+    });
+
+    test('social accounts have no password to change', () async {
+      await repo.signInWithGoogle();
+      expect(repo.canChangePassword, isFalse);
+    });
+  });
 }

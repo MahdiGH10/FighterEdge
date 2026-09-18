@@ -11,6 +11,8 @@ import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
+import 'change_password_sheet.dart';
+import 'legal_screen.dart';
 import 'paywall_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -21,6 +23,18 @@ class SettingsScreen extends StatelessWidget {
     final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
     final user = auth.user;
+
+    // Signing out or deleting the account makes the router take this page
+    // away, but it is still on screen for the length of its exit transition.
+    // Render nothing account-shaped in that window rather than a placeholder
+    // identity that looks like someone is still signed in.
+    if (user == null) {
+      return const ScreenScaffold(
+        title: 'Settings',
+        showBack: false,
+        body: SizedBox.shrink(),
+      );
+    }
 
     return ScreenScaffold(
       title: 'Settings',
@@ -50,14 +64,14 @@ class SettingsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        (user?.displayName.isNotEmpty ?? false)
-                            ? user!.displayName
-                            : 'Fighter',
+                        user.displayName.isNotEmpty
+                            ? user.displayName
+                            : user.email.split('@').first,
                         style: AppType.body(weight: FontWeight.w800),
                       ),
                       const SizedBox(height: Insets.xxs),
                       Text(
-                        user?.email ?? 'Signed in',
+                        user.email,
                         style: AppType.subhead(
                           color: AppColors.textSecondary,
                         ),
@@ -123,23 +137,23 @@ class SettingsScreen extends StatelessWidget {
           const _SectionLabel('Account'),
           _SettingsRow(
             icon: Icons.lock_outline,
-            title: 'Password & security',
-            subtitle: 'Password reset is available from the login screen',
-            onTap: () => _showInfo(
-              context,
-              'Security',
-              'Password reset is already supported from the login screen. In-app password change should be added before public launch.',
-            ),
+            title: 'Change password',
+            subtitle: auth.canChangePassword
+                ? 'Confirm your current password to set a new one'
+                : 'You sign in with Google — manage it in your Google account',
+            onTap: auth.isBusy ? null : () => _changePassword(context),
           ),
           _SettingsRow(
             icon: Icons.description_outlined,
-            title: 'Legal',
-            subtitle: 'Terms, privacy, and medical disclaimer placeholders',
-            onTap: () => _showInfo(
-              context,
-              'Legal readiness',
-              'Before launch, connect real Terms, Privacy Policy, billing terms, and a non-medical training/nutrition disclaimer.',
-            ),
+            title: 'Terms of Service',
+            subtitle: 'The rules for using Fighter Edge',
+            onTap: () => _openLegal(context, LegalDocument.terms),
+          ),
+          _SettingsRow(
+            icon: Icons.privacy_tip_outlined,
+            title: 'Privacy Policy',
+            subtitle: 'What we store and why',
+            onTap: () => _openLegal(context, LegalDocument.privacy),
           ),
           _SettingsRow(
             icon: Icons.delete_outline,
@@ -156,6 +170,32 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _changePassword(BuildContext context) async {
+    final auth = context.read<AuthController>();
+    if (!auth.canChangePassword) {
+      _showInfo(
+        context,
+        'Signed in with Google',
+        'This account has no Fighter Edge password. Your Google account '
+            'handles sign-in, so change your password there.',
+      );
+      return;
+    }
+    final changed = await showChangePasswordSheet(context);
+    if (!changed || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Password updated.')),
+    );
+  }
+
+  void _openLegal(BuildContext context, LegalDocument doc) {
+    AppNavigation.push(
+      context,
+      AppRoutes.legal(doc),
+      fallbackBuilder: (_) => LegalScreen(document: doc),
     );
   }
 

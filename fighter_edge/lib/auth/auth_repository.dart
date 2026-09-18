@@ -42,6 +42,21 @@ abstract class AuthRepository {
 
   Future<void> sendPasswordReset(String email);
 
+  /// Whether the signed-in user has a password of their own. False for
+  /// accounts that only ever used Google or Apple — they have nothing to
+  /// change here.
+  bool get canChangePassword;
+
+  /// Proves the user knows [currentPassword], then replaces it.
+  ///
+  /// Reauthentication is part of the call, not a separate step: providers
+  /// refuse a password change without a recent sign-in, and asking for the
+  /// current password is the one prompt that satisfies that for everyone.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
   Future<void> sendEmailVerification();
 
   Future<AppUser> signInWithGoogle();
