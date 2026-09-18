@@ -64,6 +64,7 @@ class RevenueCatBillingGateway implements BillingGateway {
         period: period,
         priceString: package.storeProduct.priceString,
         currencyCode: package.storeProduct.currencyCode,
+        price: package.storeProduct.price,
         providerHandle: package,
       ));
     }

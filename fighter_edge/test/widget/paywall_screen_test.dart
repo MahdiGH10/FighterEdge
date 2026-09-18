@@ -26,6 +26,8 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(monthly, findsOneWidget);
+    expect(find.text('Annual plan'), findsOneWidget);
+    expect(find.text(r'About $5.00 / month'), findsOneWidget);
     expect(find.textContaining('ANNUAL'), findsOneWidget);
     expect(find.text('Restore purchases'), findsOneWidget);
 

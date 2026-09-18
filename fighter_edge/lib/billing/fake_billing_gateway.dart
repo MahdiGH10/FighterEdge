@@ -10,12 +10,14 @@ class FakeBillingGateway implements BillingGateway {
         period: BillingProductPeriod.monthly,
         priceString: r'$7.99',
         currencyCode: 'USD',
+        price: 7.99,
       ),
       BillingProduct(
         id: 'fighter_edge_pro_annual',
         period: BillingProductPeriod.annual,
         priceString: r'$59.99',
         currencyCode: 'USD',
+        price: 59.99,
       ),
     ],
     this.purchaseState = const BillingCustomerState(

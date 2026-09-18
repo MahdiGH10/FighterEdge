@@ -20,6 +20,7 @@ import '../../widgets/brand_logo.dart';
 import '../../widgets/premium_effects.dart';
 import '../../widgets/press_scale.dart';
 import '../../widgets/primary_button.dart';
+import '../paywall_screen.dart';
 
 import 'onboarding_steps.dart';
 import 'onboarding_widgets.dart';
@@ -86,6 +87,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         isBusy: auth.isBusy,
         onOpenDashboard: _finishOnboarding,
         onViewFuelPlan: () => _finishOnboarding(openFuelPlan: true),
+        onViewPro: () => AppNavigation.push(
+          context,
+          AppRoutes.paywall,
+          fallbackBuilder: (_) => const PaywallScreen(),
+        ),
       );
     }
     final step = OnboardingStepContent.fromIndex(

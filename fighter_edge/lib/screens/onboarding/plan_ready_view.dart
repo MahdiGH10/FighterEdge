@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../features/edge_fuel/domain/models/nutrition_enums.dart';
 import '../../features/edge_fuel/domain/models/nutrition_target.dart';
 import '../../features/edge_fuel/presentation/nutrition_copy.dart';
+import '../../observability/telemetry.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_typography.dart';
@@ -33,6 +34,7 @@ class PlanReadyView extends StatelessWidget {
   final bool isBusy;
   final VoidCallback onOpenDashboard;
   final VoidCallback onViewFuelPlan;
+  final VoidCallback onViewPro;
 
   const PlanReadyView({
     super.key,
@@ -40,6 +42,7 @@ class PlanReadyView extends StatelessWidget {
     required this.isBusy,
     required this.onOpenDashboard,
     required this.onViewFuelPlan,
+    required this.onViewPro,
   });
 
   @override
@@ -132,6 +135,20 @@ class PlanReadyView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: Insets.xl),
+              _ProContinuation(
+                  onPressed: isBusy
+                      ? null
+                      : () {
+                          Telemetry.fromContext(context).track(
+                            TelemetryEvent.premiumCtaTapped,
+                            parameters: {
+                              'surface': 'plan_ready',
+                              'access': 'free',
+                            },
+                          );
+                          onViewPro();
+                        }),
+              const SizedBox(height: Insets.xl),
               PrimaryButton(
                 isBusy ? 'Opening your dashboard...' : 'Open dashboard',
                 icon: Icons.dashboard_outlined,
@@ -154,6 +171,47 @@ class PlanReadyView extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ProContinuation extends StatelessWidget {
+  final VoidCallback? onPressed;
+
+  const _ProContinuation({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      accent: AppColors.premium,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: AppColors.premium),
+              const SizedBox(width: Insets.sm),
+              Text(
+                'Make this week easier to follow',
+                style: AppType.title2(color: AppColors.premium),
+              ),
+            ],
+          ),
+          const SizedBox(height: Insets.sm),
+          Text(
+            'Pro adds deeper trends, the full technique library, and a daily '
+            'Fighter Brief built from your plan.',
+            style: AppType.callout(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: Insets.md),
+          GhostButton(
+            'See Pro options',
+            icon: Icons.arrow_forward,
+            expand: true,
+            onPressed: onPressed,
+          ),
+        ],
       ),
     );
   }

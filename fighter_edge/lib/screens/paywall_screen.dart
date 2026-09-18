@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -47,6 +48,16 @@ class _PaywallScreenState extends State<PaywallScreen> {
       'Full Technique Library',
       'Every discipline and progression path unlocked',
       Icons.sports_martial_arts
+    ),
+    (
+      'AI Fighter Brief',
+      'A concise next-action brief grounded in your plan and training day',
+      Icons.auto_awesome
+    ),
+    (
+      'Premium Fuel Library',
+      'Advanced recipes with serving sizes and fighter-friendly macros',
+      Icons.restaurant_menu
     ),
   ];
 
@@ -106,10 +117,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
     }
   }
 
+  List<BillingProduct> _orderedProducts(List<BillingProduct> products) {
+    final ordered = [...products];
+    ordered.sort((a, b) {
+      if (a.period == b.period) return 0;
+      return a.period == BillingProductPeriod.annual ? -1 : 1;
+    });
+    return ordered;
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
     final isPro = auth.isPro;
+    final products = _orderedProducts(auth.billingProducts);
     return ScreenScaffold(
       title: 'FighterEdge Pro',
       showBack: true,
@@ -156,16 +177,25 @@ class _PaywallScreenState extends State<PaywallScreen> {
             )
           else ...[
             if (auth.billingState.isPro) const _BillingSyncNotice(),
-            if (auth.billingAvailable && auth.billingProducts.isNotEmpty) ...[
+            if (auth.billingAvailable && products.isNotEmpty) ...[
               const _LaunchTermsCard(billingActive: true),
               const SizedBox(height: Insets.lg),
-              for (final product in auth.billingProducts) ...[
-                PrimaryButton(
-                  '${product.period == BillingProductPeriod.annual ? 'Annual' : 'Monthly'} · ${product.priceString}',
-                  icon: Icons.lock_open,
-                  expand: true,
-                  onPressed: auth.isBusy ? null : () => _purchase(product),
-                ),
+              for (final product in products) ...[
+                if (product.period == BillingProductPeriod.annual)
+                  _AnnualPlanOption(
+                    product: product,
+                    monthlyProduct: products
+                        .where((p) => p.period == BillingProductPeriod.monthly)
+                        .firstOrNull,
+                    onPressed: auth.isBusy ? null : () => _purchase(product),
+                  )
+                else
+                  GhostButton(
+                    _monthlyLabel(product),
+                    icon: Icons.lock_open,
+                    expand: true,
+                    onPressed: auth.isBusy ? null : () => _purchase(product),
+                  ),
                 const SizedBox(height: Insets.sm),
               ],
             ] else if (auth.billingAvailable && auth.isBusy) ...[
@@ -180,6 +210,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 onPressed: auth.isBusy
                     ? null
                     : () async {
+                        Telemetry.fromContext(context).track(
+                          TelemetryEvent.premiumCtaTapped,
+                          parameters: {
+                            'surface': 'paywall_waitlist',
+                            'access': 'free',
+                          },
+                        );
                         try {
                           await auth.startProCheckout();
                         } on AuthException catch (e) {
@@ -227,6 +264,116 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 ),
               ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+String _monthlyLabel(BillingProduct product) =>
+    'Monthly - ${product.priceString}';
+
+String? _monthlyEquivalent(BillingProduct product) {
+  final price = product.price;
+  if (price == null || !price.isFinite || price <= 0) return null;
+  return NumberFormat.simpleCurrency(
+    name: product.currencyCode,
+    decimalDigits: 2,
+  ).format(price / 12);
+}
+
+int? _annualSavingsPercent(
+  BillingProduct annual,
+  BillingProduct? monthly,
+) {
+  final annualPrice = annual.price;
+  final monthlyPrice = monthly?.price;
+  if (annualPrice == null ||
+      monthlyPrice == null ||
+      !annualPrice.isFinite ||
+      !monthlyPrice.isFinite ||
+      annualPrice <= 0 ||
+      monthlyPrice <= 0) {
+    return null;
+  }
+  final savings = 1 - annualPrice / (monthlyPrice * 12);
+  if (!savings.isFinite || savings <= 0) return null;
+  return (savings * 100).round();
+}
+
+class _AnnualPlanOption extends StatelessWidget {
+  final BillingProduct product;
+  final BillingProduct? monthlyProduct;
+  final VoidCallback? onPressed;
+
+  const _AnnualPlanOption({
+    required this.product,
+    required this.monthlyProduct,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final equivalent = _monthlyEquivalent(product);
+    final savings = _annualSavingsPercent(product, monthlyProduct);
+    return AppCard(
+      accent: AppColors.premium,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Annual plan',
+                  style: AppType.title2(color: AppColors.premium),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Insets.sm,
+                  vertical: Insets.xxs,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.premium.withValues(alpha: .14),
+                  borderRadius: BorderRadius.circular(Radii.chip),
+                ),
+                child: Text(
+                  'BEST VALUE',
+                  style: AppType.micro(
+                    color: AppColors.premium,
+                    weight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Insets.xs),
+          Text(
+            '${product.priceString} / year',
+            style: AppType.callout(weight: FontWeight.w800),
+          ),
+          if (equivalent case final monthly?) ...[
+            const SizedBox(height: Insets.xxs),
+            Text(
+              'About $monthly / month',
+              style: AppType.subhead(color: AppColors.textSecondary),
+            ),
+          ],
+          if (savings case final percent?) ...[
+            const SizedBox(height: Insets.xxs),
+            Text(
+              'Save about $percent% versus monthly billing',
+              style: AppType.subhead(color: AppColors.premium),
+            ),
+          ],
+          const SizedBox(height: Insets.md),
+          PrimaryButton(
+            'Choose annual plan',
+            icon: Icons.lock_open,
+            expand: true,
+            onPressed: onPressed,
+          ),
         ],
       ),
     );
@@ -368,9 +515,7 @@ class _LaunchTermsCard extends StatelessWidget {
           ),
           const SizedBox(height: Insets.sm),
           Text(
-            billingActive
-                ? 'Secure store checkout'
-                : 'Planned pricing: \$9.99/mo or \$79.99/yr',
+            billingActive ? 'Secure store checkout' : 'Founding Pro preview',
             style: AppType.title2(),
           ),
           const SizedBox(height: Insets.sm),
@@ -380,7 +525,8 @@ class _LaunchTermsCard extends StatelessWidget {
                     'receipt is verified before Pro access is activated, and '
                     'you can restore or manage it any time.'
                 : 'Billing is not active on this build yet. Joining the '
-                    'waitlist records interest only; no payment is taken.',
+                    'waitlist records interest only; store pricing will be '
+                    'shown before any payment is taken.',
             style: AppType.subhead(color: AppColors.textSecondary),
           ),
         ],

@@ -12,6 +12,12 @@ class BillingProduct {
   final BillingProductPeriod period;
   final String priceString;
   final String currencyCode;
+
+  /// The numeric store price when the provider exposes it. Keeping this
+  /// optional preserves support for providers that only return a localized
+  /// display string, while allowing the paywall to show an honest annual
+  /// monthly-equivalent label when the value is available.
+  final double? price;
   final Object? providerHandle;
 
   const BillingProduct({
@@ -19,6 +25,7 @@ class BillingProduct {
     required this.period,
     required this.priceString,
     required this.currencyCode,
+    this.price,
     this.providerHandle,
   });
 }
