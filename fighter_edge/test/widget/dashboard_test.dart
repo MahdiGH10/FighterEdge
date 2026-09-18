@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -60,11 +61,24 @@ void main() {
 
     expect(find.text('Verify your email'), findsOneWidget);
 
-    await tester.tap(find.text('Resend'));
+    // Resend moved off the banner and onto the screen that can actually
+    // resolve this: a bare "Resend" told the user nothing about whether the
+    // address was ever confirmed.
+    await tester.tap(find.text('Verify your email'));
+    // Not pumpAndSettle: the verify screen polls on a periodic timer and so
+    // never reaches a settled state by design.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('RESEND EMAIL'), findsOneWidget);
+    await tester.tap(find.text('RESEND EMAIL'));
     await tester.pump();
 
     expect(repo.verificationSent, isTrue);
-    expect(find.text('Verification email sent.'), findsOneWidget);
+    expect(find.text('Verification email sent.'), findsWidgets);
+
+    // The verify screen polls on a timer; tear it down before the test ends.
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 }
 

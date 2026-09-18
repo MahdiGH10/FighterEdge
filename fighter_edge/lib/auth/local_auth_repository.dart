@@ -17,6 +17,19 @@ import 'auth_repository.dart';
 /// class is the reference implementation of [AuthRepository]; a
 /// FirebaseAuthRepository implements the same interface for production.
 class LocalAuthRepository implements AuthRepository {
+  /// Opt in to acting like a backend that has email verification.
+  ///
+  /// Off by default so the simulated backend stays frictionless for dev work
+  /// and so existing tests keep seeing verified accounts. Turn it on to
+  /// exercise the verification screen and [VerificationGate] without Firebase:
+  /// new email accounts then start unverified and only
+  /// [debugMarkEmailVerified] clears them, standing in for the user clicking
+  /// the link in their inbox.
+  LocalAuthRepository({bool simulateEmailVerification = false})
+      : _simulateEmailVerification = simulateEmailVerification;
+
+  final bool _simulateEmailVerification;
+
   static const _accountsKey = 'fe_accounts';
   static const _sessionKey = 'fe_session_email';
   static const _salt = 'fighter_edge_v1';
@@ -39,7 +52,7 @@ class LocalAuthRepository implements AuthRepository {
   bool get supportsMagicLink => true;
 
   @override
-  bool get supportsEmailVerification => false;
+  bool get supportsEmailVerification => _simulateEmailVerification;
 
   /// Must be called once at startup to restore any persisted session.
   @override
@@ -219,6 +232,20 @@ class LocalAuthRepository implements AuthRepository {
       throw const AuthException('signed-out', 'Sign in before changing plan.');
     }
     final user = current.copyWith(plan: plan);
+    await _persistAccount(user, null);
+    _current = user;
+    _controller.add(_current);
+    return user;
+  }
+
+  /// Test/dev-only. Stands in for the user clicking the link in their inbox,
+  /// so the verification screen's polling can be driven deterministically.
+  Future<AppUser> debugMarkEmailVerified() async {
+    final current = _current;
+    if (current == null) {
+      throw const AuthException('signed-out', 'Sign in before verifying.');
+    }
+    final user = current.copyWith(emailVerified: true);
     await _persistAccount(user, null);
     _current = user;
     _controller.add(_current);

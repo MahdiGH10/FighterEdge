@@ -8,6 +8,8 @@ import '../models/training_session.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
+import '../auth/verification_gate.dart';
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -18,6 +20,7 @@ import '../widgets/press_scale.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/weekly_overview.dart';
+import 'auth/verify_email_screen.dart';
 import 'round_timer_screen.dart';
 import 'weight_tracker_screen.dart';
 
@@ -583,67 +586,57 @@ class _EmailVerificationBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Escalates with the stage rather than nagging at one volume forever: a
+    // first-day reminder and a week-old one are not the same message.
+    final urgent = auth.verificationStage == VerificationStage.urgent;
+    final accent = urgent ? AppColors.negative : AppColors.warning;
+
     return AppCard(
-      accent: AppColors.warning,
+      accent: accent,
       padding: const EdgeInsets.all(Insets.md),
+      // Opens the screen that can actually resolve this — it resends, watches
+      // for confirmation, and offers a way out if the address was wrong. A
+      // bare "Resend" gave the user no way to tell whether anything happened.
+      onTap: () => AppNavigation.push(
+        context,
+        AppRoutes.verifyEmail,
+        fallbackBuilder: (_) => const VerifyEmailScreen(),
+      ),
       child: Row(
         children: [
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.warning.withValues(alpha: 0.14),
+              color: accent.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.mark_email_unread_outlined,
-                color: AppColors.warning, size: 21),
+            child:
+                Icon(Icons.mark_email_unread_outlined, color: accent, size: 21),
           ),
           const SizedBox(width: Insets.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Verify your email',
+                Text(urgent ? 'Confirm your email' : 'Verify your email',
                     style: AppType.callout(weight: FontWeight.w800)),
                 const SizedBox(height: Insets.xxs),
-                Text('Secure your account before fight camp gets serious.',
-                    style: AppType.subhead(
-                        weight: FontWeight.w500,
-                        color: AppColors.textSecondary)),
+                Text(
+                  urgent
+                      ? 'Pro and the AI coach stay locked until you confirm.'
+                      : 'Secure your account before fight camp gets serious.',
+                  style: AppType.subhead(
+                      weight: FontWeight.w500,
+                      color: AppAccessibility.textSecondary(context)),
+                ),
               ],
             ),
           ),
-          TextButton(
-            onPressed: auth.isBusy
-                ? null
-                : () async {
-                    try {
-                      await auth.sendEmailVerification();
-                      if (!context.mounted) return;
-                      _showDashboardMessage(
-                          context, 'Verification email sent.');
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      _showDashboardMessage(
-                          context, 'Could not send verification email.');
-                    }
-                  },
-            child: Text('Resend',
-                style: AppType.subhead(
-                    weight: FontWeight.w800, color: AppColors.warning)),
-          ),
+          Icon(Icons.chevron_right, color: accent),
         ],
       ),
     );
-  }
-
-  void _showDashboardMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        backgroundColor: AppColors.surfaceElevated,
-        content: Text(message, style: AppType.subhead(weight: FontWeight.w600)),
-      ));
   }
 }
 

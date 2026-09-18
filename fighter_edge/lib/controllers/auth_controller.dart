@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../auth/auth_repository.dart';
 import '../auth/local_auth_repository.dart';
+import '../auth/verification_gate.dart';
 import '../billing/subscription.dart';
 import '../billing/billing_gateway.dart';
 import '../billing/unavailable_billing_gateway.dart';
@@ -28,6 +29,12 @@ class AuthController extends ChangeNotifier {
   List<BillingProduct> _billingProducts = const [];
   BillingCustomerState _billingState = const BillingCustomerState.free();
   int _billingSession = 0;
+
+  /// When the last verification email was requested, for the resend cooldown.
+  /// Firebase rate-limits these server-side; the cooldown exists so the user
+  /// sees why the button is inert instead of tapping into a silent failure.
+  DateTime? _verificationSentAt;
+  static const Duration _resendCooldown = Duration(seconds: 60);
 
   AuthController(
     this._repo, {
@@ -58,6 +65,56 @@ class AuthController extends ChangeNotifier {
   List<BillingProduct> get billingProducts => _billingProducts;
   BillingCustomerState get billingState => _billingState;
   String? get billingManagementUrl => _billingState.managementUrl;
+
+  // ---- Email verification ----------------------------------------------
+
+  /// How hard the app should currently be pushing the user to verify.
+  VerificationStage get verificationStage => VerificationGate.stageFor(
+        _user,
+        supportsVerification: supportsEmailVerification,
+      );
+
+  /// Whether the signed-in user may take [action] right now.
+  bool allowsVerified(VerifiedAction action) => VerificationGate.allows(
+        _user,
+        action,
+        supportsVerification: supportsEmailVerification,
+      );
+
+  /// Seconds left before another verification email may be requested. 0 means
+  /// the resend button is live.
+  int get resendCooldownSeconds {
+    final sentAt = _verificationSentAt;
+    if (sentAt == null) return 0;
+    final elapsed = DateTime.now().difference(sentAt).inSeconds;
+    final remaining = _resendCooldown.inSeconds - elapsed;
+    return remaining > 0 ? remaining : 0;
+  }
+
+  bool get canResendVerification => resendCooldownSeconds == 0;
+
+  /// Re-reads the account without touching [isBusy].
+  ///
+  /// The verification screen polls this every few seconds; routing it through
+  /// [_run] would strobe every button on screen for the whole wait. Returns
+  /// true once the address is verified.
+  Future<bool> refreshVerificationStatus() async {
+    try {
+      final refreshed = await _repo.refreshCurrentUser();
+      if (refreshed == null) return false;
+      final changed = refreshed.emailVerified != _user?.emailVerified;
+      _user = refreshed;
+      _status = AuthStatus.authenticated;
+      // Only rebuild when something actually changed — a poll that finds
+      // nothing new should cost the UI nothing.
+      if (changed) notifyListeners();
+      return refreshed.emailVerified;
+    } catch (_) {
+      // A failed poll is not a failed verification. Stay quiet and let the
+      // next tick retry; the user is already looking at a "waiting" state.
+      return false;
+    }
+  }
 
   void _onUserChanged(AppUser? user) {
     _user = user;
@@ -121,8 +178,10 @@ class AuthController extends ChangeNotifier {
   Future<void> sendPasswordReset(String email) =>
       _run(() => _repo.sendPasswordReset(email));
 
-  Future<void> sendEmailVerification() =>
-      _run(() => _repo.sendEmailVerification());
+  Future<void> sendEmailVerification() => _run(() async {
+        await _repo.sendEmailVerification();
+        _verificationSentAt = DateTime.now();
+      });
 
   Future<void> sendMagicLink(String email) =>
       _run(() => _repo.sendMagicLink(email));
@@ -144,6 +203,16 @@ class AuthController extends ChangeNotifier {
   /// Starts a store purchase. The store result is never converted directly
   /// into Pro; the RevenueCat webhook must update Firestore first.
   Future<void> startProCheckout([BillingProduct? product]) => _run(() async {
+        // Guarded here rather than on the button so every entry point — the
+        // product tiles, the fallback CTA, any future deep link — is covered
+        // by one check. The server is still the authority on entitlement;
+        // this only stops us taking money we would struggle to support.
+        if (!allowsVerified(VerifiedAction.purchasePro)) {
+          throw AuthException(
+            'email-not-verified',
+            VerificationGate.refusalMessage(VerifiedAction.purchasePro),
+          );
+        }
         try {
           final selected = product ??
               (_billingProducts.isNotEmpty ? _billingProducts.first : null);

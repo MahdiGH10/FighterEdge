@@ -11,6 +11,7 @@ import '../features/edge_fuel/presentation/screens/recipe_library_screen.dart';
 import '../screens/auth/auth_gate.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/magic_link_screen.dart';
+import '../screens/auth/verify_email_screen.dart';
 import '../screens/auth/signup_screen.dart';
 import '../screens/paywall_screen.dart';
 import '../screens/profile_screen.dart';
@@ -26,6 +27,7 @@ class AppRoutes {
   static const gallery = '/gallery';
   static const forgotPassword = '/auth/forgot-password';
   static const magicLink = '/auth/magic-link';
+  static const verifyEmail = '/auth/verify-email';
   static const signup = '/auth/signup';
   static const paywall = '/paywall';
   static const profile = '/profile';
@@ -60,6 +62,13 @@ GoRouter createAppRouter() {
         pageBuilder: (context, state) => _appPage(
           state: state,
           child: const MagicLinkScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.verifyEmail,
+        pageBuilder: (context, state) => _appPage(
+          state: state,
+          child: const VerifyEmailScreen(),
         ),
       ),
       GoRoute(

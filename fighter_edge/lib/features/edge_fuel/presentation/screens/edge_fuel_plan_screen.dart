@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../billing/subscription.dart';
+import '../../../../auth/verification_gate.dart';
 import '../../../../controllers/auth_controller.dart';
 import '../../../../routing/app_navigation.dart';
 import '../../../../routing/app_router.dart';
+import '../../../../screens/auth/verify_email_screen.dart';
 import '../../../../screens/paywall_screen.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
@@ -336,6 +338,33 @@ class _FighterBriefPreviewSectionState
   }
 }
 
+class _BriefNeedsVerification extends StatelessWidget {
+  final VoidCallback onVerify;
+
+  const _BriefNeedsVerification({required this.onVerify});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Confirm your email to unlock the AI coach. Your free preview below '
+          'stays accurate in the meantime.',
+          style: AppType.subhead(color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: Insets.md),
+        PrimaryButton(
+          'Verify my email',
+          icon: Icons.mark_email_unread_outlined,
+          expand: true,
+          onPressed: onVerify,
+        ),
+      ],
+    );
+  }
+}
+
 class _PremiumBriefBody extends StatelessWidget {
   final EdgeFuelAiController ai;
   final NutritionTarget target;
@@ -355,6 +384,19 @@ class _PremiumBriefBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The server refuses unverified callers outright; catching it here turns a
+    // permission error into something the user can act on.
+    final auth = context.watch<AuthController>();
+    if (!auth.allowsVerified(VerifiedAction.aiCoach)) {
+      return _BriefNeedsVerification(
+        onVerify: () => AppNavigation.push(
+          context,
+          AppRoutes.verifyEmail,
+          fallbackBuilder: (_) => const VerifyEmailScreen(),
+        ),
+      );
+    }
+
     if (ai.isLoading && ai.lastBriefResult == null) {
       return const _PremiumBriefSkeleton();
     }

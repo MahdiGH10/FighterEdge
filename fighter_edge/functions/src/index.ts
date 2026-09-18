@@ -39,6 +39,19 @@ export const edgeFuelAiExplain = onCall(
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
+    // Unverified accounts are the cheap way to farm paid inference: sign up
+    // with an address you do not own, spend our quota, repeat. The client
+    // refuses first for a readable message, but that is UX — this is the
+    // boundary. Checked before the profile read and before quota is consumed,
+    // so a refused caller costs us nothing. Federated sign-in (Google, Apple)
+    // arrives with email_verified already true.
+    if (request.auth.token.email_verified !== true) {
+      logger.info("ai_request_blocked", { reason: "email_not_verified" });
+      throw new HttpsError(
+        "permission-denied",
+        "Verify your email address to use the AI coach."
+      );
+    }
     const uid = request.auth.uid;
     const db = getFirestore();
 
