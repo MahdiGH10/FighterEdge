@@ -1,9 +1,9 @@
 # Fighter Edge — Claude Code Handoff
 
-**Verified:** 2026-09-17  
+**Verified:** 2026-09-18
 **Repository:** `MahdiGH10/FighterEdge`  
 **Branch:** `main`  
-**Latest commit:** `9f1b04f ci: use Android-specific Flutter config generation`  
+**Latest feature commit:** `4d4b50b feat: connect plan reveal to premium value`
 **Purpose:** Give a new Claude Code session enough context to continue the
 application without rebuilding work that already exists or claiming that
 account-level setup is complete when it is not.
@@ -16,6 +16,42 @@ decisions and product reasoning, but some of their implementation counts and
 this document before changing scope.
 
 ---
+
+## Continuation update — 2026-09-18
+
+The previous Claude Code session reached its limit after the auth, first-run,
+tab-motion, and premium-UI work had landed. The current repository is already
+past those phases; do not rebuild them.
+
+The latest local slice is committed as `4d4b50b`:
+
+- The onboarding plan reveal now has a clear, optional Pro continuation. The
+  free dashboard and fuel path remain available.
+- The paywall leads with the annual store product, shows an honest monthly
+  equivalent only when the provider supplies a numeric price, and keeps the
+  monthly option available as a secondary action.
+- Pro value copy now includes the AI Fighter Brief and premium fuel library.
+- The onboarding and paywall CTAs record only the surface/access pair in
+  `premium_cta_tapped`; no identity, measurements, or subscription data is
+  sent through this event.
+- RevenueCat receipts and server-owned entitlements are unchanged. This is a
+  presentation and conversion slice, not a client-side entitlement change.
+
+Validation at this handoff:
+
+- `flutter analyze` — clean.
+- `flutter test --exclude-tags golden` — 362 tests passed.
+- `flutter test --tags golden` — 3 golden tests passed.
+- `functions`: `npm test` — build plus 19 tests passed.
+
+The remaining production blocker is account configuration, not this UI slice:
+the RevenueCat webhook deployment still needs the Firebase secret
+`REVENUECAT_WEBHOOK_AUTH`, followed by real App Store/Play sandbox purchase and
+restore tests. Never put that secret in source control or in Flutter config.
+
+The next bounded engineering slice should be retention or release readiness:
+first choose one, inspect current code/status, add tests, then commit locally.
+Do not push without the user's explicit request.
 
 ## 1. Product in one paragraph
 
@@ -91,12 +127,15 @@ cd C:\Users\Mahdi\Downloads\FighterEdge\fighter_edge
 
 ### Current working tree caveat
 
-At handoff creation, the only untracked paths are unrelated/generated items:
+At this handoff, the only untracked paths are existing audit/session artifacts;
+preserve them and do not add them to the feature commit:
 
 ```text
 .playwright-mcp/
 fighter_edge/docs/SESSION_HANDOFF.md
-fighter_edge/test/golden/failures/
+fighter_edge/docs/UX_WORKFLOW_HANDOFF.md
+fighter_edge/docs/VISUAL_AUDIT_20260917.md
+fighter_edge/docs/audit_screenshots_20260917/
 ```
 
 Preserve them. Do not add, delete, or fold them into a feature commit unless
