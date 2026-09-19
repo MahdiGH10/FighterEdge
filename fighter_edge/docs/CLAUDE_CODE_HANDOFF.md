@@ -184,7 +184,23 @@ Five more local commits on top of `3a88914`, **not pushed**, all gates green
 - `87a352e` — **Login autofill.** Login now supports password managers
   (fill + save), email fields never autocorrect, OTP field offers the code.
 
-Still open, in suggested order: German localization (the partner is in
+- `03e3798` — **German + language switch.** Flutter localization is set up
+  (ARB in `lib/l10n`, generated `L` class committed to `lib/l10n/gen`, see
+  `l10n.yaml`), with a device-wide `LocaleController` and a Settings picker
+  (System / English / Deutsch). Translated so far: navigation, Settings,
+  Nutrition + Add Food, fuel week/left-today cards, Train tabs, round timer
+  and corner cues, login. Everything else falls back to English by ARB
+  design; the picker says so. `intl` bumped to ^0.20.2. Adding a string
+  means: add to `app_en.arb` + `app_de.arb`, then `flutter pub get`.
+  Widget tests that build a bare `MaterialApp` must pass
+  `L.localizationsDelegates` or `L.of(context)` throws.
+
+Local toolchain note: Flutter was pointed at `C:\Android\Sdk`, which only
+has platform-tools. The real SDK is `%LOCALAPPDATA%\Android\Sdk`;
+`flutter config --android-sdk` now points there and all SDK licences are
+accepted, so Android builds work on this machine.
+
+Still open, in suggested order: finishing the German translation (the partner is in
 Germany; the app is English-only with no l10n setup), barcode scanning
 (needs a camera package + a food-data source decision), Apple sign-in and
 Google-on-Android verification (account/console work), recipe photos,
