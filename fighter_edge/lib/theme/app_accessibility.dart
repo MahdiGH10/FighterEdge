@@ -12,9 +12,16 @@ import 'app_colors.dart';
 class AppAccessibility {
   AppAccessibility._();
 
-  /// The smallest tappable area, per HIG. Wrap small visuals to reach it
-  /// rather than shrinking the target.
-  static const double minTouchTarget = 44;
+  /// The smallest tappable area. Wrap small visuals to reach it rather than
+  /// shrinking the target.
+  ///
+  /// Apple HIG asks for 44×44pt; Android's Core App Quality guidelines and
+  /// Material's accessibility layout guidance ask for 48×48dp. Android ships
+  /// first for this app (it's the platform CI actually builds a release for
+  /// today), so this uses Android's larger number — 4dp nobody will notice
+  /// visually, and it clears both platforms' stated minimums at once rather
+  /// than picking whichever is smaller.
+  static const double minTouchTarget = 48;
 
   static Widget builder(BuildContext context, Widget? child) {
     final media = MediaQuery.maybeOf(context);

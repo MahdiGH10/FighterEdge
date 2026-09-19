@@ -310,7 +310,7 @@ class _StartIconButton extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           child: SizedBox.square(
-            dimension: 44,
+            dimension: AppAccessibility.minTouchTarget,
             child: Icon(Icons.play_arrow, color: Colors.white, size: 22),
           ),
         ),

@@ -159,6 +159,15 @@ class AppTheme {
     );
   }
 
+  /// The only theme the app ships. This is a deliberate identity decision,
+  /// not an unfinished one: "a calm, premium fight-camp instrument" is dark
+  /// by definition, the same way several premium fitness/recovery and
+  /// trading apps ship dark-only with no store-review consequence in
+  /// practice. Google Play's Core App Quality guidelines list light+dark
+  /// support as a visual-design ideal, not a submission blocker — worth
+  /// knowing if this ever gets flagged by a Play quality checklist, but not
+  /// worth compromising the identity over. See
+  /// docs/UI_UX_DESIGN_AUDIT_20260919.md §8 for the full reasoning.
   static ThemeData dark() {
     final scheme = _colorScheme();
     final base = ThemeData.dark(useMaterial3: true);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../theme/app_accessibility.dart';
 import '../../../../../theme/app_colors.dart';
 import '../../../../../theme/app_theme.dart';
 import '../../../../../theme/app_typography.dart';
@@ -123,7 +124,7 @@ class _StepButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: SizedBox.square(
-            dimension: 44,
+            dimension: AppAccessibility.minTouchTarget,
             child: Icon(
               icon,
               color: enabled ? AppColors.textPrimary : AppColors.textMuted,

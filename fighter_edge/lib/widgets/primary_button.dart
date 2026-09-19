@@ -59,7 +59,8 @@ class PrimaryButton extends StatelessWidget {
                 : null,
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
+            constraints: const BoxConstraints(
+                minHeight: AppAccessibility.minTouchTarget),
             child: _ButtonContent(
               label: label,
               icon: icon,
@@ -97,7 +98,8 @@ class GhostButton extends StatelessWidget {
             border: Border.all(color: AppAccessibility.border(context)),
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
+            constraints: const BoxConstraints(
+                minHeight: AppAccessibility.minTouchTarget),
             child: _ButtonContent(
               label: label,
               icon: icon,

@@ -74,8 +74,9 @@ class _Chip extends StatelessWidget {
           duration: reduceMotion ? Duration.zero : MotionTokens.fast,
           curve: MotionTokens.snap,
           // The app's most-used segmented control had no floor at all — text
-          // plus padding alone landed around 37px, well under the 44pt target.
-          constraints: const BoxConstraints(minHeight: 44),
+          // plus padding alone landed around 37px, well under the target.
+          constraints:
+              const BoxConstraints(minHeight: AppAccessibility.minTouchTarget),
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : AppColors.surfaceAlt,
             borderRadius: BorderRadius.circular(Radii.chip),

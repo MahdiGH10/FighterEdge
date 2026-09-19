@@ -250,7 +250,7 @@ class _IconBtn extends StatelessWidget {
         onTap: onTap,
         pressedScale: 0.9,
         child: SizedBox.square(
-          dimension: 44,
+          dimension: AppAccessibility.minTouchTarget,
           child: Icon(icon, color: AppColors.textPrimary, size: 26),
         ),
       ),
@@ -273,7 +273,7 @@ class HeaderIcon extends StatelessWidget {
         onTap: onTap,
         pressedScale: 0.9,
         child: SizedBox.square(
-          dimension: 44,
+          dimension: AppAccessibility.minTouchTarget,
           child: Icon(icon,
               color: AppAccessibility.textSecondary(context), size: 22),
         ),

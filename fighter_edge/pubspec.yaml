@@ -33,6 +33,29 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  # Generators only — they write static resource files at dev time and are
+  # never compiled into the shipped app, so they carry none of the native
+  # build risk a runtime plugin does.
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "assets/icon/icon.png"
+  # Matches AppColors.background exactly — the icon reads as part of the
+  # app, not a sticker on top of a mismatched adaptive-icon background.
+  adaptive_icon_background: "#09090D"
+  adaptive_icon_foreground: "assets/icon/foreground.png"
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#09090D"
+  image: assets/icon/foreground.png
+  android_12:
+    color: "#09090D"
+    image: assets/icon/foreground.png
+  web: false
 
 flutter:
   uses-material-design: true

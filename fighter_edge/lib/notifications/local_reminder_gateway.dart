@@ -5,6 +5,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../theme/app_colors.dart';
 import 'reminder_gateway.dart';
 
 /// On-device local notifications, via `flutter_local_notifications`.
@@ -46,7 +47,10 @@ class LocalReminderGateway implements ReminderGateway {
       // that fires at the wrong local hour still beats one that never fires
       // because a timezone lookup failed.
     }
-    const android = AndroidInitializationSettings('ic_launcher');
+    // A flat white silhouette, not the full-color app icon: Android tints
+    // status-bar icons itself, and a colored icon there just renders as a
+    // solid white blob with the mark lost. See assets/icon/ for the source.
+    const android = AndroidInitializationSettings('ic_notification');
     await _plugin.initialize(
       settings: const InitializationSettings(android: android),
     );
@@ -99,6 +103,10 @@ class LocalReminderGateway implements ReminderGateway {
               _channelName,
               channelDescription: _channelDescription,
               importance: Importance.defaultImportance,
+              icon: 'ic_notification',
+              // The accent Android tints the silhouette and app-name text
+              // with in the notification shade.
+              color: AppColors.primary,
             ),
           ),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../billing/subscription.dart';
 import '../../../../controllers/auth_controller.dart';
+import '../../../../theme/app_accessibility.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_typography.dart';
@@ -384,8 +385,9 @@ class _Toggle extends StatelessWidget {
               borderRadius: BorderRadius.circular(Radii.chip),
             ),
             child: Container(
-              // 44pt floor, not the visually-driven 36 this used to be.
-              constraints: const BoxConstraints(minHeight: 44),
+              // Accessibility floor, not the visually-driven 36 this used to be.
+              constraints: const BoxConstraints(
+                  minHeight: AppAccessibility.minTouchTarget),
               padding: const EdgeInsets.symmetric(
                 horizontal: Insets.lg,
                 vertical: Insets.sm,
