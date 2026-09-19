@@ -10,6 +10,7 @@ import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../features/edge_fuel/presentation/screens/recipe_library_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../features/edge_fuel/presentation/widgets/add_food_sheet.dart';
+import '../features/edge_fuel/presentation/widgets/fuel_what_is_left.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../theme/app_colors.dart';
@@ -408,6 +409,10 @@ class _TodayView extends StatelessWidget {
             ],
           ),
         ),
+        if (FuelWhatIsLeft.appliesTo(edgeFuel)) ...[
+          const SizedBox(height: Insets.md),
+          FuelWhatIsLeft(edgeFuel: edgeFuel),
+        ],
         const SizedBox(height: Insets.xl),
         const SectionHeader('Meals'),
         if (edgeFuel.entries.isEmpty)

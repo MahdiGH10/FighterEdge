@@ -184,6 +184,28 @@ void main() {
       expect(find.text('Couldn’t build your brief'), findsOneWidget);
     });
 
+    testWidgets('shows what is left today and opens recipes that fit',
+        (tester) async {
+      final repo = await makeRepo(signedIn: true);
+      final userId = repo.currentUser!.id;
+      final edgeFuelRepo = InMemoryEdgeFuelRepository();
+      await edgeFuelRepo.saveTarget(userId, _successTarget());
+
+      await tester.pumpWidget(wrapApp(
+        const EdgeFuelPlanScreen(),
+        repo: repo,
+        edgeFuelRepo: edgeFuelRepo,
+      ));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('2500 kcal left today'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(
+          find.text('Recipes that fit, highest protein first'), findsOneWidget);
+    });
+
     testWidgets('a used-up quota says when the brief comes back',
         (tester) async {
       final repo = await makeRepo(signedIn: true, plan: Plan.pro);

@@ -116,6 +116,32 @@ void main() {
       expect(controller.visible, isEmpty);
     });
 
+    test('fits-today keeps only servings under the budget, protein first',
+        () async {
+      final controller = _controller();
+      await controller.load();
+
+      controller.setFilters(const RecipeFilters(maxCalories: 450));
+      final visible = controller.visible;
+      expect(visible, isNotEmpty);
+      expect(visible.length, lessThan(24));
+      expect(
+        visible.every((l) => l.perServing.kcalRounded <= 450),
+        isTrue,
+      );
+      for (var i = 1; i < visible.length; i++) {
+        expect(
+          visible[i - 1].perServing.proteinGrams,
+          greaterThanOrEqualTo(visible[i].perServing.proteinGrams),
+        );
+      }
+      expect(controller.filters.hasActiveFilter, isTrue);
+
+      controller
+          .setFilters(controller.filters.copyWith(clearMaxCalories: true));
+      expect(controller.visible, hasLength(24));
+    });
+
     test('clearFilters keeps the allergen escape hatch state', () async {
       final controller = _controller();
       await controller.load();

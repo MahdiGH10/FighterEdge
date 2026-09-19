@@ -282,6 +282,15 @@ class _FilterBar extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
+                if (filters.maxCalories != null)
+                  _Toggle(
+                    label:
+                        'Fits today \u00b7 \u2264${filters.maxCalories} kcal',
+                    selected: true,
+                    onTap: () => controller.setFilters(
+                      filters.copyWith(clearMaxCalories: true),
+                    ),
+                  ),
                 _Toggle(
                   label: 'Before training',
                   selected:

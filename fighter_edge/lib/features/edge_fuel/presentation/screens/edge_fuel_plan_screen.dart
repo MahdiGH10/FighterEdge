@@ -30,6 +30,7 @@ import '../../domain/models/nutrition_target.dart';
 import '../controllers/edge_fuel_ai_controller.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../nutrition_copy.dart';
+import '../widgets/fuel_what_is_left.dart';
 import 'edge_fuel_setup_screen.dart';
 
 /// Read-only view of the confirmed EdgeFuel plan (master prompt §5.2, §19
@@ -194,6 +195,10 @@ class _PlanBody extends StatelessWidget {
         ],
         const SizedBox(height: Insets.lg),
         _FighterBriefPreviewSection(target: target, edgeFuel: edgeFuel),
+        if (FuelWhatIsLeft.appliesTo(edgeFuel)) ...[
+          const SizedBox(height: Insets.md),
+          FuelWhatIsLeft(edgeFuel: edgeFuel),
+        ],
         const SizedBox(height: Insets.lg),
         _AiCoachSection(target: target, edgeFuel: edgeFuel),
         const SizedBox(height: Insets.lg),

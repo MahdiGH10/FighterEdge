@@ -34,6 +34,10 @@ class RecipeFilters {
   final int? maxMinutes;
   final bool noOvenOnly;
 
+  /// Per-serving calorie ceiling, set from "what's left today". When set,
+  /// results are ordered by protein so the best use of the budget is first.
+  final int? maxCalories;
+
   /// When true, recipes conflicting with the user's declared allergens are
   /// shown anyway, each with a warning. Default false — see
   /// `docs/edge_fuel/EF3_PLAN.md` §8 decision 1 (Option B).
@@ -47,6 +51,7 @@ class RecipeFilters {
     this.costBand,
     this.maxMinutes,
     this.noOvenOnly = false,
+    this.maxCalories,
     this.showAllergenConflicts = false,
   });
 
@@ -58,12 +63,14 @@ class RecipeFilters {
     CostBand? costBand,
     int? maxMinutes,
     bool? noOvenOnly,
+    int? maxCalories,
     bool? showAllergenConflicts,
     bool clearMealType = false,
     bool clearTrainingTiming = false,
     bool clearDietTag = false,
     bool clearCostBand = false,
     bool clearMaxMinutes = false,
+    bool clearMaxCalories = false,
   }) {
     return RecipeFilters(
       query: query ?? this.query,
@@ -74,6 +81,7 @@ class RecipeFilters {
       costBand: clearCostBand ? null : (costBand ?? this.costBand),
       maxMinutes: clearMaxMinutes ? null : (maxMinutes ?? this.maxMinutes),
       noOvenOnly: noOvenOnly ?? this.noOvenOnly,
+      maxCalories: clearMaxCalories ? null : (maxCalories ?? this.maxCalories),
       showAllergenConflicts:
           showAllergenConflicts ?? this.showAllergenConflicts,
     );
@@ -86,7 +94,8 @@ class RecipeFilters {
       dietTag != null ||
       costBand != null ||
       maxMinutes != null ||
-      noOvenOnly;
+      noOvenOnly ||
+      maxCalories != null;
 }
 
 /// Read-side state for the recipe library.
@@ -191,6 +200,10 @@ class RecipeLibraryController extends ChangeNotifier {
   /// Recipes matching the active filters, allergen rule applied.
   List<RecipeListing> get visible {
     final matches = _all.where(_matchesFilters).toList();
+    if (_filters.maxCalories != null) {
+      matches.sort((a, b) =>
+          b.perServing.proteinGrams.compareTo(a.perServing.proteinGrams));
+    }
     if (_filters.showAllergenConflicts || _allergens.matched.isEmpty) {
       return matches;
     }
@@ -229,6 +242,10 @@ class RecipeLibraryController extends ChangeNotifier {
       return false;
     }
     if (f.noOvenOnly && recipe.requiresOven) return false;
+    if (f.maxCalories != null &&
+        listing.perServing.kcalRounded > f.maxCalories!) {
+      return false;
+    }
 
     return true;
   }
