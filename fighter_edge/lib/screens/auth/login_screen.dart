@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/auth_controller.dart';
@@ -39,6 +40,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final auth = context.read<AuthController>();
     try {
       await auth.signIn(_email.text, _password.text);
+      // Tells the password manager the sign-in worked, so it offers to save
+      // or update the credentials.
+      TextInput.finishAutofillContext();
     } catch (e) {
       if (mounted) showAuthError(context, e);
     }
@@ -100,29 +104,46 @@ class _LoginScreenState extends State<LoginScreen> {
                           style:
                               AppType.subhead(color: AppColors.textSecondary)),
                       const SizedBox(height: Insets.xl),
-                      AppTextField(
-                        controller: _email,
-                        label: 'Email',
-                        icon: Icons.mail_outline,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: Insets.md),
-                      AppTextField(
-                        controller: _password,
-                        label: 'Password',
-                        icon: Icons.lock_outline,
-                        obscure: _obscure,
-                        textInputAction: TextInputAction.done,
-                        onSubmitted: (_) => _signIn(),
-                        suffix: IconButton(
-                          tooltip: _obscure ? 'Show password' : 'Hide password',
-                          icon: Icon(
-                              _obscure
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: AppColors.textMuted,
-                              size: 20),
-                          onPressed: () => setState(() => _obscure = !_obscure),
+                      // One autofill group so a password manager fills both
+                      // fields from a single saved login.
+                      AutofillGroup(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            AppTextField(
+                              controller: _email,
+                              label: 'Email',
+                              icon: Icons.mail_outline,
+                              keyboardType: TextInputType.emailAddress,
+                              autofillHints: const [
+                                AutofillHints.email,
+                                AutofillHints.username,
+                              ],
+                            ),
+                            const SizedBox(height: Insets.md),
+                            AppTextField(
+                              controller: _password,
+                              label: 'Password',
+                              icon: Icons.lock_outline,
+                              obscure: _obscure,
+                              autofillHints: const [AutofillHints.password],
+                              textInputAction: TextInputAction.done,
+                              onSubmitted: (_) => _signIn(),
+                              suffix: IconButton(
+                                tooltip: _obscure
+                                    ? 'Show password'
+                                    : 'Hide password',
+                                icon: Icon(
+                                    _obscure
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    color: AppColors.textMuted,
+                                    size: 20),
+                                onPressed: () =>
+                                    setState(() => _obscure = !_obscure),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Align(

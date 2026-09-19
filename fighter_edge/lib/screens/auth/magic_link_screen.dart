@@ -82,6 +82,7 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
                 label: 'Email',
                 icon: Icons.mail_outline,
                 keyboardType: TextInputType.emailAddress,
+                autofillHints: const [AutofillHints.email],
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _sendCode(),
               ),
@@ -97,6 +98,9 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
                 label: '6-digit code',
                 icon: Icons.pin_outlined,
                 keyboardType: TextInputType.number,
+                // Lets iOS and Android offer the code straight from the
+                // email or message notification.
+                autofillHints: const [AutofillHints.oneTimeCode],
                 textInputAction: TextInputAction.done,
                 autofocus: true,
                 onSubmitted: (_) => _verify(),

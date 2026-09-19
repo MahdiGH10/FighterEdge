@@ -34,6 +34,26 @@ void main() {
       expect(find.text('Start your camp'), findsOneWidget); // signup subtitle
     });
 
+    testWidgets('password managers can fill and save the login',
+        (tester) async {
+      useTallScreen(tester);
+      final repo = await makeRepo();
+      await tester.pumpWidget(wrapApp(const LoginScreen(), repo: repo));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AutofillGroup), findsOneWidget);
+      final fields =
+          tester.widgetList<TextField>(find.byType(TextField)).toList();
+      final email = fields
+          .firstWhere((f) => f.keyboardType == TextInputType.emailAddress);
+      final password = fields.firstWhere((f) => f.obscureText);
+      expect(email.autofillHints, contains(AutofillHints.email));
+      expect(password.autofillHints, contains(AutofillHints.password));
+      // A keyboard must never "correct" an email or suggest a password.
+      expect(email.autocorrect, isFalse);
+      expect(password.enableSuggestions, isFalse);
+    });
+
     testWidgets('shows an error on bad credentials', (tester) async {
       useTallScreen(tester);
       final repo = await makeRepo();

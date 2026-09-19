@@ -45,11 +45,16 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Keyboards "correcting" an email address or suggesting a password are
+    // the classic reason a correct sign-in fails.
+    final literal = obscure || keyboardType == TextInputType.emailAddress;
     return TextField(
       controller: controller,
       focusNode: focusNode,
       autofillHints: autofillHints,
       obscureText: obscure,
+      autocorrect: !literal,
+      enableSuggestions: !literal,
       keyboardType: keyboardType,
       textCapitalization: textCapitalization,
       textInputAction: textInputAction,
