@@ -26,6 +26,20 @@ class Radii {
   static const double nav = 24;
 }
 
+/// Icon sizes. Glyphs sit on the type scale rather than floating free of it.
+class IconSizes {
+  IconSizes._();
+
+  /// Beside a micro label or inline with subhead text.
+  static const double inline = 18;
+
+  /// Leading glyph of a list row or section tile.
+  static const double row = 20;
+
+  /// The tinted circle a [row] glyph sits in.
+  static const double badge = 36;
+}
+
 /// A [Curve] driven by a real spring simulation.
 ///
 /// Cubic curves always take exactly their allotted time and ease out the same

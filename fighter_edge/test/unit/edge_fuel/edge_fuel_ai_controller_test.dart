@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_models.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
@@ -124,7 +127,109 @@ void main() {
 
       expect(callCount, 1);
     });
+
+    test('the brief and the coach load independently', () async {
+      final brief = Completer<EdgeFuelAiResult>();
+      final controller = EdgeFuelAiController(
+        gateway: _ManualGateway(brief: brief),
+      );
+
+      final pending = controller.generateFighterBrief(target: _successTarget());
+      expect(controller.isBriefLoading, isTrue);
+      expect(controller.isExplaining, isFalse);
+
+      // The coach is still usable while the brief is being written.
+      await controller.explainPlan(target: _successTarget());
+      expect(controller.lastResult?.status, EdgeFuelAiStatus.success);
+      expect(controller.isBriefLoading, isTrue);
+
+      brief.complete(const EdgeFuelAiResult.unavailable());
+      await pending;
+      expect(controller.isLoading, isFalse);
+      expect(controller.state, EdgeFuelAiRequestState.done);
+    });
+
+    test('a brief goes stale once the log changes, and only then', () async {
+      final controller = EdgeFuelAiController(
+        gateway: const FakeEdgeFuelAiGateway(),
+      );
+      final now = DateTime(2026, 9, 19, 12);
+      final empty = NutritionDay.empty(
+        localDate: '2026-09-19',
+        timeZone: 'UTC',
+        now: now,
+      );
+
+      expect(controller.isBriefStale(empty), isFalse);
+      await controller.generateFighterBrief(
+        target: _successTarget(),
+        day: empty,
+      );
+      expect(controller.isBriefStale(empty), isFalse);
+
+      final logged = empty.copyWith(entries: [
+        FoodLogEntry(
+          id: 'meal-1',
+          name: 'fixture',
+          notes: 'test fixture',
+          calories: 500,
+          proteinGrams: 30,
+          carbGrams: 50,
+          fatGrams: 10,
+          loggedAt: now,
+        ),
+      ]);
+      expect(controller.isBriefStale(logged), isTrue);
+    });
+
+    test('a failed brief is never reported as stale', () async {
+      final controller = EdgeFuelAiController(
+        gateway: FakeEdgeFuelAiGateway(
+          nextResult: () => const EdgeFuelAiResult.unavailable(),
+        ),
+      );
+      await controller.generateFighterBrief(target: _successTarget());
+
+      final day = NutritionDay.empty(
+        localDate: '2026-09-19',
+        timeZone: 'UTC',
+        now: DateTime(2026, 9, 19),
+      ).copyWith(entries: [
+        FoodLogEntry(
+          id: 'meal-1',
+          name: 'fixture',
+          notes: 'test fixture',
+          calories: 500,
+          proteinGrams: 30,
+          carbGrams: 50,
+          fatGrams: 10,
+          loggedAt: DateTime(2026, 9, 19),
+        ),
+      ]);
+      expect(controller.isBriefStale(day), isFalse);
+    });
   });
+}
+
+class _ManualGateway implements EdgeFuelAiGateway {
+  final Completer<EdgeFuelAiResult> brief;
+  _ManualGateway({required this.brief});
+
+  @override
+  Future<EdgeFuelAiResult> explainPlan({
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  }) async =>
+      const EdgeFuelAiResult.success(EdgeFuelAiResponse(summary: 'ok'));
+
+  @override
+  Future<EdgeFuelAiResult> generateFighterBrief({
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  }) =>
+      brief.future;
 }
 
 class _ThrowingGateway implements EdgeFuelAiGateway {

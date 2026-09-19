@@ -3,7 +3,7 @@
 **Verified:** 2026-09-19
 **Repository:** `MahdiGH10/FighterEdge`  
 **Branch:** `main`  
-**Latest feature commit:** `f4ac87d feat: apply the UI/UX audit's Android-packaging findings`
+**Latest feature commit:** premium Fighter Brief flow (on top of `979a8d7`)
 **Purpose:** Give a new Claude Code session enough context to continue the
 application without rebuilding work that already exists or claiming that
 account-level setup is complete when it is not.
@@ -120,6 +120,43 @@ audit's own findings got acted on:
 All four commits were pushed and are live on `origin/main`. Do not push a new
 commit here without the user's explicit request — the four above were
 requested explicitly; that isn't a standing instruction for future slices.
+
+## Continuation update — 2026-09-19 (EdgeFuel AI live on a free model + premium brief UX)
+
+Two local commits on top of `6cb3f2e`, **not pushed**:
+
+- `979a8d7` — **AI backend configured and deployed.** `edgeFuelAiExplain` is
+  live on `fighter-edge-app` (state ACTIVE, verified after deploy) running
+  `deepseek/deepseek-v4-flash-0731:free` via `functions/.env.fighter-edge-app`
+  (non-secret; delete the line to fall back to the paid `DEFAULT_MODEL`).
+  Reasoning disabled and output capped at 900 tokens (replies ~7–12s);
+  provider timeout 25s; one retry of a *rejected* answer inside an 18s
+  budget; client timeout 45s to match. Validator now parses fenced JSON,
+  accepts thousands separators and fact differences, and still rejects
+  invented numbers; system prompt v4 adds explicit numbers + length rules.
+  `scripts/ai-smoke.mjs` runs a model through the real prompt + validator —
+  8/8 passes before deploy. Free tier limits: 50 requests/day, 20/min.
+  The deploy also required creating the `REVENUECAT_WEBHOOK_AUTH` secret
+  (random value); the webhook fails closed until the same value is set in
+  RevenueCat. **Not tested end-to-end from the app yet** — needs a
+  verified-email account whose Firestore `users/{uid}.plan` is `pro`.
+- (this commit) — **Premium Fighter Brief flow.** The brief and the Coach
+  now load independently (one shared flag made each show the other's
+  loading state). Waiting shows a content-shaped skeleton with a step line
+  naming what the server does, holding on the last step; results reveal in
+  reading order (summary → next action, emphasized → the rest) with a
+  success haptic; quota / syncing / unavailable are titled notices with one
+  recovery action ("Refresh my access" re-reads the entitlement). A brief
+  goes visibly stale — and Refresh becomes primary — once the food log
+  changes. For Pro the deterministic quick read steps aside while the full
+  brief is building or shown. "Redo setup" became a ghost button so
+  Generate is the screen's one primary action. New `IconSizes` tokens.
+
+Still open for EdgeFuel: EF3_PLAN §3.1's "Fuel this plan" entry (Plan
+screen → Recipe Library pre-filtered to today's remaining macros) is not
+built; recipe photography is blocked on Higgsfield credits (24 prompts
+designed, nothing generated or purchased). Functions run on Node 20, which
+Google decommissions 2026-10-30 — upgrade before then.
 
 ## 1. Product in one paragraph
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,6 +12,10 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.da
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
+import 'package:fighter_edge/theme/app_theme.dart';
+import 'package:fighter_edge/widgets/skeleton.dart';
+import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 
 import '../../helpers/test_harness.dart';
 
@@ -139,6 +145,76 @@ void main() {
     });
 
     testWidgets(
+        'the brief shows a shaped building state that names each step, '
+        'and leaves the coach alone', (tester) async {
+      final repo = await makeRepo(signedIn: true, plan: Plan.pro);
+      final userId = repo.currentUser!.id;
+      final edgeFuelRepo = InMemoryEdgeFuelRepository();
+      await edgeFuelRepo.saveTarget(userId, _successTarget());
+      final gateway = _PendingBriefGateway();
+
+      await tester.pumpWidget(wrapApp(
+        const EdgeFuelPlanScreen(),
+        repo: repo,
+        edgeFuelRepo: edgeFuelRepo,
+        edgeFuelAiGateway: gateway,
+      ));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('GENERATE FULL FIGHTER BRIEF'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.text('GENERATE FULL FIGHTER BRIEF'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('GENERATE FULL FIGHTER BRIEF'));
+      await tester.pump();
+
+      expect(find.text('Reading your plan…'), findsOneWidget);
+      expect(find.byType(Skeleton), findsOneWidget,
+          reason: 'only the brief is loading, not the coach');
+      expect(find.text('ASK EDGEFUEL COACH'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(MotionTokens.fast);
+      expect(find.text('Checking today’s log…'), findsOneWidget);
+
+      gateway.brief.complete(const EdgeFuelAiResult.unavailable());
+      await tester.pumpAndSettle();
+      expect(find.byType(Skeleton), findsNothing);
+      expect(find.text('Couldn’t build your brief'), findsOneWidget);
+    });
+
+    testWidgets('a used-up quota says when the brief comes back',
+        (tester) async {
+      final repo = await makeRepo(signedIn: true, plan: Plan.pro);
+      final userId = repo.currentUser!.id;
+      final edgeFuelRepo = InMemoryEdgeFuelRepository();
+      await edgeFuelRepo.saveTarget(userId, _successTarget());
+
+      await tester.pumpWidget(wrapApp(
+        const EdgeFuelPlanScreen(),
+        repo: repo,
+        edgeFuelRepo: edgeFuelRepo,
+        edgeFuelAiGateway: FakeEdgeFuelAiGateway(
+          nextResult: () => const EdgeFuelAiResult.quotaReached(),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('GENERATE FULL FIGHTER BRIEF'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.text('GENERATE FULL FIGHTER BRIEF'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('GENERATE FULL FIGHTER BRIEF'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Today’s briefs are used up'), findsOneWidget);
+      expect(find.textContaining('resets tomorrow'), findsOneWidget);
+    });
+
+    testWidgets(
         'Ask EdgeFuel Coach shows an unavailable state without crashing',
         (tester) async {
       final repo = await makeRepo(signedIn: true, plan: Plan.pro);
@@ -233,4 +309,26 @@ void main() {
           findsNothing);
     });
   });
+}
+
+/// Answers the coach at once and holds the brief open until the test
+/// completes [brief].
+class _PendingBriefGateway implements EdgeFuelAiGateway {
+  final brief = Completer<EdgeFuelAiResult>();
+
+  @override
+  Future<EdgeFuelAiResult> explainPlan({
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  }) async =>
+      const EdgeFuelAiResult.success(EdgeFuelAiResponse(summary: 'coach'));
+
+  @override
+  Future<EdgeFuelAiResult> generateFighterBrief({
+    required NutritionTarget target,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+  }) =>
+      brief.future;
 }
