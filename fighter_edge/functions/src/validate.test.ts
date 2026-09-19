@@ -164,3 +164,64 @@ test("rejects fabricated numbers inside a Fighter Brief section", () => {
   assert.equal(result.ok, false);
   assert.equal(result.reason, "fabricated_numbers");
 });
+
+test("parseModelJson recovers an object wrapped in a code fence", () => {
+  assert.deepEqual(parseModelJson('```json\n{"a":1}\n```'), { a: 1 });
+});
+
+test("parseModelJson recovers an object after a sentence of preamble", () => {
+  assert.deepEqual(parseModelJson('Here you go: {"a":1}'), { a: 1 });
+});
+
+test("parseModelJson still rejects text with no valid object", () => {
+  assert.equal(parseModelJson("{ not really json }"), null);
+});
+
+// A real day: target 2500, 1420 eaten. Mirrors what the Flutter client sends.
+const dayFacts = JSON.stringify({
+  target: { targetCalories: 2500, proteinGrams: 150 },
+  day: { consumedCalories: 1420 },
+});
+
+test("accepts supplied numbers written with a thousands separator", () => {
+  // Regression: "2,500" used to be read as "500" and rejected as fabricated.
+  const result = validateResponse(
+    goodResponse({ summary: "You're at 1,420 of your 2,500 kcal target." }),
+    dayFacts,
+  );
+  assert.equal(result.ok, true);
+});
+
+test("accepts the difference between two supplied numbers", () => {
+  // 2500 - 1420: arithmetic on the facts, not invention.
+  const result = validateResponse(
+    goodResponse({ summary: "About 1,080 kcal left today." }),
+    dayFacts,
+  );
+  assert.equal(result.ok, true);
+});
+
+test("still rejects a number that is neither supplied nor derived", () => {
+  const result = validateResponse(
+    goodResponse({ summary: "Aim for 3,150 kcal today." }),
+    dayFacts,
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "fabricated_numbers");
+});
+
+test("checks Fighter Brief sections with the same number rules", () => {
+  const result = validateResponse(
+    goodBriefResponse({
+      brief: {
+        nextAction: "You have about 1,080 kcal left — log dinner.",
+        mealSuggestion: "Lean protein and rice.",
+        trainingTiming: "Eat 2 hours before training.",
+        weeklyAdjustment: "Hold 2,500 kcal this week.",
+      },
+    }),
+    dayFacts,
+    "fighterBrief",
+  );
+  assert.equal(result.ok, true);
+});

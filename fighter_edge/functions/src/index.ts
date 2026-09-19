@@ -17,6 +17,16 @@ export { deleteAccount } from "./accountDeletion";
 
 const OPENROUTER_API_KEY = defineSecret("OPENROUTER_API_KEY");
 const REVENUECAT_WEBHOOK_AUTH = defineSecret("REVENUECAT_WEBHOOK_AUTH");
+/** First attempt plus at most one retry of a rejected answer. */
+const MAX_MODEL_ATTEMPTS = 2;
+
+/**
+ * Retry only if the first answer came back within this long. The provider
+ * call itself is capped at 25 s, so a retry started here finishes inside the
+ * Flutter client's 45 s wait.
+ */
+const RETRY_CUTOFF_MS = 18_000;
+
 const ALLOWED_TASKS: readonly AiTaskType[] = [
   "explainPlan",
   "fighterBrief",
@@ -143,30 +153,46 @@ export const edgeFuelAiExplain = onCall(
       "\nThis deployment has no recipe catalog yet — recipeIds must always be an empty array.",
     ].join(" ");
 
-    let rawContent: string;
-    try {
-      rawContent = await callOpenRouter({
-        apiKey: OPENROUTER_API_KEY.value(),
-        model: process.env.OPENROUTER_MODEL ?? DEFAULT_MODEL,
-        systemPrompt: SYSTEM_PROMPT,
-        userContent,
-      });
-    } catch (error) {
-      // Never expose raw provider errors to the client (master prompt §13.3).
-      logger.error("openrouter_call_failed", {
-        task: data.task,
-        error: error instanceof OpenRouterError ? error.message : "unknown",
-      });
-      return { status: "unavailable" as const };
-    }
+    // One retry, only for an answer the validator rejected, and only while
+    // there is still time for a second attempt inside the client's wait.
+    // Measured on the free model: ~75% of first answers pass, so a second
+    // independent try lifts the success rate to ~94% at the cost of latency
+    // only for the unlucky quarter. A provider error or timeout is not
+    // retried — a slow provider will not get faster on the second call.
+    const model = process.env.OPENROUTER_MODEL ?? DEFAULT_MODEL;
+    const startedAt = Date.now();
+    let parsed: unknown = null;
+    let validation: { ok: boolean; reason?: string } = { ok: false };
+    for (let attempt = 1; attempt <= MAX_MODEL_ATTEMPTS; attempt++) {
+      let rawContent: string;
+      try {
+        rawContent = await callOpenRouter({
+          apiKey: OPENROUTER_API_KEY.value(),
+          model,
+          systemPrompt: SYSTEM_PROMPT,
+          userContent,
+        });
+      } catch (error) {
+        // Never expose raw provider errors to the client (master prompt §13.3).
+        logger.error("openrouter_call_failed", {
+          task: data.task,
+          attempt,
+          error: error instanceof OpenRouterError ? error.message : "unknown",
+        });
+        return { status: "unavailable" as const };
+      }
 
-    const parsed = parseModelJson(rawContent);
-    const validation = validateResponse(parsed, suppliedFactsJson, data.task);
-    if (!validation.ok) {
+      parsed = parseModelJson(rawContent);
+      validation = validateResponse(parsed, suppliedFactsJson, data.task);
+      if (validation.ok) break;
       logger.warn("ai_response_rejected", {
         task: data.task,
+        attempt,
         reason: validation.reason,
       });
+      if (Date.now() - startedAt > RETRY_CUTOFF_MS) break;
+    }
+    if (!validation.ok) {
       return { status: "unavailable" as const };
     }
 

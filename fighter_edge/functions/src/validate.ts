@@ -47,11 +47,24 @@ export interface ValidationResult {
 }
 
 /** Safely parses model output. Never throws — a parse failure is just a rejection. */
+/**
+ * Parses the model's reply. JSON mode is a request, not a guarantee — some
+ * models still wrap the object in a ```json fence or a sentence of preamble.
+ * Falls back to the outermost {...} span before giving up; anything that is
+ * still not valid JSON is rejected, never repaired.
+ */
 export function parseModelJson(raw: string): unknown | null {
   try {
     return JSON.parse(raw);
   } catch {
-    return null;
+    const start = raw.indexOf("{");
+    const end = raw.lastIndexOf("}");
+    if (start === -1 || end <= start) return null;
+    try {
+      return JSON.parse(raw.slice(start, end + 1));
+    } catch {
+      return null;
+    }
   }
 }
 
@@ -142,16 +155,34 @@ function containsProhibitedContent(response: AiResponse): boolean {
 }
 
 /**
+ * Every 3+ digit number in the text, with thousands separators removed first.
+ * Without that, "2,500 kcal" reads as "500" — a number no fact contains — and
+ * an honest answer is rejected as fabricated.
+ */
+function numbersIn(text: string): number[] {
+  const normalised = text.replace(/(\d)[,\u202f\u00a0'](?=\d{3}\b)/g, "$1");
+  return (normalised.match(/\d{3,}/g) ?? []).map(Number);
+}
+
+/**
  * Loose defense against fabricated numbers: every 3+ digit number quoted in
- * the summary must appear somewhere in the supplied facts. Not a perfect
- * guarantee, but it catches the common failure mode of a model inventing a
- * plausible-looking calorie/macro figure.
+ * the response must be a supplied fact, or the difference between two
+ * supplied facts. The difference is allowed because "1,080 kcal left today"
+ * (target minus consumed) is the single most useful thing a coach can say, and
+ * it is arithmetic on the facts, not invention. Anything else — a plausible
+ * calorie figure from nowhere — is still rejected.
  */
 function containsFabricatedNumbers(
   response: AiResponse,
   suppliedFacts: string,
 ): boolean {
-  const suppliedNumbers = new Set(suppliedFacts.match(/\d{3,}/g) ?? []);
+  const facts = [...new Set(numbersIn(suppliedFacts))];
+  const allowed = new Set(facts);
+  for (const a of facts) {
+    for (const b of facts) {
+      if (a > b) allowed.add(a - b);
+    }
+  }
   const content = [
     response.summary,
     ...(response.brief
@@ -163,8 +194,7 @@ function containsFabricatedNumbers(
         ]
       : []),
   ].join(" ");
-  const contentNumbers = content.match(/\d{3,}/g) ?? [];
-  return contentNumbers.some((n) => !suppliedNumbers.has(n));
+  return numbersIn(content).some((n) => !allowed.has(n));
 }
 
 export function validateResponse(

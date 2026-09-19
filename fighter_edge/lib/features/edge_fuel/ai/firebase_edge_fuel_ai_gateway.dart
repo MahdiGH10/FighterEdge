@@ -16,7 +16,9 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
       : _functions = functions ?? FirebaseFunctions.instance;
 
   final FirebaseFunctions _functions;
-  static const _requestTimeout = Duration(seconds: 20);
+  // Covers the server's worst case: one model call (25s) plus one retry of a
+  // rejected answer, which the function only starts inside its first 18s.
+  static const _requestTimeout = Duration(seconds: 45);
 
   @override
   Future<EdgeFuelAiResult> explainPlan({
