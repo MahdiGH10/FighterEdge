@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/edge_fuel/presentation/widgets/fuel_week_card.dart';
 import '../models/training_session.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
@@ -52,6 +53,7 @@ class DashboardScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final firstRun = context.watch<FirstRunController>();
     final streak = context.watch<StreakController>();
+    final edgeFuel = context.watch<EdgeFuelController>();
     final user = auth.user;
     final weightDelta = state.weeklyDelta;
     final losing = weightDelta <= 0;
@@ -181,10 +183,23 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: Insets.md),
+          PremiumReveal(
+            index: 2,
+            // Re-keyed on the day's totals so logging a meal anywhere in the
+            // app redraws the week.
+            child: FuelWeekCard(
+              key: ValueKey(
+                '${edgeFuel.target?.targetCalories}-'
+                '${edgeFuel.consumedCalories}-${edgeFuel.entries.length}',
+              ),
+              edgeFuel: edgeFuel,
+            ),
+          ),
           const SizedBox(height: Insets.xl),
           const SectionHeader('Next Session'),
           PremiumReveal(
-            index: 2,
+            index: 3,
             child: _NextSessionCard(
               session: nextSession,
               onOpenCamp: () => onNavigate(1),

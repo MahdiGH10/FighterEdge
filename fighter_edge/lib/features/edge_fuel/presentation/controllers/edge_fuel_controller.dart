@@ -142,6 +142,30 @@ class EdgeFuelController extends ChangeNotifier {
     );
   }
 
+  /// This calendar week's days, Monday through [now]'s date, oldest first.
+  /// Days with nothing stored come back empty rather than missing, so the
+  /// caller always gets one entry per elapsed day.
+  Future<List<NutritionDay>> loadThisWeek({DateTime? now}) async {
+    final userId = _userId;
+    if (userId == null) return const [];
+    final clock = now ?? DateTime.now();
+    final today = DateTime(clock.year, clock.month, clock.day);
+    final days = <NutritionDay>[];
+    for (var i = today.weekday - 1; i >= 0; i--) {
+      final date = DateTime(today.year, today.month, today.day - i);
+      final loaded = _day;
+      if (loaded != null && loaded.localDate == mealDateKey(date)) {
+        days.add(loaded);
+        continue;
+      }
+      days.add(await _repository
+          .watchNutritionDay(userId, date,
+              targetSnapshot: hasUsableTarget ? _target : null)
+          .first);
+    }
+    return days;
+  }
+
   /// Logs a remembered food again, as a fresh entry on the selected day.
   Future<FoodLogEntry> logAgain(FoodLogEntry template) async {
     final entry = template.copyWith(
