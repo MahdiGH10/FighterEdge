@@ -77,7 +77,13 @@ jobs:
     name: Android release build
     needs: [analyze-and-test, golden-tests]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 20 was enough before flutter_local_notifications/timezone/flutter_timezone
+    # and core library desugaring; the added dependency graph and desugaring
+    # pass pushed a cold-Gradle-cache build past that on 2026-09-18. Gradle
+    # caching is already enabled above, so warm-cache runs should be faster
+    # than this ceiling suggests — this is headroom for the worst case, not a
+    # sign the build is slow in general.
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: fighter_edge
