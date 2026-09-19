@@ -29,6 +29,8 @@ void main() {
     expect(find.text('Annual plan'), findsOneWidget);
     expect(find.text(r'About $5.00 / month'), findsOneWidget);
     expect(find.textContaining('ANNUAL'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Restore purchases'), 200,
+        scrollable: find.byType(Scrollable).first);
     expect(find.text('Restore purchases'), findsOneWidget);
 
     await tester.tap(monthly);

@@ -200,8 +200,8 @@ class _ProContinuation extends StatelessWidget {
           ),
           const SizedBox(height: Insets.sm),
           Text(
-            'Pro adds deeper trends, the full technique library, and a daily '
-            'Fighter Brief built from your plan.',
+            'Pro adds a daily Fighter Brief built from your plan, the full '
+            'drill and recipe libraries, and corner cues between rounds.',
             style: AppType.callout(color: AppColors.textSecondary),
           ),
           const SizedBox(height: Insets.md),

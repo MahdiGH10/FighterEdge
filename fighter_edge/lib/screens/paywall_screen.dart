@@ -27,40 +27,6 @@ class PaywallScreen extends StatefulWidget {
 }
 
 class _PaywallScreenState extends State<PaywallScreen> {
-  static const _benefits = [
-    (
-      'Corner Coach',
-      'Round-by-round plans and post-session feedback',
-      Icons.record_voice_over
-    ),
-    ('All Timer Presets', 'Boxing, MMA and BJJ interval sets', Icons.timer),
-    (
-      'Unlimited Weight History',
-      'Full trend history without deleting your past',
-      Icons.show_chart
-    ),
-    (
-      'Nutrition Analytics',
-      'Weekly macro trends and plan explanations',
-      Icons.insights
-    ),
-    (
-      'Full Technique Library',
-      'Every discipline and progression path unlocked',
-      Icons.sports_martial_arts
-    ),
-    (
-      'AI Fighter Brief',
-      'A concise next-action brief grounded in your plan and training day',
-      Icons.auto_awesome
-    ),
-    (
-      'Premium Fuel Library',
-      'Advanced recipes with serving sizes and fighter-friendly macros',
-      Icons.restaurant_menu
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -142,7 +108,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               textAlign: TextAlign.center, style: AppType.title1()),
           const SizedBox(height: Insets.xs),
           Text(
-              'Sharper coaching, deeper history, and fuel decisions that make sense.',
+              'Sharper coaching, the full drill library, and fuel decisions that make sense.',
               textAlign: TextAlign.center,
               style: AppType.subhead(color: AppColors.textSecondary)),
           const SizedBox(height: Insets.xl),
@@ -152,13 +118,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ],
           const _ValueStack(),
           const SizedBox(height: Insets.lg),
-          for (final b in _benefits)
-            _BenefitRow(
-              title: b.$1,
-              subtitle: b.$2,
-              icon: b.$3,
-              highlighted: widget.highlight?.title == b.$1,
-            ),
+          for (final feature in Feature.values)
+            if (Entitlements.isProOnly(feature))
+              _BenefitRow(
+                title: feature.title,
+                subtitle: feature.pitch,
+                icon: feature.icon,
+                highlighted: widget.highlight == feature,
+              ),
           const SizedBox(height: Insets.lg),
           if (isPro)
             Column(
@@ -429,9 +396,10 @@ class _ValueStack extends StatelessWidget {
       'Focus on the session, habit, or recovery signal that moves the week.'
     ),
     (
-      Icons.query_stats,
-      'See trends, not noise',
-      'Keep the full history behind weight, camp, and nutrition progress.'
+      Icons.restaurant_menu,
+      'Fuel that fits',
+      'Every recipe, scaled to your servings and checked against your '
+          'allergens.'
     ),
     (
       Icons.psychology_alt,

@@ -93,7 +93,8 @@ class SettingsScreen extends StatelessWidget {
             title: auth.isPro ? 'Manage Pro' : 'Upgrade to Pro',
             subtitle: auth.isPro
                 ? 'Refresh status and manage billing once connected'
-                : 'Unlock analytics, coaching loops, and full library access',
+                : 'AI Fighter Brief, full drill and recipe libraries, corner '
+                    'cues',
             onTap: () => AppNavigation.push(
               context,
               AppRoutes.paywall,

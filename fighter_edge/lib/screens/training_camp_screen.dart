@@ -13,9 +13,8 @@ import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/stat_card.dart';
-import 'corner_coach_screen.dart';
 import 'round_timer_screen.dart';
-import 'technique_library_screen.dart';
+import 'drill_library_screen.dart';
 import '../theme/app_haptics.dart';
 import '../widgets/press_scale.dart';
 
@@ -34,8 +33,7 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
     final activeTab = switch (_tab) {
       0 => const _WeekView(),
       1 => const _HistoryView(),
-      2 => const TechniqueLibraryScreen(embedded: true),
-      _ => const CornerCoachScreen(embedded: true),
+      _ => const DrillLibraryScreen(),
     };
     return ScreenScaffold.tab(
       title: 'Train',
@@ -45,7 +43,7 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
             child: FilterChips(
-              options: const ['Week', 'History', 'Library', 'Coach'],
+              options: const ['Week', 'History', 'Drills'],
               selectedIndex: _tab,
               onSelected: (i) => setState(() => _tab = i),
             ),

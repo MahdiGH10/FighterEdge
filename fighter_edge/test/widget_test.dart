@@ -42,13 +42,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('TRAIN'), findsOneWidget);
 
-    await tester.tap(find.text('Library'));
+    await tester.tap(find.text('Drills'));
     await tester.pumpAndSettle();
-    expect(find.text('Jab Fundamentals'), findsOneWidget);
-
-    await tester.tap(find.text('Coach'));
-    await tester.pumpAndSettle();
-    expect(find.text('Corner Coach is Pro'), findsOneWidget);
+    expect(find.text('The Jab'), findsOneWidget);
 
     await tester.tap(find.text('Fuel'));
     await tester.pumpAndSettle();

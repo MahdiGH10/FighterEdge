@@ -19,35 +19,55 @@ extension PlanInfo on Plan {
 }
 
 /// The gate-able capabilities of the app.
+///
+/// This list is also the paywall: each Pro feature carries its own paywall
+/// copy below, and the paywall renders exactly these. A benefit that is not a
+/// real, gated feature cannot be advertised — which is the point. (An
+/// earlier paywall sold timer presets and weight history that were free
+/// anyway, and analytics that did not exist.)
 enum Feature {
-  cornerCoach,
-  advancedTimerStyles,
-  unlimitedWeightHistory,
-  nutritionAnalytics,
-  fullTechniqueLibrary,
+  /// The AI Fighter Brief and "Ask EdgeFuel Coach" (master prompt §13.1).
+  /// Gated like every Pro feature, which also keeps per-user AI spend
+  /// bounded.
+  edgeFuelAiCoach,
 
-  /// EdgeFuel premium recipes (master prompt §10). Deliberately distinct from
-  /// [nutritionAnalytics] rather than folded into one vague nutrition gate —
-  /// §10 requires separate entitlement cases so each can be reasoned about,
-  /// priced, and server-verified on its own.
+  /// EdgeFuel premium recipes (master prompt §10) — its own entitlement case
+  /// so it can be reasoned about, priced, and server-verified on its own.
   edgeFuelPremiumRecipes,
 
-  /// "Ask EdgeFuel Coach" (master prompt §13.1). The one AI surface in this
-  /// release — gated like every other Pro feature rather than given away
-  /// free, which is also what keeps per-user AI spend bounded.
-  edgeFuelAiCoach,
+  /// Every drill in the library beyond the free starters.
+  fullTechniqueLibrary,
+
+  /// Tactical and recovery cues on each rest in the round timer.
+  cornerCoach,
 }
 
 extension FeatureInfo on Feature {
-  /// Human-readable name shown on the paywall.
+  /// Human-readable name shown on the paywall and lock states.
   String get title => switch (this) {
-        Feature.cornerCoach => 'Corner Coach',
-        Feature.advancedTimerStyles => 'All Timer Presets',
-        Feature.unlimitedWeightHistory => 'Unlimited Weight History',
-        Feature.nutritionAnalytics => 'Nutrition Analytics',
-        Feature.fullTechniqueLibrary => 'Full Technique Library',
+        Feature.edgeFuelAiCoach => 'AI Fighter Brief',
         Feature.edgeFuelPremiumRecipes => 'Full Recipe Library',
-        Feature.edgeFuelAiCoach => 'AI Plan Coach',
+        Feature.fullTechniqueLibrary => 'Full Drill Library',
+        Feature.cornerCoach => 'Corner Cues',
+      };
+
+  /// One line on what the feature actually does, for the paywall.
+  String get pitch => switch (this) {
+        Feature.edgeFuelAiCoach => 'A daily next-action brief and a plain-'
+            'language plan coach, grounded in your own numbers',
+        Feature.edgeFuelPremiumRecipes => 'Every recipe, scaled to your '
+            'servings and checked against your allergens',
+        Feature.fullTechniqueLibrary => 'Every drill across striking, '
+            'wrestling, BJJ and clinch, with a way to drill each one',
+        Feature.cornerCoach => 'A tactical and a recovery cue on every rest '
+            'in the round timer',
+      };
+
+  IconData get icon => switch (this) {
+        Feature.edgeFuelAiCoach => Icons.auto_awesome,
+        Feature.edgeFuelPremiumRecipes => Icons.restaurant_menu,
+        Feature.fullTechniqueLibrary => Icons.sports_martial_arts,
+        Feature.cornerCoach => Icons.record_voice_over,
       };
 }
 
@@ -58,19 +78,11 @@ class Entitlements {
 
   /// Features that require Pro. Anything not listed is available to everyone.
   static const Set<Feature> _proOnly = {
-    Feature.cornerCoach,
-    Feature.advancedTimerStyles,
-    Feature.unlimitedWeightHistory,
-    Feature.nutritionAnalytics,
-    Feature.fullTechniqueLibrary,
-    Feature.edgeFuelPremiumRecipes,
     Feature.edgeFuelAiCoach,
+    Feature.edgeFuelPremiumRecipes,
+    Feature.fullTechniqueLibrary,
+    Feature.cornerCoach,
   };
-
-  /// Free-tier hard limits enforced in the UI/business logic.
-  static const int freeWeightHistoryLimit = 5;
-  static const int freeTechniqueLimit = 3;
-  static const int freeTimerStyleCount = 1;
 
   static bool isProOnly(Feature f) => _proOnly.contains(f);
 

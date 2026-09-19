@@ -17,12 +17,6 @@ void main() {
         expect(Entitlements.allows(Plan.pro, f), isTrue);
       }
     });
-
-    test('free-tier limits are sane, non-zero values', () {
-      expect(Entitlements.freeWeightHistoryLimit, greaterThan(0));
-      expect(Entitlements.freeTechniqueLimit, greaterThan(0));
-      expect(Entitlements.freeTimerStyleCount, greaterThanOrEqualTo(1));
-    });
   });
 
   group('Plan / Feature labels', () {
@@ -31,9 +25,10 @@ void main() {
       expect(Plan.pro.label, 'Pro');
     });
 
-    test('every feature has a non-empty title', () {
+    test('every feature has paywall copy', () {
       for (final f in Feature.values) {
         expect(f.title, isNotEmpty);
+        expect(f.pitch, isNotEmpty);
       }
     });
   });

@@ -18,7 +18,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('SECRET CONTENT'), findsNothing);
-    expect(find.text('Corner Coach is Pro'), findsOneWidget);
+    expect(find.text('Corner Cues is Pro'), findsOneWidget);
     expect(find.text('UNLOCK WITH PRO'), findsOneWidget); // button upper-cases
   });
 
@@ -28,6 +28,6 @@ void main() {
     await tester.pump();
 
     expect(find.text('SECRET CONTENT'), findsOneWidget);
-    expect(find.text('Corner Coach is Pro'), findsNothing);
+    expect(find.text('Corner Cues is Pro'), findsNothing);
   });
 }

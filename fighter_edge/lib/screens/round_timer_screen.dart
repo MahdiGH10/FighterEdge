@@ -3,9 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../billing/subscription.dart';
+import '../controllers/auth_controller.dart';
 import '../data/mock_data.dart';
-import '../models/coach_cue.dart';
+import '../models/timer_style.dart';
 import '../models/training_session.dart';
+import '../routing/app_navigation.dart';
+import '../routing/app_router.dart';
 import '../state/app_state.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
@@ -13,9 +17,13 @@ import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
+import '../training/corner_cues.dart';
 import '../widgets/filter_chips.dart';
+import '../widgets/premium_effects.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/progress_ring.dart';
+import '../widgets/stat_card.dart';
+import 'paywall_screen.dart';
 
 enum _Phase { work, rest, done }
 
@@ -233,6 +241,24 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
                 )),
             const SizedBox(height: Insets.xxs),
             Text(_fmt(_nextSeconds), style: AppType.title1()),
+            // The minute between rounds is when a corner talks. Keyed by
+            // round so each rest's cue arrives fresh.
+            if (_phase == _Phase.rest) ...[
+              const SizedBox(height: Insets.xl),
+              PremiumReveal(
+                key: ValueKey('cue-$_round'),
+                child:
+                    context.watch<AuthController>().allows(Feature.cornerCoach)
+                        ? _CornerCueCard(
+                            cue: CornerCues.forRest(
+                              style: _style.name,
+                              upcomingRound: _round + 1,
+                              rounds: _style.rounds,
+                            ),
+                          )
+                        : const _CornerCueTeaser(),
+              ),
+            ],
             const SizedBox(height: Insets.xxl),
             Row(
               children: [
@@ -266,5 +292,86 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
     final m = (secs ~/ 60).toString().padLeft(2, '0');
     final s = (secs % 60).toString().padLeft(2, '0');
     return '$m:$s';
+  }
+}
+
+class _CornerCueCard extends StatelessWidget {
+  final CornerCue cue;
+  const _CornerCueCard({required this.cue});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      child: AppCard(
+        accent: AppColors.warning,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'YOUR CORNER',
+              style: AppType.micro(
+                weight: FontWeight.w800,
+                color: AppAccessibility.textMuted(context),
+                spacing: .8,
+              ),
+            ),
+            const SizedBox(height: Insets.sm),
+            Text(cue.tactical, style: AppType.headline()),
+            const SizedBox(height: Insets.sm),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.air_rounded,
+                    size: IconSizes.inline,
+                    color: AppAccessibility.textSecondary(context)),
+                const SizedBox(width: Insets.sm),
+                Expanded(
+                  child: Text(
+                    cue.recovery,
+                    style: AppType.callout(
+                        color: AppAccessibility.textSecondary(context)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// What a free account sees in the rest instead of the cue: one quiet line,
+/// never a blocking lock in the middle of a session.
+class _CornerCueTeaser extends StatelessWidget {
+  const _CornerCueTeaser();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      onTap: () => AppNavigation.push(
+        context,
+        AppRoutes.paywall,
+        extra: Feature.cornerCoach,
+        fallbackBuilder: (_) =>
+            const PaywallScreen(highlight: Feature.cornerCoach),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.record_voice_over,
+              size: IconSizes.inline, color: AppColors.premium),
+          const SizedBox(width: Insets.sm),
+          Expanded(
+            child: Text(
+              'Pro puts a corner in your rest: a cue for the next round.',
+              style: AppType.subhead(
+                  color: AppAccessibility.textSecondary(context)),
+            ),
+          ),
+          Icon(Icons.chevron_right, color: AppAccessibility.textMuted(context)),
+        ],
+      ),
+    );
   }
 }

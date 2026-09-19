@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../models/coach_cue.dart';
+import '../models/timer_style.dart';
 import '../models/fighter.dart';
 import '../models/meal.dart';
-import '../models/technique.dart';
 import '../models/training_session.dart';
 import '../models/weight_entry.dart';
 
@@ -83,52 +82,6 @@ class MockData {
         subtitle: 'Mobility + Stretching',
         icon: Icons.spa,
         completed: false),
-  ];
-
-  static const techniques = <Technique>[
-    Technique(
-        category: 'BOXING',
-        discipline: 'Striking',
-        title: 'Jab Fundamentals',
-        videoCount: 12),
-    Technique(
-        category: 'BOXING',
-        discipline: 'Striking',
-        title: 'Basic Combinations',
-        videoCount: 18),
-    Technique(
-        category: 'KICKBOXING',
-        discipline: 'Striking',
-        title: 'Low Kick Setups',
-        videoCount: 10),
-    Technique(
-        category: 'WRESTLING',
-        discipline: 'Wrestling',
-        title: 'Double Leg Takedown',
-        videoCount: 14),
-    Technique(
-        category: 'BJJ',
-        discipline: 'BJJ',
-        title: 'Guard Retention',
-        videoCount: 22),
-    Technique(
-        category: 'MUAY THAI',
-        discipline: 'Clinch',
-        title: 'Clinch Control & Knees',
-        videoCount: 9),
-  ];
-
-  static const disciplines = ['All', 'Striking', 'Wrestling', 'BJJ', 'Clinch'];
-
-  static const coachCues = <CoachCue>[
-    CoachCue('FOCUS', 'Control the pace and stay composed.',
-        Icons.center_focus_strong),
-    CoachCue('DEFENSE', 'Keep your guard high. Avoid unnecessary risks.',
-        Icons.shield),
-    CoachCue('OFFENSE', 'Set up your combinations behind the jab.',
-        Icons.sports_mma),
-    CoachCue('CONDITIONING',
-        'You\'re strong. Keep your breathing under control.', Icons.favorite),
   ];
 
   static const timerStyles = <TimerStyle>[
