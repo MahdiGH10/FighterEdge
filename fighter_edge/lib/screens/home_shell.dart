@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../state/app_state.dart';
 import '../state/first_run_controller.dart';
 import '../state/streak_controller.dart';
@@ -37,14 +38,19 @@ class _HomeShellState extends State<HomeShell> {
   static const _fuelTab = 2;
   static const _profileTab = 3;
 
-  static const _navItems = [
-    NavItem(Icons.home_filled, 'Home'),
-    NavItem(Icons.fitness_center, 'Train'),
-    NavItem(Icons.restaurant, 'Fuel'),
-    NavItem(Icons.person, 'Profile'),
-  ];
+  static const _navCount = 4;
 
-  final _navKeys = List.generate(_navItems.length, (_) => GlobalKey());
+  List<NavItem> _navItems(BuildContext context) {
+    final l = L.of(context);
+    return [
+      NavItem(Icons.home_filled, l.navHome),
+      NavItem(Icons.fitness_center, l.navTrain),
+      NavItem(Icons.restaurant, l.navFuel),
+      NavItem(Icons.person, l.navProfile),
+    ];
+  }
+
+  final _navKeys = List.generate(_navCount, (_) => GlobalKey());
   final _checklistKey = GlobalKey();
 
   late final EdgeFuelController _fuel;
@@ -143,7 +149,7 @@ class _HomeShellState extends State<HomeShell> {
       // Tabs are peers: nothing slides, because nothing moved.
       body: FadeThrough(switchKey: _index, child: activePage),
       bottomNavigationBar: AppBottomNav(
-        items: _navItems,
+        items: _navItems(context),
         currentIndex: _index,
         onTap: _goToTab,
         itemKeys: _navKeys,

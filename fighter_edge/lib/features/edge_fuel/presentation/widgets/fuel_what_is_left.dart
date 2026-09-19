@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../routing/app_navigation.dart';
 import '../../../../routing/app_router.dart';
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../theme/app_accessibility.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
@@ -62,10 +63,11 @@ class FuelWhatIsLeft extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('$remaining kcal left today', style: AppType.headline()),
+                  Text(L.of(context).fuelLeftToday(remaining),
+                      style: AppType.headline()),
                   const SizedBox(height: Insets.xxs),
                   Text(
-                    'Recipes that fit, highest protein first',
+                    L.of(context).fuelLeftTodaySubtitle,
                     style: AppType.subhead(
                         color: AppAccessibility.textSecondary(context)),
                   ),

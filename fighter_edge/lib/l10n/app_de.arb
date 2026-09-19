@@ -1,0 +1,168 @@
+{
+  "@@locale": "de",
+
+  "navHome": "Start",
+  "navTrain": "Training",
+  "navFuel": "Ernährung",
+  "navProfile": "Profil",
+
+  "commonCancel": "Abbrechen",
+  "commonSave": "Speichern",
+  "commonUndo": "Rückgängig",
+  "commonToday": "Heute",
+  "commonSignOut": "Abmelden",
+  "commonSigningOut": "Wird abgemeldet …",
+
+  "settingsTitle": "Einstellungen",
+  "settingsSectionApp": "App",
+  "settingsLanguage": "Sprache",
+  "settingsLanguageSystem": "Systemsprache",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageGerman": "Deutsch",
+  "settingsLanguageBeta": "Deutsch ist teilweise übersetzt — der Rest bleibt vorerst auf Englisch.",
+  "settingsSectionSubscription": "Abo",
+  "settingsManagePro": "Pro verwalten",
+  "settingsUpgradePro": "Auf Pro upgraden",
+  "settingsManageProSubtitle": "Status aktualisieren und Zahlungen verwalten, sobald verbunden",
+  "settingsUpgradeProSubtitle": "KI-Fighter-Brief, komplette Drill- und Rezept-Bibliothek, Ecken-Tipps",
+  "settingsSectionTraining": "Trainingseinstellungen",
+  "settingsMetricUnits": "Metrische Einheiten",
+  "settingsMetricUnitsKg": "Gewicht in kg",
+  "settingsMetricUnitsLb": "Gewicht in lb",
+  "settingsTimerHaptics": "Timer-Vibration",
+  "settingsTimerHapticsSubtitle": "Rundensignale können vibrieren",
+  "settingsCampReminders": "Trainings-Erinnerungen",
+  "settingsCampRemindersUnavailable": "Auf diesem Gerät nicht verfügbar",
+  "settingsCampRemindersOn": "Ein Hinweis an deinen Trainingstagen, gegen {time}",
+  "@settingsCampRemindersOn": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "settingsCampRemindersOff": "Lass dich an deinen Trainingstagen erinnern",
+  "settingsSectionSafety": "Sicherheit & Vertrauen",
+  "settingsSafeCut": "Hinweise zum sicheren Abkochen",
+  "settingsSafeCutSubtitle": "Zeigt Hinweise zu Flüssigkeit und Gewichtsabbau — keine medizinische Beratung",
+  "settingsSectionAccount": "Konto",
+  "settingsChangePassword": "Passwort ändern",
+  "settingsChangePasswordSubtitle": "Bestätige dein aktuelles Passwort, um ein neues zu setzen",
+  "settingsChangePasswordGoogle": "Du meldest dich mit Google an — verwalte das in deinem Google-Konto",
+  "settingsTerms": "Nutzungsbedingungen",
+  "settingsTermsSubtitle": "Die Regeln für die Nutzung von Fighter Edge",
+  "settingsPrivacy": "Datenschutzerklärung",
+  "settingsPrivacySubtitle": "Was wir speichern und warum",
+  "settingsDeleteAccount": "Konto löschen",
+  "settingsDeleteAccountSubtitle": "Löscht dein Konto und alle deine Daten endgültig",
+
+  "dashboardTitle": "Übersicht",
+  "dashboardWeeklyOverview": "Wochenübersicht",
+  "dashboardNextSession": "Nächste Einheit",
+  "dashboardRecentActivity": "Letzte Aktivität",
+  "dashboardSeeAll": "Alle ansehen",
+  "dashboardStatWeight": "Gewicht",
+  "dashboardStatSessions": "Einheiten",
+  "dashboardStatStreak": "Serie",
+  "dashboardStatCompleted": "abgeschlossen",
+  "dashboardStatDays": "{count, plural, =1{Tag} other{Tage}}",
+  "@dashboardStatDays": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dashboardAddWeighIn": "Gewicht eintragen",
+  "dashboardStreakAtRisk": "In Gefahr",
+  "dashboardStreakOnFire": "Läuft",
+  "dashboardStreakLogToday": "Heute eintragen",
+
+  "fuelWeekTitle": "ERNÄHRUNG DIESE WOCHE",
+  "fuelWeekLogged": "{count}/7 erfasst",
+  "@fuelWeekLogged": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "fuelWeekOnTarget": "im Ziel",
+  "fuelWeekProteinHit": "Protein erreicht",
+  "fuelWeekAvgKcal": "Ø kcal",
+  "fuelWeekEmpty": "Trag diese Woche deine Mahlzeiten ein — dann entsteht hier dein Verlauf, Tag für Tag gegen dein Ziel.",
+  "fuelLeftToday": "Noch {kcal} kcal heute",
+  "@fuelLeftToday": {
+    "placeholders": { "kcal": { "type": "int" } }
+  },
+  "fuelLeftTodaySubtitle": "Passende Rezepte, das meiste Protein zuerst",
+
+  "nutritionTitle": "Ernährung",
+  "nutritionTabToday": "Heute",
+  "nutritionTabMeals": "Mahlzeiten",
+  "nutritionTabRecipes": "Rezepte",
+  "nutritionCalories": "Kalorien",
+  "nutritionMeals": "Mahlzeiten",
+  "nutritionAddFood": "Essen hinzufügen",
+  "nutritionSearchFoods": "Lebensmittel suchen",
+  "nutritionLoggedToday": "heute erfasst",
+  "nutritionProtein": "Protein",
+  "nutritionCarbs": "Kohlenhydrate",
+  "nutritionFats": "Fette",
+  "nutritionAddedSnack": "{name} · {kcal} kcal hinzugefügt",
+  "@nutritionAddedSnack": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "kcal": { "type": "int" }
+    }
+  },
+
+  "addFoodTitle": "Hinzufügen zu {day}",
+  "@addFoodTitle": {
+    "placeholders": { "day": { "type": "String" } }
+  },
+  "addFoodSaved": "GESPEICHERT",
+  "addFoodRecent": "ZULETZT",
+  "addFoodManual": "Nährwerte selbst eingeben",
+  "addFoodManualSubtitle": "Für auswärts essen, eine Verpackung oder alles, was nicht gelistet ist",
+  "addFoodEmptyHint": "Such ein Lebensmittel und wähl die Menge — die Nährwerte rechnet die App aus. Was du einträgst, steht beim nächsten Mal hier, einen Tipp entfernt.",
+  "addFoodNotFound": "Noch nicht in der Lebensmittelliste",
+  "addFoodNotFoundHint": "Probier ein einfacheres Wort („Reis“, „Hähnchen“) oder gib die Nährwerte unten selbst ein.",
+  "addFoodHowMuch": "WIE VIEL?",
+  "addFoodGrams": "Gramm",
+  "addFoodAddTo": "Zu {day} hinzufügen",
+  "@addFoodAddTo": {
+    "placeholders": { "day": { "type": "String" } }
+  },
+  "addFoodPerHundred": "{kcal} kcal · {protein} g Protein pro 100 g",
+  "@addFoodPerHundred": {
+    "placeholders": {
+      "kcal": { "type": "int" },
+      "protein": { "type": "String" }
+    }
+  },
+  "addFoodAllergenWarning": "Enthält {allergens} — steht auf deiner Allergenliste.",
+  "@addFoodAllergenWarning": {
+    "placeholders": { "allergens": { "type": "String" } }
+  },
+
+  "trainTitle": "Training",
+  "trainTabWeek": "Woche",
+  "trainTabHistory": "Verlauf",
+  "trainTabDrills": "Drills",
+  "timerTitle": "Runden-Timer",
+  "timerRound": "Runde",
+  "timerWork": "ARBEIT",
+  "timerRest": "PAUSE",
+  "timerDone": "FERTIG",
+  "timerStart": "Start",
+  "timerPause": "Pause",
+  "timerReset": "Zurücksetzen",
+  "timerRestart": "Neu starten",
+  "timerNext": "Danach: {label}",
+  "@timerNext": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "timerYourCorner": "DEINE ECKE",
+  "timerCornerTeaser": "Mit Pro steht dir in der Pause deine Ecke zur Seite: ein Hinweis für die nächste Runde.",
+
+  "authWelcomeBack": "Willkommen zurück",
+  "authWelcomeBackSubtitle": "Melde dich an und mach im Camp weiter",
+  "authEmail": "E-Mail",
+  "authPassword": "Passwort",
+  "authSignIn": "Anmelden",
+  "authSigningIn": "Wird angemeldet …",
+  "authForgotPassword": "Passwort vergessen?",
+  "authNoAccount": "Neu hier?",
+  "authCreateAccount": "Konto erstellen",
+  "authShowPassword": "Passwort anzeigen",
+  "authHidePassword": "Passwort verbergen"
+}

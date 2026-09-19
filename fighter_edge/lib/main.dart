@@ -32,7 +32,9 @@ import 'observability/error_reporter.dart';
 import 'observability/telemetry.dart';
 import 'routing/app_router.dart';
 import 'state/app_state.dart';
+import 'l10n/gen/app_localizations.dart';
 import 'state/first_run_controller.dart';
+import 'state/locale_controller.dart';
 import 'state/streak_controller.dart';
 import 'theme/app_accessibility.dart';
 import 'theme/app_colors.dart';
@@ -215,6 +217,7 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
         Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
         Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
+        ChangeNotifierProvider(create: (_) => LocaleController()..load()),
         ChangeNotifierProxyProvider<AuthController, FirstRunController>(
           create: (_) => FirstRunController(),
           update: (_, auth, firstRun) =>
@@ -274,6 +277,9 @@ class _FighterEdgeMaterialAppState extends State<_FighterEdgeMaterialApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
       color: AppColors.background,
+      locale: context.watch<LocaleController>().locale,
+      localizationsDelegates: L.localizationsDelegates,
+      supportedLocales: L.supportedLocales,
       routerConfig: _router,
       builder: AppAccessibility.builder,
     );
@@ -293,6 +299,8 @@ class _BootMaterialApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
       color: AppColors.background,
+      localizationsDelegates: L.localizationsDelegates,
+      supportedLocales: L.supportedLocales,
       builder: AppAccessibility.builder,
       home: error == null
           ? const _BrandedBootScreen()

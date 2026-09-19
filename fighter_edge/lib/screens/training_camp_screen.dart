@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../models/training_session.dart';
 import '../state/app_state.dart';
 import '../theme/app_accessibility.dart';
@@ -35,15 +36,16 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
       1 => const _HistoryView(),
       _ => const DrillLibraryScreen(),
     };
+    final l = L.of(context);
     return ScreenScaffold.tab(
-      title: 'Train',
+      title: l.trainTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
             child: FilterChips(
-              options: const ['Week', 'History', 'Drills'],
+              options: [l.trainTabWeek, l.trainTabHistory, l.trainTabDrills],
               selectedIndex: _tab,
               onSelected: (i) => setState(() => _tab = i),
             ),

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
 import '../data/mock_data.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../models/timer_style.dart';
 import '../models/training_session.dart';
 import '../routing/app_navigation.dart';
@@ -149,10 +150,10 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
   Color get _phaseColor =>
       _phase == _Phase.rest ? AppColors.warning : AppColors.primary;
 
-  String get _phaseLabel => switch (_phase) {
-        _Phase.work => 'WORK',
-        _Phase.rest => 'REST',
-        _Phase.done => 'DONE',
+  String _phaseLabel(L l) => switch (_phase) {
+        _Phase.work => l.timerWork,
+        _Phase.rest => l.timerRest,
+        _Phase.done => l.timerDone,
       };
 
   String get _nextLabel {
@@ -169,10 +170,12 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
+    final phaseLabel = _phaseLabel(l);
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final urgent = _running && _phase == _Phase.work && _secondsLeft <= 10;
     return ScreenScaffold(
-      title: 'Round Timer',
+      title: l.timerTitle,
       showBack: true,
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
@@ -185,7 +188,7 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
               scrollable: false,
             ),
             const SizedBox(height: Insets.xxl),
-            Text('Round',
+            Text(l.timerRound,
                 style: AppAccessibility.adjustStyle(
                   context,
                   AppType.subhead(
@@ -196,7 +199,7 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
             Text('$_round / ${_style.rounds}', style: AppType.title1()),
             const SizedBox(height: Insets.xl),
             TweenAnimationBuilder<double>(
-              key: ValueKey(urgent ? _secondsLeft : _phaseLabel),
+              key: ValueKey(urgent ? _secondsLeft : phaseLabel),
               tween: Tween(begin: urgent ? 1.035 : 1.0, end: 1.0),
               duration: reduceMotion ? Duration.zero : MotionTokens.reveal,
               curve: MotionTokens.settle,
@@ -214,7 +217,7 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
                 child: AnimatedSwitcher(
                   duration: reduceMotion ? Duration.zero : MotionTokens.fast,
                   child: Column(
-                    key: ValueKey('$_clock-$_phaseLabel'),
+                    key: ValueKey('$_clock-$phaseLabel'),
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(_clock,
@@ -223,7 +226,7 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
                           style: AppType.heroNumeral(
                               color: AppColors.textPrimary)),
                       const SizedBox(height: Insets.xs),
-                      Text(_phaseLabel,
+                      Text(phaseLabel,
                           style:
                               AppType.title2(color: _phaseColor, spacing: 3)),
                     ],
@@ -232,7 +235,7 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
               ),
             ),
             const SizedBox(height: Insets.xl),
-            Text('Next: $_nextLabel',
+            Text(l.timerNext(_nextLabel),
                 style: AppAccessibility.adjustStyle(
                   context,
                   AppType.subhead(
@@ -265,8 +268,8 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
                 Expanded(
                   child: PrimaryButton(
                     _phase == _Phase.done
-                        ? 'Restart'
-                        : (_running ? 'Pause' : 'Start'),
+                        ? l.timerRestart
+                        : (_running ? l.timerPause : l.timerStart),
                     icon: _phase == _Phase.done
                         ? Icons.refresh
                         : (_running ? Icons.pause : Icons.play_arrow),
@@ -277,7 +280,7 @@ class _RoundTimerScreenState extends State<RoundTimerScreen> {
                 ),
                 const SizedBox(width: Insets.md),
                 Expanded(
-                  child: GhostButton('Reset',
+                  child: GhostButton(l.timerReset,
                       icon: Icons.stop, expand: true, onPressed: _reset),
                 ),
               ],
@@ -309,7 +312,7 @@ class _CornerCueCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'YOUR CORNER',
+              L.of(context).timerYourCorner,
               style: AppType.micro(
                 weight: FontWeight.w800,
                 color: AppAccessibility.textMuted(context),
@@ -364,7 +367,7 @@ class _CornerCueTeaser extends StatelessWidget {
           const SizedBox(width: Insets.sm),
           Expanded(
             child: Text(
-              'Pro puts a corner in your rest: a cue for the next round.',
+              L.of(context).timerCornerTeaser,
               style: AppType.subhead(
                   color: AppAccessibility.textSecondary(context)),
             ),

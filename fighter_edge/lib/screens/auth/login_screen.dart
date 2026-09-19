@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/auth_controller.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../routing/app_navigation.dart';
 import '../../routing/app_router.dart';
 import '../../theme/app_colors.dart';
@@ -58,6 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final auth = context.watch<AuthController>();
     final hasSecondaryAuth =
         auth.supportsGoogle || auth.supportsApple || auth.supportsMagicLink;
@@ -96,10 +98,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: Insets.xl),
                       const BrandLogo(scale: 1.1),
                       const SizedBox(height: Insets.xxl),
-                      Text('Welcome back',
+                      Text(l.authWelcomeBack,
                           textAlign: TextAlign.center, style: AppType.title1()),
                       const SizedBox(height: Insets.xs),
-                      Text('Sign in to continue your camp',
+                      Text(l.authWelcomeBackSubtitle,
                           textAlign: TextAlign.center,
                           style:
                               AppType.subhead(color: AppColors.textSecondary)),
@@ -112,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             AppTextField(
                               controller: _email,
-                              label: 'Email',
+                              label: l.authEmail,
                               icon: Icons.mail_outline,
                               keyboardType: TextInputType.emailAddress,
                               autofillHints: const [
@@ -123,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: Insets.md),
                             AppTextField(
                               controller: _password,
-                              label: 'Password',
+                              label: l.authPassword,
                               icon: Icons.lock_outline,
                               obscure: _obscure,
                               autofillHints: const [AutofillHints.password],
@@ -131,8 +133,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               onSubmitted: (_) => _signIn(),
                               suffix: IconButton(
                                 tooltip: _obscure
-                                    ? 'Show password'
-                                    : 'Hide password',
+                                    ? l.authShowPassword
+                                    : l.authHidePassword,
                                 icon: Icon(
                                     _obscure
                                         ? Icons.visibility_off
@@ -155,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             fallbackBuilder: (_) =>
                                 const ForgotPasswordScreen(),
                           ),
-                          child: Text('Forgot password?',
+                          child: Text(l.authForgotPassword,
                               style: AppType.subhead(
                                   weight: FontWeight.w600,
                                   color: AppColors.accentText)),

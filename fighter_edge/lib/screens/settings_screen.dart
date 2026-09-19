@@ -4,9 +4,13 @@ import 'package:provider/provider.dart';
 import '../controllers/auth_controller.dart';
 import '../notifications/reminder_gateway.dart';
 import '../notifications/training_reminder_schedule.dart';
+import '../l10n/gen/app_localizations.dart';
+import '../theme/app_accessibility.dart';
+import '../theme/app_haptics.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
+import '../state/locale_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -31,16 +35,17 @@ class SettingsScreen extends StatelessWidget {
     // away, but it is still on screen for the length of its exit transition.
     // Render nothing account-shaped in that window rather than a placeholder
     // identity that looks like someone is still signed in.
+    final l = L.of(context);
     if (user == null) {
-      return const ScreenScaffold(
-        title: 'Settings',
+      return ScreenScaffold(
+        title: l.settingsTitle,
         showBack: false,
-        body: SizedBox.shrink(),
+        body: const SizedBox.shrink(),
       );
     }
 
     return ScreenScaffold(
-      title: 'Settings',
+      title: l.settingsTitle,
       showBack: true,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
@@ -87,14 +92,21 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: Insets.xl),
-          const _SectionLabel('Subscription'),
+          _SectionLabel(l.settingsSectionApp),
+          _SettingsRow(
+            icon: Icons.translate,
+            title: l.settingsLanguage,
+            subtitle: _languageLabel(context, l),
+            onTap: () => _pickLanguage(context),
+          ),
+          const SizedBox(height: Insets.xl),
+          _SectionLabel(l.settingsSectionSubscription),
           _SettingsRow(
             icon: Icons.workspace_premium_outlined,
-            title: auth.isPro ? 'Manage Pro' : 'Upgrade to Pro',
+            title: auth.isPro ? l.settingsManagePro : l.settingsUpgradePro,
             subtitle: auth.isPro
-                ? 'Refresh status and manage billing once connected'
-                : 'AI Fighter Brief, full drill and recipe libraries, corner '
-                    'cues',
+                ? l.settingsManageProSubtitle
+                : l.settingsUpgradeProSubtitle,
             onTap: () => AppNavigation.push(
               context,
               AppRoutes.paywall,
@@ -102,78 +114,78 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: Insets.xl),
-          const _SectionLabel('Training Preferences'),
+          _SectionLabel(l.settingsSectionTraining),
           _SwitchRow(
             icon: Icons.straighten,
-            title: 'Metric units',
+            title: l.settingsMetricUnits,
             subtitle: state.useMetricUnits
-                ? 'Weights show in kg'
-                : 'Weights show in lb',
+                ? l.settingsMetricUnitsKg
+                : l.settingsMetricUnitsLb,
             value: state.useMetricUnits,
             onChanged: state.setUseMetricUnits,
           ),
           _SwitchRow(
             icon: Icons.vibration,
-            title: 'Timer haptics',
-            subtitle: 'Round alerts can use vibration feedback',
+            title: l.settingsTimerHaptics,
+            subtitle: l.settingsTimerHapticsSubtitle,
             value: state.timerHaptics,
             onChanged: state.setTimerHaptics,
           ),
           _SwitchRow(
             icon: Icons.notifications_active_outlined,
-            title: 'Camp reminders',
+            title: l.settingsCampReminders,
             subtitle: !reminders.isAvailable
-                ? 'Not available on this device'
+                ? l.settingsCampRemindersUnavailable
                 : state.campReminders
-                    ? 'A nudge on the days you train, around '
-                        '${TrainingReminderSchedule.defaultTime.format(context)}'
-                    : 'Get a nudge on the days you train',
+                    ? l.settingsCampRemindersOn(
+                        TrainingReminderSchedule.defaultTime.format(context))
+                    : l.settingsCampRemindersOff,
             value: state.campReminders,
             onChanged: reminders.isAvailable
                 ? (value) => _setCampReminders(context, state, reminders, value)
                 : null,
           ),
           const SizedBox(height: Insets.xl),
-          const _SectionLabel('Safety & Trust'),
+          _SectionLabel(l.settingsSectionSafety),
           _SwitchRow(
             icon: Icons.health_and_safety_outlined,
-            title: 'Safe cut guidance',
-            subtitle: 'Show hydration and non-medical weight-cut reminders',
+            title: l.settingsSafeCut,
+            subtitle: l.settingsSafeCutSubtitle,
             value: state.safeCutGuidance,
             onChanged: state.setSafeCutGuidance,
           ),
           const _TrustCard(),
           const SizedBox(height: Insets.xl),
-          const _SectionLabel('Account'),
+          _SectionLabel(l.settingsSectionAccount),
           _SettingsRow(
             icon: Icons.lock_outline,
-            title: 'Change password',
+            title: l.settingsChangePassword,
             subtitle: auth.canChangePassword
-                ? 'Confirm your current password to set a new one'
-                : 'You sign in with Google — manage it in your Google account',
+                ? l.settingsChangePasswordSubtitle
+                : l.settingsChangePasswordGoogle,
             onTap: auth.isBusy ? null : () => _changePassword(context),
           ),
           _SettingsRow(
             icon: Icons.description_outlined,
-            title: 'Terms of Service',
-            subtitle: 'The rules for using Fighter Edge',
+            title: l.settingsTerms,
+            subtitle: l.settingsTermsSubtitle,
             onTap: () => _openLegal(context, LegalDocument.terms),
           ),
           _SettingsRow(
             icon: Icons.privacy_tip_outlined,
-            title: 'Privacy Policy',
-            subtitle: 'What we store and why',
+            title: l.settingsPrivacy,
+            subtitle: l.settingsPrivacySubtitle,
             onTap: () => _openLegal(context, LegalDocument.privacy),
           ),
           _SettingsRow(
             icon: Icons.delete_outline,
-            title: 'Delete account',
-            subtitle: 'Permanently erase your account and all of your data',
+            title: l.settingsDeleteAccount,
+            subtitle: l.settingsDeleteAccountSubtitle,
             onTap: auth.isBusy ? null : () => _confirmDeleteAccount(context),
           ),
           const SizedBox(height: Insets.lg),
           GhostButton(
-            auth.isBusy ? 'Signing out...' : 'Sign out',
+            auth.isBusy ? l.commonSigningOut : l.commonSignOut,
             icon: Icons.logout,
             expand: true,
             onPressed: auth.isBusy ? null : auth.signOut,
@@ -531,6 +543,106 @@ class _TrustCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+String _languageLabel(BuildContext context, L l) {
+  final locale = context.watch<LocaleController>().locale;
+  return switch (locale?.languageCode) {
+    'de' => l.settingsLanguageGerman,
+    'en' => l.settingsLanguageEnglish,
+    _ => l.settingsLanguageSystem,
+  };
+}
+
+/// Language choices, in the language they name — someone looking for
+/// "Deutsch" should not have to read English to find it.
+Future<void> _pickLanguage(BuildContext context) async {
+  final controller = context.read<LocaleController>();
+  final l = L.of(context);
+  final current = controller.locale?.languageCode;
+  await showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: AppColors.surface,
+    showDragHandle: true,
+    builder: (sheetContext) => SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding:
+                const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, Insets.sm),
+            child: Text(l.settingsLanguage, style: AppType.title1()),
+          ),
+          for (final option in [
+            (null, l.settingsLanguageSystem),
+            ('en', l.settingsLanguageEnglish),
+            ('de', l.settingsLanguageGerman),
+          ])
+            _LanguageOption(
+              label: option.$2,
+              selected: current == option.$1,
+              onTap: () {
+                AppHaptics.selection();
+                controller
+                    .setLocale(option.$1 == null ? null : Locale(option.$1!));
+                Navigator.of(sheetContext).pop();
+              },
+            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                Insets.xl, Insets.sm, Insets.xl, Insets.lg),
+            child: Text(
+              l.settingsLanguageBeta,
+              style: AppType.subhead(
+                  color: AppAccessibility.textSecondary(context)),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _LanguageOption extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _LanguageOption({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints:
+              const BoxConstraints(minHeight: AppAccessibility.minTouchTarget),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: Insets.xl, vertical: Insets.md),
+            child: Row(
+              children: [
+                Expanded(child: Text(label, style: AppType.body())),
+                if (selected)
+                  const Icon(Icons.check, color: AppColors.accentText),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

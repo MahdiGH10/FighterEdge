@@ -11,6 +11,7 @@ import '../features/edge_fuel/presentation/screens/recipe_library_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../features/edge_fuel/presentation/widgets/add_food_sheet.dart';
 import '../features/edge_fuel/presentation/widgets/fuel_what_is_left.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../theme/app_colors.dart';
@@ -39,6 +40,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final edgeFuel = context.watch<EdgeFuelController>();
     final targetCalories = edgeFuel.targetCalories;
     final ratio =
@@ -61,11 +63,11 @@ class _NutritionScreenState extends State<NutritionScreen> {
     };
 
     return ScreenScaffold.tab(
-      title: 'Nutrition',
+      title: l.nutritionTitle,
       actions: [
         HeaderIcon(
           Icons.add,
-          label: 'Add food',
+          label: l.nutritionAddFood,
           onTap: () => _addFood(edgeFuel),
         ),
       ],
@@ -76,7 +78,11 @@ class _NutritionScreenState extends State<NutritionScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
             child: FilterChips(
-              options: const ['Today', 'Meals', 'Recipes'],
+              options: [
+                l.nutritionTabToday,
+                l.nutritionTabMeals,
+                l.nutritionTabRecipes,
+              ],
               selectedIndex: _tab,
               onSelected: (i) => setState(() => _tab = i),
               scrollable: false,
@@ -90,8 +96,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
   }
 
   Future<void> _addFood(EdgeFuelController edgeFuel) async {
+    final l = L.of(context);
     final dayLabel = edgeFuel.isToday
-        ? 'Today'
+        ? l.commonToday
         : DateFormat('EEE, MMM d').format(edgeFuel.selectedDate);
     final outcome = await showAddFoodSheet(context, dayLabel: dayLabel);
     if (!mounted) return;
@@ -113,9 +120,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text('${entry.name} · ${entry.calories} kcal added'),
+          content: Text(
+              L.of(context).nutritionAddedSnack(entry.name, entry.calories)),
           action: SnackBarAction(
-            label: 'Undo',
+            label: L.of(context).commonUndo,
             textColor: AppColors.accentText,
             onPressed: () => edgeFuel.deleteEntry(entry),
           ),
@@ -259,7 +267,7 @@ class _DateSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = edgeFuel.isToday
-        ? 'Today'
+        ? L.of(context).commonToday
         : DateFormat('EEE, MMM d').format(edgeFuel.selectedDate);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
@@ -331,6 +339,7 @@ class _TodayView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
@@ -351,7 +360,7 @@ class _TodayView extends StatelessWidget {
           ),
           const SizedBox(height: Insets.lg),
         ],
-        const SectionHeader('Calories'),
+        SectionHeader(L.of(context).nutritionCalories),
         AppCard(
           child: Column(
             children: [
@@ -374,7 +383,7 @@ class _TodayView extends StatelessWidget {
                     Text(
                       edgeFuel.hasUsableTarget
                           ? '/ ${edgeFuel.targetCalories} kcal'
-                          : 'logged today',
+                          : L.of(context).nutritionLoggedToday,
                       style: AppType.subhead(
                         weight: FontWeight.w500,
                         color: AppColors.textMuted,
@@ -387,19 +396,19 @@ class _TodayView extends StatelessWidget {
               Row(
                 children: [
                   _Macro(
-                    'Protein',
+                    l.nutritionProtein,
                     edgeFuel.consumedProtein,
                     edgeFuel.targetProtein,
                     AppColors.protein,
                   ),
                   _Macro(
-                    'Carbs',
+                    l.nutritionCarbs,
                     edgeFuel.consumedCarbs,
                     edgeFuel.targetCarbs,
                     AppColors.carbs,
                   ),
                   _Macro(
-                    'Fats',
+                    l.nutritionFats,
                     edgeFuel.consumedFats,
                     edgeFuel.targetFats,
                     AppColors.fats,
@@ -414,7 +423,7 @@ class _TodayView extends StatelessWidget {
           FuelWhatIsLeft(edgeFuel: edgeFuel),
         ],
         const SizedBox(height: Insets.xl),
-        const SectionHeader('Meals'),
+        SectionHeader(L.of(context).nutritionMeals),
         if (edgeFuel.entries.isEmpty)
           _QuickStartMeals(edgeFuel: edgeFuel, onSearch: onAdd),
         for (final entry in edgeFuel.entries)
@@ -428,7 +437,7 @@ class _TodayView extends StatelessWidget {
         if (edgeFuel.entries.isNotEmpty) ...[
           const SizedBox(height: Insets.sm),
           GhostButton(
-            'Add food',
+            L.of(context).nutritionAddFood,
             icon: Icons.add,
             expand: true,
             onPressed: onAdd,
@@ -482,7 +491,7 @@ class _QuickStartMeals extends StatelessWidget {
           const SizedBox(height: Insets.md),
           if (onSearch != null) ...[
             PrimaryButton(
-              'Search foods',
+              L.of(context).nutritionSearchFoods,
               icon: Icons.search,
               expand: true,
               onPressed: onSearch,

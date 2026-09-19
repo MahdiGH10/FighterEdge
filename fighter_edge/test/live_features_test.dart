@@ -7,6 +7,7 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dar
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import 'package:fighter_edge/l10n/gen/app_localizations.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/screens/weight_tracker_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
@@ -15,7 +16,11 @@ import 'package:fighter_edge/state/app_state.dart';
 void main() {
   group('Round timer', () {
     testWidgets('counts down, pauses, and resets', (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: RoundTimerScreen()));
+      await tester.pumpWidget(const MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        home: RoundTimerScreen(),
+      ));
       await tester.pump();
 
       expect(find.text('05:00'), findsWidgets); // MMA default work
@@ -36,7 +41,11 @@ void main() {
     });
 
     testWidgets('switching style changes rounds and work time', (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: RoundTimerScreen()));
+      await tester.pumpWidget(const MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        home: RoundTimerScreen(),
+      ));
       await tester.pump();
 
       await tester.tap(find.text('Boxing'));

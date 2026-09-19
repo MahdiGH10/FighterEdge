@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:fighter_edge/l10n/gen/app_localizations.dart';
+import 'package:fighter_edge/state/locale_controller.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/billing/billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
@@ -98,6 +100,7 @@ Widget wrapApp(
       Provider<ReminderGateway>.value(
         value: reminderGateway ?? const UnavailableReminderGateway(),
       ),
+      ChangeNotifierProvider(create: (_) => LocaleController()..load()),
       ChangeNotifierProxyProvider<AuthController, FirstRunController>(
         create: (_) => FirstRunController(),
         update: (_, auth, firstRun) =>
@@ -118,7 +121,16 @@ Widget wrapApp(
         },
       ),
     ],
-    child: MaterialApp(home: home),
+    // Mirrors the app: the language switch in Settings has to actually
+    // change the words on screen in tests too.
+    child: Builder(
+      builder: (context) => MaterialApp(
+        locale: context.watch<LocaleController>().locale,
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        home: home,
+      ),
+    ),
   );
 }
 

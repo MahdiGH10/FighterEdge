@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../theme/app_accessibility.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
@@ -60,6 +61,7 @@ class _FuelWeekBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final muted = AppAccessibility.textMuted(context);
     final average = summary.averageCalories;
     final todayIndex = summary.days.length - 1;
@@ -78,7 +80,7 @@ class _FuelWeekBody extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'FUEL THIS WEEK',
+                    l.fuelWeekTitle,
                     style: AppType.micro(
                       weight: FontWeight.w800,
                       color: muted,
@@ -87,7 +89,7 @@ class _FuelWeekBody extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${summary.loggedDays}/7 logged',
+                  l.fuelWeekLogged(summary.loggedDays),
                   style: AppType.subhead(
                     weight: FontWeight.w700,
                     color: AppAccessibility.textSecondary(context),
@@ -115,8 +117,7 @@ class _FuelWeekBody extends StatelessWidget {
             const SizedBox(height: Insets.lg),
             if (summary.loggedDays == 0)
               Text(
-                'Log meals this week and your fuel trend builds here, day '
-                'by day against your target.',
+                l.fuelWeekEmpty,
                 style: AppType.subhead(
                     color: AppAccessibility.textSecondary(context)),
               )
@@ -125,17 +126,17 @@ class _FuelWeekBody extends StatelessWidget {
                 children: [
                   _WeekStat(
                     value: '${summary.onTargetDays}',
-                    label: 'on target',
+                    label: l.fuelWeekOnTarget,
                     color: AppColors.positive,
                   ),
                   _WeekStat(
                     value: '${summary.proteinHitDays}',
-                    label: 'protein hit',
+                    label: l.fuelWeekProteinHit,
                     color: AppColors.protein,
                   ),
                   _WeekStat(
                     value: average == null ? '—' : '$average',
-                    label: 'avg kcal',
+                    label: l.fuelWeekAvgKcal,
                     color: AppColors.textPrimary,
                   ),
                 ],

@@ -1,0 +1,10 @@
+# Generated localizations live in the source tree (not the deprecated
+# synthetic package) so they are readable, greppable and analyzed like any
+# other file.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: L
+output-dir: lib/l10n/gen
+nullable-getter: false
+untranslated-messages-file: l10n_missing.json

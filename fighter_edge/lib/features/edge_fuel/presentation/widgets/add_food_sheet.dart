@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../theme/app_accessibility.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_haptics.dart';
@@ -106,13 +107,14 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
       );
     }
 
+    final l = L.of(context);
     final edgeFuel = context.watch<EdgeFuelController>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, 0),
-          child: Text('Add to ${widget.dayLabel}', style: AppType.title1()),
+          child: Text(l.addFoodTitle(widget.dayLabel), style: AppType.title1()),
         ),
         const SizedBox(height: Insets.md),
         Padding(
@@ -126,7 +128,7 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
             style: AppType.body(),
             cursorColor: AppColors.primary,
             decoration: InputDecoration(
-              hintText: 'Search foods',
+              hintText: l.nutritionSearchFoods,
               hintStyle:
                   AppType.body(color: AppAccessibility.textMuted(context)),
               prefixIcon: Icon(Icons.search,
@@ -176,8 +178,8 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
           top: false,
           child: _SheetRow(
             icon: Icons.edit_note,
-            title: 'Enter macros manually',
-            subtitle: 'For a meal out, a label, or anything not listed',
+            title: l.addFoodManual,
+            subtitle: l.addFoodManualSubtitle,
             onTap: () =>
                 Navigator.of(context).pop(const ManualEntryRequested()),
           ),
@@ -206,9 +208,7 @@ class _Remembered extends StatelessWidget {
         children: [
           const SizedBox(height: Insets.lg),
           Text(
-            'Search the food list and pick how much you had — the macros '
-            'work themselves out. Foods you log show up here next time, one '
-            'tap away.',
+            L.of(context).addFoodEmptyHint,
             style:
                 AppType.callout(color: AppAccessibility.textSecondary(context)),
           ),
@@ -224,11 +224,11 @@ class _Remembered extends StatelessWidget {
     return ListView(
       children: [
         if (saved.isNotEmpty) ...[
-          const _SectionLabel('SAVED'),
+          _SectionLabel(L.of(context).addFoodSaved),
           for (final food in saved) _RememberedRow(food: food, onLog: onLog),
         ],
         if (recentOnly.isNotEmpty) ...[
-          const _SectionLabel('RECENT'),
+          _SectionLabel(L.of(context).addFoodRecent),
           for (final food in recentOnly)
             _RememberedRow(food: food, onLog: onLog),
         ],
@@ -272,11 +272,10 @@ class _SearchResults extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: Insets.xl),
             children: [
               const SizedBox(height: Insets.lg),
-              Text('Not in the food list yet', style: AppType.headline()),
+              Text(L.of(context).addFoodNotFound, style: AppType.headline()),
               const SizedBox(height: Insets.xs),
               Text(
-                'Try a simpler word ("rice", "chicken"), or enter the macros '
-                'yourself below.',
+                L.of(context).addFoodNotFoundHint,
                 style: AppType.callout(
                     color: AppAccessibility.textSecondary(context)),
               ),
@@ -290,9 +289,10 @@ class _SearchResults extends StatelessWidget {
             return _SheetRow(
               icon: Icons.chevron_right,
               title: food.name,
-              subtitle: '${food.kcalPer100g.round()} kcal · '
-                  '${food.proteinPer100g.toStringAsFixed(0)}g protein '
-                  'per 100 g',
+              subtitle: L.of(context).addFoodPerHundred(
+                    food.kcalPer100g.round(),
+                    food.proteinPer100g.toStringAsFixed(0),
+                  ),
               onTap: () => onPick(food),
             );
           },
@@ -358,6 +358,7 @@ class _PortionStepState extends State<_PortionStep> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final food = widget.food;
     final grams = _currentGrams;
     final nutrients = PortionCalculator.forGrams(food, grams);
@@ -404,9 +405,8 @@ class _PortionStepState extends State<_PortionStep> {
                           const SizedBox(width: Insets.sm),
                           Expanded(
                             child: Text(
-                              'Contains '
-                              '${RecipeCopy.allergenList(conflicts)} — on '
-                              'your allergen list.',
+                              l.addFoodAllergenWarning(
+                                  RecipeCopy.allergenList(conflicts)),
                               style: AppType.subhead(
                                 weight: FontWeight.w700,
                                 color: AppColors.warning,
@@ -418,7 +418,7 @@ class _PortionStepState extends State<_PortionStep> {
                     ],
                     const SizedBox(height: Insets.lg),
                     Text(
-                      'HOW MUCH?',
+                      l.addFoodHowMuch,
                       style: AppType.micro(
                         weight: FontWeight.w800,
                         color: AppAccessibility.textMuted(context),
@@ -460,7 +460,7 @@ class _PortionStepState extends State<_PortionStep> {
                       style: AppType.body(),
                       cursorColor: AppColors.primary,
                       decoration: InputDecoration(
-                        labelText: 'Grams',
+                        labelText: l.addFoodGrams,
                         suffixText: 'g',
                         labelStyle: AppType.callout(color: secondary),
                         focusedBorder: const UnderlineInputBorder(
@@ -482,7 +482,7 @@ class _PortionStepState extends State<_PortionStep> {
             padding: const EdgeInsets.fromLTRB(
                 Insets.xl, Insets.sm, Insets.xl, Insets.lg),
             child: PrimaryButton(
-              'Add to ${widget.dayLabel}',
+              l.addFoodAddTo(widget.dayLabel),
               icon: Icons.add,
               expand: true,
               onPressed: grams <= 0

@@ -1,0 +1,168 @@
+{
+  "@@locale": "en",
+
+  "navHome": "Home",
+  "navTrain": "Train",
+  "navFuel": "Fuel",
+  "navProfile": "Profile",
+
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonUndo": "Undo",
+  "commonToday": "Today",
+  "commonSignOut": "Sign out",
+  "commonSigningOut": "Signing out...",
+
+  "settingsTitle": "Settings",
+  "settingsSectionApp": "App",
+  "settingsLanguage": "Language",
+  "settingsLanguageSystem": "System default",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageGerman": "Deutsch",
+  "settingsLanguageBeta": "German is partly translated — the rest stays in English for now.",
+  "settingsSectionSubscription": "Subscription",
+  "settingsManagePro": "Manage Pro",
+  "settingsUpgradePro": "Upgrade to Pro",
+  "settingsManageProSubtitle": "Refresh status and manage billing once connected",
+  "settingsUpgradeProSubtitle": "AI Fighter Brief, full drill and recipe libraries, corner cues",
+  "settingsSectionTraining": "Training Preferences",
+  "settingsMetricUnits": "Metric units",
+  "settingsMetricUnitsKg": "Weights show in kg",
+  "settingsMetricUnitsLb": "Weights show in lb",
+  "settingsTimerHaptics": "Timer haptics",
+  "settingsTimerHapticsSubtitle": "Round alerts can use vibration feedback",
+  "settingsCampReminders": "Camp reminders",
+  "settingsCampRemindersUnavailable": "Not available on this device",
+  "settingsCampRemindersOn": "A nudge on the days you train, around {time}",
+  "@settingsCampRemindersOn": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "settingsCampRemindersOff": "Get a nudge on the days you train",
+  "settingsSectionSafety": "Safety & Trust",
+  "settingsSafeCut": "Safe cut guidance",
+  "settingsSafeCutSubtitle": "Show hydration and non-medical weight-cut reminders",
+  "settingsSectionAccount": "Account",
+  "settingsChangePassword": "Change password",
+  "settingsChangePasswordSubtitle": "Confirm your current password to set a new one",
+  "settingsChangePasswordGoogle": "You sign in with Google — manage it in your Google account",
+  "settingsTerms": "Terms of Service",
+  "settingsTermsSubtitle": "The rules for using Fighter Edge",
+  "settingsPrivacy": "Privacy Policy",
+  "settingsPrivacySubtitle": "What we store and why",
+  "settingsDeleteAccount": "Delete account",
+  "settingsDeleteAccountSubtitle": "Permanently erase your account and all of your data",
+
+  "dashboardTitle": "Dashboard",
+  "dashboardWeeklyOverview": "Weekly Overview",
+  "dashboardNextSession": "Next Session",
+  "dashboardRecentActivity": "Recent Activity",
+  "dashboardSeeAll": "See all",
+  "dashboardStatWeight": "Weight",
+  "dashboardStatSessions": "Sessions",
+  "dashboardStatStreak": "Streak",
+  "dashboardStatCompleted": "completed",
+  "dashboardStatDays": "{count, plural, =1{day} other{days}}",
+  "@dashboardStatDays": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dashboardAddWeighIn": "Add weigh-in",
+  "dashboardStreakAtRisk": "At risk",
+  "dashboardStreakOnFire": "On fire",
+  "dashboardStreakLogToday": "Log today",
+
+  "fuelWeekTitle": "FUEL THIS WEEK",
+  "fuelWeekLogged": "{count}/7 logged",
+  "@fuelWeekLogged": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "fuelWeekOnTarget": "on target",
+  "fuelWeekProteinHit": "protein hit",
+  "fuelWeekAvgKcal": "avg kcal",
+  "fuelWeekEmpty": "Log meals this week and your fuel trend builds here, day by day against your target.",
+  "fuelLeftToday": "{kcal} kcal left today",
+  "@fuelLeftToday": {
+    "placeholders": { "kcal": { "type": "int" } }
+  },
+  "fuelLeftTodaySubtitle": "Recipes that fit, highest protein first",
+
+  "nutritionTitle": "Nutrition",
+  "nutritionTabToday": "Today",
+  "nutritionTabMeals": "Meals",
+  "nutritionTabRecipes": "Recipes",
+  "nutritionCalories": "Calories",
+  "nutritionMeals": "Meals",
+  "nutritionAddFood": "Add food",
+  "nutritionSearchFoods": "Search foods",
+  "nutritionLoggedToday": "logged today",
+  "nutritionProtein": "Protein",
+  "nutritionCarbs": "Carbs",
+  "nutritionFats": "Fats",
+  "nutritionAddedSnack": "{name} · {kcal} kcal added",
+  "@nutritionAddedSnack": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "kcal": { "type": "int" }
+    }
+  },
+
+  "addFoodTitle": "Add to {day}",
+  "@addFoodTitle": {
+    "placeholders": { "day": { "type": "String" } }
+  },
+  "addFoodSaved": "SAVED",
+  "addFoodRecent": "RECENT",
+  "addFoodManual": "Enter macros manually",
+  "addFoodManualSubtitle": "For a meal out, a label, or anything not listed",
+  "addFoodEmptyHint": "Search the food list and pick how much you had — the macros work themselves out. Foods you log show up here next time, one tap away.",
+  "addFoodNotFound": "Not in the food list yet",
+  "addFoodNotFoundHint": "Try a simpler word (\"rice\", \"chicken\"), or enter the macros yourself below.",
+  "addFoodHowMuch": "HOW MUCH?",
+  "addFoodGrams": "Grams",
+  "addFoodAddTo": "Add to {day}",
+  "@addFoodAddTo": {
+    "placeholders": { "day": { "type": "String" } }
+  },
+  "addFoodPerHundred": "{kcal} kcal · {protein}g protein per 100 g",
+  "@addFoodPerHundred": {
+    "placeholders": {
+      "kcal": { "type": "int" },
+      "protein": { "type": "String" }
+    }
+  },
+  "addFoodAllergenWarning": "Contains {allergens} — on your allergen list.",
+  "@addFoodAllergenWarning": {
+    "placeholders": { "allergens": { "type": "String" } }
+  },
+
+  "trainTitle": "Train",
+  "trainTabWeek": "Week",
+  "trainTabHistory": "History",
+  "trainTabDrills": "Drills",
+  "timerTitle": "Round Timer",
+  "timerRound": "Round",
+  "timerWork": "WORK",
+  "timerRest": "REST",
+  "timerDone": "DONE",
+  "timerStart": "Start",
+  "timerPause": "Pause",
+  "timerReset": "Reset",
+  "timerRestart": "Restart",
+  "timerNext": "Next: {label}",
+  "@timerNext": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "timerYourCorner": "YOUR CORNER",
+  "timerCornerTeaser": "Pro puts a corner in your rest: a cue for the next round.",
+
+  "authWelcomeBack": "Welcome back",
+  "authWelcomeBackSubtitle": "Sign in to continue your camp",
+  "authEmail": "Email",
+  "authPassword": "Password",
+  "authSignIn": "Sign In",
+  "authSigningIn": "Signing in...",
+  "authForgotPassword": "Forgot password?",
+  "authNoAccount": "New here?",
+  "authCreateAccount": "Create account",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password"
+}
