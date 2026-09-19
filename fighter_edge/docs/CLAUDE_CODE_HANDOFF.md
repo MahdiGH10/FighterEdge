@@ -3,7 +3,7 @@
 **Verified:** 2026-09-19
 **Repository:** `MahdiGH10/FighterEdge`  
 **Branch:** `main`  
-**Latest feature commit:** premium Fighter Brief flow (on top of `979a8d7`)
+**Latest feature commit:** `87a352e fix: let password managers fill and save the login`
 **Purpose:** Give a new Claude Code session enough context to continue the
 application without rebuilding work that already exists or claiming that
 account-level setup is complete when it is not.
@@ -152,11 +152,43 @@ Two local commits on top of `6cb3f2e`, **not pushed**:
   brief is building or shown. "Redo setup" became a ghost button so
   Generate is the screen's one primary action. New `IconSizes` tokens.
 
-Still open for EdgeFuel: EF3_PLAN §3.1's "Fuel this plan" entry (Plan
-screen → Recipe Library pre-filtered to today's remaining macros) is not
-built; recipe photography is blocked on Higgsfield credits (24 prompts
+Recipe photography is still blocked on Higgsfield credits (24 prompts
 designed, nothing generated or purchased). Functions run on Node 20, which
 Google decommissions 2026-10-30 — upgrade before then.
+
+## Continuation update — 2026-09-19 (metrics push: honesty, logging, retention)
+
+Five more local commits on top of `3a88914`, **not pushed**, all gates green
+(450 tests + goldens):
+
+- `92aa452` — **Every Pro promise is real.** The paywall sold 7 benefits;
+  4 were false (timer presets and weight history were already free,
+  nutrition analytics did not exist, the technique library had fake play
+  buttons). `Feature` is now the paywall — each carries its own copy and the
+  paywall renders exactly those, so nothing unbuilt can be advertised. Pro =
+  AI Fighter Brief, Full Recipe Library, Full Drill Library, Corner Cues.
+  New written **Drill Library** (17 drills, one free starter per discipline,
+  progress + bookmarks per account) replaces the Technique Library; **corner
+  cues** in the round timer's rest replace the Corner Coach tab.
+- `a656101` — **Real food logging.** The 93-food catalog was unsearchable
+  from the UI (logging meant typing macros). New Add Food sheet: saved and
+  recent foods one tap away, catalog search, portion step (household units,
+  gram presets, live macros, allergen warning), manual entry last. Recents
+  and saved foods now persist **across days** (`FoodMemory`, on-device per
+  account) — before, they were drawn from the day on screen and empty every
+  morning. Every add confirms with Undo; snackbars now follow the dark theme.
+- `620d667` — **Fuel what's left** (EF3_PLAN §3.1): "N kcal left today" on
+  the plan screen and Today opens recipes whose serving fits, protein first.
+- `a6dbf3c` — **Fuel this week** on the dashboard: per-day bars against the
+  target, on-target / protein-hit / average (pure `WeeklyFuelCalculator`).
+- `87a352e` — **Login autofill.** Login now supports password managers
+  (fill + save), email fields never autocorrect, OTP field offers the code.
+
+Still open, in suggested order: German localization (the partner is in
+Germany; the app is English-only with no l10n setup), barcode scanning
+(needs a camera package + a food-data source decision), Apple sign-in and
+Google-on-Android verification (account/console work), recipe photos,
+Terms/Privacy final text.
 
 ## 1. Product in one paragraph
 
