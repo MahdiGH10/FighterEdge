@@ -1,9 +1,9 @@
 # Fighter Edge — Claude Code Handoff
 
-**Verified:** 2026-09-18
+**Verified:** 2026-09-19
 **Repository:** `MahdiGH10/FighterEdge`  
 **Branch:** `main`  
-**Latest feature commit:** `aac4b0a feat: retention loop — streak freeze and training-day reminders`
+**Latest feature commit:** `f4ac87d feat: apply the UI/UX audit's Android-packaging findings`
 **Purpose:** Give a new Claude Code session enough context to continue the
 application without rebuilding work that already exists or claiming that
 account-level setup is complete when it is not.
@@ -85,8 +85,41 @@ or in Flutter config.
 With the original nine-step workflow complete, the next bounded engineering
 slice should come from section 9 below (`Slice A` — unblocking the hosted
 backend — is the natural next step, since it is the one blocker every other
-slice is waiting on). Confirm with the user before starting a new slice; add
-tests; commit locally; do not push without the user's explicit request.
+slice is waiting on).
+
+## Continuation update — 2026-09-19 (CI fixes + UI/UX audit)
+
+Two small things landed on top of `aac4b0a`, then a design audit, then the
+audit's own findings got acted on:
+
+- `e42762c` / `3abccbf` — CI fixes. Pushing `aac4b0a` broke the Android
+  release build: `flutter_local_notifications` needs core library
+  desugaring, which the local toolchain here (blocked from a full Android
+  build by the known NDK license issue) couldn't have caught. Fixed, then
+  the job's 20-minute timeout turned out to be too tight for the heavier
+  dependency graph on a cold Gradle cache — bumped to 30. Both verified
+  green on GitHub Actions before moving on, not just built locally.
+- `f86187b` — `docs/UI_UX_DESIGN_AUDIT_20260919.md`, ranking the app against
+  Apple HIG, Material Design 3, Google Play's Core App Quality guidelines,
+  WCAG 2.1, and Nielsen Norman Group's 10 usability heuristics, every claim
+  checked against the actual code. Overall 8.2/10; identity/branding scored
+  first and separately since protecting it was explicit scope, and none of
+  the findings ask to genericize the look.
+- `f4ac87d` — acted on the audit's concrete, non-identity findings: a proper
+  Android adaptive app icon (was a flat PNG with content close to the edge —
+  a circular launcher mask could have clipped the crest), a native splash
+  via the Android 12+ Splash Screen API (was the untouched Flutter
+  template), a corrected notification icon (was silently rendering as a
+  white blob — full-color icons don't survive Android's status-bar
+  tinting), `AppAccessibility.minTouchTarget` 44→48 to clear Android's Core
+  App Quality minimum (Apple's is 44; Android ships first here) with every
+  genuine touch target migrated onto that one constant instead of several
+  places hand-typing 44 or 48, and the dark-only theme decision documented
+  directly on `AppTheme.dark()` so it reads as a choice, not a gap.
+
+All four commits were pushed and are live on `origin/main`. Do not push a new
+commit here without the user's explicit request — the four above were
+requested explicitly; that isn't a standing instruction for future slices.
 
 ## 1. Product in one paragraph
 
@@ -449,7 +482,7 @@ rules for webhook, quota, and deletion work.
 | Settings | Local units/haptics/safety toggles and account deletion exist; camp reminders actually request permission and schedule; password change is a real reauthenticate-then-change flow; Terms/Privacy are real in-app routes whose text is still a placeholder pending publication |
 | Payments | RevenueCat adapter and server webhook code exist; real store products/sandbox not configured |
 | Crash reporting | Mobile Crashlytics adapter exists; real production crash test is pending |
-| App icon/native splash | Not fully store-polished/verified |
+| App icon/native splash | Real adaptive icon and Android 12+ native splash, generated from the actual brand mark/colors; not yet seen rendered on a physical device or real launcher (no device available in this environment) |
 | iOS | Source-compatible, but TestFlight/device validation is not done |
 
 Do not describe the current state as a shipped SaaS. It is a production-
