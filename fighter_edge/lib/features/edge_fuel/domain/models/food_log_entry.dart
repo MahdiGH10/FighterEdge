@@ -1,6 +1,6 @@
 import '../../../../../models/meal.dart';
 
-enum FoodLogSource { manual, legacyMeal, recent, savedMeal, recipe }
+enum FoodLogSource { manual, legacyMeal, recent, savedMeal, recipe, catalog }
 
 class FoodLogEntry {
   static const schemaVersion = 1;

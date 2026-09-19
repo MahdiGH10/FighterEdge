@@ -8,6 +8,7 @@ import '../../domain/models/food_log_entry.dart';
 import '../../domain/models/nutrition_setup_draft.dart';
 import '../../domain/models/nutrition_day.dart';
 import '../../domain/models/nutrition_target.dart';
+import 'food_memory.dart';
 
 /// Read-side access to a user's EdgeFuel profile/target, for screens outside
 /// the setup wizard (the Plan screen now; Today/Insights in later sprints).
@@ -26,6 +27,8 @@ class EdgeFuelController extends ChangeNotifier {
   NutritionTarget? _target;
   NutritionDay? _day;
   DateTime _selectedDate = DateTime.now();
+  FoodMemory? _memory;
+  bool _disposed = false;
 
   NutritionSetupDraft? get draft => _draft;
   NutritionTarget? get target => _target;
@@ -45,6 +48,14 @@ class EdgeFuelController extends ChangeNotifier {
   int get targetFats => target?.fatGrams ?? 0;
   bool get hasUsableTarget => target?.isSuccess == true;
 
+  /// Distinct foods logged most recently, across days — newest first.
+  List<FoodLogEntry> get recentFoods => _memory?.recent ?? const [];
+
+  /// Foods the athlete starred, across days.
+  List<FoodLogEntry> get savedFoods => _memory?.saved ?? const [];
+
+  bool isSavedFood(FoodLogEntry entry) => _memory?.isSaved(entry) ?? false;
+
   void setUser(String? userId) {
     if (_userId == userId) return;
     _userId = userId;
@@ -54,11 +65,21 @@ class EdgeFuelController extends ChangeNotifier {
     _draft = null;
     _target = null;
     _day = null;
+    _memory = null;
 
     if (userId == null) {
       notifyListeners();
       return;
     }
+
+    final memory = FoodMemory(userId);
+    memory.load().then((_) {
+      // Ignore a load that finishes after the account changed or the
+      // controller went away.
+      if (_disposed || _userId != userId) return;
+      _memory = memory;
+      notifyListeners();
+    });
 
     _draftSub = _repository.watchProfileDraft(userId).listen((draft) {
       _draft = draft;
@@ -84,6 +105,7 @@ class EdgeFuelController extends ChangeNotifier {
   }
 
   Future<void> addEntry(FoodLogEntry entry) async {
+    _memory?.remember(entry);
     final day = _activeDay();
     await _saveDay(
       day.copyWith(entries: [...day.entries, entry], updatedAt: DateTime.now()),
@@ -120,25 +142,47 @@ class EdgeFuelController extends ChangeNotifier {
     );
   }
 
-  List<FoodLogEntry> recentEntries({int limit = 5}) {
-    final seen = <String>{};
-    final recent = <FoodLogEntry>[];
-    for (final entry in entries.reversed) {
-      final key = entry.name.trim().toLowerCase();
-      if (key.isEmpty || !seen.add(key)) continue;
-      recent.add(entry.copyWith(
-        id: _manualId(),
-        source: FoodLogSource.recent,
-        loggedAt: DateTime.now(),
-        consumed: true,
-      ));
-      if (recent.length == limit) break;
+  /// Logs a remembered food again, as a fresh entry on the selected day.
+  Future<FoodLogEntry> logAgain(FoodLogEntry template) async {
+    final entry = template.copyWith(
+      id: _manualId(),
+      source: isSavedFood(template)
+          ? FoodLogSource.savedMeal
+          : FoodLogSource.recent,
+      consumed: true,
+      saved: isSavedFood(template),
+      loggedAt: DateTime.now(),
+    );
+    await addEntry(entry);
+    return entry;
+  }
+
+  /// Stars or un-stars a food everywhere: in the cross-day memory, and on
+  /// any of today's entries with the same name so the star reads the same.
+  Future<void> toggleSavedFood(FoodLogEntry entry) async {
+    final memory = _memory;
+    if (memory == null) return;
+    final saved = memory.toggleSaved(entry);
+    final key = FoodMemory.keyOf(entry);
+    final day = _activeDay();
+    if (!day.entries.any((e) => FoodMemory.keyOf(e) == key)) {
+      notifyListeners();
+      return;
     }
-    return recent;
+    await _saveDay(
+      day.copyWith(
+        entries: [
+          for (final e in day.entries)
+            if (FoodMemory.keyOf(e) == key) e.copyWith(saved: saved) else e,
+        ],
+        updatedAt: DateTime.now(),
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _disposed = true;
     _draftSub?.cancel();
     _targetSub?.cancel();
     _daySub?.cancel();

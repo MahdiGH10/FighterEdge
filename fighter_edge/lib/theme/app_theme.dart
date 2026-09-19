@@ -200,6 +200,19 @@ class AppTheme {
       // reads as an Android tell. Every tappable surface in the app now answers
       // with PressScale (press-down scale + haptic) instead, so the ripple is
       // switched off globally rather than fought widget by widget.
+      // Without this, confirmations like "Added - Undo" fall back to
+      // Material's light inverse-surface bar, the one light object on a dark
+      // screen.
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.surfaceElevated,
+        contentTextStyle: AppType.callout(color: AppColors.textPrimary),
+        actionTextColor: AppColors.accentText,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Radii.button),
+          side: const BorderSide(color: AppColors.borderStrong),
+        ),
+      ),
       splashFactory: NoSplash.splashFactory,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
