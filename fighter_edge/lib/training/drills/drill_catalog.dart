@@ -1,4 +1,5 @@
 import 'drill.dart';
+import '../taxonomy/technique_taxonomy.dart';
 
 /// The bundled drill library.
 ///
@@ -14,6 +15,7 @@ class DrillCatalog {
     Drill(
       id: 'jab',
       discipline: DrillDiscipline.striking,
+      categoryId: 'striking.punches',
       sport: 'BOXING',
       title: 'The Jab',
       summary: 'Your range finder and the setup for almost everything else.',
@@ -37,6 +39,7 @@ class DrillCatalog {
     Drill(
       id: 'one_two',
       discipline: DrillDiscipline.striking,
+      categoryId: 'striking.combinations',
       sport: 'BOXING',
       title: 'The 1-2',
       summary: 'Jab, then cross — the combination every other one is built '
@@ -59,6 +62,7 @@ class DrillCatalog {
     Drill(
       id: 'lead_hook',
       discipline: DrillDiscipline.striking,
+      categoryId: 'striking.punches',
       sport: 'BOXING',
       title: 'Lead Hook',
       summary: 'The short power shot that lands when the opponent is '
@@ -81,6 +85,7 @@ class DrillCatalog {
     Drill(
       id: 'slip_counter',
       discipline: DrillDiscipline.striking,
+      categoryId: 'striking.counters',
       sport: 'BOXING',
       title: 'Slip & Counter',
       summary: 'Make them miss, then make them pay — defence that creates '
@@ -105,6 +110,7 @@ class DrillCatalog {
     Drill(
       id: 'teep',
       discipline: DrillDiscipline.striking,
+      categoryId: 'striking.kicks',
       sport: 'MUAY THAI',
       title: 'The Teep',
       summary: 'A push kick that controls distance and breaks the '
@@ -126,6 +132,7 @@ class DrillCatalog {
     Drill(
       id: 'round_kick',
       discipline: DrillDiscipline.striking,
+      categoryId: 'striking.kicks',
       sport: 'MUAY THAI',
       title: 'Body Round Kick',
       summary: 'The heavy kick to the body that drains an opponent round by '
@@ -150,6 +157,7 @@ class DrillCatalog {
     Drill(
       id: 'low_kick_check',
       discipline: DrillDiscipline.striking,
+      categoryId: 'striking.kick_defense',
       sport: 'KICKBOXING',
       title: 'Low Kick & Check',
       summary: 'Throw the calf and thigh kick safely, and stop it coming back '
@@ -175,6 +183,7 @@ class DrillCatalog {
     Drill(
       id: 'pivot_angle',
       discipline: DrillDiscipline.striking,
+      categoryId: 'striking.footwork',
       sport: 'FOOTWORK',
       title: 'Pivot & Angle Out',
       summary: 'Get off the centre line after you punch, instead of standing '
@@ -198,6 +207,7 @@ class DrillCatalog {
     Drill(
       id: 'stance_level_change',
       discipline: DrillDiscipline.wrestling,
+      categoryId: 'grappling.fundamentals',
       sport: 'WRESTLING',
       title: 'Stance & Level Change',
       summary: 'Every takedown starts here: dropping your hips without '
@@ -221,6 +231,7 @@ class DrillCatalog {
     Drill(
       id: 'double_leg',
       discipline: DrillDiscipline.wrestling,
+      categoryId: 'grappling.takedowns',
       sport: 'WRESTLING',
       title: 'Double Leg Takedown',
       summary: 'The highest-percentage takedown in wrestling and MMA.',
@@ -243,6 +254,7 @@ class DrillCatalog {
     Drill(
       id: 'sprawl',
       discipline: DrillDiscipline.wrestling,
+      categoryId: 'grappling.sprawling',
       sport: 'WRESTLING',
       title: 'The Sprawl',
       summary: 'Your first line of takedown defence — and one of the best '
@@ -266,6 +278,7 @@ class DrillCatalog {
     Drill(
       id: 'shrimp',
       discipline: DrillDiscipline.bjj,
+      categoryId: 'grappling.fundamentals',
       sport: 'BJJ',
       title: 'Shrimp (Hip Escape)',
       summary: 'The movement behind almost every escape and guard recovery.',
@@ -288,6 +301,7 @@ class DrillCatalog {
     Drill(
       id: 'closed_guard_posture',
       discipline: DrillDiscipline.bjj,
+      categoryId: 'grappling.ground_grappling',
       sport: 'BJJ',
       title: 'Closed Guard: Break Posture',
       summary: 'From the bottom, nothing works until the opponent\'s posture '
@@ -310,6 +324,7 @@ class DrillCatalog {
     Drill(
       id: 'mount_escape',
       discipline: DrillDiscipline.bjj,
+      categoryId: 'grappling.ground_grappling',
       sport: 'BJJ',
       title: 'Mount Escape: Bridge & Roll',
       summary: 'Get out from under the worst position in grappling.',
@@ -331,6 +346,7 @@ class DrillCatalog {
     Drill(
       id: 'technical_standup',
       discipline: DrillDiscipline.bjj,
+      categoryId: 'grappling.mma_ground_fighting',
       sport: 'BJJ',
       title: 'Technical Stand-Up',
       summary: 'Get back to your feet safely, guard up, without giving your '
@@ -355,6 +371,7 @@ class DrillCatalog {
     Drill(
       id: 'plum_knees',
       discipline: DrillDiscipline.clinch,
+      categoryId: 'striking.clinch_striking',
       sport: 'MUAY THAI',
       title: 'Plum Clinch & Knees',
       summary: 'Control the head and the posture follows — then knees land.',
@@ -377,6 +394,7 @@ class DrillCatalog {
     Drill(
       id: 'pummeling',
       discipline: DrillDiscipline.clinch,
+      categoryId: 'grappling.clinch_grappling',
       sport: 'WRESTLING',
       title: 'Underhook Pummeling',
       summary: 'Win the inside position and you choose what happens next.',
@@ -397,10 +415,53 @@ class DrillCatalog {
     ),
   ];
 
+  /// Immutable indexes make path cards cheap to build: opening a system does
+  /// not scan the full catalog once for every visible category.
+  static final Map<String, List<Drill>> _byTaxonomyCategory =
+      _createCategoryIndex();
+  static final Map<String, List<Drill>> _byTaxonomySystem =
+      _createSystemIndex();
+
+  static Map<String, List<Drill>> _createCategoryIndex() {
+    final indexed = <String, List<Drill>>{};
+    for (final drill in all) {
+      (indexed[drill.categoryId] ??= []).add(drill);
+    }
+    return Map<String, List<Drill>>.unmodifiable({
+      for (final entry in indexed.entries)
+        entry.key: List<Drill>.unmodifiable(entry.value),
+    });
+  }
+
+  static Map<String, List<Drill>> _createSystemIndex() {
+    final indexed = <String, List<Drill>>{};
+    for (final drill in all) {
+      final systemId =
+          TechniqueTaxonomy.categoryById(drill.categoryId)?.systemId;
+      if (systemId != null) {
+        (indexed[systemId] ??= []).add(drill);
+      }
+    }
+    return Map<String, List<Drill>>.unmodifiable({
+      for (final entry in indexed.entries)
+        entry.key: List<Drill>.unmodifiable(entry.value),
+    });
+  }
+
   static List<Drill> byDiscipline(DrillDiscipline? discipline) =>
       discipline == null
           ? all
           : all.where((d) => d.discipline == discipline).toList();
+
+  static List<Drill> byTaxonomyCategory(String? categoryId) =>
+      categoryId == null
+          ? all
+          : _byTaxonomyCategory[categoryId] ?? const <Drill>[];
+
+  static List<Drill> byTaxonomySystem(String? systemId) {
+    if (systemId == null) return all;
+    return _byTaxonomySystem[systemId] ?? const <Drill>[];
+  }
 
   static Drill? byId(String id) {
     for (final drill in all) {

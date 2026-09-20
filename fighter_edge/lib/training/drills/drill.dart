@@ -4,6 +4,11 @@ class Drill {
   final String id;
   final DrillDiscipline discipline;
 
+  /// Stable path in the coach-owned [TechniqueTaxonomy]. A discipline is a
+  /// useful drill-card label; this key is the more specific curriculum path
+  /// that powers Train's Striking/Grappling browser.
+  final String categoryId;
+
   /// The sport the technique is taught in, shown as a small label
   /// ("BOXING", "MUAY THAI").
   final String sport;
@@ -25,6 +30,7 @@ class Drill {
   const Drill({
     required this.id,
     required this.discipline,
+    required this.categoryId,
     required this.sport,
     required this.title,
     required this.summary,

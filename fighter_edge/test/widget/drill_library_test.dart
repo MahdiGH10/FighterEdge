@@ -73,6 +73,49 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('No saved drills yet'), findsOneWidget);
     });
+
+    testWidgets('a fighter can move from a system into a coach path',
+        (tester) async {
+      await pumpLibrary(tester, Plan.pro);
+
+      expect(find.text('EXPLORE TECHNIQUE PATHS'), findsOneWidget);
+      await tester.tap(
+        find.byKey(const ValueKey('training-system-striking')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byKey(const ValueKey('training-category-striking.punches')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('selected-technique-path')),
+          findsOneWidget);
+      expect(find.text('Striking / Punches'), findsOneWidget);
+      expect(find.text('The Jab'), findsOneWidget);
+      expect(find.text('Lead Hook'), findsOneWidget);
+      expect(find.text('The Teep'), findsNothing);
+    });
+
+    testWidgets('the path rail survives 200 percent text', (tester) async {
+      tester.view.physicalSize = const Size(390, 1100);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        tester.platformDispatcher.clearTextScaleFactorTestValue();
+      });
+
+      await pumpLibrary(tester, Plan.pro);
+      await tester.tap(
+        find.byKey(const ValueKey('training-system-striking')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Punches'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('Round timer corner cues', () {

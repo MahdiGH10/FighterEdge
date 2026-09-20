@@ -13,13 +13,14 @@ import '../theme/app_typography.dart';
 import '../training/drills/drill.dart';
 import '../training/drills/drill_catalog.dart';
 import '../training/drills/drill_progress_store.dart';
+import '../training/taxonomy/technique_taxonomy.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
 import 'paywall_screen.dart';
 
-/// Written technique drills, embedded in the Train tab.
+/// Coach-mapped technique paths and written drills, embedded in the Train tab.
 ///
 /// Every drill is complete in text — key points, common mistakes, and how to
 /// put reps on it — so the library is useful today without video. Progress
@@ -32,11 +33,12 @@ class DrillLibraryScreen extends StatefulWidget {
 }
 
 class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
-  static const _filters = ['All', 'Striking', 'Wrestling', 'BJJ', 'Clinch'];
   static const _savedFilter = 'Saved';
 
   late final DrillProgressStore _store;
-  int _filter = 0;
+  String? _selectedSystemId;
+  String? _selectedCategoryId;
+  bool _savedOnly = false;
   String _query = '';
 
   @override
@@ -53,15 +55,35 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
     super.dispose();
   }
 
-  List<String> get _options => [..._filters, _savedFilter];
+  List<String> get _options => [
+        'All',
+        ...TechniqueTaxonomy.systems.map((system) => system.title),
+        _savedFilter,
+      ];
+
+  int get _selectedOptionIndex {
+    if (_savedOnly) return _options.length - 1;
+    if (_selectedSystemId == null) return 0;
+    final systemIndex =
+        TechniqueTaxonomy.systems.indexWhere((s) => s.id == _selectedSystemId);
+    return systemIndex < 0 ? 0 : systemIndex + 1;
+  }
+
+  TechniqueSystem? get _selectedSystem => _selectedSystemId == null
+      ? null
+      : TechniqueTaxonomy.systemById(_selectedSystemId!);
+
+  TechniqueCategory? get _selectedCategory => _selectedCategoryId == null
+      ? null
+      : TechniqueTaxonomy.categoryById(_selectedCategoryId!);
 
   List<Drill> get _visible {
-    final label = _options[_filter];
-    final discipline =
-        DrillDiscipline.values.where((d) => d.label == label).firstOrNull;
     final query = _query.trim().toLowerCase();
-    return DrillCatalog.byDiscipline(discipline).where((drill) {
-      if (label == _savedFilter && !_store.isBookmarked(drill.id)) {
+    final source = _selectedCategoryId != null
+        ? DrillCatalog.byTaxonomyCategory(_selectedCategoryId)
+        : DrillCatalog.byTaxonomySystem(_selectedSystemId);
+    return source.where((drill) {
+      if (_savedOnly && !_store.isBookmarked(drill.id)) {
         return false;
       }
       if (query.isEmpty) return true;
@@ -69,6 +91,43 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
           drill.sport.toLowerCase().contains(query) ||
           drill.summary.toLowerCase().contains(query);
     }).toList();
+  }
+
+  void _selectPrimaryFilter(int index) {
+    setState(() {
+      if (index == 0) {
+        _selectedSystemId = null;
+        _selectedCategoryId = null;
+        _savedOnly = false;
+        return;
+      }
+      if (index == _options.length - 1) {
+        _selectedSystemId = null;
+        _selectedCategoryId = null;
+        _savedOnly = true;
+        return;
+      }
+      _selectedSystemId = TechniqueTaxonomy.systems[index - 1].id;
+      _selectedCategoryId = null;
+      _savedOnly = false;
+    });
+  }
+
+  void _selectSystem(String systemId) {
+    setState(() {
+      _selectedSystemId = systemId;
+      _selectedCategoryId = null;
+      _savedOnly = false;
+    });
+  }
+
+  void _selectCategory(TechniqueCategory category) {
+    setState(() {
+      final isSelected = _selectedCategoryId == category.id;
+      _selectedSystemId = category.systemId;
+      _selectedCategoryId = isSelected ? null : category.id;
+      _savedOnly = false;
+    });
   }
 
   void _openPaywall() => AppNavigation.push(
@@ -108,11 +167,34 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
               padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
               child: FilterChips(
                 options: _options,
-                selectedIndex: _filter,
-                onSelected: (i) => setState(() => _filter = i),
+                selectedIndex: _selectedOptionIndex,
+                onSelected: _selectPrimaryFilter,
               ),
             ),
             const SizedBox(height: Insets.md),
+            if (!_savedOnly) ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: Insets.lg),
+                child: _SectionLabel('EXPLORE TECHNIQUE PATHS'),
+              ),
+              _TechniquePathRail(
+                selectedSystem: _selectedSystem,
+                selectedCategoryId: _selectedCategoryId,
+                onSelectSystem: _selectSystem,
+                onSelectCategory: _selectCategory,
+              ),
+              const SizedBox(height: Insets.md),
+            ],
+            if (_selectedCategory case final category?) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+                child: _SelectedPathSummary(
+                  category: category,
+                  onClear: () => setState(() => _selectedCategoryId = null),
+                ),
+              ),
+              const SizedBox(height: Insets.md),
+            ],
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
               child: Text(
@@ -130,19 +212,24 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
                   ? ListView(
                       padding: const EdgeInsets.all(Insets.lg),
                       children: [
-                        _options[_filter] == _savedFilter && _query.isEmpty
+                        _savedOnly && _query.trim().isEmpty
                             ? const EmptyState(
                                 icon: Icons.bookmark_border,
                                 title: 'No saved drills yet',
                                 message: 'Tap the bookmark on any drill to '
                                     'keep it here for your next session.',
                               )
-                            : const EmptyState(
-                                icon: Icons.search_off,
-                                title: 'No drills match',
-                                message: 'Try a different word or clear the '
-                                    'filter.',
-                              ),
+                            : _selectedCategory != null && _query.trim().isEmpty
+                                ? _CurriculumOnlyState(
+                                    category: _selectedCategory!,
+                                  )
+                                : const EmptyState(
+                                    icon: Icons.search_off,
+                                    title: 'No drills match',
+                                    message:
+                                        'Try a different word or clear the '
+                                        'filter.',
+                                  ),
                       ],
                     )
                   : ListView.builder(
@@ -247,6 +334,269 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A compact two-step navigator for the coach-owned taxonomy. Systems are the
+/// first level; selecting one replaces them with its paths. This keeps the
+/// Train screen one-handed and avoids a 22-item filter row.
+class _TechniquePathRail extends StatelessWidget {
+  final TechniqueSystem? selectedSystem;
+  final String? selectedCategoryId;
+  final ValueChanged<String> onSelectSystem;
+  final ValueChanged<TechniqueCategory> onSelectCategory;
+
+  const _TechniquePathRail({
+    required this.selectedSystem,
+    required this.selectedCategoryId,
+    required this.onSelectSystem,
+    required this.onSelectCategory,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final categories = selectedSystem == null
+        ? null
+        : TechniqueTaxonomy.categoriesForSystem(selectedSystem!.id);
+    // At large accessibility text sizes the cards grow vertically instead of
+    // clipping their labels or shrinking the athlete's type back down.
+    final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    final railHeight = 126 + ((textScale - 1).clamp(0.0, 1.4).toDouble() * 112);
+
+    return SizedBox(
+      height: railHeight,
+      child: ListView.separated(
+        key: ValueKey('technique-paths-${selectedSystem?.id ?? 'systems'}'),
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+        itemCount: categories?.length ?? TechniqueTaxonomy.systems.length,
+        separatorBuilder: (context, index) => const SizedBox(width: Insets.sm),
+        itemBuilder: (context, index) {
+          // Keep the list builder allocation-free apart from the visible
+          // cards. The taxonomy itself is static, bundled data.
+          return selectedSystem == null
+              ? _TechniqueSystemCard(
+                  system: TechniqueTaxonomy.systems[index],
+                  onTap: () => onSelectSystem(
+                    TechniqueTaxonomy.systems[index].id,
+                  ),
+                )
+              : _TechniqueCategoryCard(
+                  category: categories![index],
+                  selected: categories[index].id == selectedCategoryId,
+                  onTap: () => onSelectCategory(categories[index]),
+                );
+        },
+      ),
+    );
+  }
+}
+
+class _TechniqueSystemCard extends StatelessWidget {
+  final TechniqueSystem system;
+  final VoidCallback onTap;
+
+  const _TechniqueSystemCard({required this.system, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final categoryCount =
+        TechniqueTaxonomy.categoriesForSystem(system.id).length;
+    final secondary = AppAccessibility.textSecondary(context);
+    final icon = system.id == TechniqueTaxonomy.strikingSystemId
+        ? Icons.sports_mma_outlined
+        : Icons.sports_kabaddi_outlined;
+    return SizedBox(
+      width: 216,
+      child: Semantics(
+        button: true,
+        label: '${system.title}, $categoryCount technique paths',
+        child: ExcludeSemantics(
+          child: AppCard(
+            key: ValueKey('training-system-${system.id}'),
+            onTap: onTap,
+            accent: AppColors.primary,
+            padding: const EdgeInsets.all(Insets.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: AppColors.primary, size: IconSizes.row),
+                const SizedBox(height: Insets.sm),
+                Text(system.title, style: AppType.headline()),
+                const SizedBox(height: Insets.xxs),
+                Expanded(
+                  child: Text(
+                    system.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppType.micro(color: secondary),
+                  ),
+                ),
+                Text(
+                  '$categoryCount technique paths',
+                  style: AppType.micro(
+                    weight: FontWeight.w700,
+                    color: AppColors.accentText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TechniqueCategoryCard extends StatelessWidget {
+  final TechniqueCategory category;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TechniqueCategoryCard({
+    required this.category,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final writtenDrillCount =
+        DrillCatalog.byTaxonomyCategory(category.id).length;
+    final availability = writtenDrillCount == 0
+        ? 'Curriculum mapped'
+        : '$writtenDrillCount written ${writtenDrillCount == 1 ? 'drill' : 'drills'}';
+    final secondary = AppAccessibility.textSecondary(context);
+    return SizedBox(
+      width: 188,
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label:
+            '${category.title}, ${category.techniques.length} techniques, $availability',
+        child: ExcludeSemantics(
+          child: AppCard(
+            key: ValueKey('training-category-${category.id}'),
+            onTap: onTap,
+            accent: selected ? AppColors.primary : null,
+            color: selected ? AppColors.primarySoft : null,
+            padding: const EdgeInsets.all(Insets.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  category.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppType.headline(
+                    color: selected ? AppColors.accentText : null,
+                  ),
+                ),
+                const SizedBox(height: Insets.xxs),
+                Expanded(
+                  child: Text(
+                    category.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppType.micro(color: secondary),
+                  ),
+                ),
+                Text(
+                  availability,
+                  style: AppType.micro(
+                    weight: FontWeight.w700,
+                    color: selected
+                        ? AppColors.accentText
+                        : AppAccessibility.textMuted(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectedPathSummary extends StatelessWidget {
+  final TechniqueCategory category;
+  final VoidCallback onClear;
+
+  const _SelectedPathSummary({
+    required this.category,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final system = TechniqueTaxonomy.systemById(category.systemId)!;
+    final writtenDrillCount =
+        DrillCatalog.byTaxonomyCategory(category.id).length;
+    final secondary = AppAccessibility.textSecondary(context);
+    return AppCard(
+      key: const ValueKey('selected-technique-path'),
+      accent: AppColors.primary,
+      padding: const EdgeInsets.all(Insets.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${system.title} / ${category.title}',
+                  style: AppType.headline(color: AppColors.accentText),
+                ),
+              ),
+              Semantics(
+                button: true,
+                label: 'Clear selected technique path',
+                child: TextButton(
+                  onPressed: onClear,
+                  child: const Text('Clear'),
+                ),
+              ),
+            ],
+          ),
+          Text(
+            category.techniques.join(', '),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppType.subhead(color: secondary),
+          ),
+          const SizedBox(height: Insets.xs),
+          Text(
+            writtenDrillCount == 0
+                ? 'Coach-mapped curriculum. Written drills are coming.'
+                : '$writtenDrillCount written ${writtenDrillCount == 1 ? 'drill' : 'drills'} in this path.',
+            style: AppType.micro(
+              weight: FontWeight.w700,
+              color: AppAccessibility.textMuted(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CurriculumOnlyState extends StatelessWidget {
+  final TechniqueCategory category;
+
+  const _CurriculumOnlyState({required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: ValueKey('curriculum-only-${category.id}'),
+      child: EmptyState(
+        icon: Icons.menu_book_outlined,
+        title: '${category.title} is mapped',
+        message: 'The coach\'s curriculum is here. Written drills are being '
+            'added to this path.',
       ),
     );
   }
@@ -441,7 +791,16 @@ class _ProgressPips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final filled = progress.index;
-    return Row(
+    final label = Text(
+      progress.label,
+      style: AppType.micro(
+        weight: FontWeight.w700,
+        color: filled == 0
+            ? AppAccessibility.textMuted(context)
+            : AppColors.positive,
+      ),
+    );
+    final pips = Row(
       children: [
         for (var i = 1; i <= 3; i++) ...[
           Expanded(
@@ -455,18 +814,21 @@ class _ProgressPips extends StatelessWidget {
           ),
           if (i < 3) const SizedBox(width: Insets.xs),
         ],
-        const SizedBox(width: Insets.sm),
-        Text(
-          progress.label,
-          style: AppType.micro(
-            weight: FontWeight.w700,
-            color: filled == 0
-                ? AppAccessibility.textMuted(context)
-                : AppColors.positive,
-          ),
-        ),
       ],
     );
+    final largeText = MediaQuery.textScalerOf(context).scale(14) / 14 >= 1.4;
+    return largeText
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [pips, const SizedBox(height: Insets.xs), label],
+          )
+        : Row(
+            children: [
+              Expanded(child: pips),
+              const SizedBox(width: Insets.sm),
+              label,
+            ],
+          );
   }
 }
 
