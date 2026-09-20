@@ -4,9 +4,22 @@
 /// here stays defensive (never crash on an unexpected value).
 library;
 
-enum AiTaskType { explainPlan, fighterBrief, summarizeTrend }
+enum AiTaskType { chat, fighterBrief, summarizeTrend }
 
 enum AiActionType { meal, recipe, timing, shopping, logging, recovery }
+
+enum ChatRole { user, assistant }
+
+/// One turn of a chat conversation, sent to the server as bounded context for
+/// a follow-up message. Mirrors `functions/src/types.ts`'s `ChatTurn`.
+class ChatTurn {
+  final ChatRole role;
+  final String content;
+
+  const ChatTurn({required this.role, required this.content});
+
+  Map<String, dynamic> toJson() => {'role': role.name, 'content': content};
+}
 
 /// Discriminates the gateway call's outcome so the UI can show the right
 /// state (master prompt §14: "AI unavailable", "AI quota reached").

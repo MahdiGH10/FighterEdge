@@ -21,20 +21,6 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
   static const _requestTimeout = Duration(seconds: 45);
 
   @override
-  Future<EdgeFuelAiResult> explainPlan({
-    required NutritionTarget target,
-    NutritionDay? day,
-    NutritionSetupDraft? preferences,
-  }) async {
-    return _call(
-      task: 'explainPlan',
-      target: target,
-      day: day,
-      preferences: preferences,
-    );
-  }
-
-  @override
   Future<EdgeFuelAiResult> generateFighterBrief({
     required NutritionTarget target,
     NutritionDay? day,
@@ -48,11 +34,31 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
     );
   }
 
+  @override
+  Future<EdgeFuelAiResult> sendChatMessage({
+    required NutritionTarget target,
+    required String userMessage,
+    NutritionDay? day,
+    NutritionSetupDraft? preferences,
+    List<ChatTurn> history = const [],
+  }) {
+    return _call(
+      task: 'chat',
+      target: target,
+      day: day,
+      preferences: preferences,
+      userMessage: userMessage,
+      history: history,
+    );
+  }
+
   Future<EdgeFuelAiResult> _call({
     required String task,
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
+    String? userMessage,
+    List<ChatTurn> history = const [],
   }) async {
     try {
       final callable = _functions.httpsCallable('edgeFuelAiExplain');
@@ -66,6 +72,9 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
             'allergens': preferences.allergens,
             'dislikedFoods': preferences.dislikedFoods,
           },
+        if (userMessage != null) 'userMessage': userMessage,
+        if (history.isNotEmpty)
+          'history': [for (final turn in history) turn.toJson()],
       }).timeout(_requestTimeout);
 
       final data = Map<String, dynamic>.from(result.data as Map);

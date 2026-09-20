@@ -14,10 +14,12 @@ class FakeEdgeFuelAiGateway implements EdgeFuelAiGateway {
   const FakeEdgeFuelAiGateway({this.nextResult});
 
   @override
-  Future<EdgeFuelAiResult> explainPlan({
+  Future<EdgeFuelAiResult> sendChatMessage({
     required NutritionTarget target,
+    required String userMessage,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
+    List<ChatTurn> history = const [],
   }) async {
     if (nextResult != null) return nextResult!();
     if (!target.isSuccess) return const EdgeFuelAiResult.unavailable();

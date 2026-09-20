@@ -9,17 +9,23 @@ import 'edge_fuel_ai_models.dart';
 /// key — every implementation of this interface talks to our own backend
 /// boundary (or nothing at all, for the fake).
 abstract class EdgeFuelAiGateway {
-  Future<EdgeFuelAiResult> explainPlan({
+  /// Premium structured brief: next action, meal suggestion, training
+  /// timing, and weekly adjustment in one call.
+  Future<EdgeFuelAiResult> generateFighterBrief({
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
   });
 
-  /// Premium structured brief. It uses the same server safety pipeline as the
-  /// explanation call but has its own task name for quota and analytics.
-  Future<EdgeFuelAiResult> generateFighterBrief({
+  /// A free-text turn in the EdgeFuel Coach conversation. [history] is prior
+  /// turns, oldest first, already bounded by the caller — the server also
+  /// enforces its own bound, so a caller that forgets to trim is safe, not
+  /// silently ignored.
+  Future<EdgeFuelAiResult> sendChatMessage({
     required NutritionTarget target,
+    required String userMessage,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
+    List<ChatTurn> history = const [],
   });
 }

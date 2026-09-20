@@ -210,6 +210,31 @@ test("still rejects a number that is neither supplied nor derived", () => {
   assert.equal(result.reason, "fabricated_numbers");
 });
 
+test("accepts a chat reply using the same schema as before", () => {
+  const result = validateResponse(goodResponse(), suppliedFacts, "chat");
+  assert.equal(result.ok, true);
+});
+
+test("rejects a fabricated number in a chat reply", () => {
+  const result = validateResponse(
+    goodResponse({ summary: "You should actually eat 4200 kcal today." }),
+    suppliedFacts,
+    "chat",
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "fabricated_numbers");
+});
+
+test("rejects prohibited content smuggled into a chat reply", () => {
+  const result = validateResponse(
+    goodResponse({ summary: "Try a water fast before your weigh-in." }),
+    suppliedFacts,
+    "chat",
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "prohibited_content");
+});
+
 test("checks Fighter Brief sections with the same number rules", () => {
   const result = validateResponse(
     goodBriefResponse({

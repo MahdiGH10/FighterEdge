@@ -46,6 +46,43 @@ export async function consumeQuota(
 }
 
 /**
+ * Releases one request reservation after the server could not produce a
+ * validated answer. Calls to [consumeQuota] reserve capacity before provider
+ * I/O so concurrent requests cannot overrun the cost limit; this compensating
+ * transaction makes that reservation invisible to the athlete when the model,
+ * provider, or schema validator fails.
+ *
+ * Only trusted server code calls this. The count is clamped at zero so a retry
+ * or an operational replay can never create negative usage.
+ */
+export async function refundQuota(
+  db: Firestore,
+  uid: string,
+  now: Date,
+): Promise<QuotaResult> {
+  const ref = db
+    .collection("users")
+    .doc(uid)
+    .collection("aiUsage")
+    .doc(todayKey(now));
+
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const used = (snap.data()?.count as number | undefined) ?? 0;
+    const next = Math.max(0, used - 1);
+
+    if (next !== used) {
+      tx.set(
+        ref,
+        { count: next, updatedAt: now.toISOString() },
+        { merge: true },
+      );
+    }
+    return { allowed: true, remaining: DAILY_QUOTA - next };
+  });
+}
+
+/**
  * Server-side kill switch (master prompt §13.4). Reads a single config doc
  * so the AI feature can be disabled without a redeploy. Defaults to enabled
  * if the doc is missing, so first deploy doesn't require extra setup.

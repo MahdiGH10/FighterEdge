@@ -113,7 +113,7 @@ function isValidBriefSections(value: unknown): value is FighterBriefSections {
 /** Structural shape check — matches master prompt §13.3's schema exactly. */
 export function isWellFormedResponse(
   value: unknown,
-  task: AiTaskType = "explainPlan",
+  task: AiTaskType = "chat",
 ): value is AiResponse {
   if (typeof value !== "object" || value === null) return false;
   const response = value as Record<string, unknown>;
@@ -200,7 +200,7 @@ function containsFabricatedNumbers(
 export function validateResponse(
   parsed: unknown,
   suppliedFactsJson: string,
-  task: AiTaskType = "explainPlan",
+  task: AiTaskType = "chat",
 ): ValidationResult {
   if (!isWellFormedResponse(parsed, task)) {
     return { ok: false, reason: "malformed_schema" };

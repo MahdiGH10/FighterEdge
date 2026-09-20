@@ -28,6 +28,7 @@ class RecipeDetailScreen extends StatefulWidget {
   final Map<String, FoodItem> foodsById;
   final Set<Allergen> conflictingAllergens;
   final bool locked;
+  final double? initialServings;
 
   const RecipeDetailScreen({
     super.key,
@@ -35,6 +36,7 @@ class RecipeDetailScreen extends StatefulWidget {
     required this.foodsById,
     this.conflictingAllergens = const {},
     this.locked = false,
+    this.initialServings,
   });
 
   @override
@@ -42,7 +44,8 @@ class RecipeDetailScreen extends StatefulWidget {
 }
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
-  late double _servings = widget.listing.recipe.servings.toDouble();
+  late double _servings =
+      widget.initialServings ?? widget.listing.recipe.servings.toDouble();
   bool _adding = false;
 
   @override

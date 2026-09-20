@@ -4,7 +4,14 @@
  * lib/features/edge_fuel/ai/edge_fuel_ai_models.dart — keep both in sync.
  */
 
-export type AiTaskType = "explainPlan" | "fighterBrief" | "summarizeTrend";
+export type AiTaskType = "chat" | "fighterBrief" | "summarizeTrend";
+
+export type ChatRole = "user" | "assistant";
+
+export interface ChatTurn {
+  role: ChatRole;
+  content: string;
+}
 
 /** Minimum-necessary context sent from Flutter — never raw user PII beyond this. */
 export interface AiRequest {
@@ -16,6 +23,10 @@ export interface AiRequest {
     allergens?: string[];
     dislikedFoods?: string[];
   } | null;
+  /** Only for task "chat": the athlete's new message. */
+  userMessage?: string;
+  /** Only for task "chat": prior turns, oldest first, already bounded by the client. */
+  history?: ChatTurn[];
 }
 
 export type AiActionType =
