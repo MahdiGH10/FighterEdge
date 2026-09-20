@@ -3,10 +3,49 @@
 **Verified:** 2026-09-20
 **Repository:** `MahdiGH10/FighterEdge`  
 **Branch:** `main`  
-**Latest feature commit:** `1a803aa fix: survive a free model disappearing, and add dev messages`
-**HEAD is 11 commits ahead of `origin/main`** (last pushed: `6cb3f2e`). Nothing
+**Latest feature commit:** `ea798d4 fix: stop a food row's tap from silently un-eating the meal`
+**HEAD is 13 commits ahead of `origin/main`** (last pushed: `6cb3f2e`). Nothing
 in this document has been pushed. Do not push without the user's explicit
 request — see §2.
+
+**Two things sitting in the working tree that this session did not create —
+check `git status` before assuming a clean start:**
+
+1. **A parallel, unrelated slice was in flight during this session:**
+   `lib/screens/drill_library_screen.dart`, `lib/training/drills/*`,
+   `lib/training/taxonomy/` (new), `test/unit/training/technique_taxonomy_test.dart`
+   (new), and `test/widget/drill_library_test.dart`, plus its own
+   `docs/TRAINING_TAXONOMY_HANDOFF.md` (new, untracked) describing it —
+   status there says "Implemented locally; ready to commit after the final
+   project-wide check." It briefly left the whole project not compiling
+   (undefined `_filter` in `drill_library_screen.dart`) partway through this
+   session; by the end it compiled clean again. This work is **not part of
+   this document** and every commit in this session's history was checked to
+   exclude it (`git add` used explicit paths, never `-A`, whenever this was
+   in flight). If it is still uncommitted when a new session starts, that is
+   that other slice's own owner's unfinished business, not a sign anything
+   here is broken — read `docs/TRAINING_TAXONOMY_HANDOFF.md` for its own
+   status rather than guessing.
+2. **`Fighters_Edge_Product_AI_Technical_Blueprint.md`** (repo root, new,
+   untracked) — a general product/AI/growth blueprint the user dropped in.
+   **Read it for ideas, not as a spec to execute.** It describes a
+   *different, idealized* rebuild: Supabase/PostgreSQL (this app is
+   Firebase/Firestore), BLoC or Riverpod (this app is Provider,
+   consistently, everywhere), Isar/Hive (this app is SharedPreferences +
+   Firestore), calling `google_generative_ai`/`dart_openai` directly from
+   Flutter (this app's real, working, safety-validated AI pipeline goes
+   through `edgeFuelAiExplain`, a Cloud Function that owns auth, quota,
+   entitlement, schema validation, and fabricated-number checking —
+   CLAUDE.md: *"The client never grants or persists Pro access,"* which a
+   direct-from-Flutter LLM call would violate outright), plus video
+   tutorials, camera-based pose estimation, a voice corner-man, contextual
+   ads, and a full backend migration — none of which exist here and none of
+   which should be started as a side effect of a nutrition-AI or
+   Fighter-Brief slice. Mine it for product *direction* (structured
+   programs, audio cues, a real "ask the coach something" interaction
+   model) and translate that through the stack that actually exists, the
+   same way every other slice in this document does. Do not let it become
+   the excuse for an undirected rewrite.
 **Purpose:** Give a new Claude Code session enough context to continue the
 application without rebuilding work that already exists or claiming that
 account-level setup is complete when it is not.
