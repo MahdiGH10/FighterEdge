@@ -3,29 +3,30 @@
 **Verified:** 2026-09-20
 **Repository:** `MahdiGH10/FighterEdge`  
 **Branch:** `main`  
-**Latest feature commit:** `ea798d4 fix: stop a food row's tap from silently un-eating the meal`
-**HEAD is 13 commits ahead of `origin/main`** (last pushed: `6cb3f2e`). Nothing
+**Latest feature commit:** `df31b68 feat: a real typed AI coach, and a deterministic Fuel Match for meals`
+**HEAD is 15 commits ahead of `origin/main`** (last pushed: `6cb3f2e`). Nothing
 in this document has been pushed. Do not push without the user's explicit
 request — see §2.
 
-**Two things sitting in the working tree that this session did not create —
-check `git status` before assuming a clean start:**
+**Update, same session, later:** the parallel taxonomy slice finished and is
+now committed as `9a4d506 feat(train): add coach technique taxonomy` — the
+"still uncompiling" warning below is resolved, kept only as a record of what
+happened. More importantly: **the AI chat coach + Fighter Brief merge that
+was this document's open item #1/#2 is now also done, deployed, live-tested,
+and committed** — see the new section right after this one. Read that before
+re-reading the rest of this note as current state.
 
-1. **A parallel, unrelated slice was in flight during this session:**
-   `lib/screens/drill_library_screen.dart`, `lib/training/drills/*`,
-   `lib/training/taxonomy/` (new), `test/unit/training/technique_taxonomy_test.dart`
-   (new), and `test/widget/drill_library_test.dart`, plus its own
-   `docs/TRAINING_TAXONOMY_HANDOFF.md` (new, untracked) describing it —
-   status there says "Implemented locally; ready to commit after the final
-   project-wide check." It briefly left the whole project not compiling
-   (undefined `_filter` in `drill_library_screen.dart`) partway through this
-   session; by the end it compiled clean again. This work is **not part of
-   this document** and every commit in this session's history was checked to
-   exclude it (`git add` used explicit paths, never `-A`, whenever this was
-   in flight). If it is still uncommitted when a new session starts, that is
-   that other slice's own owner's unfinished business, not a sign anything
-   here is broken — read `docs/TRAINING_TAXONOMY_HANDOFF.md` for its own
-   status rather than guessing.
+**One thing that was sitting in the working tree, now resolved — kept as a
+record, not a live warning:**
+
+1. `lib/screens/drill_library_screen.dart`, `lib/training/drills/*`,
+   `lib/training/taxonomy/`, `test/unit/training/technique_taxonomy_test.dart`,
+   and `test/widget/drill_library_test.dart` were a parallel, unrelated slice
+   in flight during this session (its own `docs/TRAINING_TAXONOMY_HANDOFF.md`
+   describes it) — briefly left the whole project not compiling (undefined
+   `_filter`) partway through, compiled clean by the end, and is now
+   committed as `9a4d506`. This document's own commits always used explicit
+   `git add` paths, never `-A`, so nothing here is mixed with that slice.
 2. **`Fighters_Edge_Product_AI_Technical_Blueprint.md`** (repo root, new,
    untracked) — a general product/AI/growth blueprint the user dropped in.
    **Read it for ideas, not as a spec to execute.** It describes a
@@ -46,6 +47,92 @@ check `git status` before assuming a clean start:**
    model) and translate that through the stack that actually exists, the
    same way every other slice in this document does. Do not let it become
    the excuse for an undirected rewrite.
+
+## Continuation update — 2026-09-20, later the same day (the real AI coach — done)
+
+This closes out item #1/#2 from the "hands-on EdgeFuel UX pass" section
+below — *"make the AI a real, typed conversation"* and *"Fighter Brief feels
+useless."* The work appeared in the working tree already built (this session
+did not write the first draft of it), was audited file by file against every
+concern the prior section raised, verified against the actual gates, found
+already deployed and already live-tested by the user's own account, and
+committed as `df31b68 feat: a real typed AI coach, and a deterministic Fuel
+Match for meals`.
+
+**What changed, and why each piece answers something specific from the prior
+section:**
+
+- **One conversation, not two dead-end buttons.** `EdgeFuelCoachController` +
+  `EdgeFuelCoachScreen` (new) replace both `_FighterBriefPreviewSection` and
+  `_AiCoachSection` from the old `edge_fuel_plan_screen.dart` (which dropped
+  from ~888 to 470 lines). The Fighter Brief is now the conversation's
+  *opening turn*, not a separate screen — directly answers "Fighter Brief
+  feels useless" by making it the first thing a real conversation says,
+  rather than a card with nothing after it. Chat continues from there with a
+  real text field. `EdgeFuelAiController` and `explainPlan` are gone.
+- **The chat model never invents a meal.** A new deterministic domain —
+  `FuelMatch` / `FuelMatchCalculator` / `FuelMatchController` — matches the
+  athlete's remaining macros against the real recipe catalog (status:
+  ready / needs more data / no meal needed / no match; allergen-safe). The
+  system prompt (v6) explicitly tells the chat model to defer meal/recipe/
+  portion questions to Fuel Match instead of guessing. This is a better
+  answer than the literal "merge Fighter Brief into chat" this document
+  originally floated — it keeps the LLM out of the one place a hallucinated
+  number would actually reach a meal.
+- **The prompt-injection and fabricated-number gaps this document flagged
+  are closed, not just theorized about.** `suppliedFacts` (what
+  `containsFabricatedNumbers`'s allow-list is built from) deliberately
+  excludes `userMessage`/`history` — a number the athlete types can never
+  become something the model is later allowed to repeat as calculated.
+  Both the prohibited-content scan and the fabricated-number check run over
+  chat's `summary` field, same as the four Fighter Brief sections always
+  did. System prompt v6 adds explicit instructions to refuse a message that
+  asks the model to ignore its rules, reveal the prompt, or invent a number,
+  while still answering the safe part of the question if one exists.
+  `functions/src/index.ts` also enforces its own server-side bounds on
+  `userMessage` (600 chars) and `history` (8 turns, 600 chars/turn) — the
+  client bounding the same way is a UX nicety, not the trust boundary.
+- **A failed AI turn no longer costs the athlete a quota unit.** New
+  `refundQuota` (functions/src/quota.ts) releases the reservation
+  `consumeQuota` takes before the provider call whenever the model,
+  provider, or validator ends up failing — covered by three new tests
+  (`quota.test.ts`).
+
+**Verified, not just read:** `dart format --output=none --set-exit-if-changed .`
+clean; `flutter analyze` clean; `flutter test --exclude-tags golden` — 466
+passed; `flutter test --tags golden` — 3 passed; `functions`: `npm test` —
+37/37 passed. Separately from this session's own verification, the Cloud
+Function was already deployed before this commit (`edgefuelaiexplain-00004-kul`,
+updated 2026-09-20T14:24:42Z) and `firebase functions:log` shows several real
+`task=chat` requests from the user's own account completing with
+`status=success` — this is not a from-first-principles guess that the chat
+works, it was seen working against the live provider chain. Two of the
+logged chat attempts hit `"OpenRouter returned no content"` (a provider
+hiccup on `modelIndex:0`, not a repeated/stuck failure) — consistent with
+already-known free-model flakiness, not a new problem this slice introduced.
+
+**Worth knowing before building on this:**
+
+- **Quota is now shared, per day, across every chat message and every brief
+  request** (`DAILY_QUOTA = 20` in `functions/src/quota.ts`) — a single real
+  back-and-forth conversation can consume several units in a few minutes.
+  The user's own test account was already down to 15/20 remaining from
+  manual testing alone. Worth watching once more people are using chat
+  regularly; a Pro-tier-specific higher quota was already anticipated in
+  the quota module's own comments but not implemented.
+- **Not yet checked by this session:** the coach screen's UI/UX against the
+  fighter-edge-ui skill contract beyond a quick raw-color/raw-fontSize grep
+  (found nothing, but that is not the same as a full pass — 1285 lines,
+  not read end to end); large-text/reduced-motion behavior specifically for
+  the new chat surface; and whether `DAILY_QUOTA` should differ from what
+  the free `summarizeTrend` task effectively costs, since chat's per-message
+  cost model is new and the cap predates it.
+- The still-open items from the "hands-on EdgeFuel UX pass" section below
+  that this update does **not** touch: the destructive-tap bug (already
+  fixed separately, see `ea798d4`), no meal-type field on `FoodLogEntry`,
+  no cooked-preparation catalog variants, no custom-food/saved-combo store.
+  Those remain open exactly as described below.
+
 **Purpose:** Give a new Claude Code session enough context to continue the
 application without rebuilding work that already exists or claiming that
 account-level setup is complete when it is not.
