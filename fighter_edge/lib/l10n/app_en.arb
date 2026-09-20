@@ -160,6 +160,21 @@
   },
   "devMessageGotIt": "Got it",
 
+  "foodMarkEaten": "Mark as eaten",
+  "foodMarkNotEaten": "Mark as not eaten",
+  "foodMarkedEaten": "{name} marked as eaten",
+  "@foodMarkedEaten": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "foodMarkedNotEaten": "{name} marked as not eaten",
+  "@foodMarkedNotEaten": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "commonEdit": "Edit",
+  "commonSaveMeal": "Save meal",
+  "commonUnsave": "Unsave",
+  "commonDelete": "Delete",
+
   "authWelcomeBack": "Welcome back",
   "authWelcomeBackSubtitle": "Sign in to continue your camp",
   "authEmail": "Email",

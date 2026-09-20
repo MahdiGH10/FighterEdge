@@ -386,6 +386,34 @@ class LDe extends L {
   String get devMessageGotIt => 'Alles klar';
 
   @override
+  String get foodMarkEaten => 'Als gegessen markieren';
+
+  @override
+  String get foodMarkNotEaten => 'Als nicht gegessen markieren';
+
+  @override
+  String foodMarkedEaten(String name) {
+    return '$name als gegessen markiert';
+  }
+
+  @override
+  String foodMarkedNotEaten(String name) {
+    return '$name als nicht gegessen markiert';
+  }
+
+  @override
+  String get commonEdit => 'Bearbeiten';
+
+  @override
+  String get commonSaveMeal => 'Speichern';
+
+  @override
+  String get commonUnsave => 'Nicht mehr speichern';
+
+  @override
+  String get commonDelete => 'Löschen';
+
+  @override
   String get authWelcomeBack => 'Willkommen zurück';
 
   @override

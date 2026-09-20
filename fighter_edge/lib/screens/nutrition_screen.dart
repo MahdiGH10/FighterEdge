@@ -14,6 +14,7 @@ import '../features/edge_fuel/presentation/widgets/fuel_what_is_left.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
@@ -53,11 +54,13 @@ class _NutritionScreenState extends State<NutritionScreen> {
           ringColor: ringColor,
           onEdit: _editFood,
           onAdd: () => _addFood(edgeFuel),
+          onToggle: _confirmToggled,
         ),
       1 => _MealsView(
           edgeFuel: edgeFuel,
           onEdit: _editFood,
           onLogged: _confirmLogged,
+          onToggle: _confirmToggled,
         ),
       _ => const _RecipesTab(),
     };
@@ -126,6 +129,33 @@ class _NutritionScreenState extends State<NutritionScreen> {
             label: L.of(context).commonUndo,
             textColor: AppColors.accentText,
             onPressed: () => edgeFuel.deleteEntry(entry),
+          ),
+        ),
+      );
+  }
+
+  /// Marking a meal eaten/not-eaten used to be a silent side effect of
+  /// tapping the row (see the row-tap fix below) — it now gets the same
+  /// haptic + Undo treatment as adding one, so it is never a one-way door
+  /// either. Undo restores the exact original entry rather than toggling
+  /// again, since toggling the same stale [entry] object twice would flip
+  /// to the same state both times.
+  void _confirmToggled(EdgeFuelController edgeFuel, FoodLogEntry entry) {
+    AppHaptics.commit();
+    final l = L.of(context);
+    final nowEaten = !entry.consumed;
+    edgeFuel.toggleEntry(entry);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(nowEaten
+              ? l.foodMarkedEaten(entry.name)
+              : l.foodMarkedNotEaten(entry.name)),
+          action: SnackBarAction(
+            label: l.commonUndo,
+            textColor: AppColors.accentText,
+            onPressed: () => edgeFuel.updateEntry(entry),
           ),
         ),
       );
@@ -328,6 +358,7 @@ class _TodayView extends StatelessWidget {
   final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
       onEdit;
   final VoidCallback onAdd;
+  final void Function(EdgeFuelController, FoodLogEntry) onToggle;
 
   const _TodayView({
     required this.edgeFuel,
@@ -335,6 +366,7 @@ class _TodayView extends StatelessWidget {
     required this.ringColor,
     required this.onEdit,
     required this.onAdd,
+    required this.onToggle,
   });
 
   @override
@@ -429,7 +461,7 @@ class _TodayView extends StatelessWidget {
         for (final entry in edgeFuel.entries)
           _FoodRow(
             entry: entry,
-            onToggle: () => edgeFuel.toggleEntry(entry),
+            onToggle: () => onToggle(edgeFuel, entry),
             onEdit: () => onEdit(edgeFuel, existing: entry),
             onDelete: () => edgeFuel.deleteEntry(entry),
             onSaveToggle: () => edgeFuel.toggleSavedFood(entry),
@@ -742,11 +774,13 @@ class _MealsView extends StatelessWidget {
   final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
       onEdit;
   final void Function(EdgeFuelController, FoodLogEntry) onLogged;
+  final void Function(EdgeFuelController, FoodLogEntry) onToggle;
 
   const _MealsView({
     required this.edgeFuel,
     required this.onEdit,
     required this.onLogged,
+    required this.onToggle,
   });
 
   @override
@@ -796,7 +830,7 @@ class _MealsView extends StatelessWidget {
         for (final entry in edgeFuel.entries)
           _FoodRow(
             entry: entry,
-            onToggle: () => edgeFuel.toggleEntry(entry),
+            onToggle: () => onToggle(edgeFuel, entry),
             onEdit: () => onEdit(edgeFuel, existing: entry),
             onDelete: () => edgeFuel.deleteEntry(entry),
             onSaveToggle: () => edgeFuel.toggleSavedFood(entry),
@@ -871,55 +905,72 @@ class _FoodRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondary = AppAccessibility.textSecondary(context);
+    // The row itself used to toggle eaten/not-eaten on any tap, with no
+    // visible control and no way back — the exact bug a tester hit. A tap on
+    // the row now opens it for editing, matching what tapping a list row
+    // means everywhere else in the app; eaten/not-eaten moves to its own
+    // small control with its own label, below.
     return Padding(
       padding: const EdgeInsets.only(bottom: Insets.md),
       child: AppCard(
-        onTap: onToggle,
         padding: const EdgeInsets.all(Insets.md),
         child: Row(
           children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          entry.name,
-                          style: AppType.callout(weight: FontWeight.w700),
+              child: Semantics(
+                button: true,
+                label: '${entry.name}, ${entry.notes}, ${entry.calories} kcal'
+                    '${entry.saved ? ', saved' : ''}',
+                child: PressScale(
+                  onTap: onEdit,
+                  child: ExcludeSemantics(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                entry.name,
+                                style: AppType.callout(weight: FontWeight.w700),
+                              ),
+                            ),
+                            if (entry.saved) ...[
+                              const SizedBox(width: Insets.xs),
+                              const Icon(
+                                Icons.star,
+                                size: 14,
+                                color: AppColors.primary,
+                              ),
+                            ],
+                          ],
                         ),
-                      ),
-                      if (entry.saved) ...[
-                        const SizedBox(width: Insets.xs),
-                        const Icon(
-                          Icons.star,
-                          size: 14,
-                          color: AppColors.primary,
+                        const SizedBox(height: Insets.xxs),
+                        Text(
+                          entry.notes,
+                          style: AppType.subhead(
+                            weight: FontWeight.w500,
+                            color: secondary,
+                          ),
                         ),
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: Insets.xxs),
-                  Text(
-                    entry.notes,
-                    style: AppType.subhead(
-                      weight: FontWeight.w500,
-                      color: AppColors.textSecondary,
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-            Text(
-              '${entry.calories} kcal',
-              style: AppType.subhead(
-                weight: FontWeight.w600,
-                color: AppColors.textSecondary,
+            ExcludeSemantics(
+              child: Text(
+                '${entry.calories} kcal',
+                style: AppType.subhead(
+                  weight: FontWeight.w600,
+                  color: secondary,
+                ),
               ),
             ),
-            const SizedBox(width: Insets.md),
-            _Check(checked: entry.consumed),
+            const SizedBox(width: Insets.sm),
+            _ToggleCheck(checked: entry.consumed, onTap: onToggle),
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
               color: AppColors.surface,
@@ -928,16 +979,53 @@ class _FoodRow extends StatelessWidget {
                 if (value == 'save') onSaveToggle();
                 if (value == 'delete') onDelete();
               },
-              itemBuilder: (_) => [
-                const PopupMenuItem(value: 'edit', child: Text('Edit')),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Text(L.of(context).commonEdit),
+                ),
                 PopupMenuItem(
                   value: 'save',
-                  child: Text(entry.saved ? 'Unsave' : 'Save meal'),
+                  child: Text(entry.saved
+                      ? L.of(context).commonUnsave
+                      : L.of(context).commonSaveMeal),
                 ),
-                const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text(L.of(context).commonDelete),
+                ),
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The eaten/not-eaten control: its own tap target and its own label,
+/// distinct from the row (which opens the entry) and sized to
+/// [AppAccessibility.minTouchTarget] without inflating the 26px glyph a
+/// larger visual circle would have looked heavy next to.
+class _ToggleCheck extends StatelessWidget {
+  final bool checked;
+  final VoidCallback onTap;
+  const _ToggleCheck({required this.checked, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return Semantics(
+      button: true,
+      toggled: checked,
+      label: checked ? l.foodMarkNotEaten : l.foodMarkEaten,
+      excludeSemantics: true,
+      child: InkResponse(
+        onTap: onTap,
+        radius: AppAccessibility.minTouchTarget / 2,
+        child: SizedBox.square(
+          dimension: AppAccessibility.minTouchTarget,
+          child: Center(child: _Check(checked: checked)),
         ),
       ),
     );

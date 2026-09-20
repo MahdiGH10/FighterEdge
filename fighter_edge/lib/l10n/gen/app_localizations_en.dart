@@ -383,6 +383,34 @@ class LEn extends L {
   String get devMessageGotIt => 'Got it';
 
   @override
+  String get foodMarkEaten => 'Mark as eaten';
+
+  @override
+  String get foodMarkNotEaten => 'Mark as not eaten';
+
+  @override
+  String foodMarkedEaten(String name) {
+    return '$name marked as eaten';
+  }
+
+  @override
+  String foodMarkedNotEaten(String name) {
+    return '$name marked as not eaten';
+  }
+
+  @override
+  String get commonEdit => 'Edit';
+
+  @override
+  String get commonSaveMeal => 'Save meal';
+
+  @override
+  String get commonUnsave => 'Unsave';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
   String get authWelcomeBack => 'Welcome back';
 
   @override

@@ -763,6 +763,54 @@ abstract class L {
   /// **'Got it'**
   String get devMessageGotIt;
 
+  /// No description provided for @foodMarkEaten.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as eaten'**
+  String get foodMarkEaten;
+
+  /// No description provided for @foodMarkNotEaten.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as not eaten'**
+  String get foodMarkNotEaten;
+
+  /// No description provided for @foodMarkedEaten.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} marked as eaten'**
+  String foodMarkedEaten(String name);
+
+  /// No description provided for @foodMarkedNotEaten.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} marked as not eaten'**
+  String foodMarkedNotEaten(String name);
+
+  /// No description provided for @commonEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get commonEdit;
+
+  /// No description provided for @commonSaveMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Save meal'**
+  String get commonSaveMeal;
+
+  /// No description provided for @commonUnsave.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsave'**
+  String get commonUnsave;
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
   /// No description provided for @authWelcomeBack.
   ///
   /// In en, this message translates to:
