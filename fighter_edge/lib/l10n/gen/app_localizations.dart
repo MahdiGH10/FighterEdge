@@ -751,6 +751,18 @@ abstract class L {
   /// **'Pro puts a corner in your rest: a cue for the next round.'**
   String get timerCornerTeaser;
 
+  /// No description provided for @devMessageFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'FROM {from}'**
+  String devMessageFrom(String from);
+
+  /// No description provided for @devMessageGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get devMessageGotIt;
+
   /// No description provided for @authWelcomeBack.
   ///
   /// In en, this message translates to:

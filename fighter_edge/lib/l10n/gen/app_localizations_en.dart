@@ -375,6 +375,14 @@ class LEn extends L {
       'Pro puts a corner in your rest: a cue for the next round.';
 
   @override
+  String devMessageFrom(String from) {
+    return 'FROM $from';
+  }
+
+  @override
+  String get devMessageGotIt => 'Got it';
+
+  @override
   String get authWelcomeBack => 'Welcome back';
 
   @override

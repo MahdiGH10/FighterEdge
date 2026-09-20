@@ -19,6 +19,7 @@ import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/animated_count.dart';
+import '../widgets/dev_message_card.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/premium_effects.dart';
@@ -96,6 +97,8 @@ class DashboardScreen extends StatelessWidget {
                   : 'The Grind Never Lies.',
             ),
           ),
+          const SizedBox(height: Insets.lg),
+          const DevMessageCard(),
           if (firstRun.isActive) ...[
             const SizedBox(height: Insets.lg),
             FirstWeekChecklist(

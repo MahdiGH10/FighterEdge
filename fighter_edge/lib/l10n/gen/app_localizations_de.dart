@@ -378,6 +378,14 @@ class LDe extends L {
       'Mit Pro steht dir in der Pause deine Ecke zur Seite: ein Hinweis für die nächste Runde.';
 
   @override
+  String devMessageFrom(String from) {
+    return 'VON $from';
+  }
+
+  @override
+  String get devMessageGotIt => 'Alles klar';
+
+  @override
   String get authWelcomeBack => 'Willkommen zurück';
 
   @override

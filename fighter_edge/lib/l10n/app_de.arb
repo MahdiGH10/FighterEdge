@@ -154,6 +154,12 @@
   "timerYourCorner": "DEINE ECKE",
   "timerCornerTeaser": "Mit Pro steht dir in der Pause deine Ecke zur Seite: ein Hinweis für die nächste Runde.",
 
+  "devMessageFrom": "VON {from}",
+  "@devMessageFrom": {
+    "placeholders": { "from": { "type": "String" } }
+  },
+  "devMessageGotIt": "Alles klar",
+
   "authWelcomeBack": "Willkommen zurück",
   "authWelcomeBackSubtitle": "Melde dich an und mach im Camp weiter",
   "authEmail": "E-Mail",

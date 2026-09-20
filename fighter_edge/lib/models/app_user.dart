@@ -1,4 +1,5 @@
 import '../billing/subscription.dart';
+import 'dev_message.dart';
 
 /// Provider-agnostic domain user. Firebase/Supabase/etc. map into this shape
 /// so the rest of the app never depends on a specific auth SDK.
@@ -23,6 +24,10 @@ class AppUser {
   final int weeklyTrainingDays;
   final double? startingWeightKg;
 
+  /// A one-off note from the developer, set on the profile document by the
+  /// developer and never written by the client.
+  final DevMessage? devMessage;
+
   const AppUser({
     required this.id,
     required this.email,
@@ -39,6 +44,7 @@ class AppUser {
     this.experienceLevel = '',
     this.weeklyTrainingDays = 4,
     this.startingWeightKg,
+    this.devMessage,
   });
 
   bool get isPro => plan == Plan.pro;
@@ -56,6 +62,7 @@ class AppUser {
     String? experienceLevel,
     int? weeklyTrainingDays,
     double? startingWeightKg,
+    DevMessage? devMessage,
   }) {
     return AppUser(
       id: id,
@@ -73,6 +80,7 @@ class AppUser {
       experienceLevel: experienceLevel ?? this.experienceLevel,
       weeklyTrainingDays: weeklyTrainingDays ?? this.weeklyTrainingDays,
       startingWeightKg: startingWeightKg ?? this.startingWeightKg,
+      devMessage: devMessage ?? this.devMessage,
     );
   }
 
@@ -92,6 +100,7 @@ class AppUser {
         'experienceLevel': experienceLevel,
         'weeklyTrainingDays': weeklyTrainingDays,
         'startingWeightKg': startingWeightKg,
+        'devMessage': devMessage?.toJson(),
       };
 
   factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
@@ -115,5 +124,8 @@ class AppUser {
         experienceLevel: (json['experienceLevel'] as String?) ?? '',
         weeklyTrainingDays: (json['weeklyTrainingDays'] as num?)?.toInt() ?? 4,
         startingWeightKg: (json['startingWeightKg'] as num?)?.toDouble(),
+        devMessage: DevMessage.fromJson(
+          (json['devMessage'] as Map?)?.cast<String, dynamic>(),
+        ),
       );
 }

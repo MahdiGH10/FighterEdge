@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 
 import '../billing/subscription.dart';
 import '../models/app_user.dart';
+import '../models/dev_message.dart';
 import 'auth_repository.dart';
 
 /// Production auth backend built on Firebase Auth + Cloud Firestore.
@@ -104,6 +105,9 @@ class FirebaseAuthRepository implements AuthRepository {
       weeklyTrainingDays:
           (profileData['weeklyTrainingDays'] as num?)?.toInt() ?? 4,
       startingWeightKg: (profileData['startingWeightKg'] as num?)?.toDouble(),
+      devMessage: DevMessage.fromJson(
+        (profileData['devMessage'] as Map?)?.cast<String, dynamic>(),
+      ),
     );
     _cached = appUser;
     return appUser;

@@ -154,6 +154,12 @@
   "timerYourCorner": "YOUR CORNER",
   "timerCornerTeaser": "Pro puts a corner in your rest: a cue for the next round.",
 
+  "devMessageFrom": "FROM {from}",
+  "@devMessageFrom": {
+    "placeholders": { "from": { "type": "String" } }
+  },
+  "devMessageGotIt": "Got it",
+
   "authWelcomeBack": "Welcome back",
   "authWelcomeBackSubtitle": "Sign in to continue your camp",
   "authEmail": "Email",

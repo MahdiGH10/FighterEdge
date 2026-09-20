@@ -5,7 +5,7 @@ import { HttpsError, onCall, onRequest } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 
 import { mapRevenueCatEvent, RevenueCatEvent } from "./billing";
-import { callOpenRouter, DEFAULT_MODEL, OpenRouterError } from "./openrouter";
+import { callOpenRouter, modelChain, OpenRouterError } from "./openrouter";
 import { consumeQuota, isAiEnabled } from "./quota";
 import { SYSTEM_PROMPT, SYSTEM_PROMPT_VERSION } from "./systemPrompt";
 import { AiRequest, AiTaskType } from "./types";
@@ -159,26 +159,45 @@ export const edgeFuelAiExplain = onCall(
     // independent try lifts the success rate to ~94% at the cost of latency
     // only for the unlucky quarter. A provider error or timeout is not
     // retried — a slow provider will not get faster on the second call.
-    const model = process.env.OPENROUTER_MODEL ?? DEFAULT_MODEL;
+    const models = modelChain();
     const startedAt = Date.now();
     let parsed: unknown = null;
     let validation: { ok: boolean; reason?: string } = { ok: false };
+    let modelIndex = 0;
     for (let attempt = 1; attempt <= MAX_MODEL_ATTEMPTS; attempt++) {
-      let rawContent: string;
-      try {
-        rawContent = await callOpenRouter({
-          apiKey: OPENROUTER_API_KEY.value(),
-          model,
-          systemPrompt: SYSTEM_PROMPT,
-          userContent,
-        });
-      } catch (error) {
-        // Never expose raw provider errors to the client (master prompt §13.3).
-        logger.error("openrouter_call_failed", {
-          task: data.task,
-          attempt,
-          error: error instanceof OpenRouterError ? error.message : "unknown",
-        });
+      let rawContent: string | null = null;
+      // A model that is gone or throttled hands over to the next one in the
+      // chain; this does not consume a validation attempt.
+      while (modelIndex < models.length && rawContent === null) {
+        try {
+          rawContent = await callOpenRouter({
+            apiKey: OPENROUTER_API_KEY.value(),
+            model: models[modelIndex],
+            systemPrompt: SYSTEM_PROMPT,
+            userContent,
+          });
+        } catch (error) {
+          // Never expose raw provider errors to the client (master prompt
+          // §13.3) — and never log the model's own text either.
+          const openRouterError =
+            error instanceof OpenRouterError ? error : null;
+          logger.error("openrouter_call_failed", {
+            task: data.task,
+            attempt,
+            modelIndex,
+            error: openRouterError?.message ?? "unknown",
+          });
+          if (!openRouterError?.isModelFault) {
+            return { status: "unavailable" as const };
+          }
+          modelIndex++;
+          if (Date.now() - startedAt > RETRY_CUTOFF_MS) {
+            return { status: "unavailable" as const };
+          }
+        }
+      }
+      if (rawContent === null) {
+        // Every model in the chain refused.
         return { status: "unavailable" as const };
       }
 
