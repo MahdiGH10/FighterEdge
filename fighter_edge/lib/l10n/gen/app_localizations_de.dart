@@ -122,6 +122,10 @@ class LDe extends L {
       'Zeigt Hinweise zu Flüssigkeit und Gewichtsabbau — keine medizinische Beratung';
 
   @override
+  String get settingsTrustNote =>
+      'Fighter Edge unterstützt deine Trainings- und Ernährungsentscheidungen. Es ersetzt keinen Coach, keine Ärztin oder keinen Arzt und keine zugelassene Ernährungsfachkraft.';
+
+  @override
   String get settingsSectionAccount => 'Konto';
 
   @override

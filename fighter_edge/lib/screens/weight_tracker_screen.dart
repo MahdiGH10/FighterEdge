@@ -60,7 +60,8 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
               options: const ['Weight', 'Body Fat', 'Measurements'],
               selectedIndex: _tab,
               onSelected: (i) => setState(() => _tab = i),
-              scrollable: false,
+              // Sized to their labels, so "Measurements" is never cut to
+              // "Measure…"; at large text the row scrolls with an edge fade.
             ),
           ),
           const SizedBox(height: Insets.xl),
@@ -167,34 +168,39 @@ class _WeightView extends StatelessWidget {
         Center(
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  if (state.latestWeight == 0)
-                    Text('—', style: AppType.display())
-                  else
-                    NumberHero(
-                      tag: weightHeroTag,
-                      text: _fmt(state.latestWeight),
-                      style: AppType.display(),
-                      // Counts when a new weigh-in lands; static otherwise.
-                      child: AnimatedCount(
-                        value: state.displayWeight(state.latestWeight),
-                        formatter: (v) => v.toStringAsFixed(1),
+              // The hero number shrinks to fit rather than overflowing at
+              // large text sizes.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    if (state.latestWeight == 0)
+                      Text('—', style: AppType.display())
+                    else
+                      NumberHero(
+                        tag: weightHeroTag,
+                        text: _fmt(state.latestWeight),
                         style: AppType.display(),
+                        // Counts when a new weigh-in lands; static otherwise.
+                        child: AnimatedCount(
+                          value: state.displayWeight(state.latestWeight),
+                          formatter: (v) => v.toStringAsFixed(1),
+                          style: AppType.display(),
+                        ),
                       ),
+                    const SizedBox(width: Insets.xs),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(state.weightUnitLabel,
+                          style: AppType.body(
+                              weight: FontWeight.w600,
+                              color: AppColors.textMuted)),
                     ),
-                  const SizedBox(width: Insets.xs),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(state.weightUnitLabel,
-                        style: AppType.body(
-                            weight: FontWeight.w600,
-                            color: AppColors.textMuted)),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: Insets.xs),
               Row(
@@ -204,13 +210,17 @@ class _WeightView extends StatelessWidget {
                       size: 14,
                       color: losing ? AppColors.positive : AppColors.primary),
                   const SizedBox(width: 3),
-                  Text(
-                      '${_fmt(delta.abs())} ${state.weightUnitLabel} '
-                      'vs last weigh-in',
-                      style: AppType.subhead(
-                          weight: FontWeight.w600,
-                          color:
-                              losing ? AppColors.positive : AppColors.primary)),
+                  Flexible(
+                    child: Text(
+                        '${_fmt(delta.abs())} ${state.weightUnitLabel} '
+                        'vs last weigh-in',
+                        textAlign: TextAlign.center,
+                        style: AppType.subhead(
+                            weight: FontWeight.w600,
+                            color: losing
+                                ? AppColors.positive
+                                : AppColors.primary)),
+                  ),
                 ],
               ),
             ],
@@ -398,11 +408,15 @@ class _HistoryRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: Insets.lg, vertical: Insets.md + 2),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(DateFormat('MMM d, yyyy').format(entry.date),
-              style: AppType.callout(
-                  weight: FontWeight.w500, color: AppColors.textSecondary)),
+          // The date takes the leftover space and wraps at large text; the
+          // weight is short, so it keeps its size, flush right.
+          Expanded(
+            child: Text(DateFormat('MMM d, yyyy').format(entry.date),
+                style: AppType.callout(
+                    weight: FontWeight.w500, color: AppColors.textSecondary)),
+          ),
+          const SizedBox(width: Insets.md),
           Text('$display $unit',
               style: AppType.callout(weight: FontWeight.w700)),
         ],

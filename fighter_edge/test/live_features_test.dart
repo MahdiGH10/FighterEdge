@@ -133,8 +133,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('75.0'), findsWidgets); // headline
+      // The page's vertical list, not the tab row (which scrolls sideways).
       await tester.scrollUntilVisible(find.text('75.0 kg'), 240,
-          scrollable: find.byType(Scrollable).first);
+          scrollable: find
+              .byWidgetPredicate((w) =>
+                  w is Scrollable && w.axisDirection == AxisDirection.down)
+              .first);
       expect(find.text('75.0 kg'), findsOneWidget); // history row
     });
 

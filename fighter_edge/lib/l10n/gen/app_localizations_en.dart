@@ -121,6 +121,10 @@ class LEn extends L {
       'Show hydration and non-medical weight-cut reminders';
 
   @override
+  String get settingsTrustNote =>
+      'Fighter Edge guides training and nutrition decisions. It does not replace a coach, doctor, or licensed nutrition professional.';
+
+  @override
   String get settingsSectionAccount => 'Account';
 
   @override

@@ -538,8 +538,9 @@ class _TrustCard extends StatelessWidget {
           const SizedBox(width: Insets.md),
           Expanded(
             child: Text(
-              'Fighter Edge should guide training decisions, not replace a coach, doctor, or licensed nutrition professional. Keep this visible before public launch.',
-              style: AppType.subhead(color: AppColors.textSecondary),
+              L.of(context).settingsTrustNote,
+              style: AppType.subhead(
+                  color: AppAccessibility.textSecondary(context)),
             ),
           ),
         ],

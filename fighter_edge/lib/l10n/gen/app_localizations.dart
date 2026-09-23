@@ -307,6 +307,12 @@ abstract class L {
   /// **'Show hydration and non-medical weight-cut reminders'**
   String get settingsSafeCutSubtitle;
 
+  /// No description provided for @settingsTrustNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Fighter Edge guides training and nutrition decisions. It does not replace a coach, doctor, or licensed nutrition professional.'**
+  String get settingsTrustNote;
+
   /// No description provided for @settingsSectionAccount.
   ///
   /// In en, this message translates to:

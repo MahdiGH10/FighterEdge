@@ -113,6 +113,25 @@ four levels, built from the coaching team's "Combat Sports Drills" sheet
   `android/app/google-services.json` was re-downloaded (it now has the Android
   and web OAuth clients). Not yet confirmed working on a phone. A real release
   keystore and the Play app-signing key will each need their SHA-1 added.
+- **Retention plan (2026-09-23):** research in
+  `docs/UX_RETENTION_RESEARCH_20260923.md`, build plan in
+  `docs/IMPLEMENTATION_PLAN_RETENTION_20260923.md` (12 slices plus user-owned
+  Track B). Key finding: the app keeps no training history (the weekly plan
+  records are overwritten each week, with no rollover), so Slice 3 (training
+  log) must precede the weekly streak and every other retention feature.
+- **Slice 1 done (branch `feat/launch-blockers`):**
+  - the Settings safety note no longer shows an internal to-do, and it is
+    localised in EN and DE;
+  - the Weight tracker tabs are sized to their labels;
+  - three Weight tracker overflows at 200% text are fixed (they were found by
+    the new test);
+  - the AI Fighter Brief "No plan yet" state now has a Start setup button;
+  - the unused `MoreScreen` is deleted.
+  **Still open from Slice 1:** hosted Terms and Privacy links, which need the
+  user's URLs (Track B1).
+- **Test-env gotcha:** "Asset 'shaders/ink_sparkle.frag' not found" failing
+  many unrelated widget tests means `build/unit_test_assets` is incomplete
+  (e.g. after an interrupted run). Delete that folder and rerun.
 - **Could not run:** `integration_test/` on Windows needs Developer Mode
   (plugin symlinks); on Chrome needs chromedriver; no Android device or
   emulator. The C: drive was at 0 GB free (APK build died on it);
