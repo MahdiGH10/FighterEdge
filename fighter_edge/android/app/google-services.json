@@ -12,7 +12,20 @@
           "package_name": "com.fighteredge.fighter_edge"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "129456494556-817eaf7k2e1h6ul3ocslurq5lvpp91aq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fighteredge.fighter_edge",
+            "certificate_hash": "db3f6db12d9e2b7da3a0291c13c88bf8457f6e98"
+          }
+        },
+        {
+          "client_id": "129456494556-hv0fkdt6hlioktgc13viu1jlrbha1equ.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCCPTpUtTKzjkX10AsclOow9JTzM83kwFg"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "129456494556-hv0fkdt6hlioktgc13viu1jlrbha1equ.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
