@@ -81,13 +81,21 @@ class AppAccessibility {
           ? AppColors.primaryBright
           : AppColors.accentText;
 
-  /// The only role we intentionally clamp. The round timer numeral is a
-  /// dashboard-sized object, not paragraph text; at 200% it would crowd out the
+  /// The only clamp we apply, and only to scoreboard-sized objects that are
+  /// already far larger than body text: the round timer numeral, and a
+  /// reaction drill's countdown and calls. At 200% they would crowd out the
   /// actual controls. Body, labels, chips and forms keep the user's full scale.
   static TextScaler heroNumeralScaler(BuildContext context) {
     final requested = MediaQuery.textScalerOf(context).scale(1);
     return TextScaler.linear(requested.clamp(1.0, 1.25));
   }
+
+  /// True once the user's text size is large enough (≥ 140%) that
+  /// side-by-side controls stop fitting: rows of chips, paired buttons and
+  /// multi-column stats should stack or wrap instead of truncating or hiding
+  /// options off-screen.
+  static bool isLargeText(BuildContext context) =>
+      MediaQuery.textScalerOf(context).scale(14) / 14 >= 1.4;
 
   static TextTheme _adjustTextTheme(
     TextTheme theme, {

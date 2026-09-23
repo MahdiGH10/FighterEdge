@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +25,7 @@ import 'package:fighter_edge/notifications/unavailable_reminder_gateway.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/state/first_run_controller.dart';
 import 'package:fighter_edge/state/streak_controller.dart';
+import 'package:fighter_edge/training/reaction/coach_voice.dart';
 
 /// Shared test utilities. (No `_test.dart` suffix so the runner ignores it.)
 
@@ -73,6 +75,7 @@ Widget wrapApp(
   RecipeCatalogRepository? recipeCatalogRepo,
   BillingGateway? billingGateway,
   ReminderGateway? reminderGateway,
+  CoachVoice? coachVoice,
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
   final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
@@ -100,6 +103,7 @@ Widget wrapApp(
       Provider<ReminderGateway>.value(
         value: reminderGateway ?? const UnavailableReminderGateway(),
       ),
+      Provider<CoachVoice>.value(value: coachVoice ?? const SilentCoachVoice()),
       ChangeNotifierProvider(create: (_) => LocaleController()..load()),
       ChangeNotifierProxyProvider<AuthController, FirstRunController>(
         create: (_) => FirstRunController(),
@@ -168,4 +172,15 @@ class FakeReminderGateway implements ReminderGateway {
     cancelled = true;
     scheduledWeekdays = null;
   }
+}
+
+/// One move of a live reaction-drill call, as the athlete reads it: the move
+/// in capitals, led by its step number when it is part of a sequence
+/// ("KICK CHECK", or "2  KICK CHECK").
+Finder findDrillMove(String label) {
+  final move = RegExp(r'^(\d+  )?' + RegExp.escape(label.toUpperCase()) + r'$');
+  return find.byWidgetPredicate(
+    (w) => w is RichText && move.hasMatch(w.text.toPlainText()),
+    description: 'drill move "$label"',
+  );
 }

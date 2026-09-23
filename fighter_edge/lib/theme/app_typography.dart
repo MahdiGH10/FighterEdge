@@ -65,7 +65,12 @@ class AppType {
   // Oswald — brand voice
   // ---------------------------------------------------------------------------
 
-  /// 64 · The round timer's digits. The single largest thing in the app.
+  /// 160 · A drill's "get in stance" countdown. The phone is on the floor two
+  /// or three metres away, so this is sized like a scoreboard, not a dashboard.
+  /// Pair with `AppAccessibility.heroNumeralScaler`, as for [heroNumeral].
+  static TextStyle stageNumeral({Color? color}) => _oswald(160, color: color);
+
+  /// 64 · The round timer's digits. The largest thing held in the hand.
   static TextStyle heroNumeral({Color? color, double? spacing}) =>
       _oswald(64, color: color, spacing: spacing);
 

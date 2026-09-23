@@ -48,6 +48,83 @@ record, not a live warning:**
    same way every other slice in this document does. Do not let it become
    the excuse for an undirected rewrite.
 
+## Continuation update — 2026-09-22 (voice reaction drills)
+
+New **Train > Reaction** tab: a virtual coach calls random movements aloud
+("Sprawl!", "Step left, hook!") and the athlete reacts. Three disciplines ×
+four levels, built from the coaching team's "Combat Sports Drills" sheet
+(`fighter_edge/drills.png`, untracked — the user's reference, not committed).
+
+- **Domain (pure Dart):** `lib/training/reaction/reaction_drill.dart` holds the
+  command vocabulary (Wrestling 7, Striking 19, MMA 24 — the sheet's MMA
+  column repeats footwork rows; each command appears once) and one
+  `ReactionDrillSpec` per discipline × level: duration, moves per call, and
+  reaction windows as plain data. `reaction_cue_generator.dart` deals commands
+  from a reshuffled deck (every command comes up once per pass, never the same
+  call twice in a row, never the sheet's order) and draws each gap from a
+  range so no two feel identical. Not an AI feature — no network, no cost.
+- **Timing interpretation (tunable in one table):** every gap starts when the
+  voice *finishes* the call, so long sequences never eat their own reaction
+  time. The user's "pause after a long sequence" is read as *extra* recovery
+  on top of the normal gap (Advanced 4–5 moves ≈ 2 s + 1.5 s; Advanced+ 6–7
+  moves ≈ 2.5 s + 3 s) — the only reading where Advanced's "4–5 moves → 2 s"
+  and "then 1.5 s pause" don't contradict each other. Advanced+ gap tiers for
+  1–5 moves reuse Advanced's, since the brief doesn't set them.
+- **Voice:** `CoachVoice` boundary (like `ReminderGateway`), `TtsCoachVoice` on
+  the device's own speech engine via `flutter_tts` (offline, English, slightly
+  fast/low; iOS ducks music instead of stopping it), `SilentCoachVoice` for
+  tests. Every call is also shown on screen, so a silent device still works
+  and says so. Android manifest gained the `TTS_SERVICE` `<queries>` intent
+  (Android 11+ hides the engine without it). `wakelock_plus` keeps the screen
+  on during a drill.
+- **Free, not Pro-gated** — nothing in the brief asked for a gate.
+- Tests: 20 new (vocabulary, every level's durations/lengths/gaps, deck
+  fairness and no-repeat, controller timing in fake time including "gap
+  starts after speech", widget flow). Full gates green: 486 + 3 goldens.
+- **Not verified:** how the voice actually sounds, and TTS latency, on a real
+  phone — no device here. Worth a hands-on listen before tuning numbers.
+- **Full test pass after `flutter clean` (same day):** 511 passed + 1
+  deliberately skipped, 3 goldens, Functions 37/37 (after `npm ci`). Added a
+  black-box conformance suite (`test/flow/reaction_drill_conformance_test.dart`
+  — all 12 drills judged only by what is heard and when, against the brief's
+  numbers; 20 repeated runs with fresh randomness, 0 failures), accessibility
+  tests (200% bold text, high contrast, reduced motion, tap targets, labels),
+  performance guards (0.2–0.3 µs per generated call; ~20 frames/s during a
+  drill), and white-box tests of `TtsCoachVoice` against a faked platform
+  channel. Mutation check: 11/11 planted bugs caught. New-code line coverage
+  97–100% per file (whole app 79.6%).
+- **Found by the new accessibility test, pre-existing and app-wide:** the
+  shared `FilterChips` paints a selected chip's 13 pt label white on
+  `AppColors.primary` — 4.31:1, under WCAG AA 4.5:1. Every segmented control
+  in the app has it. Test is written and skipped with the reason; un-skip
+  when fixed (likely `primaryDark` fill; regenerate goldens).
+- **UX audit fixes (2026-09-23):** 17 of 19 findings in
+  `docs/REACTION_DRILL_UX_AUDIT_20260922.md` fixed; see its status table.
+  Shared changes: `FilterChips` gained `columns`, wraps fixed rows at large
+  text, and auto-reveals the selected chip with an edge fade on scrolling
+  rows. Its selected fill is now `primaryDark` (contrast 5.76:1), so all
+  three goldens were regenerated. Also new: `AppAccessibility.isLargeText`,
+  `AppType.stageNumeral`, controller `pause()`/`resume()` with a `paused`
+  phase. Open: logging drills and crediting the streak (needs a data-model
+  decision, since the streak reads the 7 planned sessions); a distinct style
+  for navigation tabs versus setting chips.
+- **Google sign-in on Android (2026-09-23):** it failed because the Firebase
+  Android app had no SHA fingerprints. The debug SHA-1 is now registered and
+  `android/app/google-services.json` was re-downloaded (it now has the Android
+  and web OAuth clients). Not yet confirmed working on a phone. A real release
+  keystore and the Play app-signing key will each need their SHA-1 added.
+- **Could not run:** `integration_test/` on Windows needs Developer Mode
+  (plugin symlinks); on Chrome needs chromedriver; no Android device or
+  emulator. The C: drive was at 0 GB free (APK build died on it);
+  `flutter clean` recovered ~3.3 GB.
+
+**Pre-existing bug found, not fixed (out of scope):** `lib/main.dart` builds
+`LocalReminderGateway()` into `_AppDependencies` but never passes
+`reminderGateway:` to `FighterEdgeApp`, so production has always used
+`UnavailableReminderGateway` since `aac4b0a` — the "Camp reminders" feature
+cannot actually schedule anything in the shipped app. One-line fix, but it
+turns on real notifications, so it deserves its own slice and a device test.
+
 ## Continuation update — 2026-09-20, later the same day (the real AI coach — done)
 
 This closes out item #1/#2 from the "hands-on EdgeFuel UX pass" section

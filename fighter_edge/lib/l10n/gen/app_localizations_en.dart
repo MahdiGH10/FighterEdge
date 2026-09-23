@@ -375,6 +375,158 @@ class LEn extends L {
       'Pro puts a corner in your rest: a cue for the next round.';
 
   @override
+  String get trainTabReaction => 'Reaction';
+
+  @override
+  String get reactionTitle => 'Reaction Drill';
+
+  @override
+  String get reactionHeadline => 'The coach calls it. You react.';
+
+  @override
+  String get reactionSoundHint =>
+      'Sound on. Every run is shuffled — nothing to memorize.';
+
+  @override
+  String get reactionDisciplineGrappling => 'Wrestling';
+
+  @override
+  String get reactionDisciplineStriking => 'Striking';
+
+  @override
+  String get reactionDisciplineMma => 'MMA';
+
+  @override
+  String get reactionLevelBeginner => 'Beginner';
+
+  @override
+  String get reactionLevelIntermediate => 'Intermediate';
+
+  @override
+  String get reactionLevelAdvanced => 'Advanced';
+
+  @override
+  String get reactionLevelAdvancedPlus => 'Advanced+';
+
+  @override
+  String get reactionStatDuration => 'DURATION';
+
+  @override
+  String get reactionStatMoves => 'MOVES';
+
+  @override
+  String get reactionStatReact => 'REACTION';
+
+  @override
+  String reactionInTheMix(int count) {
+    return 'IN THE MIX · $count';
+  }
+
+  @override
+  String get reactionStart => 'Start drill';
+
+  @override
+  String get reactionGetInStance => 'GET IN STANCE';
+
+  @override
+  String get reactionStop => 'Stop';
+
+  @override
+  String get reactionTimeUp => 'TIME';
+
+  @override
+  String reactionSummary(int calls, int moves) {
+    return '$calls calls · $moves moves';
+  }
+
+  @override
+  String get reactionAgain => 'Go again';
+
+  @override
+  String get reactionDone => 'Done';
+
+  @override
+  String get reactionNoVoice =>
+      'No voice on this device. Follow the calls on screen.';
+
+  @override
+  String get reactionTestVoice => 'Test voice';
+
+  @override
+  String get reactionShowAll => 'Show all';
+
+  @override
+  String get reactionShowLess => 'Show less';
+
+  @override
+  String get reactionPause => 'Pause';
+
+  @override
+  String get reactionResume => 'Resume';
+
+  @override
+  String get reactionPaused => 'PAUSED';
+
+  @override
+  String reactionTimeLeft(String time) {
+    return '$time left';
+  }
+
+  @override
+  String reactionCallNumber(int n) {
+    return 'CALL $n';
+  }
+
+  @override
+  String reactionFinishedSummary(int calls, String time) {
+    String _temp0 = intl.Intl.pluralLogic(
+      calls,
+      locale: localeName,
+      other: '$calls calls',
+      one: '1 call',
+    );
+    return '$_temp0 in $time';
+  }
+
+  @override
+  String reactionNextLevel(String level) {
+    return 'Ready for $level?';
+  }
+
+  @override
+  String reactionStopped(String time, int calls) {
+    String _temp0 = intl.Intl.pluralLogic(
+      calls,
+      locale: localeName,
+      other: '$calls calls',
+      one: '1 call',
+    );
+    return 'Stopped at $time · $_temp0';
+  }
+
+  @override
+  String get reactionLeaveTitle => 'Leave the drill?';
+
+  @override
+  String get reactionLeaveBody => 'This run will end.';
+
+  @override
+  String get reactionLeaveStay => 'Keep going';
+
+  @override
+  String get reactionLeaveConfirm => 'Leave';
+
+  @override
+  String reactionRecoveryNote(String time, int moves) {
+    return '+$time s to reset after $moves+ moves';
+  }
+
+  @override
+  String reactionBlockRestNote(String time, int min, int max) {
+    return '+$time s rest every $min–$max calls';
+  }
+
+  @override
   String devMessageFrom(String from) {
     return 'FROM $from';
   }
