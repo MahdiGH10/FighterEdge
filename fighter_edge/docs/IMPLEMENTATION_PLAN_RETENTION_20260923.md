@@ -3,7 +3,10 @@
 **Date:** 2026-09-23
 **Implements:** the build order in `docs/UX_RETENTION_RESEARCH_20260923.md` §5.2
 **Status:** final after five planning passes (the revision log at the end records
-what each pass changed and why). Nothing here is built yet.
+what each pass changed and why). As of 2026-09-23, the Reaction branch is on
+`main`, Slice 1's code fixes are committed (`922da76`), and Slice 2's client
+telemetry is implemented. Slice 1 still needs the hosted legal URLs; Slice 2
+still needs a device DebugView verification. Slices 3–12 have not started.
 
 ---
 
@@ -107,7 +110,7 @@ buckets only):
 | `onboarding_completed` | `days_per_week`, `goal` (enum) | onboarding finish |
 | `plan_revealed` | — | plan-ready view |
 | `training_logged` | `source` (planned/timer/reaction/manual), `is_first` | log write (Slice 3) |
-| `meal_logged` | `is_first` | EdgeFuel add entry |
+| `meal_logged` | `first_today` (0/1) | EdgeFuel add entry after save |
 | `reaction_drill_finished` | `discipline`, `level` | drill screen |
 | `reminder_prompt_result` | `granted` | Slice 6 primer |
 | `week_target_met` | `streak_weeks` bucket | Slice 4 |
@@ -120,6 +123,14 @@ D1, D7 and D30 retention come from Firebase Analytics' automatic
 is a free-text string.
 **Done when:** a debug run shows the events in Firebase DebugView. That needs your
 phone connected and your approval.
+
+**Implementation note (2026-09-23):** `first_today` is the first saved meal on
+the selected day, not the user's first-ever meal. The latter cannot be
+determined reliably from the current day-only log or the capped local recent-
+foods cache, especially across devices. Do not label a daily-first flag as
+`is_first` in conversion reports. `training_logged`, `week_target_met`,
+`streak_freeze_applied`, and `reminder_prompt_result` are registered in the
+privacy allowlist but intentionally await Slices 3, 4, and 6 for emission.
 
 ### Slice 3 — Training log (the foundation) · L, split into 3a and 3b
 

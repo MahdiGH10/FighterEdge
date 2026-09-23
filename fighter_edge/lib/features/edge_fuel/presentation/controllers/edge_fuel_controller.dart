@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../data/data_repository.dart';
+import '../../../../observability/telemetry.dart';
 import '../../data/edge_fuel_repository.dart';
 import '../../domain/models/food_log_entry.dart';
 import '../../domain/models/nutrition_setup_draft.dart';
@@ -15,10 +16,14 @@ import 'food_memory.dart';
 /// Mirrors `AppState.setUser`'s stream-subscription lifecycle so the two
 /// controllers behave the same way when auth state changes.
 class EdgeFuelController extends ChangeNotifier {
-  EdgeFuelController({required EdgeFuelRepository repository})
-      : _repository = repository;
+  EdgeFuelController({
+    required EdgeFuelRepository repository,
+    Telemetry telemetry = const NoopTelemetry(),
+  })  : _repository = repository,
+        _telemetry = telemetry;
 
   final EdgeFuelRepository _repository;
+  final Telemetry _telemetry;
   StreamSubscription<NutritionSetupDraft?>? _draftSub;
   StreamSubscription<NutritionTarget?>? _targetSub;
   StreamSubscription<NutritionDay>? _daySub;
@@ -105,10 +110,18 @@ class EdgeFuelController extends ChangeNotifier {
   }
 
   Future<void> addEntry(FoodLogEntry entry) async {
-    _memory?.remember(entry);
     final day = _activeDay();
+    final firstToday = day.entries.isEmpty;
     await _saveDay(
       day.copyWith(entries: [...day.entries, entry], updatedAt: DateTime.now()),
+    );
+    _memory?.remember(entry);
+    // Every way of logging food (quick add, search, a recipe) lands here, so
+    // this is the one place the habit is counted. Only a 0/1 flag leaves the
+    // device, and only after storage reports success.
+    _telemetry.track(
+      TelemetryEvent.mealLogged,
+      parameters: {'first_today': firstToday ? 1 : 0},
     );
   }
 

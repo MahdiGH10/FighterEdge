@@ -9,6 +9,7 @@ import '../../features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import '../../features/edge_fuel/domain/models/nutrition_target.dart';
 import '../../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../../features/edge_fuel/presentation/nutrition_copy.dart';
+import '../../observability/telemetry.dart';
 import '../../routing/app_navigation.dart';
 import '../../routing/app_router.dart';
 import '../../state/app_state.dart';
@@ -77,7 +78,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final auth = context.watch<AuthController>();
     if (_showWelcome) {
       return WelcomePages(
-        onDone: () => setState(() => _showWelcome = false),
+        onDone: () {
+          setState(() => _showWelcome = false);
+          _trackStepViewed();
+        },
       );
     }
     final completedPlan = _completedPlan;
@@ -90,7 +94,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         onViewPro: () => AppNavigation.push(
           context,
           AppRoutes.paywall,
-          fallbackBuilder: (_) => const PaywallScreen(),
+          extra: const PaywallRouteArgs(trigger: PaywallTrigger.planReady),
+          fallbackBuilder: (_) => const PaywallScreen(
+            trigger: PaywallTrigger.planReady,
+          ),
         ),
       );
     }
@@ -206,6 +213,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         _step += 1;
         _error = null;
       });
+      _trackStepViewed();
       return;
     }
     _submit(createNutritionTarget: true);
@@ -217,7 +225,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _step -= 1;
       _error = null;
     });
+    _trackStepViewed();
   }
+
+  Telemetry get _telemetry => Telemetry.fromContext(context);
+
+  /// Steps are reported 1-based, as the athlete sees them ("Step 3 of 7").
+  void _trackStepViewed() => _telemetry.track(
+        TelemetryEvent.onboardingStepViewed,
+        parameters: {'step': _step + 1},
+      );
+
+  /// Takes the [Telemetry] captured before `completeOnboarding`: completing
+  /// replaces this screen with the app, so its context is gone by then.
+  static void _trackCompleted(Telemetry telemetry,
+          {required String goal, required int days, required bool detailed}) =>
+      telemetry.track(
+        TelemetryEvent.onboardingCompleted,
+        parameters: {
+          'goal': _goalCode(goal),
+          'days_per_week': days,
+          'detailed': detailed ? 1 : 0,
+        },
+      );
+
+  /// A fixed short code per camp goal, so analytics never carries the label
+  /// text (and would not break if the label is reworded or translated).
+  static String _goalCode(String goal) => switch (goal) {
+        'Build fight-camp structure' => 'camp_structure',
+        'Lose weight safely' => 'lose_weight',
+        'Gain muscle' => 'gain_muscle',
+        'Improve technique' => 'technique',
+        'Get competition ready' => 'competition',
+        _ => 'other',
+      };
 
   void _syncNutritionGoalFromCampGoal(String value) {
     if (value == 'Lose weight safely') {
@@ -239,6 +280,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final auth = context.read<AuthController>();
     final state = context.read<AppState>();
     final firstRun = context.read<FirstRunController>();
+    final telemetry = _telemetry;
     final userId = auth.user?.id;
     final currentWeight = createNutritionTarget
         ? _parseDouble(_currentWeight.text)
@@ -267,6 +309,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             days: _days,
           );
         });
+        telemetry.track(TelemetryEvent.planRevealed);
         return;
       }
 
@@ -277,6 +320,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         weeklyTrainingDays: _days,
         startingWeightKg: currentWeight,
       );
+      _trackCompleted(telemetry, goal: _campGoal, days: _days, detailed: false);
     } catch (_) {
       if (!mounted) return;
       setState(() => _error = 'Could not save setup. Try again.');
@@ -315,6 +359,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     final auth = context.read<AuthController>();
     final firstRun = context.read<FirstRunController>();
+    final telemetry = _telemetry;
     final currentWeight = _parseDouble(_currentWeight.text);
 
     try {
@@ -327,6 +372,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         weeklyTrainingDays: plan.days,
         startingWeightKg: currentWeight,
       );
+      _trackCompleted(telemetry,
+          goal: plan.campGoal, days: plan.days, detailed: true);
       if (!openFuelPlan || !mounted) return;
       AppNavigation.replace(
         context,
@@ -384,6 +431,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _step = 2;
       _error = bodyError;
     });
+    _trackStepViewed();
     return false;
   }
 

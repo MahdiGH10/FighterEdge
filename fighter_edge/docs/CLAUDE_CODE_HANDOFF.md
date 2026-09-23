@@ -1,5 +1,25 @@
 # Fighter Edge — Claude Code Handoff
 
+## Current retention work — 2026-09-23
+
+The newer implementation plan is
+`docs/IMPLEMENTATION_PLAN_RETENTION_20260923.md`. `feat/reaction-drills` was
+already merged into `main` as `7fddcf5`. Slice 1 code fixes were committed
+as `922da76`; the two hosted legal URLs are still required. Slice 2 client
+funnel analytics is on branch `feat/funnel-telemetry` (see its commit for the
+exact files). It adds fixed-code privacy validation for all product event
+parameters, onboarding and plan-reveal events, food logging after a successful
+save, Reaction finish events, and a typed paywall trigger for each entry point.
+The Flutter suite and analyzer pass; Firebase DebugView on a device has **not**
+been verified. `meal_logged.first_today` means first saved entry on the selected
+day, not first-ever. Training, weekly streak, and reminder result events have
+schema entries but no emitters until Slices 3, 4, and 6. Do not infer those
+features are built. Next engineering slice is **3a: persistent training log,
+idempotent migration, tests, and Firestore rules prepared but not deployed**.
+Get the user's approval before any Firestore-rules deployment. Keep the
+unrelated generated Windows plugin changes and untracked audit/reference files
+out of slice commits.
+
 **Verified:** 2026-09-20
 **Repository:** `MahdiGH10/FighterEdge`  
 **Branch:** `main`  

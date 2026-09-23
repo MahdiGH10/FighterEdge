@@ -133,9 +133,14 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
   void _openPaywall() => AppNavigation.push(
         context,
         AppRoutes.paywall,
-        extra: Feature.fullTechniqueLibrary,
-        fallbackBuilder: (_) =>
-            const PaywallScreen(highlight: Feature.fullTechniqueLibrary),
+        extra: const PaywallRouteArgs(
+          highlight: Feature.fullTechniqueLibrary,
+          trigger: PaywallTrigger.techniqueLibrary,
+        ),
+        fallbackBuilder: (_) => const PaywallScreen(
+          highlight: Feature.fullTechniqueLibrary,
+          trigger: PaywallTrigger.techniqueLibrary,
+        ),
       );
 
   @override

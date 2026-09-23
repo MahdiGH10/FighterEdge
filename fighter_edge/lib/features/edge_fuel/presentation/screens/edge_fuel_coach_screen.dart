@@ -287,9 +287,14 @@ class _CoachLocked extends StatelessWidget {
           onPressed: () => AppNavigation.push(
             context,
             AppRoutes.paywall,
-            extra: Feature.edgeFuelAiCoach,
-            fallbackBuilder: (_) =>
-                const PaywallScreen(highlight: Feature.edgeFuelAiCoach),
+            extra: const PaywallRouteArgs(
+              highlight: Feature.edgeFuelAiCoach,
+              trigger: PaywallTrigger.coach,
+            ),
+            fallbackBuilder: (_) => const PaywallScreen(
+              highlight: Feature.edgeFuelAiCoach,
+              trigger: PaywallTrigger.coach,
+            ),
           ),
         ),
       ],

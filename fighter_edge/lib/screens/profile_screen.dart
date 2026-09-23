@@ -238,7 +238,9 @@ class _SubscriptionCard extends StatelessWidget {
       onTap: () => AppNavigation.push(
         context,
         AppRoutes.paywall,
-        fallbackBuilder: (_) => const PaywallScreen(),
+        extra: const PaywallRouteArgs(trigger: PaywallTrigger.profile),
+        fallbackBuilder: (_) =>
+            const PaywallScreen(trigger: PaywallTrigger.profile),
       ),
       child: Row(
         children: [

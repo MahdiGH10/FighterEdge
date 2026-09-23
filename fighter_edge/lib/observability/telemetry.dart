@@ -18,9 +18,21 @@ enum TelemetryEvent {
   purchaseRestoreResult,
   fighterBriefPreviewViewed,
   aiRequestResult,
+
+  // Activation and habit funnel. Parameters are enums, small counts and 0/1
+  // flags only — never a body measurement, a food, or anything typed.
+  onboardingStepViewed,
+  onboardingCompleted,
+  planRevealed,
+  trainingLogged,
+  mealLogged,
+  reactionDrillFinished,
+  reminderPromptResult,
+  weekTargetMet,
+  streakFreezeApplied,
 }
 
-extension on TelemetryEvent {
+extension TelemetryEventName on TelemetryEvent {
   String get eventName => switch (this) {
         TelemetryEvent.paywallViewed => 'paywall_viewed',
         TelemetryEvent.premiumCtaTapped => 'premium_cta_tapped',
@@ -32,6 +44,15 @@ extension on TelemetryEvent {
         TelemetryEvent.fighterBriefPreviewViewed =>
           'fighter_brief_preview_viewed',
         TelemetryEvent.aiRequestResult => 'ai_request_result',
+        TelemetryEvent.onboardingStepViewed => 'onboarding_step_viewed',
+        TelemetryEvent.onboardingCompleted => 'onboarding_completed',
+        TelemetryEvent.planRevealed => 'plan_revealed',
+        TelemetryEvent.trainingLogged => 'training_logged',
+        TelemetryEvent.mealLogged => 'meal_logged',
+        TelemetryEvent.reactionDrillFinished => 'reaction_drill_finished',
+        TelemetryEvent.reminderPromptResult => 'reminder_prompt_result',
+        TelemetryEvent.weekTargetMet => 'week_target_met',
+        TelemetryEvent.streakFreezeApplied => 'streak_freeze_applied',
       };
 }
 
@@ -74,7 +95,10 @@ class MemoryTelemetry implements Telemetry {
     TelemetryEvent event, {
     Map<String, Object> parameters = const {},
   }) {
-    records.add(TelemetryRecord(event, Map.unmodifiable(parameters)));
+    records.add(TelemetryRecord(
+      event,
+      Map.unmodifiable(safeTelemetryParameters(event, parameters)),
+    ));
   }
 }
 
@@ -103,12 +127,7 @@ class FirebaseTelemetry implements Telemetry {
     if (kDebugMode && parameters.keys.any(_looksSensitive)) {
       throw ArgumentError('Sensitive telemetry parameter rejected.');
     }
-    final safeParameters = <String, Object>{};
-    for (final entry in parameters.entries) {
-      if (_isSafeKey(entry.key) && _isSafeValue(entry.value)) {
-        safeParameters[entry.key] = entry.value;
-      }
-    }
+    final safeParameters = safeTelemetryParameters(event, parameters);
     unawaited(
       _analytics
           .logEvent(name: event.eventName, parameters: safeParameters)
@@ -117,16 +136,142 @@ class FirebaseTelemetry implements Telemetry {
   }
 }
 
-bool _isSafeKey(String key) =>
-    key == 'surface' ||
-    key == 'feature' ||
-    key == 'billing_period' ||
-    key == 'status' ||
-    key == 'access' ||
-    key == 'task';
+/// The final privacy boundary for analytics. Each event accepts only fixed
+/// codes or bounded counts. An accidental meal name, message, measurement or
+/// user identifier is discarded even if it is sent under a familiar key.
+Map<String, Object> safeTelemetryParameters(
+  TelemetryEvent event,
+  Map<String, Object> parameters,
+) =>
+    {
+      for (final entry in parameters.entries)
+        if (_isSafeEventValue(event, entry.key, entry.value))
+          entry.key: entry.value,
+    };
 
-bool _isSafeValue(Object value) =>
-    value is String || value is int || value is double;
+bool _oneOf(Object value, Set<String> codes) =>
+    value is String && codes.contains(value);
+
+bool _flag(Object value) => value is int && (value == 0 || value == 1);
+
+bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
+  switch (event) {
+    case TelemetryEvent.paywallViewed:
+      if (key == 'feature') {
+        return _oneOf(value, const {
+          'direct',
+          'edgeFuelAiCoach',
+          'edgeFuelPremiumRecipes',
+          'fullTechniqueLibrary',
+          'cornerCoach',
+        });
+      }
+      if (key == 'trigger') {
+        return _oneOf(value, const {
+          'direct',
+          'plan_ready',
+          'settings',
+          'profile',
+          'corner_coach',
+          'technique_library',
+          'fighter_brief',
+          'coach',
+          'premium_recipe',
+        });
+      }
+      return false;
+    case TelemetryEvent.premiumCtaTapped:
+      if (key == 'surface') {
+        return _oneOf(value, const {
+          'plan_ready',
+          'paywall_waitlist',
+          'fighter_brief_preview',
+        });
+      }
+      if (key == 'access') return _oneOf(value, const {'free', 'pro'});
+      return false;
+    case TelemetryEvent.subscriptionCheckoutStarted:
+      if (key == 'billing_period') {
+        return _oneOf(value, const {'monthly', 'annual'});
+      }
+      return false;
+    case TelemetryEvent.subscriptionPurchaseResult:
+      if (key == 'billing_period') {
+        return _oneOf(value, const {'monthly', 'annual'});
+      }
+      if (key == 'status') return _oneOf(value, const {'active', 'pending'});
+      return false;
+    case TelemetryEvent.purchaseRestoreResult:
+      if (key == 'status') return _oneOf(value, const {'active', 'none'});
+      return false;
+    case TelemetryEvent.fighterBriefPreviewViewed:
+      if (key == 'access') return _oneOf(value, const {'free', 'pro'});
+      return false;
+    case TelemetryEvent.aiRequestResult:
+      if (key == 'task') return _oneOf(value, const {'chat', 'fighter_brief'});
+      if (key == 'status') {
+        return _oneOf(value, const {
+          'success',
+          'quota_reached',
+          'entitlement_required',
+          'unavailable',
+        });
+      }
+      return false;
+    case TelemetryEvent.onboardingStepViewed:
+      if (key == 'step') return value is int && value >= 1 && value <= 7;
+      return false;
+    case TelemetryEvent.onboardingCompleted:
+      if (key == 'days_per_week') {
+        return value is int && value >= 1 && value <= 7;
+      }
+      if (key == 'goal') {
+        return _oneOf(value, const {
+          'camp_structure',
+          'lose_weight',
+          'gain_muscle',
+          'technique',
+          'competition',
+          'other',
+        });
+      }
+      if (key == 'detailed') return _flag(value);
+      return false;
+    case TelemetryEvent.trainingLogged:
+      if (key == 'source') {
+        return _oneOf(value, const {'planned', 'timer', 'reaction', 'manual'});
+      }
+      if (key == 'is_first') return _flag(value);
+      return false;
+    case TelemetryEvent.mealLogged:
+      if (key == 'first_today') return _flag(value);
+      return false;
+    case TelemetryEvent.reactionDrillFinished:
+      if (key == 'discipline') {
+        return _oneOf(value, const {'grappling', 'striking', 'mma'});
+      }
+      if (key == 'level') {
+        return _oneOf(value, const {
+          'beginner',
+          'intermediate',
+          'advanced',
+          'advancedPlus',
+        });
+      }
+      return false;
+    case TelemetryEvent.reminderPromptResult:
+      if (key == 'granted') return _flag(value);
+      return false;
+    case TelemetryEvent.weekTargetMet:
+      if (key == 'streak_weeks') {
+        return _oneOf(value, const {'1', '2_3', '4_7', '8_plus'});
+      }
+      return false;
+    case TelemetryEvent.planRevealed:
+    case TelemetryEvent.streakFreezeApplied:
+      return false;
+  }
+}
 
 bool _looksSensitive(String key) {
   final normalized = key.toLowerCase();

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../l10n/gen/app_localizations.dart';
+import '../observability/telemetry.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
@@ -76,6 +77,13 @@ class _ReactionDrillScreenState extends State<ReactionDrillScreen>
     final phase = _drill.phase;
     if (phase != _lastPhase && phase == ReactionDrillPhase.finished) {
       AppHaptics.success();
+      Telemetry.fromContext(context).track(
+        TelemetryEvent.reactionDrillFinished,
+        parameters: {
+          'discipline': widget.spec.discipline.name,
+          'level': widget.spec.level.name,
+        },
+      );
     }
     _lastPhase = phase;
     setState(() {});

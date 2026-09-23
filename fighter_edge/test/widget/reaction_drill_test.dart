@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/screens/reaction_drill_picker.dart';
+import 'package:fighter_edge/observability/telemetry.dart';
 import 'package:fighter_edge/screens/reaction_drill_screen.dart';
 import 'package:fighter_edge/screens/training_camp_screen.dart';
 import 'package:fighter_edge/training/reaction/coach_voice.dart';
@@ -68,9 +69,11 @@ void main() {
         ReactionDiscipline.striking, ReactionLevel.beginner);
     final expected = ReactionCueGenerator(spec, random: Random(3));
     final repo = await makeRepo(signedIn: true);
+    final telemetry = MemoryTelemetry();
     await tester.pumpWidget(wrapApp(
       ReactionDrillScreen(spec: spec, randomFactory: () => Random(3)),
       repo: repo,
+      telemetry: telemetry,
     ));
     await tester.pump();
     expect(find.text('3'), findsOneWidget);
@@ -91,6 +94,11 @@ void main() {
     await tester.pump(_callSettle);
     expect(find.text('TIME'), findsOneWidget);
     expect(find.text('GO AGAIN'), findsOneWidget);
+    expect(telemetry.records, hasLength(1));
+    expect(
+        telemetry.records.single.event, TelemetryEvent.reactionDrillFinished);
+    expect(telemetry.records.single.parameters,
+        {'discipline': 'striking', 'level': 'beginner'});
 
     await tester.tap(find.text('GO AGAIN'));
     await tester.pump();
@@ -98,6 +106,8 @@ void main() {
     await tester.tap(find.text('STOP'));
     await tester.pump();
     expect(find.text('START DRILL'), findsOneWidget);
+    expect(telemetry.records, hasLength(1),
+        reason: 'stopping a restarted drill does not count as a finish');
   });
 
   final grapplingBeginner = ReactionDrillSpec.of(

@@ -160,13 +160,19 @@ GoRouter createAppRouter({AuthController? auth}) {
       GoRoute(
         path: AppRoutes.paywall,
         pageBuilder: (context, state) {
-          final highlight =
-              state.extra is Feature ? state.extra as Feature : null;
+          final args = state.extra is PaywallRouteArgs
+              ? state.extra as PaywallRouteArgs
+              : PaywallRouteArgs(
+                  highlight:
+                      state.extra is Feature ? state.extra as Feature : null,
+                  trigger: PaywallTrigger.direct,
+                );
           // A decision interrupting the current thread, not a step deeper into
           // it — so it rises rather than slides in from the side.
           return AppPageTransitions.modal(
             state: state,
-            child: PaywallScreen(highlight: highlight),
+            child:
+                PaywallScreen(highlight: args.highlight, trigger: args.trigger),
           );
         },
       ),

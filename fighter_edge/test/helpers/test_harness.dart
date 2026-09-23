@@ -22,6 +22,7 @@ import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_reposit
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/notifications/reminder_gateway.dart';
 import 'package:fighter_edge/notifications/unavailable_reminder_gateway.dart';
+import 'package:fighter_edge/observability/telemetry.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/state/first_run_controller.dart';
 import 'package:fighter_edge/state/streak_controller.dart';
@@ -76,6 +77,7 @@ Widget wrapApp(
   BillingGateway? billingGateway,
   ReminderGateway? reminderGateway,
   CoachVoice? coachVoice,
+  Telemetry telemetry = const NoopTelemetry(),
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
   final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
@@ -104,6 +106,7 @@ Widget wrapApp(
         value: reminderGateway ?? const UnavailableReminderGateway(),
       ),
       Provider<CoachVoice>.value(value: coachVoice ?? const SilentCoachVoice()),
+      Provider<Telemetry>.value(value: telemetry),
       ChangeNotifierProvider(create: (_) => LocaleController()..load()),
       ChangeNotifierProxyProvider<AuthController, FirstRunController>(
         create: (_) => FirstRunController(),

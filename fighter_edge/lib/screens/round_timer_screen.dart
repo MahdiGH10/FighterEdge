@@ -356,9 +356,14 @@ class _CornerCueTeaser extends StatelessWidget {
       onTap: () => AppNavigation.push(
         context,
         AppRoutes.paywall,
-        extra: Feature.cornerCoach,
-        fallbackBuilder: (_) =>
-            const PaywallScreen(highlight: Feature.cornerCoach),
+        extra: const PaywallRouteArgs(
+          highlight: Feature.cornerCoach,
+          trigger: PaywallTrigger.cornerCoach,
+        ),
+        fallbackBuilder: (_) => const PaywallScreen(
+          highlight: Feature.cornerCoach,
+          trigger: PaywallTrigger.cornerCoach,
+        ),
       ),
       child: Row(
         children: [

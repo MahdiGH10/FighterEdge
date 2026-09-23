@@ -270,9 +270,14 @@ class _FighterBriefPreviewSectionState
     AppNavigation.push(
       context,
       AppRoutes.paywall,
-      extra: Feature.edgeFuelAiCoach,
-      fallbackBuilder: (_) =>
-          const PaywallScreen(highlight: Feature.edgeFuelAiCoach),
+      extra: const PaywallRouteArgs(
+        highlight: Feature.edgeFuelAiCoach,
+        trigger: PaywallTrigger.fighterBrief,
+      ),
+      fallbackBuilder: (_) => const PaywallScreen(
+        highlight: Feature.edgeFuelAiCoach,
+        trigger: PaywallTrigger.fighterBrief,
+      ),
     );
   }
 

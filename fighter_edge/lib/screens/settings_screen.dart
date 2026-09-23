@@ -110,7 +110,10 @@ class SettingsScreen extends StatelessWidget {
             onTap: () => AppNavigation.push(
               context,
               AppRoutes.paywall,
-              fallbackBuilder: (_) => const PaywallScreen(),
+              extra: const PaywallRouteArgs(trigger: PaywallTrigger.settings),
+              fallbackBuilder: (_) => const PaywallScreen(
+                trigger: PaywallTrigger.settings,
+              ),
             ),
           ),
           const SizedBox(height: Insets.xl),

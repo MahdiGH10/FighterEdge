@@ -240,10 +240,16 @@ class FighterEdgeApp extends StatelessWidget {
               (streak ?? StreakController())..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
-          create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
+          create: (_) => EdgeFuelController(
+            repository: resolvedEdgeFuelRepo,
+            telemetry: telemetry ?? const NoopTelemetry(),
+          ),
           update: (_, auth, controller) {
             final edgeFuel = controller ??
-                EdgeFuelController(repository: resolvedEdgeFuelRepo);
+                EdgeFuelController(
+                  repository: resolvedEdgeFuelRepo,
+                  telemetry: telemetry ?? const NoopTelemetry(),
+                );
             edgeFuel.setUser(auth.user?.id);
             return edgeFuel;
           },
