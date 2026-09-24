@@ -527,16 +527,17 @@ Two more local commits on top of `03e3798`, **not pushed** (11 ahead of
 **Two accounts are live-granted Pro right now, by direct Firestore write, for
 the user's own testing — not through billing:**
 
-- `ayanoayou890@gmail.com` (uid `7OiFXafY09Myc0hc5R9uBjxjaf03`) — the user's
-  friend/tester. Verified email, `plan: pro`, has a `devMessage` explaining
-  the grant.
-- `mgharbi031+protest@gmail.com` / password `FighterEdge#Pro2026` (uid
-  `G48sYEvhZKXRdD8ljI4tA43zTVh2`) — a fresh account created for the user to
-  test in a browser, verified email at creation, `plan: pro`, has a
-  `devMessage`. **This is a real credential sitting in this document in
-  plaintext** — acceptable only because it is a disposable test account on a
-  free plan with no payment method attached, not a production secret; do not
-  extend that reasoning to anything else.
+- A friend/tester's account. Verified email, `plan: pro`, has a
+  `devMessage` explaining the grant.
+- A disposable browser-test account created for the owner. Verified email,
+  `plan: pro`, has a `devMessage`.
+
+**Redacted 2026-09-24 (audit finding S-1).** This section used to list both
+accounts' email addresses and Firebase UIDs, plus the test account's password,
+in plain text. Treat that password as leaked: it is still in git history.
+Change it or disable the account, and remove both manual grants once
+sandbox billing works. Identify the accounts from the Firebase console, and
+keep test credentials in a password manager, never in this repository.
 
 Both grants bypass RevenueCat entirely and will be silently overwritten back
 to `free` the moment a real webhook event fires for either uid once billing
