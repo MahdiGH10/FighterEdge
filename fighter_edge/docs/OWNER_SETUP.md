@@ -253,3 +253,76 @@ message names the missing permission. In the Google Cloud console, open
 There is also a fallback that uses a stored key (the `FIREBASE_SERVICE_ACCOUNT`
 secret). Use it only if the setup above is impossible for you: a stored key
 can leak, and the setup above has none.
+
+## 4. Protect the AI budget
+
+The app now proves to the server that requests come from the real app
+(Firebase App Check), and the server limits how much each account and the
+whole app can spend on AI each day. Some switches need you.
+
+### 4.1 Register the apps in App Check
+
+Firebase console > **App Check** > **Apps**:
+
+- **Android:** choose **Play Integrity**. It needs the SHA-256 fingerprint
+  of your app signing key (Google Play Console > your app > **Test and
+  release > App integrity**) and your Google Cloud project linked in the Play
+  Console (**App integrity > Play Integrity API**).
+- **iOS:** choose **DeviceCheck**. In the Apple Developer website, create a
+  key with **DeviceCheck** enabled (**Certificates, IDs & Profiles > Keys**),
+  then upload the `.p8` file with its Key ID and your Team ID.
+- **While developing:** debug builds print a debug token in the device log.
+  Add it under **App Check > Apps > (your app) > Manage debug tokens**.
+
+### 4.2 Switch on enforcement, later
+
+Wait until a version of the app with App Check is in the stores and most
+users have updated. Then check Firebase console > **App Check** > **APIs** >
+**Cloud Functions**: almost all requests should show as verified.
+
+Then, in `functions/.env.fighter-edge-app`, change `ENFORCE_APP_CHECK=false`
+to `ENFORCE_APP_CHECK=true`, commit, and deploy the functions. From then on,
+the AI coach and the purchase sync refuse requests that don't come from the
+real app. **Older app versions without App Check lose the AI coach at that
+moment**, which is why you wait.
+
+Leave App Check enforcement for Firestore off in the console for now.
+Turning it on would lock users of older app versions out of their own data.
+
+### 4.3 Set spending limits
+
+- **OpenRouter:** open **Keys**, edit the key the functions use, and set a
+  **credit limit**. OpenRouter then stops that key at the limit.
+- **Google Cloud:** open **Billing > Budgets & alerts** and create a monthly
+  budget with email alerts at 50%, 90% and 100%.
+
+### 4.4 The daily AI budget
+
+The server adds up the AI tokens used each day, for all users together, in
+Firestore under `aiStats/<date>`. These totals contain counts only, never
+user data. When a day reaches its budget, the AI pauses until midnight UTC.
+
+- The default budget is 2,000,000 tokens a day.
+- To change it, create the Firestore document `config/edgeFuelAi` (if it
+  doesn't exist) and set the number field `dailyTokenBudget`.
+- To switch the AI off completely, set the boolean field `enabled` to
+  `false` in the same document.
+
+Each account also has daily limits: 6 Fighter Briefs, 20 chat messages,
+25 AI requests in total.
+
+### 4.5 Move to a paid AI model before launch
+
+You approved this. The free models can be withdrawn at any time, and their
+providers may keep what users type.
+
+1. Add credits to your OpenRouter account.
+2. Ask Claude to pick the model and update the app. It will use the
+   `aiStats` totals to estimate the cost per user. Then, in
+   `functions/.env.fighter-edge-app`, the `OPENROUTER_MODELS` line gets the
+   paid model and `OPENROUTER_DATA_COLLECTION=deny` is switched on. With
+   that setting, OpenRouter only uses providers that don't store or train on
+   what users type.
+3. The privacy policy (section 2.3) and the app's AI consent text both say
+   that free models may keep inputs. Claude updates both in the same change.
+

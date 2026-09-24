@@ -4,6 +4,8 @@
  * app, source control, or a request/response body sent to the client.
  */
 
+import { ModelUsage, parseUsage } from "./usage";
+
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 /** Cheap, JSON-mode-capable default. Override via the OPENROUTER_MODEL env var. */
@@ -68,12 +70,53 @@ export class OpenRouterError extends Error {
   }
 }
 
-export async function callOpenRouter(params: {
-  apiKey: string;
+export interface OpenRouterRequest {
   model: string;
   systemPrompt: string;
   userContent: string;
-}): Promise<string> {
+}
+
+/**
+ * The request body. Pure, so the privacy-relevant parts are testable:
+ * - `usage.include` asks OpenRouter to report tokens and cost (usage.ts).
+ * - With `OPENROUTER_DATA_COLLECTION=deny`, OpenRouter routes only to
+ *   providers that don't store or train on prompts (audit S-5). Free models
+ *   are mostly served by providers that do, so turn this on together with a
+ *   paid model.
+ */
+export function buildRequestBody(
+  request: OpenRouterRequest,
+  env: NodeJS.ProcessEnv = process.env,
+): Record<string, unknown> {
+  const denyDataCollection =
+    (env.OPENROUTER_DATA_COLLECTION ?? "").trim().toLowerCase() === "deny";
+  return {
+    model: request.model,
+    response_format: { type: "json_object" },
+    temperature: 0.2,
+    max_tokens: MAX_OUTPUT_TOKENS,
+    // The model is filling in a fixed JSON shape from supplied facts, not
+    // solving a problem — a hidden reasoning pass quadruples latency past
+    // what a user will wait for and adds nothing the validator keeps.
+    // Ignored by models that do not reason.
+    reasoning: { enabled: false },
+    usage: { include: true },
+    ...(denyDataCollection ? { provider: { data_collection: "deny" } } : {}),
+    messages: [
+      { role: "system", content: request.systemPrompt },
+      { role: "user", content: request.userContent },
+    ],
+  };
+}
+
+export interface OpenRouterResult {
+  content: string;
+  usage: ModelUsage;
+}
+
+export async function callOpenRouter(
+  params: OpenRouterRequest & { apiKey: string },
+): Promise<OpenRouterResult> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -84,21 +127,7 @@ export async function callOpenRouter(params: {
         Authorization: `Bearer ${params.apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: params.model,
-        response_format: { type: "json_object" },
-        temperature: 0.2,
-        max_tokens: MAX_OUTPUT_TOKENS,
-        // The model is filling in a fixed JSON shape from supplied facts, not
-        // solving a problem — a hidden reasoning pass quadruples latency past
-        // what a user will wait for and adds nothing the validator keeps.
-        // Ignored by models that do not reason.
-        reasoning: { enabled: false },
-        messages: [
-          { role: "system", content: params.systemPrompt },
-          { role: "user", content: params.userContent },
-        ],
-      }),
+      body: JSON.stringify(buildRequestBody(params)),
       signal: controller.signal,
     });
 
@@ -116,7 +145,7 @@ export async function callOpenRouter(params: {
     if (!content) {
       throw new OpenRouterError("OpenRouter returned no content");
     }
-    return content;
+    return { content, usage: parseUsage(body) };
   } finally {
     clearTimeout(timeout);
   }
