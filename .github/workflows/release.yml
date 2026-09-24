@@ -1,0 +1,158 @@
+name: Release
+
+# Builds the signed Android App Bundle for Google Play from a version tag
+# (v1.2.3) or on demand. It never runs on pull requests, and it refuses to
+# build without the upload key, the store-facing config, and the legal
+# URLs the paywall links to.
+#
+# Required repository/environment secrets (Settings > Environments >
+# production):
+#   ANDROID_KEYSTORE_BASE64      base64 of the upload keystore (.jks)
+#   ANDROID_KEYSTORE_PASSWORD
+#   ANDROID_KEY_ALIAS
+#   ANDROID_KEY_PASSWORD
+#   REVENUECAT_ANDROID_PUBLIC_KEY  RevenueCat public SDK key (not a secret
+#                                  to RevenueCat, but kept out of git)
+# Required variables:
+#   TERMS_URL, PRIVACY_URL        hosted legal documents
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      build-name:
+        description: 'Version name (e.g. 1.2.3). Defaults to pubspec.'
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fighter-edge-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.47.2'
+
+jobs:
+  android-bundle:
+    name: Signed Android App Bundle
+    runs-on: ubuntu-latest
+    # Protect with required reviewers under Settings > Environments.
+    environment: production
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: fighter_edge
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check release configuration
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          RC_KEY: ${{ secrets.REVENUECAT_ANDROID_PUBLIC_KEY }}
+          TERMS_URL: ${{ vars.TERMS_URL }}
+          PRIVACY_URL: ${{ vars.PRIVACY_URL }}
+        run: |
+          missing=()
+          for name in KEYSTORE STORE_PASSWORD KEY_ALIAS KEY_PASSWORD RC_KEY TERMS_URL PRIVACY_URL; do
+            [ -n "${!name}" ] || missing+=("$name")
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Release configuration missing: ${missing[*]}"
+            exit 1
+          fi
+          for url in "$TERMS_URL" "$PRIVACY_URL"; do
+            case "$url" in https://*) ;; *) echo "::error::Legal URLs must be https"; exit 1;; esac
+          done
+
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies (lockfile enforced)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Test before shipping
+        run: flutter test --exclude-tags golden --reporter github
+
+      - name: Decode upload keystore
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/upload-keystore.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/upload-keystore.jks" >> "$GITHUB_ENV"
+
+      - name: Resolve version
+        id: version
+        env:
+          INPUT_NAME: ${{ inputs.build-name }}
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            name="${GITHUB_REF_NAME#v}"
+          elif [ -n "$INPUT_NAME" ]; then
+            name="$INPUT_NAME"
+          else
+            name="$(grep '^version:' pubspec.yaml | sed -E 's/version: *([^+]+).*/\1/')"
+          fi
+          if ! printf '%s' "$name" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Version name '$name' is not MAJOR.MINOR.PATCH"
+            exit 1
+          fi
+          # Monotonic across runs, so Play never sees a reused build number.
+          number="$((GITHUB_RUN_NUMBER + 1000))"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "Building $name ($number)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Generate release plugin configuration
+        run: flutter build apk --config-only
+
+      - name: Build signed App Bundle
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          RC_KEY: ${{ secrets.REVENUECAT_ANDROID_PUBLIC_KEY }}
+          TERMS_URL: ${{ vars.TERMS_URL }}
+          PRIVACY_URL: ${{ vars.PRIVACY_URL }}
+          # Passed through env, never interpolated into the script, so a
+          # tag or input value can't inject shell.
+          BUILD_NAME: ${{ steps.version.outputs.name }}
+          BUILD_NUMBER: ${{ steps.version.outputs.number }}
+        run: >-
+          flutter build appbundle --release --no-pub
+          --build-name="$BUILD_NAME"
+          --build-number="$BUILD_NUMBER"
+          --obfuscate --split-debug-info=build/symbols/android
+          --dart-define=REVENUECAT_ANDROID_PUBLIC_KEY="$RC_KEY"
+          --dart-define=TERMS_URL="$TERMS_URL"
+          --dart-define=PRIVACY_URL="$PRIVACY_URL"
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload-keystore.jks"
+
+      - name: Upload bundle, symbols and R8 mapping
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fighter-edge-${{ steps.version.outputs.name }}-${{ steps.version.outputs.number }}
+          path: |
+            fighter_edge/build/app/outputs/bundle/release/app-release.aab
+            fighter_edge/build/app/outputs/mapping/release/mapping.txt
+            fighter_edge/build/symbols/android
+          if-no-files-found: error
+          retention-days: 90
