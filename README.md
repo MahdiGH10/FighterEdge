@@ -179,6 +179,16 @@ Keep CI green before merging. A green CI run proves the repository builds and
 tests; it does not prove that store accounts, Firebase secrets, webhook
 deployment, signing, or sandbox purchases are configured.
 
+## Backend deploys and legal pages
+
+`.github/workflows/deploy-backend.yml` deploys Cloud Functions, Firestore
+rules and indexes after the unit and emulator suites pass, from `main`,
+behind the `production` environment. Run it manually with
+`targets: hosting` to publish the legal pages (`fighter_edge/hosting/`,
+see its README). Deploys need these Firebase secrets: `OPENROUTER_API_KEY`,
+`REVENUECAT_WEBHOOK_AUTH`, and `REVENUECAT_API_KEY` (a RevenueCat `sk_`
+key, or `unset` until RevenueCat is configured).
+
 ## License and release note
 
 This is a private, unpublished product repository (`publish_to: none`). Add a

@@ -230,6 +230,12 @@ class LocalAuthRepository implements AuthRepository {
   @override
   Future<AppUser?> refreshCurrentUser() async => _current;
 
+  /// Counts calls so tests can check the app asks the server to sync.
+  int syncEntitlementCalls = 0;
+
+  @override
+  Future<void> syncEntitlement() async => syncEntitlementCalls++;
+
   @override
   Future<AppUser> completeOnboarding({
     required String goal,

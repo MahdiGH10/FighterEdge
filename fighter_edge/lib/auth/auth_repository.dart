@@ -81,6 +81,11 @@ abstract class AuthRepository {
   /// Reload the current user and server-owned entitlement state.
   Future<AppUser?> refreshCurrentUser();
 
+  /// Asks the trusted server to re-read this account's paid entitlement from
+  /// the billing provider now, e.g. right after a purchase or restore. Never
+  /// grants anything itself. Implementations must not throw.
+  Future<void> syncEntitlement();
+
   /// Stores first-run setup choices. This is account profile data, not a paid
   /// entitlement, so the client may write it directly.
   Future<AppUser> completeOnboarding({

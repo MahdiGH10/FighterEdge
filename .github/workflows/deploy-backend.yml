@@ -1,0 +1,176 @@
+name: Deploy backend
+
+# Deploys Cloud Functions, Firestore rules and indexes (and, on request, the
+# legal pages on Firebase Hosting) to Firebase, after the backend test
+# suites pass. Runs automatically when backend files change on main, and on
+# demand. It deploys only from main, behind the `production` environment:
+# add required reviewers there to make every deploy an explicit approval.
+#
+# Credentials, one of:
+#   - Recommended, keyless: repository variables
+#     GCP_WORKLOAD_IDENTITY_PROVIDER and GCP_SERVICE_ACCOUNT (Workload
+#     Identity Federation for this repository).
+#   - Fallback: secret FIREBASE_SERVICE_ACCOUNT (a service-account JSON key).
+# Without either, automatic runs skip deploying with a notice; manual runs
+# fail.
+#
+# Firebase secrets the functions need (set once with
+# `firebase functions:secrets:set NAME`): OPENROUTER_API_KEY,
+# REVENUECAT_WEBHOOK_AUTH, REVENUECAT_API_KEY ("unset" until RevenueCat
+# exists).
+on:
+  push:
+    branches: [main]
+    paths:
+      - fighter_edge/functions/**
+      - fighter_edge/firestore.rules
+      - fighter_edge/firestore.indexes.json
+      - fighter_edge/firebase.json
+      - .github/workflows/deploy-backend.yml
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: What to deploy
+        type: choice
+        default: backend
+        options:
+          - backend
+          - hosting
+          - backend-and-hosting
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fighter-edge-deploy
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '22'
+  FIREBASE_TOOLS: firebase-tools@15.31.0
+  FIREBASE_PROJECT: ${{ vars.FIREBASE_PROJECT_ID || 'fighter-edge-app' }}
+
+jobs:
+  verify:
+    name: Verify backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: fighter_edge/functions
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Java (Firestore emulator)
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: fighter_edge/functions/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Rules and billing tests against the emulator
+        run: npm run test:rules
+
+  deploy:
+    name: Deploy to Firebase
+    needs: [verify]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write # Workload Identity Federation
+    defaults:
+      run:
+        working-directory: fighter_edge
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check deploy credentials
+        id: creds
+        env:
+          WIF_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          WIF_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          SA_KEY_PRESENT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ -n "$WIF_PROVIDER" ] && [ -n "$WIF_ACCOUNT" ]; then
+            echo "mode=wif" >> "$GITHUB_OUTPUT"
+          elif [ "$SA_KEY_PRESENT" = "true" ]; then
+            echo "mode=key" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT" = "push" ]; then
+            echo "::notice::Deploy credentials are not configured; skipping. See the header of deploy-backend.yml."
+            echo "mode=none" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Deploy credentials are not configured. See the header of deploy-backend.yml."
+            exit 1
+          fi
+
+      - name: Authenticate (Workload Identity Federation)
+        if: steps.creds.outputs.mode == 'wif'
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Authenticate (service-account key)
+        if: steps.creds.outputs.mode == 'key'
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Set up Node
+        if: steps.creds.outputs.mode != 'none'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: fighter_edge/functions/package-lock.json
+
+      - name: Install function dependencies
+        if: steps.creds.outputs.mode != 'none'
+        working-directory: fighter_edge/functions
+        run: npm ci
+
+      - name: Resolve deploy targets
+        if: steps.creds.outputs.mode != 'none'
+        id: targets
+        env:
+          CHOICE: ${{ inputs.targets || 'backend' }}
+        run: |
+          case "$CHOICE" in
+            backend) only="functions,firestore:rules,firestore:indexes" ;;
+            hosting) only="hosting" ;;
+            backend-and-hosting) only="functions,firestore:rules,firestore:indexes,hosting" ;;
+            *) echo "::error::Unknown target $CHOICE"; exit 1 ;;
+          esac
+          echo "only=$only" >> "$GITHUB_OUTPUT"
+          echo "Deploying: $only to $FIREBASE_PROJECT" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deploy
+        if: steps.creds.outputs.mode != 'none'
+        env:
+          ONLY: ${{ steps.targets.outputs.only }}
+        # No --force: a deploy never silently deletes functions or indexes
+        # that exist in the console but not in this repository. Hosting's
+        # predeploy hook refuses pages that still contain TODO(owner).
+        run: >-
+          npx -y "$FIREBASE_TOOLS" deploy
+          --only "$ONLY"
+          --project "$FIREBASE_PROJECT"
+          --non-interactive

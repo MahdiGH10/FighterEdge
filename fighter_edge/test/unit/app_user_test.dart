@@ -13,6 +13,42 @@ void main() {
         emailVerified: true,
       );
 
+  group('expiry-aware Pro (audit M-4)', () {
+    final now = DateTime.utc(2026, 9, 24, 12);
+    AppUser pro({DateTime? expires}) =>
+        sample().copyWith(plan: Plan.pro, planExpiresAt: expires);
+
+    test('a Pro plan with a future expiry is Pro', () {
+      expect(
+          pro(expires: now.add(const Duration(days: 30))).isProAt(now), isTrue);
+    });
+
+    test('just past expiry stays Pro within the renewal leeway', () {
+      expect(
+          pro(expires: now.subtract(const Duration(minutes: 5))).isProAt(now),
+          isTrue);
+    });
+
+    test('past the leeway it is no longer Pro, even with plan: pro', () {
+      final lapsed = pro(
+          expires: now.subtract(
+              Entitlements.expiryLeeway + const Duration(seconds: 1)));
+      expect(lapsed.isProAt(now), isFalse);
+    });
+
+    test('no recorded expiry (lifetime or manual grant) stays Pro', () {
+      expect(pro().isProAt(now), isTrue);
+    });
+
+    test('a free plan is never Pro, whatever the expiry', () {
+      expect(
+          sample()
+              .copyWith(planExpiresAt: now.add(const Duration(days: 1)))
+              .isProAt(now),
+          isFalse);
+    });
+  });
+
   group('AppUser', () {
     test('isPro reflects the plan', () {
       expect(sample().isPro, isFalse);

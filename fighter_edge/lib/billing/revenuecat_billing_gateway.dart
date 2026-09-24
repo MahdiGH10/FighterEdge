@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart' as rc;
@@ -19,6 +21,10 @@ class RevenueCatBillingGateway implements BillingGateway {
   final String _iosApiKey;
   final Map<String, rc.Package> _packages = {};
   bool _configured = false;
+  final _updates = StreamController<BillingCustomerState>.broadcast();
+
+  @override
+  Stream<BillingCustomerState> get customerInfoUpdates => _updates.stream;
 
   @override
   bool get isAvailable => !kIsWeb && _apiKeyForPlatform.isNotEmpty;
@@ -35,6 +41,9 @@ class RevenueCatBillingGateway implements BillingGateway {
     if (!_configured) {
       await rc.Purchases.configure(
         rc.PurchasesConfiguration(_apiKeyForPlatform)..appUserID = userId,
+      );
+      rc.Purchases.addCustomerInfoUpdateListener(
+        (info) => _updates.add(_stateFrom(info)),
       );
       _configured = true;
       return;

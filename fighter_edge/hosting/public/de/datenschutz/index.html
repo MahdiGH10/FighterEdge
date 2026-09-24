@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Datenschutzerklärung | Fighter Edge</title>
+  <link rel="stylesheet" href="/legal.css">
+</head>
+<body>
+<main>
+<header>
+  <a class="lang" href="/privacy" hreflang="en" lang="en">English</a>
+  <h1>Datenschutzerklärung</h1>
+  <p>App Fighter Edge. Version 1.0, gültig ab <mark class="todo">TODO(owner): Veröffentlichungsdatum</mark>.</p>
+</header>
+
+<div class="summary">
+  <p><strong>Kurz gesagt:</strong> Wir verwenden deine Daten, um dein Konto
+  bereitzustellen, deine Ernährungsziele zu berechnen und dein Training, dein
+  Gewicht und deine Ernährung zu erfassen. Gesundheitsdaten nutzen wir nur für
+  diese Funktionen. Wir verkaufen keine Daten und zeigen keine Werbung.
+  Nutzungsanalysen und Absturzberichte werden nur mit deiner Erlaubnis gesendet,
+  die du jederzeit unter <em>Einstellungen &gt; Datenschutz</em> ändern kannst. Der
+  optionale KI-Coach sendet eine Zusammenfassung deiner Ernährungsdaten (nie
+  deinen Namen oder deine E-Mail-Adresse) an einen KI-Anbieter in den USA. Du
+  kannst dein Konto und alle App-Daten direkt in der App löschen.</p>
+</div>
+
+<h2>1. Verantwortlicher</h2>
+<p>Verantwortlich im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:</p>
+<p><mark class="todo">TODO(owner): vollständiger Name bzw. Firma, Rechtsform</mark><br>
+<mark class="todo">TODO(owner): Anschrift</mark><br>
+E-Mail: <mark class="todo">TODO(owner): Datenschutz-E-Mail, z. B. privacy@deine-domain</mark></p>
+<p><mark class="todo">TODO(owner): Hat der Verantwortliche keine Niederlassung in der EU,
+hier den Vertreter nach Art. 27 DSGVO angeben. Falls ein Datenschutzbeauftragter
+benannt ist, dessen Kontaktdaten ergänzen. Andernfalls diesen Hinweis löschen.</mark></p>
+
+<h2>2. Welche Daten wir verarbeiten, wozu und auf welcher Rechtsgrundlage</h2>
+
+<h3>2.1 Dein Konto</h3>
+<p>E-Mail-Adresse, Anzeigename, Passwort (verarbeitet durch Firebase
+Authentication; wir sehen dein Passwort nie im Klartext),
+Verifizierungsstatus der E-Mail-Adresse und Erstellungsdatum des Kontos. Bei
+der Anmeldung mit Google (oder Apple) erhalten wir von diesem Anbieter deine
+E-Mail-Adresse und deinen Namen. Für dich wird eine eindeutige Konto-ID
+erzeugt.</p>
+<p><em>Zweck:</em> Anlage und Absicherung deines Kontos sowie Verfügbarkeit
+deiner Daten auf mehreren Geräten. <em>Rechtsgrundlage:</em> Vertragserfüllung
+(Art. 6 Abs. 1 lit. b DSGVO).</p>
+
+<h3>2.2 Gesundheits-, Körper- und Trainingsdaten</h3>
+<p>Wenn du die entsprechenden Funktionen nutzt, speichern wir:</p>
+<ul>
+  <li><strong>Einrichtung und Ernährungsprofil:</strong> Ziel,
+  Erfahrungsstufe, Trainingstage pro Woche, Alter, Größe, aktuelles
+  Gewicht und Zielgewicht, Körperfettanteil (optional), das gewählte
+  Grundumsatz-Profil (entspricht dem biologischen Geschlecht),
+  Aktivitätsniveau, Tempo, Ernährungsform, Allergien und Unverträglichkeiten,
+  unerwünschte Lebensmittel, Mahlzeiten pro Tag, Budget- und
+  Kochzeit-Präferenzen sowie deine Antworten auf die Sicherheitsfragen.</li>
+  <li><strong>Berechnete Ziele:</strong> deine täglichen Kalorien- und
+  Makronährstoffziele.</li>
+  <li><strong>Protokolle:</strong> Gewichtseinträge; geloggte Lebensmittel
+  (Name, Portion, Kalorien, Eiweiß, Kohlenhydrate, Fett, Zeitpunkt);
+  Trainingseinheiten, Timer-Workouts und Reaktionsdrills (Datum, Dauer,
+  empfundene Anstrengung, Notizen); Fortschritt in der Drill-Bibliothek.</li>
+</ul>
+<p>Teile davon sind Gesundheitsdaten (besondere Kategorien nach Art. 9
+DSGVO). <em>Zweck:</em> Berechnung deiner Ziele, Darstellung deines
+Fortschritts und Empfehlungen. <em>Rechtsgrundlage:</em> deine ausdrückliche
+Einwilligung (Art. 9 Abs. 2 lit. a und Art. 6 Abs. 1 lit. a DSGVO), die du
+erteilst, bevor du diese Daten eingibst. Du kannst die Einwilligung jederzeit
+widerrufen, indem du die Daten oder dein Konto löschst. Die Rechtmäßigkeit
+der bis dahin erfolgten Verarbeitung bleibt unberührt.</p>
+<p><mark class="todo">TODO(owner): Die App muss diese ausdrückliche Einwilligung
+einholen, bevor Gesundheitsdaten eingegeben werden (z. B. als Schritt zu Beginn
+des Onboardings). Bis dieser Schritt ausgeliefert ist, entspricht dieser
+Abschnitt nicht der App. Siehe Übergabenotizen.</mark></p>
+
+<h3>2.3 KI-Coach (Pro, optional)</h3>
+<p>Wenn du den KI-Fighter-Brief oder den Chat nutzt, sendet unser Server
+(Google Cloud Functions, USA) Folgendes an OpenRouter, Inc. (USA), das die
+Anfrage an den ausgewählten Anbieter des KI-Modells weiterleitet:</p>
+<ul>
+  <li>deine berechneten Ziele und die Zusammenfassung des Ernährungsprotokolls
+  des jeweiligen Tages,</li>
+  <li>deine Ernährungsform, Allergien und unerwünschten Lebensmittel,</li>
+  <li>deine Chat-Nachricht und bis zu acht vorherige Nachrichten der
+  Unterhaltung.</li>
+</ul>
+<p>Dein Name, deine E-Mail-Adresse und deine Konto-ID werden
+<strong>nicht</strong> übermittelt. Wir speichern einen täglichen
+Nutzungszähler für Fair-Use-Grenzen. Die KI-Unterhaltung speichern wir nicht
+auf unseren Servern.</p>
+<p><strong>Wichtig:</strong> Einige Modellanbieter, insbesondere bei kostenlosen
+Modellen, können Eingaben nach ihren eigenen Bedingungen speichern oder
+verwenden. <mark class="todo">TODO(owner): Diesen Satz beibehalten, solange kostenlose
+Modelle konfiguriert sind. Bei einem Wechsel zu Anbietern ohne Datenspeicherung
+ersetzen durch: „Wir nutzen nur Anbieter, die Eingaben weder speichern noch
+zum Training verwenden.“</mark> Gib im Chat keine Informationen ein, die du nicht
+teilen möchtest.</p>
+<p><em>Zweck:</em> Erläuterung deines Plans und Beantwortung deiner Fragen.
+<em>Rechtsgrundlage:</em> deine ausdrückliche Einwilligung (Art. 9 Abs. 2
+lit. a und Art. 6 Abs. 1 lit. a DSGVO), die du beim Start des KI-Coaches
+erteilst. Die Nutzung ist freiwillig. KI-Antworten werden immer mit den von
+der App berechneten Zahlen abgeglichen. Die KI kann deine Ziele nicht
+ändern.</p>
+
+<h3>2.4 Käufe und Abonnements</h3>
+<p>Zahlungen wickeln Apple (App Store) bzw. Google (Google Play) ab. Deine
+Kartendaten erhalten wir nie. RevenueCat, Inc. (USA) erhält den Kaufbeleg vom
+Store und teilt unserem Server deinen Abo-Status mit. Wir speichern Tarif,
+Produkt, Store, Ablaufdatum und Verlängerungsstatus zu deiner Konto-ID.</p>
+<p><em>Rechtsgrundlage:</em> Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO).
+Buchungsbelege bewahren wir auf, soweit handels- und steuerrechtliche Pflichten
+bestehen (Art. 6 Abs. 1 lit. c DSGVO).</p>
+
+<h3>2.5 Nutzungsanalyse (nur mit Einwilligung)</h3>
+<p>Wenn du zustimmst, sendet die App anonyme Nutzungsereignisse an Google
+Analytics for Firebase, zum Beispiel „Paywall angesehen“, „Onboarding-Schritt
+angesehen“ oder „Mahlzeit geloggt“ (als Ja/Nein-Wert). Die Ereignisse enthalten
+Angaben zu Gerät, Betriebssystem und App-Version sowie eine App-Instanz-ID;
+Google kann aus der IP-Adresse einen ungefähren Standort ableiten. Die
+Ereignisse enthalten nie deinen Namen, deine E-Mail-Adresse, deine Konto-ID,
+Lebensmittelnamen oder Körper- und Ernährungswerte. Werbefunktionen sind
+deaktiviert.</p>
+<p><em>Rechtsgrundlage:</em> deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO;
+§ 25 Abs. 1 TDDDG). Die App fragt einmal danach, und du kannst deine Wahl
+jederzeit unter <em>Einstellungen &gt; Datenschutz</em> ändern. Vor deiner
+Entscheidung wird nichts erfasst.</p>
+
+<h3>2.6 Absturzberichte (nur mit Einwilligung)</h3>
+<p>Wenn du zustimmst, erhält Firebase Crashlytics (Google) Absturz- und
+Fehlerberichte mit dem technischen Fehler, Gerätemodell, Betriebssystem,
+App-Version und einer Installations-ID. Sie enthalten keine Gesundheitsdaten
+und keine von dir eingegebenen Inhalte. <em>Rechtsgrundlage:</em> deine
+Einwilligung (Art. 6 Abs. 1 lit. a DSGVO; § 25 Abs. 1 TDDDG), die du unter
+<em>Einstellungen &gt; Datenschutz</em> ändern kannst.</p>
+
+<h3>2.7 Technisch notwendige Daten</h3>
+<p>Wenn die App mit unseren Servern kommuniziert, verarbeitet Google als unser
+Hosting-Anbieter zwangsläufig deine IP-Adresse, Anfrage-Metadaten und
+Sicherheitsprotokolle. <em>Rechtsgrundlage:</em> unser berechtigtes Interesse
+am sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO; § 25 Abs. 2 TDDDG).</p>
+
+<h3>2.8 Daten, die auf deinem Gerät bleiben</h3>
+<p>Manche Daten werden nur auf deinem Telefon gespeichert und nie an uns
+gesendet: Sprache, Einheiten- und Timer-Einstellungen, deine
+Datenschutz-Entscheidungen, zuletzt genutzte und gespeicherte Lebensmittel,
+Streak-Freezes, der Onboarding-Fortschritt und geplante
+Trainingserinnerungen (die Benachrichtigungen erzeugt dein Telefon).
+Sprachansagen in Drills und im Runden-Timer nutzen die Sprachausgabe deines
+Geräts. Diese Daten sind nicht in Geräte-Backups enthalten.</p>
+
+<h3>2.9 Wenn du uns kontaktierst</h3>
+<p>Wenn du uns eine E-Mail schreibst, verwenden wir deine Nachricht und Adresse
+zur Beantwortung (Art. 6 Abs. 1 lit. b oder f DSGVO) und löschen sie nach
+Abschluss, sofern keine gesetzlichen Aufbewahrungspflichten bestehen.</p>
+
+<h2>3. Empfänger</h2>
+<table>
+  <tr><th>Empfänger</th><th>Rolle</th><th>Daten</th></tr>
+  <tr><td>Google Ireland Ltd. / Google LLC (Firebase: Authentication, Cloud Firestore, Cloud Functions, Hosting, Analytics, Crashlytics)</td><td>Auftragsverarbeiter</td><td>Konto, App-Daten, technische Daten; Analyse- und Absturzdaten nur mit Einwilligung</td></tr>
+  <tr><td>RevenueCat, Inc.</td><td>Auftragsverarbeiter</td><td>Konto-ID, Kaufbelege, Abo-Status</td></tr>
+  <tr><td>OpenRouter, Inc. und der jeweils gewählte Modellanbieter</td><td>Auftragsverarbeiter / Unterauftragsverarbeiter</td><td>Die in 2.3 genannten KI-Coach-Daten, nur bei Nutzung</td></tr>
+  <tr><td>Apple Inc. / Google LLC als App-Stores</td><td>Eigenständig Verantwortliche</td><td>Zahlungen, nach deren Datenschutzbestimmungen</td></tr>
+</table>
+<p>Wir verkaufen deine personenbezogenen Daten nicht und verwenden sie nicht
+für Werbung.</p>
+
+<h2>4. Übermittlung in Drittländer</h2>
+<p>Einige Empfänger verarbeiten Daten in den USA. KI-Anfragen und Abo-Webhooks
+laufen auf Cloud Functions in den USA (Region us-central1). Grundlage der
+Übermittlung ist das EU-US Data Privacy Framework, soweit der Empfänger
+zertifiziert ist, andernfalls die EU-Standardvertragsklauseln (Art. 46 Abs. 2
+lit. c DSGVO). Deine App-Datenbank wird gespeichert in
+<mark class="todo">TODO(owner): Firestore-Standort aus der Firebase-Konsole, z. B. „der EU (eur3)“</mark>.
+<mark class="todo">TODO(owner): Übermittlungsgrundlage für RevenueCat und OpenRouter
+prüfen und mit jedem Anbieter den Auftragsverarbeitungsvertrag abschließen.</mark></p>
+
+<h2>5. Speicherdauer</h2>
+<ul>
+  <li><strong>Konto- und App-Daten:</strong> bis du sie oder dein Konto löschst.
+  <em>Einstellungen &gt; Konto löschen</em> löscht dein Konto und alle darunter
+  gespeicherten Daten sofort aus unserer Datenbank. Kopien in den Backups von
+  Google werden nach deren Zeitplan überschrieben.</li>
+  <li><strong>Abrechnungsnachweise:</strong> Ein minimaler Nachweis der
+  Abo-Ereignisse (Ereignis-ID, Typ, Datum, Konto-ID) wird aufbewahrt für
+  <mark class="todo">TODO(owner): Frist, z. B. 10 Jahre nach deutschem Steuerrecht, oder kürzer, falls keine Pflicht besteht</mark>.</li>
+  <li><strong>RevenueCat:</strong> Die Abo-Historie wird bei RevenueCat für
+  denselben Zeitraum aufbewahrt. <mark class="todo">TODO(owner): Den RevenueCat-Kunden bei
+  Kontolöschung löschen oder anonymisieren (Audit D-9).</mark></li>
+  <li><strong>Nutzungsanalyse:</strong> Die Ereignisdaten werden aufbewahrt für
+  <mark class="todo">TODO(owner): in Firebase Analytics &gt; Datenaufbewahrung auf 2 Monate setzen</mark>.</li>
+  <li><strong>Absturzberichte:</strong> 90 Tage.</li>
+</ul>
+
+<h2>6. Deine Rechte</h2>
+<p>Du hast nach der DSGVO das Recht auf Auskunft (Art. 15), Berichtigung
+(Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18) und
+Datenübertragbarkeit (Art. 20) sowie das Recht, einer Verarbeitung auf
+Grundlage berechtigter Interessen zu widersprechen (Art. 21). Eine
+Einwilligung kannst du jederzeit mit Wirkung für die Zukunft widerrufen
+(Art. 7 Abs. 3). Schreib uns dazu an die oben genannte Adresse. Dein Konto
+kannst du auch selbst in der App löschen.</p>
+<p>Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu
+beschweren, insbesondere in dem Land, in dem du lebst.
+<mark class="todo">TODO(owner): zuständige Behörde nennen, z. B. die Datenschutzbehörde deines Bundeslandes.</mark></p>
+
+<h2>7. Pflicht zur Bereitstellung</h2>
+<p>Für ein Konto ist eine E-Mail-Adresse erforderlich. Gesundheits- und
+Trainingsdaten sind freiwillig, ohne sie funktionieren die Ernährungs- und
+Tracking-Funktionen jedoch nicht. Nutzungsanalyse, Absturzberichte und der
+KI-Coach sind vollständig freiwillig.</p>
+
+<h2>8. Automatisierte Berechnungen</h2>
+<p>Deine Kalorien- und Makronährstoffziele werden automatisch aus deinen
+Angaben berechnet. Sie sind reine Empfehlungen und haben keine rechtliche
+oder ähnlich erhebliche Wirkung (Art. 22 DSGVO findet keine Anwendung). Sie
+ersetzen keine ärztliche oder ernährungsfachliche Beratung.</p>
+
+<h2>9. Kinder</h2>
+<p>Fighter Edge richtet sich nicht an Personen unter 16 Jahren. Wir erheben
+wissentlich keine Daten von Kindern unter 16 Jahren.</p>
+
+<h2>10. Sicherheit</h2>
+<p>Die Übertragung ist verschlüsselt, und Zugriffsregeln stellen sicher, dass
+nur du deine Daten lesen kannst. Deinen Abo-Status kann nur unser Server
+ändern, niemals die App. Die Schlüssel der KI-Anbieter bleiben auf unserem
+Server.</p>
+
+<h2>11. Änderungen</h2>
+<p>Wir passen diese Erklärung an, wenn sich unsere Verarbeitung ändert, etwa
+falls jemals Werbung eingeführt wird. Das Datum oben ändert sich dann, und über
+wesentliche Änderungen informieren wir dich in der App.</p>
+
+<footer>
+  <p>Fragen: <mark class="todo">TODO(owner): Datenschutz-E-Mail</mark> ·
+  <a href="/de/nutzungsbedingungen">Nutzungsbedingungen</a> · <a href="/de/konto-loeschen">Konto löschen</a></p>
+</footer>
+</main>
+</body>
+</html>

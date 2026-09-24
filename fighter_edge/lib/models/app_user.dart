@@ -1,3 +1,5 @@
+import 'package:clock/clock.dart';
+
 import '../billing/subscription.dart';
 import 'dev_message.dart';
 
@@ -47,7 +49,18 @@ class AppUser {
     this.devMessage,
   });
 
-  bool get isPro => plan == Plan.pro;
+  /// Expiry-aware, like the server (audit M-4): a Pro plan whose recorded
+  /// expiry has passed (beyond [Entitlements.expiryLeeway]) no longer counts,
+  /// even if the EXPIRATION webhook never arrived. No recorded expiry means
+  /// a lifetime purchase or a manual grant.
+  bool get isPro => isProAt(clock.now());
+
+  bool isProAt(DateTime now) {
+    if (plan != Plan.pro) return false;
+    final expires = planExpiresAt;
+    return expires == null ||
+        expires.add(Entitlements.expiryLeeway).isAfter(now);
+  }
 
   AppUser copyWith({
     String? displayName,

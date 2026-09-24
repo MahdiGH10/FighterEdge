@@ -87,4 +87,8 @@ class Entitlements {
   static bool isProOnly(Feature f) => _proOnly.contains(f);
 
   static bool allows(Plan plan, Feature f) => plan == Plan.pro || !isProOnly(f);
+
+  /// How long past a recorded expiry Pro still counts, covering store
+  /// renewal lag. Mirrors ENTITLEMENT_LEEWAY_MS in functions/src/billing.ts.
+  static const Duration expiryLeeway = Duration(hours: 1);
 }
