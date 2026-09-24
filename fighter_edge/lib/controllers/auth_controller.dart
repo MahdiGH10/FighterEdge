@@ -229,7 +229,7 @@ class AuthController extends ChangeNotifier {
           if (selected == null) {
             throw const BillingException(
               'billing-not-configured',
-              'Payments are not active yet. Connect the store products before purchasing.',
+              "Pro isn't available to buy on this version yet.",
             );
           }
           _telemetry.track(

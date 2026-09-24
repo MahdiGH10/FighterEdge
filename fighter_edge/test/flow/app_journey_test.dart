@@ -95,11 +95,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Unlock your full edge'), findsOneWidget);
 
-    // Billing is not wired yet, so checkout intent must not grant Pro from
-    // the client.
-    await tester.tap(find.byType(PrimaryButton)); // Join Pro Waitlist.
+    // Billing is not wired yet: the CTA records interest honestly and must
+    // not grant Pro from the client or pretend to be a checkout.
+    await tester.tap(find.byType(PrimaryButton)); // Notify me when Pro opens.
     await tester.pumpAndSettle();
-    expect(find.textContaining('Payments are not active yet'), findsOneWidget);
+    expect(find.textContaining('Pro will appear here when it opens'),
+        findsOneWidget);
+    expect(find.textContaining(RegExp("on the list", caseSensitive: false)),
+        findsOneWidget);
 
     // Pro remains locked until a trusted billing backend grants it.
     expect(repo.currentUser!.isPro, isFalse);

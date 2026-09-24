@@ -420,6 +420,20 @@ class LEn extends L {
   String get timerAnnounceDone => 'Session complete.';
 
   @override
+  String get paywallWaitlistCta => 'Notify me when Pro opens';
+
+  @override
+  String get paywallWaitlistJoined => 'You\'re on the list';
+
+  @override
+  String get paywallWaitlistThanks =>
+      'Noted. Pro will appear here when it opens, with the price shown before any charge.';
+
+  @override
+  String get paywallWaitlistBody =>
+      'Pro can\'t be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.';
+
+  @override
   String get trainTabReaction => 'Reaction';
 
   @override

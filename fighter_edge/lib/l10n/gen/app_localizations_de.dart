@@ -423,6 +423,20 @@ class LDe extends L {
   String get timerAnnounceDone => 'Einheit beendet.';
 
   @override
+  String get paywallWaitlistCta => 'Benachrichtige mich, wenn Pro startet';
+
+  @override
+  String get paywallWaitlistJoined => 'Du stehst auf der Liste';
+
+  @override
+  String get paywallWaitlistThanks =>
+      'Notiert. Pro erscheint hier, sobald es startet, mit Preis vor jeder Zahlung.';
+
+  @override
+  String get paywallWaitlistBody =>
+      'Pro kann in dieser Version noch nicht gekauft werden. Tippe unten, und dieses Gerät merkt sich deine Anfrage. Der Store-Preis wird immer vor jeder Zahlung angezeigt.';
+
+  @override
   String get trainTabReaction => 'Reaktion';
 
   @override

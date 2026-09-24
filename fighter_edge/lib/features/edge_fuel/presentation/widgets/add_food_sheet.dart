@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -85,14 +87,18 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
     });
   }
 
-  Future<void> _logAgain(FoodLogEntry template) async {
-    final entry = await context.read<EdgeFuelController>().logAgain(template);
-    if (mounted) Navigator.of(context).pop(FoodLogged(entry));
+  // The entry shows on the day at once; storage confirms in the background.
+  // Waiting for that confirmation froze the sheet while offline (audit A-4).
+  void _logAgain(FoodLogEntry template) {
+    final edgeFuel = context.read<EdgeFuelController>();
+    final entry = edgeFuel.entryForLogAgain(template);
+    unawaited(edgeFuel.addEntry(entry));
+    Navigator.of(context).pop(FoodLogged(entry));
   }
 
-  Future<void> _logPortion(FoodLogEntry entry) async {
-    await context.read<EdgeFuelController>().addEntry(entry);
-    if (mounted) Navigator.of(context).pop(FoodLogged(entry));
+  void _logPortion(FoodLogEntry entry) {
+    unawaited(context.read<EdgeFuelController>().addEntry(entry));
+    Navigator.of(context).pop(FoodLogged(entry));
   }
 
   @override

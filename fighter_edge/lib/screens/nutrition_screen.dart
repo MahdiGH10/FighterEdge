@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -281,11 +283,12 @@ class _NutritionScreenState extends State<NutritionScreen> {
     fats.dispose();
 
     if (entry == null) return;
+    // Shown at once; storage confirms in the background (audit A-4).
     if (existing == null) {
-      await edgeFuel.addEntry(entry);
+      unawaited(edgeFuel.addEntry(entry));
       if (mounted) _confirmLogged(edgeFuel, entry);
     } else {
-      await edgeFuel.updateEntry(entry);
+      unawaited(edgeFuel.updateEntry(entry));
     }
   }
 }
@@ -555,7 +558,7 @@ class _QuickStartMeals extends StatelessWidget {
 
   Future<void> _addMeal(BuildContext context, _QuickMeal meal) async {
     AppHaptics.commit();
-    await edgeFuel.addEntry(
+    unawaited(edgeFuel.addEntry(
       FoodLogEntry(
         id: 'quick-${DateTime.now().microsecondsSinceEpoch}',
         name: meal.name,
@@ -567,7 +570,7 @@ class _QuickStartMeals extends StatelessWidget {
         source: FoodLogSource.manual,
         loggedAt: DateTime.now(),
       ),
-    );
+    ));
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${meal.name} added to today')),
@@ -816,8 +819,9 @@ class _MealsView extends StatelessWidget {
                     size: IconSizes.inline,
                     color: AppColors.primary,
                   ),
-                  onPressed: () async {
-                    final logged = await edgeFuel.logAgain(entry);
+                  onPressed: () {
+                    final logged = edgeFuel.entryForLogAgain(entry);
+                    unawaited(edgeFuel.addEntry(logged));
                     onLogged(edgeFuel, logged);
                   },
                 ),

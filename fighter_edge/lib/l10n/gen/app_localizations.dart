@@ -823,6 +823,30 @@ abstract class L {
   /// **'Session complete.'**
   String get timerAnnounceDone;
 
+  /// No description provided for @paywallWaitlistCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify me when Pro opens'**
+  String get paywallWaitlistCta;
+
+  /// No description provided for @paywallWaitlistJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on the list'**
+  String get paywallWaitlistJoined;
+
+  /// No description provided for @paywallWaitlistThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Noted. Pro will appear here when it opens, with the price shown before any charge.'**
+  String get paywallWaitlistThanks;
+
+  /// No description provided for @paywallWaitlistBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro can\'t be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.'**
+  String get paywallWaitlistBody;
+
   /// No description provided for @trainTabReaction.
   ///
   /// In en, this message translates to:

@@ -65,7 +65,7 @@ class FighterEdgeBootstrap extends StatefulWidget {
 }
 
 class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
-  late Future<_AppDependencies> _boot = _initializeProductionDependencies();
+  late Future<AppDependencies> _boot = _initializeProductionDependencies();
 
   void _retry() {
     setState(() => _boot = _initializeProductionDependencies());
@@ -73,21 +73,12 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<_AppDependencies>(
+    return FutureBuilder<AppDependencies>(
       future: _boot,
       builder: (context, snapshot) {
         final dependencies = snapshot.data;
         if (dependencies != null) {
-          return FighterEdgeApp(
-            authRepo: dependencies.authRepo,
-            dataRepo: dependencies.dataRepo,
-            edgeFuelRepo: dependencies.edgeFuelRepo,
-            edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
-            billingGateway: dependencies.billingGateway,
-            coachVoice: dependencies.coachVoice,
-            telemetry: dependencies.telemetry,
-            errorReporter: dependencies.errorReporter,
-          );
+          return FighterEdgeApp.fromDependencies(dependencies);
         }
 
         return _BootMaterialApp(
@@ -99,7 +90,7 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
   }
 }
 
-Future<_AppDependencies> _initializeProductionDependencies() async {
+Future<AppDependencies> _initializeProductionDependencies() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final crashlyticsSupported = !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
@@ -120,7 +111,7 @@ Future<_AppDependencies> _initializeProductionDependencies() async {
   final AuthRepository authRepo = FirebaseAuthRepository();
   await authRepo.init();
 
-  return _AppDependencies(
+  return AppDependencies(
     authRepo: authRepo,
     dataRepo: FirestoreDataRepository(),
     edgeFuelRepo: FirestoreEdgeFuelRepository(),
@@ -133,7 +124,13 @@ Future<_AppDependencies> _initializeProductionDependencies() async {
   );
 }
 
-class _AppDependencies {
+/// Every production service the app is built from.
+///
+/// [FighterEdgeApp.fromDependencies] is the only way the bootstrap hands
+/// these over, so a service cannot be built here and then silently dropped
+/// on the way to the widget tree. `reminderGateway` once was, leaving camp
+/// reminders permanently unavailable in production (audit A-1).
+class AppDependencies {
   final AuthRepository authRepo;
   final DataRepository dataRepo;
   final EdgeFuelRepository edgeFuelRepo;
@@ -144,7 +141,7 @@ class _AppDependencies {
   final Telemetry telemetry;
   final ErrorReporter errorReporter;
 
-  const _AppDependencies({
+  const AppDependencies({
     required this.authRepo,
     required this.dataRepo,
     required this.edgeFuelRepo,
@@ -183,6 +180,21 @@ class FighterEdgeApp extends StatelessWidget {
     this.telemetry,
     this.errorReporter,
   });
+
+  /// The production wiring: every field of [dependencies], none dropped.
+  FighterEdgeApp.fromDependencies(AppDependencies dependencies, {Key? key})
+      : this(
+          key: key,
+          authRepo: dependencies.authRepo,
+          dataRepo: dependencies.dataRepo,
+          edgeFuelRepo: dependencies.edgeFuelRepo,
+          edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
+          billingGateway: dependencies.billingGateway,
+          reminderGateway: dependencies.reminderGateway,
+          coachVoice: dependencies.coachVoice,
+          telemetry: dependencies.telemetry,
+          errorReporter: dependencies.errorReporter,
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -243,12 +255,14 @@ class FighterEdgeApp extends StatelessWidget {
           create: (_) => EdgeFuelController(
             repository: resolvedEdgeFuelRepo,
             telemetry: telemetry ?? const NoopTelemetry(),
+            errorReporter: errorReporter ?? const NoopErrorReporter(),
           ),
           update: (_, auth, controller) {
             final edgeFuel = controller ??
                 EdgeFuelController(
                   repository: resolvedEdgeFuelRepo,
                   telemetry: telemetry ?? const NoopTelemetry(),
+                  errorReporter: errorReporter ?? const NoopErrorReporter(),
                 );
             edgeFuel.setUser(auth.user?.id);
             return edgeFuel;

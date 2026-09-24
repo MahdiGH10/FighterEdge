@@ -165,6 +165,10 @@
   "timerAnnounceWork": "Runde {round} von {total}. Los.",
   "timerAnnounceRest": "Runde {round} vorbei. Pause.",
   "timerAnnounceDone": "Einheit beendet.",
+  "paywallWaitlistCta": "Benachrichtige mich, wenn Pro startet",
+  "paywallWaitlistJoined": "Du stehst auf der Liste",
+  "paywallWaitlistThanks": "Notiert. Pro erscheint hier, sobald es startet, mit Preis vor jeder Zahlung.",
+  "paywallWaitlistBody": "Pro kann in dieser Version noch nicht gekauft werden. Tippe unten, und dieses Gerät merkt sich deine Anfrage. Der Store-Preis wird immer vor jeder Zahlung angezeigt.",
 
   "trainTabReaction": "Reaktion",
   "reactionTitle": "Reaktionsdrill",

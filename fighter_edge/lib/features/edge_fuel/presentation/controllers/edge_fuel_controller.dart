@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../data/data_repository.dart';
+import '../../../../observability/error_reporter.dart';
 import '../../../../observability/telemetry.dart';
 import '../../data/edge_fuel_repository.dart';
 import '../../domain/models/food_log_entry.dart';
@@ -19,11 +20,19 @@ class EdgeFuelController extends ChangeNotifier {
   EdgeFuelController({
     required EdgeFuelRepository repository,
     Telemetry telemetry = const NoopTelemetry(),
+    ErrorReporter errorReporter = const NoopErrorReporter(),
   })  : _repository = repository,
-        _telemetry = telemetry;
+        _telemetry = telemetry,
+        _errorReporter = errorReporter;
 
   final EdgeFuelRepository _repository;
   final Telemetry _telemetry;
+  final ErrorReporter _errorReporter;
+  bool _lastSaveFailed = false;
+
+  /// True when the most recent change could not be stored. Any later
+  /// successful save clears it. The change stays on screen either way.
+  bool get lastSaveFailed => _lastSaveFailed;
   StreamSubscription<NutritionSetupDraft?>? _draftSub;
   StreamSubscription<NutritionTarget?>? _targetSub;
   StreamSubscription<NutritionDay>? _daySub;
@@ -109,12 +118,17 @@ class EdgeFuelController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Applies the entry at once. The returned future completes only when
+  /// storage confirms the write, which Firestore never does while offline,
+  /// so UI flows should not wait on it (audit A-4). It never throws: a
+  /// failed write is reported and surfaces as [lastSaveFailed].
   Future<void> addEntry(FoodLogEntry entry) async {
     final day = _activeDay();
     final firstToday = day.entries.isEmpty;
-    await _saveDay(
+    final saved = await _saveDay(
       day.copyWith(entries: [...day.entries, entry], updatedAt: DateTime.now()),
     );
+    if (!saved) return;
     _memory?.remember(entry);
     // Every way of logging food (quick add, search, a recipe) lands here, so
     // this is the one place the habit is counted. Only a 0/1 flag leaves the
@@ -181,7 +195,15 @@ class EdgeFuelController extends ChangeNotifier {
 
   /// Logs a remembered food again, as a fresh entry on the selected day.
   Future<FoodLogEntry> logAgain(FoodLogEntry template) async {
-    final entry = template.copyWith(
+    final entry = entryForLogAgain(template);
+    await addEntry(entry);
+    return entry;
+  }
+
+  /// The fresh entry [logAgain] would add, without adding it. UI flows use
+  /// this to add in the background and move on without waiting on storage.
+  FoodLogEntry entryForLogAgain(FoodLogEntry template) {
+    return template.copyWith(
       id: _manualId(),
       source: isSavedFood(template)
           ? FoodLogSource.savedMeal
@@ -190,8 +212,6 @@ class EdgeFuelController extends ChangeNotifier {
       saved: isSavedFood(template),
       loggedAt: DateTime.now(),
     );
-    await addEntry(entry);
-    return entry;
   }
 
   /// Stars or un-stars a food everywhere: in the cross-day memory, and on
@@ -252,12 +272,27 @@ class EdgeFuelController extends ChangeNotifier {
         );
   }
 
-  Future<void> _saveDay(NutritionDay day) async {
+  /// Shows [day] immediately, then stores it. Returns whether storage
+  /// confirmed the write. Never throws: callers include fire-and-forget
+  /// taps, where an escaped error would become an uncaught crash report.
+  Future<bool> _saveDay(NutritionDay day) async {
     final userId = _userId;
-    if (userId == null) return;
+    if (userId == null) return false;
     _day = day;
     notifyListeners();
-    await _repository.saveNutritionDay(userId, day);
+    try {
+      await _repository.saveNutritionDay(userId, day);
+      if (_lastSaveFailed) {
+        _lastSaveFailed = false;
+        if (!_disposed) notifyListeners();
+      }
+      return true;
+    } catch (error, stack) {
+      _errorReporter.report(error, stack, reason: 'nutrition_day_save_failed');
+      _lastSaveFailed = true;
+      if (!_disposed) notifyListeners();
+      return false;
+    }
   }
 
   String _manualId() => 'food-${DateTime.now().microsecondsSinceEpoch}';

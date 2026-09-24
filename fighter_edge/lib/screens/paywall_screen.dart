@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../auth/auth_repository.dart';
 import '../billing/billing_gateway.dart';
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../observability/telemetry.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -66,9 +68,13 @@ class PaywallScreen extends StatefulWidget {
 }
 
 class _PaywallScreenState extends State<PaywallScreen> {
+  static const _waitlistKey = 'paywall.waitlistInterest';
+  bool _onWaitlist = false;
+
   @override
   void initState() {
     super.initState();
+    _loadWaitlist();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       Telemetry.fromContext(context).track(
@@ -80,6 +86,38 @@ class _PaywallScreenState extends State<PaywallScreen> {
       );
       if (mounted) context.read<AuthController>().loadBillingProducts();
     });
+  }
+
+  Future<void> _loadWaitlist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final joined = prefs.getBool(_waitlistKey) ?? false;
+      if (mounted && joined) setState(() => _onWaitlist = true);
+    } catch (_) {
+      // No storage (tests, unsupported platform): the button just offers
+      // itself again.
+    }
+  }
+
+  /// Billing is not live on this build. The old button started a checkout
+  /// that could only fail with developer-facing text, while promising the
+  /// tap "records interest" (audit M-6). It now does exactly what it says:
+  /// the device remembers, the anonymous funnel counts it (subject to
+  /// analytics consent), and nothing pretends to be a purchase.
+  Future<void> _joinWaitlist() async {
+    final l = L.of(context);
+    Telemetry.fromContext(context).track(
+      TelemetryEvent.premiumCtaTapped,
+      parameters: {'surface': 'paywall_waitlist', 'access': 'free'},
+    );
+    setState(() => _onWaitlist = true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l.paywallWaitlistThanks)),
+    );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_waitlistKey, true);
+    } catch (_) {}
   }
 
   Future<void> _purchase(BillingProduct product) async {
@@ -211,28 +249,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
               const _LaunchTermsCard(billingActive: false),
               const SizedBox(height: Insets.lg),
               PrimaryButton(
-                auth.isBusy ? 'Saving interest...' : 'Join Pro Waitlist',
-                icon: Icons.bolt,
+                _onWaitlist
+                    ? L.of(context).paywallWaitlistJoined
+                    : L.of(context).paywallWaitlistCta,
+                icon: _onWaitlist ? Icons.check : Icons.notifications_active,
                 expand: true,
-                onPressed: auth.isBusy
-                    ? null
-                    : () async {
-                        Telemetry.fromContext(context).track(
-                          TelemetryEvent.premiumCtaTapped,
-                          parameters: {
-                            'surface': 'paywall_waitlist',
-                            'access': 'free',
-                          },
-                        );
-                        try {
-                          await auth.startProCheckout();
-                        } on AuthException catch (e) {
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(e.message)),
-                          );
-                        }
-                      },
+                onPressed: _onWaitlist ? null : _joinWaitlist,
               ),
             ],
             const SizedBox(height: Insets.sm),
@@ -532,9 +554,7 @@ class _LaunchTermsCard extends StatelessWidget {
                 ? 'Subscriptions are processed by Apple or Google. Your '
                     'receipt is verified before Pro access is activated, and '
                     'you can restore or manage it any time.'
-                : 'Billing is not active on this build yet. Joining the '
-                    'waitlist records interest only; store pricing will be '
-                    'shown before any payment is taken.',
+                : L.of(context).paywallWaitlistBody,
             style: AppType.subhead(color: AppColors.textSecondary),
           ),
         ],
