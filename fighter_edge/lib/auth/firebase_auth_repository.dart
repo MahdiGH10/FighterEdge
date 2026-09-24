@@ -85,7 +85,9 @@ class FirebaseAuthRepository implements AuthRepository {
         .authStateChanges()
         .first
         .timeout(_startupTimeout, onTimeout: () => null);
-    if (user != null) _cached = await _hydrate(user);
+    if (user != null) {
+      _cached = await _hydrate(user, timeout: _startupTimeout);
+    }
   }
 
   /// The signed-in user, re-emitted whenever their `users/{uid}` profile
@@ -169,10 +171,19 @@ class FirebaseAuthRepository implements AuthRepository {
 
   /// Map a Firebase [User] to our [AppUser], reading (or seeding) the plan in
   /// Firestore. Falls back to a free-plan user if Firestore is unavailable.
-  Future<AppUser> _hydrate(User user) async {
+  ///
+  /// [timeout] bounds the Firestore read; pass it only from [init]. The other
+  /// callers (sign-up, sign-in, `completeOnboarding`, `refreshCurrentUser`)
+  /// are user-initiated and often run right after a Firestore write of their
+  /// own, so a tight timeout there would silently revert a slow-but-successful
+  /// write's result to defaults — e.g. bouncing a user who just finished
+  /// onboarding back into the onboarding wizard.
+  Future<AppUser> _hydrate(User user, {Duration? timeout}) async {
     Map<String, dynamic> profileData = const {};
     try {
-      final snap = await _doc(user.uid).get().timeout(_startupTimeout);
+      var future = _doc(user.uid).get();
+      if (timeout != null) future = future.timeout(timeout);
+      final snap = await future;
       if (snap.exists) {
         profileData = snap.data() ?? const {};
       } else {

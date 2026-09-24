@@ -130,6 +130,7 @@ void main() {
 
     state.dispose();
     await repository.weightsController.close();
+    repository._inner.dispose();
   });
 
   group('AppState — weight', () {
