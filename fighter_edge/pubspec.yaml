@@ -38,7 +38,7 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
   # Generators only — they write static resource files at dev time and are
   # never compiled into the shipped app, so they carry none of the native
   # build risk a runtime plugin does.
