@@ -1,5 +1,45 @@
 # Fighter Edge — Claude Code Handoff
 
+## Production-readiness audit and Phase 1: 2026-09-24 (branch `claude/fighteredge-audit-uo9vmm`, PR #1)
+
+`AUDIT.md` (repo root) is a full production-readiness audit: 88 open
+findings, P0-P3, re-verified against `98d1785`, with a three-phase plan.
+The owner approved Phase 1 (P0 blockers plus a CI upgrade), and it is
+implemented on this branch. `AUDIT.md` > "Phase 1 status" maps every
+finding to its commit and to what only the owner can do.
+
+**Done in code, each with tests:** Google sign-in on mobile (the provider
+cast threw on every attempt); Sign in with Apple gating on iOS (4.8); a
+wall-clock round timer (it froze when the phone locked) with wakelock and
+voice/screen-reader calls; reminders wired in production; no UI waits on
+Firestore acknowledgements (offline logging used to hang); an honest
+waitlist; paywall renewal disclosure and Terms/Privacy links
+(`TERMS_URL`/`PRIVACY_URL` dart-defines); consent-gated analytics and
+crash reports (native off, Consent Mode v2, prompt, Settings toggles);
+upload-key signing with `bundleRelease` refusing the debug key; backups
+excluded; an iOS project (Info.plist privacy keys, privacy manifest, real
+icon and splash); Functions on Node 22 / functions 7 / admin 14; and a
+production-grade CI and release pipeline, including 14 Firestore rules
+tests under the emulator.
+
+**Verified locally:** format clean, `analyze --fatal-infos` clean, 595 Flutter
+tests, coverage 82.4% (excluding generated l10n), functions 37/37, rules
+14/14 (emulator), actionlint clean. **Not verified here:** the Android
+Gradle build (this container's network policy blocks dl.google.com, so no
+Android SDK; CI builds it) and the iOS build (no macOS; CI builds it). There
+was no device testing.
+
+**Owner actions that block a store build (not code):** change the leaked
+test password; publish the Privacy Policy and Terms and set them as release
+variables; create the Android upload keystore and release secrets; register
+the iOS app in Firebase (`flutterfire configure --platforms=ios`); set up
+Apple signing and capabilities; choose the final application/bundle IDs;
+redeploy the functions on Node 22 before 2026-10-30.
+
+**Next bounded slice:** Phase 2 item 1 (entitlement correctness: a
+`users/{uid}` listener, expiry-aware Pro on client and server, and
+RevenueCat TRANSFER handling).
+
 ## Current retention work — 2026-09-24: Slice 3a done (branch `feat/training-log`)
 
 - **Training log.** A new `TrainingLogEntry` model is stored in
@@ -1041,7 +1081,7 @@ FighterEdge/                         git root
    ├─ lib/widgets/                    shared UI primitives
    ├─ lib/theme/                      tokens, accessibility, motion, haptics
    ├─ lib/observability/               telemetry + error reporter
-   ├─ functions/                      Node 20 TypeScript Cloud Functions
+   ├─ functions/                      Node 22 TypeScript Cloud Functions
    ├─ firestore.rules                  owner-only data + server-owned billing
    ├─ test/                            unit, widget, flow, accessibility, goldens
    └─ integration_test/                device/performance journeys

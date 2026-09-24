@@ -375,6 +375,38 @@ reduced motion, has large-text tests, and contains no literal `fontSize`.
 
 ---
 
+## Phase 1 status (2026-09-24)
+
+Phase 1 was approved and implemented on this branch, one commit per slice.
+"Code done" means the change is merged into this branch and tested. The
+last column is what only the owner can do, with store, Firebase, or Apple
+accounts.
+
+| Finding | Commit | Code done | Still needs the owner |
+|---|---|---|---|
+| S-1 credentials in docs | `cff3a29` | Redacted from the handoff | **Change or disable that test account's password now.** It is still in git history. Revoke the two manual Pro grants once sandbox billing works. |
+| S-2 Google sign-in crash | `012e622` | Cast removed. Adapter tests fail against the old code with the original TypeError. | Verify the SHA-1/256 fingerprints in Firebase for the upload key. |
+| S-3 Apple 4.8 | `012e622` | Google is hidden on iOS unless `ENABLE_APPLE_SIGN_IN=true` | Apple service ID, the Firebase Apple provider, and the capability, then build with the flag |
+| S-9 UID in release logs | `012e622` | The debugPrint is debug-only | — |
+| P-1/P-2/P-3/U-5/T-1 round timer | `fb99e90` | Wall-clock engine, resume-correct, wakelock, voice calls, screen-reader announcements, no extra second; 22 new tests | Device check on a locked phone. The notification bell for a round that ends while the screen is off is a follow-up (needs exact-alarm / time-sensitive permission). |
+| A-1 reminders unwired | `232cd86` | Wired, plus a wiring test for every dependency | Real-device notification check |
+| A-4 offline logging hang | `232cd86` | UI no longer waits on server acks; writes never throw | — |
+| M-6 fake waitlist | `232cd86` | Honest "Notify me" CTA | — |
+| M-1 paywall disclosure | `4a9e714` | Localized renewal terms plus Terms and Privacy links | — |
+| R-3 legal pages | `4a9e714` | `TERMS_URL`/`PRIVACY_URL` build config, with an in-app fallback | **Publish the Privacy Policy and Terms (EULA)**, then set them as release variables. Fill in Play Data safety and App Store privacy details. |
+| M-2 consent | `3369409` | Collection off natively, Consent Mode v2 denied, a one-time Allow/Don't allow prompt, Settings toggles, and Dart-side gates | — (UMP/ATT arrive with ads in Phase 3) |
+| S-8 fatal FlutterErrors | `3369409` | Reported as non-fatal | — |
+| R-2 debug-signed release | `d575bc7` | Upload-key signing from `key.properties` or CI secrets; `bundleRelease` refuses without a key | **Create the upload keystore** and add the release secrets (see `release.yml`) |
+| S-6 backups | `d575bc7` | Backup and device transfer excluded | — |
+| R-1 iOS project | `bbc4bf2` | Runner project, Info.plist privacy keys, privacy manifest, real icon and splash | **Register the iOS app in Firebase and run `flutterfire configure --platforms=ios`**, set the signing team and capabilities, and choose the final bundle ID (R-6) |
+| R-8 iOS reminders | `bbc4bf2` | Darwin init settings | — |
+| D-2 Node 20 EOL | `bec8097` | Node 22, firebase-functions 7, firebase-admin 14; 12 → 2 moderate advisories | **Redeploy the functions before 2026-10-30** |
+| R-5/S-12/T-3/T-7 CI | `bde422a` | Every PR, SHA-pinned actions, coverage gate, l10n check, rules emulator job (14 tests), obfuscated APK, iOS build, a tag-driven signed AAB release, Dependabot | Protect the `production` environment with required reviewers. Mark the new jobs as required checks. |
+
+Not in Phase 1 (by design, see Phases 2-3): entitlement listener/expiry
+(M-3, M-4), TRANSFER handling (M-5), App Check (S-4), data-model changes
+(D-1, D-3), flavors (R-4), and ads (M-9).
+
 ## 4. Three-phase plan
 
 Each phase ends with a verifiable exit gate. Findings are referenced by ID.

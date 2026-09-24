@@ -69,7 +69,7 @@ environment/configuration instead.
 ## Requirements
 
 - Flutter `3.47.2` (Dart `3.13.2`)
-- Node.js `20` and npm for `fighter_edge/functions`
+- Node.js `22` and npm for `fighter_edge/functions`
 - Firebase CLI for emulator/deployment work
 - Android Studio/SDK for Android builds
 - Xcode and Apple Developer access for local iOS builds (or a macOS CI runner)
@@ -111,7 +111,19 @@ The Android release check used by CI is:
 
 ```powershell
 flutter build apk --config-only
-flutter build apk --release --no-pub
+flutter build apk --release --no-pub --obfuscate --split-debug-info=build/symbols/android
+```
+
+Store builds come from `.github/workflows/release.yml` (tag `vX.Y.Z` or run
+it manually). It needs the upload keystore and RevenueCat key as secrets,
+and `TERMS_URL`/`PRIVACY_URL` as variables. Locally, copy
+`android/key.properties.example` to `android/key.properties`. Release
+builds take:
+
+```powershell
+--dart-define=REVENUECAT_ANDROID_PUBLIC_KEY=... `
+--dart-define=TERMS_URL=https://... --dart-define=PRIVACY_URL=https://... `
+--dart-define=ENABLE_APPLE_SIGN_IN=true   # once Apple sign-in is configured
 ```
 
 ## Architecture rules
@@ -146,12 +158,22 @@ flutter build apk --release --no-pub
 
 ## CI and publishing
 
-`.github/workflows/flutter-ci.yml` runs on pushes and pull requests to `main`:
+`.github/workflows/flutter-ci.yml` runs on every pull request and on pushes
+to `main`. All actions are pinned to commit SHAs; Dependabot updates them.
 
-1. Flutter formatting, analysis, non-golden tests, and coverage artifact.
-2. Windows golden tests.
-3. Android release APK build and artifact upload.
-4. Functions TypeScript build and tests.
+1. **Analyze & test.** Lockfile-enforced `pub get`, format, a check that
+   generated l10n is committed and current, `analyze --fatal-infos`, tests,
+   and a coverage floor (`tool/coverage_gate.dart`).
+2. **Golden tests** on the Windows renderer.
+3. **Cloud Functions.** Node 22 build, tests, and a production-dependency
+   audit.
+4. **Firestore rules.** The security-rules suite against the emulator.
+5. **Android release build.** An obfuscated APK plus debug symbols.
+6. **iOS build.** A release build without code signing (skipped on draft
+   PRs).
+
+`.github/workflows/release.yml` builds the signed Play App Bundle from a
+version tag, behind the `production` environment.
 
 Keep CI green before merging. A green CI run proves the repository builds and
 tests; it does not prove that store accounts, Firebase secrets, webhook
