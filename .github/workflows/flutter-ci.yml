@@ -164,7 +164,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run security-rules tests against the emulator
+      - name: Run security-rules and billing-handler tests against the emulator
         run: npm run test:rules
 
   android-release:

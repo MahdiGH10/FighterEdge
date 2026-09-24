@@ -407,6 +407,17 @@ Not in Phase 1 (by design, see Phases 2-3): entitlement listener/expiry
 (M-3, M-4), TRANSFER handling (M-5), App Check (S-4), data-model changes
 (D-1, D-3), flavors (R-4), and ads (M-9).
 
+## Phase 2 progress
+
+| Finding | Status | Still needs the owner |
+|---|---|---|
+| M-3 entitlement read once per session | **Fixed.** The app follows `users/{uid}` live; purchase and restore call the new `syncEntitlement` function; a RevenueCat customer-info listener nudges the server. | Deploy the functions |
+| M-4 expiry ignored | **Fixed.** `hasActivePro` (server) and `AppUser.isPro` (client) require the recorded expiry, with a 1 h renewal leeway and billing-issue grace. A `reconcileEntitlements` schedule (every 6 h) recovers missed renewals and expires lapsed plans. | Deploy the functions and the new composite index |
+| M-5 TRANSFER dropped | **Fixed.** Both sides are re-read from the RevenueCat REST API; without a key the old side is revoked and the new side flagged. | Create the `REVENUECAT_API_KEY` secret (an `sk_` key; "unset" until RevenueCat exists) |
+| S-11 webhook auth compare | **Fixed.** Constant-time comparison. | — |
+| R-3 legal pages | **Drafted.** Privacy Policy, Terms and account deletion in EN/DE, ready for Firebase Hosting (`fighter_edge/hosting/`). | Fill in the `TODO(owner)` items, get a legal review, then deploy hosting |
+| CD | **Added.** `deploy-backend.yml` deploys functions, rules and indexes after the unit and emulator suites pass (hosting on request), behind the `production` environment. | Configure Workload Identity Federation (or a service-account secret) and required reviewers |
+
 ## 4. Three-phase plan
 
 Each phase ends with a verifiable exit gate. Findings are referenced by ID.

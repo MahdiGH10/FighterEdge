@@ -1,5 +1,36 @@
 # Fighter Edge — Claude Code Handoff
 
+## Phase 2, slice 1: Pro status is correct (2026-09-24, PR after #1)
+
+Phase 1 is merged (`35e8751`). This slice fixes audit M-3, M-4 and M-5 and
+drafts the legal pages. **Read `AUDIT.md` > "Phase 2 progress".**
+
+- **Server** (`functions/src/entitlements.ts`, `billing.ts`): expiry-aware
+  `hasActivePro` (1 h leeway, grace periods) gates the AI; webhook
+  processing moved out of `index.ts` and handles TRANSFER; new
+  `syncEntitlement` callable (throttled) and `reconcileEntitlements`
+  schedule (every 6 h); all writes are timestamp-ordered; new composite
+  index `users(plan, billing.expiresAtMs)`; new secret `REVENUECAT_API_KEY`.
+- **Client:** `FirebaseAuthRepository.authStateChanges` follows the profile
+  document live; `AuthController` updates the same account in place;
+  expiry-aware `AppUser.isPro` gates features; purchase and restore call
+  `syncEntitlement`; RevenueCat customer-info listener.
+- **Legal:** `fighter_edge/hosting/`, drafts with `TODO(owner)` guards. The
+  privacy policy states Art. 9 explicit consent for health data. **The app
+  does not ask for it yet: that consent step is the next slice to build**,
+  or the policy is inaccurate for EU users.
+- **CD:** `.github/workflows/deploy-backend.yml`.
+
+**Verified locally:** 607 Flutter tests, 82.5% coverage, format, analyze,
+l10n; functions: 52 unit tests plus 29 emulator tests (rules + billing
+handlers) on firebase-tools 15.31.0; actionlint clean. **Not verified:**
+the live RevenueCat API (no key; the REST client is tested with a fake),
+Cloud Scheduler in production, and any device.
+
+**Before deploying:** `firebase functions:secrets:set REVENUECAT_API_KEY`
+(use `unset` until RevenueCat exists), then deploy functions + indexes
+(or let `deploy-backend.yml` do it).
+
 ## Production-readiness audit and Phase 1: 2026-09-24 (branch `claude/fighteredge-audit-uo9vmm`, PR #1)
 
 `AUDIT.md` (repo root) is a full production-readiness audit: 88 open
