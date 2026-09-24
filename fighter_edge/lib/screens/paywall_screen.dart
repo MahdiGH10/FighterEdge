@@ -9,7 +9,10 @@ import '../billing/billing_gateway.dart';
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
 import '../l10n/gen/app_localizations.dart';
+import '../legal/legal_links.dart';
+import 'legal_screen.dart';
 import '../observability/telemetry.dart';
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -243,6 +246,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   ),
                 const SizedBox(height: Insets.sm),
               ],
+              const _RenewalDisclosure(),
             ] else if (auth.billingAvailable && auth.isBusy) ...[
               const _BillingLoadingNotice(),
             ] else ...[
@@ -292,9 +296,56 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   ),
                 ),
               ),
+            const _LegalLinksRow(),
           ],
         ],
       ),
+    );
+  }
+}
+
+/// The auto-renewal terms App Review Guideline 3.1.2 and Google Play's
+/// subscription policy require beside the purchase buttons (audit M-1).
+/// Price and period are on each plan button directly above.
+class _RenewalDisclosure extends StatelessWidget {
+  const _RenewalDisclosure();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: Insets.xs),
+      child: Text(
+        L.of(context).paywallRenewalDisclosure,
+        key: const ValueKey('paywall-renewal-disclosure'),
+        style: AppType.micro(color: AppAccessibility.textSecondary(context)),
+      ),
+    );
+  }
+}
+
+/// Terms of Use (EULA) and Privacy Policy, reachable from the paywall itself.
+class _LegalLinksRow extends StatelessWidget {
+  const _LegalLinksRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final style = AppType.subhead(
+      weight: FontWeight.w700,
+      color: AppAccessibility.textSecondary(context),
+    );
+    return Wrap(
+      alignment: WrapAlignment.center,
+      children: [
+        TextButton(
+          onPressed: () => LegalLinks.open(context, LegalDocument.terms),
+          child: Text(l.legalTermsLink, style: style),
+        ),
+        TextButton(
+          onPressed: () => LegalLinks.open(context, LegalDocument.privacy),
+          child: Text(l.legalPrivacyLink, style: style),
+        ),
+      ],
     );
   }
 }

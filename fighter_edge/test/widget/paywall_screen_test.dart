@@ -9,6 +9,8 @@ import 'package:fighter_edge/screens/paywall_screen.dart';
 import '../helpers/test_harness.dart';
 
 void main() {
+  _paywallComplianceTests();
+
   testWidgets('configured paywall renders store products and keeps server sync',
       (tester) async {
     final repo = await makeRepo(signedIn: true);
@@ -52,6 +54,58 @@ void main() {
     // The SDK result is positive, but the local auth repository remains Free;
     // only the server webhook is allowed to change the entitlement.
     expect(repo.currentUser!.isPro, isFalse);
-    expect(find.textContaining('secure account sync'), findsOneWidget);
+    final syncNotice = find.textContaining('secure account sync');
+    await tester.scrollUntilVisible(syncNotice, -200,
+        scrollable: find.byType(Scrollable).first);
+    expect(syncNotice, findsOneWidget);
+  });
+}
+
+void _paywallComplianceTests() {
+  testWidgets('store plans carry the auto-renewal disclosure (M-1)',
+      (tester) async {
+    final repo = await makeRepo(signedIn: true);
+    await tester.pumpWidget(wrapApp(
+      const PaywallScreen(),
+      repo: repo,
+      billingGateway: FakeBillingGateway(),
+    ));
+    await tester.pumpAndSettle();
+
+    final disclosure = find.byKey(const ValueKey('paywall-renewal-disclosure'));
+    await tester.scrollUntilVisible(disclosure, 200,
+        scrollable: find.byType(Scrollable).first);
+    expect(find.textContaining('renew automatically'), findsOneWidget);
+    expect(find.textContaining('24 hours before the end'), findsOneWidget);
+  });
+
+  testWidgets('without store plans there is no renewal disclosure',
+      (tester) async {
+    final repo = await makeRepo(signedIn: true);
+    await tester.pumpWidget(wrapApp(const PaywallScreen(), repo: repo));
+    await tester.pumpAndSettle();
+    expect(
+        find.byKey(const ValueKey('paywall-renewal-disclosure')), findsNothing);
+  });
+
+  testWidgets('Terms and Privacy are reachable from the paywall',
+      (tester) async {
+    final repo = await makeRepo(signedIn: true);
+    await tester.pumpWidget(wrapApp(
+      const PaywallScreen(),
+      repo: repo,
+      billingGateway: FakeBillingGateway(),
+    ));
+    await tester.pumpAndSettle();
+
+    final terms = find.text('Terms of Use');
+    await tester.scrollUntilVisible(terms, 200,
+        scrollable: find.byType(Scrollable).first);
+    expect(find.text('Privacy Policy'), findsOneWidget);
+
+    // No TERMS_URL in tests: the in-app document opens instead.
+    await tester.tap(terms);
+    await tester.pumpAndSettle();
+    expect(find.text('TERMS OF SERVICE'), findsOneWidget);
   });
 }

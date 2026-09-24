@@ -20,6 +20,7 @@ import '../widgets/stat_card.dart';
 import 'change_password_sheet.dart';
 import 'legal_screen.dart';
 import 'paywall_screen.dart';
+import '../legal/legal_links.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -250,11 +251,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _openLegal(BuildContext context, LegalDocument doc) {
-    AppNavigation.push(
-      context,
-      AppRoutes.legal(doc),
-      fallbackBuilder: (_) => LegalScreen(document: doc),
-    );
+    LegalLinks.open(context, doc);
   }
 
   void _showInfo(BuildContext context, String title, String message) {

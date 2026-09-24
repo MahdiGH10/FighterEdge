@@ -181,6 +181,10 @@
   "paywallWaitlistJoined": "You're on the list",
   "paywallWaitlistThanks": "Noted. Pro will appear here when it opens, with the price shown before any charge.",
   "paywallWaitlistBody": "Pro can't be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.",
+  "paywallRenewalDisclosure": "Subscriptions renew automatically at the price and period shown above unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple ID or Google Play account when you confirm the purchase. You can manage or cancel your subscription at any time in your store account settings.",
+  "legalTermsLink": "Terms of Use",
+  "legalPrivacyLink": "Privacy Policy",
+  "legalOpenPublished": "Open the published version",
 
   "trainTabReaction": "Reaction",
   "reactionTitle": "Reaction Drill",

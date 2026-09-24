@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../auth/password_policy.dart';
 import '../../controllers/auth_controller.dart';
-import '../../routing/app_navigation.dart';
 import '../../routing/app_router.dart';
 import '../../theme/app_accessibility.dart';
 import '../../theme/app_colors.dart';
@@ -17,6 +16,7 @@ import '../../widgets/password_strength_meter.dart';
 import '../../widgets/primary_button.dart';
 import '../legal_screen.dart';
 import 'auth_widgets.dart';
+import '../../legal/legal_links.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -105,11 +105,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _openLegal(LegalDocument doc) {
-    AppNavigation.push(
-      context,
-      AppRoutes.legal(doc),
-      fallbackBuilder: (_) => LegalScreen(document: doc),
-    );
+    LegalLinks.open(context, doc);
   }
 
   @override

@@ -437,6 +437,19 @@ class LDe extends L {
       'Pro kann in dieser Version noch nicht gekauft werden. Tippe unten, und dieses Gerät merkt sich deine Anfrage. Der Store-Preis wird immer vor jeder Zahlung angezeigt.';
 
   @override
+  String get paywallRenewalDisclosure =>
+      'Abonnements verlängern sich automatisch zum oben angezeigten Preis und Zeitraum, sofern sie nicht mindestens 24 Stunden vor Ende des laufenden Zeitraums gekündigt werden. Die Zahlung wird bei Bestätigung des Kaufs über deine Apple-ID bzw. dein Google-Play-Konto abgerechnet. Du kannst dein Abo jederzeit in den Einstellungen deines Store-Kontos verwalten oder kündigen.';
+
+  @override
+  String get legalTermsLink => 'Nutzungsbedingungen';
+
+  @override
+  String get legalPrivacyLink => 'Datenschutzerklärung';
+
+  @override
+  String get legalOpenPublished => 'Veröffentlichte Fassung öffnen';
+
+  @override
   String get trainTabReaction => 'Reaktion';
 
   @override

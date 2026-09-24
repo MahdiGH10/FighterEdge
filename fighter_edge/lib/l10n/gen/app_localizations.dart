@@ -847,6 +847,30 @@ abstract class L {
   /// **'Pro can\'t be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.'**
   String get paywallWaitlistBody;
 
+  /// No description provided for @paywallRenewalDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions renew automatically at the price and period shown above unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple ID or Google Play account when you confirm the purchase. You can manage or cancel your subscription at any time in your store account settings.'**
+  String get paywallRenewalDisclosure;
+
+  /// No description provided for @legalTermsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get legalTermsLink;
+
+  /// No description provided for @legalPrivacyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get legalPrivacyLink;
+
+  /// No description provided for @legalOpenPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the published version'**
+  String get legalOpenPublished;
+
   /// No description provided for @trainTabReaction.
   ///
   /// In en, this message translates to:

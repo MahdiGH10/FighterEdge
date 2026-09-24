@@ -434,6 +434,19 @@ class LEn extends L {
       'Pro can\'t be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.';
 
   @override
+  String get paywallRenewalDisclosure =>
+      'Subscriptions renew automatically at the price and period shown above unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple ID or Google Play account when you confirm the purchase. You can manage or cancel your subscription at any time in your store account settings.';
+
+  @override
+  String get legalTermsLink => 'Terms of Use';
+
+  @override
+  String get legalPrivacyLink => 'Privacy Policy';
+
+  @override
+  String get legalOpenPublished => 'Open the published version';
+
+  @override
   String get trainTabReaction => 'Reaction';
 
   @override

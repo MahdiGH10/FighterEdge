@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/gen/app_localizations.dart';
+import '../legal/legal_links.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/primary_button.dart';
 
 /// The legal documents the app links to. The slug is the route segment.
 enum LegalDocument {
@@ -53,6 +56,15 @@ class LegalScreen extends StatelessWidget {
             'replace a coach, doctor, or licensed nutrition professional.',
             style: AppType.callout(color: AppColors.textSecondary),
           ),
+          if (LegalLinks.hostedUrl(document) != null) ...[
+            const SizedBox(height: Insets.lg),
+            GhostButton(
+              L.of(context).legalOpenPublished,
+              icon: Icons.open_in_new,
+              expand: true,
+              onPressed: () => LegalLinks.open(context, document),
+            ),
+          ],
         ],
       ),
     );
