@@ -79,16 +79,24 @@ android {
                 )
                 signingConfigs.getByName("debug")
             }
-            // Code and resource shrinking (audit R-11). The Crashlytics
-            // Gradle plugin uploads this build's mapping file automatically,
-            // so shrunk stack traces still decode to real names in the
-            // dashboard.
+            // Code and resource shrinking (audit R-11).
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // The Crashlytics Gradle plugin's own mapping upload fails on
+            // this project's Gradle 9.1 (`uploadCrashlyticsMappingFileRelease`
+            // throws `groovy/util/XmlSlurper` — a class the plugin's bundled
+            // Groovy usage expects that Gradle 9's newer Groovy no longer
+            // provides at that path). Crash *reporting* is unaffected: it's
+            // the Firebase SDK's own runtime code, not this Gradle plugin.
+            // Turn this back on once a Crashlytics Gradle plugin version
+            // confirmed compatible with Gradle 9 is available.
+            firebaseCrashlytics {
+                mappingFileUploadEnabled = false
+            }
         }
     }
 }

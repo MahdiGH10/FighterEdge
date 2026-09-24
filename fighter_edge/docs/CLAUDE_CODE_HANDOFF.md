@@ -194,6 +194,23 @@ caveat as slice 2's minification change.
 verify everything end-to-end, update the handoff/AUDIT one more time if
 CI surfaces anything, and get the PR to green.
 
+## Phase 1, slice 6: fix a real CI failure — Crashlytics plugin vs. Gradle 9 (2026-09-24, PR after slice 5)
+
+CI (not this sandbox — see slice 2 and 5's caveats) caught a genuine
+incompatibility: the Crashlytics Gradle plugin (`2.8.1`) applies fine,
+but its `uploadCrashlyticsMappingFileRelease` task throws
+`groovy/util/XmlSlurper` on this project's Gradle 9.1 — the plugin's
+Groovy usage expects a class Gradle 9's newer bundled Groovy no longer
+provides at that path. `android/app/build.gradle.kts`'s `release` build
+type now sets `firebaseCrashlytics { mappingFileUploadEnabled = false }`,
+the documented way to skip exactly that task. Everything else slice 2
+added (minification, resource shrinking, the 16 KB check, the AD_ID
+removal) is unaffected — the rest of that release build genuinely
+succeeded before this task ran. Crash *reporting* itself is the Firebase
+SDK's runtime code, independent of this Gradle plugin, so it still
+works; only automatic ProGuard mapping upload is off until a
+Gradle-9-compatible plugin version is confirmed.
+
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 
 PR #7 is merged (`96f96c8`). The owner approved the product plan in
