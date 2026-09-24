@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy | Fighter Edge</title>
+  <link rel="stylesheet" href="/legal.css">
+</head>
+<body>
+<main>
+<header>
+  <a class="lang" href="/de/datenschutz" hreflang="de" lang="de">Deutsch</a>
+  <h1>Privacy Policy</h1>
+  <p>Fighter Edge mobile app. Version 1.0, effective <mark class="todo">TODO(owner): publication date</mark>.</p>
+</header>
+
+<div class="summary">
+  <p><strong>In short.</strong> We use your data to run your account, calculate your
+  nutrition targets, and track your training, weight, and food. Health data is
+  only used for these features. We don't sell your data or show ads. Usage
+  analytics and crash reports are only sent if you allow them, and you can
+  change that at any time in <em>Settings &gt; Privacy</em>. The optional AI coach
+  sends a summary of your nutrition data (never your name or email) to an AI
+  provider in the USA. You can delete your account and all app data from within
+  the app.</p>
+</div>
+
+<h2>1. Who is responsible</h2>
+<p>The controller responsible for processing your personal data under the EU
+General Data Protection Regulation (GDPR) is:</p>
+<p><mark class="todo">TODO(owner): full name or company name, legal form</mark><br>
+<mark class="todo">TODO(owner): postal address</mark><br>
+Email: <mark class="todo">TODO(owner): privacy contact email, e.g. privacy@your-domain</mark></p>
+<p><mark class="todo">TODO(owner): If the controller is not established in the EU, name
+the EU representative under Art. 27 GDPR here. If you have appointed a data
+protection officer, add their contact details. Otherwise delete this note.</mark></p>
+
+<h2>2. What we process, why, and on what legal basis</h2>
+
+<h3>2.1 Your account</h3>
+<p>Email address, display name, password (processed by Firebase Authentication;
+we never see your password in plain text), whether your email is verified, and
+when the account was created. If you sign in with Google (or Apple), we receive
+your email address and name from that provider. A unique account ID is created
+for you.</p>
+<p><em>Purpose:</em> to create and secure your account and keep your data
+available across devices. <em>Legal basis:</em> performance of our contract with
+you (Art. 6(1)(b) GDPR).</p>
+
+<h3>2.2 Health, body, and fitness data</h3>
+<p>If you use these features, we store:</p>
+<ul>
+  <li><strong>Setup and nutrition profile:</strong> goal, experience level,
+  training days per week, age, height, current and target weight, body-fat
+  percentage (optional), the energy-equation profile you choose (which
+  corresponds to biological sex), activity level, goal pace, diet type,
+  allergies and intolerances, disliked foods, meals per day, budget and cooking
+  time preferences, and the safety answers you give during setup.</li>
+  <li><strong>Calculated targets:</strong> your daily calorie and macronutrient
+  targets.</li>
+  <li><strong>Logs:</strong> weight entries; foods you log (name, portion,
+  calories, protein, carbohydrates, fat, time); training sessions, timer
+  workouts and reaction drills (date, duration, perceived effort, notes);
+  drill progress.</li>
+</ul>
+<p>Some of this is health data (special-category data under Art. 9 GDPR).
+<em>Purpose:</em> to calculate your targets, show your progress, and give you
+guidance. <em>Legal basis:</em> your explicit consent (Art. 9(2)(a) and
+Art. 6(1)(a) GDPR), which you give before you enter this data. You can withdraw
+consent at any time by deleting the data or your account. Withdrawal does not
+affect processing that took place before it.</p>
+<p><mark class="todo">TODO(owner): the app must ask for this explicit consent before
+health data is entered (e.g. a consent step at the start of onboarding). Until
+that step ships, this section does not match the app. See the handoff notes.</mark></p>
+
+<h3>2.3 AI coach (Pro, optional)</h3>
+<p>If you use the AI Fighter Brief or chat, our server (Google Cloud Functions,
+USA) sends the following to OpenRouter, Inc. (USA), which forwards it to the
+AI model provider it selects:</p>
+<ul>
+  <li>your calculated targets and the day's food-log summary,</li>
+  <li>your diet type, allergies, and disliked foods,</li>
+  <li>your chat message and up to eight previous messages in the conversation.</li>
+</ul>
+<p>Your name, email address, and account ID are <strong>not</strong> included.
+We store a daily usage counter to enforce fair-use limits. We don't store the
+AI conversation on our servers.</p>
+<p><strong>Important:</strong> some model providers, particularly those offering
+free models, may keep or use inputs according to their own terms.
+<mark class="todo">TODO(owner): keep this sentence while free models are configured.
+If you switch to providers with zero data retention, replace it with:
+"We only use providers that do not retain or train on your inputs."</mark>
+Don't enter information in the chat that you don't want to share.</p>
+<p><em>Purpose:</em> to explain your plan and answer your questions.
+<em>Legal basis:</em> your explicit consent (Art. 9(2)(a) and 6(1)(a) GDPR),
+given when you start using the AI coach. Using it is optional.
+AI answers are always checked against the numbers our app calculates. The AI
+cannot change your targets.</p>
+
+<h3>2.4 Purchases and subscriptions</h3>
+<p>Payments are processed by Apple (App Store) or Google (Google Play). We never
+receive your payment card details. RevenueCat, Inc. (USA) receives the purchase
+receipt from the store and tells our server your subscription status. We store
+your plan, the product, the store, the expiry date, and whether it will renew,
+linked to your account ID.</p>
+<p><em>Legal basis:</em> performance of the contract (Art. 6(1)(b) GDPR). We keep
+billing records where commercial and tax law requires it (Art. 6(1)(c)
+GDPR).</p>
+
+<h3>2.5 Usage analytics (only with your consent)</h3>
+<p>If you allow it, the app sends anonymous usage events to Google Analytics for
+Firebase. Examples are "paywall viewed", "onboarding step viewed", and "meal
+logged" (as a yes/no flag). The events come with device, operating system, and
+app version information and an app-instance identifier, and Google may derive
+an approximate location from your IP address. The events never contain your
+name, email, account ID, food names, or body or nutrition values. Advertising
+features are disabled.</p>
+<p><em>Legal basis:</em> your consent (Art. 6(1)(a) GDPR; § 25(1) TDDDG). The
+app asks once, and you can change your choice at any time in
+<em>Settings &gt; Privacy</em>. Nothing is collected before you decide.</p>
+
+<h3>2.6 Crash reports (only with your consent)</h3>
+<p>If you allow it, Firebase Crashlytics (Google) receives crash and error
+reports: the technical error, device model, operating system, app version, and
+an installation identifier. They contain no health data or content you
+entered. <em>Legal basis:</em> your consent (Art. 6(1)(a) GDPR; § 25(1) TDDDG),
+which you can change in <em>Settings &gt; Privacy</em>.</p>
+
+<h3>2.7 Technical data needed to run the service</h3>
+<p>When the app talks to our servers, Google (as our hosting provider)
+necessarily processes your IP address, request metadata, and security logs.
+<em>Legal basis:</em> our legitimate interest in operating a secure service
+(Art. 6(1)(f) GDPR; § 25(2) TDDDG).</p>
+
+<h3>2.8 Data that stays on your device</h3>
+<p>Some data is stored only on your phone and never sent to us: language,
+units and timer settings, your privacy choices, recently used and saved foods,
+streak-freeze state, onboarding progress, and scheduled training reminders
+(notifications are created by your phone). Voice cues in drills and the round
+timer use your device's speech engine. This data isn't included in phone
+backups.</p>
+
+<h3>2.9 When you contact us</h3>
+<p>If you email us, we use your message and address to answer you
+(Art. 6(1)(b) or (f) GDPR) and delete them when the matter is closed, unless
+we have to keep them by law.</p>
+
+<h2>3. Who receives your data</h2>
+<table>
+  <tr><th>Recipient</th><th>Role</th><th>What</th></tr>
+  <tr><td>Google Ireland Ltd. / Google LLC (Firebase: Authentication, Cloud Firestore, Cloud Functions, Hosting, Analytics, Crashlytics)</td><td>Processor</td><td>Account, app data, technical data; analytics and crash data only with consent</td></tr>
+  <tr><td>RevenueCat, Inc.</td><td>Processor</td><td>Account ID, purchase receipts, subscription status</td></tr>
+  <tr><td>OpenRouter, Inc. and the AI model provider it routes to</td><td>Processor / sub-processor</td><td>AI coach input described in 2.3, only when you use it</td></tr>
+  <tr><td>Apple Inc. / Google LLC as app stores</td><td>Independent controllers</td><td>Payments, under their own privacy policies</td></tr>
+</table>
+<p>We don't sell your personal data, and we don't use it for advertising.</p>
+
+<h2>4. Transfers outside the EU</h2>
+<p>Some recipients process data in the USA. Our AI requests and subscription
+webhooks run on Cloud Functions in the USA (region us-central1). Transfers rely
+on the EU–US Data Privacy Framework where the recipient is certified, and
+otherwise on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR).
+Your app database is stored in
+<mark class="todo">TODO(owner): Firestore location from the Firebase console, e.g. "the EU (eur3)"</mark>.
+<mark class="todo">TODO(owner): confirm the transfer mechanism for RevenueCat and
+OpenRouter and sign each provider's data processing agreement.</mark></p>
+
+<h2>5. How long we keep data</h2>
+<ul>
+  <li><strong>Account and app data:</strong> until you delete it or your account.
+  <em>Settings &gt; Delete account</em> immediately deletes your account and all
+  data stored under it on our database. Copies in Google's backups are
+  overwritten on Google's backup schedule.</li>
+  <li><strong>Billing records:</strong> a minimal record of subscription events
+  (event ID, type, date, account ID) is kept for
+  <mark class="todo">TODO(owner): period, e.g. 10 years under German tax law, or shorter if none applies</mark>.</li>
+  <li><strong>RevenueCat:</strong> subscription history is kept by RevenueCat for
+  the same period. <mark class="todo">TODO(owner): delete or anonymise the RevenueCat
+  customer when an account is deleted (audit D-9).</mark></li>
+  <li><strong>Analytics:</strong> event data is kept for
+  <mark class="todo">TODO(owner): set to 2 months in Firebase Analytics &gt; Data retention</mark>.</li>
+  <li><strong>Crash reports:</strong> 90 days.</li>
+</ul>
+
+<h2>6. Your rights</h2>
+<p>Under the GDPR you have the right to access your data (Art. 15), to have it
+corrected (Art. 16) or erased (Art. 17), to restrict processing (Art. 18), to
+data portability (Art. 20), and to object to processing based on legitimate
+interests (Art. 21). You can withdraw consent at any time with effect for the
+future (Art. 7(3)). To exercise these rights, email us at the address above.
+You can also delete your account yourself in the app.</p>
+<p>You have the right to lodge a complaint with a data protection supervisory
+authority, in particular in your country of residence.
+<mark class="todo">TODO(owner): name the authority responsible for you, e.g. the data protection authority of your German state.</mark></p>
+
+<h2>7. Is providing data required?</h2>
+<p>An email address is required to create an account. Health and fitness data
+is optional, but the nutrition and tracking features can't work without it.
+Analytics, crash reports, and the AI coach are fully optional.</p>
+
+<h2>8. Automated calculations</h2>
+<p>Your calorie and macronutrient targets are calculated automatically from
+the data you enter. They are guidance only and have no legal or similarly
+significant effect on you (Art. 22 GDPR doesn't apply). They don't replace
+advice from a doctor or dietitian.</p>
+
+<h2>9. Children</h2>
+<p>Fighter Edge is not intended for anyone under 16, and we don't knowingly
+collect data from children under 16.</p>
+
+<h2>10. Security</h2>
+<p>Data is encrypted in transit, and access rules ensure that only you can
+read your data. Your subscription status can only be changed by our server,
+never by the app. AI provider keys stay on our server.</p>
+
+<h2>11. Changes</h2>
+<p>We will update this policy when our processing changes, for example if
+advertising is ever introduced. The effective date above will change, and we
+will tell you in the app about significant changes.</p>
+
+<footer>
+  <p>Questions: <mark class="todo">TODO(owner): privacy contact email</mark> ·
+  <a href="/terms">Terms of Use</a> · <a href="/delete-account">Delete your account</a></p>
+</footer>
+</main>
+</body>
+</html>
