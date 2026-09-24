@@ -1,5 +1,34 @@
 # Fighter Edge — Claude Code Handoff
 
+## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
+
+PR #7 is merged (`96f96c8`). The owner approved the product plan in
+`docs/PRODUCT_PLAN_20260924.md` (one daily loop, the AI features, the
+build order). This PR is step 0 of it. **Owner steps: `docs/OWNER_SETUP.md`
+section 4.**
+
+- **App Check (S-4).** `lib/security/app_check.dart`, called in `main.dart`
+  right after `Firebase.initializeApp`. Server: `enforceAppCheck:
+  ENFORCE_APP_CHECK` (`functions/src/config.ts`, a `defineBoolean` param,
+  `false` in `.env.fighter-edge-app`) on `edgeFuelAiExplain` and
+  `syncEntitlement`. `deleteAccount` deliberately has no App Check, so
+  deletion always works.
+- **Bounded facts (S-4, S-5).** `functions/src/aiFacts.ts` builds the
+  model's facts from the request: whitelisted numeric target fields, the
+  day's totals and up to 40 entries (name ≤ 60 chars, macros, consumed),
+  bounded preferences; 12 KB cap. The fabricated-number check now runs
+  against these trimmed facts.
+- **Limits and cost (D-8).** `quota.ts`: per-task daily limits plus a total.
+  `usage.ts`: OpenRouter usage (tokens, cost via `usage.include`) summed
+  per UTC day in `aiStats/{date}`; `dailyBudgetReached` pauses the AI at
+  `config/edgeFuelAi.dailyTokenBudget` (default 2M tokens).
+  `readAiConfig` replaced `isAiEnabled`.
+- **No-retention routing (S-5, R-10).** `OPENROUTER_DATA_COLLECTION=deny`
+  adds `provider.data_collection: "deny"`. Leave it off while the chain is
+  free models.
+
+**Next plan step:** 1, a weekly streak and a "one next action" Home.
+
 ## Phase 2, slice 2: explicit consent and complete deletion (2026-09-24, PR after #6)
 
 PR #6 (slice 1) is merged (`924fc8e`). This slice makes the app do what the

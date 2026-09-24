@@ -7,7 +7,9 @@ import { HttpsError, onCall, onRequest } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as logger from "firebase-functions/logger";
 
+import { buildAiFacts } from "./aiFacts";
 import { hasActivePro, RevenueCatEvent } from "./billing";
+import { ENFORCE_APP_CHECK } from "./config";
 import { hasConsent } from "./consents";
 import {
   processRevenueCatEvent,
@@ -16,10 +18,11 @@ import {
   usableApiKey,
 } from "./entitlements";
 import { callOpenRouter, modelChain, OpenRouterError } from "./openrouter";
-import { consumeQuota, isAiEnabled, refundQuota } from "./quota";
+import { consumeQuota, readAiConfig, refundQuota } from "./quota";
 import { REVENUECAT_API_KEY } from "./secrets";
 import { SYSTEM_PROMPT, SYSTEM_PROMPT_VERSION } from "./systemPrompt";
 import { AiRequest, ChatTurn, AiTaskType } from "./types";
+import { addUsage, dailyBudgetReached, NO_USAGE, recordUsage } from "./usage";
 import { parseModelJson, validateResponse } from "./validate";
 
 initializeApp();
@@ -71,12 +74,14 @@ function isValidHistory(value: unknown): value is ChatTurn[] {
  * auth -> quota -> request validation -> minimum-necessary context -> model
  * -> strict schema + safety validation -> typed result.
  *
- * Fast-MVP scope (explicit, user-approved deviation from the full spec):
- * App Check is still a deployment follow-up. Entitlement checks and the
- * server-owned Pro gate are enforced here before quota is consumed.
+ * Budget protection (audit S-4, D-8): App Check once `ENFORCE_APP_CHECK`
+ * is on, bounded request facts (aiFacts.ts), per-task daily limits
+ * (quota.ts), and a daily token budget across all accounts (usage.ts).
+ * Entitlement and consent are checked against the stored profile before
+ * quota is consumed.
  */
 export const edgeFuelAiExplain = onCall(
-  { secrets: [OPENROUTER_API_KEY], cors: true },
+  { secrets: [OPENROUTER_API_KEY], cors: true, enforceAppCheck: ENFORCE_APP_CHECK },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -97,7 +102,8 @@ export const edgeFuelAiExplain = onCall(
     const uid = request.auth.uid;
     const db = getFirestore();
 
-    if (!(await isAiEnabled(db))) {
+    const aiConfig = await readAiConfig(db);
+    if (!aiConfig.enabled) {
       return { status: "unavailable" as const };
     }
 
@@ -105,9 +111,7 @@ export const edgeFuelAiExplain = onCall(
     if (!data || !data.task || !ALLOWED_TASKS.includes(data.task)) {
       throw new HttpsError("invalid-argument", "Unsupported or missing task.");
     }
-    if (!data.target || typeof data.target !== "object") {
-      throw new HttpsError("invalid-argument", "Missing target facts.");
-    }
+    const task: AiTaskType = data.task;
     if (data.task === "chat") {
       if (
         typeof data.userMessage !== "string" ||
@@ -119,6 +123,12 @@ export const edgeFuelAiExplain = onCall(
       if (data.history !== undefined && !isValidHistory(data.history)) {
         throw new HttpsError("invalid-argument", "Invalid conversation history.");
       }
+    }
+    // Only the fields the model needs, bounded in size (audit S-4, S-5).
+    const factsResult = buildAiFacts(data);
+    if (!factsResult.ok) {
+      logger.info("ai_request_blocked", { task, reason: factsResult.reason });
+      throw new HttpsError("invalid-argument", "Invalid plan facts.");
     }
 
     // Client-side gates are only a UX optimization. Every task is authorized
@@ -140,7 +150,14 @@ export const edgeFuelAiExplain = onCall(
       return { status: "entitlementRequired" as const };
     }
 
-    const quota = await consumeQuota(db, uid, new Date());
+    // Across all accounts: pauses the AI for the rest of the UTC day if
+    // something spends far more than expected.
+    if (await dailyBudgetReached(db, new Date(), aiConfig.dailyTokenBudget)) {
+      logger.warn("ai_daily_budget_reached", { task });
+      return { status: "unavailable" as const };
+    }
+
+    const quota = await consumeQuota(db, uid, new Date(), task);
     if (!quota.allowed) {
       logger.info("ai_request_blocked", {
         task: data.task,
@@ -158,11 +175,23 @@ export const edgeFuelAiExplain = onCall(
     // release that reservation: athletes should never lose a turn because our
     // provider or schema gate failed.
     let quotaReserved = true;
+    let usage = NO_USAGE;
+    let modelCalls = 0;
+    // Every model call costs tokens, answered or not.
+    const recordUsageSafely = async (answered: boolean) => {
+      if (modelCalls === 0) return;
+      try {
+        await recordUsage(db, new Date(), { task, modelCalls, usage, answered });
+      } catch (error) {
+        logger.error("ai_usage_record_failed", { task, error: String(error) });
+      }
+    };
     const unavailableAfterRefund = async (reason: string) => {
+      await recordUsageSafely(false);
       if (quotaReserved) {
         quotaReserved = false;
         try {
-          const refunded = await refundQuota(db, uid, new Date());
+          const refunded = await refundQuota(db, uid, new Date(), task);
           logger.info("ai_quota_refunded", {
             task: data.task,
             reason,
@@ -186,12 +215,7 @@ export const edgeFuelAiExplain = onCall(
     // below only allows numbers that appear here, so a number the athlete
     // typed (unverified, possibly wrong) can never be laundered into
     // something the model is allowed to repeat as if it were calculated.
-    const suppliedFacts = {
-      task: data.task,
-      target: data.target,
-      day: data.day ?? null,
-      foodPreferences: data.foodPreferences ?? null,
-    };
+    const suppliedFacts = { task, ...factsResult.facts };
     const suppliedFactsJson = JSON.stringify(suppliedFacts);
 
     const responseShape =
@@ -268,12 +292,15 @@ export const edgeFuelAiExplain = onCall(
       // chain; this does not consume a validation attempt.
       while (modelIndex < models.length && rawContent === null) {
         try {
-          rawContent = await callOpenRouter({
+          const result = await callOpenRouter({
             apiKey: OPENROUTER_API_KEY.value(),
             model: models[modelIndex],
             systemPrompt: SYSTEM_PROMPT,
             userContent,
           });
+          rawContent = result.content;
+          usage = addUsage(usage, result.usage);
+          modelCalls++;
         } catch (error) {
           // Never expose raw provider errors to the client (master prompt
           // §13.3) — and never log the model's own text either.
@@ -313,9 +340,13 @@ export const edgeFuelAiExplain = onCall(
       return unavailableAfterRefund("response_rejected");
     }
 
+    await recordUsageSafely(true);
     logger.info("ai_request_completed", {
       task: data.task,
       status: "success",
+      modelCalls,
+      promptTokens: usage.promptTokens,
+      completionTokens: usage.completionTokens,
       requiresProfessionalReview:
         (parsed as { requiresProfessionalReview?: unknown })
           .requiresProfessionalReview === true,
@@ -391,7 +422,7 @@ export const revenueCatWebhook = onRequest(
  * restore onto a different account works (audit M-3, M-5).
  */
 export const syncEntitlement = onCall(
-  { secrets: [REVENUECAT_API_KEY], cors: true },
+  { secrets: [REVENUECAT_API_KEY], cors: true, enforceAppCheck: ENFORCE_APP_CHECK },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");

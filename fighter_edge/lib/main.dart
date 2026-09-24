@@ -32,6 +32,7 @@ import 'observability/error_reporter.dart';
 import 'observability/telemetry.dart';
 import 'privacy/consent.dart';
 import 'routing/app_router.dart';
+import 'security/app_check.dart';
 import 'state/app_state.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'state/first_run_controller.dart';
@@ -93,6 +94,8 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
 
 Future<AppDependencies> _initializeProductionDependencies() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Before the first callable request, so every AI call carries a token.
+  await activateAppCheck();
   final crashlyticsSupported = !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS ||
