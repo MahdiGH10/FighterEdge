@@ -19,16 +19,44 @@ import 'auth_repository.dart';
 ///   reads are best-effort: if the database isn't set up yet, auth still works
 ///   and the user defaults to the free plan.
 class FirebaseAuthRepository implements AuthRepository {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  /// The Firebase singletons in production. Tests pass in-memory doubles, so
+  /// the adapter itself is exercised rather than only the controllers above
+  /// it.
+  FirebaseAuthRepository({
+    FirebaseAuth? auth,
+    FirebaseFirestore? firestore,
+    bool? appleSignInEnabled,
+    TargetPlatform? platform,
+    bool? isWeb,
+  })  : _auth = auth ?? FirebaseAuth.instance,
+        _db = firestore ?? FirebaseFirestore.instance,
+        _appleSignInEnabled = appleSignInEnabled ??
+            const bool.fromEnvironment('ENABLE_APPLE_SIGN_IN'),
+        _platform = platform ?? defaultTargetPlatform,
+        _isWeb = isWeb ?? kIsWeb;
+
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _db;
+
+  /// Sign in with Apple needs an Apple Developer service ID and the Firebase
+  /// Apple provider, which are account setup, not code. Until a build is
+  /// made with `--dart-define=ENABLE_APPLE_SIGN_IN=true` it stays hidden.
+  final bool _appleSignInEnabled;
+  final TargetPlatform _platform;
+  final bool _isWeb;
 
   AppUser? _cached;
 
+  bool get _isIos => !_isWeb && _platform == TargetPlatform.iOS;
+
+  /// App Review Guideline 4.8: an iOS app that offers a third-party login must
+  /// also offer Sign in with Apple. Google is therefore shown on iOS only
+  /// when Apple is available alongside it.
   @override
-  bool get supportsGoogle => true;
+  bool get supportsGoogle => !_isIos || supportsApple;
 
   @override
-  bool get supportsApple => false;
+  bool get supportsApple => _appleSignInEnabled;
 
   @override
   bool get supportsMagicLink => false;
@@ -86,7 +114,11 @@ class FirebaseAuthRepository implements AuthRepository {
         }, SetOptions(merge: true));
       }
     } catch (e) {
-      debugPrint('[auth] Firestore unavailable, defaulting to free plan: $e');
+      // Debug only: Firestore errors can name the `users/{uid}` path, and
+      // debugPrint is not stripped from release builds.
+      if (kDebugMode) {
+        debugPrint('[auth] Firestore unavailable, defaulting to free plan: $e');
+      }
     }
     final appUser = AppUser(
       id: user.uid,
@@ -229,9 +261,12 @@ class FirebaseAuthRepository implements AuthRepository {
 
   Future<AppUser> _signInWithProvider(AuthProvider provider) async {
     try {
-      final cred = kIsWeb
+      // Passed through as-is. `GoogleAuthProvider` is an `AuthProvider` but
+      // not an `OAuthProvider`; the cast that used to sit here threw a
+      // TypeError on every mobile Google sign-in (audit S-2).
+      final cred = _isWeb
           ? await _auth.signInWithPopup(provider)
-          : await _auth.signInWithProvider(provider as OAuthProvider);
+          : await _auth.signInWithProvider(provider);
       return await _hydrate(cred.user!);
     } on FirebaseAuthException catch (e) {
       throw AuthException(e.code, _message(e));
