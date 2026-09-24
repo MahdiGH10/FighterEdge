@@ -208,6 +208,13 @@ jobs:
           flutter build apk --release --no-pub
           --obfuscate --split-debug-info=build/symbols/android
 
+      - name: Check native libraries are 16 KB page-aligned
+        # Play requires this for every app update from November 2025; a
+        # misaligned .so fails Play's pre-launch checks outright.
+        run: |
+          zipalign="$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name zipalign | sort -V | tail -1)"
+          "$zipalign" -c -P 16 -v 4 build/app/outputs/flutter-apk/app-release.apk
+
       - name: Upload release APK and symbols
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

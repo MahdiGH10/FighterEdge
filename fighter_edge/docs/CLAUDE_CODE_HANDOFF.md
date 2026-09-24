@@ -36,9 +36,44 @@ Tests: 3 new in `test/unit/app_state_test.dart`, 1 in
 `test/widget/verify_email_test.dart` (639 total, up from 634). No new owner
 steps.
 
-**Next in Phase 1:** Android release setup (ProGuard, Crashlytics, the
-notification-icon `keep.xml`), list performance and query limits, paywall
-error handling, then reviving `integration_test/app_flow_test.dart`.
+## Phase 1, slice 2: Android release setup (2026-09-24, PR after slice 1)
+
+Audit R-11, plus the ad-ID permission and a 16 KB page-size CI check.
+
+- **Minify and shrink resources are now on for release** (`android/app/build.gradle.kts`
+  `buildTypes.release`: `isMinifyEnabled`/`isShrinkResources = true`, plus
+  `proguard-rules.pro`). This is the first release build with R8 on —
+  **not yet verified on a real device or in the Play console.** If a
+  release build ever throws where debug does not, that's a missing keep
+  rule; add it narrowly to `proguard-rules.pro` rather than turning
+  shrinking off.
+- **`res/raw/keep.xml`** protects `@drawable/ic_notification`: it's looked
+  up by string name (`flutter_local_notifications`), which the resource
+  shrinker can't see.
+- **Crashlytics Gradle plugin** (`com.google.firebase.crashlytics` `2.8.1`,
+  read from the `firebase_crashlytics` 5.4.0 package's own FlutterFire
+  template, matching the project's `google-services` version) is applied
+  in `android/app/build.gradle.kts` and declared in
+  `android/settings.gradle.kts`. It uploads the ProGuard mapping file on
+  every release build automatically — no owner step, since it uses the
+  `google-services.json` already committed.
+- **AD_ID permission removed explicitly** in `AndroidManifest.xml`
+  (`tools:node="remove"`), so the Play Data safety form never has to
+  answer for advertising-ID use that doesn't happen.
+- **CI 16 KB page-size check**: a new step in `.github/workflows/flutter-ci.yml`'s
+  `android-release` job runs `zipalign -c -P 16 -v 4` on the built APK.
+
+**Verify once CI is green:** all six checks pass with minification on
+(this is the real risk in this slice — I could not run a full Android
+Gradle build locally in this sandbox: no network path to Google's Maven
+repo, and the system Gradle doesn't match this project's Gradle 9.1
+requirement). If the Android job fails, the cause is almost certainly
+either a stripped class (add a `-keep` rule) or the Crashlytics mapping
+upload (if so, set `firebaseCrashlytics { mappingFileUploadEnabled = false }`
+in the `release` block as a stopgap and file it as a follow-up).
+
+**Next in Phase 1:** list performance and query limits, paywall error
+handling, then reviving `integration_test/app_flow_test.dart`.
 
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 
