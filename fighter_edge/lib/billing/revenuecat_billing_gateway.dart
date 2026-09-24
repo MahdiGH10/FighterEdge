@@ -6,6 +6,38 @@ import 'package:purchases_flutter/purchases_flutter.dart' as rc;
 
 import 'billing_gateway.dart';
 
+/// Maps a RevenueCat error into user-facing copy (audit M-8). Only
+/// `purchaseCancelledError` needs a distinct code today (the paywall treats
+/// a cancel as "say nothing"); everything else keeps the raw platform code
+/// but gets a message worth showing someone, with a retry or restore
+/// suggestion where one applies, instead of the developer-facing platform
+/// string. A top-level function, not a gateway method, so the mapping is
+/// testable without mocking the `purchases_flutter` platform channel —
+/// `PurchasesErrorHelper.getErrorCode` only parses `error.code`.
+BillingException translateRevenueCatError(
+  PlatformException error, {
+  required String fallback,
+}) {
+  final code = rc.PurchasesErrorHelper.getErrorCode(error);
+  if (code == rc.PurchasesErrorCode.purchaseCancelledError) {
+    return const BillingException('cancelled', 'Purchase cancelled.');
+  }
+  final message = switch (code) {
+    rc.PurchasesErrorCode.paymentPendingError =>
+      "Your payment needs approval (parental controls, bank authorization) "
+          "before it can complete. We'll unlock Pro once it clears.",
+    rc.PurchasesErrorCode.productAlreadyPurchasedError =>
+      'You already own this subscription. Try Restore Purchases instead.',
+    rc.PurchasesErrorCode.storeProblemError =>
+      'The store had a problem completing this. Please try again in a moment.',
+    rc.PurchasesErrorCode.networkError ||
+    rc.PurchasesErrorCode.offlineConnectionError =>
+      'No connection to the store. Check your connection and try again.',
+    _ => null,
+  };
+  return BillingException(code.name, message ?? fallback);
+}
+
 /// RevenueCat adapter. Public store keys are intentionally supplied through
 /// `--dart-define`; no secret or entitlement decision lives in the client.
 class RevenueCatBillingGateway implements BillingGateway {
@@ -103,12 +135,7 @@ class RevenueCatBillingGateway implements BillingGateway {
       );
       return _stateFrom(result.customerInfo);
     } on PlatformException catch (error) {
-      final code = rc.PurchasesErrorHelper.getErrorCode(error);
-      if (code == rc.PurchasesErrorCode.purchaseCancelledError) {
-        throw const BillingException('cancelled', 'Purchase cancelled.');
-      }
-      throw BillingException(
-          'purchase-failed', error.message ?? 'Purchase failed.');
+      throw translateRevenueCatError(error, fallback: 'Purchase failed.');
     }
   }
 
@@ -120,7 +147,11 @@ class RevenueCatBillingGateway implements BillingGateway {
         'Purchase restore is not active on this build yet.',
       );
     }
-    return _stateFrom(await rc.Purchases.restorePurchases());
+    try {
+      return _stateFrom(await rc.Purchases.restorePurchases());
+    } on PlatformException catch (error) {
+      throw translateRevenueCatError(error, fallback: 'Restore failed.');
+    }
   }
 
   @override
@@ -131,7 +162,19 @@ class RevenueCatBillingGateway implements BillingGateway {
 
   @override
   Future<void> logOut() async {
-    if (_configured) await rc.Purchases.logOut();
+    if (_configured) {
+      try {
+        await rc.Purchases.logOut();
+      } on PlatformException catch (error) {
+        // Two sign-out events in a row, or a session that never actually
+        // logged in to the store: RevenueCat already considers the current
+        // user anonymous, so there is nothing left to undo (audit M-8).
+        final code = rc.PurchasesErrorHelper.getErrorCode(error);
+        if (code != rc.PurchasesErrorCode.logOutWithAnonymousUserError) {
+          rethrow;
+        }
+      }
+    }
     _packages.clear();
   }
 

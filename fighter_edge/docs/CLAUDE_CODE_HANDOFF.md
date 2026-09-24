@@ -109,8 +109,43 @@ see below.
 Tests: 1 new in `test/widget/profile_identity_test.dart` (the History
 tab through the new sliver list). 640 total.
 
-**Next in Phase 1:** paywall error handling, then reviving
-`integration_test/app_flow_test.dart`.
+## Phase 1, slice 4: paywall error handling (2026-09-24, PR after slice 3)
+
+Audit M-8 and part of M-11.
+
+- **`translateRevenueCatError`** (`billing/revenuecat_billing_gateway.dart`,
+  top-level so it's unit-testable without mocking `purchases_flutter`)
+  maps `paymentPendingError`, `productAlreadyPurchasedError`,
+  `storeProblemError`, `networkError` and `offlineConnectionError` to
+  specific copy with a retry or restore suggestion. Every other code keeps
+  its name as `BillingException.code` (was a fixed `'purchase-failed'`
+  string, so reports were indistinguishable by cause).
+- **`restorePurchases()` now goes through the same mapping** — it had no
+  error translation at all before. It wasn't a crash risk in practice
+  (`AuthController.restorePurchases()`'s bare `catch (error, stack)`
+  already turns anything into a clean `AuthException` before it reaches
+  the paywall — verified by reading the call chain, not assumed), but it
+  meant a real restore failure showed the same generic "please try again"
+  regardless of cause.
+- **`logOut()`** swallows only `logOutWithAnonymousUserError` (RevenueCat's
+  error when `logOut` is called on an already-anonymous user — reachable
+  here if `authStateChanges()` ever emits two `null`s in a row, since
+  `_onUserChanged`'s dedupe guard only covers repeated *same-user* events)
+  and rethrows anything else instead of swallowing every error.
+- **`AuthController._syncBilling`'s catch-all** (M-11) now reports the
+  error instead of discarding it silently. Still no typed
+  `BillingStatus`/`EntitlementState` for the paywall to read — that's
+  M-12, deferred to the monetization phase (roadmap Phase 6).
+
+Tests: `test/unit/revenuecat_billing_gateway_test.dart` (new, 7 cases —
+the error-code mapping is pure and testable via
+`PurchasesErrorHelper.getErrorCode`, which just parses
+`PlatformException.code`, no channel mock needed), 1 new in
+`test/unit/auth_controller_test.dart`. 648 total.
+
+**Next in Phase 1:** reviving `integration_test/app_flow_test.dart` and
+wiring the CI/Play upload pieces (release.yml, 16 KB check is already in
+from slice 2).
 
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 
