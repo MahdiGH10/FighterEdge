@@ -1,10 +1,10 @@
 {
   "name": "fighter-edge-functions",
-  "description": "Backend boundary for EdgeFuel AI (master prompt \u00a713). Holds the OpenRouter key server-side; the Flutter app never calls an AI provider directly.",
+  "description": "Backend boundary for EdgeFuel AI (master prompt §13). Holds the OpenRouter key server-side; the Flutter app never calls an AI provider directly.",
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "main": "lib/index.js",
   "scripts": {
@@ -16,8 +16,8 @@
     "deploy": "firebase deploy --only functions"
   },
   "dependencies": {
-    "firebase-admin": "^13.0.0",
-    "firebase-functions": "^6.1.0"
+    "firebase-admin": "^14.5.0",
+    "firebase-functions": "^7.4.0"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.2",
