@@ -450,6 +450,40 @@ class LDe extends L {
   String get legalOpenPublished => 'Veröffentlichte Fassung öffnen';
 
   @override
+  String get consentTitle => 'Hilf uns, Fighter Edge zu verbessern';
+
+  @override
+  String get consentBody =>
+      'Mit deiner Erlaubnis erfassen wir anonyme Nutzungsereignisse und Absturzberichte. Sie enthalten nie deine Mahlzeiten, dein Gewicht, Körpermaße, Nachrichten oder deine E-Mail-Adresse. Ohne deine Erlaubnis wird nichts gesendet.';
+
+  @override
+  String get consentAllow => 'Erlauben';
+
+  @override
+  String get consentDecline => 'Nicht erlauben';
+
+  @override
+  String get consentChangeLater =>
+      'Du kannst das jederzeit in den Einstellungen ändern.';
+
+  @override
+  String get settingsSectionPrivacy => 'Datenschutz';
+
+  @override
+  String get settingsAnalytics => 'Nutzungsanalyse';
+
+  @override
+  String get settingsAnalyticsSubtitle =>
+      'Anonyme Ereignisse, die zeigen, welche Funktionen helfen. Keine Gesundheitsdaten.';
+
+  @override
+  String get settingsCrashReports => 'Absturzberichte';
+
+  @override
+  String get settingsCrashReportsSubtitle =>
+      'Fehlerdetails, mit denen wir Bugs beheben. Keine persönlichen Daten.';
+
+  @override
   String get trainTabReaction => 'Reaktion';
 
   @override

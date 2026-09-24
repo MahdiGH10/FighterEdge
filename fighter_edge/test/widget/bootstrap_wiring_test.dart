@@ -12,6 +12,7 @@ import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/notifications/reminder_gateway.dart';
 import 'package:fighter_edge/observability/error_reporter.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
+import 'package:fighter_edge/privacy/consent.dart';
 import 'package:fighter_edge/training/reaction/coach_voice.dart';
 
 import '../helpers/test_harness.dart';
@@ -53,6 +54,7 @@ void main() {
     const reporter = _MarkedReporter();
     final edgeFuelRepo = InMemoryEdgeFuelRepository();
     const aiGateway = FakeEdgeFuelAiGateway();
+    final consent = ConsentController.decided(ConsentChoices.all);
 
     final dependencies = AppDependencies(
       authRepo: await makeRepo(),
@@ -64,6 +66,7 @@ void main() {
       coachVoice: voice,
       telemetry: telemetry,
       errorReporter: reporter,
+      consent: consent,
     );
 
     await tester.pumpWidget(FighterEdgeApp.fromDependencies(dependencies));
@@ -78,5 +81,6 @@ void main() {
     expect(identical(read<ErrorReporter>(), reporter), isTrue);
     expect(identical(read<EdgeFuelRepository>(), edgeFuelRepo), isTrue);
     expect(identical(read<EdgeFuelAiGateway>(), aiGateway), isTrue);
+    expect(identical(read<ConsentController>(), consent), isTrue);
   });
 }

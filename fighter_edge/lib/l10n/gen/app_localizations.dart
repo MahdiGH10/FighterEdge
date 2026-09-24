@@ -871,6 +871,66 @@ abstract class L {
   /// **'Open the published version'**
   String get legalOpenPublished;
 
+  /// No description provided for @consentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help improve Fighter Edge'**
+  String get consentTitle;
+
+  /// No description provided for @consentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'With your permission we collect anonymous usage events and crash reports. They never include your meals, weight, measurements, messages or email address. Nothing is sent unless you allow it.'**
+  String get consentBody;
+
+  /// No description provided for @consentAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get consentAllow;
+
+  /// No description provided for @consentDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t allow'**
+  String get consentDecline;
+
+  /// No description provided for @consentChangeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this any time in Settings.'**
+  String get consentChangeLater;
+
+  /// No description provided for @settingsSectionPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get settingsSectionPrivacy;
+
+  /// No description provided for @settingsAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage analytics'**
+  String get settingsAnalytics;
+
+  /// No description provided for @settingsAnalyticsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous events that show which features help. No health data.'**
+  String get settingsAnalyticsSubtitle;
+
+  /// No description provided for @settingsCrashReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Crash reports'**
+  String get settingsCrashReports;
+
+  /// No description provided for @settingsCrashReportsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error details that help us fix bugs. No personal data.'**
+  String get settingsCrashReportsSubtitle;
+
   /// No description provided for @trainTabReaction.
   ///
   /// In en, this message translates to:

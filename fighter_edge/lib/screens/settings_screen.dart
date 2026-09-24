@@ -21,6 +21,7 @@ import 'change_password_sheet.dart';
 import 'legal_screen.dart';
 import 'paywall_screen.dart';
 import '../legal/legal_links.dart';
+import '../privacy/consent.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -30,6 +31,7 @@ class SettingsScreen extends StatelessWidget {
     final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
     final reminders = context.watch<ReminderGateway>();
+    final consent = context.watch<ConsentController>();
     final user = auth.user;
 
     // Signing out or deleting the account makes the router take this page
@@ -159,6 +161,22 @@ class SettingsScreen extends StatelessWidget {
             onChanged: state.setSafeCutGuidance,
           ),
           const _TrustCard(),
+          const SizedBox(height: Insets.xl),
+          _SectionLabel(l.settingsSectionPrivacy),
+          _SwitchRow(
+            icon: Icons.insights_outlined,
+            title: l.settingsAnalytics,
+            subtitle: l.settingsAnalyticsSubtitle,
+            value: consent.analyticsAllowed,
+            onChanged: consent.setAnalytics,
+          ),
+          _SwitchRow(
+            icon: Icons.bug_report_outlined,
+            title: l.settingsCrashReports,
+            subtitle: l.settingsCrashReportsSubtitle,
+            value: consent.crashReportsAllowed,
+            onChanged: consent.setCrashReports,
+          ),
           const SizedBox(height: Insets.xl),
           _SectionLabel(l.settingsSectionAccount),
           _SettingsRow(

@@ -55,12 +55,14 @@ class FirebaseErrorReporter implements ErrorReporter {
 void installProductionErrorHandlers(ErrorReporter reporter) {
   if (kIsWeb) return;
 
+  // Framework errors (a layout overflow, a failed image decode) are not
+  // crashes: reporting them as fatal inflated the crash-free rate and any
+  // alerting built on it (audit S-8). Uncaught async errors stay fatal.
   FlutterError.onError = (details) {
     reporter.report(
       details.exception,
       details.stack ?? StackTrace.current,
       reason: 'flutter_error',
-      fatal: true,
     );
   };
   PlatformDispatcher.instance.onError = (error, stack) {

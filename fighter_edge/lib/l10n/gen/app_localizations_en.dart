@@ -447,6 +447,39 @@ class LEn extends L {
   String get legalOpenPublished => 'Open the published version';
 
   @override
+  String get consentTitle => 'Help improve Fighter Edge';
+
+  @override
+  String get consentBody =>
+      'With your permission we collect anonymous usage events and crash reports. They never include your meals, weight, measurements, messages or email address. Nothing is sent unless you allow it.';
+
+  @override
+  String get consentAllow => 'Allow';
+
+  @override
+  String get consentDecline => 'Don\'t allow';
+
+  @override
+  String get consentChangeLater => 'You can change this any time in Settings.';
+
+  @override
+  String get settingsSectionPrivacy => 'Privacy';
+
+  @override
+  String get settingsAnalytics => 'Usage analytics';
+
+  @override
+  String get settingsAnalyticsSubtitle =>
+      'Anonymous events that show which features help. No health data.';
+
+  @override
+  String get settingsCrashReports => 'Crash reports';
+
+  @override
+  String get settingsCrashReportsSubtitle =>
+      'Error details that help us fix bugs. No personal data.';
+
+  @override
   String get trainTabReaction => 'Reaction';
 
   @override

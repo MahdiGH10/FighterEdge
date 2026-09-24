@@ -30,6 +30,7 @@ import 'notifications/reminder_gateway.dart';
 import 'notifications/unavailable_reminder_gateway.dart';
 import 'observability/error_reporter.dart';
 import 'observability/telemetry.dart';
+import 'privacy/consent.dart';
 import 'routing/app_router.dart';
 import 'state/app_state.dart';
 import 'l10n/gen/app_localizations.dart';
@@ -96,8 +97,16 @@ Future<AppDependencies> _initializeProductionDependencies() async {
       (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.macOS);
-  final errorReporter = crashlyticsSupported
-      ? FirebaseErrorReporter()
+  // Nothing is collected until the athlete decides (audit M-2). Collection
+  // is also off natively, so the SDKs stay quiet until the choice applies.
+  final consent = ConsentController(
+    sink: kIsWeb
+        ? const NoopConsentSink()
+        : FirebaseConsentSink(crashlyticsSupported: crashlyticsSupported),
+  );
+  await consent.load();
+  final ErrorReporter errorReporter = crashlyticsSupported
+      ? ConsentGatedErrorReporter(FirebaseErrorReporter(), consent)
       : const NoopErrorReporter();
   if (crashlyticsSupported) {
     installProductionErrorHandlers(errorReporter);
@@ -119,8 +128,11 @@ Future<AppDependencies> _initializeProductionDependencies() async {
     billingGateway: RevenueCatBillingGateway(),
     reminderGateway: LocalReminderGateway(),
     coachVoice: TtsCoachVoice(),
-    telemetry: kIsWeb ? const NoopTelemetry() : FirebaseTelemetry(),
+    telemetry: kIsWeb
+        ? const NoopTelemetry()
+        : ConsentGatedTelemetry(FirebaseTelemetry(), consent),
     errorReporter: errorReporter,
+    consent: consent,
   );
 }
 
@@ -140,6 +152,7 @@ class AppDependencies {
   final CoachVoice coachVoice;
   final Telemetry telemetry;
   final ErrorReporter errorReporter;
+  final ConsentController consent;
 
   const AppDependencies({
     required this.authRepo,
@@ -151,6 +164,7 @@ class AppDependencies {
     required this.coachVoice,
     required this.telemetry,
     required this.errorReporter,
+    required this.consent,
   });
 }
 
@@ -166,6 +180,10 @@ class FighterEdgeApp extends StatelessWidget {
   final CoachVoice? coachVoice;
   final Telemetry? telemetry;
   final ErrorReporter? errorReporter;
+
+  /// Null in tests: consent counts as already decided (nothing allowed), so
+  /// no prompt covers the screen under test.
+  final ConsentController? consent;
   const FighterEdgeApp({
     super.key,
     required this.authRepo,
@@ -179,6 +197,7 @@ class FighterEdgeApp extends StatelessWidget {
     this.coachVoice,
     this.telemetry,
     this.errorReporter,
+    this.consent,
   });
 
   /// The production wiring: every field of [dependencies], none dropped.
@@ -194,6 +213,7 @@ class FighterEdgeApp extends StatelessWidget {
           coachVoice: dependencies.coachVoice,
           telemetry: dependencies.telemetry,
           errorReporter: dependencies.errorReporter,
+          consent: dependencies.consent,
         );
 
   @override
@@ -214,6 +234,12 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<ErrorReporter>.value(
           value: errorReporter ?? const NoopErrorReporter(),
         ),
+        if (consent case final consent?)
+          ChangeNotifierProvider<ConsentController>.value(value: consent)
+        else
+          ChangeNotifierProvider<ConsentController>(
+            create: (_) => ConsentController.decided(ConsentChoices.none),
+          ),
         Provider<ReminderGateway>.value(
           value: reminderGateway ?? const UnavailableReminderGateway(),
         ),
