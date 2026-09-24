@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/billing/fake_billing_gateway.dart';
+import 'package:fighter_edge/billing/subscription.dart';
+import 'package:fighter_edge/observability/telemetry.dart';
 import 'package:fighter_edge/screens/paywall_screen.dart';
 
 import '../helpers/test_harness.dart';
@@ -11,13 +13,23 @@ void main() {
       (tester) async {
     final repo = await makeRepo(signedIn: true);
     final billing = FakeBillingGateway();
+    final telemetry = MemoryTelemetry();
 
     await tester.pumpWidget(wrapApp(
-      const PaywallScreen(),
+      const PaywallScreen(
+        highlight: Feature.edgeFuelAiCoach,
+        trigger: PaywallTrigger.fighterBrief,
+      ),
       repo: repo,
       billingGateway: billing,
+      telemetry: telemetry,
     ));
     await tester.pumpAndSettle();
+    expect(telemetry.records.single.event, TelemetryEvent.paywallViewed);
+    expect(telemetry.records.single.parameters, {
+      'feature': 'edgeFuelAiCoach',
+      'trigger': 'fighter_brief',
+    });
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));
     final monthly = find.textContaining('MONTHLY');

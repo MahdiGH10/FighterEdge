@@ -41,6 +41,7 @@
   "settingsSectionSafety": "Safety & Trust",
   "settingsSafeCut": "Safe cut guidance",
   "settingsSafeCutSubtitle": "Show hydration and non-medical weight-cut reminders",
+  "settingsTrustNote": "Fighter Edge guides training and nutrition decisions. It does not replace a coach, doctor, or licensed nutrition professional.",
   "settingsSectionAccount": "Account",
   "settingsChangePassword": "Change password",
   "settingsChangePasswordSubtitle": "Confirm your current password to set a new one",
@@ -153,6 +154,90 @@
   },
   "timerYourCorner": "YOUR CORNER",
   "timerCornerTeaser": "Pro puts a corner in your rest: a cue for the next round.",
+
+  "trainTabReaction": "Reaction",
+  "reactionTitle": "Reaction Drill",
+  "reactionHeadline": "The coach calls it. You react.",
+  "reactionSoundHint": "Sound on. Every run is shuffled — nothing to memorize.",
+  "reactionDisciplineGrappling": "Wrestling",
+  "reactionDisciplineStriking": "Striking",
+  "reactionDisciplineMma": "MMA",
+  "reactionLevelBeginner": "Beginner",
+  "reactionLevelIntermediate": "Intermediate",
+  "reactionLevelAdvanced": "Advanced",
+  "reactionLevelAdvancedPlus": "Advanced+",
+  "reactionStatDuration": "DURATION",
+  "reactionStatMoves": "MOVES",
+  "reactionStatReact": "REACTION",
+  "reactionInTheMix": "IN THE MIX · {count}",
+  "@reactionInTheMix": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "reactionStart": "Start drill",
+  "reactionGetInStance": "GET IN STANCE",
+  "reactionStop": "Stop",
+  "reactionTimeUp": "TIME",
+  "reactionSummary": "{calls} calls · {moves} moves",
+  "@reactionSummary": {
+    "placeholders": {
+      "calls": { "type": "int" },
+      "moves": { "type": "int" }
+    }
+  },
+  "reactionAgain": "Go again",
+  "reactionDone": "Done",
+  "reactionNoVoice": "No voice on this device. Follow the calls on screen.",
+  "reactionTestVoice": "Test voice",
+  "reactionShowAll": "Show all",
+  "reactionShowLess": "Show less",
+  "reactionPause": "Pause",
+  "reactionResume": "Resume",
+  "reactionPaused": "PAUSED",
+  "reactionTimeLeft": "{time} left",
+  "@reactionTimeLeft": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "reactionCallNumber": "CALL {n}",
+  "@reactionCallNumber": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "reactionFinishedSummary": "{calls, plural, =1{1 call} other{{calls} calls}} in {time}",
+  "@reactionFinishedSummary": {
+    "placeholders": {
+      "calls": { "type": "int" },
+      "time": { "type": "String" }
+    }
+  },
+  "reactionNextLevel": "Ready for {level}?",
+  "@reactionNextLevel": {
+    "placeholders": { "level": { "type": "String" } }
+  },
+  "reactionStopped": "Stopped at {time} · {calls, plural, =1{1 call} other{{calls} calls}}",
+  "@reactionStopped": {
+    "placeholders": {
+      "time": { "type": "String" },
+      "calls": { "type": "int" }
+    }
+  },
+  "reactionLeaveTitle": "Leave the drill?",
+  "reactionLeaveBody": "This run will end.",
+  "reactionLeaveStay": "Keep going",
+  "reactionLeaveConfirm": "Leave",
+  "reactionRecoveryNote": "+{time} s to reset after {moves}+ moves",
+  "@reactionRecoveryNote": {
+    "placeholders": {
+      "time": { "type": "String" },
+      "moves": { "type": "int" }
+    }
+  },
+  "reactionBlockRestNote": "+{time} s rest every {min}–{max} calls",
+  "@reactionBlockRestNote": {
+    "placeholders": {
+      "time": { "type": "String" },
+      "min": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
 
   "devMessageFrom": "FROM {from}",
   "@devMessageFrom": {

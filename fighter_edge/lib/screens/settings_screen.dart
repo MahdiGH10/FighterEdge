@@ -110,7 +110,10 @@ class SettingsScreen extends StatelessWidget {
             onTap: () => AppNavigation.push(
               context,
               AppRoutes.paywall,
-              fallbackBuilder: (_) => const PaywallScreen(),
+              extra: const PaywallRouteArgs(trigger: PaywallTrigger.settings),
+              fallbackBuilder: (_) => const PaywallScreen(
+                trigger: PaywallTrigger.settings,
+              ),
             ),
           ),
           const SizedBox(height: Insets.xl),
@@ -538,8 +541,9 @@ class _TrustCard extends StatelessWidget {
           const SizedBox(width: Insets.md),
           Expanded(
             child: Text(
-              'Fighter Edge should guide training decisions, not replace a coach, doctor, or licensed nutrition professional. Keep this visible before public launch.',
-              style: AppType.subhead(color: AppColors.textSecondary),
+              L.of(context).settingsTrustNote,
+              style: AppType.subhead(
+                  color: AppAccessibility.textSecondary(context)),
             ),
           ),
         ],

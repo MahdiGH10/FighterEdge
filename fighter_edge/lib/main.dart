@@ -36,6 +36,8 @@ import 'l10n/gen/app_localizations.dart';
 import 'state/first_run_controller.dart';
 import 'state/locale_controller.dart';
 import 'state/streak_controller.dart';
+import 'training/reaction/coach_voice.dart';
+import 'training/reaction/tts_coach_voice.dart';
 import 'theme/app_accessibility.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
@@ -82,6 +84,7 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
             edgeFuelRepo: dependencies.edgeFuelRepo,
             edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
             billingGateway: dependencies.billingGateway,
+            coachVoice: dependencies.coachVoice,
             telemetry: dependencies.telemetry,
             errorReporter: dependencies.errorReporter,
           );
@@ -124,6 +127,7 @@ Future<_AppDependencies> _initializeProductionDependencies() async {
     edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
     billingGateway: RevenueCatBillingGateway(),
     reminderGateway: LocalReminderGateway(),
+    coachVoice: TtsCoachVoice(),
     telemetry: kIsWeb ? const NoopTelemetry() : FirebaseTelemetry(),
     errorReporter: errorReporter,
   );
@@ -136,6 +140,7 @@ class _AppDependencies {
   final EdgeFuelAiGateway edgeFuelAiGateway;
   final BillingGateway billingGateway;
   final ReminderGateway reminderGateway;
+  final CoachVoice coachVoice;
   final Telemetry telemetry;
   final ErrorReporter errorReporter;
 
@@ -146,6 +151,7 @@ class _AppDependencies {
     required this.edgeFuelAiGateway,
     required this.billingGateway,
     required this.reminderGateway,
+    required this.coachVoice,
     required this.telemetry,
     required this.errorReporter,
   });
@@ -160,6 +166,7 @@ class FighterEdgeApp extends StatelessWidget {
   final RecipeCatalogRepository? recipeCatalogRepo;
   final BillingGateway? billingGateway;
   final ReminderGateway? reminderGateway;
+  final CoachVoice? coachVoice;
   final Telemetry? telemetry;
   final ErrorReporter? errorReporter;
   const FighterEdgeApp({
@@ -172,6 +179,7 @@ class FighterEdgeApp extends StatelessWidget {
     this.recipeCatalogRepo,
     this.billingGateway,
     this.reminderGateway,
+    this.coachVoice,
     this.telemetry,
     this.errorReporter,
   });
@@ -196,6 +204,9 @@ class FighterEdgeApp extends StatelessWidget {
         ),
         Provider<ReminderGateway>.value(
           value: reminderGateway ?? const UnavailableReminderGateway(),
+        ),
+        Provider<CoachVoice>.value(
+          value: coachVoice ?? const SilentCoachVoice(),
         ),
         ChangeNotifierProvider(
           create: (_) => AuthController(
@@ -229,10 +240,16 @@ class FighterEdgeApp extends StatelessWidget {
               (streak ?? StreakController())..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
-          create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
+          create: (_) => EdgeFuelController(
+            repository: resolvedEdgeFuelRepo,
+            telemetry: telemetry ?? const NoopTelemetry(),
+          ),
           update: (_, auth, controller) {
             final edgeFuel = controller ??
-                EdgeFuelController(repository: resolvedEdgeFuelRepo);
+                EdgeFuelController(
+                  repository: resolvedEdgeFuelRepo,
+                  telemetry: telemetry ?? const NoopTelemetry(),
+                );
             edgeFuel.setUser(auth.user?.id);
             return edgeFuel;
           },

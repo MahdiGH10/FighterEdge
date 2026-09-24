@@ -6,29 +6,47 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/data_repository.dart';
 import '../data/mock_data.dart';
 import '../models/meal.dart';
+import '../models/training_log_entry.dart';
 import '../models/training_session.dart';
 import '../models/weight_entry.dart';
+import 'streak_engine.dart';
 
 /// Holds the mutable state for the three interactive features:
 /// weight tracking and nutrition. (The round timer keeps local state.)
 class AppState extends ChangeNotifier {
-  AppState({DataRepository? dataRepository})
+  AppState({DataRepository? dataRepository, DateTime Function()? clock})
       : _dataRepository = dataRepository,
+        _clock = clock ?? DateTime.now,
         _weights = dataRepository == null ? MockData.seedWeights() : [],
         _meals = dataRepository == null ? MockData.seedMeals() : [],
-        _sessions = dataRepository == null ? List.of(MockData.week) : [] {
+        _sessions = dataRepository == null ? List.of(MockData.week) : [],
+        _log = [] {
+    if (dataRepository == null) _log = _demoLog(_sessions, _clock());
     unawaited(_loadSettings());
   }
 
   final DataRepository? _dataRepository;
 
+  /// Injected so tests can move through weeks without waiting for them.
+  final DateTime Function() _clock;
+
   List<WeightEntry> _weights;
   List<Meal> _meals;
+
+  /// The weekly plan: a template that repeats every week. Whether a slot is
+  /// done is never stored on it; that comes from [_log], per week.
   List<TrainingSession> _sessions;
+
+  /// Every piece of training ever logged, newest first.
+  List<TrainingLogEntry> _log;
   DateTime _nutritionDate = DateTime.now();
   StreamSubscription<List<WeightEntry>>? _weightSub;
   StreamSubscription<List<Meal>>? _mealSub;
   StreamSubscription<List<TrainingSession>>? _sessionSub;
+  StreamSubscription<List<TrainingLogEntry>>? _logSub;
+  bool _sessionsLoaded = false;
+  bool _logLoaded = false;
+  String? _migratedFor;
   String? _userId;
   bool _useMetricUnits = true;
   bool _timerHaptics = true;
@@ -41,12 +59,16 @@ class AppState extends ChangeNotifier {
     _weightSub?.cancel();
     _mealSub?.cancel();
     _sessionSub?.cancel();
+    _logSub?.cancel();
+    _sessionsLoaded = false;
+    _logLoaded = false;
 
     final repo = _dataRepository;
     if (repo == null || userId == null) {
       _weights = MockData.seedWeights();
       _meals = MockData.seedMeals();
       _sessions = List.of(MockData.week);
+      _log = _demoLog(_sessions, _clock());
       notifyListeners();
       return;
     }
@@ -60,6 +82,15 @@ class AppState extends ChangeNotifier {
 
     _sessionSub = repo.watchSessions(userId).listen((sessions) {
       _sessions = List.of(sessions);
+      _sessionsLoaded = true;
+      _migrateLegacyCompletions(repo, userId);
+      notifyListeners();
+    });
+
+    _logSub = repo.watchTrainingLog(userId).listen((log) {
+      _log = List.of(log);
+      _logLoaded = true;
+      _migrateLegacyCompletions(repo, userId);
       notifyListeners();
     });
   }
@@ -200,56 +231,206 @@ class AppState extends ChangeNotifier {
   }
 
   // ---- Training ----
-  List<TrainingSession> get sessions => List.unmodifiable(_sessions);
 
+  /// This week's plan: each slot's `completed`, `completedAt`, RPE and note
+  /// come from this week's log entry for it, so the plan starts every Monday
+  /// fresh while last week's work stays in the log.
+  List<TrainingSession> get sessions =>
+      List.unmodifiable([for (final slot in _sessions) _asThisWeek(slot)]);
+
+  /// Every entry, newest first.
+  List<TrainingLogEntry> get trainingLog => List.unmodifiable(_log);
+
+  /// The calendar days (see `mealDateKey`) with training that counts toward
+  /// the weekly target and streak, across every week, not only this one.
+  Set<String> get trainingDayKeys => {
+        for (final entry in _log)
+          if (entry.source.countsAsTrainingDay) entry.dateKey,
+      };
+
+  /// All-time count of logged sessions that count as training.
   int get completedSessionCount =>
-      _sessions.where((session) => session.completed).length;
+      _log.where((entry) => entry.source.countsAsTrainingDay).length;
 
-  List<TrainingSession> get completedSessionsDesc {
-    final completed = _sessions.where((s) => s.completed).toList();
-    completed.sort((a, b) {
-      final aDate = a.completedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final bDate = b.completedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-      return bDate.compareTo(aDate);
-    });
-    return List.unmodifiable(completed);
-  }
-
-  // Streak counting itself moved to StreakEngine.streakDays, which — unlike
-  // the count this getter used to return — does not zero out the instant
-  // "today" has nothing logged yet; that correction is what makes a streak
-  // freeze (StreakController) meaningful in the first place. Kept here as a
-  // pointer rather than silently removed, since several screens used to read
-  // this directly.
+  /// The log, newest first, shaped as sessions for the History list and
+  /// Recent activity.
+  List<TrainingSession> get completedSessionsDesc => List.unmodifiable([
+        for (final entry in _log) _asSession(entry),
+      ]);
 
   void toggleSession(TrainingSession session) {
     final index = _sessions.indexWhere((item) => item.id == session.id);
     if (index == -1) return;
-    completeSession(session, completed: !session.completed);
+    completeSession(session, completed: !_isDoneThisWeek(session.id));
   }
 
+  /// Marks a plan slot done this week (or updates its RPE and note if it
+  /// already is), or with `completed: false` removes this week's entry for
+  /// it. Earlier weeks are never touched.
   void completeSession(
     TrainingSession session, {
     bool completed = true,
     int rpe = 7,
     String note = '',
   }) {
-    final index = _sessions.indexWhere((item) => item.id == session.id);
-    if (index == -1) return;
-    final updated = session.copyWith(
-      completed: completed,
-      completedAt: completed ? DateTime.now() : null,
-      clearCompletedAt: !completed,
-      rpe: completed ? rpe.clamp(1, 10) : 0,
-      note: completed ? note.trim() : '',
+    final slot = _sessions.where((item) => item.id == session.id).firstOrNull;
+    if (slot == null) return;
+    final existing = _thisWeekEntryFor(slot.id);
+    if (!completed) {
+      if (existing == null) return;
+      _log.removeWhere((entry) => entry.id == existing.id);
+      final repo = _dataRepository;
+      final userId = _userId;
+      if (repo != null && userId != null) {
+        unawaited(repo.deleteTrainingLogEntry(userId, existing.id));
+      }
+      notifyListeners();
+      return;
+    }
+    final now = _clock();
+    addTrainingLogEntry(
+      existing?.copyWith(rpe: rpe.clamp(1, 10), note: note.trim()) ??
+          TrainingLogEntry(
+            id: TrainingLogEntry.plannedId(slot.id, now),
+            completedAt: now,
+            source: TrainingSource.planned,
+            title: slot.title,
+            planSlotId: slot.id,
+            rpe: rpe.clamp(1, 10),
+            note: note.trim(),
+          ),
     );
-    _sessions[index] = updated;
+  }
+
+  /// Adds an entry to the log, or replaces the one with the same id.
+  void addTrainingLogEntry(TrainingLogEntry entry) {
+    _upsertLocal(entry);
     final repo = _dataRepository;
     final userId = _userId;
     if (repo != null && userId != null) {
-      unawaited(repo.saveSession(userId, updated));
+      unawaited(repo.saveTrainingLogEntry(userId, entry));
     }
     notifyListeners();
+  }
+
+  bool _isDoneThisWeek(String slotId) => _thisWeekEntryFor(slotId) != null;
+
+  /// The newest entry for [slotId] in the current Monday-to-Sunday week.
+  TrainingLogEntry? _thisWeekEntryFor(String slotId) {
+    final start = StreakEngine.weekStart(_clock());
+    final end = start.add(const Duration(days: 7));
+    for (final entry in _log) {
+      if (entry.planSlotId != slotId) continue;
+      if (entry.completedAt.isBefore(start)) continue;
+      if (!entry.completedAt.isBefore(end)) continue;
+      return entry; // _log is newest first
+    }
+    return null;
+  }
+
+  TrainingSession _asThisWeek(TrainingSession slot) {
+    final entry = _thisWeekEntryFor(slot.id);
+    return slot.copyWith(
+      completed: entry != null,
+      completedAt: entry?.completedAt,
+      clearCompletedAt: entry == null,
+      rpe: entry?.rpe ?? 0,
+      note: entry?.note ?? '',
+    );
+  }
+
+  /// A log entry dressed as a session, borrowing its plan slot's icon and
+  /// subtitle when it has one.
+  TrainingSession _asSession(TrainingLogEntry entry) {
+    final slot =
+        _sessions.where((item) => item.id == entry.planSlotId).firstOrNull;
+    return TrainingSession(
+      id: entry.id,
+      day: slot?.day ?? '',
+      title: entry.title,
+      subtitle: slot?.subtitle ?? '',
+      icon: slot?.icon ?? _sourceIcon(entry.source),
+      completed: true,
+      completedAt: entry.completedAt,
+      rpe: entry.rpe,
+      note: entry.note,
+    );
+  }
+
+  static IconData _sourceIcon(TrainingSource source) => switch (source) {
+        TrainingSource.planned => Icons.sports_mma,
+        TrainingSource.timer => Icons.timer,
+        TrainingSource.reaction => Icons.flash_on,
+        TrainingSource.manual => Icons.fitness_center,
+      };
+
+  void _upsertLocal(TrainingLogEntry entry) {
+    _log
+      ..removeWhere((item) => item.id == entry.id)
+      ..add(entry)
+      ..sort((a, b) => b.completedAt.compareTo(a.completedAt));
+  }
+
+  /// One-time move of completions stored on the old weekly-plan documents
+  /// into the log. Before the log existed, a completed slot kept its only
+  /// record in `completed`/`completedAt` on the slot itself.
+  ///
+  /// Runs once both streams have delivered. Each entry gets a deterministic
+  /// id, so a second run writes the same document instead of a duplicate.
+  /// Once an entry is saved, the slot's completion is cleared: the data now
+  /// lives in the log, and a device with a stale cache can then never
+  /// re-migrate old values over an entry the athlete has since edited.
+  void _migrateLegacyCompletions(DataRepository repo, String userId) {
+    if (!_sessionsLoaded || !_logLoaded || _migratedFor == userId) return;
+    _migratedFor = userId;
+    final known = {for (final entry in _log) entry.id};
+    for (final slot in _sessions) {
+      final completedAt = slot.completedAt;
+      if (!slot.completed || completedAt == null) continue;
+      final entry = TrainingLogEntry(
+        id: TrainingLogEntry.plannedId(slot.id, completedAt),
+        completedAt: completedAt,
+        source: TrainingSource.planned,
+        title: slot.title,
+        planSlotId: slot.id,
+        rpe: slot.rpe,
+        note: slot.note,
+      );
+      final isNew = !known.contains(entry.id);
+      if (isNew) _upsertLocal(entry);
+      final cleared = slot.copyWith(
+          completed: false, clearCompletedAt: true, rpe: 0, note: '');
+      unawaited(() async {
+        try {
+          if (isNew) await repo.saveTrainingLogEntry(userId, entry);
+          await repo.saveSession(userId, cleared);
+        } catch (_) {
+          // Left as it was; the next launch tries again, and the
+          // deterministic id keeps that safe.
+        }
+      }());
+    }
+  }
+
+  /// The offline demo's completed slots as log entries in the current week,
+  /// never dated after now.
+  static List<TrainingLogEntry> _demoLog(
+      List<TrainingSession> week, DateTime now) {
+    final monday = StreakEngine.weekStart(now);
+    final entries = <TrainingLogEntry>[];
+    for (final (index, slot) in week.indexed) {
+      if (!slot.completed) continue;
+      final day = monday.add(Duration(days: index, hours: 18));
+      final completedAt = day.isAfter(now) ? now : day;
+      entries.add(TrainingLogEntry(
+        id: TrainingLogEntry.plannedId(slot.id, completedAt),
+        completedAt: completedAt,
+        source: TrainingSource.planned,
+        title: slot.title,
+        planSlotId: slot.id,
+      ));
+    }
+    return entries..sort((a, b) => b.completedAt.compareTo(a.completedAt));
   }
 
   Future<void> startFreshCamp({
@@ -285,6 +466,7 @@ class AppState extends ChangeNotifier {
     _weightSub?.cancel();
     _mealSub?.cancel();
     _sessionSub?.cancel();
+    _logSub?.cancel();
     super.dispose();
   }
 

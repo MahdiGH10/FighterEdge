@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/meal.dart';
+import '../models/training_log_entry.dart';
 import '../models/training_session.dart';
 import '../models/weight_entry.dart';
 import 'data_repository.dart';
@@ -76,6 +77,31 @@ class FirestoreDataRepository implements DataRepository {
     return _userCollection(userId, 'sessions')
         .doc(session.id)
         .set(session.toJson());
+  }
+
+  @override
+  Stream<List<TrainingLogEntry>> watchTrainingLog(String userId) {
+    return _userCollection(userId, 'trainingLog')
+        .orderBy('completedAtMs', descending: true)
+        .snapshots()
+        .map((snapshot) => [
+              for (final doc in snapshot.docs)
+                if (TrainingLogEntry.fromJson(doc.data(), id: doc.id)
+                    case final entry?)
+                  entry,
+            ]);
+  }
+
+  @override
+  Future<void> saveTrainingLogEntry(String userId, TrainingLogEntry entry) {
+    return _userCollection(userId, 'trainingLog')
+        .doc(entry.id)
+        .set(entry.toJson());
+  }
+
+  @override
+  Future<void> deleteTrainingLogEntry(String userId, String entryId) {
+    return _userCollection(userId, 'trainingLog').doc(entryId).delete();
   }
 
   int _dayOrder(String day) {

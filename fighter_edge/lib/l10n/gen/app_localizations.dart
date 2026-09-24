@@ -307,6 +307,12 @@ abstract class L {
   /// **'Show hydration and non-medical weight-cut reminders'**
   String get settingsSafeCutSubtitle;
 
+  /// No description provided for @settingsTrustNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Fighter Edge guides training and nutrition decisions. It does not replace a coach, doctor, or licensed nutrition professional.'**
+  String get settingsTrustNote;
+
   /// No description provided for @settingsSectionAccount.
   ///
   /// In en, this message translates to:
@@ -750,6 +756,246 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Pro puts a corner in your rest: a cue for the next round.'**
   String get timerCornerTeaser;
+
+  /// No description provided for @trainTabReaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reaction'**
+  String get trainTabReaction;
+
+  /// No description provided for @reactionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reaction Drill'**
+  String get reactionTitle;
+
+  /// No description provided for @reactionHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'The coach calls it. You react.'**
+  String get reactionHeadline;
+
+  /// No description provided for @reactionSoundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound on. Every run is shuffled — nothing to memorize.'**
+  String get reactionSoundHint;
+
+  /// No description provided for @reactionDisciplineGrappling.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrestling'**
+  String get reactionDisciplineGrappling;
+
+  /// No description provided for @reactionDisciplineStriking.
+  ///
+  /// In en, this message translates to:
+  /// **'Striking'**
+  String get reactionDisciplineStriking;
+
+  /// No description provided for @reactionDisciplineMma.
+  ///
+  /// In en, this message translates to:
+  /// **'MMA'**
+  String get reactionDisciplineMma;
+
+  /// No description provided for @reactionLevelBeginner.
+  ///
+  /// In en, this message translates to:
+  /// **'Beginner'**
+  String get reactionLevelBeginner;
+
+  /// No description provided for @reactionLevelIntermediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Intermediate'**
+  String get reactionLevelIntermediate;
+
+  /// No description provided for @reactionLevelAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get reactionLevelAdvanced;
+
+  /// No description provided for @reactionLevelAdvancedPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced+'**
+  String get reactionLevelAdvancedPlus;
+
+  /// No description provided for @reactionStatDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'DURATION'**
+  String get reactionStatDuration;
+
+  /// No description provided for @reactionStatMoves.
+  ///
+  /// In en, this message translates to:
+  /// **'MOVES'**
+  String get reactionStatMoves;
+
+  /// No description provided for @reactionStatReact.
+  ///
+  /// In en, this message translates to:
+  /// **'REACTION'**
+  String get reactionStatReact;
+
+  /// No description provided for @reactionInTheMix.
+  ///
+  /// In en, this message translates to:
+  /// **'IN THE MIX · {count}'**
+  String reactionInTheMix(int count);
+
+  /// No description provided for @reactionStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start drill'**
+  String get reactionStart;
+
+  /// No description provided for @reactionGetInStance.
+  ///
+  /// In en, this message translates to:
+  /// **'GET IN STANCE'**
+  String get reactionGetInStance;
+
+  /// No description provided for @reactionStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get reactionStop;
+
+  /// No description provided for @reactionTimeUp.
+  ///
+  /// In en, this message translates to:
+  /// **'TIME'**
+  String get reactionTimeUp;
+
+  /// No description provided for @reactionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{calls} calls · {moves} moves'**
+  String reactionSummary(int calls, int moves);
+
+  /// No description provided for @reactionAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Go again'**
+  String get reactionAgain;
+
+  /// No description provided for @reactionDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get reactionDone;
+
+  /// No description provided for @reactionNoVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'No voice on this device. Follow the calls on screen.'**
+  String get reactionNoVoice;
+
+  /// No description provided for @reactionTestVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Test voice'**
+  String get reactionTestVoice;
+
+  /// No description provided for @reactionShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get reactionShowAll;
+
+  /// No description provided for @reactionShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get reactionShowLess;
+
+  /// No description provided for @reactionPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get reactionPause;
+
+  /// No description provided for @reactionResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get reactionResume;
+
+  /// No description provided for @reactionPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'PAUSED'**
+  String get reactionPaused;
+
+  /// No description provided for @reactionTimeLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} left'**
+  String reactionTimeLeft(String time);
+
+  /// No description provided for @reactionCallNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'CALL {n}'**
+  String reactionCallNumber(int n);
+
+  /// No description provided for @reactionFinishedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{calls, plural, =1{1 call} other{{calls} calls}} in {time}'**
+  String reactionFinishedSummary(int calls, String time);
+
+  /// No description provided for @reactionNextLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for {level}?'**
+  String reactionNextLevel(String level);
+
+  /// No description provided for @reactionStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped at {time} · {calls, plural, =1{1 call} other{{calls} calls}}'**
+  String reactionStopped(String time, int calls);
+
+  /// No description provided for @reactionLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the drill?'**
+  String get reactionLeaveTitle;
+
+  /// No description provided for @reactionLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This run will end.'**
+  String get reactionLeaveBody;
+
+  /// No description provided for @reactionLeaveStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going'**
+  String get reactionLeaveStay;
+
+  /// No description provided for @reactionLeaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get reactionLeaveConfirm;
+
+  /// No description provided for @reactionRecoveryNote.
+  ///
+  /// In en, this message translates to:
+  /// **'+{time} s to reset after {moves}+ moves'**
+  String reactionRecoveryNote(String time, int moves);
+
+  /// No description provided for @reactionBlockRestNote.
+  ///
+  /// In en, this message translates to:
+  /// **'+{time} s rest every {min}–{max} calls'**
+  String reactionBlockRestNote(String time, int min, int max);
 
   /// No description provided for @devMessageFrom.
   ///

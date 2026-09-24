@@ -15,12 +15,51 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
 
+/// Fixed, non-personal source codes for conversion analysis.
+enum PaywallTrigger {
+  direct,
+  planReady,
+  settings,
+  profile,
+  cornerCoach,
+  techniqueLibrary,
+  fighterBrief,
+  coach,
+  premiumRecipe,
+}
+
+extension PaywallTriggerCode on PaywallTrigger {
+  String get code => switch (this) {
+        PaywallTrigger.direct => 'direct',
+        PaywallTrigger.planReady => 'plan_ready',
+        PaywallTrigger.settings => 'settings',
+        PaywallTrigger.profile => 'profile',
+        PaywallTrigger.cornerCoach => 'corner_coach',
+        PaywallTrigger.techniqueLibrary => 'technique_library',
+        PaywallTrigger.fighterBrief => 'fighter_brief',
+        PaywallTrigger.coach => 'coach',
+        PaywallTrigger.premiumRecipe => 'premium_recipe',
+      };
+}
+
+class PaywallRouteArgs {
+  final Feature? highlight;
+  final PaywallTrigger trigger;
+
+  const PaywallRouteArgs({this.highlight, required this.trigger});
+}
+
 /// Upgrade screen. Store purchases are initiated here, but paid entitlements
 /// are granted only after the server webhook updates the account profile.
 class PaywallScreen extends StatefulWidget {
   /// Optional feature that triggered the paywall, highlighted at the top.
   final Feature? highlight;
-  const PaywallScreen({super.key, this.highlight});
+  final PaywallTrigger trigger;
+  const PaywallScreen({
+    super.key,
+    this.highlight,
+    this.trigger = PaywallTrigger.direct,
+  });
 
   @override
   State<PaywallScreen> createState() => _PaywallScreenState();
@@ -36,6 +75,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         TelemetryEvent.paywallViewed,
         parameters: {
           'feature': widget.highlight?.name ?? 'direct',
+          'trigger': widget.trigger.code,
         },
       );
       if (mounted) context.read<AuthController>().loadBillingProducts();

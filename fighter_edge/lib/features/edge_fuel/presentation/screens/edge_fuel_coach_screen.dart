@@ -36,6 +36,7 @@ import '../controllers/edge_fuel_coach_controller.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../controllers/fuel_match_controller.dart';
 import '../controllers/recipe_library_controller.dart';
+import 'edge_fuel_setup_screen.dart';
 import 'recipe_detail_screen.dart';
 
 /// The one AI surface (master prompt §13): a running conversation that can
@@ -236,14 +237,29 @@ class _CoachNoPlan extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(Insets.lg),
-      child: EmptyState(
-        icon: Icons.auto_awesome,
-        title: 'No plan yet',
-        message: 'Finish EdgeFuel setup first — the coach reads your target '
-            'and today\'s log.',
-      ),
+    // An empty state teaches the next action: the coach needs a plan, so the
+    // way to one is right here rather than back through Fuel.
+    return ListView(
+      padding: const EdgeInsets.all(Insets.lg),
+      children: [
+        const EmptyState(
+          icon: Icons.auto_awesome,
+          title: 'No plan yet',
+          message: 'Finish EdgeFuel setup first — the coach reads your target '
+              'and today\'s log.',
+        ),
+        const SizedBox(height: Insets.lg),
+        PrimaryButton(
+          'Start setup',
+          icon: Icons.arrow_forward,
+          expand: true,
+          onPressed: () => AppNavigation.push(
+            context,
+            AppRoutes.fuelSetup,
+            fallbackBuilder: (_) => const EdgeFuelSetupScreen(),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -271,9 +287,14 @@ class _CoachLocked extends StatelessWidget {
           onPressed: () => AppNavigation.push(
             context,
             AppRoutes.paywall,
-            extra: Feature.edgeFuelAiCoach,
-            fallbackBuilder: (_) =>
-                const PaywallScreen(highlight: Feature.edgeFuelAiCoach),
+            extra: const PaywallRouteArgs(
+              highlight: Feature.edgeFuelAiCoach,
+              trigger: PaywallTrigger.coach,
+            ),
+            fallbackBuilder: (_) => const PaywallScreen(
+              highlight: Feature.edgeFuelAiCoach,
+              trigger: PaywallTrigger.coach,
+            ),
           ),
         ),
       ],

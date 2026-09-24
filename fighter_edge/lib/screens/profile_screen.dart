@@ -32,7 +32,7 @@ class ProfileScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final streak = context.watch<StreakController>();
     final streakDays = StreakEngine.streakDays(
-      StreakEngine.completedDateKeys(state.sessions),
+      state.trainingDayKeys,
       protectedDateKeys: streak.protectedDateKeys,
     );
     final weight = state.latestWeight;
@@ -238,7 +238,9 @@ class _SubscriptionCard extends StatelessWidget {
       onTap: () => AppNavigation.push(
         context,
         AppRoutes.paywall,
-        fallbackBuilder: (_) => const PaywallScreen(),
+        extra: const PaywallRouteArgs(trigger: PaywallTrigger.profile),
+        fallbackBuilder: (_) =>
+            const PaywallScreen(trigger: PaywallTrigger.profile),
       ),
       child: Row(
         children: [

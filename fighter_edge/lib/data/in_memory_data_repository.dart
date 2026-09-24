@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../models/meal.dart';
+import '../models/training_log_entry.dart';
 import '../models/training_session.dart';
 import '../models/weight_entry.dart';
 import 'data_repository.dart';
@@ -9,12 +10,15 @@ class InMemoryDataRepository implements DataRepository {
   final Map<String, List<WeightEntry>> _weights = {};
   final Map<String, Map<String, List<Meal>>> _meals = {};
   final Map<String, List<TrainingSession>> _sessions = {};
+  final Map<String, Map<String, TrainingLogEntry>> _log = {};
 
   final Map<String, StreamController<List<WeightEntry>>> _weightControllers =
       {};
   final Map<String, StreamController<List<Meal>>> _mealControllers = {};
   final Map<String, StreamController<List<TrainingSession>>>
       _sessionControllers = {};
+  final Map<String, StreamController<List<TrainingLogEntry>>> _logControllers =
+      {};
 
   @override
   Stream<List<WeightEntry>> watchWeights(String userId) {
@@ -84,7 +88,41 @@ class InMemoryDataRepository implements DataRepository {
     _sessionControllers[userId]?.add(List.unmodifiable(sessions));
   }
 
+  @override
+  Stream<List<TrainingLogEntry>> watchTrainingLog(String userId) {
+    _ensureUser(userId);
+    final controller = _logControllers.putIfAbsent(
+      userId,
+      () => StreamController<List<TrainingLogEntry>>.broadcast(),
+    );
+    Future.microtask(() => controller.add(_logNewestFirst(userId)));
+    return controller.stream;
+  }
+
+  @override
+  Future<void> saveTrainingLogEntry(
+      String userId, TrainingLogEntry entry) async {
+    _ensureUser(userId);
+    _log[userId]![entry.id] = entry;
+    _logControllers[userId]?.add(_logNewestFirst(userId));
+  }
+
+  @override
+  Future<void> deleteTrainingLogEntry(String userId, String entryId) async {
+    _ensureUser(userId);
+    _log[userId]!.remove(entryId);
+    _logControllers[userId]?.add(_logNewestFirst(userId));
+  }
+
+  List<TrainingLogEntry> _logNewestFirst(String userId) => List.unmodifiable(
+        _log[userId]!.values.toList()
+          ..sort((a, b) => b.completedAt.compareTo(a.completedAt)),
+      );
+
   void dispose() {
+    for (final controller in _logControllers.values) {
+      controller.close();
+    }
     for (final controller in _weightControllers.values) {
       controller.close();
     }
@@ -100,6 +138,7 @@ class InMemoryDataRepository implements DataRepository {
     _weights.putIfAbsent(userId, () => []);
     _meals.putIfAbsent(userId, () => {});
     _sessions.putIfAbsent(userId, () => []);
+    _log.putIfAbsent(userId, () => {});
   }
 
   List<WeightEntry> _sortedWeights(String userId) {

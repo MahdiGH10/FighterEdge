@@ -122,6 +122,10 @@ class LDe extends L {
       'Zeigt Hinweise zu Flüssigkeit und Gewichtsabbau — keine medizinische Beratung';
 
   @override
+  String get settingsTrustNote =>
+      'Fighter Edge unterstützt deine Trainings- und Ernährungsentscheidungen. Es ersetzt keinen Coach, keine Ärztin oder keinen Arzt und keine zugelassene Ernährungsfachkraft.';
+
+  @override
   String get settingsSectionAccount => 'Konto';
 
   @override
@@ -376,6 +380,158 @@ class LDe extends L {
   @override
   String get timerCornerTeaser =>
       'Mit Pro steht dir in der Pause deine Ecke zur Seite: ein Hinweis für die nächste Runde.';
+
+  @override
+  String get trainTabReaction => 'Reaktion';
+
+  @override
+  String get reactionTitle => 'Reaktionsdrill';
+
+  @override
+  String get reactionHeadline => 'Der Coach ruft. Du reagierst.';
+
+  @override
+  String get reactionSoundHint =>
+      'Ton an. Jeder Durchgang wird neu gemischt – nichts zum Auswendiglernen.';
+
+  @override
+  String get reactionDisciplineGrappling => 'Ringen';
+
+  @override
+  String get reactionDisciplineStriking => 'Striking';
+
+  @override
+  String get reactionDisciplineMma => 'MMA';
+
+  @override
+  String get reactionLevelBeginner => 'Anfänger';
+
+  @override
+  String get reactionLevelIntermediate => 'Mittelstufe';
+
+  @override
+  String get reactionLevelAdvanced => 'Fortgeschritten';
+
+  @override
+  String get reactionLevelAdvancedPlus => 'Fortgeschritten+';
+
+  @override
+  String get reactionStatDuration => 'DAUER';
+
+  @override
+  String get reactionStatMoves => 'BEWEGUNGEN';
+
+  @override
+  String get reactionStatReact => 'REAKTION';
+
+  @override
+  String reactionInTheMix(int count) {
+    return 'IM MIX · $count';
+  }
+
+  @override
+  String get reactionStart => 'Drill starten';
+
+  @override
+  String get reactionGetInStance => 'IN KAMPFSTELLUNG';
+
+  @override
+  String get reactionStop => 'Stopp';
+
+  @override
+  String get reactionTimeUp => 'ZEIT';
+
+  @override
+  String reactionSummary(int calls, int moves) {
+    return '$calls Rufe · $moves Bewegungen';
+  }
+
+  @override
+  String get reactionAgain => 'Nochmal';
+
+  @override
+  String get reactionDone => 'Fertig';
+
+  @override
+  String get reactionNoVoice =>
+      'Keine Sprachausgabe auf diesem Gerät. Folge den Rufen auf dem Bildschirm.';
+
+  @override
+  String get reactionTestVoice => 'Stimme testen';
+
+  @override
+  String get reactionShowAll => 'Alle zeigen';
+
+  @override
+  String get reactionShowLess => 'Weniger zeigen';
+
+  @override
+  String get reactionPause => 'Pause';
+
+  @override
+  String get reactionResume => 'Weiter';
+
+  @override
+  String get reactionPaused => 'PAUSIERT';
+
+  @override
+  String reactionTimeLeft(String time) {
+    return 'Noch $time';
+  }
+
+  @override
+  String reactionCallNumber(int n) {
+    return 'RUF $n';
+  }
+
+  @override
+  String reactionFinishedSummary(int calls, String time) {
+    String _temp0 = intl.Intl.pluralLogic(
+      calls,
+      locale: localeName,
+      other: '$calls Rufe',
+      one: '1 Ruf',
+    );
+    return '$_temp0 in $time';
+  }
+
+  @override
+  String reactionNextLevel(String level) {
+    return 'Bereit für $level?';
+  }
+
+  @override
+  String reactionStopped(String time, int calls) {
+    String _temp0 = intl.Intl.pluralLogic(
+      calls,
+      locale: localeName,
+      other: '$calls Rufe',
+      one: '1 Ruf',
+    );
+    return 'Gestoppt bei $time · $_temp0';
+  }
+
+  @override
+  String get reactionLeaveTitle => 'Drill verlassen?';
+
+  @override
+  String get reactionLeaveBody => 'Dieser Durchgang wird beendet.';
+
+  @override
+  String get reactionLeaveStay => 'Weitermachen';
+
+  @override
+  String get reactionLeaveConfirm => 'Verlassen';
+
+  @override
+  String reactionRecoveryNote(String time, int moves) {
+    return '+$time s zum Zurücksetzen nach $moves+ Bewegungen';
+  }
+
+  @override
+  String reactionBlockRestNote(String time, int min, int max) {
+    return '+$time s Pause alle $min–$max Rufe';
+  }
 
   @override
   String devMessageFrom(String from) {

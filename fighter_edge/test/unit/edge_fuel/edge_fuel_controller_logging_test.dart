@@ -3,12 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import 'package:fighter_edge/observability/telemetry.dart';
 
 void main() {
   group('EdgeFuelController daily logging', () {
     test('adds, toggles, edits, and deletes entries', () async {
       final repo = InMemoryEdgeFuelRepository();
-      final controller = EdgeFuelController(repository: repo)..setUser('u1');
+      final telemetry = MemoryTelemetry();
+      final controller =
+          EdgeFuelController(repository: repo, telemetry: telemetry)
+            ..setUser('u1');
       await Future<void>.delayed(Duration.zero);
 
       final entry = FoodLogEntry(
@@ -25,6 +29,8 @@ void main() {
       await controller.addEntry(entry);
       expect(controller.entries.single.name, 'Rice bowl');
       expect(controller.consumedCalories, 700);
+      expect(telemetry.records.single.event, TelemetryEvent.mealLogged);
+      expect(telemetry.records.single.parameters, {'first_today': 1});
 
       await controller.toggleEntry(entry);
       expect(controller.entries.single.consumed, isFalse);
@@ -36,6 +42,37 @@ void main() {
       await controller.deleteEntry(controller.entries.single);
       expect(controller.entries, isEmpty);
 
+      controller.dispose();
+    });
+
+    test('meal event has a daily-first flag and only follows a saved add',
+        () async {
+      final repo = InMemoryEdgeFuelRepository();
+      final telemetry = MemoryTelemetry();
+      final controller =
+          EdgeFuelController(repository: repo, telemetry: telemetry)
+            ..setUser('u1');
+      await Future<void>.delayed(Duration.zero);
+
+      FoodLogEntry meal(String id) => FoodLogEntry(
+            id: id,
+            name: 'Private meal name',
+            notes: 'Private note',
+            calories: 400,
+            proteinGrams: 20,
+            carbGrams: 40,
+            fatGrams: 12,
+            loggedAt: DateTime.now(),
+          );
+
+      await controller.addEntry(meal('one'));
+      await controller.addEntry(meal('two'));
+      expect(telemetry.records.map((r) => r.event),
+          everyElement(TelemetryEvent.mealLogged));
+      expect(telemetry.records.map((r) => r.parameters).toList(), [
+        {'first_today': 1},
+        {'first_today': 0},
+      ]);
       controller.dispose();
     });
 

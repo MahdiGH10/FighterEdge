@@ -63,7 +63,10 @@ class ProLock extends StatelessWidget {
               onPressed: () => AppNavigation.push(
                 context,
                 AppRoutes.paywall,
-                extra: feature,
+                extra: PaywallRouteArgs(
+                  highlight: feature,
+                  trigger: PaywallTrigger.direct,
+                ),
                 fallbackBuilder: (_) => PaywallScreen(highlight: feature),
               ),
             ),

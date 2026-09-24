@@ -16,6 +16,7 @@ import '../widgets/filter_chips.dart';
 import '../widgets/stat_card.dart';
 import 'round_timer_screen.dart';
 import 'drill_library_screen.dart';
+import 'reaction_drill_picker.dart';
 import '../theme/app_haptics.dart';
 import '../widgets/press_scale.dart';
 
@@ -34,7 +35,8 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
     final activeTab = switch (_tab) {
       0 => const _WeekView(),
       1 => const _HistoryView(),
-      _ => const DrillLibraryScreen(),
+      2 => const DrillLibraryScreen(),
+      _ => const ReactionDrillPicker(),
     };
     final l = L.of(context);
     return ScreenScaffold.tab(
@@ -45,7 +47,12 @@ class _TrainingCampScreenState extends State<TrainingCampScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
             child: FilterChips(
-              options: [l.trainTabWeek, l.trainTabHistory, l.trainTabDrills],
+              options: [
+                l.trainTabWeek,
+                l.trainTabHistory,
+                l.trainTabDrills,
+                l.trainTabReaction,
+              ],
               selectedIndex: _tab,
               onSelected: (i) => setState(() => _tab = i),
             ),

@@ -148,7 +148,9 @@ void main() {
       expect(logged.completedAt, isNotNull);
       expect(logged.rpe, 9);
       expect(logged.note, 'Hard rounds');
-      expect(s.completedSessionsDesc.first.id, session.id);
+      // History now lists log entries, each linked back to its plan slot.
+      expect(s.completedSessionsDesc.first.title, session.title);
+      expect(s.trainingLog.first.planSlotId, session.id);
     });
   });
 }

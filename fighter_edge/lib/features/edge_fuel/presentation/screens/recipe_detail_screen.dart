@@ -214,9 +214,13 @@ class _LockedRecipe extends StatelessWidget {
               onPressed: () => AppNavigation.push(
                 context,
                 AppRoutes.paywall,
-                extra: Feature.edgeFuelPremiumRecipes,
+                extra: const PaywallRouteArgs(
+                  highlight: Feature.edgeFuelPremiumRecipes,
+                  trigger: PaywallTrigger.premiumRecipe,
+                ),
                 fallbackBuilder: (_) => const PaywallScreen(
                   highlight: Feature.edgeFuelPremiumRecipes,
+                  trigger: PaywallTrigger.premiumRecipe,
                 ),
               ),
             ),
