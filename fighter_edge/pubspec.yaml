@@ -73,7 +73,7 @@ flutter:
   generate: true
   uses-material-design: true
   assets:
-    - assets/images/login_background.png
+    - assets/images/login_background.webp
     - assets/data/
   fonts:
     # Both faces are variable fonts. Declaring an explicit `weight:` would pin

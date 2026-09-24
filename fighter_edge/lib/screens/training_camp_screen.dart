@@ -336,12 +336,30 @@ class _HistoryView extends StatelessWidget {
       return const _PlaceholderView(
           'Complete or log a session to build history');
     }
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
-      children: [
-        Text('SESSION HISTORY', style: AppType.title1()),
-        const SizedBox(height: Insets.lg),
-        for (final session in sessions) _HistoryRow(session),
+    // A lazy sliver list rather than building every row up front (audit
+    // P-4): the log grows for as long as the account trains, with no cap.
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, 0),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('SESSION HISTORY', style: AppType.title1()),
+                const SizedBox(height: Insets.lg),
+              ],
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding:
+              const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+          sliver: SliverList.builder(
+            itemCount: sessions.length,
+            itemBuilder: (context, index) => _HistoryRow(sessions[index]),
+          ),
+        ),
       ],
     );
   }

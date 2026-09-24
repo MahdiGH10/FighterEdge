@@ -22,6 +22,7 @@ class AppState extends ChangeNotifier {
         _meals = dataRepository == null ? MockData.seedMeals() : [],
         _sessions = dataRepository == null ? List.of(MockData.week) : [],
         _log = [] {
+    _resortWeights();
     if (dataRepository == null) _log = _demoLog(_sessions, _clock());
     unawaited(_loadSettings());
   }
@@ -32,6 +33,19 @@ class AppState extends ChangeNotifier {
   final DateTime Function() _clock;
 
   List<WeightEntry> _weights;
+
+  /// [_weights] sorted both ways, recomputed only when it changes (audit
+  /// P-4) — every screen that reads `weights`/`weightHistoryDesc` used to
+  /// re-sort the whole list on every call, and the weight tracker's history
+  /// row called `weightHistoryDesc` once per row, making one screen O(n²).
+  List<WeightEntry> _weightsAsc = const [];
+  List<WeightEntry> _weightsDesc = const [];
+
+  void _resortWeights() {
+    _weightsAsc = [..._weights]..sort((a, b) => a.date.compareTo(b.date));
+    _weightsDesc = [..._weights]..sort((a, b) => b.date.compareTo(a.date));
+  }
+
   List<Meal> _meals;
 
   /// The weekly plan: a template that repeats every week. Whether a slot is
@@ -73,6 +87,7 @@ class AppState extends ChangeNotifier {
       _meals = MockData.seedMeals();
       _sessions = List.of(MockData.week);
       _log = _demoLog(_sessions, _clock());
+      _resortWeights();
       notifyListeners();
       return;
     }
@@ -86,6 +101,7 @@ class AppState extends ChangeNotifier {
       _meals = [];
       _sessions = [];
       _log = [];
+      _resortWeights();
       notifyListeners();
       return;
     }
@@ -93,6 +109,7 @@ class AppState extends ChangeNotifier {
     _weightSub = repo.watchWeights(userId).listen(
       (weights) {
         _weights = List.of(weights);
+        _resortWeights();
         notifyListeners();
       },
       onError: (Object error) {
@@ -132,23 +149,19 @@ class AppState extends ChangeNotifier {
   }
 
   // ---- Weight ----
-  List<WeightEntry> get weights => List.unmodifiable(_sortedByDate);
+  List<WeightEntry> get weights => List.unmodifiable(_weightsAsc);
 
-  double get latestWeight => _weights.isEmpty ? 0 : _sortedByDate.last.kg;
+  double get latestWeight => _weightsAsc.isEmpty ? 0 : _weightsAsc.last.kg;
 
   /// Change vs the previous weigh-in (negative = weight loss).
   double get weeklyDelta {
-    final s = _sortedByDate;
+    final s = _weightsAsc;
     if (s.length < 2) return 0;
     return s.last.kg - s[s.length - 2].kg;
   }
 
-  List<WeightEntry> get _sortedByDate =>
-      [..._weights]..sort((a, b) => a.date.compareTo(b.date));
-
   /// History newest-first for the list view.
-  List<WeightEntry> get weightHistoryDesc =>
-      [..._weights]..sort((a, b) => b.date.compareTo(a.date));
+  List<WeightEntry> get weightHistoryDesc => List.unmodifiable(_weightsDesc);
 
   double get sevenDayAverage {
     final cutoff = DateTime.now().subtract(const Duration(days: 7));
@@ -162,6 +175,7 @@ class AppState extends ChangeNotifier {
   void addWeight(DateTime date, double kg) {
     final entry = WeightEntry(date, kg);
     _weights.add(entry);
+    _resortWeights();
     final repo = _dataRepository;
     final userId = _userId;
     if (repo != null && userId != null) {
@@ -490,6 +504,7 @@ class AppState extends ChangeNotifier {
         unawaited(repo.addWeight(userId, entry));
       }
     }
+    _resortWeights();
 
     _meals = [];
     _sessions = sessions;

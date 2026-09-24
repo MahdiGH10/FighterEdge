@@ -72,8 +72,45 @@ either a stripped class (add a `-keep` rule) or the Crashlytics mapping
 upload (if so, set `firebaseCrashlytics { mappingFileUploadEnabled = false }`
 in the `release` block as a stopgap and file it as a follow-up).
 
-**Next in Phase 1:** list performance and query limits, paywall error
-handling, then reviving `integration_test/app_flow_test.dart`.
+## Phase 1, slice 3: list performance and the login image (2026-09-24, PR after slice 2)
+
+Audit P-4 and P-7. D-3 (query limits) turned out unsafe to do naively —
+see below.
+
+- **`AppState` caches the weight sort** (`_weightsAsc`/`_weightsDesc`,
+  recomputed only in `_resortWeights()` when `_weights` actually changes)
+  instead of re-sorting on every `weights`/`weightHistoryDesc` read. The
+  weight tracker's history loop called `weightHistoryDesc` twice per row,
+  so this was previously O(n²) per build.
+- **Training log ("Session History") is a real lazy list now**:
+  `training_camp_screen.dart`'s `_HistoryView` renders through
+  `CustomScrollView` + `SliverList.builder` instead of building every row
+  up front. The weight tracker's history stays an eager `Column` for
+  now — it's a single bordered card with internal dividers, and making
+  that lazy without changing how it looks is more of a rebuild; left for
+  the Phase 2/8 screen work.
+- **D-3 (unbounded queries) is deliberately NOT done.** `watchTrainingLog`
+  feeds `completedSessionCount` and the streak engine's `trainingDayKeys`
+  ("across every week, not only this one") — a naive `.limit()` would
+  silently produce a wrong streak and count for any account past the
+  limit, not just cap what the history screen shows. `watchSessions` was
+  never actually unbounded (it's the weekly plan, 2-6 docs). Doing this
+  right needs a bounded query for the history list plus a separate
+  unlimited/aggregated source for streak and count — that's Phase 3's
+  data-model work (D-1/D-4), not a safe change here.
+- **Login image**: `assets/images/login_background.png` (1.8 MB) →
+  `assets/images/login_background.webp` (124 KB, quality 80, converted
+  with Pillow since no `cwebp`/ImageMagick was available in this
+  sandbox — visually identical on this dark, textured image, and it sits
+  behind a gradient overlay anyway). `login_screen.dart` also sets
+  `cacheWidth` to the device's physical width instead of decoding at the
+  source's full resolution.
+
+Tests: 1 new in `test/widget/profile_identity_test.dart` (the History
+tab through the new sliver list). 640 total.
+
+**Next in Phase 1:** paywall error handling, then reviving
+`integration_test/app_flow_test.dart`.
 
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 

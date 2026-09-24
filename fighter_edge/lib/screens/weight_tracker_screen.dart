@@ -162,6 +162,9 @@ class _WeightView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Read once: the getter is O(n) per call (audit P-4), and the history
+    // list below used to call it twice per row inside its loop.
+    final history = state.weightHistoryDesc;
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, 80),
       children: [
@@ -252,13 +255,13 @@ class _WeightView extends StatelessWidget {
           padding: EdgeInsets.zero,
           child: Column(
             children: [
-              for (int i = 0; i < state.weightHistoryDesc.length; i++) ...[
+              for (int i = 0; i < history.length; i++) ...[
                 if (i > 0)
                   const Divider(
                       height: 1, thickness: 1, color: AppColors.border),
                 _HistoryRow(
-                  entry: state.weightHistoryDesc[i],
-                  display: _fmt(state.weightHistoryDesc[i].kg),
+                  entry: history[i],
+                  display: _fmt(history[i].kg),
                   unit: state.weightUnitLabel,
                 ),
               ],
