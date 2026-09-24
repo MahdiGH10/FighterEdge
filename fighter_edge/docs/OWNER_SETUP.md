@@ -1,36 +1,40 @@
-# Owner setup: secrets, legal pages, automatic deploys
+# Owner setup guide
 
-Only the account owner can do these steps, because they need your Firebase,
-RevenueCat, Google Cloud and GitHub logins. Commands run from the
-`fighter_edge/` folder unless a step says otherwise. The Firebase project is
-`fighter-edge-app` and the functions run in `us-central1`.
+These steps need your own logins (Firebase, RevenueCat, Google Cloud and
+GitHub), so only you can do them. Run the commands from the `fighter_edge/`
+folder unless a step says otherwise.
 
-Never paste a key, password or secret into chat, git, a GitHub comment or a
-document. The commands below ask for secret values at a hidden prompt.
+- Firebase project: `fighter-edge-app`
+- Cloud Functions region: `us-central1`
 
-## 1. RevenueCat secret key, then deploy the backend
+**Never paste a key, password or secret into a chat, a git commit, a GitHub
+comment or a document.** The commands below ask for secret values in a hidden
+prompt.
 
-Do this after PR #6 is merged, from an up-to-date `main`.
+## 1. Add the RevenueCat key, then deploy the backend
 
-**1.1 Get the value.**
+Do this from an up-to-date `main` branch.
 
-- **No RevenueCat account yet:** the value is the word `unset`. Pro still
-  works from webhooks; instant sync, transfers and reconciliation switch on
-  once you replace it with a real key.
-- **RevenueCat account exists:** RevenueCat dashboard > your project >
-  **API keys** > **+ New secret API key**. Name it `firebase-functions`. If it
-  asks for an API version, choose **V1** (the functions read
-  `GET /v1/subscribers`). Copy the key; it starts with `sk_`.
+### 1.1 Choose the value
 
-**1.2 Store it in Firebase.**
+- **You don't have a RevenueCat account yet:** use the word `unset`. Pro
+  still works through RevenueCat's webhook. Instant sync, account transfers,
+  the 6-hourly check and deleting RevenueCat data start working once you
+  replace `unset` with a real key.
+- **You have a RevenueCat account:** open the RevenueCat dashboard, pick your
+  project, go to **API keys** and click **+ New secret API key**. Name it
+  `firebase-functions`. If it asks for an API version, choose **V1**. Copy
+  the key. It starts with `sk_`.
+
+### 1.2 Save it in Firebase
 
 ```sh
 firebase login
 firebase functions:secrets:set REVENUECAT_API_KEY --project fighter-edge-app
 ```
 
-Paste the value at the hidden prompt. Check that the three secrets the
-functions need exist (this lists versions, never values):
+Paste the value when asked. Then check that all three secrets exist. These
+commands show only version numbers, never the values:
 
 ```sh
 firebase functions:secrets:get OPENROUTER_API_KEY --project fighter-edge-app
@@ -38,7 +42,7 @@ firebase functions:secrets:get REVENUECAT_WEBHOOK_AUTH --project fighter-edge-ap
 firebase functions:secrets:get REVENUECAT_API_KEY --project fighter-edge-app
 ```
 
-**1.3 Deploy.**
+### 1.3 Deploy
 
 ```sh
 git checkout main && git pull
@@ -47,119 +51,136 @@ firebase functions:artifacts:setpolicy --location us-central1 --project fighter-
 firebase deploy --only functions,firestore:rules,firestore:indexes --project fighter-edge-app
 ```
 
-The `setpolicy` line is one-time: it deletes old build images so they don't
-cost storage, and it stops later automatic deploys from failing on that
-question. Accept the default.
+You only need the `setpolicy` line once. It deletes old build images so they
+don't cost money, and it stops later automatic deploys from stopping to ask
+about it. Accept the default answer.
 
-**1.4 Check it worked.**
+### 1.4 Check that it worked
 
-- `firebase functions:list --project fighter-edge-app` shows
-  `syncEntitlement` and `reconcileEntitlements` next to the existing
-  functions.
-- Firebase console > Firestore > **Indexes**: the `users` index
-  (`plan`, `billing.expiresAtMs`) turns from "Building" to "Enabled" within
-  a few minutes.
-- Google Cloud console > **Cloud Scheduler** shows a job for
-  `reconcileEntitlements`, every 6 hours.
+- `firebase functions:list --project fighter-edge-app` lists
+  `syncEntitlement` and `reconcileEntitlements` next to the other functions.
+- In the Firebase console, open **Firestore > Indexes**. The new `users`
+  index (`plan`, `billing.expiresAtMs`) changes from "Building" to "Enabled"
+  after a few minutes.
+- In the Google Cloud console, open **Cloud Scheduler**. There is a job for
+  `reconcileEntitlements` that runs every 6 hours.
 
-**Deadline:** deploy before **2026-10-30**. That is when Node 20 functions
-stop being supported, and this deploy moves them to Node 22.
+**Deadline: deploy before 30 October 2026.** After that date, Google stops
+supporting the old Node 20 version the functions currently run on. This
+deploy moves them to Node 22.
 
 ## 2. Legal pages
 
-The drafts are in `hosting/public/`: Privacy Policy, Terms and account
-deletion, in English and German. Every fact only you know is marked
-`TODO(owner)` and highlighted on the page. List them with:
+The Privacy Policy, Terms of Use and account-deletion page are ready in
+`hosting/public/`, in English and German. Each fact that only you know is
+marked `TODO(owner)` and highlighted in yellow on the page. To list them:
 
 ```sh
 grep -rn "TODO(owner)" hosting/public
 ```
 
-**2.1 Facts only you can give.** Either edit the pages yourself, or send
-these to Claude and it fills them in:
+### 2.1 Information only you can give
 
-| # | What | Example |
+Edit the pages yourself, or send these answers to Claude and it will fill
+them in:
+
+| # | What | Notes |
 |---|---|---|
-| 1 | Your full name or company name, and legal form | "Jane Doe (sole trader)" or "Example GmbH" |
-| 2 | Postal address | This is published on the pages |
-| 3 | Contact email for privacy and support | Use a dedicated address such as `privacy@yourdomain`, not a personal one. It is published and stored in git. |
-| 4 | Country you are based in | Decides the EU representative, the supervisory authority, the governing law and the German § 36 VSBG statement |
-| 5 | Developer name exactly as shown in the stores | |
-| 6 | Effective date | The day you publish |
-| 7 | Firestore location | Firebase console > Firestore > the database's **Location** field, for example `eur3` or `nam5` |
-| 8 | Whether the AI coach stays on free models | Free models may keep prompts; the pages say so while that is true. If you switch, the in-app AI consent text changes too. |
+| 1 | Your full name or company name, and its legal form | For example "Jane Doe (sole trader)" or "Example Ltd" |
+| 2 | Postal address | It will be public on the pages |
+| 3 | Contact email for privacy and support | Use a separate address, for example `privacy@your-domain.com`, not your personal one. It will be public and stored in git. |
+| 4 | The country where you or your company are based | This decides which data-protection authority, which law and which consumer-dispute statement the pages name |
+| 5 | Your developer name, exactly as the app stores show it | |
+| 6 | The date the pages take effect | Usually the day you publish them |
+| 7 | Where your database is stored | Firebase console > Firestore > the database's **Location**, for example `eur3` or `nam5` |
+| 8 | Whether the AI coach will keep using free AI models | Free models may keep what users type. The pages and the app say so while that is true. If you change providers, the app's AI consent text must change too. |
 
-**2.2 Settings to change** (the pages promise these):
+### 2.2 Settings to change
 
-- Google Analytics (from Firebase console > Analytics) > **Admin** > **Data
-  collection and modification** > **Data retention**: set event data to
-  **2 months**.
-- Accept each provider's data-processing terms: Firebase and Google
+The pages promise these, so set them:
+
+- **Analytics data retention:** Firebase console > Analytics > **Admin** >
+  **Data collection and modification** > **Data retention**. Set event data
+  to **2 months**.
+- **Data processing agreements:** accept them for Firebase and Google
   Analytics (Firebase console > Project settings, "Data Processing Terms"),
-  RevenueCat and OpenRouter (their DPA pages).
+  and on the RevenueCat and OpenRouter websites.
 
-**2.3 Already handled in the app.** The pages promise two things the app now
-does:
+### 2.3 What the app already does
 
-- It asks for explicit consent before collecting health data (Art. 9 GDPR),
-  and before the AI coach sends anything to the AI provider. Both can be
-  withdrawn in Settings > Privacy.
-- Deleting an account also deletes the RevenueCat customer and unlinks the
-  billing history (audit D-9). This needs a real `REVENUECAT_API_KEY` once
-  RevenueCat is live; with `unset`, deletion can't reach RevenueCat.
+The pages promise two things that the app now handles itself:
 
-**2.4 Legal review.** The pages handle health data under the GDPR, so have a
-lawyer or a data-protection service review them before launch. They are
+- It asks users for clear permission before it collects health data, and
+  again before the AI coach sends anything to the AI provider. Users can
+  take back either permission in **Settings > Privacy**.
+- Deleting an account also deletes the user's RevenueCat record and removes
+  their account from the billing history. Once RevenueCat is live, this
+  needs a real `REVENUECAT_API_KEY`. With `unset`, the app can't reach
+  RevenueCat to delete that record.
+
+### 2.4 Legal review
+
+The app handles health data, which the law protects strictly. Have a lawyer
+or a data-protection service review the pages before launch. They are
 drafts, not legal advice.
 
-**2.5 Publish.** The deploy refuses while any `TODO(owner)` is left.
+### 2.5 Publish
+
+The deploy refuses to run while any `TODO(owner)` is left.
 
 ```sh
 firebase deploy --only hosting --project fighter-edge-app
 ```
 
-Or, after step 3: GitHub > **Actions** > **Deploy backend** > **Run
-workflow** > targets **hosting**.
+After step 3 you can also publish from GitHub: **Actions > Deploy backend >
+Run workflow**, then choose **hosting**.
 
-The pages are then at:
+The pages will be at:
 
 - `https://fighter-edge-app.web.app/privacy`
 - `https://fighter-edge-app.web.app/terms`
 - `https://fighter-edge-app.web.app/delete-account`
-- German: `/de/datenschutz`, `/de/nutzungsbedingungen`, `/de/konto-loeschen`
 
-**2.6 Point the app and the stores at them.**
+The German translations are under `/de/` on the same site.
 
-- GitHub > repository **Settings** > **Environments** > `production` >
-  **Environment variables**:
+### 2.6 Link the app and the stores to the pages
+
+- **GitHub:** repository **Settings > Environments > production >
+  Environment variables**. Add:
   - `TERMS_URL` = `https://fighter-edge-app.web.app/terms`
   - `PRIVACY_URL` = `https://fighter-edge-app.web.app/privacy`
 
-  Release builds embed these. Without them the release workflow stops.
-- App Store Connect: set the Privacy Policy URL. For the License Agreement,
-  use the Terms URL as a custom EULA, or keep Apple's standard EULA and
-  link the Terms in the app description.
-- Google Play Console: set the Privacy Policy URL, and set **Data deletion**
-  > the account-deletion URL to
+  Release builds include these links. Without them, the release workflow
+  stops.
+- **App Store Connect:** set the Privacy Policy URL. For the License
+  Agreement, either use the Terms URL as a custom agreement, or keep Apple's
+  standard agreement and link the Terms in the app description.
+- **Google Play Console:** set the Privacy Policy URL. Under **Data
+  deletion**, set the account-deletion URL to
   `https://fighter-edge-app.web.app/delete-account`.
 
 ## 3. Automatic backend deploys (optional)
 
-After this, every merge to `main` that changes the backend runs the tests
-and then deploys, once you approve it. It uses keyless Workload Identity
-Federation: GitHub proves who it is to Google, so no key is stored anywhere.
+After this setup, every merge to `main` that changes the backend runs the
+tests and then deploys, after you approve it. No password or key is stored
+anywhere: GitHub proves its identity to Google directly (this is called
+Workload Identity Federation).
 
-**3.1 Protect the `production` environment first.** GitHub > **Settings** >
-**Environments** > `production` (create it if missing):
+### 3.1 First, protect the `production` environment
 
-- **Required reviewers:** add yourself. Every deploy and release then waits
-  for your click.
-- **Deployment branches and tags:** "Selected branches and tags", add `main`
-  and the tag pattern `v*.*.*` (used by the release workflow).
+GitHub > **Settings > Environments > production** (create it if it doesn't
+exist):
 
-**3.2 Create the Google Cloud side.** Open the Google Cloud console for
-project `fighter-edge-app`, click **Activate Cloud Shell** (the `>_` icon,
-top right), and paste this whole block:
+- **Required reviewers:** add yourself. Every deploy and every release then
+  waits until you click approve.
+- **Deployment branches and tags:** choose "Selected branches and tags",
+  then add `main` and the tag pattern `v*.*.*` (used for releases).
+
+### 3.2 Set up Google Cloud
+
+Open the Google Cloud console for the project `fighter-edge-app`. Click
+**Activate Cloud Shell** (the `>_` icon at the top right). Paste this whole
+block and press Enter:
 
 ```sh
 PROJECT_ID=fighter-edge-app
@@ -185,8 +206,8 @@ gcloud iam workload-identity-pools providers create-oidc fighteredge \
 gcloud iam service-accounts create github-deployer \
   --project="$PROJECT_ID" --display-name="GitHub deploys"
 
-# Only jobs running in the protected `production` environment of this
-# repository may act as the deployer.
+# Only jobs in this repository's protected `production` environment may
+# act as the deployer.
 gcloud iam service-accounts add-iam-policy-binding "$SA" \
   --project="$PROJECT_ID" \
   --role=roles/iam.workloadIdentityUser \
@@ -209,22 +230,26 @@ echo "GCP_WORKLOAD_IDENTITY_PROVIDER = projects/${PROJECT_NUMBER}/locations/glob
 echo "GCP_SERVICE_ACCOUNT = ${SA}"
 ```
 
-The last two lines print the two values for the next step. Neither is a
+The last two lines print two values you need in the next step. They are not
 secret.
 
-**3.3 Tell GitHub.** GitHub > **Settings** > **Secrets and variables** >
-**Actions** > **Variables** tab > **New repository variable**, twice, with
-the names and values printed above.
+### 3.3 Give the values to GitHub
 
-**3.4 Test it.** Wait about five minutes for Google to apply the new
-permissions, then go to GitHub > **Actions** > **Deploy backend** > **Run
-workflow** > branch `main`, targets `backend`. Approve the deployment when
-GitHub asks. The run should end green.
+GitHub > **Settings > Secrets and variables > Actions**, then the
+**Variables** tab. Click **New repository variable** and add both values
+printed above, with the same names.
 
-If it fails with "Permission denied" or "does not have permission", the
-error names the missing permission. Add the matching role in Cloud Console >
-**IAM** to `github-deployer`, then run it again.
+### 3.4 Test it
 
-Don't use the `FIREBASE_SERVICE_ACCOUNT` key fallback unless Workload
-Identity Federation is impossible for you. A stored key can leak; the setup
-above has no key.
+Wait about five minutes for Google to apply the new permissions. Then go to
+GitHub > **Actions > Deploy backend > Run workflow**. Choose the branch
+`main` and the target `backend`. Approve the deployment when GitHub asks. The
+run should finish with a green check.
+
+If it fails with "Permission denied" or "does not have permission", the error
+message names the missing permission. In the Google Cloud console, open
+**IAM**, give that role to `github-deployer`, and run the workflow again.
+
+There is also a fallback that uses a stored key (the `FIREBASE_SERVICE_ACCOUNT`
+secret). Use it only if the setup above is impossible for you: a stored key
+can leak, and the setup above has none.
