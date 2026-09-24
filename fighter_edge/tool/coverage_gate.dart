@@ -41,8 +41,8 @@ void main(List<String> args) {
       '($hit/$found, excluding generated l10n); minimum $minimum%.';
   final stepSummary = Platform.environment['GITHUB_STEP_SUMMARY'];
   if (stepSummary != null) {
-    File(stepSummary).writeAsStringSync('### Coverage\n\n$summary\n',
-        mode: FileMode.append);
+    File(stepSummary)
+        .writeAsStringSync('### Coverage\n\n$summary\n', mode: FileMode.append);
   }
   if (percent < minimum) {
     stderr.writeln('coverage gate FAILED: $summary');
