@@ -86,20 +86,20 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Stream<AppUser?> authStateChanges() {
     StreamSubscription<User?>? authSub;
-    StreamSubscription<AppUser>? profileSub;
+    StreamSubscription<Object?>? profileSub;
     late final StreamController<AppUser?> controller;
     controller = StreamController<AppUser?>(
       onListen: () {
         authSub = _auth.authStateChanges().listen(
           (user) {
-            profileSub?.cancel();
+            unawaited(profileSub?.cancel());
             profileSub = null;
             if (user == null) {
               _cached = null;
               controller.add(null);
               return;
             }
-            profileSub = _followProfile(user).listen(controller.add);
+            profileSub = _followProfile(user, controller.add);
           },
           onError: controller.addError,
         );
@@ -116,21 +116,33 @@ class FirebaseAuthRepository implements AuthRepository {
   /// a permission race while signing out) are not fatal: the last known
   /// state stays, and if nothing was known yet the account continues as
   /// free, exactly as the one-shot read used to.
-  Stream<AppUser> _followProfile(User user) async* {
+  ///
+  /// A plain subscription rather than an `async*` generator: a generator
+  /// only notices cancellation at its next event, so it kept the Firestore
+  /// listener open after sign-out and could still overwrite [_cached] with
+  /// the previous account when a late snapshot arrived.
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> _followProfile(
+    User user,
+    void Function(AppUser user) emit,
+  ) {
     var emitted = false;
     var seeded = false;
-    final snapshots = _doc(user.uid).snapshots().handleError((Object error) {
-      if (kDebugMode) debugPrint('[auth] profile listener error: $error');
-    });
-    await for (final snap in snapshots) {
-      if (!snap.exists && !seeded && !snap.metadata.isFromCache) {
-        seeded = true;
-        unawaited(_seedProfile(user).catchError((Object _) {}));
-      }
-      emitted = true;
-      yield _remember(_appUserFrom(user, snap.data() ?? const {}));
-    }
-    if (!emitted) yield _remember(_appUserFrom(user, const {}));
+    return _doc(user.uid).snapshots().listen(
+      (snap) {
+        if (!snap.exists && !seeded && !snap.metadata.isFromCache) {
+          seeded = true;
+          unawaited(_seedProfile(user).catchError((Object _) {}));
+        }
+        emitted = true;
+        emit(_remember(_appUserFrom(user, snap.data() ?? const {})));
+      },
+      onError: (Object error) {
+        if (kDebugMode) debugPrint('[auth] profile listener error: $error');
+      },
+      onDone: () {
+        if (!emitted) emit(_remember(_appUserFrom(user, const {})));
+      },
+    );
   }
 
   AppUser _remember(AppUser user) => _cached = user;

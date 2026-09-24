@@ -187,6 +187,47 @@ void main() {
       await sub.cancel();
     });
 
+    test('cancelling stops following the profile at once', () async {
+      final auth = MockFirebaseAuth(mockUser: athlete());
+      final r = repo(auth: auth);
+      final emissions = <AppUser?>[];
+      final sub = r.authStateChanges().listen(emissions.add);
+      await auth.signInWithEmailAndPassword(
+          email: 'athlete@example.test', password: 'x');
+      await pumpEventQueue();
+
+      // An async* follower only noticed cancellation at its next snapshot,
+      // so this waited, with the Firestore listener still open.
+      await sub.cancel().timeout(const Duration(seconds: 2));
+      final seen = emissions.length;
+      await firestore
+          .collection('users')
+          .doc('athlete-1')
+          .set({'goal': 'Make weight'}, SetOptions(merge: true));
+      await pumpEventQueue();
+      expect(emissions, hasLength(seen));
+    });
+
+    test('a late profile change never revives a signed-out account', () async {
+      final auth = MockFirebaseAuth(mockUser: athlete());
+      final r = repo(auth: auth);
+      final sub = r.authStateChanges().listen((_) {});
+      await auth.signInWithEmailAndPassword(
+          email: 'athlete@example.test', password: 'x');
+      await pumpEventQueue();
+      await auth.signOut();
+      await pumpEventQueue();
+      expect(r.currentUser, isNull);
+
+      await firestore
+          .collection('users')
+          .doc('athlete-1')
+          .set({'plan': 'pro'}, SetOptions(merge: true));
+      await pumpEventQueue();
+      expect(r.currentUser, isNull);
+      await sub.cancel();
+    });
+
     test('a Pro plan past its expiry is not Pro', () async {
       await firestore.collection('users').doc('athlete-1').set({
         'plan': 'pro',
