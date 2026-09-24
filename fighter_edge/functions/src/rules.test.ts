@@ -77,6 +77,116 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
     );
   });
 
+  // --- Billing is server-owned (audit T-3): the client must never be able
+  // to grant, extend, or fake a paid entitlement, only the Admin SDK.
+
+  const profile = (uid: string, db: ReturnType<typeof ownerDb>) =>
+    db.collection("users").doc(uid);
+
+  const seedProfile = async (uid: string, data: Record<string, unknown>) => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection("users").doc(uid).set(data);
+    });
+  };
+
+  it("lets a new athlete create a free profile", async () => {
+    const db = ownerDb("alice");
+    await assertSucceeds(
+      profile("alice", db).set({ email: "a@example.test", plan: "free" }),
+    );
+  });
+
+  it("refuses a profile created as Pro or with billing fields", async () => {
+    const db = ownerDb("alice");
+    await assertFails(profile("alice", db).set({ plan: "pro" }));
+    await assertFails(
+      profile("alice", db).set({ plan: "free", entitlement: "pro" }),
+    );
+    await assertFails(
+      profile("alice", db).set({ plan: "free", billing: { expiresAtMs: 1 } }),
+    );
+  });
+
+  it("refuses every client change to plan and billing fields", async () => {
+    await seedProfile("alice", {
+      plan: "free",
+      billing: { provider: "revenuecat", expiresAtMs: 0 },
+    });
+    const db = ownerDb("alice");
+    await assertFails(profile("alice", db).update({ plan: "pro" }));
+    await assertFails(profile("alice", db).update({ entitlement: "pro" }));
+    await assertFails(
+      profile("alice", db).update({ "billing.expiresAtMs": 4102444800000 }),
+    );
+    await assertFails(profile("alice", db).update({ expiresAt: 1 }));
+    await assertFails(profile("alice", db).update({ billingProvider: "x" }));
+  });
+
+  it("refuses downgrading or removing a server-granted Pro plan", async () => {
+    await seedProfile("alice", { plan: "pro", billing: { expiresAtMs: 1 } });
+    const db = ownerDb("alice");
+    await assertFails(profile("alice", db).update({ plan: "free" }));
+    await assertFails(profile("alice", db).set({ goal: "x" }));
+  });
+
+  it("still lets an athlete edit their own profile fields", async () => {
+    await seedProfile("alice", { plan: "free", goal: "" });
+    const db = ownerDb("alice");
+    await assertSucceeds(
+      profile("alice", db).update({ goal: "Make weight", onboardingComplete: true }),
+    );
+  });
+
+  it("never lets a client delete the profile document", async () => {
+    await seedProfile("alice", { plan: "free" });
+    await assertFails(profile("alice", ownerDb("alice")).delete());
+  });
+
+  it("keeps other athletes and visitors out of a profile", async () => {
+    await seedProfile("alice", { plan: "pro" });
+    await assertFails(profile("alice", ownerDb("mallory")).get());
+    await assertFails(profile("alice", ownerDb("mallory")).update({ goal: "x" }));
+    const anon = env.unauthenticatedContext().firestore();
+    await assertFails(anon.collection("users").doc("alice").get());
+  });
+
+  it("lets an athlete read but never write their AI quota", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection("users").doc("alice")
+        .collection("aiUsage").doc("2026-09-24").set({ count: 20 });
+    });
+    const usage = ownerDb("alice").collection("users").doc("alice")
+      .collection("aiUsage").doc("2026-09-24");
+    await assertSucceeds(usage.get());
+    await assertFails(usage.set({ count: 0 }));
+    await assertFails(usage.delete());
+  });
+
+  it("keeps server config and the billing ledger closed to clients", async () => {
+    const db = ownerDb("alice");
+    await assertFails(db.collection("config").doc("edgeFuelAi").get());
+    await assertFails(
+      db.collection("config").doc("edgeFuelAi").set({ enabled: true }),
+    );
+    await assertFails(db.collection("billingEvents").doc("evt").get());
+    await assertFails(
+      db.collection("billingEvents").doc("evt").set({ applied: true }),
+    );
+  });
+
+  it("keeps each athlete's nutrition and weights private", async () => {
+    const mallory = ownerDb("mallory");
+    for (const sub of ["weights", "nutritionDays", "nutritionTargets", "nutritionProfile", "sessions", "meals"]) {
+      await assertFails(
+        mallory.collection("users").doc("alice").collection(sub).doc("x").get(),
+      );
+      await assertSucceeds(
+        ownerDb("alice").collection("users").doc("alice").collection(sub)
+          .doc("x").set({ v: 1 }),
+      );
+    }
+  });
+
   it("still denies collections the rules do not name", async () => {
     const db = ownerDb("alice");
     await assertFails(

@@ -757,6 +757,180 @@ abstract class L {
   /// **'Pro puts a corner in your rest: a cue for the next round.'**
   String get timerCornerTeaser;
 
+  /// No description provided for @timerNextSessionComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Session complete'**
+  String get timerNextSessionComplete;
+
+  /// No description provided for @timerNextFinalRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Final round'**
+  String get timerNextFinalRound;
+
+  /// No description provided for @timerNextRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest'**
+  String get timerNextRest;
+
+  /// No description provided for @timerNextRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String timerNextRound(int round);
+
+  /// No description provided for @timerCallTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get timerCallTime;
+
+  /// No description provided for @timerCallRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest'**
+  String get timerCallRest;
+
+  /// No description provided for @timerCallTenSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ten seconds'**
+  String get timerCallTenSeconds;
+
+  /// No description provided for @timerClockSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes {seconds} seconds left'**
+  String timerClockSemantics(int minutes, int seconds);
+
+  /// No description provided for @timerAnnounceWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} of {total}. Work.'**
+  String timerAnnounceWork(int round, int total);
+
+  /// No description provided for @timerAnnounceRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} done. Rest.'**
+  String timerAnnounceRest(int round);
+
+  /// No description provided for @timerAnnounceDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Session complete.'**
+  String get timerAnnounceDone;
+
+  /// No description provided for @paywallWaitlistCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify me when Pro opens'**
+  String get paywallWaitlistCta;
+
+  /// No description provided for @paywallWaitlistJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on the list'**
+  String get paywallWaitlistJoined;
+
+  /// No description provided for @paywallWaitlistThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Noted. Pro will appear here when it opens, with the price shown before any charge.'**
+  String get paywallWaitlistThanks;
+
+  /// No description provided for @paywallWaitlistBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro can\'t be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.'**
+  String get paywallWaitlistBody;
+
+  /// No description provided for @paywallRenewalDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions renew automatically at the price and period shown above unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple ID or Google Play account when you confirm the purchase. You can manage or cancel your subscription at any time in your store account settings.'**
+  String get paywallRenewalDisclosure;
+
+  /// No description provided for @legalTermsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get legalTermsLink;
+
+  /// No description provided for @legalPrivacyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get legalPrivacyLink;
+
+  /// No description provided for @legalOpenPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the published version'**
+  String get legalOpenPublished;
+
+  /// No description provided for @consentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help improve Fighter Edge'**
+  String get consentTitle;
+
+  /// No description provided for @consentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'With your permission we collect anonymous usage events and crash reports. They never include your meals, weight, measurements, messages or email address. Nothing is sent unless you allow it.'**
+  String get consentBody;
+
+  /// No description provided for @consentAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get consentAllow;
+
+  /// No description provided for @consentDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t allow'**
+  String get consentDecline;
+
+  /// No description provided for @consentChangeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this any time in Settings.'**
+  String get consentChangeLater;
+
+  /// No description provided for @settingsSectionPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get settingsSectionPrivacy;
+
+  /// No description provided for @settingsAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage analytics'**
+  String get settingsAnalytics;
+
+  /// No description provided for @settingsAnalyticsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous events that show which features help. No health data.'**
+  String get settingsAnalyticsSubtitle;
+
+  /// No description provided for @settingsCrashReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Crash reports'**
+  String get settingsCrashReports;
+
+  /// No description provided for @settingsCrashReportsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error details that help us fix bugs. No personal data.'**
+  String get settingsCrashReportsSubtitle;
+
   /// No description provided for @trainTabReaction.
   ///
   /// In en, this message translates to:

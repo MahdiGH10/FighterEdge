@@ -30,6 +30,7 @@ import 'notifications/reminder_gateway.dart';
 import 'notifications/unavailable_reminder_gateway.dart';
 import 'observability/error_reporter.dart';
 import 'observability/telemetry.dart';
+import 'privacy/consent.dart';
 import 'routing/app_router.dart';
 import 'state/app_state.dart';
 import 'l10n/gen/app_localizations.dart';
@@ -65,7 +66,7 @@ class FighterEdgeBootstrap extends StatefulWidget {
 }
 
 class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
-  late Future<_AppDependencies> _boot = _initializeProductionDependencies();
+  late Future<AppDependencies> _boot = _initializeProductionDependencies();
 
   void _retry() {
     setState(() => _boot = _initializeProductionDependencies());
@@ -73,21 +74,12 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<_AppDependencies>(
+    return FutureBuilder<AppDependencies>(
       future: _boot,
       builder: (context, snapshot) {
         final dependencies = snapshot.data;
         if (dependencies != null) {
-          return FighterEdgeApp(
-            authRepo: dependencies.authRepo,
-            dataRepo: dependencies.dataRepo,
-            edgeFuelRepo: dependencies.edgeFuelRepo,
-            edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
-            billingGateway: dependencies.billingGateway,
-            coachVoice: dependencies.coachVoice,
-            telemetry: dependencies.telemetry,
-            errorReporter: dependencies.errorReporter,
-          );
+          return FighterEdgeApp.fromDependencies(dependencies);
         }
 
         return _BootMaterialApp(
@@ -99,14 +91,22 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
   }
 }
 
-Future<_AppDependencies> _initializeProductionDependencies() async {
+Future<AppDependencies> _initializeProductionDependencies() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final crashlyticsSupported = !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.macOS);
-  final errorReporter = crashlyticsSupported
-      ? FirebaseErrorReporter()
+  // Nothing is collected until the athlete decides (audit M-2). Collection
+  // is also off natively, so the SDKs stay quiet until the choice applies.
+  final consent = ConsentController(
+    sink: kIsWeb
+        ? const NoopConsentSink()
+        : FirebaseConsentSink(crashlyticsSupported: crashlyticsSupported),
+  );
+  await consent.load();
+  final ErrorReporter errorReporter = crashlyticsSupported
+      ? ConsentGatedErrorReporter(FirebaseErrorReporter(), consent)
       : const NoopErrorReporter();
   if (crashlyticsSupported) {
     installProductionErrorHandlers(errorReporter);
@@ -120,7 +120,7 @@ Future<_AppDependencies> _initializeProductionDependencies() async {
   final AuthRepository authRepo = FirebaseAuthRepository();
   await authRepo.init();
 
-  return _AppDependencies(
+  return AppDependencies(
     authRepo: authRepo,
     dataRepo: FirestoreDataRepository(),
     edgeFuelRepo: FirestoreEdgeFuelRepository(),
@@ -128,12 +128,21 @@ Future<_AppDependencies> _initializeProductionDependencies() async {
     billingGateway: RevenueCatBillingGateway(),
     reminderGateway: LocalReminderGateway(),
     coachVoice: TtsCoachVoice(),
-    telemetry: kIsWeb ? const NoopTelemetry() : FirebaseTelemetry(),
+    telemetry: kIsWeb
+        ? const NoopTelemetry()
+        : ConsentGatedTelemetry(FirebaseTelemetry(), consent),
     errorReporter: errorReporter,
+    consent: consent,
   );
 }
 
-class _AppDependencies {
+/// Every production service the app is built from.
+///
+/// [FighterEdgeApp.fromDependencies] is the only way the bootstrap hands
+/// these over, so a service cannot be built here and then silently dropped
+/// on the way to the widget tree. `reminderGateway` once was, leaving camp
+/// reminders permanently unavailable in production (audit A-1).
+class AppDependencies {
   final AuthRepository authRepo;
   final DataRepository dataRepo;
   final EdgeFuelRepository edgeFuelRepo;
@@ -143,8 +152,9 @@ class _AppDependencies {
   final CoachVoice coachVoice;
   final Telemetry telemetry;
   final ErrorReporter errorReporter;
+  final ConsentController consent;
 
-  const _AppDependencies({
+  const AppDependencies({
     required this.authRepo,
     required this.dataRepo,
     required this.edgeFuelRepo,
@@ -154,6 +164,7 @@ class _AppDependencies {
     required this.coachVoice,
     required this.telemetry,
     required this.errorReporter,
+    required this.consent,
   });
 }
 
@@ -169,6 +180,10 @@ class FighterEdgeApp extends StatelessWidget {
   final CoachVoice? coachVoice;
   final Telemetry? telemetry;
   final ErrorReporter? errorReporter;
+
+  /// Null in tests: consent counts as already decided (nothing allowed), so
+  /// no prompt covers the screen under test.
+  final ConsentController? consent;
   const FighterEdgeApp({
     super.key,
     required this.authRepo,
@@ -182,7 +197,24 @@ class FighterEdgeApp extends StatelessWidget {
     this.coachVoice,
     this.telemetry,
     this.errorReporter,
+    this.consent,
   });
+
+  /// The production wiring: every field of [dependencies], none dropped.
+  FighterEdgeApp.fromDependencies(AppDependencies dependencies, {Key? key})
+      : this(
+          key: key,
+          authRepo: dependencies.authRepo,
+          dataRepo: dependencies.dataRepo,
+          edgeFuelRepo: dependencies.edgeFuelRepo,
+          edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
+          billingGateway: dependencies.billingGateway,
+          reminderGateway: dependencies.reminderGateway,
+          coachVoice: dependencies.coachVoice,
+          telemetry: dependencies.telemetry,
+          errorReporter: dependencies.errorReporter,
+          consent: dependencies.consent,
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +234,12 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<ErrorReporter>.value(
           value: errorReporter ?? const NoopErrorReporter(),
         ),
+        if (consent case final consent?)
+          ChangeNotifierProvider<ConsentController>.value(value: consent)
+        else
+          ChangeNotifierProvider<ConsentController>(
+            create: (_) => ConsentController.decided(ConsentChoices.none),
+          ),
         Provider<ReminderGateway>.value(
           value: reminderGateway ?? const UnavailableReminderGateway(),
         ),
@@ -243,12 +281,14 @@ class FighterEdgeApp extends StatelessWidget {
           create: (_) => EdgeFuelController(
             repository: resolvedEdgeFuelRepo,
             telemetry: telemetry ?? const NoopTelemetry(),
+            errorReporter: errorReporter ?? const NoopErrorReporter(),
           ),
           update: (_, auth, controller) {
             final edgeFuel = controller ??
                 EdgeFuelController(
                   repository: resolvedEdgeFuelRepo,
                   telemetry: telemetry ?? const NoopTelemetry(),
+                  errorReporter: errorReporter ?? const NoopErrorReporter(),
                 );
             edgeFuel.setUser(auth.user?.id);
             return edgeFuel;

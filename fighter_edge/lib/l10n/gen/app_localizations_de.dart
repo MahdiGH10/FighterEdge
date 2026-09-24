@@ -382,6 +382,108 @@ class LDe extends L {
       'Mit Pro steht dir in der Pause deine Ecke zur Seite: ein Hinweis für die nächste Runde.';
 
   @override
+  String get timerNextSessionComplete => 'Einheit beendet';
+
+  @override
+  String get timerNextFinalRound => 'Letzte Runde';
+
+  @override
+  String get timerNextRest => 'Pause';
+
+  @override
+  String timerNextRound(int round) {
+    return 'Runde $round';
+  }
+
+  @override
+  String get timerCallTime => 'Zeit';
+
+  @override
+  String get timerCallRest => 'Pause';
+
+  @override
+  String get timerCallTenSeconds => 'Zehn Sekunden';
+
+  @override
+  String timerClockSemantics(int minutes, int seconds) {
+    return 'Noch $minutes Minuten $seconds Sekunden';
+  }
+
+  @override
+  String timerAnnounceWork(int round, int total) {
+    return 'Runde $round von $total. Los.';
+  }
+
+  @override
+  String timerAnnounceRest(int round) {
+    return 'Runde $round vorbei. Pause.';
+  }
+
+  @override
+  String get timerAnnounceDone => 'Einheit beendet.';
+
+  @override
+  String get paywallWaitlistCta => 'Benachrichtige mich, wenn Pro startet';
+
+  @override
+  String get paywallWaitlistJoined => 'Du stehst auf der Liste';
+
+  @override
+  String get paywallWaitlistThanks =>
+      'Notiert. Pro erscheint hier, sobald es startet, mit Preis vor jeder Zahlung.';
+
+  @override
+  String get paywallWaitlistBody =>
+      'Pro kann in dieser Version noch nicht gekauft werden. Tippe unten, und dieses Gerät merkt sich deine Anfrage. Der Store-Preis wird immer vor jeder Zahlung angezeigt.';
+
+  @override
+  String get paywallRenewalDisclosure =>
+      'Abonnements verlängern sich automatisch zum oben angezeigten Preis und Zeitraum, sofern sie nicht mindestens 24 Stunden vor Ende des laufenden Zeitraums gekündigt werden. Die Zahlung wird bei Bestätigung des Kaufs über deine Apple-ID bzw. dein Google-Play-Konto abgerechnet. Du kannst dein Abo jederzeit in den Einstellungen deines Store-Kontos verwalten oder kündigen.';
+
+  @override
+  String get legalTermsLink => 'Nutzungsbedingungen';
+
+  @override
+  String get legalPrivacyLink => 'Datenschutzerklärung';
+
+  @override
+  String get legalOpenPublished => 'Veröffentlichte Fassung öffnen';
+
+  @override
+  String get consentTitle => 'Hilf uns, Fighter Edge zu verbessern';
+
+  @override
+  String get consentBody =>
+      'Mit deiner Erlaubnis erfassen wir anonyme Nutzungsereignisse und Absturzberichte. Sie enthalten nie deine Mahlzeiten, dein Gewicht, Körpermaße, Nachrichten oder deine E-Mail-Adresse. Ohne deine Erlaubnis wird nichts gesendet.';
+
+  @override
+  String get consentAllow => 'Erlauben';
+
+  @override
+  String get consentDecline => 'Nicht erlauben';
+
+  @override
+  String get consentChangeLater =>
+      'Du kannst das jederzeit in den Einstellungen ändern.';
+
+  @override
+  String get settingsSectionPrivacy => 'Datenschutz';
+
+  @override
+  String get settingsAnalytics => 'Nutzungsanalyse';
+
+  @override
+  String get settingsAnalyticsSubtitle =>
+      'Anonyme Ereignisse, die zeigen, welche Funktionen helfen. Keine Gesundheitsdaten.';
+
+  @override
+  String get settingsCrashReports => 'Absturzberichte';
+
+  @override
+  String get settingsCrashReportsSubtitle =>
+      'Fehlerdetails, mit denen wir Bugs beheben. Keine persönlichen Daten.';
+
+  @override
   String get trainTabReaction => 'Reaktion';
 
   @override

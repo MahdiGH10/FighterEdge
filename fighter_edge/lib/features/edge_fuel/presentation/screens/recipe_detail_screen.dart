@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -150,7 +152,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       loggedAt: DateTime.now(),
     );
 
-    await edgeFuel.addEntry(entry);
+    // Shown at once; storage confirms in the background (audit A-4).
+    unawaited(edgeFuel.addEntry(entry));
     AppHaptics.commit();
     if (!mounted) return;
     setState(() => _adding = false);

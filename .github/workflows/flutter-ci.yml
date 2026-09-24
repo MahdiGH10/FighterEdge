@@ -1,17 +1,21 @@
 name: Flutter CI
 
+# Every pull request, every push to main, and on demand. Job names are kept
+# stable ("Analyze & test", "Golden tests (Windows renderer)", "Android
+# release build", "Cloud Functions") so branch-protection rules keep matching.
 on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
   group: fighter-edge-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded PR runs are cancelled; main always finishes.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 defaults:
   run:
@@ -19,130 +23,218 @@ defaults:
 
 env:
   FLUTTER_VERSION: '3.47.2'
+  NODE_VERSION: '22'
+  # Line-coverage floor, excluding generated localizations. Raise it as
+  # coverage grows; never lower it to get a PR through.
+  MIN_COVERAGE: '80'
 
+# Third-party actions are pinned to full commit SHAs (the version is in the
+# comment); Dependabot keeps them current.
 jobs:
   analyze-and-test:
     name: Analyze & test
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Install dependencies (lockfile enforced)
+        run: flutter pub get --enforce-lockfile
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
 
-      - name: Analyze
-        run: flutter analyze
+      - name: Verify generated localizations are current
+        run: |
+          flutter gen-l10n
+          git diff --exit-code -- lib/l10n/gen || {
+            echo "::error::lib/l10n/gen is stale. Run 'flutter gen-l10n' and commit the result."
+            exit 1
+          }
 
-      - name: Run tests
-        run: flutter test --exclude-tags golden --coverage --reporter compact
+      - name: Analyze
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests with coverage
+        run: flutter test --exclude-tags golden --coverage --reporter github
+
+      - name: Enforce coverage floor
+        run: dart run tool/coverage_gate.dart coverage/lcov.info "$MIN_COVERAGE"
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v4
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: flutter-coverage
           path: fighter_edge/coverage/lcov.info
+          if-no-files-found: ignore
+          retention-days: 14
 
   golden-tests:
     name: Golden tests (Windows renderer)
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           # Windows cache post-cleanup can hold the job open after the tests
           # have passed; the golden gate is small enough to run uncached.
           cache: false
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Install dependencies (lockfile enforced)
+        run: flutter pub get --enforce-lockfile
 
       - name: Run golden tests
-        run: flutter test --tags golden --reporter compact
+        run: flutter test --tags golden --reporter github
 
-  android-release:
-    name: Android release build
-    needs: [analyze-and-test, golden-tests]
-    runs-on: ubuntu-latest
-    # 20 was enough before flutter_local_notifications/timezone/flutter_timezone
-    # and core library desugaring; the added dependency graph and desugaring
-    # pass pushed a cold-Gradle-cache build past that on 2026-09-18. Gradle
-    # caching is already enabled above, so warm-cache runs should be faster
-    # than this ceiling suggests — this is headroom for the worst case, not a
-    # sign the build is slow in general.
-    timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: fighter_edge
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - name: Upload golden failures
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          distribution: temurin
-          java-version: '17'
-          cache: gradle
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generate release plugin configuration
-        # Flutter 3.47 can leave integration_test (a dev-only plugin) in the
-        # release registrant. The config-only pass regenerates it correctly.
-        run: flutter build apk --config-only
-
-      - name: Build release APK
-        # Dependencies were resolved in the preceding step. Avoid a second
-        # Flutter pub invocation, which can leave the Android watcher attached
-        # twice on hosted runners and stall Gradle.
-        run: flutter build apk --release --no-pub
-
-      - name: Upload release APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: fighter-edge-android-release
-          path: fighter_edge/build/app/outputs/flutter-apk/app-release.apk
+          name: golden-failures
+          path: fighter_edge/test/golden/failures
+          if-no-files-found: ignore
+          retention-days: 7
 
   functions:
     name: Cloud Functions
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: fighter_edge/functions
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: fighter_edge/functions/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
+      - name: Build and unit-test
         run: npm test
+
+      - name: Audit production dependencies
+        # Fails on high or critical advisories in what ships. The known
+        # moderate uuid advisory (see the audit notes) is not reachable.
+        run: npm audit --omit=dev --audit-level=high
+
+  firestore-rules:
+    name: Firestore rules
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: fighter_edge/functions
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Java (Firestore emulator)
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: fighter_edge/functions/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security-rules tests against the emulator
+        run: npm run test:rules
+
+  android-release:
+    name: Android release build
+    needs: [analyze-and-test]
+    runs-on: ubuntu-latest
+    # A cold Gradle cache with the notification/timezone/desugaring graph has
+    # passed 20 minutes before (2026-09-18); this is headroom, not the norm.
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies (lockfile enforced)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Generate release plugin configuration
+        # Flutter 3.47 can leave integration_test (a dev-only plugin) in the
+        # release registrant. The config-only pass regenerates it correctly.
+        run: flutter build apk --config-only
+
+      - name: Build obfuscated release APK
+        # No upload key on PRs: the APK falls back to the debug key (see
+        # android/app/build.gradle.kts). Store bundles are built only by the
+        # release workflow, which requires the key.
+        run: >-
+          flutter build apk --release --no-pub
+          --obfuscate --split-debug-info=build/symbols/android
+
+      - name: Upload release APK and symbols
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fighter-edge-android-release
+          path: |
+            fighter_edge/build/app/outputs/flutter-apk/app-release.apk
+            fighter_edge/build/symbols/android
+          retention-days: 14
+
+  ios-build:
+    name: iOS build (no codesign)
+    needs: [analyze-and-test]
+    # Skipped on draft PRs: macOS minutes are the expensive ones.
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies (lockfile enforced)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build iOS app without signing
+        run: flutter build ios --release --no-codesign

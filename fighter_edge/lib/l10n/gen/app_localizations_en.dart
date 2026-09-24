@@ -379,6 +379,107 @@ class LEn extends L {
       'Pro puts a corner in your rest: a cue for the next round.';
 
   @override
+  String get timerNextSessionComplete => 'Session complete';
+
+  @override
+  String get timerNextFinalRound => 'Final round';
+
+  @override
+  String get timerNextRest => 'Rest';
+
+  @override
+  String timerNextRound(int round) {
+    return 'Round $round';
+  }
+
+  @override
+  String get timerCallTime => 'Time';
+
+  @override
+  String get timerCallRest => 'Rest';
+
+  @override
+  String get timerCallTenSeconds => 'Ten seconds';
+
+  @override
+  String timerClockSemantics(int minutes, int seconds) {
+    return '$minutes minutes $seconds seconds left';
+  }
+
+  @override
+  String timerAnnounceWork(int round, int total) {
+    return 'Round $round of $total. Work.';
+  }
+
+  @override
+  String timerAnnounceRest(int round) {
+    return 'Round $round done. Rest.';
+  }
+
+  @override
+  String get timerAnnounceDone => 'Session complete.';
+
+  @override
+  String get paywallWaitlistCta => 'Notify me when Pro opens';
+
+  @override
+  String get paywallWaitlistJoined => 'You\'re on the list';
+
+  @override
+  String get paywallWaitlistThanks =>
+      'Noted. Pro will appear here when it opens, with the price shown before any charge.';
+
+  @override
+  String get paywallWaitlistBody =>
+      'Pro can\'t be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.';
+
+  @override
+  String get paywallRenewalDisclosure =>
+      'Subscriptions renew automatically at the price and period shown above unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple ID or Google Play account when you confirm the purchase. You can manage or cancel your subscription at any time in your store account settings.';
+
+  @override
+  String get legalTermsLink => 'Terms of Use';
+
+  @override
+  String get legalPrivacyLink => 'Privacy Policy';
+
+  @override
+  String get legalOpenPublished => 'Open the published version';
+
+  @override
+  String get consentTitle => 'Help improve Fighter Edge';
+
+  @override
+  String get consentBody =>
+      'With your permission we collect anonymous usage events and crash reports. They never include your meals, weight, measurements, messages or email address. Nothing is sent unless you allow it.';
+
+  @override
+  String get consentAllow => 'Allow';
+
+  @override
+  String get consentDecline => 'Don\'t allow';
+
+  @override
+  String get consentChangeLater => 'You can change this any time in Settings.';
+
+  @override
+  String get settingsSectionPrivacy => 'Privacy';
+
+  @override
+  String get settingsAnalytics => 'Usage analytics';
+
+  @override
+  String get settingsAnalyticsSubtitle =>
+      'Anonymous events that show which features help. No health data.';
+
+  @override
+  String get settingsCrashReports => 'Crash reports';
+
+  @override
+  String get settingsCrashReportsSubtitle =>
+      'Error details that help us fix bugs. No personal data.';
+
+  @override
   String get trainTabReaction => 'Reaction';
 
   @override

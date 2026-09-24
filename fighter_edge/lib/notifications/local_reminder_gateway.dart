@@ -51,8 +51,16 @@ class LocalReminderGateway implements ReminderGateway {
     // status-bar icons itself, and a colored icon there just renders as a
     // solid white blob with the mark lost. See assets/icon/ for the source.
     const android = AndroidInitializationSettings('ic_notification');
+    // Without Darwin settings the plugin never initializes on iOS and every
+    // reminder silently fails (audit R-8). Permission is requested
+    // explicitly from Settings, never as a side effect of initializing.
+    const darwin = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
     await _plugin.initialize(
-      settings: const InitializationSettings(android: android),
+      settings: const InitializationSettings(android: android, iOS: darwin),
     );
     _initialized = true;
   }
@@ -108,6 +116,7 @@ class LocalReminderGateway implements ReminderGateway {
               // with in the notification shade.
               color: AppColors.primary,
             ),
+            iOS: DarwinNotificationDetails(presentSound: true),
           ),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,

@@ -27,6 +27,7 @@ import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/state/first_run_controller.dart';
 import 'package:fighter_edge/state/streak_controller.dart';
 import 'package:fighter_edge/training/reaction/coach_voice.dart';
+import 'package:fighter_edge/privacy/consent.dart';
 
 /// Shared test utilities. (No `_test.dart` suffix so the runner ignores it.)
 
@@ -78,6 +79,7 @@ Widget wrapApp(
   ReminderGateway? reminderGateway,
   CoachVoice? coachVoice,
   Telemetry telemetry = const NoopTelemetry(),
+  ConsentController? consent,
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
   final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
@@ -106,6 +108,10 @@ Widget wrapApp(
         value: reminderGateway ?? const UnavailableReminderGateway(),
       ),
       Provider<CoachVoice>.value(value: coachVoice ?? const SilentCoachVoice()),
+      ChangeNotifierProvider<ConsentController>(
+        create: (_) =>
+            consent ?? ConsentController.decided(ConsentChoices.none),
+      ),
       Provider<Telemetry>.value(value: telemetry),
       ChangeNotifierProvider(create: (_) => LocaleController()..load()),
       ChangeNotifierProxyProvider<AuthController, FirstRunController>(

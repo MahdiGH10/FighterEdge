@@ -16,6 +16,8 @@ import 'first_run/first_win_sheet.dart';
 import 'nutrition_screen.dart';
 import 'profile_screen.dart';
 import 'training_camp_screen.dart';
+import '../privacy/consent.dart';
+import '../privacy/consent_sheet.dart';
 
 /// Root scaffold that owns the persistent bottom navigation.
 ///
@@ -64,7 +66,18 @@ class _HomeShellState extends State<HomeShell> {
     _streak = context.read<StreakController>()..addListener(_syncStreakEarn);
     // The controller loads its persisted state asynchronously; this first
     // call is usually a no-op that the load's own notify (above) retries.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncStreakEarn());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncStreakEarn();
+      _askForConsentOnce();
+    });
+  }
+
+  /// First time in the app: ask about analytics and crash reports before
+  /// anything is collected (audit M-2).
+  void _askForConsentOnce() {
+    if (!mounted) return;
+    final consent = context.read<ConsentController>();
+    if (consent.needsDecision) showConsentSheet(context, consent);
   }
 
   @override
