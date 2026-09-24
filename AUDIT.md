@@ -425,6 +425,15 @@ Not in Phase 1 (by design, see Phases 2-3): entitlement listener/expiry
 | R-10 free-model chain in production | **Ready to switch.** See S-5. | Same as S-5 |
 | CD | **Added.** `deploy-backend.yml` deploys functions, rules and indexes after the unit and emulator suites pass (hosting on request), behind the `production` environment. | Configure Workload Identity Federation (or a service-account secret) and required reviewers |
 
+## Phase 3 progress (closed-test hardening)
+
+| Finding | Status | Still needs the owner |
+|---|---|---|
+| A-3 `MockData` shown to real users | **Fixed.** `AppState.setUser` no longer conflates "no repository" (the offline demo, kept for `main_local.dart`/tests) with "no user yet" (a real repository, but signed out or not yet resolved). The second case now starts empty instead of falling back to `MockData`, so a slow first launch or a sign-out never flashes fabricated weights, sessions or training history, and it can no longer survive sign-in until the first Firestore snapshot arrives. | — |
+| A-5 streams have no `onError` | **Fixed for `AppState` and `EdgeFuelController`.** All seven `.listen(...)` subscriptions across the two (weights, meals, sessions, training log, profile draft, target, nutrition day) now handle stream errors: the last known data stays on screen, a debug-only log names the stream, and the subscription is never silently abandoned. Two regression tests per file cover the fix. | — |
+| P-6 no startup timeout | **Fixed.** `FirebaseAuthRepository.init()` bounds both the persisted-session restore and the first profile read to 4 s (matching the existing `syncEntitlement` timeout pattern), so a stalled network starts the app cold instead of hanging on the splash screen. | — |
+| P-9 verify-email screen polls in the background | **Fixed.** `VerifyEmailScreen` now stops its 3 s poll and 1 s cooldown ticker when the app is backgrounded (`AppLifecycleState.paused`), and checks once immediately on return instead of waiting for the next tick. | — |
+
 ## 4. Three-phase plan
 
 Each phase ends with a verifiable exit gate. Findings are referenced by ID.

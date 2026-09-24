@@ -1,5 +1,45 @@
 # Fighter Edge — Claude Code Handoff
 
+## Phase 1 (closed-test hardening), slice 1: no fake data, no silent stream failures (2026-09-24, PR after #8)
+
+PR #8 is merged (`70e3ed6`). This starts the roadmap in
+`fighter_edge/docs/CLAUDE_CODE_HANDOFF.md`'s companion plan (10 phases,
+approved by the owner): Phase 1 is the gate before the Play closed test can
+start. This slice covers audit A-3, A-5, P-6 and P-9.
+
+- **A-3, `MockData` shown to real users.** `lib/state/app_state.dart`
+  `setUser`/`shiftNutritionDate` used to treat "no repository" (the offline
+  demo) and "no user yet" (signed out, or not yet resolved, with a real
+  repository) as the same case, and filled both with `MockData`. Split them:
+  no repository still seeds the demo (unchanged, `main_local.dart`/tests
+  rely on it); no user now starts empty. A slow first launch or a sign-out
+  can no longer flash fabricated weights, sessions or training history, and
+  it can't survive sign-in until the first Firestore snapshot lands either.
+- **A-5, streams with no `onError`.** All seven `.listen(...)` calls across
+  `AppState` (weights, meals, sessions, training log) and
+  `EdgeFuelController` (profile draft, target, nutrition day) now pass
+  `onError`: the last known data stays on screen, and a debug-only
+  `debugPrint` names the stream. Nothing here is fatal — Firestore retries
+  the underlying listener itself.
+- **P-6, no startup timeout.** `FirebaseAuthRepository.init()` bounds the
+  persisted-session restore and the first profile read to 4 s
+  (`_startupTimeout`), matching the existing `syncEntitlement` `.timeout(20s)`
+  pattern. A stalled network now starts the app signed out instead of
+  hanging on the splash screen.
+- **P-9, verify-email screen polls in the background.**
+  `VerifyEmailScreen` now mixes in `WidgetsBindingObserver` and stops its
+  poll/cooldown timers on `AppLifecycleState.paused`, restarting (and
+  checking once immediately) on `resumed`.
+
+Tests: 3 new in `test/unit/app_state_test.dart`, 1 in
+`test/unit/edge_fuel/edge_fuel_controller_sync_test.dart`, 1 in
+`test/widget/verify_email_test.dart` (639 total, up from 634). No new owner
+steps.
+
+**Next in Phase 1:** Android release setup (ProGuard, Crashlytics, the
+notification-icon `keep.xml`), list performance and query limits, paywall
+error handling, then reviving `integration_test/app_flow_test.dart`.
+
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 
 PR #7 is merged (`96f96c8`). The owner approved the product plan in

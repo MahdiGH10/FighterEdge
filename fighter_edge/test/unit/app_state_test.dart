@@ -1,9 +1,60 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:fighter_edge/data/data_repository.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/models/meal.dart';
+import 'package:fighter_edge/models/training_log_entry.dart';
+import 'package:fighter_edge/models/training_session.dart';
+import 'package:fighter_edge/models/weight_entry.dart';
 import 'package:fighter_edge/state/app_state.dart';
+
+/// A [DataRepository] whose weights stream is controlled directly, so tests
+/// can inject an error without going through Firestore.
+class _FlakyRepository implements DataRepository {
+  _FlakyRepository(this._inner);
+  final InMemoryDataRepository _inner;
+  final weightsController = StreamController<List<WeightEntry>>.broadcast();
+
+  @override
+  Stream<List<WeightEntry>> watchWeights(String userId) =>
+      weightsController.stream;
+
+  @override
+  Future<void> addWeight(String userId, WeightEntry entry) =>
+      _inner.addWeight(userId, entry);
+
+  @override
+  Stream<List<Meal>> watchMeals(String userId, DateTime date) =>
+      _inner.watchMeals(userId, date);
+
+  @override
+  Future<void> saveMealsForDate(
+          String userId, DateTime date, List<Meal> meals) =>
+      _inner.saveMealsForDate(userId, date, meals);
+
+  @override
+  Stream<List<TrainingSession>> watchSessions(String userId) =>
+      _inner.watchSessions(userId);
+
+  @override
+  Future<void> saveSession(String userId, TrainingSession session) =>
+      _inner.saveSession(userId, session);
+
+  @override
+  Stream<List<TrainingLogEntry>> watchTrainingLog(String userId) =>
+      _inner.watchTrainingLog(userId);
+
+  @override
+  Future<void> saveTrainingLogEntry(String userId, TrainingLogEntry entry) =>
+      _inner.saveTrainingLogEntry(userId, entry);
+
+  @override
+  Future<void> deleteTrainingLogEntry(String userId, String entryId) =>
+      _inner.deleteTrainingLogEntry(userId, entryId);
+}
 
 void main() {
   test('repository-backed state starts empty instead of flashing demo data',
@@ -17,6 +68,68 @@ void main() {
 
     state.dispose();
     repository.dispose();
+  });
+
+  test('signed out with a real repository stays empty, never MockData (A-3)',
+      () {
+    final repository = InMemoryDataRepository();
+    final state = AppState(dataRepository: repository);
+
+    // Never resolved (or a genuine sign-out): userId is null, but a real
+    // repository exists, so this must not fall back to fabricated numbers.
+    state.setUser(null);
+
+    expect(state.weights, isEmpty);
+    expect(state.meals, isEmpty);
+    expect(state.sessions, isEmpty);
+    expect(state.trainingLog, isEmpty);
+
+    state.dispose();
+    repository.dispose();
+  });
+
+  test(
+      'signing out after signing in clears state instead of showing '
+      'the previous account or MockData (A-3)', () async {
+    final repository = InMemoryDataRepository();
+    final state = AppState(dataRepository: repository);
+
+    state.setUser('athlete-1');
+    await repository.addWeight(
+        'athlete-1', WeightEntry(DateTime(2026, 1, 1), 80));
+    await pumpEventQueue();
+    expect(state.weights, isNotEmpty);
+
+    state.setUser(null);
+
+    expect(state.weights, isEmpty);
+    expect(state.sessions, isEmpty);
+    expect(state.trainingLog, isEmpty);
+
+    state.dispose();
+    repository.dispose();
+  });
+
+  test(
+      'a weights stream error keeps the last known data instead of '
+      'crashing or hanging (A-5)', () async {
+    final repository = _FlakyRepository(InMemoryDataRepository());
+    final state = AppState(dataRepository: repository);
+    state.setUser('athlete-1');
+
+    repository.weightsController.add([WeightEntry(DateTime(2026, 1, 1), 80)]);
+    await pumpEventQueue();
+    expect(state.weights, hasLength(1));
+
+    repository.weightsController.addError(Exception('offline'));
+    await pumpEventQueue();
+
+    // The subscription survives the error; the last known weights remain
+    // instead of the app crashing or freezing on a hung stream.
+    expect(state.weights, hasLength(1));
+
+    state.dispose();
+    await repository.weightsController.close();
   });
 
   group('AppState — weight', () {

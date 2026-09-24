@@ -71,11 +71,20 @@ class FirebaseAuthRepository implements AuthRepository {
   DocumentReference<Map<String, dynamic>> _doc(String uid) =>
       _db.collection('users').doc(uid);
 
+  /// How long startup waits on Firebase's persisted-session restore and on
+  /// the first profile read before giving up and starting cold. Without a
+  /// bound, a stalled network hangs the app on its splash screen forever
+  /// (audit P-6); after it, the user sees the normal signed-out flow instead.
+  static const _startupTimeout = Duration(seconds: 4);
+
   @override
   Future<void> init() async {
     // Wait for Firebase to restore any persisted session, then hydrate it so
     // AuthController can seed its status synchronously (no login-screen flash).
-    final user = await _auth.authStateChanges().first;
+    final user = await _auth
+        .authStateChanges()
+        .first
+        .timeout(_startupTimeout, onTimeout: () => null);
     if (user != null) _cached = await _hydrate(user);
   }
 
@@ -163,7 +172,7 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<AppUser> _hydrate(User user) async {
     Map<String, dynamic> profileData = const {};
     try {
-      final snap = await _doc(user.uid).get();
+      final snap = await _doc(user.uid).get().timeout(_startupTimeout);
       if (snap.exists) {
         profileData = snap.data() ?? const {};
       } else {
