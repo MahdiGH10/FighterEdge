@@ -224,6 +224,51 @@ jobs:
             fighter_edge/build/symbols/android
           retention-days: 14
 
+  integration-test:
+    name: Integration test (Android emulator)
+    needs: [analyze-and-test]
+    # Skipped on draft PRs: emulator boot alone is several minutes.
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Enable KVM (hardware acceleration for the emulator)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies (lockfile enforced)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Generate debug plugin configuration
+        run: flutter build apk --config-only --debug
+
+      - name: Run the integration tests on an emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          working-directory: fighter_edge
+          script: flutter test integration_test/
+
   ios-build:
     name: iOS build (no codesign)
     needs: [analyze-and-test]

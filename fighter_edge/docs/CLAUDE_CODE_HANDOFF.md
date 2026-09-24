@@ -143,9 +143,56 @@ the error-code mapping is pure and testable via
 `PlatformException.code`, no channel mock needed), 1 new in
 `test/unit/auth_controller_test.dart`. 648 total.
 
-**Next in Phase 1:** reviving `integration_test/app_flow_test.dart` and
-wiring the CI/Play upload pieces (release.yml, 16 KB check is already in
-from slice 2).
+## Phase 1, slice 5: revive the integration test, run it in CI, wire the Play upload (2026-09-24, PR after slice 4)
+
+Audit T-6, and closes the Play-upload gap in R-5.
+
+- **`integration_test/app_flow_test.dart` rewritten.** The old one expected
+  a "More" tab, "Corner Coach", and a client-side "Upgrade to Pro" button
+  that flipped `isPro` in one tap — none of that exists anymore. It now
+  walks the real flow: welcome pages → Art. 9 health-data consent → all 6
+  onboarding questions → dashboard → Profile → a real store purchase
+  (`FakeBillingGateway`, since this runs against the local backend) that
+  does **not** grant Pro by itself → `repo.debugSetPlan(Plan.pro)`
+  (standing in for RevenueCat's webhook) → the UI unlocks reactively →
+  sign out. That purchase/grant split is the one thing most worth an
+  on-device regression test: the client must never be able to grant itself
+  Pro.
+  - `test/flow/app_journey_test.dart` (the same flow, headless, already
+    passing) stops instead at the honest-waitlist path, since its
+    `makeRepo()` leaves billing unconfigured (audit M-6's own regression
+    test). The two files now deliberately cover different paths instead of
+    duplicating one — see the doc comment on each.
+  - Verified by porting the new ending into a scratch widget test in this
+    sandbox first (no Android emulator/device is available here): caught
+    that the paywall's monthly-plan button renders as `MONTHLY - $7.99`
+    (uppercased by the button widget), not `_monthlyLabel()`'s
+    `Monthly - $7.99`, before it went into the real integration test.
+- **`flutter-ci.yml` gets an `integration-test` job**
+  (`reactivecircus/android-emulator-runner`, API 34, `google_apis`,
+  `x86_64`; skipped on draft PRs like the iOS job) that runs everything
+  under `integration_test/` — both `app_flow_test.dart` and the existing
+  `performance_smoke_test.dart` — on a real Android emulator. This is a
+  7th required check now (was 6).
+- **`release.yml` uploads to Play's internal track** once
+  `PLAY_SERVICE_ACCOUNT_JSON` is set (`OWNER_SETUP.md` section 5,
+  new — how to create the service account and grant it Release Manager
+  access). Without the secret, the step skips with a `::notice::` and the
+  signed AAB is still attached to the run for a manual upload, same as
+  before. Both new third-party actions
+  (`reactivecircus/android-emulator-runner`, `r0adkll/upload-google-play`)
+  are pinned to a commit SHA read from the real tag via `git ls-remote`
+  and their `action.yml` fetched and checked for the exact input names
+  used — this sandbox can't reach GitHub's API directly to verify a SHA
+  the usual way, but git protocol access to public repos works.
+
+**Not yet verified:** the emulator job itself — this sandbox has no
+Android emulator to run it against, so CI is the first real run, same
+caveat as slice 2's minification change.
+
+**Phase 1 is now feature-complete** (all six original items). Next:
+verify everything end-to-end, update the handoff/AUDIT one more time if
+CI surfaces anything, and get the PR to green.
 
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 

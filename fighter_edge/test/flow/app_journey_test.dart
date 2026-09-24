@@ -7,8 +7,12 @@ import 'package:fighter_edge/widgets/primary_button.dart';
 
 import '../helpers/test_harness.dart';
 
-/// Headless end-to-end journey (runs under `flutter test`). The same flow lives
-/// in integration_test/app_flow_test.dart for on-device / CI driver runs.
+/// Headless end-to-end journey (runs under `flutter test`), through
+/// onboarding to the dashboard, then proving the honest-waitlist path when
+/// billing is unconfigured (audit M-6). `integration_test/app_flow_test.dart`
+/// runs the same onboarding on-device, then diverges to exercise a
+/// configured store purchase and the server-owned entitlement boundary
+/// instead — the two together cover both paywall paths.
 void main() {
   testWidgets(
       'signup -> hit Pro gate -> checkout intent stays locked -> sign out',
