@@ -13,10 +13,15 @@
     <!-- Android clears all scheduled alarms on reboot; this lets the plugin's
          own receiver re-arm the ones it had persisted. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Backups are off (audit S-6): allowBackup/fullBackupContent cover
+         Android 11 and below, data_extraction_rules covers 12+. -->
     <application
         android:label="Fighter Edge"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/launcher_icon"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
             android:name=".MainActivity"
             android:exported="true"
