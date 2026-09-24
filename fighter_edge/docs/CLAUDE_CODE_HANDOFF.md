@@ -211,6 +211,15 @@ SDK's runtime code, independent of this Gradle plugin, so it still
 works; only automatic ProGuard mapping upload is off until a
 Gradle-9-compatible plugin version is confirmed.
 
+**Also from this CI run:** the new `integration-test` job's emulator never
+booted — `FATAL | Not enough space to create userdata partition.
+Available: 4848.20 MB, need 7372.80 MB.` The GitHub-hosted runner's
+preinstalled tooling (`.NET` SDK, Android NDK, stray Docker images —
+none of which this job uses) was eating into the disk the AVD needed.
+`flutter-ci.yml`'s `integration-test` job now frees that up
+(`rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk /opt/ghc`,
+`docker image prune`) before creating the emulator.
+
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 
 PR #7 is merged (`96f96c8`). The owner approved the product plan in
