@@ -59,7 +59,7 @@ class DashboardScreen extends StatelessWidget {
     final weightDelta = state.weeklyDelta;
     final losing = weightDelta <= 0;
     final nextSession = state.sessions.where((s) => !s.completed).firstOrNull;
-    final streakCompletedDays = StreakEngine.completedDateKeys(state.sessions);
+    final streakCompletedDays = state.trainingDayKeys;
     final streakDays = StreakEngine.streakDays(
       streakCompletedDays,
       protectedDateKeys: streak.protectedDateKeys,
@@ -286,7 +286,7 @@ class _TodayFocusCard extends StatelessWidget {
     final streak = context.watch<StreakController>();
     final nextSession = state.sessions.where((s) => !s.completed).firstOrNull;
     final streakDays = StreakEngine.streakDays(
-      StreakEngine.completedDateKeys(state.sessions),
+      state.trainingDayKeys,
       protectedDateKeys: streak.protectedDateKeys,
     );
 

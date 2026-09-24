@@ -7,7 +7,6 @@ import '../l10n/gen/app_localizations.dart';
 import '../state/app_state.dart';
 import '../state/first_run_controller.dart';
 import '../state/streak_controller.dart';
-import '../state/streak_engine.dart';
 import '../theme/app_haptics.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/coach_marks.dart';
@@ -80,10 +79,9 @@ class _HomeShellState extends State<HomeShell> {
   /// [StreakController.syncWeeklyEarn] only does real work once per week.
   void _syncStreakEarn() {
     if (!mounted) return;
-    final sessions = context.read<AppState>().sessions;
     final isPro = context.read<AuthController>().isPro;
     _streak.syncWeeklyEarn(
-      completedDateKeys: StreakEngine.completedDateKeys(sessions),
+      completedDateKeys: context.read<AppState>().trainingDayKeys,
       isPro: isPro,
     );
   }

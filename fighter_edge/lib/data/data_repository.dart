@@ -1,4 +1,5 @@
 import '../models/meal.dart';
+import '../models/training_log_entry.dart';
 import '../models/training_session.dart';
 import '../models/weight_entry.dart';
 
@@ -18,6 +19,14 @@ abstract class DataRepository {
   Stream<List<TrainingSession>> watchSessions(String userId);
 
   Future<void> saveSession(String userId, TrainingSession session);
+
+  /// Every logged training entry, newest first.
+  Stream<List<TrainingLogEntry>> watchTrainingLog(String userId);
+
+  /// Creates or replaces the entry with [TrainingLogEntry.id].
+  Future<void> saveTrainingLogEntry(String userId, TrainingLogEntry entry);
+
+  Future<void> deleteTrainingLogEntry(String userId, String entryId);
 }
 
 String mealDateKey(DateTime date) {

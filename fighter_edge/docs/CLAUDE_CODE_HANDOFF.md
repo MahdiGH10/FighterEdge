@@ -1,6 +1,39 @@
 # Fighter Edge — Claude Code Handoff
 
-## Current retention work — 2026-09-23
+## Current retention work — 2026-09-24: Slice 3a done (branch `feat/training-log`)
+
+- **Training log.** A new `TrainingLogEntry` model is stored in
+  `users/{uid}/trainingLog/{id}`. `DataRepository` gains
+  `watchTrainingLog`, `saveTrainingLogEntry` and `deleteTrainingLogEntry`
+  (Firestore and in-memory).
+- **The weekly plan is now a template.** `AppState.sessions` derives each
+  slot's done state, RPE and note from **this week's** log entry, so the plan
+  starts fresh every Monday. `completeSession` writes the log and never the
+  slot.
+- **History and stats read the log.** `completedSessionsDesc` (History,
+  Recent activity) now covers all weeks. `completedSessionCount` and
+  `trainingDayKeys` (streak) count only sources where
+  `countsAsTrainingDay` is true, so Reaction drills are excluded (plan
+  decision D1). Dashboard, profile and home-shell streak callers switched to
+  `trainingDayKeys`.
+- **Migration.** On the first load of a user, completions stored on old slot
+  documents move into the log with deterministic IDs
+  (`plan-{slotId}-{dateKey}`), and each slot's completion is then cleared.
+  Tests cover running it twice. `AppState` takes a `clock` for week-based
+  tests.
+- **Rules.** `firestore.rules` gains an owner-only `trainingLog` match.
+  `functions/src/rules.test.ts` runs 4 tests in the emulator via
+  `npm run test:rules`, which uses the pinned `firebase-tools@13.35.1`
+  because the global CLI (v15) needs Java 21 and this PC has Java 17.
+  Plain `npm test` skips the rules suite when no emulator is running.
+- **NOT DEPLOYED — ship blocker.** The rules are not deployed. Deploy them
+  (`firebase deploy --only firestore:rules`, only with the user's approval)
+  **before** any build with this code reaches users. Otherwise every log
+  write is denied in production and History stays empty.
+- **Next: Slice 3b.** Log round-timer and Reaction finishes, and give
+  History sources, durations and week grouping.
+
+## Earlier retention work — 2026-09-23
 
 The newer implementation plan is
 `docs/IMPLEMENTATION_PLAN_RETENTION_20260923.md`. `feat/reaction-drills` was

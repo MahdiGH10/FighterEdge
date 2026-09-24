@@ -1,6 +1,6 @@
 {
   "name": "fighter-edge-functions",
-  "description": "Backend boundary for EdgeFuel AI (master prompt §13). Holds the OpenRouter key server-side; the Flutter app never calls an AI provider directly.",
+  "description": "Backend boundary for EdgeFuel AI (master prompt \u00a713). Holds the OpenRouter key server-side; the Flutter app never calls an AI provider directly.",
   "version": "1.0.0",
   "private": true,
   "engines": {
@@ -10,7 +10,8 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "test": "npm run build && node --test lib/validate.test.js lib/billing.test.js lib/openrouter.test.js lib/quota.test.js",
+    "test": "npm run build && node --test lib/validate.test.js lib/billing.test.js lib/openrouter.test.js lib/quota.test.js lib/rules.test.js",
+    "test:rules": "npx -y firebase-tools@13.35.1 emulators:exec --only firestore --project fighter-edge-rules-test \"npm run build && node --test lib/rules.test.js\"",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions"
   },
@@ -19,6 +20,8 @@
     "firebase-functions": "^6.1.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "firebase": "^12.19.0",
     "typescript": "^5.6.0"
   }
 }

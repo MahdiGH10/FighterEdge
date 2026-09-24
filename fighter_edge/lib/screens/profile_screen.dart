@@ -32,7 +32,7 @@ class ProfileScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final streak = context.watch<StreakController>();
     final streakDays = StreakEngine.streakDays(
-      StreakEngine.completedDateKeys(state.sessions),
+      state.trainingDayKeys,
       protectedDateKeys: streak.protectedDateKeys,
     );
     final weight = state.latestWeight;
