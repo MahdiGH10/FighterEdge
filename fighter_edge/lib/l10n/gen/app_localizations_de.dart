@@ -382,6 +382,47 @@ class LDe extends L {
       'Mit Pro steht dir in der Pause deine Ecke zur Seite: ein Hinweis für die nächste Runde.';
 
   @override
+  String get timerNextSessionComplete => 'Einheit beendet';
+
+  @override
+  String get timerNextFinalRound => 'Letzte Runde';
+
+  @override
+  String get timerNextRest => 'Pause';
+
+  @override
+  String timerNextRound(int round) {
+    return 'Runde $round';
+  }
+
+  @override
+  String get timerCallTime => 'Zeit';
+
+  @override
+  String get timerCallRest => 'Pause';
+
+  @override
+  String get timerCallTenSeconds => 'Zehn Sekunden';
+
+  @override
+  String timerClockSemantics(int minutes, int seconds) {
+    return 'Noch $minutes Minuten $seconds Sekunden';
+  }
+
+  @override
+  String timerAnnounceWork(int round, int total) {
+    return 'Runde $round von $total. Los.';
+  }
+
+  @override
+  String timerAnnounceRest(int round) {
+    return 'Runde $round vorbei. Pause.';
+  }
+
+  @override
+  String get timerAnnounceDone => 'Einheit beendet.';
+
+  @override
   String get trainTabReaction => 'Reaktion';
 
   @override

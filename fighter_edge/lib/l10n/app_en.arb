@@ -154,6 +154,29 @@
   },
   "timerYourCorner": "YOUR CORNER",
   "timerCornerTeaser": "Pro puts a corner in your rest: a cue for the next round.",
+  "timerNextSessionComplete": "Session complete",
+  "timerNextFinalRound": "Final round",
+  "timerNextRest": "Rest",
+  "timerNextRound": "Round {round}",
+  "@timerNextRound": {
+    "placeholders": { "round": { "type": "int" } }
+  },
+  "timerCallTime": "Time",
+  "timerCallRest": "Rest",
+  "timerCallTenSeconds": "Ten seconds",
+  "timerClockSemantics": "{minutes} minutes {seconds} seconds left",
+  "@timerClockSemantics": {
+    "placeholders": { "minutes": { "type": "int" }, "seconds": { "type": "int" } }
+  },
+  "timerAnnounceWork": "Round {round} of {total}. Work.",
+  "@timerAnnounceWork": {
+    "placeholders": { "round": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "timerAnnounceRest": "Round {round} done. Rest.",
+  "@timerAnnounceRest": {
+    "placeholders": { "round": { "type": "int" } }
+  },
+  "timerAnnounceDone": "Session complete.",
 
   "trainTabReaction": "Reaction",
   "reactionTitle": "Reaction Drill",

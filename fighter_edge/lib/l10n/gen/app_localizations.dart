@@ -757,6 +757,72 @@ abstract class L {
   /// **'Pro puts a corner in your rest: a cue for the next round.'**
   String get timerCornerTeaser;
 
+  /// No description provided for @timerNextSessionComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Session complete'**
+  String get timerNextSessionComplete;
+
+  /// No description provided for @timerNextFinalRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Final round'**
+  String get timerNextFinalRound;
+
+  /// No description provided for @timerNextRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest'**
+  String get timerNextRest;
+
+  /// No description provided for @timerNextRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String timerNextRound(int round);
+
+  /// No description provided for @timerCallTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get timerCallTime;
+
+  /// No description provided for @timerCallRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest'**
+  String get timerCallRest;
+
+  /// No description provided for @timerCallTenSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ten seconds'**
+  String get timerCallTenSeconds;
+
+  /// No description provided for @timerClockSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes {seconds} seconds left'**
+  String timerClockSemantics(int minutes, int seconds);
+
+  /// No description provided for @timerAnnounceWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} of {total}. Work.'**
+  String timerAnnounceWork(int round, int total);
+
+  /// No description provided for @timerAnnounceRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} done. Rest.'**
+  String timerAnnounceRest(int round);
+
+  /// No description provided for @timerAnnounceDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Session complete.'**
+  String get timerAnnounceDone;
+
   /// No description provided for @trainTabReaction.
   ///
   /// In en, this message translates to:

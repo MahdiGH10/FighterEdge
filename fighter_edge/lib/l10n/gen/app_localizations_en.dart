@@ -379,6 +379,47 @@ class LEn extends L {
       'Pro puts a corner in your rest: a cue for the next round.';
 
   @override
+  String get timerNextSessionComplete => 'Session complete';
+
+  @override
+  String get timerNextFinalRound => 'Final round';
+
+  @override
+  String get timerNextRest => 'Rest';
+
+  @override
+  String timerNextRound(int round) {
+    return 'Round $round';
+  }
+
+  @override
+  String get timerCallTime => 'Time';
+
+  @override
+  String get timerCallRest => 'Rest';
+
+  @override
+  String get timerCallTenSeconds => 'Ten seconds';
+
+  @override
+  String timerClockSemantics(int minutes, int seconds) {
+    return '$minutes minutes $seconds seconds left';
+  }
+
+  @override
+  String timerAnnounceWork(int round, int total) {
+    return 'Round $round of $total. Work.';
+  }
+
+  @override
+  String timerAnnounceRest(int round) {
+    return 'Round $round done. Rest.';
+  }
+
+  @override
+  String get timerAnnounceDone => 'Session complete.';
+
+  @override
   String get trainTabReaction => 'Reaction';
 
   @override
