@@ -48,7 +48,10 @@ dev_dependencies:
 
 flutter_launcher_icons:
   android: "launcher_icon"
-  ios: false
+  ios: true
+  # App Store icons must be opaque.
+  remove_alpha_ios: true
+  background_color_ios: "#09090D"
   image_path: "assets/icon/icon.png"
   # Matches AppColors.background exactly — the icon reads as part of the
   # app, not a sticker on top of a mismatched adaptive-icon background.

@@ -18,6 +18,9 @@ migration:
     - platform: android
       create_revision: ee80f08bbf97172ec030b8751ceab557177a34a6
       base_revision: ee80f08bbf97172ec030b8751ceab557177a34a6
+    - platform: ios
+      create_revision: d3b14c876900e553bc736ca19295fc09e3853e8e
+      base_revision: d3b14c876900e553bc736ca19295fc09e3853e8e
     - platform: web
       create_revision: ee80f08bbf97172ec030b8751ceab557177a34a6
       base_revision: ee80f08bbf97172ec030b8751ceab557177a34a6
