@@ -9,6 +9,7 @@ import 'package:fighter_edge/auth/auth_repository.dart';
 import 'package:fighter_edge/auth/firebase_auth_repository.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/models/app_user.dart';
+import 'package:fighter_edge/privacy/data_consent.dart';
 
 /// Exercises the production Firebase adapter against in-memory doubles. The
 /// controllers above it are tested with fakes of [AuthRepository]; these
@@ -187,6 +188,47 @@ void main() {
       await sub.cancel();
     });
 
+    test('cancelling stops following the profile at once', () async {
+      final auth = MockFirebaseAuth(mockUser: athlete());
+      final r = repo(auth: auth);
+      final emissions = <AppUser?>[];
+      final sub = r.authStateChanges().listen(emissions.add);
+      await auth.signInWithEmailAndPassword(
+          email: 'athlete@example.test', password: 'x');
+      await pumpEventQueue();
+
+      // An async* follower only noticed cancellation at its next snapshot,
+      // so this waited, with the Firestore listener still open.
+      await sub.cancel().timeout(const Duration(seconds: 2));
+      final seen = emissions.length;
+      await firestore
+          .collection('users')
+          .doc('athlete-1')
+          .set({'goal': 'Make weight'}, SetOptions(merge: true));
+      await pumpEventQueue();
+      expect(emissions, hasLength(seen));
+    });
+
+    test('a late profile change never revives a signed-out account', () async {
+      final auth = MockFirebaseAuth(mockUser: athlete());
+      final r = repo(auth: auth);
+      final sub = r.authStateChanges().listen((_) {});
+      await auth.signInWithEmailAndPassword(
+          email: 'athlete@example.test', password: 'x');
+      await pumpEventQueue();
+      await auth.signOut();
+      await pumpEventQueue();
+      expect(r.currentUser, isNull);
+
+      await firestore
+          .collection('users')
+          .doc('athlete-1')
+          .set({'plan': 'pro'}, SetOptions(merge: true));
+      await pumpEventQueue();
+      expect(r.currentUser, isNull);
+      await sub.cancel();
+    });
+
     test('a Pro plan past its expiry is not Pro', () async {
       await firestore.collection('users').doc('athlete-1').set({
         'plan': 'pro',
@@ -226,6 +268,97 @@ void main() {
       await signedIn.signInWithGoogle();
       await signedIn.syncEntitlement();
       expect(calls, 1);
+    });
+  });
+
+  group('data consents (Art. 9)', () {
+    Future<Map<String, dynamic>> storedConsents() async {
+      final snap = await firestore.collection('users').doc('athlete-1').get();
+      return Map<String, dynamic>.from(
+          (snap.data()?['consents'] as Map?) ?? const {});
+    }
+
+    test('records consent with the server clock and follows it live', () async {
+      final auth = MockFirebaseAuth(mockUser: athlete());
+      final r = repo(auth: auth);
+      final emissions = <AppUser?>[];
+      final sub = r.authStateChanges().listen(emissions.add);
+      await auth.signInWithEmailAndPassword(
+          email: 'athlete@example.test', password: 'x');
+      await pumpEventQueue();
+      expect(emissions.last?.hasHealthDataConsent, isFalse);
+
+      final returned = await r.setDataConsent(
+        DataConsentPurpose.healthData,
+        granted: true,
+      );
+      expect(returned.hasHealthDataConsent, isTrue,
+          reason: 'the app moves on without waiting for the server');
+      await pumpEventQueue();
+      expect(emissions.last?.hasHealthDataConsent, isTrue);
+
+      final record =
+          Map<String, dynamic>.from((await storedConsents())['healthData']);
+      expect(record['version'], DataConsentPurpose.healthData.currentVersion);
+      expect(record['grantedAt'], isA<Timestamp>(),
+          reason: 'a server timestamp, never the device clock');
+      expect(record.keys, unorderedEquals(['version', 'grantedAt']));
+      expect(
+        emissions.last?.consents
+            .recordFor(DataConsentPurpose.healthData)
+            ?.grantedAt,
+        isNotNull,
+      );
+      await sub.cancel();
+    });
+
+    test('withdrawing one consent keeps the others', () async {
+      final auth = MockFirebaseAuth(mockUser: athlete());
+      final r = repo(auth: auth);
+      await r.signInWithGoogle();
+      await r.setDataConsent(DataConsentPurpose.healthData, granted: true);
+      await r.setDataConsent(DataConsentPurpose.aiCoach, granted: true);
+      await pumpEventQueue();
+      expect((await storedConsents()).keys,
+          unorderedEquals(['healthData', 'aiCoach']));
+
+      final user =
+          await r.setDataConsent(DataConsentPurpose.aiCoach, granted: false);
+      await pumpEventQueue();
+
+      expect(user.hasAiCoachConsent, isFalse);
+      expect(user.hasHealthDataConsent, isTrue);
+      expect((await storedConsents()).keys, ['healthData']);
+    });
+
+    test('hydrates a stored consent on sign-in', () async {
+      await firestore.collection('users').doc('athlete-1').set({
+        'plan': 'free',
+        'consents': {
+          'healthData': {
+            'version': DataConsentPurpose.healthData.currentVersion,
+            'grantedAt': Timestamp.fromDate(DateTime.utc(2026, 9, 1)),
+          },
+        },
+      });
+      final user = await repo(auth: MockFirebaseAuth(mockUser: athlete()))
+          .signInWithGoogle();
+
+      expect(user.hasHealthDataConsent, isTrue);
+      expect(user.hasAiCoachConsent, isFalse);
+      expect(
+        user.consents.recordFor(DataConsentPurpose.healthData)?.grantedAt,
+        DateTime.utc(2026, 9, 1).toLocal(),
+      );
+    });
+
+    test('needs an account', () async {
+      await expectLater(
+        repo(auth: MockFirebaseAuth())
+            .setDataConsent(DataConsentPurpose.healthData, granted: true),
+        throwsA(
+            isA<AuthException>().having((e) => e.code, 'code', 'signed-out')),
+      );
     });
   });
 }

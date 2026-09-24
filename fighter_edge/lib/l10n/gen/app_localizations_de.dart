@@ -484,6 +484,109 @@ class LDe extends L {
       'Fehlerdetails, mit denen wir Bugs beheben. Keine persönlichen Daten.';
 
   @override
+  String get healthConsentTitle => 'Deine Körperdaten, deine Entscheidung';
+
+  @override
+  String get healthConsentIntro =>
+      'Um deinen Plan zu erstellen, braucht Fighter Edge Daten über deinen Körper und deine Gesundheit. Das Gesetz stuft diese Daten als besonders sensibel ein, deshalb bitten wir zuerst um deine ausdrückliche Einwilligung.';
+
+  @override
+  String get healthConsentWhatTitle => 'Was wir speichern';
+
+  @override
+  String get healthConsentWhat =>
+      'Alter, Größe, Gewicht und Zielgewicht, Körperfett, falls du es angibst, das gewählte Energieprofil, Aktivitätslevel, Ernährungsweise, Allergien und Unverträglichkeiten sowie die Mahlzeiten, Gewichte und Trainings, die du einträgst.';
+
+  @override
+  String get healthConsentWhyTitle => 'Wofür wir sie nutzen';
+
+  @override
+  String get healthConsentWhy =>
+      'Nur, um deine Ziele zu berechnen, deinen Fortschritt zu zeigen und dich anzuleiten. Nie für Werbung und nie verkauft.';
+
+  @override
+  String get healthConsentWhereTitle => 'Wo sie liegen';
+
+  @override
+  String get healthConsentWhere =>
+      'In deinem Konto bei Google Firebase. Nur du kannst sie lesen.';
+
+  @override
+  String get healthConsentWithdraw =>
+      'Du kannst deine Einwilligung jederzeit unter Einstellungen > Datenschutz widerrufen. Ohne diese Daten funktioniert die App nicht, deshalb löscht ein Widerruf dein Konto und seine Daten.';
+
+  @override
+  String get healthConsentStatement =>
+      'Ich willige ein, dass Fighter Edge meine Gesundheitsdaten wie hier und in der Datenschutzerklärung beschrieben speichert und nutzt.';
+
+  @override
+  String get healthConsentAgree => 'Ich willige ein';
+
+  @override
+  String get healthConsentSignOut => 'Jetzt nicht, abmelden';
+
+  @override
+  String get healthConsentDeleteAccount => 'Stattdessen mein Konto löschen';
+
+  @override
+  String get aiConsentTitle => 'Bevor du mit dem Coach sprichst';
+
+  @override
+  String get aiConsentBody =>
+      'Für eine Antwort sendet unser Server deine Kalorien- und Makroziele, die Zusammenfassung deines heutigen Ernährungsprotokolls, deine Ernährungsweise, Allergien, Abneigungen und deine Nachrichten an OpenRouter (USA), das sie an einen KI-Modellanbieter weitergibt. Dein Name, deine E-Mail-Adresse und deine Konto-ID werden nie gesendet.';
+
+  @override
+  String get aiConsentRetention =>
+      'Manche Anbieter, besonders kostenlose Modelle, können Eingaben nach ihren eigenen Bedingungen speichern. Schreib nichts, was du nicht teilen möchtest.';
+
+  @override
+  String get aiConsentStatement =>
+      'Ich willige ein, dass diese Daten wie beschrieben an den KI-Anbieter übermittelt werden, auch in die USA.';
+
+  @override
+  String get aiConsentAgree => 'Ich willige ein';
+
+  @override
+  String get aiConsentChangeLater =>
+      'Du kannst das jederzeit unter Einstellungen > Datenschutz ausschalten.';
+
+  @override
+  String get aiConsentRequiredNotice =>
+      'Erlaube die Datenweitergabe an den KI-Coach, um eine Antwort zu bekommen.';
+
+  @override
+  String get settingsHealthData => 'Gesundheitsdaten';
+
+  @override
+  String settingsHealthDataGranted(String date) {
+    return 'Eingewilligt am $date';
+  }
+
+  @override
+  String get settingsHealthDataGrantedNoDate => 'Du hast eingewilligt';
+
+  @override
+  String get settingsHealthDataWithdrawTitle => 'Einwilligung widerrufen?';
+
+  @override
+  String get settingsHealthDataWithdrawBody =>
+      'Ohne deine Gesundheitsdaten kann Fighter Edge weder deinen Plan berechnen noch deinen Fortschritt verfolgen. Ein Widerruf bedeutet deshalb, dass dein Konto mit allen Daten gelöscht wird.';
+
+  @override
+  String get settingsHealthDataWithdrawConfirm => 'Mein Konto löschen';
+
+  @override
+  String get settingsAiCoach => 'Datenweitergabe an den KI-Coach';
+
+  @override
+  String get settingsAiCoachSubtitle =>
+      'Sendet deine Planwerte und Nachrichten an unseren KI-Anbieter (USA), wenn du den Coach nutzt.';
+
+  @override
+  String get deleteAccountSubscriptionWarning =>
+      'Das Löschen deines Kontos kündigt dein Abo nicht. Kündige es zuerst in deinen App-Store- oder Google-Play-Einstellungen, sonst verlängert es sich weiter.';
+
+  @override
   String get trainTabReaction => 'Reaktion';
 
   @override

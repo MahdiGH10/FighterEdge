@@ -480,6 +480,109 @@ class LEn extends L {
       'Error details that help us fix bugs. No personal data.';
 
   @override
+  String get healthConsentTitle => 'Your body data, your call';
+
+  @override
+  String get healthConsentIntro =>
+      'To build your plan, Fighter Edge needs data about your body and health. The law treats this data as sensitive, so we ask for your explicit consent first.';
+
+  @override
+  String get healthConsentWhatTitle => 'What we store';
+
+  @override
+  String get healthConsentWhat =>
+      'Age, height, weight and target weight, body fat if you add it, the energy profile you choose, activity level, diet, allergies and intolerances, and the food, weight and training you log.';
+
+  @override
+  String get healthConsentWhyTitle => 'What it\'s used for';
+
+  @override
+  String get healthConsentWhy =>
+      'Only to calculate your targets, show your progress and guide you. Never for ads, and never sold.';
+
+  @override
+  String get healthConsentWhereTitle => 'Where it\'s kept';
+
+  @override
+  String get healthConsentWhere =>
+      'In your account on Google Firebase. Only you can read it.';
+
+  @override
+  String get healthConsentWithdraw =>
+      'You can withdraw your consent at any time in Settings > Privacy. The app can\'t work without this data, so withdrawing deletes your account and its data.';
+
+  @override
+  String get healthConsentStatement =>
+      'I agree that Fighter Edge stores and uses my health data as described here and in the Privacy Policy.';
+
+  @override
+  String get healthConsentAgree => 'I agree';
+
+  @override
+  String get healthConsentSignOut => 'Not now, sign out';
+
+  @override
+  String get healthConsentDeleteAccount => 'Delete my account instead';
+
+  @override
+  String get aiConsentTitle => 'Before you talk to the coach';
+
+  @override
+  String get aiConsentBody =>
+      'To answer, our server sends your calorie and macro targets, today\'s food-log summary, your diet type, allergies, disliked foods and your messages to OpenRouter (USA), which passes them to an AI model provider. Your name, email address and account ID are never sent.';
+
+  @override
+  String get aiConsentRetention =>
+      'Some providers, especially free models, may keep what they receive under their own terms. Don\'t type anything you don\'t want to share.';
+
+  @override
+  String get aiConsentStatement =>
+      'I agree that this data is sent to the AI provider as described, including to the USA.';
+
+  @override
+  String get aiConsentAgree => 'I agree';
+
+  @override
+  String get aiConsentChangeLater =>
+      'You can turn this off any time in Settings > Privacy.';
+
+  @override
+  String get aiConsentRequiredNotice =>
+      'Allow AI coach data sharing to get an answer.';
+
+  @override
+  String get settingsHealthData => 'Health data';
+
+  @override
+  String settingsHealthDataGranted(String date) {
+    return 'You agreed on $date';
+  }
+
+  @override
+  String get settingsHealthDataGrantedNoDate => 'You agreed to its use';
+
+  @override
+  String get settingsHealthDataWithdrawTitle => 'Withdraw consent?';
+
+  @override
+  String get settingsHealthDataWithdrawBody =>
+      'Fighter Edge can\'t calculate your plan or track your progress without your health data. Withdrawing your consent therefore means deleting your account and all its data.';
+
+  @override
+  String get settingsHealthDataWithdrawConfirm => 'Delete my account';
+
+  @override
+  String get settingsAiCoach => 'AI coach data sharing';
+
+  @override
+  String get settingsAiCoachSubtitle =>
+      'Sends your plan facts and messages to our AI provider (USA) when you use the coach.';
+
+  @override
+  String get deleteAccountSubscriptionWarning =>
+      'Deleting your account doesn\'t cancel your subscription. Cancel it first in your App Store or Google Play account settings, or it keeps renewing.';
+
+  @override
   String get trainTabReaction => 'Reaction';
 
   @override

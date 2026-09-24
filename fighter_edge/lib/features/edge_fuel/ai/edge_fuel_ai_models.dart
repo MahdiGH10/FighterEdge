@@ -27,6 +27,9 @@ enum EdgeFuelAiStatus {
   success,
   quotaReached,
   entitlementRequired,
+
+  /// The account hasn't agreed to AI data sharing (the server checks).
+  consentRequired,
   unavailable,
 }
 
@@ -138,6 +141,10 @@ class EdgeFuelAiResult {
 
   const EdgeFuelAiResult.entitlementRequired()
       : status = EdgeFuelAiStatus.entitlementRequired,
+        response = null;
+
+  const EdgeFuelAiResult.consentRequired()
+      : status = EdgeFuelAiStatus.consentRequired,
         response = null;
 
   const EdgeFuelAiResult.unavailable()

@@ -9,8 +9,10 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if isOwner(uid);
-      allow create: if isOwner(uid) && isFreeProfileCreate();
-      allow update: if isOwner(uid) && billingFieldsUnchanged();
+      allow create: if isOwner(uid) && isFreeProfileCreate() &&
+        consentsValid({});
+      allow update: if isOwner(uid) && billingFieldsUnchanged() &&
+        consentsValid(resource.data);
       allow delete: if false;
 
       match /weights/{entryId} {
@@ -81,6 +83,28 @@ service cloud.firestore {
           'expiresAt',
           'gracePeriodEndsAt',
         ]);
+    }
+
+    // `consents.<purpose>` is the athlete's own explicit consent (health
+    // data, AI coach). They may give or withdraw it, but a new record must
+    // carry the server's clock, so consent can't be backdated.
+    function consentsValid(before) {
+      let after = request.resource.data.get('consents', {});
+      let prior = before.get('consents', {});
+      return after is map &&
+        after.keys().hasOnly(['healthData', 'aiCoach']) &&
+        consentKeptOrFresh(after, prior, 'healthData') &&
+        consentKeptOrFresh(after, prior, 'aiCoach');
+    }
+
+    function consentKeptOrFresh(after, prior, purpose) {
+      return !(purpose in after) ||
+        (prior is map && purpose in prior && after[purpose] == prior[purpose]) ||
+        (after[purpose] is map &&
+          after[purpose].keys().hasOnly(['version', 'grantedAt']) &&
+          after[purpose].version is int &&
+          after[purpose].version >= 1 &&
+          after[purpose].grantedAt == request.time);
     }
 
     function billingFieldsUnchanged() {

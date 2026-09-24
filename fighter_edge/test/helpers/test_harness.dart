@@ -28,6 +28,7 @@ import 'package:fighter_edge/state/first_run_controller.dart';
 import 'package:fighter_edge/state/streak_controller.dart';
 import 'package:fighter_edge/training/reaction/coach_voice.dart';
 import 'package:fighter_edge/privacy/consent.dart';
+import 'package:fighter_edge/privacy/data_consent.dart';
 
 /// Shared test utilities. (No `_test.dart` suffix so the runner ignores it.)
 
@@ -37,10 +38,16 @@ const testName = 'Ayoub';
 
 /// Builds a fresh [LocalAuthRepository] backed by mocked SharedPreferences,
 /// optionally already signed in (and optionally on the Pro plan).
+///
+/// A signed-in account has agreed to health-data use and AI coach data
+/// sharing unless a test says otherwise, like most real accounts past the
+/// first screen.
 Future<LocalAuthRepository> makeRepo({
   bool signedIn = false,
   Plan plan = Plan.free,
   bool onboarded = false,
+  bool healthConsent = true,
+  bool aiCoachConsent = true,
 }) async {
   SharedPreferences.setMockInitialValues({});
   final repo = LocalAuthRepository();
@@ -51,6 +58,12 @@ Future<LocalAuthRepository> makeRepo({
       password: testPassword,
       displayName: testName,
     );
+    if (healthConsent) {
+      await repo.setDataConsent(DataConsentPurpose.healthData, granted: true);
+    }
+    if (aiCoachConsent) {
+      await repo.setDataConsent(DataConsentPurpose.aiCoach, granted: true);
+    }
     if (onboarded) {
       await repo.completeOnboarding(
         goal: 'Build fight-camp structure',

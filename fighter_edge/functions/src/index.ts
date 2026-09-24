@@ -8,6 +8,7 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as logger from "firebase-functions/logger";
 
 import { hasActivePro, RevenueCatEvent } from "./billing";
+import { hasConsent } from "./consents";
 import {
   processRevenueCatEvent,
   reconcileExpiredEntitlements,
@@ -16,6 +17,7 @@ import {
 } from "./entitlements";
 import { callOpenRouter, modelChain, OpenRouterError } from "./openrouter";
 import { consumeQuota, isAiEnabled, refundQuota } from "./quota";
+import { REVENUECAT_API_KEY } from "./secrets";
 import { SYSTEM_PROMPT, SYSTEM_PROMPT_VERSION } from "./systemPrompt";
 import { AiRequest, ChatTurn, AiTaskType } from "./types";
 import { parseModelJson, validateResponse } from "./validate";
@@ -26,13 +28,6 @@ export { deleteAccount } from "./accountDeletion";
 
 const OPENROUTER_API_KEY = defineSecret("OPENROUTER_API_KEY");
 const REVENUECAT_WEBHOOK_AUTH = defineSecret("REVENUECAT_WEBHOOK_AUTH");
-/**
- * RevenueCat secret API key (starts with `sk_`). Used to read entitlements
- * straight from RevenueCat for syncs, transfers and reconciliation. Until
- * RevenueCat is set up, create the secret with the value "unset": deploys
- * work, and those paths degrade safely.
- */
-const REVENUECAT_API_KEY = defineSecret("REVENUECAT_API_KEY");
 /** First attempt plus at most one retry of a rejected answer. */
 const MAX_MODEL_ATTEMPTS = 2;
 
@@ -126,15 +121,23 @@ export const edgeFuelAiExplain = onCall(
       }
     }
 
-    // Client-side gates are only a UX optimization. Premium tasks must be
-    // authorized against the server-owned profile before consuming quota.
-    if (data.task !== "summarizeTrend") {
-      const profile = await db.collection("users").doc(uid).get();
-      // Expiry-aware (audit M-4): `plan` alone let a missed EXPIRATION
-      // webhook keep paid AI on forever.
-      if (!hasActivePro(profile.data(), Date.now())) {
-        return { status: "entitlementRequired" as const };
-      }
+    // Client-side gates are only a UX optimization. Every task is authorized
+    // against the stored profile before quota is consumed or anything leaves
+    // our servers.
+    const profile = (await db.collection("users").doc(uid).get()).data();
+    // Health data goes to a third party (OpenRouter, USA) only with the
+    // account's explicit consent (Art. 9(2)(a) GDPR; Privacy Policy 2.3).
+    if (!hasConsent(profile, "aiCoach")) {
+      logger.info("ai_request_blocked", {
+        task: data.task,
+        reason: "consent_required",
+      });
+      return { status: "consentRequired" as const };
+    }
+    // Expiry-aware (audit M-4): `plan` alone let a missed EXPIRATION
+    // webhook keep paid AI on forever.
+    if (data.task !== "summarizeTrend" && !hasActivePro(profile, Date.now())) {
+      return { status: "entitlementRequired" as const };
     }
 
     const quota = await consumeQuota(db, uid, new Date());

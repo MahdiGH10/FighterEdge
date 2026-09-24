@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../billing/subscription.dart';
 import '../models/app_user.dart';
+import '../privacy/data_consent.dart';
 import 'auth_repository.dart';
 
 /// A fully working on-device auth backend used until Firebase is connected.
@@ -256,6 +257,26 @@ class LocalAuthRepository implements AuthRepository {
     );
     await _persistAccount(user, null);
     return _completeSignIn(user);
+  }
+
+  @override
+  Future<AppUser> setDataConsent(
+    DataConsentPurpose purpose, {
+    required bool granted,
+  }) async {
+    final current = _current;
+    if (current == null) {
+      throw const AuthException('signed-out', 'Sign in first.');
+    }
+    final user = current.copyWith(
+      consents: granted
+          ? current.consents.granted(purpose, at: DateTime.now())
+          : current.consents.withdrawn(purpose),
+    );
+    await _persistAccount(user, null);
+    _current = user;
+    _controller.add(_current);
+    return user;
   }
 
   /// Test/dev-only entitlement seeding. Production UI must never call this.

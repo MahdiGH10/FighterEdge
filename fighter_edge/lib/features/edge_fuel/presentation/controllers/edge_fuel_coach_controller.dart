@@ -214,5 +214,6 @@ String _statusName(EdgeFuelAiStatus status) => switch (status) {
       EdgeFuelAiStatus.success => 'success',
       EdgeFuelAiStatus.quotaReached => 'quota_reached',
       EdgeFuelAiStatus.entitlementRequired => 'entitlement_required',
+      EdgeFuelAiStatus.consentRequired => 'consent_required',
       EdgeFuelAiStatus.unavailable => 'unavailable',
     };

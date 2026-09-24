@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { FetchLike, fetchRevenueCatEntitlement, usableApiKey } from "./entitlements";
+import {
+  deleteRevenueCatSubscriber,
+  FetchLike,
+  fetchRevenueCatEntitlement,
+  RevenueCatUnavailable,
+  usableApiKey,
+} from "./entitlements";
 
 test("only RevenueCat secret keys count as configured", () => {
   assert.equal(usableApiKey("sk_live_abc"), "sk_live_abc");
@@ -41,5 +47,53 @@ test("the RevenueCat client refuses without a key and surfaces HTTP errors", asy
   await assert.rejects(
     fetchRevenueCatEntitlement("u", { apiKey: "sk_test", nowMs: 0, fetchImpl: failing }),
     /429/,
+  );
+});
+
+test("deleting a RevenueCat customer sends DELETE with the key", async () => {
+  const seen: { url: string; method: string; auth: string }[] = [];
+  const fetchImpl: FetchLike = async (url, init) => {
+    seen.push({ url, method: init.method, auth: init.headers.Authorization });
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  const outcome = await deleteRevenueCatSubscriber("uid/1", {
+    apiKey: "sk_test",
+    nowMs: 0,
+    fetchImpl,
+  });
+  assert.equal(outcome, "deleted");
+  assert.deepEqual(seen, [
+    {
+      url: "https://api.revenuecat.com/v1/subscribers/uid%2F1",
+      method: "DELETE",
+      auth: "Bearer sk_test",
+    },
+  ]);
+});
+
+test("an unknown RevenueCat customer counts as deleted; outages throw", async () => {
+  const answering = (status: number): FetchLike => async () => ({
+    ok: status < 300,
+    status,
+    json: async () => ({}),
+  });
+  assert.equal(
+    await deleteRevenueCatSubscriber("u", { apiKey: "sk_test", nowMs: 0, fetchImpl: answering(404) }),
+    "not_found",
+  );
+  await assert.rejects(
+    deleteRevenueCatSubscriber("u", { apiKey: "sk_test", nowMs: 0, fetchImpl: answering(500) }),
+    RevenueCatUnavailable,
+  );
+  const offline: FetchLike = async () => {
+    throw new TypeError("fetch failed");
+  };
+  await assert.rejects(
+    deleteRevenueCatSubscriber("u", { apiKey: "sk_test", nowMs: 0, fetchImpl: offline }),
+    RevenueCatUnavailable,
+  );
+  await assert.rejects(
+    deleteRevenueCatSubscriber("u", { apiKey: null, nowMs: 0 }),
+    RevenueCatUnavailable,
   );
 });

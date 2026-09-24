@@ -32,25 +32,29 @@ You need to provide:
 - the effective date;
 - if you are not established in the EU, an EU representative (Art. 27 GDPR);
 - the Firestore location (Firebase console > Firestore > Settings);
-- the billing-record retention period and your supervisory authority;
+- your supervisory authority;
 - governing law and, if based in Germany, your § 36 VSBG statement;
 - the AI-provider sentence, depending on whether you use free models.
 
 `hosting/check-placeholders.sh` blocks `firebase deploy --only hosting` and
 the release workflow while any placeholder remains.
 
-## 2. Things the app must match (engineering follow-ups)
+## 2. Things the app must match
 
-The policy is only accurate once these are true:
+The policy describes what the app does. Keep them in step:
 
-1. **Explicit consent for health data** (Art. 9 GDPR): add a consent step
-   before onboarding asks for weight and body data, and before the AI coach is
-   first used.
-2. **Account deletion** also deletes or anonymises the RevenueCat customer
-   and billing-event records (audit D-9), or the policy states the retention.
-3. **Firebase Analytics data retention** set to 2 months.
+1. **Explicit consent (done in the app).** A consent screen before onboarding
+   asks for body data, and another before the first AI request. The server
+   refuses AI requests without it. Withdrawal is in Settings > Privacy. If
+   the wording of either screen changes materially, raise the version in
+   `lib/privacy/data_consent.dart` and `functions/src/consents.ts` so every
+   account is asked again, and update section 2.2 or 2.3.
+2. **Account deletion (done in the app).** It deletes the RevenueCat customer
+   and removes the account ID from the billing ledger (audit D-9). This needs
+   a real `REVENUECAT_API_KEY` once RevenueCat is live.
+3. **Firebase Analytics data retention** set to 2 months (owner setting).
 4. **Data processing agreements** signed with Google (Firebase), RevenueCat
-   and OpenRouter.
+   and OpenRouter (owner).
 
 ## 3. Publish
 

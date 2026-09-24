@@ -8,7 +8,7 @@
  * RevenueCat REST client takes an injectable fetch so all of this is tested
  * against the Firestore emulator without network access.
  */
-import { Firestore } from "firebase-admin/firestore";
+import { FieldValue, Firestore } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 
 import {
@@ -54,34 +54,93 @@ export function usableApiKey(raw: string | null | undefined): string | null {
 
 export class RevenueCatUnavailable extends Error {}
 
-/** The account's `pro` entitlement as RevenueCat sees it right now. */
-export async function fetchRevenueCatEntitlement(
+/** One call to RevenueCat's v1 subscriber endpoint, with a timeout. */
+async function revenueCatRequest(
+  method: "GET" | "DELETE",
   appUserId: string,
   deps: RevenueCatDeps,
-): Promise<RevenueCatEntitlement> {
+): Promise<Awaited<ReturnType<FetchLike>>> {
   if (!deps.apiKey) throw new RevenueCatUnavailable("RevenueCat API key not configured");
   const fetchImpl = deps.fetchImpl ?? (fetch as unknown as FetchLike);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REVENUECAT_TIMEOUT_MS);
   try {
-    const response = await fetchImpl(
-      REVENUECAT_SUBSCRIBERS + encodeURIComponent(appUserId),
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${deps.apiKey}`,
-          "Content-Type": "application/json",
-        },
-        signal: controller.signal,
+    return await fetchImpl(REVENUECAT_SUBSCRIBERS + encodeURIComponent(appUserId), {
+      method,
+      headers: {
+        Authorization: `Bearer ${deps.apiKey}`,
+        "Content-Type": "application/json",
       },
-    );
-    if (!response.ok) {
-      throw new RevenueCatUnavailable(`RevenueCat responded ${response.status}`);
-    }
-    return entitlementFromSubscriber(await response.json(), deps.nowMs);
+      signal: controller.signal,
+    });
+  } catch (error) {
+    throw new RevenueCatUnavailable(`RevenueCat unreachable: ${String(error)}`);
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/** The account's `pro` entitlement as RevenueCat sees it right now. */
+export async function fetchRevenueCatEntitlement(
+  appUserId: string,
+  deps: RevenueCatDeps,
+): Promise<RevenueCatEntitlement> {
+  const response = await revenueCatRequest("GET", appUserId, deps);
+  if (!response.ok) {
+    throw new RevenueCatUnavailable(`RevenueCat responded ${response.status}`);
+  }
+  return entitlementFromSubscriber(await response.json(), deps.nowMs);
+}
+
+/**
+ * Deletes the RevenueCat customer and its purchase history (RevenueCat's
+ * GDPR deletion). A customer RevenueCat doesn't know counts as deleted, so
+ * a retried account deletion goes through. This does not cancel a store
+ * subscription; the account-deletion page tells the athlete to do that.
+ */
+export async function deleteRevenueCatSubscriber(
+  appUserId: string,
+  deps: RevenueCatDeps,
+): Promise<"deleted" | "not_found"> {
+  const response = await revenueCatRequest("DELETE", appUserId, deps);
+  if (response.status === 404) return "not_found";
+  if (!response.ok) {
+    throw new RevenueCatUnavailable(`RevenueCat responded ${response.status}`);
+  }
+  return "deleted";
+}
+
+/**
+ * Unlinks the `billingEvents` ledger from a deleted account (audit D-9). The
+ * entries stay, with their event ID, type and time, so a replayed webhook is
+ * still recognised as a duplicate, but none of them points to the account
+ * any more. Returns how many entries were unlinked.
+ */
+export async function forgetBillingLedger(db: Firestore, uid: string): Promise<number> {
+  const ledger = db.collection("billingEvents");
+  const [single, transfers] = await Promise.all([
+    ledger.where("userId", "==", uid).get(),
+    ledger.where("userIds", "array-contains", uid).get(),
+  ]);
+  const updates = [
+    ...single.docs.map((doc) => ({
+      ref: doc.ref,
+      data: { userId: FieldValue.delete(), accountDeleted: true },
+    })),
+    ...transfers.docs.map((doc) => ({
+      ref: doc.ref,
+      data: { userIds: FieldValue.arrayRemove(uid), accountDeleted: true },
+    })),
+  ];
+  // A batch holds at most 500 writes.
+  for (let start = 0; start < updates.length; start += 400) {
+    const batch = db.batch();
+    for (const { ref, data } of updates.slice(start, start + 400)) {
+      batch.update(ref, data);
+    }
+    await batch.commit();
+  }
+  return updates.length;
 }
 
 export type WriteOutcome = "applied" | "stale" | "unknown_user";
@@ -167,9 +226,11 @@ export async function processRevenueCatEvent(
       receivedAt: new Date(deps.nowMs).toISOString(),
     };
 
-    // Never create an entitlement profile from an external identifier.
+    // Never create an entitlement profile from an external identifier, and
+    // don't record the identifier either: it may belong to a deleted account.
     if (!userSnap.exists) {
-      tx.create(eventRef, { ...ledger, applied: false, ignored: "unknown_user" });
+      const { userId: _unknown, ...anonymous } = ledger;
+      tx.create(eventRef, { ...anonymous, applied: false, ignored: "unknown_user" });
       return { status: "processed", applied: 0 };
     }
 

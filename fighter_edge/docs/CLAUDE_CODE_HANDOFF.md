@@ -1,5 +1,39 @@
 # Fighter Edge — Claude Code Handoff
 
+## Phase 2, slice 2: explicit consent and complete deletion (2026-09-24, PR after #6)
+
+PR #6 (slice 1) is merged (`924fc8e`). This slice makes the app do what the
+privacy policy says. **Owner steps: `docs/OWNER_SETUP.md`.**
+
+- **Explicit consent (Art. 9 GDPR).** `lib/privacy/data_consent.dart` models
+  versioned consents stored on `users/{uid}.consents.{healthData,aiCoach}`
+  as `{version, grantedAt}`. `firestore.rules` accepts a new record only
+  with `grantedAt == request.time`. `HealthConsentScreen` sits after the
+  welcome pages and before any body question (`OnboardingScreen`), and in
+  `AuthGate` for accounts onboarded before it existed. The coach screen shows
+  `AiCoachConsentPanel` before the first request; `edgeFuelAiExplain`
+  returns `consentRequired` without it (`functions/src/consents.ts`).
+  Settings > Privacy: AI sharing toggle; health-data withdrawal leads to the
+  delete-account flow (`lib/screens/delete_account_flow.dart`). Strings are
+  in EN and DE. **If the wording changes materially, bump the version in
+  both `data_consent.dart` and `consents.ts`.** The in-app AI text says free
+  models may retain inputs; change it together with privacy policy 2.3 if
+  the providers change.
+- **Deletion (audit D-9).** `deleteAccountData` (`functions/src/accountDeletion.ts`):
+  RevenueCat `DELETE /v1/subscribers/{id}` first (outage = nothing deleted),
+  then unlink `billingEvents` (`forgetBillingLedger`), then
+  `recursiveDelete(users/{uid})`. `REVENUECAT_API_KEY` moved to
+  `functions/src/secrets.ts` and is now also bound to `deleteAccount`.
+  Deletion logs carry no UID.
+- **Bug fix.** `FirebaseAuthRepository._followProfile` is a plain
+  subscription; the `async*` version leaked the Firestore listener after
+  sign-out and could restore the previous account into `currentUser`.
+
+**Verified locally:** 632 Flutter tests (25 new), 82.8% coverage, format,
+analyze --fatal-infos, l10n; functions: 58 unit tests and 38 emulator tests
+(rules, billing, deletion) on firebase-tools 15.31.0. **Not verified:** the
+live RevenueCat DELETE endpoint (fake fetch only), any device.
+
 ## Phase 2, slice 1: Pro status is correct (2026-09-24, PR after #1)
 
 Phase 1 is merged (`35e8751`). This slice fixes audit M-3, M-4 and M-5 and
@@ -16,9 +50,8 @@ drafts the legal pages. **Read `AUDIT.md` > "Phase 2 progress".**
   expiry-aware `AppUser.isPro` gates features; purchase and restore call
   `syncEntitlement`; RevenueCat customer-info listener.
 - **Legal:** `fighter_edge/hosting/`, drafts with `TODO(owner)` guards. The
-  privacy policy states Art. 9 explicit consent for health data. **The app
-  does not ask for it yet: that consent step is the next slice to build**,
-  or the policy is inaccurate for EU users.
+  privacy policy states Art. 9 explicit consent for health data; slice 2
+  (above) added that consent step.
 - **CD:** `.github/workflows/deploy-backend.yml`.
 
 **Verified locally:** 607 Flutter tests, 82.5% coverage, format, analyze,

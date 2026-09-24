@@ -11,6 +11,7 @@ import '../billing/unavailable_billing_gateway.dart';
 import '../models/app_user.dart';
 import '../observability/error_reporter.dart';
 import '../observability/telemetry.dart';
+import '../privacy/data_consent.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
@@ -375,6 +376,18 @@ class AuthController extends ChangeNotifier {
           ));
 
   bool allows(Feature feature) => Entitlements.allows(plan, feature);
+
+  /// Whether the signed-in account has explicitly agreed to [purpose] at its
+  /// current wording.
+  bool hasConsent(DataConsentPurpose purpose) =>
+      _user?.consents.allows(purpose) ?? false;
+
+  /// Records or withdraws an explicit consent (see [DataConsentPurpose]).
+  Future<void> setDataConsent(
+    DataConsentPurpose purpose, {
+    required bool granted,
+  }) =>
+      _apply(() => _repo.setDataConsent(purpose, granted: granted));
 
   /// DEV ONLY: with the local backend, returns the last simulated magic code so
   /// the passwordless flow is demoable without a real email service.

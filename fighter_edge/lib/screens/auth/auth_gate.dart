@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../auth/verification_gate.dart';
 import '../../controllers/auth_controller.dart';
 import '../../models/app_user.dart';
+import '../../privacy/health_consent_screen.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/brand_logo.dart';
 import '../../widgets/premium_effects.dart';
@@ -32,7 +33,17 @@ class AuthGate extends StatelessWidget {
     // Onboarding comes first even when verification is overdue: a brand-new
     // account cannot be overdue, and interrupting setup to demand an email
     // would strand the user with nothing to come back to.
-    if (!(user?.onboardingComplete ?? false)) return const OnboardingScreen();
+    // Onboarding asks for health-data consent itself, after the welcome
+    // pages and before the first question about the body.
+    if (user == null || !user.onboardingComplete) {
+      return const OnboardingScreen();
+    }
+
+    // Accounts that finished setup before the consent step existed are asked
+    // once, before anything else (Art. 9 GDPR).
+    if (!user.hasHealthDataConsent) {
+      return const HealthConsentScreen(existingAccount: true);
+    }
 
     // Long overdue. The free loop stayed open for a week; past that the app
     // asks the user to resolve it before continuing.

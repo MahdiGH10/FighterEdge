@@ -10,6 +10,7 @@ import '../../features/edge_fuel/domain/models/nutrition_target.dart';
 import '../../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../../features/edge_fuel/presentation/nutrition_copy.dart';
 import '../../observability/telemetry.dart';
+import '../../privacy/health_consent_screen.dart';
 import '../../routing/app_navigation.dart';
 import '../../routing/app_router.dart';
 import '../../state/app_state.dart';
@@ -83,6 +84,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           _trackStepViewed();
         },
       );
+    }
+    // Every step after this one asks about the body, so nothing is collected
+    // before explicit consent (Art. 9 GDPR).
+    if (!(auth.user?.hasHealthDataConsent ?? false)) {
+      return const HealthConsentScreen();
     }
     final completedPlan = _completedPlan;
     if (completedPlan != null) {

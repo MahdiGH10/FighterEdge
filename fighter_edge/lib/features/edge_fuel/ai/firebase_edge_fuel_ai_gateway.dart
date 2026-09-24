@@ -87,6 +87,8 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
           return const EdgeFuelAiResult.quotaReached();
         case 'entitlementRequired':
           return const EdgeFuelAiResult.entitlementRequired();
+        case 'consentRequired':
+          return const EdgeFuelAiResult.consentRequired();
         default:
           return const EdgeFuelAiResult.unavailable();
       }

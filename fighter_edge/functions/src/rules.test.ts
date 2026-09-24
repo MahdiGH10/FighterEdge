@@ -5,6 +5,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { after, before, beforeEach, describe, it } from "node:test";
 
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
+
 import {
   assertFails,
   assertSucceeds,
@@ -134,6 +137,91 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
     const db = ownerDb("alice");
     await assertSucceeds(
       profile("alice", db).update({ goal: "Make weight", onboardingComplete: true }),
+    );
+  });
+
+  // --- Explicit consents (Art. 9 GDPR): the athlete's own declaration, but
+  // stamped with the server's clock so it can't be backdated.
+
+  const serverTime = () => firebase.firestore.FieldValue.serverTimestamp();
+
+  it("lets an athlete give and withdraw consent with the server's time", async () => {
+    await seedProfile("alice", { plan: "free" });
+    const db = ownerDb("alice");
+    await assertSucceeds(
+      profile("alice", db).set(
+        { consents: { healthData: { version: 1, grantedAt: serverTime() } } },
+        { merge: true },
+      ),
+    );
+    await assertSucceeds(
+      profile("alice", db).set(
+        { consents: { aiCoach: { version: 1, grantedAt: serverTime() } } },
+        { merge: true },
+      ),
+    );
+    // Other profile edits leave recorded consents alone and still pass.
+    await assertSucceeds(profile("alice", db).update({ goal: "Make weight" }));
+    await assertSucceeds(
+      profile("alice", db).update({
+        "consents.aiCoach": firebase.firestore.FieldValue.delete(),
+      }),
+    );
+  });
+
+  it("records consent on a profile that doesn't exist yet", async () => {
+    const db = ownerDb("alice");
+    await assertSucceeds(
+      profile("alice", db).set(
+        { consents: { healthData: { version: 1, grantedAt: serverTime() } } },
+        { merge: true },
+      ),
+    );
+  });
+
+  it("refuses backdated, malformed or unknown consents", async () => {
+    await seedProfile("alice", { plan: "free" });
+    const db = ownerDb("alice");
+    const backdated = new Date("2020-01-01T00:00:00Z");
+    await assertFails(
+      profile("alice", db).update({
+        "consents.healthData": { version: 1, grantedAt: backdated },
+      }),
+    );
+    await assertFails(
+      profile("alice", db).update({
+        "consents.healthData": { version: "1", grantedAt: serverTime() },
+      }),
+    );
+    await assertFails(
+      profile("alice", db).update({
+        "consents.healthData": { version: 0, grantedAt: serverTime() },
+      }),
+    );
+    await assertFails(
+      profile("alice", db).update({
+        "consents.healthData": {
+          version: 1,
+          grantedAt: serverTime(),
+          grantedBy: "support",
+        },
+      }),
+    );
+    await assertFails(
+      profile("alice", db).update({
+        "consents.marketing": { version: 1, grantedAt: serverTime() },
+      }),
+    );
+    await assertFails(profile("alice", db).update({ consents: "all" }));
+  });
+
+  it("keeps other athletes from recording consent for someone", async () => {
+    await seedProfile("alice", { plan: "free" });
+    await assertFails(
+      profile("alice", ownerDb("mallory")).set(
+        { consents: { healthData: { version: 1, grantedAt: serverTime() } } },
+        { merge: true },
+      ),
     );
   });
 

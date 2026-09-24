@@ -1,6 +1,7 @@
 import 'package:clock/clock.dart';
 
 import '../billing/subscription.dart';
+import '../privacy/data_consent.dart';
 import 'dev_message.dart';
 
 /// Provider-agnostic domain user. Firebase/Supabase/etc. map into this shape
@@ -30,6 +31,11 @@ class AppUser {
   /// developer and never written by the client.
   final DevMessage? devMessage;
 
+  /// Explicit consents the account holds (health data, AI coach). Written by
+  /// the athlete, checked by the app before collecting health data and by the
+  /// server before any AI call.
+  final DataConsents consents;
+
   const AppUser({
     required this.id,
     required this.email,
@@ -47,7 +53,13 @@ class AppUser {
     this.weeklyTrainingDays = 4,
     this.startingWeightKg,
     this.devMessage,
+    this.consents = DataConsents.none,
   });
+
+  bool get hasHealthDataConsent =>
+      consents.allows(DataConsentPurpose.healthData);
+
+  bool get hasAiCoachConsent => consents.allows(DataConsentPurpose.aiCoach);
 
   /// Expiry-aware, like the server (audit M-4): a Pro plan whose recorded
   /// expiry has passed (beyond [Entitlements.expiryLeeway]) no longer counts,
@@ -76,6 +88,7 @@ class AppUser {
     int? weeklyTrainingDays,
     double? startingWeightKg,
     DevMessage? devMessage,
+    DataConsents? consents,
   }) {
     return AppUser(
       id: id,
@@ -94,6 +107,7 @@ class AppUser {
       weeklyTrainingDays: weeklyTrainingDays ?? this.weeklyTrainingDays,
       startingWeightKg: startingWeightKg ?? this.startingWeightKg,
       devMessage: devMessage ?? this.devMessage,
+      consents: consents ?? this.consents,
     );
   }
 
@@ -114,6 +128,7 @@ class AppUser {
         'weeklyTrainingDays': weeklyTrainingDays,
         'startingWeightKg': startingWeightKg,
         'devMessage': devMessage?.toJson(),
+        'consents': consents.toJson(),
       };
 
   factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
@@ -140,5 +155,6 @@ class AppUser {
         devMessage: DevMessage.fromJson(
           (json['devMessage'] as Map?)?.cast<String, dynamic>(),
         ),
+        consents: DataConsents.fromProfile(json['consents']),
       );
 }

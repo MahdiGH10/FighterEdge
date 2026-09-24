@@ -68,14 +68,13 @@ deiner Daten auf mehreren Geräten. <em>Rechtsgrundlage:</em> Vertragserfüllung
 <p>Teile davon sind Gesundheitsdaten (besondere Kategorien nach Art. 9
 DSGVO). <em>Zweck:</em> Berechnung deiner Ziele, Darstellung deines
 Fortschritts und Empfehlungen. <em>Rechtsgrundlage:</em> deine ausdrückliche
-Einwilligung (Art. 9 Abs. 2 lit. a und Art. 6 Abs. 1 lit. a DSGVO), die du
-erteilst, bevor du diese Daten eingibst. Du kannst die Einwilligung jederzeit
-widerrufen, indem du die Daten oder dein Konto löschst. Die Rechtmäßigkeit
-der bis dahin erfolgten Verarbeitung bleibt unberührt.</p>
-<p><mark class="todo">TODO(owner): Die App muss diese ausdrückliche Einwilligung
-einholen, bevor Gesundheitsdaten eingegeben werden (z. B. als Schritt zu Beginn
-des Onboardings). Bis dieser Schritt ausgeliefert ist, entspricht dieser
-Abschnitt nicht der App. Siehe Übergabenotizen.</mark></p>
+Einwilligung (Art. 9 Abs. 2 lit. a und Art. 6 Abs. 1 lit. a DSGVO). Die App
+fragt auf einem eigenen Bildschirm danach, bevor sie nach diesen Daten fragt,
+und speichert, welcher Fassung du wann zugestimmt hast. Du kannst die
+Einwilligung jederzeit unter Einstellungen &gt; Datenschutz &gt;
+Gesundheitsdaten widerrufen. Ohne diese Daten kann die App keinen Plan
+berechnen, deshalb löscht ein Widerruf dein Konto und seine Daten. Die
+Rechtmäßigkeit der bis dahin erfolgten Verarbeitung bleibt unberührt.</p>
 
 <h3>2.3 KI-Coach (Pro, optional)</h3>
 <p>Wenn du den KI-Fighter-Brief oder den Chat nutzt, sendet unser Server
@@ -101,9 +100,13 @@ zum Training verwenden.“</mark> Gib im Chat keine Informationen ein, die du ni
 teilen möchtest.</p>
 <p><em>Zweck:</em> Erläuterung deines Plans und Beantwortung deiner Fragen.
 <em>Rechtsgrundlage:</em> deine ausdrückliche Einwilligung (Art. 9 Abs. 2
-lit. a und Art. 6 Abs. 1 lit. a DSGVO), die du beim Start des KI-Coaches
-erteilst. Die Nutzung ist freiwillig. KI-Antworten werden immer mit den von
-der App berechneten Zahlen abgeglichen. Die KI kann deine Ziele nicht
+lit. a und Art. 6 Abs. 1 lit. a DSGVO), um die dich die App mit dieser
+Beschreibung vor deiner ersten KI-Anfrage bittet. Unser Server lehnt
+KI-Anfragen von Konten ohne diese Einwilligung ab. Die Nutzung des KI-Coaches
+ist freiwillig, und du kannst die Einwilligung jederzeit unter Einstellungen
+&gt; Datenschutz &gt; Datenweitergabe an den KI-Coach widerrufen, ohne dass
+der Rest der App betroffen ist. KI-Antworten werden immer mit den von der App
+berechneten Zahlen abgeglichen. Die KI kann deine Ziele nicht
 ändern.</p>
 
 <h3>2.4 Käufe und Abonnements</h3>
@@ -184,12 +187,15 @@ prüfen und mit jedem Anbieter den Auftragsverarbeitungsvertrag abschließen.</m
   <em>Einstellungen &gt; Konto löschen</em> löscht dein Konto und alle darunter
   gespeicherten Daten sofort aus unserer Datenbank. Kopien in den Backups von
   Google werden nach deren Zeitplan überschrieben.</li>
-  <li><strong>Abrechnungsnachweise:</strong> Ein minimaler Nachweis der
-  Abo-Ereignisse (Ereignis-ID, Typ, Datum, Konto-ID) wird aufbewahrt für
-  <mark class="todo">TODO(owner): Frist, z. B. 10 Jahre nach deutschem Steuerrecht, oder kürzer, falls keine Pflicht besteht</mark>.</li>
-  <li><strong>RevenueCat:</strong> Die Abo-Historie wird bei RevenueCat für
-  denselben Zeitraum aufbewahrt. <mark class="todo">TODO(owner): Den RevenueCat-Kunden bei
-  Kontolöschung löschen oder anonymisieren (Audit D-9).</mark></li>
+  <li><strong>Abrechnungsnachweise:</strong> Ein minimaler Nachweis jedes
+  Abo-Ereignisses (Ereignis-ID, Typ, Datum, Konto-ID), damit dasselbe Ereignis
+  nie zweimal angewendet wird. Wenn du dein Konto löschst, wird die Konto-ID
+  aus diesen Nachweisen entfernt; was bleibt, lässt sich dir nicht mehr
+  zuordnen.</li>
+  <li><strong>RevenueCat:</strong> Wenn du dein Konto löschst, beauftragen wir
+  RevenueCat, deinen Kundendatensatz und deine Kaufhistorie zu löschen. Apple
+  und Google bewahren ihre eigenen Kaufbelege nach ihren eigenen Richtlinien
+  auf.</li>
   <li><strong>Nutzungsanalyse:</strong> Die Ereignisdaten werden aufbewahrt für
   <mark class="todo">TODO(owner): in Firebase Analytics &gt; Datenaufbewahrung auf 2 Monate setzen</mark>.</li>
   <li><strong>Absturzberichte:</strong> 90 Tage.</li>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/routing/app_router.dart';
 import 'package:fighter_edge/screens/change_password_sheet.dart';
@@ -39,6 +40,39 @@ void main() {
 
     expect(find.byType(SettingsScreen), findsNothing);
     expect(find.text('Welcome back'), findsOneWidget);
+  });
+
+  testWidgets(
+      'deleting a subscribed account warns that the store keeps billing',
+      (tester) async {
+    final repo =
+        await makeRepo(signedIn: true, onboarded: true, plan: Plan.pro);
+    await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
+    await tester.pump();
+    await openSettings(tester);
+
+    await tester.tap(find.text('Delete account'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('delete-subscription-warning')),
+      findsOneWidget,
+    );
+    expect(find.textContaining("doesn't cancel your subscription"),
+        findsOneWidget);
+  });
+
+  testWidgets('a free account sees no subscription warning', (tester) async {
+    final repo = await makeRepo(signedIn: true, onboarded: true);
+    await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
+    await tester.pump();
+    await openSettings(tester);
+
+    await tester.tap(find.text('Delete account'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('delete-subscription-warning')),
+      findsNothing,
+    );
   });
 
   testWidgets('deleting the account from Settings lands on login',
