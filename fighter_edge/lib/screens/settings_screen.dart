@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
@@ -18,10 +19,14 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
 import 'change_password_sheet.dart';
+import 'delete_account_flow.dart';
 import 'legal_screen.dart';
 import 'paywall_screen.dart';
 import '../legal/legal_links.dart';
+import '../models/app_user.dart';
+import '../privacy/ai_coach_consent.dart';
 import '../privacy/consent.dart';
+import '../privacy/data_consent.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -163,6 +168,26 @@ class SettingsScreen extends StatelessWidget {
           const _TrustCard(),
           const SizedBox(height: Insets.xl),
           _SectionLabel(l.settingsSectionPrivacy),
+          _SettingsRow(
+            icon: Icons.monitor_heart_outlined,
+            title: l.settingsHealthData,
+            subtitle: _healthConsentSummary(context, user),
+            onTap: auth.isBusy ? null : () => _withdrawHealthConsent(context),
+          ),
+          _SwitchRow(
+            icon: Icons.smart_toy_outlined,
+            title: l.settingsAiCoach,
+            subtitle: l.settingsAiCoachSubtitle,
+            value: user.hasAiCoachConsent,
+            onChanged: auth.isBusy
+                ? null
+                : (allowed) => allowed
+                    ? showAiCoachConsentSheet(context)
+                    : auth.setDataConsent(
+                        DataConsentPurpose.aiCoach,
+                        granted: false,
+                      ),
+          ),
           _SwitchRow(
             icon: Icons.insights_outlined,
             title: l.settingsAnalytics,
@@ -203,7 +228,7 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.delete_outline,
             title: l.settingsDeleteAccount,
             subtitle: l.settingsDeleteAccountSubtitle,
-            onTap: auth.isBusy ? null : () => _confirmDeleteAccount(context),
+            onTap: auth.isBusy ? null : () => confirmAndDeleteAccount(context),
           ),
           const SizedBox(height: Insets.lg),
           GhostButton(
@@ -268,6 +293,46 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  String _healthConsentSummary(BuildContext context, AppUser user) {
+    final l = L.of(context);
+    final at =
+        user.consents.recordFor(DataConsentPurpose.healthData)?.grantedAt;
+    if (at == null) return l.settingsHealthDataGrantedNoDate;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    return l.settingsHealthDataGranted(DateFormat.yMMMd(locale).format(at));
+  }
+
+  /// The app can't work without health data, so withdrawing that consent
+  /// is deleting the account (as the Privacy Policy says). The dialog says
+  /// so plainly before handing over to the usual typed confirmation.
+  Future<void> _withdrawHealthConsent(BuildContext context) async {
+    final l = L.of(context);
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(l.settingsHealthDataWithdrawTitle),
+        content: Text(
+          l.settingsHealthDataWithdrawBody,
+          style: AppType.subhead(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.negative),
+            child: Text(l.settingsHealthDataWithdrawConfirm),
+          ),
+        ],
+      ),
+    );
+    if (proceed != true || !context.mounted) return;
+    await confirmAndDeleteAccount(context);
+  }
+
   void _openLegal(BuildContext context, LegalDocument doc) {
     LegalLinks.open(context, doc);
   }
@@ -300,85 +365,6 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Future<void> _confirmDeleteAccount(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => const _DeleteAccountDialog(),
-    );
-    if (confirmed != true || !context.mounted) return;
-
-    try {
-      await context.read<AuthController>().deleteAccount();
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
-    }
-  }
-}
-
-/// Requires typing DELETE before the button enables — a deliberate speed
-/// bump for an irreversible action, not just a yes/no tap.
-class _DeleteAccountDialog extends StatefulWidget {
-  const _DeleteAccountDialog();
-
-  @override
-  State<_DeleteAccountDialog> createState() => _DeleteAccountDialogState();
-}
-
-class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
-  final _controller = TextEditingController();
-  bool _confirmed = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: AppColors.surface,
-      title: const Text('Delete your account?'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'This permanently erases your account, weight history, training '
-            'sessions, and nutrition data. This cannot be undone.',
-            style: AppType.subhead(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: Insets.md),
-          Text(
-            'Type DELETE to confirm.',
-            style: AppType.subhead(weight: FontWeight.w700),
-          ),
-          const SizedBox(height: Insets.sm),
-          TextField(
-            controller: _controller,
-            autofocus: true,
-            textCapitalization: TextCapitalization.characters,
-            onChanged: (v) => setState(() => _confirmed = v.trim() == 'DELETE'),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: _confirmed ? () => Navigator.of(context).pop(true) : null,
-          style: TextButton.styleFrom(foregroundColor: AppColors.negative),
-          child: const Text('Delete forever'),
-        ),
-      ],
     );
   }
 }

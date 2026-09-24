@@ -7,6 +7,9 @@ import 'package:provider/provider.dart';
 import '../../../../auth/verification_gate.dart';
 import '../../../../billing/subscription.dart';
 import '../../../../controllers/auth_controller.dart';
+import '../../../../l10n/gen/app_localizations.dart';
+import '../../../../privacy/ai_coach_consent.dart';
+import '../../../../privacy/data_consent.dart';
 import '../../../../routing/app_navigation.dart';
 import '../../../../routing/app_router.dart';
 import '../../../../screens/auth/verify_email_screen.dart';
@@ -174,6 +177,12 @@ class _CoachBodyState extends State<_CoachBody> {
           AppRoutes.verifyEmail,
           fallbackBuilder: (_) => const VerifyEmailScreen(),
         ),
+      );
+    }
+    if (!auth.hasConsent(DataConsentPurpose.aiCoach)) {
+      return ListView(
+        padding: const EdgeInsets.all(Insets.lg),
+        children: const [AiCoachConsentPanel()],
       );
     }
 
@@ -854,6 +863,10 @@ class _ReplyCard extends StatelessWidget {
                 'and try again.',
                 style: AppType.callout(color: secondary),
               ),
+            EdgeFuelAiStatus.consentRequired => Text(
+                L.of(context).aiConsentRequiredNotice,
+                style: AppType.callout(color: secondary),
+              ),
             EdgeFuelAiStatus.unavailable => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -935,6 +948,11 @@ class _BriefCard extends StatelessWidget {
               message: 'Your purchase has not reached our server yet.',
               actionLabel: 'Refresh my access',
               onAction: onRefresh,
+            ),
+          EdgeFuelAiStatus.consentRequired => _BriefNotice(
+              icon: Icons.privacy_tip_outlined,
+              title: L.of(context).settingsAiCoach,
+              message: L.of(context).aiConsentRequiredNotice,
             ),
           EdgeFuelAiStatus.success when result.response?.brief != null =>
             Column(

@@ -1,4 +1,5 @@
 import '../models/app_user.dart';
+import '../privacy/data_consent.dart';
 
 /// Thrown by any [AuthRepository] method on a recoverable auth failure.
 /// Concrete implementations translate provider errors (FirebaseAuthException,
@@ -85,6 +86,14 @@ abstract class AuthRepository {
   /// the billing provider now, e.g. right after a purchase or restore. Never
   /// grants anything itself. Implementations must not throw.
   Future<void> syncEntitlement();
+
+  /// Records (or, with [granted] false, withdraws) an explicit consent on the
+  /// signed-in account at [DataConsentPurpose.currentVersion]. Returns the
+  /// account as it now stands; the write itself may still be syncing.
+  Future<AppUser> setDataConsent(
+    DataConsentPurpose purpose, {
+    required bool granted,
+  });
 
   /// Stores first-run setup choices. This is account profile data, not a paid
   /// entitlement, so the client may write it directly.

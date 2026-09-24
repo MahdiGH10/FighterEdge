@@ -48,6 +48,13 @@ void main() {
     await tester.tap(find.text('BUILD MY PLAN'));
     await tester.pumpAndSettle();
 
+    // Explicit consent comes before the first question about the body.
+    expect(find.text('Your body data, your call'), findsOneWidget);
+    expect(repo.currentUser!.hasHealthDataConsent, isFalse);
+    await tester.tap(find.text('I AGREE'));
+    await tester.pumpAndSettle();
+    expect(repo.currentUser!.hasHealthDataConsent, isTrue);
+
     // First-run setup creates a clean personal starting point.
     expect(find.text('What should Fighter Edge build first?'), findsOneWidget);
     await tester.tap(find.text('CONTINUE'));

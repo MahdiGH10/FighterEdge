@@ -931,6 +931,180 @@ abstract class L {
   /// **'Error details that help us fix bugs. No personal data.'**
   String get settingsCrashReportsSubtitle;
 
+  /// No description provided for @healthConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your body data, your call'**
+  String get healthConsentTitle;
+
+  /// No description provided for @healthConsentIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'To build your plan, Fighter Edge needs data about your body and health. The law treats this data as sensitive, so we ask for your explicit consent first.'**
+  String get healthConsentIntro;
+
+  /// No description provided for @healthConsentWhatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What we store'**
+  String get healthConsentWhatTitle;
+
+  /// No description provided for @healthConsentWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'Age, height, weight and target weight, body fat if you add it, the energy profile you choose, activity level, diet, allergies and intolerances, and the food, weight and training you log.'**
+  String get healthConsentWhat;
+
+  /// No description provided for @healthConsentWhyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What it\'s used for'**
+  String get healthConsentWhyTitle;
+
+  /// No description provided for @healthConsentWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Only to calculate your targets, show your progress and guide you. Never for ads, and never sold.'**
+  String get healthConsentWhy;
+
+  /// No description provided for @healthConsentWhereTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it\'s kept'**
+  String get healthConsentWhereTitle;
+
+  /// No description provided for @healthConsentWhere.
+  ///
+  /// In en, this message translates to:
+  /// **'In your account on Google Firebase. Only you can read it.'**
+  String get healthConsentWhere;
+
+  /// No description provided for @healthConsentWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'You can withdraw your consent at any time in Settings > Privacy. The app can\'t work without this data, so withdrawing deletes your account and its data.'**
+  String get healthConsentWithdraw;
+
+  /// No description provided for @healthConsentStatement.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree that Fighter Edge stores and uses my health data as described here and in the Privacy Policy.'**
+  String get healthConsentStatement;
+
+  /// No description provided for @healthConsentAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree'**
+  String get healthConsentAgree;
+
+  /// No description provided for @healthConsentSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now, sign out'**
+  String get healthConsentSignOut;
+
+  /// No description provided for @healthConsentDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my account instead'**
+  String get healthConsentDeleteAccount;
+
+  /// No description provided for @aiConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you talk to the coach'**
+  String get aiConsentTitle;
+
+  /// No description provided for @aiConsentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'To answer, our server sends your calorie and macro targets, today\'s food-log summary, your diet type, allergies, disliked foods and your messages to OpenRouter (USA), which passes them to an AI model provider. Your name, email address and account ID are never sent.'**
+  String get aiConsentBody;
+
+  /// No description provided for @aiConsentRetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Some providers, especially free models, may keep what they receive under their own terms. Don\'t type anything you don\'t want to share.'**
+  String get aiConsentRetention;
+
+  /// No description provided for @aiConsentStatement.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree that this data is sent to the AI provider as described, including to the USA.'**
+  String get aiConsentStatement;
+
+  /// No description provided for @aiConsentAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree'**
+  String get aiConsentAgree;
+
+  /// No description provided for @aiConsentChangeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'You can turn this off any time in Settings > Privacy.'**
+  String get aiConsentChangeLater;
+
+  /// No description provided for @aiConsentRequiredNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow AI coach data sharing to get an answer.'**
+  String get aiConsentRequiredNotice;
+
+  /// No description provided for @settingsHealthData.
+  ///
+  /// In en, this message translates to:
+  /// **'Health data'**
+  String get settingsHealthData;
+
+  /// No description provided for @settingsHealthDataGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'You agreed on {date}'**
+  String settingsHealthDataGranted(String date);
+
+  /// No description provided for @settingsHealthDataGrantedNoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You agreed to its use'**
+  String get settingsHealthDataGrantedNoDate;
+
+  /// No description provided for @settingsHealthDataWithdrawTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw consent?'**
+  String get settingsHealthDataWithdrawTitle;
+
+  /// No description provided for @settingsHealthDataWithdrawBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Fighter Edge can\'t calculate your plan or track your progress without your health data. Withdrawing your consent therefore means deleting your account and all its data.'**
+  String get settingsHealthDataWithdrawBody;
+
+  /// No description provided for @settingsHealthDataWithdrawConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my account'**
+  String get settingsHealthDataWithdrawConfirm;
+
+  /// No description provided for @settingsAiCoach.
+  ///
+  /// In en, this message translates to:
+  /// **'AI coach data sharing'**
+  String get settingsAiCoach;
+
+  /// No description provided for @settingsAiCoachSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends your plan facts and messages to our AI provider (USA) when you use the coach.'**
+  String get settingsAiCoachSubtitle;
+
+  /// No description provided for @deleteAccountSubscriptionWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account doesn\'t cancel your subscription. Cancel it first in your App Store or Google Play account settings, or it keeps renewing.'**
+  String get deleteAccountSubscriptionWarning;
+
   /// No description provided for @trainTabReaction.
   ///
   /// In en, this message translates to:

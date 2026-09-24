@@ -66,12 +66,11 @@ you (Art. 6(1)(b) GDPR).</p>
 <p>Some of this is health data (special-category data under Art. 9 GDPR).
 <em>Purpose:</em> to calculate your targets, show your progress, and give you
 guidance. <em>Legal basis:</em> your explicit consent (Art. 9(2)(a) and
-Art. 6(1)(a) GDPR), which you give before you enter this data. You can withdraw
-consent at any time by deleting the data or your account. Withdrawal does not
-affect processing that took place before it.</p>
-<p><mark class="todo">TODO(owner): the app must ask for this explicit consent before
-health data is entered (e.g. a consent step at the start of onboarding). Until
-that step ships, this section does not match the app. See the handoff notes.</mark></p>
+Art. 6(1)(a) GDPR). The app asks for it on a separate screen before it asks for
+any of this data, and records the version you agreed to and when. You can
+withdraw consent at any time in Settings &gt; Privacy &gt; Health data. The app
+can't calculate a plan without this data, so withdrawing deletes your account
+and its data. Withdrawal does not affect processing that took place before it.</p>
 
 <h3>2.3 AI coach (Pro, optional)</h3>
 <p>If you use the AI Fighter Brief or chat, our server (Google Cloud Functions,
@@ -93,7 +92,10 @@ If you switch to providers with zero data retention, replace it with:
 Don't enter information in the chat that you don't want to share.</p>
 <p><em>Purpose:</em> to explain your plan and answer your questions.
 <em>Legal basis:</em> your explicit consent (Art. 9(2)(a) and 6(1)(a) GDPR),
-given when you start using the AI coach. Using it is optional.
+which the app asks for, with this description, before your first AI request.
+Our server refuses AI requests from accounts without it. Using the AI coach is
+optional, and you can withdraw this consent at any time in Settings &gt;
+Privacy &gt; AI coach data sharing, without affecting the rest of the app.
 AI answers are always checked against the numbers our app calculates. The AI
 cannot change your targets.</p>
 
@@ -171,12 +173,13 @@ OpenRouter and sign each provider's data processing agreement.</mark></p>
   <em>Settings &gt; Delete account</em> immediately deletes your account and all
   data stored under it on our database. Copies in Google's backups are
   overwritten on Google's backup schedule.</li>
-  <li><strong>Billing records:</strong> a minimal record of subscription events
-  (event ID, type, date, account ID) is kept for
-  <mark class="todo">TODO(owner): period, e.g. 10 years under German tax law, or shorter if none applies</mark>.</li>
-  <li><strong>RevenueCat:</strong> subscription history is kept by RevenueCat for
-  the same period. <mark class="todo">TODO(owner): delete or anonymise the RevenueCat
-  customer when an account is deleted (audit D-9).</mark></li>
+  <li><strong>Billing records:</strong> a minimal record of each subscription
+  event (event ID, type, date, account ID), so the same event is never applied
+  twice. When you delete your account, the account ID is removed from these
+  records; what remains can no longer be linked to you.</li>
+  <li><strong>RevenueCat:</strong> when you delete your account, we tell
+  RevenueCat to delete your customer record and purchase history. Apple and
+  Google keep their own purchase records under their own policies.</li>
   <li><strong>Analytics:</strong> event data is kept for
   <mark class="todo">TODO(owner): set to 2 months in Firebase Analytics &gt; Data retention</mark>.</li>
   <li><strong>Crash reports:</strong> 90 days.</li>
