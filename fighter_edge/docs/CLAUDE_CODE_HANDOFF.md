@@ -194,22 +194,33 @@ caveat as slice 2's minification change.
 verify everything end-to-end, update the handoff/AUDIT one more time if
 CI surfaces anything, and get the PR to green.
 
-## Phase 1, slice 6: fix a real CI failure — Crashlytics plugin vs. Gradle 9 (2026-09-24, PR after slice 5)
+## Phase 1, slice 6: fix a real CI failure — the Crashlytics plugin doesn't work under Gradle 9 (2026-09-24, PR after slice 5)
 
 CI (not this sandbox — see slice 2 and 5's caveats) caught a genuine
-incompatibility: the Crashlytics Gradle plugin (`2.8.1`) applies fine,
-but its `uploadCrashlyticsMappingFileRelease` task throws
-`groovy/util/XmlSlurper` on this project's Gradle 9.1 — the plugin's
-Groovy usage expects a class Gradle 9's newer bundled Groovy no longer
-provides at that path. `android/app/build.gradle.kts`'s `release` build
-type now sets `firebaseCrashlytics { mappingFileUploadEnabled = false }`,
-the documented way to skip exactly that task. Everything else slice 2
-added (minification, resource shrinking, the 16 KB check, the AD_ID
-removal) is unaffected — the rest of that release build genuinely
-succeeded before this task ran. Crash *reporting* itself is the Firebase
-SDK's runtime code, independent of this Gradle plugin, so it still
-works; only automatic ProGuard mapping upload is off until a
-Gradle-9-compatible plugin version is confirmed.
+incompatibility, in two steps:
+
+1. The Crashlytics Gradle plugin (`2.8.1`) applied fine, but its
+   `uploadCrashlyticsMappingFileRelease` task threw
+   `groovy/util/XmlSlurper` at runtime on this project's Gradle 9.1.
+2. The first fix — `firebaseCrashlytics { mappingFileUploadEnabled =
+   false }` in the `release` build type, the documented way to skip
+   exactly that task — made CI fail differently: Kotlin DSL *script
+   compilation* itself broke, `Unresolved reference 'firebaseCrashlytics'`.
+   Whatever registers that plugin's per-variant DSL extension fails the
+   same way its Groovy usage does, so there's no live-editable flag that
+   reaches this build. The plugin doesn't functionally work here at all.
+
+Fix: remove `id("com.google.firebase.crashlytics")` entirely — from
+`android/app/build.gradle.kts`'s `plugins {}` block and
+`settings.gradle.kts`'s version declaration — rather than applying a
+broken plugin. Everything else slice 2 added (minification, resource
+shrinking, the 16 KB check, the AD_ID removal) is unaffected. Crash
+*reporting* itself is the `firebase_crashlytics` Android AAR's own
+runtime code, wired in by the Flutter plugin mechanism, independent of
+this Gradle plugin — confirmed by reading how the plugin is registered,
+not assumed — so it still works; only automatic ProGuard-mapping upload
+and build-ID injection are unavailable until a Gradle-9-compatible
+plugin version is confirmed.
 
 **Also from this CI run:** the new `integration-test` job's emulator never
 booted — `FATAL | Not enough space to create userdata partition.

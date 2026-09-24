@@ -22,7 +22,8 @@ plugins {
     id("com.android.application") version "9.0.1" apply false
     // START: FlutterFire Configuration
     id("com.google.gms.google-services") version("4.3.15") apply false
-    id("com.google.firebase.crashlytics") version "2.8.1" apply false
+    // com.google.firebase.crashlytics is deliberately not declared here —
+    // see the comment in app/build.gradle.kts.
     // END: FlutterFire Configuration
     id("org.jetbrains.kotlin.android") version "2.3.20" apply false
 }

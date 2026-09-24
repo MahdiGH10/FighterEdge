@@ -5,7 +5,18 @@ plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
     id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+    // The Crashlytics Gradle plugin (com.google.firebase.crashlytics) is
+    // deliberately not applied: 2.8.1 doesn't work at all under this
+    // project's Gradle 9.1 (its own Groovy usage throws
+    // `groovy/util/XmlSlurper`, and whatever registers its `buildTypes`
+    // DSL extension breaks the same way — confirmed by a Kotlin DSL
+    // compile error, "Unresolved reference 'firebaseCrashlytics'", not
+    // just a task failure). Crash *reporting* is unaffected: it's the
+    // firebase_crashlytics Android AAR's own runtime code, wired in by the
+    // Flutter plugin mechanism, not by this Gradle plugin. Only automatic
+    // ProGuard-mapping upload and build-ID injection are unavailable.
+    // Re-add once a Crashlytics Gradle plugin version confirmed compatible
+    // with Gradle 9 exists.
     // END: FlutterFire Configuration
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -86,17 +97,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            // The Crashlytics Gradle plugin's own mapping upload fails on
-            // this project's Gradle 9.1 (`uploadCrashlyticsMappingFileRelease`
-            // throws `groovy/util/XmlSlurper` — a class the plugin's bundled
-            // Groovy usage expects that Gradle 9's newer Groovy no longer
-            // provides at that path). Crash *reporting* is unaffected: it's
-            // the Firebase SDK's own runtime code, not this Gradle plugin.
-            // Turn this back on once a Crashlytics Gradle plugin version
-            // confirmed compatible with Gradle 9 is available.
-            firebaseCrashlytics {
-                mappingFileUploadEnabled = false
-            }
         }
     }
 }
