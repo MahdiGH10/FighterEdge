@@ -28,7 +28,9 @@ class FirebaseAuthRepository implements AuthRepository {
     bool? appleSignInEnabled,
     TargetPlatform? platform,
     bool? isWeb,
+    FirebaseFunctions Function()? functions,
   })  : _auth = auth ?? FirebaseAuth.instance,
+        _functions = functions ?? (() => FirebaseFunctions.instance),
         _db = firestore ?? FirebaseFirestore.instance,
         _appleSignInEnabled = appleSignInEnabled ??
             const bool.fromEnvironment('ENABLE_APPLE_SIGN_IN'),
@@ -37,6 +39,7 @@ class FirebaseAuthRepository implements AuthRepository {
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _db;
+  final FirebaseFunctions Function() _functions;
 
   /// Sign in with Apple needs an Apple Developer service ID and the Firebase
   /// Apple provider, which are account setup, not code. Until a build is
@@ -75,15 +78,69 @@ class FirebaseAuthRepository implements AuthRepository {
     if (user != null) _cached = await _hydrate(user);
   }
 
+  /// The signed-in user, re-emitted whenever their `users/{uid}` profile
+  /// changes on the server. A webhook granting, renewing or revoking Pro
+  /// therefore reaches the app at once. Before this, the plan was read once
+  /// per session, so buyers sat on "pending" and expirations only landed on
+  /// the next launch (audit M-3).
   @override
-  Stream<AppUser?> authStateChanges() =>
-      _auth.authStateChanges().asyncMap((u) async {
-        if (u == null) {
-          _cached = null;
-          return null;
-        }
-        return _hydrate(u);
-      });
+  Stream<AppUser?> authStateChanges() {
+    StreamSubscription<User?>? authSub;
+    StreamSubscription<AppUser>? profileSub;
+    late final StreamController<AppUser?> controller;
+    controller = StreamController<AppUser?>(
+      onListen: () {
+        authSub = _auth.authStateChanges().listen(
+          (user) {
+            profileSub?.cancel();
+            profileSub = null;
+            if (user == null) {
+              _cached = null;
+              controller.add(null);
+              return;
+            }
+            profileSub = _followProfile(user).listen(controller.add);
+          },
+          onError: controller.addError,
+        );
+      },
+      onCancel: () async {
+        await profileSub?.cancel();
+        await authSub?.cancel();
+      },
+    );
+    return controller.stream;
+  }
+
+  /// Follows one account's profile document. Errors (offline with no cache,
+  /// a permission race while signing out) are not fatal: the last known
+  /// state stays, and if nothing was known yet the account continues as
+  /// free, exactly as the one-shot read used to.
+  Stream<AppUser> _followProfile(User user) async* {
+    var emitted = false;
+    var seeded = false;
+    final snapshots = _doc(user.uid).snapshots().handleError((Object error) {
+      if (kDebugMode) debugPrint('[auth] profile listener error: $error');
+    });
+    await for (final snap in snapshots) {
+      if (!snap.exists && !seeded && !snap.metadata.isFromCache) {
+        seeded = true;
+        unawaited(_seedProfile(user).catchError((Object _) {}));
+      }
+      emitted = true;
+      yield _remember(_appUserFrom(user, snap.data() ?? const {}));
+    }
+    if (!emitted) yield _remember(_appUserFrom(user, const {}));
+  }
+
+  AppUser _remember(AppUser user) => _cached = user;
+
+  Future<void> _seedProfile(User user) => _doc(user.uid).set({
+        'email': user.email,
+        'displayName': user.displayName,
+        'plan': Plan.free.name,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
   @override
   AppUser? get currentUser => _cached;
@@ -91,27 +148,13 @@ class FirebaseAuthRepository implements AuthRepository {
   /// Map a Firebase [User] to our [AppUser], reading (or seeding) the plan in
   /// Firestore. Falls back to a free-plan user if Firestore is unavailable.
   Future<AppUser> _hydrate(User user) async {
-    Plan plan = Plan.free;
     Map<String, dynamic> profileData = const {};
-    Map<String, dynamic> billingData = const {};
     try {
       final snap = await _doc(user.uid).get();
       if (snap.exists) {
         profileData = snap.data() ?? const {};
-        billingData = Map<String, dynamic>.from(
-          (profileData['billing'] as Map?) ?? const <String, dynamic>{},
-        );
-        plan = Plan.values.firstWhere(
-          (p) => p.name == profileData['plan'],
-          orElse: () => Plan.free,
-        );
       } else {
-        await _doc(user.uid).set({
-          'email': user.email,
-          'displayName': user.displayName,
-          'plan': Plan.free.name,
-          'createdAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
+        await _seedProfile(user);
       }
     } catch (e) {
       // Debug only: Firestore errors can name the `users/{uid}` path, and
@@ -120,7 +163,19 @@ class FirebaseAuthRepository implements AuthRepository {
         debugPrint('[auth] Firestore unavailable, defaulting to free plan: $e');
       }
     }
-    final appUser = AppUser(
+    return _remember(_appUserFrom(user, profileData));
+  }
+
+  /// Builds the app's user from the auth account and its profile document.
+  AppUser _appUserFrom(User user, Map<String, dynamic> profileData) {
+    final billingData = Map<String, dynamic>.from(
+      (profileData['billing'] as Map?) ?? const <String, dynamic>{},
+    );
+    final plan = Plan.values.firstWhere(
+      (p) => p.name == profileData['plan'],
+      orElse: () => Plan.free,
+    );
+    return AppUser(
       id: user.uid,
       email: user.email ?? '',
       displayName:
@@ -141,8 +196,6 @@ class FirebaseAuthRepository implements AuthRepository {
         (profileData['devMessage'] as Map?)?.cast<String, dynamic>(),
       ),
     );
-    _cached = appUser;
-    return appUser;
   }
 
   @override
@@ -308,7 +361,7 @@ class FirebaseAuthRepository implements AuthRepository {
       // block a client from deleting `users/{uid}` itself (billing state is
       // server-owned), and this also sidesteps Firebase's "requires a
       // recent sign-in" client-side re-auth requirement entirely.
-      await FirebaseFunctions.instance.httpsCallable('deleteAccount').call();
+      await _functions().httpsCallable('deleteAccount').call();
     } on FirebaseFunctionsException catch (e) {
       throw AuthException(
         e.code,
@@ -328,6 +381,23 @@ class FirebaseAuthRepository implements AuthRepository {
     }
     await user.reload();
     return _hydrate(_auth.currentUser ?? user);
+  }
+
+  /// Asks the server to re-read this account's entitlement from RevenueCat
+  /// right now (after a purchase or restore). The profile listener then
+  /// delivers the result. Best effort: the webhook still catches up if this
+  /// fails.
+  @override
+  Future<void> syncEntitlement() async {
+    if (_auth.currentUser == null) return;
+    try {
+      await _functions()
+          .httpsCallable('syncEntitlement')
+          .call<Object?>()
+          .timeout(const Duration(seconds: 20));
+    } catch (_) {
+      // Offline, not deployed yet, or RevenueCat unavailable.
+    }
   }
 
   @override

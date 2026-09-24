@@ -69,5 +69,10 @@ abstract interface class BillingGateway {
 
   Future<BillingCustomerState> refreshCustomerInfo();
 
+  /// Store-side subscription changes the SDK learns about on its own: a
+  /// renewal, an approved Ask to Buy, a pending payment completing. Display
+  /// only. The server stays the entitlement authority.
+  Stream<BillingCustomerState> get customerInfoUpdates;
+
   Future<void> logOut();
 }

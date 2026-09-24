@@ -22,6 +22,7 @@ class AuthController extends ChangeNotifier {
   final Telemetry _telemetry;
   final ErrorReporter _errorReporter;
   StreamSubscription<AppUser?>? _sub;
+  StreamSubscription<BillingCustomerState>? _billingUpdates;
 
   AuthStatus _status = AuthStatus.unknown;
   AppUser? _user;
@@ -50,13 +51,19 @@ class AuthController extends ChangeNotifier {
     _status =
         _user == null ? AuthStatus.unauthenticated : AuthStatus.authenticated;
     _sub = _repo.authStateChanges().listen(_onUserChanged);
+    _billingUpdates = _billing.customerInfoUpdates.listen(_onStoreUpdate);
   }
 
   AuthStatus get status => _status;
   AppUser? get user => _user;
   bool get isBusy => _busy;
+
+  /// Expiry-aware (see [AppUser.isPro]).
   bool get isPro => _user?.isPro ?? false;
-  Plan get plan => _user?.plan ?? Plan.free;
+
+  /// The plan in effect right now. It gates features, so a Pro plan past its
+  /// expiry counts as free here, even before the server has caught up.
+  Plan get plan => isPro ? Plan.pro : Plan.free;
   bool get supportsGoogle => _repo.supportsGoogle;
   bool get supportsApple => _repo.supportsApple;
   bool get supportsMagicLink => _repo.supportsMagicLink;
@@ -118,6 +125,15 @@ class AuthController extends ChangeNotifier {
   }
 
   void _onUserChanged(AppUser? user) {
+    // The same account again: its server profile changed (Pro granted,
+    // renewed or revoked by the webhook; onboarding saved). Update it
+    // without tearing down the billing session.
+    if (user != null && _user?.id == user.id) {
+      _user = user;
+      _status = AuthStatus.authenticated;
+      notifyListeners();
+      return;
+    }
     _user = user;
     _status =
         user == null ? AuthStatus.unauthenticated : AuthStatus.authenticated;
@@ -311,9 +327,22 @@ class AuthController extends ChangeNotifier {
         }
       });
 
+  /// The store saw a change the server may not know yet (a renewal, an
+  /// approved Ask to Buy). Show it as "activating" and ask the server to
+  /// re-read RevenueCat. The server, not this, decides Pro.
+  void _onStoreUpdate(BillingCustomerState state) {
+    if (_user == null) return;
+    _billingState = state;
+    notifyListeners();
+    if (state.isPro && !isPro) unawaited(_repo.syncEntitlement());
+  }
+
   Future<void> _refreshServerEntitlement() async {
-    // Webhook delivery is asynchronous. Bounded polling improves activation
-    // latency without turning the client into an entitlement authority.
+    // Ask the server to pull the entitlement from RevenueCat now; the live
+    // profile listener delivers the result. This also makes a restore onto
+    // a different account work (audit M-5). The bounded re-read below covers
+    // backends without a listener.
+    await _repo.syncEntitlement();
     for (var attempt = 0; attempt < 3; attempt++) {
       final refreshed = await _repo.refreshCurrentUser();
       _user = refreshed;
@@ -357,6 +386,7 @@ class AuthController extends ChangeNotifier {
   @override
   void dispose() {
     _sub?.cancel();
+    _billingUpdates?.cancel();
     super.dispose();
   }
 }

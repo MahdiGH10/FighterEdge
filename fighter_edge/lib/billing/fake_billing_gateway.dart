@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'billing_gateway.dart';
 
 /// Deterministic billing adapter for widget/flow tests. It models the store
@@ -31,6 +33,13 @@ class FakeBillingGateway implements BillingGateway {
   final BillingCustomerState purchaseState;
   final BillingCustomerState restoreState;
   bool configured = false;
+  final _updates = StreamController<BillingCustomerState>.broadcast();
+
+  /// Simulates the store telling the SDK about a change (e.g. a renewal).
+  void emitCustomerInfo(BillingCustomerState state) => _updates.add(state);
+
+  @override
+  Stream<BillingCustomerState> get customerInfoUpdates => _updates.stream;
   int purchaseCount = 0;
   int restoreCount = 0;
 

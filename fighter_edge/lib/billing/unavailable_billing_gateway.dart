@@ -9,6 +9,9 @@ class UnavailableBillingGateway implements BillingGateway {
   bool get isAvailable => false;
 
   @override
+  Stream<BillingCustomerState> get customerInfoUpdates => const Stream.empty();
+
+  @override
   Future<void> configureForUser(String userId) async {}
 
   @override
