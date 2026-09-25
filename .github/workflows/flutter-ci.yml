@@ -230,7 +230,9 @@ jobs:
     # Skipped on draft PRs: emulator boot alone is several minutes.
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Two emulator boots now, not one shared between both test files — see
+    # the comment below on the run steps. +5 min for the second boot.
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -270,14 +272,36 @@ jobs:
       - name: Generate debug plugin configuration
         run: flutter build apk --config-only --debug
 
-      - name: Run the integration tests on an emulator
+      # Two emulator boots, one per test file, instead of one `flutter test
+      # integration_test/` covering both: pointed at a directory, it reuses
+      # a single long-lived emulator for every file it finds. This runner
+      # has no real GPU — the emulator always renders through SwiftShader
+      # software rendering (visible in its own launch args, `-gpu
+      # swiftshader_indirect`) — and twice in a row, that one shared
+      # instance died right as the *second* file (app_flow_test.dart, by
+      # far the longer/heavier of the two) finished: both files' tests
+      # passed (their own pass/fail output said so), but the emulator was
+      # already unreachable by the time the action's own cleanup tried to
+      # kill it, which failed the job anyway. A fresh emulator per file
+      # avoids the accumulated memory/GPU-context pressure that's the most
+      # likely trigger.
+      - name: Run the performance smoke test on an emulator
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
           api-level: 34
           target: google_apis
           arch: x86_64
           working-directory: fighter_edge
-          script: flutter test integration_test/
+          script: flutter test integration_test/performance_smoke_test.dart
+
+      - name: Run the app flow test on a fresh emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          working-directory: fighter_edge
+          script: flutter test integration_test/app_flow_test.dart
 
   ios-build:
     name: iOS build (no codesign)

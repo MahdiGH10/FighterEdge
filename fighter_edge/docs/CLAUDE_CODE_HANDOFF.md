@@ -285,6 +285,31 @@ Two more things surfaced before all 7 checks were green:
   the target already exists, its scroll loop is a no-op (`while
   (maxIteration > 0 && finder.evaluate().isEmpty)`), so this doesn't
   change behavior on screens that didn't need it.
+- **With that fix in, both test files' own assertions passed — twice in a
+  row — but the job still failed both times, identically.** The log
+  showed `✅ performance_smoke_test.dart`, then `🎉 1 test passed` for
+  `app_flow_test.dart`, immediately followed by `The process '/usr/bin/sh'
+  failed with exit code 1` and, in the action's own cleanup step, `adb
+  ... emu kill` → `error: could not connect to TCP port 5554: Connection
+  refused` — the emulator was already gone. The first occurrence was
+  treated as a one-off and re-run (the one re-run the drive-to-green rules
+  allow to confirm a "passed on this exact commit" case); the second,
+  identical occurrence made it a real, reproducible failure, not a flake.
+  Root cause: `flutter test integration_test/` pointed at the directory
+  runs both files against one long-lived emulator instance. This runner
+  has no real GPU — its own launch command shows `-gpu
+  swiftshader_indirect`, software rendering — and the emulator died right
+  as the second, much heavier file (`app_flow_test.dart`, dozens of
+  widget interactions across the full onboarding flow) finished,
+  consistent with accumulated memory/GPU-context pressure on a
+  software-rendered, 2-CPU/2560MB instance. Fixed in
+  `flutter-ci.yml`'s `integration-test` job: two
+  `reactivecircus/android-emulator-runner` steps instead of one, each
+  booting its own fresh emulator for a single test file
+  (`performance_smoke_test.dart`, then `app_flow_test.dart`). Job timeout
+  raised 30 → 35 min for the extra boot. **Not yet confirmed green** —
+  this fix could only be reasoned from the job logs, not run locally (no
+  Android SDK/emulator in this sandbox).
 
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 
