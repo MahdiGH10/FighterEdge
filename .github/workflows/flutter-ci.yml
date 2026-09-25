@@ -285,20 +285,28 @@ jobs:
       # kill it, which failed the job anyway. A fresh emulator per file
       # avoids the accumulated memory/GPU-context pressure that's the most
       # likely trigger.
-      # cores/ram-size: the emulator's own boot log warns "will run more
-      # smoothly with 4 CPU cores (currently using 2)" on every run, and
-      # app_flow_test.dart twice failed on a `ColorBuffer` allocation error
-      # from the software (SwiftShader) GPU renderer at the same step, ~170
-      # buffers into the session both times — consistent with a resource
-      # ceiling in the renderer, not a random glitch. More CPU and RAM give
-      # it headroom instead of guessing at undocumented emulator flags.
+      # ram-size: app_flow_test.dart twice failed on a `ColorBuffer`
+      # allocation error from the software (SwiftShader) GPU renderer at
+      # the same step, ~170 buffers into the session both times —
+      # consistent with a resource ceiling in the renderer, not a random
+      # glitch. More RAM gives it headroom.
+      #
+      # cores is deliberately left at the action's default (2), NOT bumped
+      # to 4: that was tried here and made things much worse. The emulator
+      # logs "will run more smoothly with 4 CPU cores" on every run, but
+      # this runner's KVM only actually has 2: raising `cores` to 4 made
+      # qemu itself warn "Number of SMP cpus requested (4) exceeds the
+      # recommended cpus supported by KVM (2)", and the run then hung on
+      # oversubscribed vCPU threads ("detected a hanging thread 'QEMU2
+      # CPU0 thread'. No response for 20205 ms") until GitHub killed the
+      # runner outright. The message is real, but it's advice for a
+      # differently-provisioned host, not this one.
       - name: Run the performance smoke test on an emulator
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
           api-level: 34
           target: google_apis
           arch: x86_64
-          cores: 4
           ram-size: 4096M
           working-directory: fighter_edge
           script: flutter test integration_test/performance_smoke_test.dart
@@ -309,7 +317,6 @@ jobs:
           api-level: 34
           target: google_apis
           arch: x86_64
-          cores: 4
           ram-size: 4096M
           working-directory: fighter_edge
           script: flutter test integration_test/app_flow_test.dart

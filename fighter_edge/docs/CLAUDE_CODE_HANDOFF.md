@@ -330,8 +330,24 @@ Two more things surfaced before all 7 checks were green:
   tapping, since `pumpAndSettle` only waits for scheduled frames, not
   for the raster thread to actually catch up — plausible given the
   failure's timing correlates with a raster-side buffer-allocation
-  error, not a widget-tree/animation issue. **Still not confirmed
-  green.**
+  error, not a widget-tree/animation issue.
+- **The `cores: 4` half of that fix was wrong, and made things much
+  worse.** The next run never even reached the test itself — it hung
+  during the Gradle build, then the whole runner was killed. The actual
+  qemu process logged the real cause directly: `warning: Number of SMP
+  cpus requested (4) exceeds the recommended cpus supported by KVM (2)`,
+  followed by repeated `detected a hanging thread 'QEMU2 CPU0 thread'.
+  No response for 20205 ms` as the oversubscribed vCPUs starved each
+  other, until `The runner has received a shutdown signal`. The
+  emulator's own advice ("will run more smoothly with 4 CPU cores") is
+  real, but it assumes a host that actually has 4 to give it — this
+  runner's KVM only has 2, and asking for more didn't get ignored, it
+  broke scheduling entirely. Reverted `cores: 4` back to the action's
+  default (2) in both `flutter-ci.yml` steps; kept `ram-size: 4096M`,
+  which wasn't implicated in this failure and still addresses the
+  `ColorBuffer` allocation ceiling. The `_tapVisible` settle-pump is
+  also still in place, untested by this run (it hung before reaching any
+  Dart test code). **Still not confirmed green.**
 
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 
