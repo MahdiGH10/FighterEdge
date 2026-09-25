@@ -347,7 +347,43 @@ Two more things surfaced before all 7 checks were green:
   which wasn't implicated in this failure and still addresses the
   `ColorBuffer` allocation ceiling. The `_tapVisible` settle-pump is
   also still in place, untested by this run (it hung before reaching any
-  Dart test code). **Still not confirmed green.**
+  Dart test code).
+- **The repo went public partway through this loop** (the owner's
+  monthly Actions minutes had run out — every check was instantly
+  failing with no runner ever assigned, an account-level quota block,
+  not a code issue; public repos get free unlimited minutes on
+  GitHub-hosted runners). Once that cleared, real CI runs resumed: 6/7
+  checks passed immediately, including both historically-flaky jobs
+  (`Android release build`, `iOS build`), confirming the environment
+  itself is healthy. The `Integration test` job then produced two more
+  distinct results:
+  - A run that got the emulator booted and the APK installed, then
+    produced **zero further log output for 25 minutes** — no test
+    group, no error, nothing — until the 35-minute job timeout
+    cancelled it. No diagnosable cause; treated as a one-off stall and
+    re-run, since every other job in the same run had just passed
+    normally on the same infrastructure.
+  - The re-run failed differently again: `Found 0 widgets with text
+    "CONTINUE"` — but this time at the CONTINUE tap right after
+    entering age/height/weight, one step *earlier* in the flow than the
+    three prior `ColorBuffer`-correlated failures at the "Which formula
+    fits your body?" CONTINUE. Four distinct failures now, at four
+    different screens, all the same underlying shape: `_ensureVisible`
+    confirms a widget exists, and by the time the actual interaction
+    runs a moment later, it's gone. That's not four separate app bugs —
+    it's evidence that on this specific real, GPU-less, software-
+    rendered emulator, a widget can transiently vanish and reappear
+    under raster/resource pressure, which is the standard case for
+    retrying a real-device UI interaction rather than chasing each new
+    disappearance individually.
+  - Fixed by wrapping `_tapVisible`/`_enterTextVisible` in a shared
+    `_retrying` helper (`app_flow_test.dart`): up to 3 attempts, each
+    redoing `_ensureVisible` + the interaction from scratch. Safe against
+    accidental double-actions because every observed failure so far
+    threw from *resolving* the tap target (`Scrollable.ensureVisible` or
+    `WidgetController.tap`'s coordinate lookup), before any gesture is
+    actually dispatched to the device — nothing to double-send yet when
+    a retry fires. **Still not confirmed green.**
 
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 

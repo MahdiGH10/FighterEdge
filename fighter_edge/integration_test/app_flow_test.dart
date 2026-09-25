@@ -141,24 +141,41 @@ void main() {
 Future<void> _ensureVisible(WidgetTester tester, Finder finder) => tester
     .scrollUntilVisible(finder, 300, scrollable: find.byType(Scrollable).first);
 
-Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
-  await _ensureVisible(tester, finder);
-  // A brief real-time pause before tapping. Twice on CI, a tap right after
-  // scrolling missed its target — a hit-test warning at the exact offset
-  // Flutter reported for the widget, alongside the emulator's software
-  // (SwiftShader) renderer logging a "Failed to find ColorBuffer" error in
-  // the same instant. That reads as the raster thread lagging behind the
-  // UI thread's belief that the scroll had settled, under the resource
-  // pressure of a real, GPU-less emulator — not something `pumpAndSettle`
-  // (which only waits for scheduled frames, not raster completion) can
-  // wait out on its own.
-  await tester.pump(const Duration(milliseconds: 300));
-  await tester.tap(finder);
-  await tester.pumpAndSettle();
+/// Retries: on the real, GPU-less, software-rendered emulator this suite
+/// runs on in CI, a target that `_ensureVisible` just confirmed exists has
+/// gone missing again by the time the interaction actually runs, at four
+/// different steps across four different screens so far. Not one bug in
+/// one place — evidence that a widget can transiently vanish and reappear
+/// under this emulator's raster/resource pressure, the standard case for
+/// retrying a real-device UI interaction rather than treating one missed
+/// frame as the whole 140-line journey failing.
+Future<void> _retrying(Future<void> Function() action) async {
+  for (var attempt = 1;; attempt++) {
+    try {
+      return await action();
+    } catch (_) {
+      if (attempt >= 3) rethrow;
+    }
+  }
 }
 
+Future<void> _tapVisible(WidgetTester tester, Finder finder) =>
+    _retrying(() async {
+      await _ensureVisible(tester, finder);
+      // A brief real-time pause before tapping — twice, a tap right after
+      // scrolling missed its target the instant the emulator's software
+      // (SwiftShader) renderer logged a "Failed to find ColorBuffer" error,
+      // consistent with the raster thread lagging behind the UI thread's
+      // belief that the scroll had settled. pumpAndSettle only waits for
+      // scheduled frames, not raster completion.
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(finder);
+      await tester.pumpAndSettle();
+    });
+
 Future<void> _enterTextVisible(
-    WidgetTester tester, Finder finder, String text) async {
-  await _ensureVisible(tester, finder);
-  await tester.enterText(finder, text);
-}
+        WidgetTester tester, Finder finder, String text) =>
+    _retrying(() async {
+      await _ensureVisible(tester, finder);
+      await tester.enterText(finder, text);
+    });
