@@ -263,10 +263,28 @@ Two more things surfaced before all 7 checks were green:
   `'Create account'` into view the same way, before tapping it. This
   could only be found by a real emulator run — nothing in this sandbox
   or in `flutter test`'s default viewport reproduces a 320×640 screen.
-  **Not yet reconfirmed by CI as of this write-up** — if another step
-  later in the same flow fails the same way on this small emulator
-  profile, apply the same `scrollUntilVisible` pattern there too rather
-  than guessing which one in advance.
+  **That fix wasn't enough either — CI immediately found a second,
+  different instance of the same root cause.** The next run got past
+  "Create account" and failed at `tap(find.text('I AGREE'))` with "Found
+  0 widgets" — not a hit-test miss this time, but the widget not existing
+  in the tree at all. Why the two failures look different: the login
+  screen's `SingleChildScrollView` eagerly builds its one child (a
+  `Column`), so an off-screen widget still exists to hit-test against;
+  the health-consent screen uses a plain `ListView(children: [...])`,
+  which is sliver-backed and therefore lazy — Flutter only mounts
+  children within the viewport plus a cache extent, so a widget far
+  enough below the fold is never built at all. On a 320×640 screen
+  (confirmed from the job log: `androidboot.qemu.skin=320x640`, this
+  emulator profile's real size, not a guess), that's not a one-off: every
+  screen in this flow puts its primary action after scrollable content.
+  Rather than spend another 15-20 minute CI round trip per screen, the
+  whole file was rewritten to route every tap and text entry through
+  `_tapVisible`/`_enterTextVisible` helpers that call
+  `scrollUntilVisible` first — confirmed safe by reading
+  `scrollUntilVisible`'s own source in the installed Flutter SDK: when
+  the target already exists, its scroll loop is a no-op (`while
+  (maxIteration > 0 && finder.evaluate().isEmpty)`), so this doesn't
+  change behavior on screens that didn't need it.
 
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 

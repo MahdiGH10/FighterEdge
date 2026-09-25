@@ -21,6 +21,13 @@ import 'package:fighter_edge/widgets/primary_button.dart';
 /// M-6); this one configures a [FakeBillingGateway] to exercise the actual
 /// purchase button and the server-owned entitlement boundary instead, so the
 /// two together cover both paths without duplicating either.
+///
+/// Every tap/entry goes through [_tapVisible]/[_enterTextVisible] rather than
+/// `tester.tap`/`tester.enterText` directly. The CI emulator's default
+/// profile is a tiny 320x640 screen: a target further down a screen's
+/// scrollable content can be either mounted-but-off-screen (a hit-test miss)
+/// or, inside a lazily built list, not mounted at all (a "0 widgets found"
+/// failure) — both seen for real on that emulator, in two different screens.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -37,93 +44,79 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 1. Land on login, go to signup. The login form sits in a
-    // SingleChildScrollView, so on a small/low-density screen (this ran off
-    // the bottom of a real CI emulator's 320x640 viewport) it needs
-    // scrolling into view first, same as the sign-out button in step 10.
+    // 1. Land on login, go to signup.
     expect(find.text('Welcome back'), findsOneWidget);
-    final createAccount = find.text('Create account');
-    await tester.scrollUntilVisible(createAccount, 300,
-        scrollable: find.byType(Scrollable).first);
-    await tester.tap(createAccount);
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('Create account'));
 
     // 2. Create an account.
-    await tester.enterText(find.byType(TextField).at(0), 'Ayoub');
-    await tester.enterText(find.byType(TextField).at(1), 'journey@test.com');
-    await tester.enterText(find.byType(TextField).at(2), 'journey-pass-1');
-    await tester.enterText(find.byType(TextField).at(3), 'journey-pass-1');
-    await tester.tap(find.byType(Checkbox));
-    await tester.pump();
-    await tester.tap(find.byType(PrimaryButton));
-    await tester.pumpAndSettle();
+    await _enterTextVisible(tester, find.byType(TextField).at(0), 'Ayoub');
+    await _enterTextVisible(
+        tester, find.byType(TextField).at(1), 'journey@test.com');
+    await _enterTextVisible(
+        tester, find.byType(TextField).at(2), 'journey-pass-1');
+    await _enterTextVisible(
+        tester, find.byType(TextField).at(3), 'journey-pass-1');
+    await _tapVisible(tester, find.byType(Checkbox));
+    await _tapVisible(tester, find.byType(PrimaryButton));
 
     // 3. The value pages come before any questions.
     expect(find.text('Your camp, organised.'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('CONTINUE'));
     expect(find.text('Fuel that matches the work.'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('CONTINUE'));
     expect(find.text('Watch the edge build.'), findsOneWidget);
-    await tester.tap(find.text('BUILD MY PLAN'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('BUILD MY PLAN'));
 
     // 4. Explicit consent comes before the first question about the body
     // (Art. 9 GDPR — audit finding, fixed in Phase 2 slice 2).
     expect(find.text('Your body data, your call'), findsOneWidget);
     expect(repo.currentUser!.hasHealthDataConsent, isFalse);
-    await tester.tap(find.text('I AGREE'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('I AGREE'));
     expect(repo.currentUser!.hasHealthDataConsent, isTrue);
 
     // 5. Onboarding questions.
     expect(find.text('What should Fighter Edge build first?'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('CONTINUE'));
     expect(find.text('What should EdgeFuel optimize for?'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('CONTINUE'));
     expect(find.text('Tell us your starting point.'), findsOneWidget);
-    await tester.enterText(find.byType(TextField).at(0), '28');
-    await tester.enterText(find.byType(TextField).at(1), '178');
-    await tester.enterText(find.byType(TextField).at(2), '77.2');
-    await tester.tap(find.text('CONTINUE'));
-    await tester.pumpAndSettle();
+    await _enterTextVisible(tester, find.byType(TextField).at(0), '28');
+    await _enterTextVisible(tester, find.byType(TextField).at(1), '178');
+    await _enterTextVisible(tester, find.byType(TextField).at(2), '77.2');
+    await _tapVisible(tester, find.text('CONTINUE'));
     expect(find.text('Which formula fits your body?'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('CONTINUE'));
     expect(find.text('Outside the gym, how active are you?'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('CONTINUE'));
     expect(find.text('How many days can you train?'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('CONTINUE'));
     expect(find.text('Your first plan is ready.'), findsOneWidget);
-    await tester.tap(find.text('START MY PLAN'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('START MY PLAN'));
 
     // 6. Activation moment, then the dashboard.
     expect(find.text('Your first Fighter Edge plan is ready'), findsOneWidget);
-    await tester.tap(find.text('OPEN DASHBOARD'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('OPEN DASHBOARD'));
     expect(find.text('DASHBOARD'), findsOneWidget);
 
-    // 7. Profile -> the paid upgrade entry point.
+    // 7. Profile -> the paid upgrade entry point. Computed from the nav
+    // bar's own rect, so it needs no scrolling regardless of screen size.
     final navRect = tester.getRect(find.byType(AppBottomNav));
     await tester.tapAt(Offset(
       navRect.left + navRect.width * .875,
       navRect.center.dy,
     ));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('UPGRADE'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('UPGRADE'));
     expect(find.text('Unlock your full edge'), findsOneWidget);
 
     // 8. A real store purchase completes, but the client never grants Pro:
     // only the trusted webhook does (a non-negotiable rule, not just a UI
     // choice — this is the property most worth an on-device regression).
-    await tester.tap(find.text('MONTHLY - \$7.99'));
+    // A single pump (not pumpAndSettle) checks the state right after the
+    // tap, before anything else runs.
+    final monthlyPlan = find.text('MONTHLY - \$7.99');
+    await _ensureVisible(tester, monthlyPlan);
+    await tester.tap(monthlyPlan);
     await tester.pump();
     expect(billing.purchaseCount, 1);
     expect(repo.currentUser!.isPro, isFalse);
@@ -135,14 +128,27 @@ void main() {
     expect(find.text("You're on Pro"), findsOneWidget);
 
     // 10. Sign out from Profile -> back to login.
-    await tester.tap(find.byIcon(Icons.chevron_left)); // Paywall -> Profile.
-    await tester.pumpAndSettle();
-    final signOut = find.byType(GhostButton);
-    await tester.scrollUntilVisible(signOut, 300,
-        scrollable: find.byType(Scrollable).first);
-    await tester.tap(signOut);
-    await tester.pumpAndSettle();
+    await _tapVisible(
+        tester, find.byIcon(Icons.chevron_left)); // Paywall -> Profile.
+    await _tapVisible(tester, find.byType(GhostButton));
 
     expect(find.text('Welcome back'), findsOneWidget);
   });
+}
+
+/// Scrolls [finder] into view (if it isn't already) before interacting with
+/// it — see the file doc comment for why this is needed on every step here.
+Future<void> _ensureVisible(WidgetTester tester, Finder finder) => tester
+    .scrollUntilVisible(finder, 300, scrollable: find.byType(Scrollable).first);
+
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await _ensureVisible(tester, finder);
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _enterTextVisible(
+    WidgetTester tester, Finder finder, String text) async {
+  await _ensureVisible(tester, finder);
+  await tester.enterText(finder, text);
 }
