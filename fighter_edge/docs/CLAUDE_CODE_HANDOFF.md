@@ -231,6 +231,43 @@ none of which this job uses) was eating into the disk the AVD needed.
 (`rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk /opt/ghc`,
 `docker image prune`) before creating the emulator.
 
+## Phase 1, slice 7: a code review fix and a real emulator-only test failure (2026-09-24/25, PR after slice 6)
+
+With the Crashlytics-plugin fix in, the Android release build went green.
+Two more things surfaced before all 7 checks were green:
+
+- **Code review caught a real bug in slice 1's P-6 fix.** The 4 s
+  `_startupTimeout` had been applied inside the shared `_hydrate()`
+  helper (`firebase_auth_repository.dart`), so it also bounded sign-up,
+  sign-in and `completeOnboarding`, not just `init()`. On a merely-slow
+  (not down) connection, `completeOnboarding`'s follow-up read could time
+  out even though the onboarding write had already succeeded — and the
+  timeout's catch block falls back to an empty profile, which would
+  bounce the user straight back into the onboarding wizard right after
+  they finished it. Fixed: `_hydrate` now takes an optional `timeout`
+  that only `init()` passes; every other caller hydrates unbounded, same
+  as before P-6 existed. (Also fixed a leaked `StreamController` in the
+  A-5 regression test, same review.)
+- **The revived integration test failed for real, only on the CI
+  emulator.** `performance_smoke_test.dart` passed; `app_flow_test.dart`
+  failed at its very first interaction: `tester.tap(find.text('Create
+  account'))` missed — the hit-test warning showed the text at
+  `Offset(196.1, 769.1)` outside the render tree's `Size(320.0, 640.0)`,
+  i.e. below the bottom of this emulator's small viewport. The login
+  form *is* inside a `SingleChildScrollView` (nothing wrong with the
+  screen), but the test tapped the link directly instead of scrolling it
+  into view first — unlike step 10's sign-out tap, which already used
+  `scrollUntilVisible`. Everything downstream (an `IndexError` on the
+  next `enterText`) was a symptom of that missed tap, not a separate
+  bug: the app was still on the login screen. Fixed by scrolling
+  `'Create account'` into view the same way, before tapping it. This
+  could only be found by a real emulator run — nothing in this sandbox
+  or in `flutter test`'s default viewport reproduces a 320×640 screen.
+  **Not yet reconfirmed by CI as of this write-up** — if another step
+  later in the same flow fails the same way on this small emulator
+  profile, apply the same `scrollUntilVisible` pattern there too rather
+  than guessing which one in advance.
+
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 
 PR #7 is merged (`96f96c8`). The owner approved the product plan in

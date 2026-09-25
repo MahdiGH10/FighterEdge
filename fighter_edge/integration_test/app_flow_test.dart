@@ -37,9 +37,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 1. Land on login, go to signup.
+    // 1. Land on login, go to signup. The login form sits in a
+    // SingleChildScrollView, so on a small/low-density screen (this ran off
+    // the bottom of a real CI emulator's 320x640 viewport) it needs
+    // scrolling into view first, same as the sign-out button in step 10.
     expect(find.text('Welcome back'), findsOneWidget);
-    await tester.tap(find.text('Create account'));
+    final createAccount = find.text('Create account');
+    await tester.scrollUntilVisible(createAccount, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(createAccount);
     await tester.pumpAndSettle();
 
     // 2. Create an account.
