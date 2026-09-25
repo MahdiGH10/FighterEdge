@@ -310,6 +310,28 @@ Two more things surfaced before all 7 checks were green:
   raised 30 → 35 min for the extra boot. **Not yet confirmed green** —
   this fix could only be reasoned from the job logs, not run locally (no
   Android SDK/emulator in this sandbox).
+- **That fix worked — the emulator shut down cleanly both times after
+  it — but a new, different failure appeared twice in its place**, both
+  times at the exact same test step: `tap('CONTINUE')` right after
+  "Which formula fits your body?", with the job log showing `ERROR |
+  Failed to find ColorBuffer: 170` (then `173` on the retry) in the same
+  instant as a hit-test-miss warning at the tap's own reported offset.
+  Same step, near-identical buffer IDs, twice — a resource ceiling in
+  the software (SwiftShader) GPU renderer, not random noise; per the
+  drive-to-green rules a second identical failure is real, not a flake,
+  so this got fixed rather than re-run again. Two evidence-based changes:
+  (1) `flutter-ci.yml`'s two emulator-runner steps now request `cores: 4`
+  (every run in this job has logged the emulator's own warning, "will
+  run more smoothly with 4 CPU cores (currently using 2)") and
+  `ram-size: 4096M` (up from the auto-selected 2560MB) — both real,
+  documented inputs of `reactivecircus/android-emulator-runner`'s
+  `action.yml`, cloned and read directly rather than guessed at; (2)
+  `_tapVisible` in `app_flow_test.dart` now pumps a real 300ms before
+  tapping, since `pumpAndSettle` only waits for scheduled frames, not
+  for the raster thread to actually catch up — plausible given the
+  failure's timing correlates with a raster-side buffer-allocation
+  error, not a widget-tree/animation issue. **Still not confirmed
+  green.**
 
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 
