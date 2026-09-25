@@ -162,9 +162,13 @@ class AuthController extends ChangeNotifier {
       _billingState = await _billing.refreshCustomerInfo();
       if (session != _billingSession) return;
       notifyListeners();
-    } catch (_) {
+    } catch (error, stack) {
       // Billing is a secondary surface. A store outage must not block login or
       // make the app appear signed out; the next explicit restore can retry.
+      // But it must not go unreported either (audit M-11) — without this,
+      // "store down" and "no offering configured" look identical from the
+      // paywall, and neither ever surfaces anywhere to investigate.
+      _errorReporter.report(error, stack, reason: 'billing_sync_failed');
     }
   }
 

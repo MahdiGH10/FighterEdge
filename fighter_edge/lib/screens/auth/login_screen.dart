@@ -69,8 +69,14 @@ class _LoginScreenState extends State<LoginScreen> {
         fit: StackFit.expand,
         children: [
           Image.asset(
-            'assets/images/login_background.png',
+            'assets/images/login_background.webp',
             fit: BoxFit.cover,
+            // Decoded at the device's physical width instead of the source
+            // asset's full resolution (audit P-7) — this is a background
+            // behind a dark gradient, so nothing visible is lost.
+            cacheWidth: (MediaQuery.sizeOf(context).width *
+                    MediaQuery.devicePixelRatioOf(context))
+                .round(),
           ),
           Container(
             decoration: BoxDecoration(

@@ -6,6 +6,23 @@ import 'package:fighter_edge/billing/billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/billing/fake_billing_gateway.dart';
 import 'package:fighter_edge/controllers/auth_controller.dart';
+import 'package:fighter_edge/observability/error_reporter.dart';
+
+/// A store that is down: every call that would reach it fails.
+class _DownBillingGateway extends FakeBillingGateway {
+  @override
+  Future<void> configureForUser(String userId) async =>
+      throw Exception('store unreachable');
+}
+
+class _RecordingReporter implements ErrorReporter {
+  final reasons = <String?>[];
+
+  @override
+  void report(Object error, StackTrace stack,
+          {String? reason, bool fatal = false}) =>
+      reasons.add(reason);
+}
 
 void main() {
   late LocalAuthRepository repo;
@@ -70,6 +87,23 @@ void main() {
     expect(billing.purchaseCount, 1);
     expect(auth.isPro, isFalse);
     expect(auth.billingState.isPro, isTrue);
+  });
+
+  test('a billing sync failure is reported, not silently swallowed (M-11)',
+      () async {
+    final reporter = _RecordingReporter();
+    final auth = AuthController(
+      repo,
+      billingGateway: _DownBillingGateway(),
+      errorReporter: reporter,
+    );
+
+    await auth.signUp('a@b.com', 'secret1', 'A');
+    await Future<void>.delayed(Duration.zero);
+
+    // Login itself must not fail just because the store is unreachable.
+    expect(auth.status, AuthStatus.authenticated);
+    expect(reporter.reasons, contains('billing_sync_failed'));
   });
 
   test('sign-out returns to unauthenticated', () async {

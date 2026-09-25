@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     The notification icon is looked up by string name at runtime
+     (flutter_local_notifications' `icon: 'ic_notification'`, see
+     lib/notifications/local_reminder_gateway.dart), so the resource
+     shrinker cannot see the reference and would otherwise strip it,
+     leaving reminders with no icon (audit R-11).
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_notification" />

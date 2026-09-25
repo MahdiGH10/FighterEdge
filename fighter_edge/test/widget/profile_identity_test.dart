@@ -129,6 +129,27 @@ void main() {
       expect(find.text('May 20 – May 26'), findsNothing);
     });
 
+    testWidgets(
+        'History tab renders the log through the lazy sliver list (P-4)',
+        (tester) async {
+      final repo = await _repoWithRealUser();
+
+      await tester.pumpWidget(
+        wrapApp(const TrainingCampScreen(), repo: repo, state: AppState()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('History'));
+      await tester.pumpAndSettle();
+
+      // The demo seed's completed slots (mock_data.dart).
+      expect(find.text('SESSION HISTORY'), findsOneWidget);
+      expect(find.text('Striking'), findsOneWidget);
+      expect(find.text('Wrestling'), findsOneWidget);
+      expect(find.text('Conditioning'), findsOneWidget);
+      expect(find.text('BJJ'), findsOneWidget);
+    });
+
     testWidgets('date range covers the current Monday-to-Sunday week',
         (tester) async {
       final repo = await _repoWithRealUser();

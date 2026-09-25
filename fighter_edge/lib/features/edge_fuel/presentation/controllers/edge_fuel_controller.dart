@@ -95,15 +95,27 @@ class EdgeFuelController extends ChangeNotifier {
       notifyListeners();
     });
 
-    _draftSub = _repository.watchProfileDraft(userId).listen((draft) {
-      _draft = draft;
-      notifyListeners();
-    });
-    _targetSub = _repository.watchTarget(userId).listen((target) {
-      _target = target;
-      _watchSelectedDay();
-      notifyListeners();
-    });
+    _draftSub = _repository.watchProfileDraft(userId).listen(
+      (draft) {
+        _draft = draft;
+        notifyListeners();
+      },
+      onError: (Object error) {
+        if (kDebugMode) {
+          debugPrint('[edge_fuel] profile draft stream error: $error');
+        }
+      },
+    );
+    _targetSub = _repository.watchTarget(userId).listen(
+      (target) {
+        _target = target;
+        _watchSelectedDay();
+        notifyListeners();
+      },
+      onError: (Object error) {
+        if (kDebugMode) debugPrint('[edge_fuel] target stream error: $error');
+      },
+    );
     _watchSelectedDay();
   }
 
@@ -256,10 +268,15 @@ class EdgeFuelController extends ChangeNotifier {
       _selectedDate,
       targetSnapshot: hasUsableTarget ? _target : null,
     )
-        .listen((day) {
-      _day = day;
-      notifyListeners();
-    });
+        .listen(
+      (day) {
+        _day = day;
+        notifyListeners();
+      },
+      onError: (Object error) {
+        if (kDebugMode) debugPrint('[edge_fuel] day stream error: $error');
+      },
+    );
   }
 
   NutritionDay _activeDay() {

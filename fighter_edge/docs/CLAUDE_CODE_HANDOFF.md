@@ -1,5 +1,390 @@
 # Fighter Edge — Claude Code Handoff
 
+## Phase 1 (closed-test hardening), slice 1: no fake data, no silent stream failures (2026-09-24, PR after #8)
+
+PR #8 is merged (`70e3ed6`). This starts the roadmap in
+`fighter_edge/docs/CLAUDE_CODE_HANDOFF.md`'s companion plan (10 phases,
+approved by the owner): Phase 1 is the gate before the Play closed test can
+start. This slice covers audit A-3, A-5, P-6 and P-9.
+
+- **A-3, `MockData` shown to real users.** `lib/state/app_state.dart`
+  `setUser`/`shiftNutritionDate` used to treat "no repository" (the offline
+  demo) and "no user yet" (signed out, or not yet resolved, with a real
+  repository) as the same case, and filled both with `MockData`. Split them:
+  no repository still seeds the demo (unchanged, `main_local.dart`/tests
+  rely on it); no user now starts empty. A slow first launch or a sign-out
+  can no longer flash fabricated weights, sessions or training history, and
+  it can't survive sign-in until the first Firestore snapshot lands either.
+- **A-5, streams with no `onError`.** All seven `.listen(...)` calls across
+  `AppState` (weights, meals, sessions, training log) and
+  `EdgeFuelController` (profile draft, target, nutrition day) now pass
+  `onError`: the last known data stays on screen, and a debug-only
+  `debugPrint` names the stream. Nothing here is fatal — Firestore retries
+  the underlying listener itself.
+- **P-6, no startup timeout.** `FirebaseAuthRepository.init()` bounds the
+  persisted-session restore and the first profile read to 4 s
+  (`_startupTimeout`), matching the existing `syncEntitlement` `.timeout(20s)`
+  pattern. A stalled network now starts the app signed out instead of
+  hanging on the splash screen.
+- **P-9, verify-email screen polls in the background.**
+  `VerifyEmailScreen` now mixes in `WidgetsBindingObserver` and stops its
+  poll/cooldown timers on `AppLifecycleState.paused`, restarting (and
+  checking once immediately) on `resumed`.
+
+Tests: 3 new in `test/unit/app_state_test.dart`, 1 in
+`test/unit/edge_fuel/edge_fuel_controller_sync_test.dart`, 1 in
+`test/widget/verify_email_test.dart` (639 total, up from 634). No new owner
+steps.
+
+## Phase 1, slice 2: Android release setup (2026-09-24, PR after slice 1)
+
+Audit R-11, plus the ad-ID permission and a 16 KB page-size CI check.
+
+- **Minify and shrink resources are now on for release** (`android/app/build.gradle.kts`
+  `buildTypes.release`: `isMinifyEnabled`/`isShrinkResources = true`, plus
+  `proguard-rules.pro`). This is the first release build with R8 on —
+  **not yet verified on a real device or in the Play console.** If a
+  release build ever throws where debug does not, that's a missing keep
+  rule; add it narrowly to `proguard-rules.pro` rather than turning
+  shrinking off.
+- **`res/raw/keep.xml`** protects `@drawable/ic_notification`: it's looked
+  up by string name (`flutter_local_notifications`), which the resource
+  shrinker can't see.
+- **Crashlytics Gradle plugin** (`com.google.firebase.crashlytics` `2.8.1`,
+  read from the `firebase_crashlytics` 5.4.0 package's own FlutterFire
+  template, matching the project's `google-services` version) is applied
+  in `android/app/build.gradle.kts` and declared in
+  `android/settings.gradle.kts`. It uploads the ProGuard mapping file on
+  every release build automatically — no owner step, since it uses the
+  `google-services.json` already committed.
+- **AD_ID permission removed explicitly** in `AndroidManifest.xml`
+  (`tools:node="remove"`), so the Play Data safety form never has to
+  answer for advertising-ID use that doesn't happen.
+- **CI 16 KB page-size check**: a new step in `.github/workflows/flutter-ci.yml`'s
+  `android-release` job runs `zipalign -c -P 16 -v 4` on the built APK.
+
+**Verify once CI is green:** all six checks pass with minification on
+(this is the real risk in this slice — I could not run a full Android
+Gradle build locally in this sandbox: no network path to Google's Maven
+repo, and the system Gradle doesn't match this project's Gradle 9.1
+requirement). If the Android job fails, the cause is almost certainly
+either a stripped class (add a `-keep` rule) or the Crashlytics mapping
+upload (if so, set `firebaseCrashlytics { mappingFileUploadEnabled = false }`
+in the `release` block as a stopgap and file it as a follow-up).
+
+## Phase 1, slice 3: list performance and the login image (2026-09-24, PR after slice 2)
+
+Audit P-4 and P-7. D-3 (query limits) turned out unsafe to do naively —
+see below.
+
+- **`AppState` caches the weight sort** (`_weightsAsc`/`_weightsDesc`,
+  recomputed only in `_resortWeights()` when `_weights` actually changes)
+  instead of re-sorting on every `weights`/`weightHistoryDesc` read. The
+  weight tracker's history loop called `weightHistoryDesc` twice per row,
+  so this was previously O(n²) per build.
+- **Training log ("Session History") is a real lazy list now**:
+  `training_camp_screen.dart`'s `_HistoryView` renders through
+  `CustomScrollView` + `SliverList.builder` instead of building every row
+  up front. The weight tracker's history stays an eager `Column` for
+  now — it's a single bordered card with internal dividers, and making
+  that lazy without changing how it looks is more of a rebuild; left for
+  the Phase 2/8 screen work.
+- **D-3 (unbounded queries) is deliberately NOT done.** `watchTrainingLog`
+  feeds `completedSessionCount` and the streak engine's `trainingDayKeys`
+  ("across every week, not only this one") — a naive `.limit()` would
+  silently produce a wrong streak and count for any account past the
+  limit, not just cap what the history screen shows. `watchSessions` was
+  never actually unbounded (it's the weekly plan, 2-6 docs). Doing this
+  right needs a bounded query for the history list plus a separate
+  unlimited/aggregated source for streak and count — that's Phase 3's
+  data-model work (D-1/D-4), not a safe change here.
+- **Login image**: `assets/images/login_background.png` (1.8 MB) →
+  `assets/images/login_background.webp` (124 KB, quality 80, converted
+  with Pillow since no `cwebp`/ImageMagick was available in this
+  sandbox — visually identical on this dark, textured image, and it sits
+  behind a gradient overlay anyway). `login_screen.dart` also sets
+  `cacheWidth` to the device's physical width instead of decoding at the
+  source's full resolution.
+
+Tests: 1 new in `test/widget/profile_identity_test.dart` (the History
+tab through the new sliver list). 640 total.
+
+## Phase 1, slice 4: paywall error handling (2026-09-24, PR after slice 3)
+
+Audit M-8 and part of M-11.
+
+- **`translateRevenueCatError`** (`billing/revenuecat_billing_gateway.dart`,
+  top-level so it's unit-testable without mocking `purchases_flutter`)
+  maps `paymentPendingError`, `productAlreadyPurchasedError`,
+  `storeProblemError`, `networkError` and `offlineConnectionError` to
+  specific copy with a retry or restore suggestion. Every other code keeps
+  its name as `BillingException.code` (was a fixed `'purchase-failed'`
+  string, so reports were indistinguishable by cause).
+- **`restorePurchases()` now goes through the same mapping** — it had no
+  error translation at all before. It wasn't a crash risk in practice
+  (`AuthController.restorePurchases()`'s bare `catch (error, stack)`
+  already turns anything into a clean `AuthException` before it reaches
+  the paywall — verified by reading the call chain, not assumed), but it
+  meant a real restore failure showed the same generic "please try again"
+  regardless of cause.
+- **`logOut()`** swallows only `logOutWithAnonymousUserError` (RevenueCat's
+  error when `logOut` is called on an already-anonymous user — reachable
+  here if `authStateChanges()` ever emits two `null`s in a row, since
+  `_onUserChanged`'s dedupe guard only covers repeated *same-user* events)
+  and rethrows anything else instead of swallowing every error.
+- **`AuthController._syncBilling`'s catch-all** (M-11) now reports the
+  error instead of discarding it silently. Still no typed
+  `BillingStatus`/`EntitlementState` for the paywall to read — that's
+  M-12, deferred to the monetization phase (roadmap Phase 6).
+
+Tests: `test/unit/revenuecat_billing_gateway_test.dart` (new, 7 cases —
+the error-code mapping is pure and testable via
+`PurchasesErrorHelper.getErrorCode`, which just parses
+`PlatformException.code`, no channel mock needed), 1 new in
+`test/unit/auth_controller_test.dart`. 648 total.
+
+## Phase 1, slice 5: revive the integration test, run it in CI, wire the Play upload (2026-09-24, PR after slice 4)
+
+Audit T-6, and closes the Play-upload gap in R-5.
+
+- **`integration_test/app_flow_test.dart` rewritten.** The old one expected
+  a "More" tab, "Corner Coach", and a client-side "Upgrade to Pro" button
+  that flipped `isPro` in one tap — none of that exists anymore. It now
+  walks the real flow: welcome pages → Art. 9 health-data consent → all 6
+  onboarding questions → dashboard → Profile → a real store purchase
+  (`FakeBillingGateway`, since this runs against the local backend) that
+  does **not** grant Pro by itself → `repo.debugSetPlan(Plan.pro)`
+  (standing in for RevenueCat's webhook) → the UI unlocks reactively →
+  sign out. That purchase/grant split is the one thing most worth an
+  on-device regression test: the client must never be able to grant itself
+  Pro.
+  - `test/flow/app_journey_test.dart` (the same flow, headless, already
+    passing) stops instead at the honest-waitlist path, since its
+    `makeRepo()` leaves billing unconfigured (audit M-6's own regression
+    test). The two files now deliberately cover different paths instead of
+    duplicating one — see the doc comment on each.
+  - Verified by porting the new ending into a scratch widget test in this
+    sandbox first (no Android emulator/device is available here): caught
+    that the paywall's monthly-plan button renders as `MONTHLY - $7.99`
+    (uppercased by the button widget), not `_monthlyLabel()`'s
+    `Monthly - $7.99`, before it went into the real integration test.
+- **`flutter-ci.yml` gets an `integration-test` job**
+  (`reactivecircus/android-emulator-runner`, API 34, `google_apis`,
+  `x86_64`; skipped on draft PRs like the iOS job) that runs everything
+  under `integration_test/` — both `app_flow_test.dart` and the existing
+  `performance_smoke_test.dart` — on a real Android emulator. This is a
+  7th required check now (was 6).
+- **`release.yml` uploads to Play's internal track** once
+  `PLAY_SERVICE_ACCOUNT_JSON` is set (`OWNER_SETUP.md` section 5,
+  new — how to create the service account and grant it Release Manager
+  access). Without the secret, the step skips with a `::notice::` and the
+  signed AAB is still attached to the run for a manual upload, same as
+  before. Both new third-party actions
+  (`reactivecircus/android-emulator-runner`, `r0adkll/upload-google-play`)
+  are pinned to a commit SHA read from the real tag via `git ls-remote`
+  and their `action.yml` fetched and checked for the exact input names
+  used — this sandbox can't reach GitHub's API directly to verify a SHA
+  the usual way, but git protocol access to public repos works.
+
+**Not yet verified:** the emulator job itself — this sandbox has no
+Android emulator to run it against, so CI is the first real run, same
+caveat as slice 2's minification change.
+
+**Phase 1 is now feature-complete** (all six original items). Next:
+verify everything end-to-end, update the handoff/AUDIT one more time if
+CI surfaces anything, and get the PR to green.
+
+## Phase 1, slice 6: fix a real CI failure — the Crashlytics plugin doesn't work under Gradle 9 (2026-09-24, PR after slice 5)
+
+CI (not this sandbox — see slice 2 and 5's caveats) caught a genuine
+incompatibility, in two steps:
+
+1. The Crashlytics Gradle plugin (`2.8.1`) applied fine, but its
+   `uploadCrashlyticsMappingFileRelease` task threw
+   `groovy/util/XmlSlurper` at runtime on this project's Gradle 9.1.
+2. The first fix — `firebaseCrashlytics { mappingFileUploadEnabled =
+   false }` in the `release` build type, the documented way to skip
+   exactly that task — made CI fail differently: Kotlin DSL *script
+   compilation* itself broke, `Unresolved reference 'firebaseCrashlytics'`.
+   Whatever registers that plugin's per-variant DSL extension fails the
+   same way its Groovy usage does, so there's no live-editable flag that
+   reaches this build. The plugin doesn't functionally work here at all.
+
+Fix: remove `id("com.google.firebase.crashlytics")` entirely — from
+`android/app/build.gradle.kts`'s `plugins {}` block and
+`settings.gradle.kts`'s version declaration — rather than applying a
+broken plugin. Everything else slice 2 added (minification, resource
+shrinking, the 16 KB check, the AD_ID removal) is unaffected. Crash
+*reporting* itself is the `firebase_crashlytics` Android AAR's own
+runtime code, wired in by the Flutter plugin mechanism, independent of
+this Gradle plugin — confirmed by reading how the plugin is registered,
+not assumed — so it still works; only automatic ProGuard-mapping upload
+and build-ID injection are unavailable until a Gradle-9-compatible
+plugin version is confirmed.
+
+**Also from this CI run:** the new `integration-test` job's emulator never
+booted — `FATAL | Not enough space to create userdata partition.
+Available: 4848.20 MB, need 7372.80 MB.` The GitHub-hosted runner's
+preinstalled tooling (`.NET` SDK, Android NDK, stray Docker images —
+none of which this job uses) was eating into the disk the AVD needed.
+`flutter-ci.yml`'s `integration-test` job now frees that up
+(`rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk /opt/ghc`,
+`docker image prune`) before creating the emulator.
+
+## Phase 1, slice 7: a code review fix and a real emulator-only test failure (2026-09-24/25, PR after slice 6)
+
+With the Crashlytics-plugin fix in, the Android release build went green.
+Two more things surfaced before all 7 checks were green:
+
+- **Code review caught a real bug in slice 1's P-6 fix.** The 4 s
+  `_startupTimeout` had been applied inside the shared `_hydrate()`
+  helper (`firebase_auth_repository.dart`), so it also bounded sign-up,
+  sign-in and `completeOnboarding`, not just `init()`. On a merely-slow
+  (not down) connection, `completeOnboarding`'s follow-up read could time
+  out even though the onboarding write had already succeeded — and the
+  timeout's catch block falls back to an empty profile, which would
+  bounce the user straight back into the onboarding wizard right after
+  they finished it. Fixed: `_hydrate` now takes an optional `timeout`
+  that only `init()` passes; every other caller hydrates unbounded, same
+  as before P-6 existed. (Also fixed a leaked `StreamController` in the
+  A-5 regression test, same review.)
+- **The revived integration test failed for real, only on the CI
+  emulator.** `performance_smoke_test.dart` passed; `app_flow_test.dart`
+  failed at its very first interaction: `tester.tap(find.text('Create
+  account'))` missed — the hit-test warning showed the text at
+  `Offset(196.1, 769.1)` outside the render tree's `Size(320.0, 640.0)`,
+  i.e. below the bottom of this emulator's small viewport. The login
+  form *is* inside a `SingleChildScrollView` (nothing wrong with the
+  screen), but the test tapped the link directly instead of scrolling it
+  into view first — unlike step 10's sign-out tap, which already used
+  `scrollUntilVisible`. Everything downstream (an `IndexError` on the
+  next `enterText`) was a symptom of that missed tap, not a separate
+  bug: the app was still on the login screen. Fixed by scrolling
+  `'Create account'` into view the same way, before tapping it. This
+  could only be found by a real emulator run — nothing in this sandbox
+  or in `flutter test`'s default viewport reproduces a 320×640 screen.
+  **That fix wasn't enough either — CI immediately found a second,
+  different instance of the same root cause.** The next run got past
+  "Create account" and failed at `tap(find.text('I AGREE'))` with "Found
+  0 widgets" — not a hit-test miss this time, but the widget not existing
+  in the tree at all. Why the two failures look different: the login
+  screen's `SingleChildScrollView` eagerly builds its one child (a
+  `Column`), so an off-screen widget still exists to hit-test against;
+  the health-consent screen uses a plain `ListView(children: [...])`,
+  which is sliver-backed and therefore lazy — Flutter only mounts
+  children within the viewport plus a cache extent, so a widget far
+  enough below the fold is never built at all. On a 320×640 screen
+  (confirmed from the job log: `androidboot.qemu.skin=320x640`, this
+  emulator profile's real size, not a guess), that's not a one-off: every
+  screen in this flow puts its primary action after scrollable content.
+  Rather than spend another 15-20 minute CI round trip per screen, the
+  whole file was rewritten to route every tap and text entry through
+  `_tapVisible`/`_enterTextVisible` helpers that call
+  `scrollUntilVisible` first — confirmed safe by reading
+  `scrollUntilVisible`'s own source in the installed Flutter SDK: when
+  the target already exists, its scroll loop is a no-op (`while
+  (maxIteration > 0 && finder.evaluate().isEmpty)`), so this doesn't
+  change behavior on screens that didn't need it.
+- **With that fix in, both test files' own assertions passed — twice in a
+  row — but the job still failed both times, identically.** The log
+  showed `✅ performance_smoke_test.dart`, then `🎉 1 test passed` for
+  `app_flow_test.dart`, immediately followed by `The process '/usr/bin/sh'
+  failed with exit code 1` and, in the action's own cleanup step, `adb
+  ... emu kill` → `error: could not connect to TCP port 5554: Connection
+  refused` — the emulator was already gone. The first occurrence was
+  treated as a one-off and re-run (the one re-run the drive-to-green rules
+  allow to confirm a "passed on this exact commit" case); the second,
+  identical occurrence made it a real, reproducible failure, not a flake.
+  Root cause: `flutter test integration_test/` pointed at the directory
+  runs both files against one long-lived emulator instance. This runner
+  has no real GPU — its own launch command shows `-gpu
+  swiftshader_indirect`, software rendering — and the emulator died right
+  as the second, much heavier file (`app_flow_test.dart`, dozens of
+  widget interactions across the full onboarding flow) finished,
+  consistent with accumulated memory/GPU-context pressure on a
+  software-rendered, 2-CPU/2560MB instance. Fixed in
+  `flutter-ci.yml`'s `integration-test` job: two
+  `reactivecircus/android-emulator-runner` steps instead of one, each
+  booting its own fresh emulator for a single test file
+  (`performance_smoke_test.dart`, then `app_flow_test.dart`). Job timeout
+  raised 30 → 35 min for the extra boot. **Not yet confirmed green** —
+  this fix could only be reasoned from the job logs, not run locally (no
+  Android SDK/emulator in this sandbox).
+- **That fix worked — the emulator shut down cleanly both times after
+  it — but a new, different failure appeared twice in its place**, both
+  times at the exact same test step: `tap('CONTINUE')` right after
+  "Which formula fits your body?", with the job log showing `ERROR |
+  Failed to find ColorBuffer: 170` (then `173` on the retry) in the same
+  instant as a hit-test-miss warning at the tap's own reported offset.
+  Same step, near-identical buffer IDs, twice — a resource ceiling in
+  the software (SwiftShader) GPU renderer, not random noise; per the
+  drive-to-green rules a second identical failure is real, not a flake,
+  so this got fixed rather than re-run again. Two evidence-based changes:
+  (1) `flutter-ci.yml`'s two emulator-runner steps now request `cores: 4`
+  (every run in this job has logged the emulator's own warning, "will
+  run more smoothly with 4 CPU cores (currently using 2)") and
+  `ram-size: 4096M` (up from the auto-selected 2560MB) — both real,
+  documented inputs of `reactivecircus/android-emulator-runner`'s
+  `action.yml`, cloned and read directly rather than guessed at; (2)
+  `_tapVisible` in `app_flow_test.dart` now pumps a real 300ms before
+  tapping, since `pumpAndSettle` only waits for scheduled frames, not
+  for the raster thread to actually catch up — plausible given the
+  failure's timing correlates with a raster-side buffer-allocation
+  error, not a widget-tree/animation issue.
+- **The `cores: 4` half of that fix was wrong, and made things much
+  worse.** The next run never even reached the test itself — it hung
+  during the Gradle build, then the whole runner was killed. The actual
+  qemu process logged the real cause directly: `warning: Number of SMP
+  cpus requested (4) exceeds the recommended cpus supported by KVM (2)`,
+  followed by repeated `detected a hanging thread 'QEMU2 CPU0 thread'.
+  No response for 20205 ms` as the oversubscribed vCPUs starved each
+  other, until `The runner has received a shutdown signal`. The
+  emulator's own advice ("will run more smoothly with 4 CPU cores") is
+  real, but it assumes a host that actually has 4 to give it — this
+  runner's KVM only has 2, and asking for more didn't get ignored, it
+  broke scheduling entirely. Reverted `cores: 4` back to the action's
+  default (2) in both `flutter-ci.yml` steps; kept `ram-size: 4096M`,
+  which wasn't implicated in this failure and still addresses the
+  `ColorBuffer` allocation ceiling. The `_tapVisible` settle-pump is
+  also still in place, untested by this run (it hung before reaching any
+  Dart test code).
+- **The repo went public partway through this loop** (the owner's
+  monthly Actions minutes had run out — every check was instantly
+  failing with no runner ever assigned, an account-level quota block,
+  not a code issue; public repos get free unlimited minutes on
+  GitHub-hosted runners). Once that cleared, real CI runs resumed: 6/7
+  checks passed immediately, including both historically-flaky jobs
+  (`Android release build`, `iOS build`), confirming the environment
+  itself is healthy. The `Integration test` job then produced two more
+  distinct results:
+  - A run that got the emulator booted and the APK installed, then
+    produced **zero further log output for 25 minutes** — no test
+    group, no error, nothing — until the 35-minute job timeout
+    cancelled it. No diagnosable cause; treated as a one-off stall and
+    re-run, since every other job in the same run had just passed
+    normally on the same infrastructure.
+  - The re-run failed differently again: `Found 0 widgets with text
+    "CONTINUE"` — but this time at the CONTINUE tap right after
+    entering age/height/weight, one step *earlier* in the flow than the
+    three prior `ColorBuffer`-correlated failures at the "Which formula
+    fits your body?" CONTINUE. Four distinct failures now, at four
+    different screens, all the same underlying shape: `_ensureVisible`
+    confirms a widget exists, and by the time the actual interaction
+    runs a moment later, it's gone. That's not four separate app bugs —
+    it's evidence that on this specific real, GPU-less, software-
+    rendered emulator, a widget can transiently vanish and reappear
+    under raster/resource pressure, which is the standard case for
+    retrying a real-device UI interaction rather than chasing each new
+    disappearance individually.
+  - Fixed by wrapping `_tapVisible`/`_enterTextVisible` in a shared
+    `_retrying` helper (`app_flow_test.dart`): up to 3 attempts, each
+    redoing `_ensureVisible` + the interaction from scratch. Safe against
+    accidental double-actions because every observed failure so far
+    threw from *resolving* the tap target (`Scrollable.ensureVisible` or
+    `WidgetController.tap`'s coordinate lookup), before any gesture is
+    actually dispatched to the device — nothing to double-send yet when
+    a retry fires. **Still not confirmed green.**
+
 ## Phase 2, plan step 0: protect the AI budget (2026-09-24, PR after #7)
 
 PR #7 is merged (`96f96c8`). The owner approved the product plan in

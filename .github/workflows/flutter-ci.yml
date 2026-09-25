@@ -208,6 +208,13 @@ jobs:
           flutter build apk --release --no-pub
           --obfuscate --split-debug-info=build/symbols/android
 
+      - name: Check native libraries are 16 KB page-aligned
+        # Play requires this for every app update from November 2025; a
+        # misaligned .so fails Play's pre-launch checks outright.
+        run: |
+          zipalign="$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name zipalign | sort -V | tail -1)"
+          "$zipalign" -c -P 16 -v 4 build/app/outputs/flutter-apk/app-release.apk
+
       - name: Upload release APK and symbols
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -216,6 +223,103 @@ jobs:
             fighter_edge/build/app/outputs/flutter-apk/app-release.apk
             fighter_edge/build/symbols/android
           retention-days: 14
+
+  integration-test:
+    name: Integration test (Android emulator)
+    needs: [analyze-and-test]
+    # Skipped on draft PRs: emulator boot alone is several minutes.
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    # Two emulator boots now, not one shared between both test files — see
+    # the comment below on the run steps. +5 min for the second boot.
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Free up disk space for the emulator's userdata partition
+        # The first run failed here: "Not enough space to create userdata
+        # partition. Available: 4848.20 MB, need 7372.80 MB." The runner's
+        # preinstalled .NET SDK and Android NDK are several GB neither this
+        # job nor this project needs.
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk /opt/ghc
+          sudo docker image prune -af 2>/dev/null || true
+          df -h /
+
+      - name: Enable KVM (hardware acceleration for the emulator)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies (lockfile enforced)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Generate debug plugin configuration
+        run: flutter build apk --config-only --debug
+
+      # Two emulator boots, one per test file, instead of one `flutter test
+      # integration_test/` covering both: pointed at a directory, it reuses
+      # a single long-lived emulator for every file it finds. This runner
+      # has no real GPU — the emulator always renders through SwiftShader
+      # software rendering (visible in its own launch args, `-gpu
+      # swiftshader_indirect`) — and twice in a row, that one shared
+      # instance died right as the *second* file (app_flow_test.dart, by
+      # far the longer/heavier of the two) finished: both files' tests
+      # passed (their own pass/fail output said so), but the emulator was
+      # already unreachable by the time the action's own cleanup tried to
+      # kill it, which failed the job anyway. A fresh emulator per file
+      # avoids the accumulated memory/GPU-context pressure that's the most
+      # likely trigger.
+      # ram-size: app_flow_test.dart twice failed on a `ColorBuffer`
+      # allocation error from the software (SwiftShader) GPU renderer at
+      # the same step, ~170 buffers into the session both times —
+      # consistent with a resource ceiling in the renderer, not a random
+      # glitch. More RAM gives it headroom.
+      #
+      # cores is deliberately left at the action's default (2), NOT bumped
+      # to 4: that was tried here and made things much worse. The emulator
+      # logs "will run more smoothly with 4 CPU cores" on every run, but
+      # this runner's KVM only actually has 2: raising `cores` to 4 made
+      # qemu itself warn "Number of SMP cpus requested (4) exceeds the
+      # recommended cpus supported by KVM (2)", and the run then hung on
+      # oversubscribed vCPU threads ("detected a hanging thread 'QEMU2
+      # CPU0 thread'. No response for 20205 ms") until GitHub killed the
+      # runner outright. The message is real, but it's advice for a
+      # differently-provisioned host, not this one.
+      - name: Run the performance smoke test on an emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          ram-size: 4096M
+          working-directory: fighter_edge
+          script: flutter test integration_test/performance_smoke_test.dart
+
+      - name: Run the app flow test on a fresh emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          ram-size: 4096M
+          working-directory: fighter_edge
+          script: flutter test integration_test/app_flow_test.dart
 
   ios-build:
     name: iOS build (no codesign)

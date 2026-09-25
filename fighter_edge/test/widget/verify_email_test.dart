@@ -83,6 +83,33 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
 
+    testWidgets(
+        'stops polling while backgrounded, and checks again on return (P-9)',
+        (tester) async {
+      final repo = await _unverifiedRepo();
+
+      await tester.pumpWidget(
+        wrapApp(const VerifyEmailScreen(), repo: repo),
+      );
+      await tester.pump();
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await repo.debugMarkEmailVerified();
+
+      // More than one poll interval, but the app is backgrounded: nothing
+      // should have polled, so the screen has not advanced.
+      await tester.pump(const Duration(seconds: 4));
+      expect(find.text('Email confirmed'), findsNothing);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Email confirmed'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
     testWidgets('blocking mode hides the dismiss affordance', (tester) async {
       final repo = await _unverifiedRepo();
 

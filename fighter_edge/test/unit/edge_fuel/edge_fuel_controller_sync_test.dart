@@ -5,9 +5,31 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/observability/error_reporter.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
+
+/// A repository whose target stream is controlled directly, so a test can
+/// inject an error without going through Firestore.
+class _FlakyEdgeFuelRepository extends InMemoryEdgeFuelRepository {
+  final targetController = StreamController<NutritionTarget?>.broadcast();
+
+  @override
+  Stream<NutritionTarget?> watchTarget(String userId) =>
+      targetController.stream;
+}
+
+NutritionTarget _target() => NutritionTarget(
+      status: NutritionTargetStatus.success,
+      policyVersion: 1,
+      calculatedAt: DateTime(2026, 1, 1),
+      targetCalories: 2400,
+      proteinGrams: 180,
+      carbGrams: 260,
+      fatGrams: 75,
+    );
 
 /// Firestore's write future completes only when the server acknowledges it,
 /// which never happens offline. This repository never acknowledges.
@@ -104,6 +126,27 @@ void main() {
     await controller.addEntry(_meal('b'));
     expect(controller.lastSaveFailed, isFalse);
     controller.dispose();
+  });
+
+  test(
+      'a target stream error keeps the last known target instead of '
+      'crashing or hanging (A-5)', () async {
+    final repo = _FlakyEdgeFuelRepository();
+    final controller = EdgeFuelController(repository: repo)..setUser('u1');
+    await Future<void>.delayed(Duration.zero);
+
+    final target = _target();
+    repo.targetController.add(target);
+    await Future<void>.delayed(Duration.zero);
+    expect(controller.target, target);
+
+    repo.targetController.addError(Exception('offline'));
+    await Future<void>.delayed(Duration.zero);
+
+    // The subscription survives the error; the last known target remains.
+    expect(controller.target, target);
+    controller.dispose();
+    await repo.targetController.close();
   });
 }
 

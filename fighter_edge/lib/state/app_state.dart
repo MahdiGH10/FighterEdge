@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,6 +22,7 @@ class AppState extends ChangeNotifier {
         _meals = dataRepository == null ? MockData.seedMeals() : [],
         _sessions = dataRepository == null ? List.of(MockData.week) : [],
         _log = [] {
+    _resortWeights();
     if (dataRepository == null) _log = _demoLog(_sessions, _clock());
     unawaited(_loadSettings());
   }
@@ -31,6 +33,19 @@ class AppState extends ChangeNotifier {
   final DateTime Function() _clock;
 
   List<WeightEntry> _weights;
+
+  /// [_weights] sorted both ways, recomputed only when it changes (audit
+  /// P-4) — every screen that reads `weights`/`weightHistoryDesc` used to
+  /// re-sort the whole list on every call, and the weight tracker's history
+  /// row called `weightHistoryDesc` once per row, making one screen O(n²).
+  List<WeightEntry> _weightsAsc = const [];
+  List<WeightEntry> _weightsDesc = const [];
+
+  void _resortWeights() {
+    _weightsAsc = [..._weights]..sort((a, b) => a.date.compareTo(b.date));
+    _weightsDesc = [..._weights]..sort((a, b) => b.date.compareTo(a.date));
+  }
+
   List<Meal> _meals;
 
   /// The weekly plan: a template that repeats every week. Whether a slot is
@@ -64,55 +79,89 @@ class AppState extends ChangeNotifier {
     _logLoaded = false;
 
     final repo = _dataRepository;
-    if (repo == null || userId == null) {
+    if (repo == null) {
+      // No repository at all: the offline demo (main_local.dart, previews,
+      // tests that construct AppState with no arguments). Real MockData is
+      // fine here — nothing else could ever be shown.
       _weights = MockData.seedWeights();
       _meals = MockData.seedMeals();
       _sessions = List.of(MockData.week);
       _log = _demoLog(_sessions, _clock());
+      _resortWeights();
+      notifyListeners();
+      return;
+    }
+    if (userId == null) {
+      // Signed out, or not yet resolved at startup. A real repository exists,
+      // so this must never fall back to MockData: a slow first launch would
+      // otherwise show fabricated numbers as if they were the user's, and
+      // keep showing them after sign-in until the first snapshot arrives
+      // (audit A-3). Empty is the only honest state here.
+      _weights = [];
+      _meals = [];
+      _sessions = [];
+      _log = [];
+      _resortWeights();
       notifyListeners();
       return;
     }
 
-    _weightSub = repo.watchWeights(userId).listen((weights) {
-      _weights = List.of(weights);
-      notifyListeners();
-    });
+    _weightSub = repo.watchWeights(userId).listen(
+      (weights) {
+        _weights = List.of(weights);
+        _resortWeights();
+        notifyListeners();
+      },
+      onError: (Object error) {
+        // The last known weights stay on screen; a listener error is not
+        // fatal and Firestore keeps retrying the subscription itself.
+        if (kDebugMode) debugPrint('[app_state] weights stream error: $error');
+      },
+    );
 
     _watchMealsForCurrentDate(repo, userId);
 
-    _sessionSub = repo.watchSessions(userId).listen((sessions) {
-      _sessions = List.of(sessions);
-      _sessionsLoaded = true;
-      _migrateLegacyCompletions(repo, userId);
-      notifyListeners();
-    });
+    _sessionSub = repo.watchSessions(userId).listen(
+      (sessions) {
+        _sessions = List.of(sessions);
+        _sessionsLoaded = true;
+        _migrateLegacyCompletions(repo, userId);
+        notifyListeners();
+      },
+      onError: (Object error) {
+        if (kDebugMode) debugPrint('[app_state] sessions stream error: $error');
+      },
+    );
 
-    _logSub = repo.watchTrainingLog(userId).listen((log) {
-      _log = List.of(log);
-      _logLoaded = true;
-      _migrateLegacyCompletions(repo, userId);
-      notifyListeners();
-    });
+    _logSub = repo.watchTrainingLog(userId).listen(
+      (log) {
+        _log = List.of(log);
+        _logLoaded = true;
+        _migrateLegacyCompletions(repo, userId);
+        notifyListeners();
+      },
+      onError: (Object error) {
+        if (kDebugMode) {
+          debugPrint('[app_state] training log stream error: $error');
+        }
+      },
+    );
   }
 
   // ---- Weight ----
-  List<WeightEntry> get weights => List.unmodifiable(_sortedByDate);
+  List<WeightEntry> get weights => List.unmodifiable(_weightsAsc);
 
-  double get latestWeight => _weights.isEmpty ? 0 : _sortedByDate.last.kg;
+  double get latestWeight => _weightsAsc.isEmpty ? 0 : _weightsAsc.last.kg;
 
   /// Change vs the previous weigh-in (negative = weight loss).
   double get weeklyDelta {
-    final s = _sortedByDate;
+    final s = _weightsAsc;
     if (s.length < 2) return 0;
     return s.last.kg - s[s.length - 2].kg;
   }
 
-  List<WeightEntry> get _sortedByDate =>
-      [..._weights]..sort((a, b) => a.date.compareTo(b.date));
-
   /// History newest-first for the list view.
-  List<WeightEntry> get weightHistoryDesc =>
-      [..._weights]..sort((a, b) => b.date.compareTo(a.date));
+  List<WeightEntry> get weightHistoryDesc => List.unmodifiable(_weightsDesc);
 
   double get sevenDayAverage {
     final cutoff = DateTime.now().subtract(const Duration(days: 7));
@@ -126,6 +175,7 @@ class AppState extends ChangeNotifier {
   void addWeight(DateTime date, double kg) {
     final entry = WeightEntry(date, kg);
     _weights.add(entry);
+    _resortWeights();
     final repo = _dataRepository;
     final userId = _userId;
     if (repo != null && userId != null) {
@@ -221,8 +271,13 @@ class AppState extends ChangeNotifier {
             .add(Duration(days: days));
     final repo = _dataRepository;
     final userId = _userId;
-    if (repo == null || userId == null) {
+    if (repo == null) {
       _meals = isTodayNutrition ? MockData.seedMeals() : [];
+      notifyListeners();
+      return;
+    }
+    if (userId == null) {
+      _meals = [];
       notifyListeners();
       return;
     }
@@ -449,6 +504,7 @@ class AppState extends ChangeNotifier {
         unawaited(repo.addWeight(userId, entry));
       }
     }
+    _resortWeights();
 
     _meals = [];
     _sessions = sessions;
@@ -471,10 +527,15 @@ class AppState extends ChangeNotifier {
   }
 
   void _watchMealsForCurrentDate(DataRepository repo, String userId) {
-    _mealSub = repo.watchMeals(userId, _nutritionDate).listen((meals) {
-      _meals = List.of(meals);
-      notifyListeners();
-    });
+    _mealSub = repo.watchMeals(userId, _nutritionDate).listen(
+      (meals) {
+        _meals = List.of(meals);
+        notifyListeners();
+      },
+      onError: (Object error) {
+        if (kDebugMode) debugPrint('[app_state] meals stream error: $error');
+      },
+    );
   }
 
   Future<void> _loadSettings() async {

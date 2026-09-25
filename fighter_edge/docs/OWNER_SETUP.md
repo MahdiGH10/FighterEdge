@@ -326,3 +326,38 @@ providers may keep what users type.
 3. The privacy policy (section 2.3) and the app's AI consent text both say
    that free models may keep inputs. Claude updates both in the same change.
 
+## 5. Automatic Play Store uploads (optional)
+
+Without this, the release workflow still builds a signed app bundle and
+attaches it to the GitHub Actions run for you to upload to Play by hand.
+With it, every version tag (`v1.2.3`) uploads straight to Play's internal
+testing track.
+
+### 5.1 Create the service account
+
+1. Google Play Console > **Setup > API access**. If this is the first time,
+   click **Choose a project** and link or create a Google Cloud project.
+2. Click **Create new service account**. It opens Google Cloud Console for
+   you; click **Create Service Account**, give it any name, and finish the
+   wizard without granting it a project role.
+3. Back in Play Console, find the new service account in the list and click
+   **Grant access**. Give it the **Release manager** permission for this
+   app (it doesn't need Admin).
+4. In Google Cloud Console, open the service account > **Keys** > **Add
+   key** > **Create new key** > **JSON**. This downloads a `.json` file —
+   treat it like a password.
+
+### 5.2 Add it to GitHub
+
+1. This repository's **Settings > Environments > production > Secrets**.
+2. Add a secret named `PLAY_SERVICE_ACCOUNT_JSON`.
+3. Open the downloaded `.json` file, copy its entire contents, and paste
+   them as the secret's value.
+4. Delete the local `.json` file once it's saved in GitHub.
+
+### 5.3 Before the first upload
+
+Play requires the app's first release to be uploaded by hand once, through
+the Play Console website, before the API can publish to it. Do that first
+(any track), then every tagged release after that can upload automatically.
+

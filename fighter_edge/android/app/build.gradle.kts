@@ -5,6 +5,18 @@ plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
     id("com.google.gms.google-services")
+    // The Crashlytics Gradle plugin (com.google.firebase.crashlytics) is
+    // deliberately not applied: 2.8.1 doesn't work at all under this
+    // project's Gradle 9.1 (its own Groovy usage throws
+    // `groovy/util/XmlSlurper`, and whatever registers its `buildTypes`
+    // DSL extension breaks the same way — confirmed by a Kotlin DSL
+    // compile error, "Unresolved reference 'firebaseCrashlytics'", not
+    // just a task failure). Crash *reporting* is unaffected: it's the
+    // firebase_crashlytics Android AAR's own runtime code, wired in by the
+    // Flutter plugin mechanism, not by this Gradle plugin. Only automatic
+    // ProGuard-mapping upload and build-ID injection are unavailable.
+    // Re-add once a Crashlytics Gradle plugin version confirmed compatible
+    // with Gradle 9 exists.
     // END: FlutterFire Configuration
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -78,6 +90,13 @@ android {
                 )
                 signingConfigs.getByName("debug")
             }
+            // Code and resource shrinking (audit R-11).
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

@@ -38,7 +38,8 @@ class VerifyEmailScreen extends StatefulWidget {
   State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
 }
 
-class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
+class _VerifyEmailScreenState extends State<VerifyEmailScreen>
+    with WidgetsBindingObserver {
   /// Fast enough that the app feels like it noticed, slow enough not to hammer
   /// the auth backend while someone hunts through their spam folder.
   static const _pollInterval = Duration(seconds: 3);
@@ -50,6 +51,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _startTimers();
+  }
+
+  void _startTimers() {
     _poll = Timer.periodic(_pollInterval, (_) => _check());
     // Drives the countdown label only; the cooldown itself is time-based, so a
     // missed tick cannot desynchronise it.
@@ -64,10 +70,34 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     );
   }
 
+  void _stopTimers() {
+    _poll?.cancel();
+    _poll = null;
+    _cooldownTicker?.cancel();
+    _cooldownTicker = null;
+  }
+
+  // Polling every 3 seconds is wasted battery and network while the app sits
+  // in the background — nobody is watching this screen for the result (audit
+  // P-9). Stop on the way out, and check once immediately on the way back in,
+  // in case the link was confirmed while backgrounded.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_verified) return;
+    if (state == AppLifecycleState.resumed) {
+      if (_poll == null) {
+        _startTimers();
+        unawaited(_check());
+      }
+    } else if (state == AppLifecycleState.paused) {
+      _stopTimers();
+    }
+  }
+
   @override
   void dispose() {
-    _poll?.cancel();
-    _cooldownTicker?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _stopTimers();
     super.dispose();
   }
 

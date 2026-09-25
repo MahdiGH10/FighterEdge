@@ -15,6 +15,13 @@ name: Release
 #                                  to RevenueCat, but kept out of git)
 # Required variables:
 #   TERMS_URL, PRIVACY_URL        hosted legal documents
+#
+# Optional secret, for the automatic Play internal-track upload:
+#   PLAY_SERVICE_ACCOUNT_JSON    a Play Console service-account key with
+#                                Release Manager access (see OWNER_SETUP.md
+#                                section 5). Without it, the bundle is still
+#                                built and attached to the run for a manual
+#                                upload.
 on:
   push:
     tags: ['v*.*.*']
@@ -161,3 +168,25 @@ jobs:
             fighter_edge/build/symbols/android
           if-no-files-found: error
           retention-days: 90
+
+      - name: Check Play upload credentials
+        id: play
+        env:
+          SA_JSON_PRESENT: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
+        run: |
+          if [ "$SA_JSON_PRESENT" = "true" ]; then
+            echo "upload=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON is not configured; the bundle above is ready for a manual upload. See OWNER_SETUP.md section 5."
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload to Play's internal track
+        if: steps.play.outputs.upload == 'true'
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.fighteredge.fighter_edge
+          releaseFiles: fighter_edge/build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          mappingFile: fighter_edge/build/app/outputs/mapping/release/mapping.txt

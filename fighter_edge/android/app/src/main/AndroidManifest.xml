@@ -1,4 +1,10 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- No ads, so no advertising ID. Removed explicitly rather than left to
+         chance: Play Services libraries can pull this permission in
+         transitively, and its presence forces answers about ad tracking on
+         the Play Data safety form that would otherwise not apply. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
     <!-- Camp reminders (flutter_local_notifications). POST_NOTIFICATIONS is
          the Android 13+ runtime permission the app requests before
          scheduling; below API 33 it is granted automatically and this is a
