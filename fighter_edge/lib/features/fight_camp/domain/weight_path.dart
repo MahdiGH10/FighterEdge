@@ -215,7 +215,10 @@ class WeightPathCalculator {
   ) {
     final totalDays = daysBetween(today, fightWeekStart);
     final points = <WeightCheckpoint>[];
-    for (var day = 7; day < totalDays; day += 7) {
+    // A weekly target closer than this to the start of fight week would sit
+    // a day or two from the final one and add nothing but noise.
+    const minGapToFinal = 4;
+    for (var day = 7; day <= totalDays - minGapToFinal; day += 7) {
       points.add(WeightCheckpoint(
         addDays(today, day),
         _round(current - rate * day / 7, 1),

@@ -3,6 +3,7 @@ import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repos
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
+import 'package:fighter_edge/features/fight_camp/presentation/screens/fight_path_screen.dart';
 import 'package:fighter_edge/features/fight_camp/presentation/screens/fight_setup_screen.dart';
 import 'package:fighter_edge/main.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +50,11 @@ void main() {
     expect(find.textContaining('Fight night'), findsOneWidget);
 
     await tester.tap(find.textContaining('Fight night'));
+    await tester.pumpAndSettle();
+    expect(find.byType(FightPathScreen), findsOneWidget);
+    expectNoFlutterException(tester);
+
+    await tester.tap(find.bySemanticsLabel('Edit fight'));
     await tester.pumpAndSettle();
     expect(find.byType(FightSetupScreen), findsOneWidget);
     expectNoFlutterException(tester);

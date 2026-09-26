@@ -548,5 +548,14 @@
   "fightDone": "Kampf vorbei. Trag deinen nächsten ein.",
   "fightEdit": "Kampf bearbeiten",
   "fightPathShortSupervision": "Nur mit betreutem Wasser-Cut machbar. Zum Prüfen tippen.",
-  "fightPathShortNotSafe": "Bis zu diesem Termin nicht sicher. Zum Prüfen tippen."
+  "fightPathShortNotSafe": "Bis zu diesem Termin nicht sicher. Zum Prüfen tippen.",
+  "fightPathScreenTitle": "Gewichtsweg",
+  "fightCheckpointsTitle": "Wochenziele",
+  "fightCheckpointFightWeek": "Kampfwoche beginnt",
+  "fightChartLimit": "Limit {value}",
+  "fightChartToday": "Heute",
+  "fightChartWeighIns": "Wiegungen",
+  "fightChartTrend": "7-Tage-Trend",
+  "fightChartPlan": "Plan",
+  "fightChartEmpty": "Trag zwei Gewichte ein, um deinen Trend zu sehen."
 }

@@ -74,6 +74,27 @@ class LayoutTokens {
   static const double authButton = 52;
 }
 
+/// Line-chart marks, shared by every weight chart so they read the same.
+class ChartTokens {
+  ChartTokens._();
+
+  /// A measured series (trend, weigh-ins joined up).
+  static const double line = 3;
+
+  /// Guides and projections: limits, goals, planned paths.
+  static const double guide = 1.5;
+  static const List<int> dash = [6, 5];
+
+  static const double dot = 3.5;
+
+  /// A single weigh-in behind a trend line: present, not competing.
+  static const double faintDot = 2.5;
+
+  /// Room for the value axis labels and the date labels.
+  static const double valueAxis = 32;
+  static const double dateAxis = 24;
+}
+
 /// Icon sizes. Glyphs sit on the type scale rather than floating free of it.
 class IconSizes {
   IconSizes._();

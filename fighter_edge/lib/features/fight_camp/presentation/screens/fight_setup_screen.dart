@@ -135,7 +135,8 @@ class _FightSetupScreenState extends State<FightSetupScreen> {
     if (confirmed != true || !mounted) return;
     context.read<FightCampController>().clear();
     AppHaptics.warning();
-    Navigator.of(context).maybePop();
+    // Back past the weight path too: it has nothing left to show.
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   @override

@@ -1336,4 +1336,33 @@ class LEn extends L {
 
   @override
   String get fightPathShortNotSafe => 'Not safe by this date. Tap to review.';
+
+  @override
+  String get fightPathScreenTitle => 'Weight path';
+
+  @override
+  String get fightCheckpointsTitle => 'Weekly targets';
+
+  @override
+  String get fightCheckpointFightWeek => 'Fight week starts';
+
+  @override
+  String fightChartLimit(String value) {
+    return 'Limit $value';
+  }
+
+  @override
+  String get fightChartToday => 'Today';
+
+  @override
+  String get fightChartWeighIns => 'Weigh-ins';
+
+  @override
+  String get fightChartTrend => '7-day trend';
+
+  @override
+  String get fightChartPlan => 'Plan';
+
+  @override
+  String get fightChartEmpty => 'Log two weigh-ins to draw your trend.';
 }

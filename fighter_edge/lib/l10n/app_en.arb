@@ -617,5 +617,15 @@
   "fightDone": "Fight done. Add your next one.",
   "fightEdit": "Edit fight",
   "fightPathShortSupervision": "Needs a supervised water cut. Tap to review.",
-  "fightPathShortNotSafe": "Not safe by this date. Tap to review."
+  "fightPathShortNotSafe": "Not safe by this date. Tap to review.",
+  "fightPathScreenTitle": "Weight path",
+  "fightCheckpointsTitle": "Weekly targets",
+  "fightCheckpointFightWeek": "Fight week starts",
+  "fightChartLimit": "Limit {value}",
+  "@fightChartLimit": {"placeholders": {"value": {"type": "String"}}},
+  "fightChartToday": "Today",
+  "fightChartWeighIns": "Weigh-ins",
+  "fightChartTrend": "7-day trend",
+  "fightChartPlan": "Plan",
+  "fightChartEmpty": "Log two weigh-ins to draw your trend."
 }

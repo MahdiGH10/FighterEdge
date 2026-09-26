@@ -16,12 +16,19 @@ import '../../domain/fight_camp.dart';
 import '../../domain/weight_path.dart';
 import '../fight_camp_controller.dart';
 import '../fight_camp_copy.dart';
+import '../screens/fight_path_screen.dart';
 import '../screens/fight_setup_screen.dart';
 
 void openFightSetup(BuildContext context) => AppNavigation.push<void>(
       context,
       AppRoutes.fightSetup,
       fallbackBuilder: (_) => const FightSetupScreen(),
+    );
+
+void openFightPath(BuildContext context) => AppNavigation.push<void>(
+      context,
+      AppRoutes.fightPath,
+      fallbackBuilder: (_) => const FightPathScreen(),
     );
 
 /// The fight the camp is built around, at the top of the dashboard (pattern
@@ -52,7 +59,7 @@ class FightCountdownSection extends StatelessWidget {
         status: status,
         copy: copy,
         today: state.now,
-        onTap: () => openFightSetup(context),
+        onTap: () => openFightPath(context),
       ),
     );
   }

@@ -153,8 +153,12 @@ void main() {
                   points[i].weightKg, lessThanOrEqualTo(points[i - 1].weightKg),
                   reason: reason);
               // Rounding to 0.1 kg is the only slack.
-              expect(points[i - 1].weightKg - points[i].weightKg,
-                  lessThanOrEqualTo(WeightCutPolicy.maxWeeklyLossKg + 0.1),
+              final days = daysBetween(points[i - 1].date, points[i].date);
+              expect(days, greaterThanOrEqualTo(4), reason: reason);
+              expect(
+                  points[i - 1].weightKg - points[i].weightKg,
+                  lessThanOrEqualTo(
+                      WeightCutPolicy.maxWeeklyLossKg * days / 7 + 0.1),
                   reason: reason);
             }
             if (points.isNotEmpty) {
