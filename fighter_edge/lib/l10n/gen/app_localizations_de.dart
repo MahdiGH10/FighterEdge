@@ -169,7 +169,7 @@ class LDe extends L {
   String get dashboardNextSession => 'Nächste Einheit';
 
   @override
-  String get dashboardRecentActivity => 'Letzte Aktivität';
+  String get dashboardRecentActivity => 'Letzte Aktivitäten';
 
   @override
   String get dashboardSeeAll => 'Alle ansehen';
@@ -824,4 +824,100 @@ class LDe extends L {
 
   @override
   String get authHidePassword => 'Passwort verbergen';
+
+  @override
+  String get dashboardThisWeek => 'Diese Woche';
+
+  @override
+  String get dashboardFighter => 'Athlet';
+
+  @override
+  String get dashboardToday => 'Heute';
+
+  @override
+  String get dashboardNoPlan => 'Noch keine Einheiten geplant';
+
+  @override
+  String get dashboardWeekDone => 'Woche abgeschlossen';
+
+  @override
+  String get dashboardRestDay => 'Ruhetag';
+
+  @override
+  String get dashboardRecovery =>
+      'Deine geplanten Einheiten sind erledigt. Nimm dir Zeit zur Erholung.';
+
+  @override
+  String get dashboardPlanHint => 'Öffne Training, um deine Woche zu planen.';
+
+  @override
+  String dashboardNextUp(String day, String session) {
+    return 'Als Nächstes: $day · $session';
+  }
+
+  @override
+  String get dashboardStartSession => 'Einheit starten';
+
+  @override
+  String get dashboardOpenCamp => 'Trainingsplan öffnen';
+
+  @override
+  String get dashboardSetFuel => 'Ernährungsziel festlegen';
+
+  @override
+  String get dashboardFuelInfo => 'Warum dieses Ziel wichtig ist';
+
+  @override
+  String get dashboardFuelExplanation =>
+      'Kalorien unterstützen dein Ziel. Eiweiß unterstützt Erholung und Muskeln. Kohlenhydrate liefern Energie fürs Training.';
+
+  @override
+  String get commonClose => 'Schließen';
+
+  @override
+  String get dashboardNoActivity =>
+      'Schließe deine erste Einheit ab, um deinen Verlauf zu starten.';
+
+  @override
+  String get dashboardVerifyEmail => 'E-Mail bestätigen';
+
+  @override
+  String get dashboardConfirmEmail => 'E-Mail bestätigen';
+
+  @override
+  String get dashboardRiskTitle => 'Serie gefährdet';
+
+  @override
+  String dashboardFreezeHint(int count) {
+    return 'Gestern fehlt ein Eintrag. Schütze den Tag mit einem Schutz ($count übrig).';
+  }
+
+  @override
+  String get dashboardLogHint =>
+      'Kein Schutz verfügbar. Trage heute eine Einheit ein, um neu zu starten.';
+
+  @override
+  String get dashboardFreeze => 'Schützen';
+
+  @override
+  String get dashboardLogNow => 'Jetzt eintragen';
+
+  @override
+  String get dashboardFreezeUsed => 'Schutz verwendet — gestern ist geschützt.';
+
+  @override
+  String get dashboardLogged => 'Eingetragen';
+
+  @override
+  String get dashboardYesterday => 'Gestern';
+
+  @override
+  String dashboardDaysAgo(int count) {
+    return 'Vor $count Tagen';
+  }
+
+  @override
+  String dashboardChecklistProgress(int done, int total) {
+    return '$done von $total erledigt';
+  }
 }

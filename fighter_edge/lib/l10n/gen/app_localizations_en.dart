@@ -167,7 +167,7 @@ class LEn extends L {
   String get dashboardNextSession => 'Next Session';
 
   @override
-  String get dashboardRecentActivity => 'Recent Activity';
+  String get dashboardRecentActivity => 'Recent activity';
 
   @override
   String get dashboardSeeAll => 'See all';
@@ -820,4 +820,100 @@ class LEn extends L {
 
   @override
   String get authHidePassword => 'Hide password';
+
+  @override
+  String get dashboardThisWeek => 'This week';
+
+  @override
+  String get dashboardFighter => 'Fighter';
+
+  @override
+  String get dashboardToday => 'Today';
+
+  @override
+  String get dashboardNoPlan => 'No sessions planned';
+
+  @override
+  String get dashboardWeekDone => 'Week complete';
+
+  @override
+  String get dashboardRestDay => 'Rest day';
+
+  @override
+  String get dashboardRecovery =>
+      'Your planned sessions are done. Take time to recover.';
+
+  @override
+  String get dashboardPlanHint => 'Open Train to set up your week.';
+
+  @override
+  String dashboardNextUp(String day, String session) {
+    return 'Next: $day · $session';
+  }
+
+  @override
+  String get dashboardStartSession => 'Start session';
+
+  @override
+  String get dashboardOpenCamp => 'Open camp';
+
+  @override
+  String get dashboardSetFuel => 'Set a fuel target';
+
+  @override
+  String get dashboardFuelInfo => 'Why this target matters';
+
+  @override
+  String get dashboardFuelExplanation =>
+      'Calories support your goal. Protein supports recovery and muscle. Carbohydrates provide energy for training.';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get dashboardNoActivity =>
+      'Complete your first session to start your history.';
+
+  @override
+  String get dashboardVerifyEmail => 'Verify your email';
+
+  @override
+  String get dashboardConfirmEmail => 'Confirm your email';
+
+  @override
+  String get dashboardRiskTitle => 'Streak at risk';
+
+  @override
+  String dashboardFreezeHint(int count) {
+    return 'Yesterday is unlogged. Protect it with a freeze ($count left).';
+  }
+
+  @override
+  String get dashboardLogHint =>
+      'No freeze is available. Log a session today to start again.';
+
+  @override
+  String get dashboardFreeze => 'Freeze';
+
+  @override
+  String get dashboardLogNow => 'Log now';
+
+  @override
+  String get dashboardFreezeUsed => 'Freeze used — yesterday is protected.';
+
+  @override
+  String get dashboardLogged => 'Logged';
+
+  @override
+  String get dashboardYesterday => 'Yesterday';
+
+  @override
+  String dashboardDaysAgo(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String dashboardChecklistProgress(int done, int total) {
+    return '$done of $total complete';
+  }
 }

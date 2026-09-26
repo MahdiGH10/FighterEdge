@@ -56,7 +56,7 @@
   "dashboardTitle": "Dashboard",
   "dashboardWeeklyOverview": "Weekly Overview",
   "dashboardNextSession": "Next Session",
-  "dashboardRecentActivity": "Recent Activity",
+  "dashboardRecentActivity": "Recent activity",
   "dashboardSeeAll": "See all",
   "dashboardStatWeight": "Weight",
   "dashboardStatSessions": "Sessions",
@@ -349,5 +349,67 @@
   "authNoAccount": "New here?",
   "authCreateAccount": "Create account",
   "authShowPassword": "Show password",
-  "authHidePassword": "Hide password"
+  "authHidePassword": "Hide password",
+  "dashboardThisWeek": "This week",
+  "dashboardFighter": "Fighter",
+  "dashboardToday": "Today",
+  "dashboardNoPlan": "No sessions planned",
+  "dashboardWeekDone": "Week complete",
+  "dashboardRestDay": "Rest day",
+  "dashboardRecovery": "Your planned sessions are done. Take time to recover.",
+  "dashboardPlanHint": "Open Train to set up your week.",
+  "dashboardNextUp": "Next: {day} · {session}",
+  "dashboardStartSession": "Start session",
+  "dashboardOpenCamp": "Open camp",
+  "dashboardSetFuel": "Set a fuel target",
+  "dashboardFuelInfo": "Why this target matters",
+  "dashboardFuelExplanation": "Calories support your goal. Protein supports recovery and muscle. Carbohydrates provide energy for training.",
+  "commonClose": "Close",
+  "dashboardNoActivity": "Complete your first session to start your history.",
+  "dashboardVerifyEmail": "Verify your email",
+  "dashboardConfirmEmail": "Confirm your email",
+  "dashboardRiskTitle": "Streak at risk",
+  "dashboardFreezeHint": "Yesterday is unlogged. Protect it with a freeze ({count} left).",
+  "dashboardLogHint": "No freeze is available. Log a session today to start again.",
+  "dashboardFreeze": "Freeze",
+  "dashboardLogNow": "Log now",
+  "dashboardFreezeUsed": "Freeze used — yesterday is protected.",
+  "dashboardLogged": "Logged",
+  "dashboardYesterday": "Yesterday",
+  "dashboardDaysAgo": "{count} days ago",
+  "@dashboardNextUp": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashboardFreezeHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashboardDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardChecklistProgress": "{done} of {total} complete",
+  "@dashboardChecklistProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

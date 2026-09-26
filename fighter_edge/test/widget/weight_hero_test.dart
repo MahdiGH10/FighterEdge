@@ -19,7 +19,7 @@ void main() {
     await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('WEIGHT'));
+    await tester.tap(find.text('Weight'));
     await tester.pump(); // route starts
     await tester.pump(const Duration(milliseconds: 120)); // mid-flight
     // One flying copy of the number, no duplicate-tag failure.

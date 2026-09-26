@@ -15,8 +15,10 @@ import '../controllers/edge_fuel_controller.dart';
 /// the two halves of camp read together.
 class FuelWeekCard extends StatefulWidget {
   final EdgeFuelController edgeFuel;
+  final bool embedded;
 
-  const FuelWeekCard({super.key, required this.edgeFuel});
+  const FuelWeekCard(
+      {super.key, required this.edgeFuel, this.embedded = false});
 
   @override
   State<FuelWeekCard> createState() => _FuelWeekCardState();
@@ -42,7 +44,8 @@ class _FuelWeekCardState extends State<FuelWeekCard> {
         if (days == null) return const SizedBox.shrink();
         final summary =
             WeeklyFuelCalculator.summarise(days: days, target: target);
-        return _FuelWeekBody(summary: summary);
+        final body = _FuelWeekBody(summary: summary);
+        return widget.embedded ? body : AppCard(child: body);
       },
     );
   }
@@ -72,77 +75,75 @@ class _FuelWeekBody extends StatelessWidget {
           '${summary.onTargetDays} on target, protein hit on '
           '${summary.proteinHitDays} days.',
       excludeSemantics: true,
-      child: AppCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l.fuelWeekTitle,
-                    style: AppType.micro(
-                      weight: FontWeight.w800,
-                      color: muted,
-                      spacing: .8,
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l.fuelWeekTitle,
+                  style: AppType.micro(
+                    weight: FontWeight.w800,
+                    color: muted,
+                    spacing: .8,
                   ),
                 ),
-                Text(
-                  l.fuelWeekLogged(summary.loggedDays),
-                  style: AppType.subhead(
-                    weight: FontWeight.w700,
-                    color: AppAccessibility.textSecondary(context),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: Insets.md),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (var i = 0; i < 7; i++) ...[
-                  Expanded(
-                    child: _DayBar(
-                      day: i < summary.days.length ? summary.days[i] : null,
-                      target: summary.targetCalories,
-                      letter: _letters[i],
-                      isToday: i == todayIndex,
-                    ),
-                  ),
-                  if (i < 6) const SizedBox(width: Insets.sm),
-                ],
-              ],
-            ),
-            const SizedBox(height: Insets.lg),
-            if (summary.loggedDays == 0)
-              Text(
-                l.fuelWeekEmpty,
-                style: AppType.subhead(
-                    color: AppAccessibility.textSecondary(context)),
-              )
-            else
-              Row(
-                children: [
-                  _WeekStat(
-                    value: '${summary.onTargetDays}',
-                    label: l.fuelWeekOnTarget,
-                    color: AppColors.positive,
-                  ),
-                  _WeekStat(
-                    value: '${summary.proteinHitDays}',
-                    label: l.fuelWeekProteinHit,
-                    color: AppColors.protein,
-                  ),
-                  _WeekStat(
-                    value: average == null ? '—' : '$average',
-                    label: l.fuelWeekAvgKcal,
-                    color: AppColors.textPrimary,
-                  ),
-                ],
               ),
-          ],
-        ),
+              Text(
+                l.fuelWeekLogged(summary.loggedDays),
+                style: AppType.subhead(
+                  weight: FontWeight.w700,
+                  color: AppAccessibility.textSecondary(context),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Insets.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              for (var i = 0; i < 7; i++) ...[
+                Expanded(
+                  child: _DayBar(
+                    day: i < summary.days.length ? summary.days[i] : null,
+                    target: summary.targetCalories,
+                    letter: _letters[i],
+                    isToday: i == todayIndex,
+                  ),
+                ),
+                if (i < 6) const SizedBox(width: Insets.sm),
+              ],
+            ],
+          ),
+          const SizedBox(height: Insets.lg),
+          if (summary.loggedDays == 0)
+            Text(
+              l.fuelWeekEmpty,
+              style: AppType.subhead(
+                  color: AppAccessibility.textSecondary(context)),
+            )
+          else
+            Row(
+              children: [
+                _WeekStat(
+                  value: '${summary.onTargetDays}',
+                  label: l.fuelWeekOnTarget,
+                  color: AppColors.positive,
+                ),
+                _WeekStat(
+                  value: '${summary.proteinHitDays}',
+                  label: l.fuelWeekProteinHit,
+                  color: AppColors.protein,
+                ),
+                _WeekStat(
+                  value: average == null ? '—' : '$average',
+                  label: l.fuelWeekAvgKcal,
+                  color: AppColors.textPrimary,
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

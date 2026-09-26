@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../auth/verification_gate.dart';
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../features/edge_fuel/presentation/widgets/fuel_week_card.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../models/training_session.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
@@ -12,19 +14,16 @@ import '../state/app_state.dart';
 import '../state/first_run_controller.dart';
 import '../state/streak_controller.dart';
 import '../state/streak_engine.dart';
-import '../auth/verification_gate.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
-import '../widgets/animated_count.dart';
-import '../widgets/dev_message_card.dart';
 import '../widgets/app_scaffold.dart';
-import '../widgets/primary_button.dart';
-import '../widgets/premium_effects.dart';
+import '../widgets/dev_message_card.dart';
+import '../widgets/number_hero.dart';
 import '../widgets/press_scale.dart';
-import '../widgets/section_header.dart';
+import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/weekly_overview.dart';
 import 'auth/verify_email_screen.dart';
@@ -34,11 +33,7 @@ import 'weight_tracker_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final ValueChanged<int> onNavigate;
-
-  /// Lets the tour point at the first-week checklist.
   final GlobalKey? checklistKey;
-
-  /// Starts the app tour. Null hides the checklist's tour item's action.
   final VoidCallback? onStartTour;
 
   const DashboardScreen({
@@ -50,900 +45,414 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
     final firstRun = context.watch<FirstRunController>();
     final streak = context.watch<StreakController>();
-    final edgeFuel = context.watch<EdgeFuelController>();
+    final fuel = context.watch<EdgeFuelController>();
     final user = auth.user;
-    final weightDelta = state.weeklyDelta;
-    final losing = weightDelta <= 0;
-    final nextSession = state.sessions.where((s) => !s.completed).firstOrNull;
-    final streakCompletedDays = state.trainingDayKeys;
-    final streakDays = StreakEngine.streakDays(
-      streakCompletedDays,
-      protectedDateKeys: streak.protectedDateKeys,
-      now: state.now,
-    );
-    final streakAtRisk = StreakEngine.isAtRisk(
-      streakCompletedDays,
-      protectedDateKeys: streak.protectedDateKeys,
-      now: state.now,
-    );
-    const dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    const dayNames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-    final completedDays = {
-      for (final session in state.sessions.where((s) => s.completed))
-        session.day.trim().toLowerCase(),
-    };
-    final weeklyProgress = [
-      for (final day in dayNames)
-        completedDays.any((completed) => completed.startsWith(day)) ? 1.0 : 0.0,
-    ];
-    final recentSessions = state.completedSessionsDesc.take(3).toList();
-    final showVerificationBanner = auth.supportsEmailVerification &&
-        auth.user != null &&
-        !auth.user!.emailVerified;
+    final streakDays = StreakEngine.streakDays(state.trainingDayKeys,
+        protectedDateKeys: streak.protectedDateKeys, now: state.now);
+    final atRisk = StreakEngine.isAtRisk(state.trainingDayKeys,
+        protectedDateKeys: streak.protectedDateKeys, now: state.now);
+    const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    final today = days[state.now.weekday - 1];
+    final unfinished = state.sessions.where((s) => !s.completed);
+    final todaysSession = unfinished
+        .where((s) => s.day.toLowerCase().startsWith(today))
+        .firstOrNull;
+    final next = todaysSession ?? unfinished.firstOrNull;
+    final recent = state.completedSessionsDesc.take(3).toList();
     return ScreenScaffold.tab(
-      title: 'Dashboard',
+      title: l.dashboardTitle,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
         children: [
-          PremiumReveal(
-            child: _ProfileHeader(
-              name: (user?.displayName.isNotEmpty ?? false)
+          Text(
+              user?.displayName.isNotEmpty == true
                   ? user!.displayName
-                  : 'Fighter',
-              tagline: user?.goal.isNotEmpty ?? false
-                  ? user!.goal
-                  : 'The Grind Never Lies.',
-            ),
-          ),
+                  : l.dashboardFighter,
+              style: AppType.title1()),
+          if (user?.goal.isNotEmpty == true)
+            Text(user!.goal,
+                style: AppType.subhead(
+                    color: AppAccessibility.textSecondary(context))),
           const SizedBox(height: Insets.lg),
-          const DevMessageCard(),
           if (firstRun.isActive) ...[
-            const SizedBox(height: Insets.lg),
             FirstWeekChecklist(
-              key: checklistKey,
-              onStartTour: onStartTour ?? () {},
-              onLogMeal: () => onNavigate(2),
-              onTrain: () => onNavigate(1),
-            ),
+                key: checklistKey,
+                compact: true,
+                onStartTour: onStartTour ?? () {},
+                onLogMeal: () => onNavigate(2),
+                onTrain: () => onNavigate(1)),
+            const SizedBox(height: Insets.md),
           ],
-          if (showVerificationBanner) ...[
-            const SizedBox(height: Insets.lg),
-            _EmailVerificationBanner(auth: auth),
-          ],
-          if (streakAtRisk) ...[
-            const SizedBox(height: Insets.lg),
-            _StreakFreezeBanner(streak: streak, onNavigate: onNavigate),
-          ],
-          const SizedBox(height: Insets.lg),
-          _TodayFocusCard(onNavigate: onNavigate),
-          const SizedBox(height: Insets.xl),
-          _DashboardStats(
-            cards: [
-              StatCard(
-                label: 'Weight',
-                value: state.latestWeight == 0
-                    ? '—'
-                    : state
-                        .displayWeight(state.latestWeight)
-                        .toStringAsFixed(1),
-                unit: state.weightUnitLabel,
-                delta: state.weights.length < 2
-                    ? 'Add weigh-in'
-                    : '${state.displayWeight(weightDelta).abs().toStringAsFixed(1)} ${state.weightUnitLabel}',
-                deltaColor: losing ? AppColors.positive : AppColors.primary,
-                deltaIcon: losing ? Icons.arrow_downward : Icons.arrow_upward,
-                onTap: () => AppNavigation.push(
-                  context,
-                  AppRoutes.weightTracker,
-                  fallbackBuilder: (_) => const WeightTrackerScreen(),
-                ),
-                heroTag: state.latestWeight == 0 ? null : weightHeroTag,
-              ),
-              StatCard(
-                label: 'Sessions',
-                value: '${state.completedSessionCount}',
-                unit: '',
-                delta: 'completed',
-                deltaColor: AppColors.positive,
-                deltaIcon: Icons.check_circle_outline,
-              ),
-              StatCard(
-                label: 'Streak',
-                value: '$streakDays',
-                unit: streakDays == 1 ? 'day' : 'days',
-                delta: streakAtRisk
-                    ? 'At risk'
-                    : streakDays > 0
-                        ? 'On fire'
-                        : 'Log today',
-                deltaColor:
-                    streakAtRisk ? AppColors.negative : AppColors.warning,
-                deltaIcon: streakAtRisk
-                    ? Icons.warning_amber_rounded
-                    : Icons.local_fire_department,
-                accent: streakAtRisk ? AppColors.negative : null,
-              ),
-            ],
-          ),
-          const SizedBox(height: Insets.xl),
-          const SectionHeader('Weekly Overview'),
-          PremiumReveal(
-            index: 1,
-            child: AppCard(
-              child: WeeklyOverview(
-                dayLetters: dayLetters,
-                progress: weeklyProgress,
-                todayIndex: state.now.weekday - 1,
-              ),
-            ),
-          ),
-          const SizedBox(height: Insets.md),
-          PremiumReveal(
-            index: 2,
-            // Re-keyed on the day's totals so logging a meal anywhere in the
-            // app redraws the week.
-            child: FuelWeekCard(
-              key: ValueKey(
-                '${edgeFuel.target?.targetCalories}-'
-                '${edgeFuel.consumedCalories}-${edgeFuel.entries.length}',
-              ),
-              edgeFuel: edgeFuel,
-            ),
-          ),
-          const SizedBox(height: Insets.xl),
-          const SectionHeader('Next Session'),
-          PremiumReveal(
-            index: 3,
-            child: _NextSessionCard(
-              session: nextSession,
+          _SessionHero(
+              session: next,
+              today: todaysSession != null,
               hasPlan: state.sessions.isNotEmpty,
-              onOpenCamp: () => onNavigate(1),
-              onStart: nextSession == null
-                  ? null
-                  : () => _push(
-                        context,
-                        RoundTimerScreen(session: nextSession),
-                      ),
-            ),
-          ),
+              onNavigate: onNavigate),
+          const SizedBox(height: Insets.md),
+          if (auth.supportsEmailVerification &&
+              user != null &&
+              !user.emailVerified) ...[
+            _VerificationBanner(auth: auth),
+            const SizedBox(height: Insets.md),
+          ],
+          if (atRisk) ...[
+            _StreakFreezeBanner(streak: streak, onNavigate: onNavigate),
+            const SizedBox(height: Insets.md),
+          ],
+          const DevMessageCard(),
+          _DashboardStats(streakDays: streakDays),
           const SizedBox(height: Insets.xl),
-          SectionHeader(
-            'Recent Activity',
-            trailing: PressScale(
-              onTap: () => onNavigate(1),
-              child: Text('See all',
-                  style: AppType.subhead(
-                      weight: FontWeight.w600, color: AppColors.accentText)),
-            ),
-          ),
-          if (recentSessions.isEmpty)
-            const _NoRecentActivity()
+          Text(l.dashboardThisWeek, style: AppType.headline()),
+          const SizedBox(height: Insets.md),
+          AppCard(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                WeeklyOverview(
+                  dayLetters: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+                  progress: [
+                    for (final day in days)
+                      state.sessions.any((s) =>
+                              s.completed &&
+                              s.day.toLowerCase().startsWith(day))
+                          ? 1.0
+                          : 0.0
+                  ],
+                  todayIndex: state.now.weekday - 1,
+                ),
+                if (fuel.hasUsableTarget) ...[
+                  const SizedBox(height: Insets.xl),
+                  FuelWeekCard(
+                      key: ValueKey(
+                          '${fuel.targetCalories}-${fuel.consumedCalories}-${fuel.entries.length}'),
+                      edgeFuel: fuel,
+                      embedded: true),
+                ],
+              ])),
+          const SizedBox(height: Insets.xl),
+          Row(children: [
+            Expanded(
+                child:
+                    Text(l.dashboardRecentActivity, style: AppType.headline())),
+            TextButton(
+                onPressed: () => onNavigate(1), child: Text(l.dashboardSeeAll)),
+          ]),
+          if (recent.isEmpty)
+            Padding(
+                padding: const EdgeInsets.symmetric(vertical: Insets.md),
+                child: Text(l.dashboardNoActivity,
+                    style: AppType.callout(
+                        color: AppAccessibility.textSecondary(context))))
           else
-            for (final session in recentSessions) _ActivityRow(session),
+            AppCard(
+                padding: EdgeInsets.zero,
+                child: Column(children: [
+                  for (final (index, session) in recent.indexed) ...[
+                    if (index > 0)
+                      Divider(
+                          height: Insets.xxs / 2,
+                          color: AppAccessibility.border(context)),
+                    _ActivityRow(session: session, now: state.now),
+                  ],
+                ])),
         ],
       ),
     );
   }
+}
 
-  void _push(BuildContext context, Widget screen) {
-    Navigator.of(context).push(CupertinoPageRoute(builder: (_) => screen));
+class _SessionHero extends StatelessWidget {
+  final TrainingSession? session;
+  final bool today;
+  final bool hasPlan;
+  final ValueChanged<int> onNavigate;
+  const _SessionHero(
+      {required this.session,
+      required this.today,
+      required this.hasPlan,
+      required this.onNavigate});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final fuel = context.watch<EdgeFuelController>();
+    final title = session == null
+        ? (hasPlan ? l.dashboardWeekDone : l.dashboardNoPlan)
+        : today
+            ? session!.title
+            : l.dashboardRestDay;
+    return AppCard(
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text(l.dashboardToday,
+          style:
+              AppType.subhead(color: AppAccessibility.textSecondary(context))),
+      const SizedBox(height: Insets.xs),
+      Text(title, style: AppType.largeTitle()),
+      const SizedBox(height: Insets.sm),
+      Text(
+          session == null
+              ? (hasPlan ? l.dashboardRecovery : l.dashboardPlanHint)
+              : today
+                  ? session!.subtitle
+                  : l.dashboardNextUp(session!.day, session!.title),
+          style:
+              AppType.callout(color: AppAccessibility.textSecondary(context))),
+      const SizedBox(height: Insets.lg),
+      PrimaryButton(today ? l.dashboardStartSession : l.dashboardOpenCamp,
+          expand: true,
+          onPressed: today
+              ? () => Navigator.of(context).push(CupertinoPageRoute<void>(
+                  builder: (_) => RoundTimerScreen(session: session)))
+              : () => onNavigate(1)),
+      const SizedBox(height: Insets.sm),
+      Row(children: [
+        Expanded(
+            child: TextButton(
+          style: TextButton.styleFrom(
+              alignment: Alignment.centerLeft, padding: EdgeInsets.zero),
+          onPressed: () => onNavigate(2),
+          child: Text(
+              fuel.hasUsableTarget
+                  ? l.fuelLeftToday(
+                      (fuel.targetCalories - fuel.consumedCalories)
+                          .clamp(0, fuel.targetCalories))
+                  : l.dashboardSetFuel,
+              style: AppType.subhead(
+                  color: AppAccessibility.textSecondary(context))),
+        )),
+        IconButton(
+            tooltip: l.dashboardFuelInfo,
+            icon: const Icon(Icons.info_outline, size: IconSizes.row),
+            onPressed: () => showDialog<void>(
+                context: context,
+                builder: (context) => AlertDialog(
+                      title: Text(l.dashboardFuelInfo),
+                      content: Text(l.dashboardFuelExplanation),
+                      actions: [
+                        TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(l.commonClose))
+                      ],
+                    ))),
+      ]),
+    ]));
   }
 }
 
 class _DashboardStats extends StatelessWidget {
-  final List<StatCard> cards;
-
-  const _DashboardStats({required this.cards});
-
-  @override
-  Widget build(BuildContext context) {
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final shouldStack = constraints.maxWidth < 340 || textScale >= 1.3;
-        if (shouldStack) {
-          return Column(
-            children: [
-              for (var i = 0; i < cards.length; i++) ...[
-                cards[i],
-                if (i != cards.length - 1) const SizedBox(height: Insets.md),
-              ],
-            ],
-          );
-        }
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var i = 0; i < cards.length; i++) ...[
-              Expanded(child: cards[i]),
-              if (i != cards.length - 1) const SizedBox(width: Insets.md),
-            ],
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _TodayFocusCard extends StatelessWidget {
-  final ValueChanged<int> onNavigate;
-  const _TodayFocusCard({required this.onNavigate});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final edgeFuel = context.watch<EdgeFuelController>();
-    final streak = context.watch<StreakController>();
-    final nextSession = state.sessions.where((s) => !s.completed).firstOrNull;
-    final streakDays = StreakEngine.streakDays(
-      state.trainingDayKeys,
-      protectedDateKeys: streak.protectedDateKeys,
-      now: state.now,
-    );
-
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(Radii.tile),
-                ),
-                child: const Icon(Icons.flag_outlined,
-                    color: AppColors.primary, size: 22),
-              ),
-              const SizedBox(width: Insets.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Today\'s focus', style: AppType.title1(spacing: .3)),
-                    const SizedBox(height: Insets.xxs),
-                    Text(
-                      nextSession == null
-                          ? (state.sessions.isEmpty
-                              ? 'No sessions planned yet.'
-                              : 'Camp work complete — protect recovery.')
-                          : '${nextSession.title} · ${nextSession.subtitle}',
-                      style: AppType.subhead(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: Insets.lg),
-          if (edgeFuel.hasUsableTarget) ...[
-            _FuelTargetSnapshot(
-              edgeFuel: edgeFuel,
-              streakDays: streakDays,
-            ),
-            const SizedBox(height: Insets.md),
-            const _FuelWhyCard(),
-          ] else
-            Row(
-              children: [
-                const Expanded(
-                  child: _FocusMetric(
-                    label: 'Fuel target',
-                    value: 'Set target',
-                    icon: Icons.restaurant,
-                  ),
-                ),
-                const SizedBox(width: Insets.sm),
-                Expanded(
-                  child: _FocusMetric(
-                    label: 'Streak',
-                    value: streakDays == 1 ? '1 day' : '$streakDays days',
-                    icon: Icons.local_fire_department,
-                  ),
-                ),
-              ],
-            ),
-          const SizedBox(height: Insets.lg),
-          Row(
-            children: [
-              Expanded(
-                child: PrimaryButton(
-                  nextSession == null ? 'Open camp' : 'Start camp',
-                  icon: Icons.play_arrow,
-                  expand: true,
-                  onPressed: () => onNavigate(1),
-                ),
-              ),
-              const SizedBox(width: Insets.sm),
-              Expanded(
-                child: GhostButton(
-                  'Log meal',
-                  icon: Icons.add,
-                  expand: true,
-                  onPressed: () => onNavigate(2),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FuelTargetSnapshot extends StatelessWidget {
-  final EdgeFuelController edgeFuel;
   final int streakDays;
-
-  const _FuelTargetSnapshot({
-    required this.edgeFuel,
-    required this.streakDays,
-  });
-
+  const _DashboardStats({required this.streakDays});
   @override
   Widget build(BuildContext context) {
-    final target = edgeFuel.targetCalories;
-    final consumed = edgeFuel.consumedCalories;
-    final remaining = (target - consumed).clamp(0, target);
-    final progress = target <= 0 ? 0.0 : (consumed / target).clamp(0.0, 1.0);
-    final overTarget = target > 0 && consumed > target;
-
-    return Container(
-      padding: const EdgeInsets.all(Insets.md),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundRaised,
-        borderRadius: BorderRadius.circular(Radii.button),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.bolt, color: AppColors.primary, size: 18),
-              const SizedBox(width: Insets.sm),
-              Expanded(
-                child: Text(
-                  'EdgeFuel target',
-                  style: AppType.callout(weight: FontWeight.w800),
-                ),
-              ),
-              AnimatedCount(
-                value: remaining.toDouble(),
-                formatter: (v) =>
-                    overTarget ? 'Over target' : '${v.round()} kcal left',
-                style: AppType.subhead(
-                  weight: FontWeight.w800,
-                  color: overTarget ? AppColors.negative : AppColors.positive,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: Insets.sm),
-          AnimatedCount(
-            value: consumed.toDouble(),
-            formatter: (v) => '${v.round()} / $target kcal',
-            style: AppType.title2().copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: Insets.sm),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(Radii.chip),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: AppColors.track,
-              valueColor: AlwaysStoppedAnimation(
-                overTarget ? AppColors.negative : AppColors.primary,
-              ),
-            ),
-          ),
-          const SizedBox(height: Insets.md),
-          Wrap(
-            spacing: Insets.sm,
-            runSpacing: Insets.sm,
-            children: [
-              _TargetPill(
-                label: 'Protein',
-                value: '${edgeFuel.targetProtein}g',
-                color: AppColors.protein,
-              ),
-              _TargetPill(
-                label: 'Carbs',
-                value: '${edgeFuel.targetCarbs}g',
-                color: AppColors.carbs,
-              ),
-              _TargetPill(
-                label: 'Fats',
-                value: '${edgeFuel.targetFats}g',
-                color: AppColors.fats,
-              ),
-              _TargetPill(
-                label: 'Streak',
-                value: '${streakDays}d',
-                color: AppColors.warning,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FuelWhyCard extends StatelessWidget {
-  const _FuelWhyCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Why this target matters',
-            style: AppType.subhead(weight: FontWeight.w800)),
-        const SizedBox(height: Insets.sm),
-        const _FuelWhyRow(
-          icon: Icons.track_changes,
-          text: 'Calories keep the goal honest.',
-        ),
-        const _FuelWhyRow(
-          icon: Icons.favorite_border,
-          text: 'Protein supports recovery and muscle.',
-        ),
-        const _FuelWhyRow(
-          icon: Icons.flash_on,
-          text: 'Carbs protect hard rounds.',
-        ),
-      ],
-    );
-  }
-}
-
-class _FuelWhyRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _FuelWhyRow({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.xs),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: AppColors.primary),
-          const SizedBox(width: Insets.sm),
-          Expanded(
-            child: Text(text,
-                style: AppType.subhead(color: AppColors.textSecondary)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TargetPill extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-
-  const _TargetPill({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: Insets.sm, vertical: Insets.xs),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(Radii.chip),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: Insets.xs),
-          Text(
-            '$label $value',
-            style: AppType.micro(
-              weight: FontWeight.w800,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FocusMetric extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  const _FocusMetric({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(Insets.md),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundRaised,
-        borderRadius: BorderRadius.circular(Radii.tile),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.primary, size: 18),
-          const SizedBox(width: Insets.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label.toUpperCase(),
-                    style: AppType.micro(
-                      weight: FontWeight.w800,
-                      color: AppColors.textMuted,
-                      spacing: .8,
-                    )),
-                const SizedBox(height: Insets.xxs),
-                Text(value, style: AppType.subhead(weight: FontWeight.w800)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileHeader extends StatelessWidget {
-  final String name;
-  final String tagline;
-  const _ProfileHeader({required this.name, required this.tagline});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const FighterAvatar(size: 52),
-        const SizedBox(width: Insets.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(name, style: AppType.title1()),
-              const SizedBox(height: Insets.xxs),
-              Text(tagline,
-                  style: AppType.subhead(
-                      weight: FontWeight.w500, color: AppColors.textSecondary)),
-            ],
-          ),
-        ),
-        const PremiumBadge('Camp mode'),
-      ],
-    );
-  }
-}
-
-class _EmailVerificationBanner extends StatelessWidget {
-  final AuthController auth;
-  const _EmailVerificationBanner({required this.auth});
-
-  @override
-  Widget build(BuildContext context) {
-    // Escalates with the stage rather than nagging at one volume forever: a
-    // first-day reminder and a week-old one are not the same message.
-    final urgent = auth.verificationStage == VerificationStage.urgent;
-    final accent = urgent ? AppColors.negative : AppColors.warning;
-
+    final l = L.of(context);
+    final state = context.watch<AppState>();
+    final weight = state.latestWeight == 0
+        ? '—'
+        : state.displayWeight(state.latestWeight).toStringAsFixed(1);
+    final stats = [
+      _Stat(
+          label: l.dashboardStatWeight,
+          value: weight,
+          unit: state.weightUnitLabel,
+          detail: state.weights.length < 2 ? l.dashboardAddWeighIn : null,
+          heroTag: state.latestWeight == 0 ? null : weightHeroTag,
+          onTap: () => AppNavigation.push(context, AppRoutes.weightTracker,
+              fallbackBuilder: (_) => const WeightTrackerScreen())),
+      _Stat(
+          label: l.dashboardStatSessions,
+          value: '${state.completedSessionCount}',
+          unit: l.dashboardStatCompleted),
+      _Stat(
+          label: l.dashboardStatStreak,
+          value: '$streakDays',
+          unit: l.dashboardStatDays(streakDays)),
+    ];
     return AppCard(
-      accent: accent,
-      padding: const EdgeInsets.all(Insets.md),
-      // Opens the screen that can actually resolve this — it resends, watches
-      // for confirmation, and offers a way out if the address was wrong. A
-      // bare "Resend" gave the user no way to tell whether anything happened.
-      onTap: () => AppNavigation.push(
-        context,
-        AppRoutes.verifyEmail,
-        fallbackBuilder: (_) => const VerifyEmailScreen(),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(Radii.tile),
-            ),
-            child:
-                Icon(Icons.mark_email_unread_outlined, color: accent, size: 21),
-          ),
-          const SizedBox(width: Insets.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(urgent ? 'Confirm your email' : 'Verify your email',
-                    style: AppType.callout(weight: FontWeight.w800)),
-                const SizedBox(height: Insets.xxs),
-                Text(
-                  urgent
-                      ? 'Pro and the AI coach stay locked until you confirm.'
-                      : 'Secure your account before fight camp gets serious.',
-                  style: AppType.subhead(
-                      weight: FontWeight.w500,
-                      color: AppAccessibility.textSecondary(context)),
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right, color: accent),
-        ],
-      ),
-    );
+        child: AppAccessibility.isLargeText(context)
+            ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                for (final (index, stat) in stats.indexed) ...[
+                  if (index > 0) const SizedBox(height: Insets.lg),
+                  stat,
+                ]
+              ])
+            : Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                for (final (index, stat) in stats.indexed) ...[
+                  if (index > 0) const SizedBox(width: Insets.sm),
+                  Expanded(child: stat),
+                ]
+              ]));
   }
 }
 
-/// Shown when the streak is one missed day from breaking: yesterday has
-/// nothing logged and today hasn't happened yet. A freeze is spent on
-/// yesterday specifically, not "today" — the whole point is to cover the day
-/// that has already passed, before it costs the streak.
+class _Stat extends StatelessWidget {
+  final String label, value, unit;
+  final String? detail;
+  final Object? heroTag;
+  final VoidCallback? onTap;
+  const _Stat(
+      {required this.label,
+      required this.value,
+      required this.unit,
+      this.detail,
+      this.heroTag,
+      this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    final number = Text(value, style: AppType.title1());
+    final body =
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label,
+          style:
+              AppType.subhead(color: AppAccessibility.textSecondary(context))),
+      const SizedBox(height: Insets.sm),
+      if (heroTag case final tag?)
+        NumberHero(
+            tag: tag, text: value, style: AppType.title1(), child: number)
+      else
+        number,
+      Text(unit,
+          style:
+              AppType.subhead(color: AppAccessibility.textSecondary(context))),
+      if (detail != null) ...[
+        const SizedBox(height: Insets.xs),
+        Text(detail!,
+            style:
+                AppType.subhead(color: AppAccessibility.accentText(context))),
+      ],
+    ]);
+    return MergeSemantics(
+        child: Semantics(
+            button: onTap != null,
+            child: onTap == null
+                ? body
+                : PressScale(
+                    onTap: onTap,
+                    child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                            minHeight: AppAccessibility.minTouchTarget),
+                        child: body))));
+  }
+}
+
+class _VerificationBanner extends StatelessWidget {
+  final AuthController auth;
+  const _VerificationBanner({required this.auth});
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final urgent = auth.verificationStage == VerificationStage.urgent;
+    return AppCard(
+        accent: urgent ? AppColors.negative : AppColors.warning,
+        padding: const EdgeInsets.all(Insets.md),
+        onTap: () => AppNavigation.push(context, AppRoutes.verifyEmail,
+            fallbackBuilder: (_) => const VerifyEmailScreen()),
+        child: Row(children: [
+          Expanded(
+              child: Text(
+                  urgent ? l.dashboardConfirmEmail : l.dashboardVerifyEmail,
+                  style: AppType.callout())),
+          const Icon(Icons.chevron_right,
+              size: IconSizes.row, color: AppColors.textSecondary),
+        ]));
+  }
+}
+
 class _StreakFreezeBanner extends StatelessWidget {
   final StreakController streak;
   final ValueChanged<int> onNavigate;
-
   const _StreakFreezeBanner({required this.streak, required this.onNavigate});
-
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final hasFreeze = streak.freezesAvailable > 0;
     return AppCard(
-      accent: AppColors.negative,
-      padding: const EdgeInsets.all(Insets.md),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.negative.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(Radii.tile),
-            ),
-            child:
-                const Icon(Icons.ac_unit, color: AppColors.negative, size: 21),
-          ),
-          const SizedBox(width: Insets.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Streak at risk',
-                    style: AppType.callout(weight: FontWeight.w800)),
-                const SizedBox(height: Insets.xxs),
-                Text(
-                  hasFreeze
-                      ? 'Yesterday is unlogged. Use a freeze to protect it '
-                          '(${streak.freezesAvailable} left).'
-                      : 'Yesterday is unlogged and no freeze is banked. Log '
-                          'something today to keep it going.',
-                  style: AppType.subhead(
-                      weight: FontWeight.w500,
-                      color: AppAccessibility.textSecondary(context)),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: Insets.sm),
-          if (hasFreeze)
-            GhostButton('Freeze', onPressed: () => _useFreeze(context))
-          else
-            GhostButton('Log now', onPressed: () => onNavigate(1)),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _useFreeze(BuildContext context) async {
-    final used = await streak.useFreezeForYesterday();
-    if (!context.mounted) return;
-    if (used) {
-      AppHaptics.success();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Freeze used — yesterday is protected.'),
-      ));
-    }
-  }
-}
-
-class _NextSessionCard extends StatelessWidget {
-  final TrainingSession? session;
-
-  /// False when there are no planned sessions at all, so an empty week is not
-  /// described as a finished one.
-  final bool hasPlan;
-  final VoidCallback? onStart;
-  final VoidCallback onOpenCamp;
-  const _NextSessionCard({
-    required this.session,
-    required this.hasPlan,
-    required this.onStart,
-    required this.onOpenCamp,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      child: Row(
-        children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(Radii.tile),
-            ),
-            child:
-                Icon(session?.icon ?? Icons.task_alt, color: AppColors.primary),
-          ),
-          const SizedBox(width: Insets.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                    session?.title ??
-                        (hasPlan ? 'Week complete' : 'No sessions planned'),
-                    style: AppType.callout(weight: FontWeight.w700)),
-                const SizedBox(height: Insets.xxs),
-                Text(
-                    session?.subtitle ??
-                        (hasPlan
-                            ? 'Review your completed sessions'
-                            : 'Your training week appears here once camp is set up'),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppType.subhead(
-                        weight: FontWeight.w500,
-                        color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-          PrimaryButton(
-            session == null ? 'View' : 'Start',
-            onPressed: onStart ?? onOpenCamp,
-          ),
-        ],
-      ),
-    );
+        accent: AppColors.negative,
+        padding: const EdgeInsets.all(Insets.md),
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(l.dashboardRiskTitle, style: AppType.headline()),
+          const SizedBox(height: Insets.xs),
+          Text(
+              hasFreeze
+                  ? l.dashboardFreezeHint(streak.freezesAvailable)
+                  : l.dashboardLogHint,
+              style: AppType.subhead(
+                  color: AppAccessibility.textSecondary(context))),
+          const SizedBox(height: Insets.sm),
+          GhostButton(hasFreeze ? l.dashboardFreeze : l.dashboardLogNow,
+              onPressed: hasFreeze
+                  ? () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      final used = await streak.useFreezeForYesterday();
+                      if (!messenger.mounted || !used) return;
+                      AppHaptics.success();
+                      messenger.showSnackBar(
+                          SnackBar(content: Text(l.dashboardFreezeUsed)));
+                    }
+                  : () => onNavigate(1)),
+        ]));
   }
 }
 
 class _ActivityRow extends StatelessWidget {
   final TrainingSession session;
-  const _ActivityRow(this.session);
-
+  final DateTime now;
+  const _ActivityRow({required this.session, required this.now});
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
+    final date = session.completedAt;
+    final days = date == null
+        ? null
+        : DateUtils.dateOnly(now).difference(DateUtils.dateOnly(date)).inDays;
+    final when = days == null
+        ? l.dashboardLogged
+        : days <= 0
+            ? l.commonToday
+            : days == 1
+                ? l.dashboardYesterday
+                : l.dashboardDaysAgo(days);
     return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.md),
-      child: AppCard(
-        padding: const EdgeInsets.all(Insets.md),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(Radii.tile),
-              ),
-              child:
-                  Icon(session.icon, size: 20, color: AppColors.textSecondary),
-            ),
-            const SizedBox(width: Insets.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(session.title,
-                      style: AppType.callout(weight: FontWeight.w600)),
-                  const SizedBox(height: Insets.xxs),
-                  Text(
-                      session.rpe > 0
-                          ? '${session.subtitle} · RPE ${session.rpe}'
-                          : session.subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppType.subhead(
-                          weight: FontWeight.w500,
-                          color: AppColors.textSecondary)),
-                ],
-              ),
-            ),
-            Text(_relativeDate(session.completedAt),
-                style: AppType.micro(
-                    weight: FontWeight.w500, color: AppColors.textMuted)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NoRecentActivity extends StatelessWidget {
-  const _NoRecentActivity();
-
-  @override
-  Widget build(BuildContext context) {
-    return const AppCard(
-      padding: EdgeInsets.all(Insets.lg),
-      child: Row(
-        children: [
-          Icon(Icons.history, color: AppColors.textMuted),
-          SizedBox(width: Insets.md),
+        padding: const EdgeInsets.all(Insets.lg),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(session.icon,
+              size: IconSizes.row, color: AppColors.textSecondary),
+          const SizedBox(width: Insets.md),
           Expanded(
-            child: Text(
-              'Complete your first session to start your history.',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-        ],
-      ),
-    );
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Text(session.title,
+                    style: AppType.callout(weight: FontWeight.w600)),
+                const SizedBox(height: Insets.xs),
+                Text(session.subtitle,
+                    style: AppType.subhead(
+                        color: AppAccessibility.textSecondary(context))),
+                const SizedBox(height: Insets.xs),
+                Text(when,
+                    style: AppType.subhead(
+                        color: AppAccessibility.textMuted(context))),
+              ])),
+        ]));
   }
 }
 
-String _relativeDate(DateTime? completedAt) {
-  if (completedAt == null) return 'Logged';
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final date = DateTime(completedAt.year, completedAt.month, completedAt.day);
-  final days = today.difference(date).inDays;
-  if (days <= 0) return 'Today';
-  if (days == 1) return 'Yesterday';
-  return '$days days ago';
-}
-
-/// Simple monogram avatar (no network image needed for the prototype).
+/// A local avatar; never requires a network image.
 class FighterAvatar extends StatelessWidget {
   final double size;
-  const FighterAvatar({super.key, this.size = 48});
-
+  const FighterAvatar({super.key, this.size = AppAccessibility.minTouchTarget});
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       width: size,
       height: size,
       decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.surfaceElevated,
-      ),
+          shape: BoxShape.circle, color: AppColors.surfaceElevated),
       child:
-          Icon(Icons.person, size: size * 0.55, color: AppColors.textSecondary),
-    );
-  }
+          Icon(Icons.person, size: size * .55, color: AppColors.textSecondary));
 }

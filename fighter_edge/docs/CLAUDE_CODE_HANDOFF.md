@@ -1,5 +1,27 @@
 # Fighter Edge — Claude Code Handoff
 
+## UI task slice B: dashboard hierarchy (2026-09-26)
+
+- One session/rest/empty/completed hero and one primary action. Fuel is a
+  single status line with its explanation behind an info button. Weight,
+  sessions and streak appear once; stats stack at large text and labels wrap.
+- First-week checklist starts collapsed and hides after all items are done.
+  All actions remain available on expansion. Verification, streak-risk and
+  account messages follow the hero, keeping it visible at 390x844.
+- Training and fuel weeks share one surface. Recent activity uses divided
+  rows. Removed Camp mode, repeated session cards and repeated streak/fuel
+  summaries. New dashboard copy is localized in English and German.
+- Behavior covered: today's hero opens its exact session; the checklist
+  expands before its tour action; fuel info opens a dialog. Freeze feedback
+  now holds the ScaffoldMessenger across removal of the resolved banner.
+- Verified: 667 tests (664 before, 3 added), analyzer and format clean,
+  3 unchanged goldens. Browser screenshots: B-dashboard-390/320/large and
+  scrolled stats in `C:/Users/Mahdi/Downloads/FighterEdge-ui-evidence/`.
+  Actual 200% Flutter text, high contrast and reduced motion verified.
+  No app console errors; reconnecting the debug server produced DWDS
+  WebSocket transport warnings, cleared on the fresh large-text load.
+- Not verified: real devices, iOS, release builds, Firebase or billing.
+
 ## UI task slice A: deterministic streak dates (2026-09-26)
 
 Branch `feat/ui-polish-slices-2-5`, isolated worktree `FighterEdge-ui-slices`.

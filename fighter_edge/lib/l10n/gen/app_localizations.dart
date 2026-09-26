@@ -394,7 +394,7 @@ abstract class L {
   /// No description provided for @dashboardRecentActivity.
   ///
   /// In en, this message translates to:
-  /// **'Recent Activity'**
+  /// **'Recent activity'**
   String get dashboardRecentActivity;
 
   /// No description provided for @dashboardSeeAll.
@@ -1506,6 +1506,174 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Hide password'**
   String get authHidePassword;
+
+  /// No description provided for @dashboardThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get dashboardThisWeek;
+
+  /// No description provided for @dashboardFighter.
+  ///
+  /// In en, this message translates to:
+  /// **'Fighter'**
+  String get dashboardFighter;
+
+  /// No description provided for @dashboardToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get dashboardToday;
+
+  /// No description provided for @dashboardNoPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions planned'**
+  String get dashboardNoPlan;
+
+  /// No description provided for @dashboardWeekDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Week complete'**
+  String get dashboardWeekDone;
+
+  /// No description provided for @dashboardRestDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest day'**
+  String get dashboardRestDay;
+
+  /// No description provided for @dashboardRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Your planned sessions are done. Take time to recover.'**
+  String get dashboardRecovery;
+
+  /// No description provided for @dashboardPlanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Train to set up your week.'**
+  String get dashboardPlanHint;
+
+  /// No description provided for @dashboardNextUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {day} · {session}'**
+  String dashboardNextUp(String day, String session);
+
+  /// No description provided for @dashboardStartSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start session'**
+  String get dashboardStartSession;
+
+  /// No description provided for @dashboardOpenCamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open camp'**
+  String get dashboardOpenCamp;
+
+  /// No description provided for @dashboardSetFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a fuel target'**
+  String get dashboardSetFuel;
+
+  /// No description provided for @dashboardFuelInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Why this target matters'**
+  String get dashboardFuelInfo;
+
+  /// No description provided for @dashboardFuelExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories support your goal. Protein supports recovery and muscle. Carbohydrates provide energy for training.'**
+  String get dashboardFuelExplanation;
+
+  /// No description provided for @commonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
+  /// No description provided for @dashboardNoActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your first session to start your history.'**
+  String get dashboardNoActivity;
+
+  /// No description provided for @dashboardVerifyEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get dashboardVerifyEmail;
+
+  /// No description provided for @dashboardConfirmEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your email'**
+  String get dashboardConfirmEmail;
+
+  /// No description provided for @dashboardRiskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak at risk'**
+  String get dashboardRiskTitle;
+
+  /// No description provided for @dashboardFreezeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday is unlogged. Protect it with a freeze ({count} left).'**
+  String dashboardFreezeHint(int count);
+
+  /// No description provided for @dashboardLogHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No freeze is available. Log a session today to start again.'**
+  String get dashboardLogHint;
+
+  /// No description provided for @dashboardFreeze.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze'**
+  String get dashboardFreeze;
+
+  /// No description provided for @dashboardLogNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Log now'**
+  String get dashboardLogNow;
+
+  /// No description provided for @dashboardFreezeUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze used — yesterday is protected.'**
+  String get dashboardFreezeUsed;
+
+  /// No description provided for @dashboardLogged.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged'**
+  String get dashboardLogged;
+
+  /// No description provided for @dashboardYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get dashboardYesterday;
+
+  /// No description provided for @dashboardDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String dashboardDaysAgo(int count);
+
+  /// No description provided for @dashboardChecklistProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} complete'**
+  String dashboardChecklistProgress(int done, int total);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

@@ -56,7 +56,7 @@
   "dashboardTitle": "Übersicht",
   "dashboardWeeklyOverview": "Wochenübersicht",
   "dashboardNextSession": "Nächste Einheit",
-  "dashboardRecentActivity": "Letzte Aktivität",
+  "dashboardRecentActivity": "Letzte Aktivitäten",
   "dashboardSeeAll": "Alle ansehen",
   "dashboardStatWeight": "Gewicht",
   "dashboardStatSessions": "Einheiten",
@@ -291,5 +291,67 @@
   "authNoAccount": "Neu hier?",
   "authCreateAccount": "Konto erstellen",
   "authShowPassword": "Passwort anzeigen",
-  "authHidePassword": "Passwort verbergen"
+  "authHidePassword": "Passwort verbergen",
+  "dashboardThisWeek": "Diese Woche",
+  "dashboardFighter": "Athlet",
+  "dashboardToday": "Heute",
+  "dashboardNoPlan": "Noch keine Einheiten geplant",
+  "dashboardWeekDone": "Woche abgeschlossen",
+  "dashboardRestDay": "Ruhetag",
+  "dashboardRecovery": "Deine geplanten Einheiten sind erledigt. Nimm dir Zeit zur Erholung.",
+  "dashboardPlanHint": "Öffne Training, um deine Woche zu planen.",
+  "dashboardNextUp": "Als Nächstes: {day} · {session}",
+  "dashboardStartSession": "Einheit starten",
+  "dashboardOpenCamp": "Trainingsplan öffnen",
+  "dashboardSetFuel": "Ernährungsziel festlegen",
+  "dashboardFuelInfo": "Warum dieses Ziel wichtig ist",
+  "dashboardFuelExplanation": "Kalorien unterstützen dein Ziel. Eiweiß unterstützt Erholung und Muskeln. Kohlenhydrate liefern Energie fürs Training.",
+  "commonClose": "Schließen",
+  "dashboardNoActivity": "Schließe deine erste Einheit ab, um deinen Verlauf zu starten.",
+  "dashboardVerifyEmail": "E-Mail bestätigen",
+  "dashboardConfirmEmail": "E-Mail bestätigen",
+  "dashboardRiskTitle": "Serie gefährdet",
+  "dashboardFreezeHint": "Gestern fehlt ein Eintrag. Schütze den Tag mit einem Schutz ({count} übrig).",
+  "dashboardLogHint": "Kein Schutz verfügbar. Trage heute eine Einheit ein, um neu zu starten.",
+  "dashboardFreeze": "Schützen",
+  "dashboardLogNow": "Jetzt eintragen",
+  "dashboardFreezeUsed": "Schutz verwendet — gestern ist geschützt.",
+  "dashboardLogged": "Eingetragen",
+  "dashboardYesterday": "Gestern",
+  "dashboardDaysAgo": "Vor {count} Tagen",
+  "@dashboardNextUp": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashboardFreezeHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashboardDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardChecklistProgress": "{done} von {total} erledigt",
+  "@dashboardChecklistProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }
