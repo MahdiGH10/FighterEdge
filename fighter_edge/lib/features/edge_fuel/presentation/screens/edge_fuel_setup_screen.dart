@@ -205,12 +205,14 @@ class _StepProgress extends StatelessWidget {
                 if (i > 0) const SizedBox(width: Insets.xs),
                 Expanded(
                   child: AnimatedContainer(
-                    duration: MotionTokens.standard,
-                    curve: MotionTokens.emphasized,
+                    duration: MediaQuery.disableAnimationsOf(context)
+                        ? Duration.zero
+                        : MotionTokens.standard,
+                    curve: MotionTokens.settle,
                     height: 4,
                     decoration: BoxDecoration(
                       color: i <= step ? AppColors.primary : AppColors.border,
-                      borderRadius: BorderRadius.circular(100),
+                      borderRadius: BorderRadius.circular(Radii.chip),
                     ),
                   ),
                 ),

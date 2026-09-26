@@ -22,8 +22,16 @@ class Radii {
   Radii._();
   static const double card = 16;
   static const double button = 14;
+
+  /// Small inset surfaces: icon wells, badges, swatches. One step tighter
+  /// than [button] so a tile inside a card reads as nested, not parallel.
+  static const double tile = 12;
   static const double chip = 100;
   static const double nav = 24;
+
+  /// The selected-tab pill inside the nav bar. Concentric with [nav]: the bar
+  /// radius minus the pill's 6pt inset, so the two curves run parallel.
+  static const double navItem = 18;
 }
 
 /// Icon sizes. Glyphs sit on the type scale rather than floating free of it.
@@ -211,6 +219,26 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(Radii.button),
           side: const BorderSide(color: AppColors.borderStrong),
+        ),
+      ),
+      // Every AlertDialog in the app (confirmations, quick-entry forms)
+      // inherits this, so none of them falls back to Material 3's 28pt
+      // tinted-surface card. Same radius and hairline edge as the app's own
+      // cards; the title takes the brand voice, the body stays readable.
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.surfaceAlt,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        barrierColor: AppColors.scrim,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Radii.card),
+          side: const BorderSide(color: AppColors.borderStrong),
+        ),
+        titleTextStyle: AppType.title2(),
+        contentTextStyle: AppType.callout(color: AppColors.textSecondary),
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: Insets.xl,
+          vertical: Insets.xxl,
         ),
       ),
       splashFactory: NoSplash.splashFactory,

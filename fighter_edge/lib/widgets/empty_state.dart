@@ -39,7 +39,7 @@ class EmptyState extends StatelessWidget {
               height: 64,
               decoration: BoxDecoration(
                 color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(Radii.card),
               ),
               child: Icon(icon, size: 28, color: AppColors.textMuted),
             ),

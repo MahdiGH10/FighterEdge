@@ -55,7 +55,6 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
     final subscribed = user != null &&
         (user.plan == Plan.pro || user.planWillRenew || user.isPro);
     return AlertDialog(
-      backgroundColor: AppColors.surface,
       title: const Text('Delete your account?'),
       content: Column(
         mainAxisSize: MainAxisSize.min,

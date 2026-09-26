@@ -50,7 +50,7 @@ class PlanReadyView extends StatelessWidget {
     final target = plan.target;
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: PremiumBackground(
+      body: AppBackground(
         child: SafeArea(
           child: ListView(
             padding:
@@ -62,8 +62,6 @@ class PlanReadyView extends StatelessWidget {
               ),
               const SizedBox(height: Insets.xxl),
               AppCard(
-                accent: AppColors.positive,
-                elevated: true,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -72,7 +70,7 @@ class PlanReadyView extends StatelessWidget {
                       height: 48,
                       decoration: BoxDecoration(
                         color: AppColors.positive.withValues(alpha: .14),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(Radii.button),
                       ),
                       child: const Icon(Icons.check_rounded,
                           color: AppColors.positive, size: 26),
@@ -239,7 +237,7 @@ class _PlanMetric extends StatelessWidget {
       padding: const EdgeInsets.all(Insets.md),
       decoration: BoxDecoration(
         color: AppColors.backgroundRaised,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(Radii.button),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(

@@ -8,6 +8,9 @@ import '../theme/app_typography.dart';
 import 'press_scale.dart';
 
 /// Solid red call-to-action button used across the app.
+///
+/// Flat on purpose: one solid fill, no gradient, no glow. It is already the
+/// brightest thing on the screen; a halo under it only blurs the edge.
 class PrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -21,7 +24,7 @@ class PrimaryButton extends StatelessWidget {
     this.onPressed,
     this.icon,
     this.expand = false,
-    this.color = AppColors.primary,
+    this.color = AppColors.primaryFill,
   });
 
   @override
@@ -39,24 +42,8 @@ class PrimaryButton extends StatelessWidget {
         haptic: AppHaptics.commit,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: enabled
-                ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [color, AppColors.primaryDark],
-                  )
-                : null,
-            color: enabled ? null : AppColors.surfaceElevated,
+            color: enabled ? color : AppColors.surfaceElevated,
             borderRadius: BorderRadius.circular(Radii.button),
-            boxShadow: enabled
-                ? const [
-                    BoxShadow(
-                      color: AppColors.primaryGlow,
-                      blurRadius: 12,
-                      offset: Offset(0, 6),
-                    ),
-                  ]
-                : null,
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(

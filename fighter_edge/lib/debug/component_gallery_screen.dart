@@ -31,7 +31,7 @@ class ComponentGalleryCanvas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const PremiumBackground(
+    return const AppBackground(
       child: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(Insets.lg),

@@ -51,7 +51,9 @@ class ProfileScreen extends StatelessWidget {
     final goalLine = (user?.goal.isNotEmpty ?? false) ? user!.goal : null;
     final measurements = [
       if (heightCm != null) '${heightCm.round()} cm',
-      if (weight > 0) '${weight.toStringAsFixed(1)} ${state.weightUnitLabel}',
+      if (weight > 0)
+        '${state.displayWeight(weight).toStringAsFixed(1)} '
+            '${state.weightUnitLabel}',
     ].join(' · ');
 
     final details = Column(
@@ -200,7 +202,7 @@ class _ToolRow extends StatelessWidget {
               height: 42,
               decoration: BoxDecoration(
                 color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(11),
+                borderRadius: BorderRadius.circular(Radii.tile),
               ),
               child: Icon(icon, color: AppColors.primary, size: 21),
             ),
@@ -249,7 +251,7 @@ class _SubscriptionCard extends StatelessWidget {
             height: 42,
             decoration: BoxDecoration(
               color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(11),
+              borderRadius: BorderRadius.circular(Radii.tile),
             ),
             child: Icon(isPro ? Icons.verified : Icons.bolt,
                 color: AppColors.primary, size: 22),

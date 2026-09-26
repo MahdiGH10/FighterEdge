@@ -100,7 +100,6 @@ class _PlanBody extends StatelessWidget {
       ),
       children: [
         AppCard(
-          accent: AppColors.primary,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

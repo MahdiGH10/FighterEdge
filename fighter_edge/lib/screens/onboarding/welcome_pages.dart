@@ -94,7 +94,7 @@ class _WelcomePagesState extends State<WelcomePages> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: PremiumBackground(
+      body: AppBackground(
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(

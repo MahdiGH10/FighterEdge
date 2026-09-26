@@ -261,6 +261,24 @@ class LDe extends L {
   String get nutritionAddFood => 'Essen hinzufügen';
 
   @override
+  String get nutritionPreviousDay => 'Vorheriger Tag';
+
+  @override
+  String get nutritionNextDay => 'Nächster Tag';
+
+  @override
+  String get trainingLogSession => 'Einheit erfassen';
+
+  @override
+  String get trainingEditSessionLog => 'Einheitsprotokoll bearbeiten';
+
+  @override
+  String get weightFieldLabel => 'Gewicht';
+
+  @override
+  String get weightAddWeighIn => 'Gewicht erfassen';
+
+  @override
   String get nutritionSearchFoods => 'Lebensmittel suchen';
 
   @override

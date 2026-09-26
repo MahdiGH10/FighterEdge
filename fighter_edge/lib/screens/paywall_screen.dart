@@ -467,7 +467,6 @@ class _TriggeredFeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      accent: AppColors.primary,
       child: Row(
         children: [
           Container(
@@ -475,7 +474,7 @@ class _TriggeredFeatureCard extends StatelessWidget {
             height: 42,
             decoration: BoxDecoration(
               color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Radii.tile),
             ),
             child: const Icon(Icons.lock_open, color: AppColors.primary),
           ),
@@ -524,12 +523,6 @@ class _ValueStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      elevated: true,
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF201416), Color(0xFF121218)],
-      ),
       child: Column(
         children: [
           for (final item in _items) _ValueRow(item.$1, item.$2, item.$3),
@@ -620,7 +613,6 @@ class _BillingSyncNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      accent: AppColors.primary,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

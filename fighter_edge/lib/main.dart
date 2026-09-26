@@ -376,7 +376,7 @@ class _BrandedBootScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: AppColors.background,
-      body: PremiumBackground(
+      body: AppBackground(
         child: Center(
           child: PremiumReveal(
             child: BrandLogo(scale: 1.15),
@@ -396,7 +396,7 @@ class _BootFailureScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: PremiumBackground(
+      body: AppBackground(
         child: SafeArea(
           child: Center(
             child: Padding(

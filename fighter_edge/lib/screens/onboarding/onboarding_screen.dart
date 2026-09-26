@@ -139,7 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: PremiumBackground(
+      body: AppBackground(
         child: SafeArea(
           child: ListView(
             padding:
@@ -153,7 +153,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               OnboardingProgressHeader(step: _step, stepCount: _stepCount),
               const SizedBox(height: Insets.xxl),
               AnimatedSwitcher(
-                duration: MotionTokens.standard,
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : MotionTokens.standard,
                 switchInCurve: MotionTokens.settle,
                 switchOutCurve: MotionTokens.snap,
                 child: QuestionStep(
@@ -454,7 +456,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return 'Enter height in cm, for example 178.';
     }
     if (currentWeight == null || currentWeight < 35 || currentWeight > 220) {
-      return 'Enter current weight in kg, for example 78.';
+      return 'Enter current weight in kg, from 35 to 220 (for example 78).';
     }
     if (_targetWeight.text.trim().isEmpty) return null;
     if (targetWeight == null || targetWeight < 35 || targetWeight > 220) {

@@ -1,5 +1,55 @@
 # Fighter Edge — Claude Code Handoff
 
+## UI polish slice 1: shared components (2026-09-26, uncommitted on main)
+
+First slice of `docs/UI_POLISH_AUDIT_20260925.md`. Visual only, no behaviour
+changes.
+
+- **Background:** `PremiumBackground` (red + blue radial glow) is now
+  `AppBackground`, a flat `AppColors.background`. `GradientText` deleted (unused).
+- **Cards:** `AppCard.gradient` removed; `elevated` now lifts one surface step
+  (`surfaceAlt`) instead of casting a shadow. 18 decorative accents removed.
+  Accents that carry meaning stay: selection state, warnings, Pro gold.
+- **Primary button:** flat, no gradient or glow. New `AppColors.primaryFill`
+  (`crimson600`, 5.23:1 with white): flat `primary` was 4.31:1, under AA.
+- **Dialogs:** `dialogTheme` in `AppTheme` (card radius, hairline edge, scrim);
+  per-dialog background overrides removed.
+- **Tokens:** `Radii.tile` (12) and `Radii.navItem` (18); all raw radii now use
+  tokens. `AppColors.floatingShadow` for the nav bar. The avatar is a flat circle.
+- **Fixes:** header title centring (back-button spacer was 38 not 48); weight
+  tracker "+" moved from a stock FAB into the header; reduced motion honoured in
+  the onboarding step switch and the EdgeFuel setup progress bar.
+
+Goldens regenerated and reviewed by eye (only the intended changes).
+**Pre-existing, not from this slice:** `dashboard_test.dart` "shows the fighter…"
+and "streak freeze is not shown…" fail on some weekdays. `AppState()` seeds
+Mon–Thu demo sessions, so on Fri–Sun the demo streak is "at risk". The tests
+need a fixed clock. Next slice: dashboard (audit slice 2).
+
+## QA pass fixes: input dialogs, units, empty states (2026-09-25, uncommitted on main)
+
+A browser QA pass on the offline build (`-t lib/main_local.dart`) found bugs the
+648 existing tests missed. Fixed, with 14 regression tests in
+`test/widget/input_dialogs_test.dart` (all fail on the old code, pass now):
+
+- **Crash:** the manual-food and session-log dialogs disposed their
+  `TextEditingController`s right after `showDialog` returned, while the dialog
+  was still animating out. Typing then saving froze the dialog (debug builds).
+  Both are now StatefulWidgets that own their controllers.
+- **Validation:** manual food has inline errors, digits-only numbers and limits
+  (10000 kcal, 1000 g per macro). The weigh-in dialog has a 35-220 kg range
+  (stated in the user's unit). A portion over 2000 g is flagged and blocks Add
+  instead of being silently clamped.
+- **Profile header** converted the label to lb but not the number; fixed.
+- **Empty states:** Train > Week, the dashboard cards and the weight tracker no
+  longer show a blank week, "Week complete", or an invented "0.0 kg" change.
+- **Accessibility:** named the Nutrition day arrows, the session-log buttons,
+  the weigh-in FAB and the weigh-in field (EN + DE).
+
+**Not verified:** release builds, real Firebase, device behaviour. The last small
+change (hiding the empty weight-history card) was covered by the test suite but
+not re-checked in the browser. Not committed: ask before committing.
+
 ## Phase 1 (closed-test hardening), slice 1: no fake data, no silent stream failures (2026-09-24, PR after #8)
 
 PR #8 is merged (`70e3ed6`). This starts the roadmap in

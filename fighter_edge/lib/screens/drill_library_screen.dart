@@ -422,7 +422,6 @@ class _TechniqueSystemCard extends StatelessWidget {
           child: AppCard(
             key: ValueKey('training-system-${system.id}'),
             onTap: onTap,
-            accent: AppColors.primary,
             padding: const EdgeInsets.all(Insets.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,7 +542,6 @@ class _SelectedPathSummary extends StatelessWidget {
     final secondary = AppAccessibility.textSecondary(context);
     return AppCard(
       key: const ValueKey('selected-technique-path'),
-      accent: AppColors.primary,
       padding: const EdgeInsets.all(Insets.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -872,7 +870,6 @@ class _DrillDetail extends StatelessWidget {
           _MistakePoint(text: mistake),
         const SizedBox(height: Insets.lg),
         AppCard(
-          accent: AppColors.primary,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

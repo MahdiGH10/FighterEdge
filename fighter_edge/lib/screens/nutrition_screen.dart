@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -167,121 +168,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
     EdgeFuelController edgeFuel, {
     FoodLogEntry? existing,
   }) async {
-    final name = TextEditingController(text: existing?.name ?? '');
-    final notes = TextEditingController(text: existing?.notes ?? '');
-    final calories = TextEditingController(
-      text: existing?.calories.toString() ?? '',
-    );
-    final protein = TextEditingController(
-      text: existing?.proteinGrams.toString() ?? '',
-    );
-    final carbs = TextEditingController(
-      text: existing?.carbGrams.toString() ?? '',
-    );
-    final fats = TextEditingController(
-      text: existing?.fatGrams.toString() ?? '',
-    );
-
     final entry = await showDialog<FoodLogEntry>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(
-          existing == null ? 'Add food' : 'Edit food',
-          style: AppType.title2(),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _DialogField(controller: name, label: 'Food or meal name'),
-              _DialogField(controller: notes, label: 'Notes'),
-              _DialogField(
-                controller: calories,
-                label: 'Calories',
-                number: true,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: _DialogField(
-                      controller: protein,
-                      label: 'Protein',
-                      number: true,
-                    ),
-                  ),
-                  const SizedBox(width: Insets.sm),
-                  Expanded(
-                    child: _DialogField(
-                      controller: carbs,
-                      label: 'Carbs',
-                      number: true,
-                    ),
-                  ),
-                  const SizedBox(width: Insets.sm),
-                  Expanded(
-                    child: _DialogField(
-                      controller: fats,
-                      label: 'Fats',
-                      number: true,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Cancel',
-              style: AppType.callout(color: AppColors.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              final parsedCalories = int.tryParse(calories.text.trim());
-              if (name.text.trim().isEmpty || parsedCalories == null) return;
-              Navigator.pop(
-                ctx,
-                FoodLogEntry(
-                  id: existing?.id ??
-                      'food-${DateTime.now().microsecondsSinceEpoch}',
-                  name: name.text.trim(),
-                  notes: notes.text.trim().isEmpty
-                      ? 'Custom meal'
-                      : notes.text.trim(),
-                  calories: parsedCalories,
-                  proteinGrams: int.tryParse(protein.text.trim()) ?? 0,
-                  carbGrams: int.tryParse(carbs.text.trim()) ?? 0,
-                  fatGrams: int.tryParse(fats.text.trim()) ?? 0,
-                  consumed: existing?.consumed ?? true,
-                  saved: existing?.saved ?? false,
-                  source: existing?.source ?? FoodLogSource.manual,
-                  loggedAt: existing?.loggedAt ?? DateTime.now(),
-                ),
-              );
-            },
-            child: Text(
-              'Save',
-              style: AppType.callout(
-                weight: FontWeight.w700,
-                color: AppColors.accentText,
-              ),
-            ),
-          ),
-        ],
-      ),
+      builder: (_) => _FoodEntryDialog(existing: existing),
     );
-
-    name.dispose();
-    notes.dispose();
-    calories.dispose();
-    protein.dispose();
-    carbs.dispose();
-    fats.dispose();
-
     if (entry == null) return;
     // Shown at once; storage confirms in the background (audit A-4).
     if (existing == null) {
@@ -299,14 +189,19 @@ class _DateSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final label = edgeFuel.isToday
-        ? L.of(context).commonToday
+        ? l.commonToday
         : DateFormat('EEE, MMM d').format(edgeFuel.selectedDate);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
       child: Row(
         children: [
-          HeaderIcon(Icons.chevron_left, onTap: () => edgeFuel.shiftDate(-1)),
+          HeaderIcon(
+            Icons.chevron_left,
+            label: l.nutritionPreviousDay,
+            onTap: () => edgeFuel.shiftDate(-1),
+          ),
           Expanded(
             child: Text(
               label,
@@ -317,9 +212,192 @@ class _DateSwitcher extends StatelessWidget {
               ),
             ),
           ),
-          HeaderIcon(Icons.chevron_right, onTap: () => edgeFuel.shiftDate(1)),
+          HeaderIcon(
+            Icons.chevron_right,
+            label: l.nutritionNextDay,
+            onTap: () => edgeFuel.shiftDate(1),
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// A calorie figure above this is a typo, not a meal.
+const int _maxManualCalories = 10000;
+
+/// Same for any single macro, in grams.
+const int _maxManualMacroGrams = 1000;
+
+/// Manual food entry. Owns its controllers so they are disposed with the
+/// dialog, after its exit animation, never while it is still on screen.
+class _FoodEntryDialog extends StatefulWidget {
+  final FoodLogEntry? existing;
+  const _FoodEntryDialog({this.existing});
+
+  @override
+  State<_FoodEntryDialog> createState() => _FoodEntryDialogState();
+}
+
+class _FoodEntryDialogState extends State<_FoodEntryDialog> {
+  late final TextEditingController _name;
+  late final TextEditingController _notes;
+  late final TextEditingController _calories;
+  late final TextEditingController _protein;
+  late final TextEditingController _carbs;
+  late final TextEditingController _fats;
+
+  String? _nameError;
+  String? _caloriesError;
+  String? _proteinError;
+  String? _carbsError;
+  String? _fatsError;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.existing;
+    _name = TextEditingController(text: e?.name ?? '');
+    _notes = TextEditingController(text: e?.notes ?? '');
+    _calories = TextEditingController(text: e?.calories.toString() ?? '');
+    _protein = TextEditingController(text: e?.proteinGrams.toString() ?? '');
+    _carbs = TextEditingController(text: e?.carbGrams.toString() ?? '');
+    _fats = TextEditingController(text: e?.fatGrams.toString() ?? '');
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _notes.dispose();
+    _calories.dispose();
+    _protein.dispose();
+    _carbs.dispose();
+    _fats.dispose();
+    super.dispose();
+  }
+
+  /// Empty is allowed for macros (counted as 0); anything typed must be a
+  /// whole number in range. Digits-only fields already rule out signs.
+  String? _macroError(String text) {
+    final t = text.trim();
+    if (t.isEmpty) return null;
+    final v = int.tryParse(t);
+    if (v == null || v > _maxManualMacroGrams) {
+      return 'Enter 0 to $_maxManualMacroGrams g.';
+    }
+    return null;
+  }
+
+  void _save() {
+    final calories = int.tryParse(_calories.text.trim());
+    setState(() {
+      _nameError = _name.text.trim().isEmpty ? 'Enter a name.' : null;
+      _caloriesError = calories == null || calories > _maxManualCalories
+          ? 'Enter 0 to $_maxManualCalories kcal.'
+          : null;
+      _proteinError = _macroError(_protein.text);
+      _carbsError = _macroError(_carbs.text);
+      _fatsError = _macroError(_fats.text);
+    });
+    if ([_nameError, _caloriesError, _proteinError, _carbsError, _fatsError]
+        .any((e) => e != null)) {
+      return;
+    }
+    final existing = widget.existing;
+    Navigator.pop(
+      context,
+      FoodLogEntry(
+        id: existing?.id ?? 'food-${DateTime.now().microsecondsSinceEpoch}',
+        name: _name.text.trim(),
+        notes: _notes.text.trim().isEmpty ? 'Custom meal' : _notes.text.trim(),
+        calories: calories!,
+        proteinGrams: int.tryParse(_protein.text.trim()) ?? 0,
+        carbGrams: int.tryParse(_carbs.text.trim()) ?? 0,
+        fatGrams: int.tryParse(_fats.text.trim()) ?? 0,
+        consumed: existing?.consumed ?? true,
+        saved: existing?.saved ?? false,
+        source: existing?.source ?? FoodLogSource.manual,
+        loggedAt: existing?.loggedAt ?? DateTime.now(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        widget.existing == null ? 'Add food' : 'Edit food',
+        style: AppType.title2(),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _DialogField(
+              controller: _name,
+              label: 'Food or meal name',
+              errorText: _nameError,
+            ),
+            _DialogField(controller: _notes, label: 'Notes'),
+            _DialogField(
+              controller: _calories,
+              label: 'Calories',
+              number: true,
+              errorText: _caloriesError,
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _DialogField(
+                    controller: _protein,
+                    label: 'Protein',
+                    number: true,
+                    errorText: _proteinError,
+                  ),
+                ),
+                const SizedBox(width: Insets.sm),
+                Expanded(
+                  child: _DialogField(
+                    controller: _carbs,
+                    label: 'Carbs',
+                    number: true,
+                    errorText: _carbsError,
+                  ),
+                ),
+                const SizedBox(width: Insets.sm),
+                Expanded(
+                  child: _DialogField(
+                    controller: _fats,
+                    label: 'Fats',
+                    number: true,
+                    errorText: _fatsError,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            'Cancel',
+            style: AppType.callout(color: AppColors.textSecondary),
+          ),
+        ),
+        TextButton(
+          onPressed: _save,
+          child: Text(
+            'Save',
+            style: AppType.callout(
+              weight: FontWeight.w700,
+              color: AppColors.accentText,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -328,10 +406,12 @@ class _DialogField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final bool number;
+  final String? errorText;
   const _DialogField({
     required this.controller,
     required this.label,
     this.number = false,
+    this.errorText,
   });
 
   @override
@@ -341,10 +421,18 @@ class _DialogField extends StatelessWidget {
       child: TextField(
         controller: controller,
         keyboardType: number ? TextInputType.number : TextInputType.text,
+        inputFormatters: number
+            ? [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(6),
+              ]
+            : null,
         style: AppType.callout(),
         cursorColor: AppColors.primary,
         decoration: InputDecoration(
           labelText: label,
+          errorText: errorText,
+          errorMaxLines: 2,
           focusedBorder: const UnderlineInputBorder(
             borderSide: BorderSide(color: AppColors.primary),
           ),
@@ -513,7 +601,6 @@ class _QuickStartMeals extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      accent: AppColors.primary,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -611,7 +698,7 @@ class _QuickMealTile extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: AppColors.backgroundRaised,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(Radii.button),
           border: Border.all(color: AppColors.border),
         ),
         child: Padding(
@@ -623,7 +710,7 @@ class _QuickMealTile extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Radii.tile),
                 ),
                 child: Icon(meal.icon, color: AppColors.primary, size: 20),
               ),
@@ -688,7 +775,6 @@ class _RecipesTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
         AppCard(
-          accent: AppColors.primary,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -876,7 +962,7 @@ class _Macro extends StatelessWidget {
           ),
           const SizedBox(height: Insets.sm),
           ClipRRect(
-            borderRadius: BorderRadius.circular(100),
+            borderRadius: BorderRadius.circular(Radii.chip),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 5,
@@ -1092,7 +1178,6 @@ class _EdgeFuelEntryCard extends StatelessWidget {
     final overTarget = targetCalories > 0 && consumed > targetCalories;
 
     return AppCard(
-      accent: AppColors.premium,
       onTap: () => AppNavigation.push(
         context,
         hasSetup ? AppRoutes.fuelPlan : AppRoutes.fuelSetup,
@@ -1110,7 +1195,7 @@ class _EdgeFuelEntryCard extends StatelessWidget {
                 height: 42,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Radii.tile),
                 ),
                 child: const Icon(Icons.bolt, color: AppColors.primary),
               ),
@@ -1173,7 +1258,7 @@ class _EdgeFuelEntryCard extends StatelessWidget {
             ),
             const SizedBox(height: Insets.md),
             ClipRRect(
-              borderRadius: BorderRadius.circular(100),
+              borderRadius: BorderRadius.circular(Radii.chip),
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 6,

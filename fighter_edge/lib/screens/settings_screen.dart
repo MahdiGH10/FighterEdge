@@ -59,7 +59,7 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
         children: [
           AppCard(
-            accent: auth.isPro ? AppColors.premium : AppColors.primary,
+            accent: auth.isPro ? AppColors.premium : null,
             child: Row(
               children: [
                 Container(
@@ -67,7 +67,7 @@ class SettingsScreen extends StatelessWidget {
                   height: 46,
                   decoration: BoxDecoration(
                     color: AppColors.surfaceElevated,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Radii.tile),
                   ),
                   child: Icon(
                     auth.isPro ? Icons.verified : Icons.person_outline,
@@ -310,7 +310,6 @@ class SettingsScreen extends StatelessWidget {
     final proceed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface,
         title: Text(l.settingsHealthDataWithdrawTitle),
         content: Text(
           l.settingsHealthDataWithdrawBody,
@@ -499,7 +498,7 @@ class _RowIcon extends StatelessWidget {
       height: 42,
       decoration: BoxDecoration(
         color: AppColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: BorderRadius.circular(Radii.tile),
       ),
       child: Icon(icon, color: AppColors.primary, size: 21),
     );

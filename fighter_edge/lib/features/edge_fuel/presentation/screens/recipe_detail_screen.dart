@@ -189,7 +189,7 @@ class _LockedRecipe extends StatelessWidget {
               height: 64,
               decoration: BoxDecoration(
                 color: AppColors.premium.withValues(alpha: .16),
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(Radii.card),
               ),
               child: const Icon(
                 Icons.lock_outline,

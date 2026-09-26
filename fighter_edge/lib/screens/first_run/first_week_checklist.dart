@@ -70,7 +70,7 @@ class FirstWeekChecklist extends StatelessWidget {
     final nextIndex = items.indexWhere((i) => !i.done);
 
     return AppCard(
-      accent: allDone ? AppColors.positive : AppColors.primary,
+      accent: allDone ? AppColors.positive : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

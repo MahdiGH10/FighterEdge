@@ -57,7 +57,6 @@ class QuestionStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      accent: AppColors.primary,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -158,7 +157,7 @@ class SelectCard<T> extends StatelessWidget {
               height: 38,
               decoration: BoxDecoration(
                 color: active ? AppColors.primarySoft : AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Radii.tile),
                 border: Border.all(
                   color: active ? AppColors.primary : AppColors.border,
                 ),
@@ -255,7 +254,7 @@ class _StepButton extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Radii.tile),
           ),
           child: SizedBox.square(
             dimension: AppAccessibility.minTouchTarget,
@@ -294,7 +293,7 @@ class PlanPreviewCard extends StatelessWidget {
             height: 42,
             decoration: BoxDecoration(
               color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Radii.tile),
             ),
             child: const Icon(Icons.auto_graph, color: AppColors.primary),
           ),

@@ -13,8 +13,15 @@ class AppCard extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
   final Color? color;
+
+  /// Tints the border to carry *state or meaning*: a selected option, a
+  /// warning, a Pro surface. Never decoration: when every card is outlined in
+  /// red, none of them reads as the important one.
   final Color? accent;
-  final Gradient? gradient;
+
+  /// Lifts the card one step up the surface ramp. Depth comes from the
+  /// surfaces, not from shadows or gradients, which read as noise on a dark
+  /// ground.
   final bool elevated;
 
   const AppCard({
@@ -24,7 +31,6 @@ class AppCard extends StatelessWidget {
     this.onTap,
     this.color,
     this.accent,
-    this.gradient,
     this.elevated = false,
   });
 
@@ -34,19 +40,9 @@ class AppCard extends StatelessWidget {
         accent?.withValues(alpha: .42) ?? AppAccessibility.border(context);
     final content = DecoratedBox(
       decoration: BoxDecoration(
-        color: gradient == null ? color ?? AppColors.surface : null,
-        gradient: gradient,
+        color: color ?? (elevated ? AppColors.surfaceAlt : AppColors.surface),
         borderRadius: BorderRadius.circular(Radii.card),
         border: Border.all(color: borderColor),
-        boxShadow: elevated
-            ? [
-                BoxShadow(
-                  color: (accent ?? Colors.black).withValues(alpha: .16),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : null,
       ),
       child: Padding(padding: padding, child: child),
     );

@@ -75,7 +75,7 @@ class _ScreenScaffoldState extends State<ScreenScaffold> {
             actions: widget.actions,
             showBack: widget.showBack,
           );
-    final content = PremiumBackground(
+    final content = AppBackground(
       child: SafeArea(
         bottom: false,
         child: NotificationListener<ScrollNotification>(
@@ -228,7 +228,10 @@ class AppHeader extends StatelessWidget {
               ),
             ),
           ),
-          if (actions.isEmpty && showBack) const SizedBox(width: 38),
+          // Balances the back button exactly, so the title sits on the
+          // screen's centre line rather than 10pt to the right of it.
+          if (actions.isEmpty && showBack)
+            const SizedBox(width: AppAccessibility.minTouchTarget),
           ...actions,
         ],
       ),

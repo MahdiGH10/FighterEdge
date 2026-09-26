@@ -96,6 +96,14 @@ class _WeekView extends StatelessWidget {
               color: AppAccessibility.textSecondary(context)),
         ),
         const SizedBox(height: Insets.lg),
+        if (state.sessions.isEmpty)
+          const Padding(
+            padding: EdgeInsets.only(top: Insets.xxl),
+            child: _PlaceholderView(
+              'No sessions planned yet. Your training week appears here '
+              'once your camp is set up.',
+            ),
+          ),
         for (final s in state.sessions)
           _SessionRow(
             s,
@@ -113,64 +121,92 @@ class _WeekView extends StatelessWidget {
     AppState state,
     TrainingSession session,
   ) async {
-    var rpe = session.rpe == 0 ? 7 : session.rpe;
-    final note = TextEditingController(text: session.note);
     final result = await showDialog<({int rpe, String note})>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          title: Text('Log ${session.title}', style: AppType.title2()),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('RPE $rpe / 10',
-                  style: AppType.subhead(
-                      weight: FontWeight.w700, color: AppColors.textSecondary)),
-              Slider(
-                value: rpe.toDouble(),
-                min: 1,
-                max: 10,
-                divisions: 9,
-                activeColor: AppColors.primary,
-                onChanged: (value) => setDialogState(() => rpe = value.round()),
-              ),
-              TextField(
-                controller: note,
-                minLines: 2,
-                maxLines: 3,
-                style: AppType.callout(),
-                cursorColor: AppColors.primary,
-                decoration: const InputDecoration(
-                  hintText: 'Quick reflection',
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancel',
-                  style: AppType.callout(color: AppColors.textSecondary)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, (rpe: rpe, note: note.text)),
-              child: Text('Save',
-                  style: AppType.callout(
-                      weight: FontWeight.w700, color: AppColors.accentText)),
-            ),
-          ],
-        ),
-      ),
+      builder: (_) => _SessionLogDialog(session: session),
     );
-    note.dispose();
     if (result == null) return;
     state.completeSession(session, rpe: result.rpe, note: result.note);
     AppHaptics.success();
+  }
+}
+
+/// Owns the note controller so it is disposed with the dialog, after its exit
+/// animation, never while a focused field is still on screen.
+class _SessionLogDialog extends StatefulWidget {
+  final TrainingSession session;
+  const _SessionLogDialog({required this.session});
+
+  @override
+  State<_SessionLogDialog> createState() => _SessionLogDialogState();
+}
+
+class _SessionLogDialogState extends State<_SessionLogDialog> {
+  late int _rpe;
+  late final TextEditingController _note;
+
+  @override
+  void initState() {
+    super.initState();
+    _rpe = widget.session.rpe == 0 ? 7 : widget.session.rpe;
+    _note = TextEditingController(text: widget.session.note);
+  }
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Log ${widget.session.title}', style: AppType.title2()),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('RPE $_rpe / 10',
+              style: AppType.subhead(
+                  weight: FontWeight.w700, color: AppColors.textSecondary)),
+          Slider(
+            value: _rpe.toDouble(),
+            min: 1,
+            max: 10,
+            divisions: 9,
+            activeColor: AppColors.primary,
+            onChanged: (value) => setState(() => _rpe = value.round()),
+          ),
+          TextField(
+            controller: _note,
+            minLines: 2,
+            maxLines: 3,
+            style: AppType.callout(),
+            cursorColor: AppColors.primary,
+            decoration: const InputDecoration(
+              hintText: 'Quick reflection',
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel',
+              style: AppType.callout(color: AppColors.textSecondary)),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.pop(context, (rpe: _rpe, note: _note.text)),
+          child: Text('Save',
+              style: AppType.callout(
+                  weight: FontWeight.w700, color: AppColors.accentText)),
+        ),
+      ],
+    );
   }
 }
 
@@ -202,7 +238,7 @@ class _SessionRow extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(
             color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(Radii.tile),
           ),
           child: Icon(s.icon,
               size: 20,
@@ -240,6 +276,9 @@ class _SessionRow extends StatelessWidget {
         const SizedBox(width: Insets.sm),
         HeaderIcon(
           s.completed ? Icons.edit_note : Icons.check_circle_outline,
+          label: s.completed
+              ? L.of(context).trainingEditSessionLog
+              : L.of(context).trainingLogSession,
           onTap: onLog,
         ),
       ],

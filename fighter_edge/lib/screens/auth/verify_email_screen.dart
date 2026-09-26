@@ -134,7 +134,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
       canPop: !widget.blocking,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: PremiumBackground(
+        body: AppBackground(
           child: SafeArea(
             child: Center(
               child: SingleChildScrollView(

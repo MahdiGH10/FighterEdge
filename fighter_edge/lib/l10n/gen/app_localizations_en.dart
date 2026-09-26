@@ -258,6 +258,24 @@ class LEn extends L {
   String get nutritionAddFood => 'Add food';
 
   @override
+  String get nutritionPreviousDay => 'Previous day';
+
+  @override
+  String get nutritionNextDay => 'Next day';
+
+  @override
+  String get trainingLogSession => 'Log session';
+
+  @override
+  String get trainingEditSessionLog => 'Edit session log';
+
+  @override
+  String get weightFieldLabel => 'Weight';
+
+  @override
+  String get weightAddWeighIn => 'Add weigh-in';
+
+  @override
   String get nutritionSearchFoods => 'Search foods';
 
   @override

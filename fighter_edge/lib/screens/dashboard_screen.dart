@@ -139,7 +139,6 @@ class DashboardScreen extends StatelessWidget {
                   AppRoutes.weightTracker,
                   fallbackBuilder: (_) => const WeightTrackerScreen(),
                 ),
-                accent: AppColors.primary,
                 heroTag: state.latestWeight == 0 ? null : weightHeroTag,
               ),
               StatCard(
@@ -164,7 +163,7 @@ class DashboardScreen extends StatelessWidget {
                 deltaIcon: streakAtRisk
                     ? Icons.warning_amber_rounded
                     : Icons.local_fire_department,
-                accent: streakAtRisk ? AppColors.negative : AppColors.warning,
+                accent: streakAtRisk ? AppColors.negative : null,
               ),
             ],
           ),
@@ -173,12 +172,6 @@ class DashboardScreen extends StatelessWidget {
           PremiumReveal(
             index: 1,
             child: AppCard(
-              elevated: true,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF1B1B25), Color(0xFF121218)],
-              ),
               child: WeeklyOverview(
                 dayLetters: dayLetters,
                 progress: weeklyProgress,
@@ -205,6 +198,7 @@ class DashboardScreen extends StatelessWidget {
             index: 3,
             child: _NextSessionCard(
               session: nextSession,
+              hasPlan: state.sessions.isNotEmpty,
               onOpenCamp: () => onNavigate(1),
               onStart: nextSession == null
                   ? null
@@ -291,13 +285,6 @@ class _TodayFocusCard extends StatelessWidget {
     );
 
     return AppCard(
-      accent: AppColors.primary,
-      elevated: true,
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF201416), Color(0xFF121218)],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -308,7 +295,7 @@ class _TodayFocusCard extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Radii.tile),
                 ),
                 child: const Icon(Icons.flag_outlined,
                     color: AppColors.primary, size: 22),
@@ -322,7 +309,9 @@ class _TodayFocusCard extends StatelessWidget {
                     const SizedBox(height: Insets.xxs),
                     Text(
                       nextSession == null
-                          ? 'Camp work complete — protect recovery.'
+                          ? (state.sessions.isEmpty
+                              ? 'No sessions planned yet.'
+                              : 'Camp work complete — protect recovery.')
                           : '${nextSession.title} · ${nextSession.subtitle}',
                       style: AppType.subhead(
                         color: AppColors.textSecondary,
@@ -410,7 +399,7 @@ class _FuelTargetSnapshot extends StatelessWidget {
       padding: const EdgeInsets.all(Insets.md),
       decoration: BoxDecoration(
         color: AppColors.backgroundRaised,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(Radii.button),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -445,7 +434,7 @@ class _FuelTargetSnapshot extends StatelessWidget {
           ),
           const SizedBox(height: Insets.sm),
           ClipRRect(
-            borderRadius: BorderRadius.circular(100),
+            borderRadius: BorderRadius.circular(Radii.chip),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
@@ -599,7 +588,7 @@ class _FocusMetric extends StatelessWidget {
       padding: const EdgeInsets.all(Insets.md),
       decoration: BoxDecoration(
         color: AppColors.backgroundRaised,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Radii.tile),
         border: Border.all(color: AppColors.border),
       ),
       child: Row(
@@ -685,7 +674,7 @@ class _EmailVerificationBanner extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: accent.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(Radii.tile),
             ),
             child:
                 Icon(Icons.mark_email_unread_outlined, color: accent, size: 21),
@@ -739,7 +728,7 @@ class _StreakFreezeBanner extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: AppColors.negative.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(Radii.tile),
             ),
             child:
                 const Icon(Icons.ac_unit, color: AppColors.negative, size: 21),
@@ -789,10 +778,15 @@ class _StreakFreezeBanner extends StatelessWidget {
 
 class _NextSessionCard extends StatelessWidget {
   final TrainingSession? session;
+
+  /// False when there are no planned sessions at all, so an empty week is not
+  /// described as a finished one.
+  final bool hasPlan;
   final VoidCallback? onStart;
   final VoidCallback onOpenCamp;
   const _NextSessionCard({
     required this.session,
+    required this.hasPlan,
     required this.onStart,
     required this.onOpenCamp,
   });
@@ -800,13 +794,6 @@ class _NextSessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      accent: AppColors.primary,
-      elevated: true,
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF211719), Color(0xFF15141B)],
-      ),
       child: Row(
         children: [
           Container(
@@ -814,7 +801,7 @@ class _NextSessionCard extends StatelessWidget {
             height: 46,
             decoration: BoxDecoration(
               color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Radii.tile),
             ),
             child:
                 Icon(session?.icon ?? Icons.task_alt, color: AppColors.primary),
@@ -824,10 +811,16 @@ class _NextSessionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(session?.title ?? 'Week complete',
+                Text(
+                    session?.title ??
+                        (hasPlan ? 'Week complete' : 'No sessions planned'),
                     style: AppType.callout(weight: FontWeight.w700)),
                 const SizedBox(height: Insets.xxs),
-                Text(session?.subtitle ?? 'Review your completed sessions',
+                Text(
+                    session?.subtitle ??
+                        (hasPlan
+                            ? 'Review your completed sessions'
+                            : 'Your training week appears here once camp is set up'),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppType.subhead(
@@ -863,7 +856,7 @@ class _ActivityRow extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(Radii.tile),
               ),
               child:
                   Icon(session.icon, size: 20, color: AppColors.textSecondary),
@@ -942,14 +935,9 @@ class FighterAvatar extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2A2A2E), Color(0xFF141416)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: AppColors.primary, width: 1.5),
+        color: AppColors.surfaceElevated,
       ),
       child:
           Icon(Icons.person, size: size * 0.55, color: AppColors.textSecondary),

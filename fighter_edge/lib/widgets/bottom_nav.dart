@@ -45,7 +45,7 @@ class AppBottomNav extends StatelessWidget {
             borderRadius: BorderRadius.circular(Radii.nav),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x66000000),
+                color: AppColors.floatingShadow,
                 blurRadius: 24,
                 offset: Offset(0, 10),
               ),
@@ -120,7 +120,7 @@ class _NavButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
           decoration: BoxDecoration(
             color: selected ? AppColors.primarySoft : Colors.transparent,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(Radii.navItem),
             border: Border.all(
               color: selected
                   ? AppColors.primary.withValues(alpha: .24)

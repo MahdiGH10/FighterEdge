@@ -107,7 +107,6 @@ class _ReactionDrillScreenState extends State<ReactionDrillScreen>
     final leave = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
         title: Text(l.reactionLeaveTitle),
         content: Text(l.reactionLeaveBody),
         actions: [

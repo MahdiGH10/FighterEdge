@@ -547,6 +547,42 @@ abstract class L {
   /// **'Add food'**
   String get nutritionAddFood;
 
+  /// No description provided for @nutritionPreviousDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous day'**
+  String get nutritionPreviousDay;
+
+  /// No description provided for @nutritionNextDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Next day'**
+  String get nutritionNextDay;
+
+  /// No description provided for @trainingLogSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Log session'**
+  String get trainingLogSession;
+
+  /// No description provided for @trainingEditSessionLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit session log'**
+  String get trainingEditSessionLog;
+
+  /// No description provided for @weightFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get weightFieldLabel;
+
+  /// No description provided for @weightAddWeighIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Add weigh-in'**
+  String get weightAddWeighIn;
+
   /// No description provided for @nutritionSearchFoods.
   ///
   /// In en, this message translates to:

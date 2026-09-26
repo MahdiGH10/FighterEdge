@@ -350,8 +350,14 @@ class _PortionStepState extends State<_PortionStep> {
     super.dispose();
   }
 
-  double get _currentGrams => (double.tryParse(_grams.text.trim()) ?? 0)
-      .clamp(0, PortionCalculator.maxGrams);
+  double get _typedGrams => double.tryParse(_grams.text.trim()) ?? 0;
+
+  /// The amount actually calculated and logged. Anything typed above the
+  /// limit is flagged in the field and blocks Add, so the number on screen is
+  /// always the number that lands in the log.
+  double get _currentGrams => _typedGrams.clamp(0, PortionCalculator.maxGrams);
+
+  bool get _overMax => _typedGrams > PortionCalculator.maxGrams;
 
   void _setGrams(double grams, {HouseholdUnit? unit, double count = 1}) {
     AppHaptics.selection();
@@ -468,6 +474,9 @@ class _PortionStepState extends State<_PortionStep> {
                       decoration: InputDecoration(
                         labelText: l.addFoodGrams,
                         suffixText: 'g',
+                        errorText: _overMax
+                            ? 'Up to ${PortionCalculator.maxGrams.toInt()} g per entry.'
+                            : null,
                         labelStyle: AppType.callout(color: secondary),
                         focusedBorder: const UnderlineInputBorder(
                           borderSide: BorderSide(color: AppColors.primary),
@@ -491,7 +500,7 @@ class _PortionStepState extends State<_PortionStep> {
               l.addFoodAddTo(widget.dayLabel),
               icon: Icons.add,
               expand: true,
-              onPressed: grams <= 0
+              onPressed: grams <= 0 || _overMax
                   ? null
                   : () => widget.onAdd(
                         FoodLogEntry(
