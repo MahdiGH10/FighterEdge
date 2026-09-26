@@ -916,4 +916,36 @@ class LEn extends L {
   String dashboardChecklistProgress(int done, int total) {
     return '$done of $total complete';
   }
+
+  @override
+  String get nutritionKcalLeft => 'kcal left';
+
+  @override
+  String nutritionOverTarget(int kcal) {
+    return '$kcal kcal above target';
+  }
+
+  @override
+  String get nutritionViewPlan => 'View fuel plan';
+
+  @override
+  String get nutritionRecipesFit => 'Recipes that fit';
+
+  @override
+  String nutritionMacroGrams(int value, int target) {
+    return '$value / $target g';
+  }
+
+  @override
+  String nutritionGrams(int value) {
+    return '$value g';
+  }
+
+  @override
+  String get trainingSessionDone => 'Done';
+
+  @override
+  String trainingStartSession(String session) {
+    return 'Start $session';
+  }
 }

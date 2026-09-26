@@ -353,5 +353,44 @@
         "type": "int"
       }
     }
+  },
+  "nutritionKcalLeft": "kcal übrig",
+  "nutritionOverTarget": "{kcal} kcal über dem Ziel",
+  "nutritionViewPlan": "Ernährungsplan ansehen",
+  "nutritionRecipesFit": "Passende Rezepte",
+  "nutritionMacroGrams": "{value} / {target} g",
+  "nutritionGrams": "{value} g",
+  "trainingSessionDone": "Erledigt",
+  "trainingStartSession": "{session} starten",
+  "@nutritionOverTarget": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutritionMacroGrams": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutritionGrams": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@trainingStartSession": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      }
+    }
   }
 }

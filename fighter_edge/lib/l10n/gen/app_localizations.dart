@@ -1674,6 +1674,54 @@ abstract class L {
   /// In en, this message translates to:
   /// **'{done} of {total} complete'**
   String dashboardChecklistProgress(int done, int total);
+
+  /// No description provided for @nutritionKcalLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'kcal left'**
+  String get nutritionKcalLeft;
+
+  /// No description provided for @nutritionOverTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal above target'**
+  String nutritionOverTarget(int kcal);
+
+  /// No description provided for @nutritionViewPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'View fuel plan'**
+  String get nutritionViewPlan;
+
+  /// No description provided for @nutritionRecipesFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes that fit'**
+  String get nutritionRecipesFit;
+
+  /// No description provided for @nutritionMacroGrams.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} / {target} g'**
+  String nutritionMacroGrams(int value, int target);
+
+  /// No description provided for @nutritionGrams.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} g'**
+  String nutritionGrams(int value);
+
+  /// No description provided for @trainingSessionDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get trainingSessionDone;
+
+  /// No description provided for @trainingStartSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start {session}'**
+  String trainingStartSession(String session);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

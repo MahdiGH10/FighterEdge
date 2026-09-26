@@ -920,4 +920,36 @@ class LDe extends L {
   String dashboardChecklistProgress(int done, int total) {
     return '$done von $total erledigt';
   }
+
+  @override
+  String get nutritionKcalLeft => 'kcal übrig';
+
+  @override
+  String nutritionOverTarget(int kcal) {
+    return '$kcal kcal über dem Ziel';
+  }
+
+  @override
+  String get nutritionViewPlan => 'Ernährungsplan ansehen';
+
+  @override
+  String get nutritionRecipesFit => 'Passende Rezepte';
+
+  @override
+  String nutritionMacroGrams(int value, int target) {
+    return '$value / $target g';
+  }
+
+  @override
+  String nutritionGrams(int value) {
+    return '$value g';
+  }
+
+  @override
+  String get trainingSessionDone => 'Erledigt';
+
+  @override
+  String trainingStartSession(String session) {
+    return '$session starten';
+  }
 }

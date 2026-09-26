@@ -72,7 +72,14 @@ class _WeekView extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final campStart = context.watch<AuthController>().user?.createdAt;
-    final now = DateTime.now();
+    final now = state.now;
+    const dayNames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    final unfinished = state.sessions.where((s) => !s.completed);
+    final next = unfinished
+            .where((s) =>
+                s.day.toLowerCase().startsWith(dayNames[now.weekday - 1]))
+            .firstOrNull ??
+        unfinished.firstOrNull;
     // The camp begins when the account does — onboarding seeds a fresh camp,
     // and there is no separate camp-start model yet. Week 1 is the first
     // calendar week of the account, not a fixed number.
@@ -107,6 +114,7 @@ class _WeekView extends StatelessWidget {
         for (final s in state.sessions)
           _SessionRow(
             s,
+            isNext: s.id == next?.id,
             onStart: () => Navigator.of(context).push(CupertinoPageRoute(
               builder: (_) => RoundTimerScreen(session: s),
             )),
@@ -212,157 +220,95 @@ class _SessionLogDialogState extends State<_SessionLogDialog> {
 
 class _SessionRow extends StatelessWidget {
   final TrainingSession s;
-  final VoidCallback onStart;
-  final VoidCallback onLog;
-  const _SessionRow(this.s, {required this.onStart, required this.onLog});
-
+  final bool isNext;
+  final VoidCallback onStart, onLog;
+  const _SessionRow(this.s,
+      {required this.isNext, required this.onStart, required this.onLog});
   @override
   Widget build(BuildContext context) {
-    final largeText = MediaQuery.textScalerOf(context).scale(14) / 14 >= 1.4;
-    final leading = Row(
-      children: [
-        SizedBox(
-          width: 38,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              s.day.toUpperCase(),
-              style: AppType.subhead(
-                  weight: FontWeight.w700, color: AppColors.textMuted),
-            ),
-          ),
-        ),
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(Radii.tile),
-          ),
-          child: Icon(s.icon,
-              size: 20,
-              color: s.completed ? AppColors.primary : AppColors.textSecondary),
-        ),
-        const SizedBox(width: Insets.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(s.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppType.callout(weight: FontWeight.w700)),
-              const SizedBox(height: Insets.xxs),
-              Text(s.subtitle,
-                  maxLines: largeText ? 3 : 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppType.subhead(
-                      weight: FontWeight.w500, color: AppColors.textSecondary)),
-            ],
-          ),
-        ),
+    final large = AppAccessibility.isLargeText(context);
+    final content =
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(s.day,
+          style: AppType.subhead(color: AppAccessibility.textMuted(context))),
+      const SizedBox(height: Insets.xs),
+      Text(s.title, style: AppType.headline()),
+      const SizedBox(height: Insets.xs),
+      Text(s.subtitle,
+          style:
+              AppType.subhead(color: AppAccessibility.textSecondary(context))),
+      if (s.completed) ...[
+        const SizedBox(height: Insets.sm),
+        Row(children: [
+          const Icon(Icons.check,
+              size: IconSizes.inline, color: AppColors.textSecondary),
+          const SizedBox(width: Insets.xs),
+          Flexible(
+              child: Text(L.of(context).trainingSessionDone,
+                  style: AppType.subhead(color: AppColors.textSecondary))),
+        ]),
       ],
-    );
-    final actions = Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment:
-          largeText ? MainAxisAlignment.end : MainAxisAlignment.start,
-      children: [
-        if (s.completed)
-          _CompletionDot(completed: s.completed)
-        else
-          _StartIconButton(label: s.title, onTap: onStart),
-        const SizedBox(width: Insets.sm),
-        HeaderIcon(
-          s.completed ? Icons.edit_note : Icons.check_circle_outline,
+    ]);
+    final actions = Row(mainAxisSize: MainAxisSize.min, children: [
+      if (!s.completed)
+        _StartIconButton(label: s.title, primary: isNext, onTap: onStart),
+      HeaderIcon(s.completed ? Icons.edit_note : Icons.check_circle_outline,
           label: s.completed
               ? L.of(context).trainingEditSessionLog
               : L.of(context).trainingLogSession,
-          onTap: onLog,
-        ),
-      ],
-    );
-
+          onTap: onLog),
+    ]);
     return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.md),
-      child: AppCard(
-        padding: const EdgeInsets.all(Insets.md),
-        child: largeText
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  leading,
-                  const SizedBox(height: Insets.md),
-                  actions,
-                ],
-              )
-            : Row(
-                children: [
-                  Expanded(child: leading),
-                  const SizedBox(width: Insets.sm),
-                  actions,
-                ],
-              ),
-      ),
-    );
-  }
-}
-
-class _CompletionDot extends StatelessWidget {
-  final bool completed;
-  const _CompletionDot({required this.completed});
-
-  @override
-  Widget build(BuildContext context) {
-    if (completed) {
-      return Container(
-        width: 24,
-        height: 24,
-        decoration: const BoxDecoration(
-          color: AppColors.primary,
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.check, size: 15, color: Colors.white),
-      );
-    }
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.border, width: 2),
-      ),
-    );
+        padding: const EdgeInsets.only(bottom: Insets.md),
+        child: AppCard(
+            padding: const EdgeInsets.all(Insets.md),
+            child: large
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                        content,
+                        const SizedBox(height: Insets.md),
+                        Align(alignment: Alignment.centerRight, child: actions)
+                      ])
+                : Row(children: [
+                    Icon(s.icon,
+                        size: IconSizes.row, color: AppColors.textSecondary),
+                    const SizedBox(width: Insets.md),
+                    Expanded(child: content),
+                    const SizedBox(width: Insets.sm),
+                    actions,
+                  ])));
   }
 }
 
 class _StartIconButton extends StatelessWidget {
   final String label;
+  final bool primary;
   final VoidCallback onTap;
-  const _StartIconButton({required this.label, required this.onTap});
-
+  const _StartIconButton(
+      {required this.label, required this.primary, required this.onTap});
   @override
-  Widget build(BuildContext context) {
-    return Semantics(
+  Widget build(BuildContext context) => Semantics(
       button: true,
-      label: 'Start $label',
+      label: L.of(context).trainingStartSession(label),
       child: PressScale(
-        onTap: onTap,
-        haptic: AppHaptics.commit,
-        child: const DecoratedBox(
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            shape: BoxShape.circle,
-          ),
-          child: SizedBox.square(
-            dimension: AppAccessibility.minTouchTarget,
-            child: Icon(Icons.play_arrow, color: Colors.white, size: 22),
-          ),
-        ),
-      ),
-    );
-  }
+          key: primary ? const ValueKey('primary-session-start') : null,
+          onTap: onTap,
+          haptic: AppHaptics.commit,
+          child: DecoratedBox(
+              decoration: BoxDecoration(
+                  color: primary ? AppColors.primaryFill : AppColors.surface,
+                  border: primary
+                      ? null
+                      : Border.all(color: AppAccessibility.border(context)),
+                  shape: BoxShape.circle),
+              child: SizedBox.square(
+                  dimension: AppAccessibility.minTouchTarget,
+                  child: Icon(Icons.play_arrow,
+                      color: primary
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary,
+                      size: IconSizes.row)))));
 }
 
 class _HistoryView extends StatelessWidget {

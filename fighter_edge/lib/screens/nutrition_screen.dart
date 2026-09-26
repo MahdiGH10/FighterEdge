@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -24,8 +25,6 @@ import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/animated_count.dart';
 import '../widgets/app_scaffold.dart';
-import '../widgets/empty_state.dart';
-import '../widgets/filter_chips.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/progress_ring.dart';
 import '../widgets/press_scale.dart';
@@ -79,20 +78,15 @@ class _NutritionScreenState extends State<NutritionScreen> {
       ],
       body: Column(
         children: [
-          _DateSwitcher(edgeFuel: edgeFuel),
-          const SizedBox(height: Insets.md),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
-            child: FilterChips(
-              options: [
-                l.nutritionTabToday,
-                l.nutritionTabMeals,
-                l.nutritionTabRecipes,
-              ],
-              selectedIndex: _tab,
-              onSelected: (i) => setState(() => _tab = i),
-              scrollable: false,
-            ),
+            child: Column(children: [
+              _DateSwitcher(edgeFuel: edgeFuel),
+              const SizedBox(height: Insets.sm),
+              _NutritionSegments(
+                  selected: _tab,
+                  onSelected: (index) => setState(() => _tab = index)),
+            ]),
           ),
           const SizedBox(height: Insets.lg),
           Expanded(child: activeTab),
@@ -450,125 +444,189 @@ class _TodayView extends StatelessWidget {
       onEdit;
   final VoidCallback onAdd;
   final void Function(EdgeFuelController, FoodLogEntry) onToggle;
-
-  const _TodayView({
-    required this.edgeFuel,
-    required this.ratio,
-    required this.ringColor,
-    required this.onEdit,
-    required this.onAdd,
-    required this.onToggle,
-  });
+  const _TodayView(
+      {required this.edgeFuel,
+      required this.ratio,
+      required this.ringColor,
+      required this.onEdit,
+      required this.onAdd,
+      required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    final hasTarget = edgeFuel.hasUsableTarget;
+    final left = (edgeFuel.targetCalories - edgeFuel.consumedCalories)
+        .clamp(0, edgeFuel.targetCalories);
+    final over =
+        hasTarget && edgeFuel.consumedCalories > edgeFuel.targetCalories;
     return ListView(
       padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
       children: [
-        _EdgeFuelEntryCard(edgeFuel: edgeFuel),
-        const SizedBox(height: Insets.lg),
-        if (!edgeFuel.hasUsableTarget) ...[
-          EmptyState(
-            icon: Icons.bolt,
-            title: 'Set your fuel target',
-            message:
-                'Complete EdgeFuel setup so your daily log can track against your own plan.',
-            actionLabel: 'Set up EdgeFuel',
-            onAction: () => AppNavigation.push(
-              context,
-              AppRoutes.fuelSetup,
-              fallbackBuilder: (_) => const EdgeFuelSetupScreen(),
-            ),
-          ),
-          const SizedBox(height: Insets.lg),
-        ],
-        SectionHeader(L.of(context).nutritionCalories),
         AppCard(
-          child: Column(
-            children: [
-              const SizedBox(height: Insets.sm),
-              ProgressRing(
-                progress: ratio.clamp(0.0, 1.0),
-                size: 160,
-                strokeWidth: 12,
-                color: ringColor,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Counts when a meal lands: the number moving is the
-                    // meal you just logged, arriving.
-                    AnimatedCount(
-                      value: edgeFuel.consumedCalories.toDouble(),
-                      formatter: (v) => '${v.round()}',
-                      style: AppType.largeTitle(),
-                    ),
-                    Text(
-                      edgeFuel.hasUsableTarget
-                          ? '/ ${edgeFuel.targetCalories} kcal'
-                          : L.of(context).nutritionLoggedToday,
-                      style: AppType.subhead(
-                        weight: FontWeight.w500,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: Insets.xl),
-              Row(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _Macro(
-                    l.nutritionProtein,
-                    edgeFuel.consumedProtein,
-                    edgeFuel.targetProtein,
-                    AppColors.protein,
+              Center(
+                  child: ProgressRing(
+                progress: ratio.clamp(0.0, 1.0),
+                size: AppAccessibility.isLargeText(context)
+                    ? LayoutTokens.fuelRingLarge
+                    : LayoutTokens.fuelRing,
+                strokeWidth: Insets.sm,
+                color: ringColor,
+                child: Padding(
+                    padding: const EdgeInsets.all(Insets.xl),
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      AnimatedCount(
+                          value: (hasTarget ? left : edgeFuel.consumedCalories)
+                              .toDouble(),
+                          formatter: (value) => '${value.round()}',
+                          style: AppType.largeTitle()),
+                      Text(
+                          hasTarget
+                              ? l.nutritionKcalLeft
+                              : l.nutritionLoggedToday,
+                          textAlign: TextAlign.center,
+                          style: AppType.subhead(
+                              color: AppAccessibility.textSecondary(context))),
+                    ])),
+              )),
+              if (over) ...[
+                const SizedBox(height: Insets.md),
+                Text(
+                    l.nutritionOverTarget(
+                        edgeFuel.consumedCalories - edgeFuel.targetCalories),
+                    textAlign: TextAlign.center,
+                    style: AppType.subhead(color: AppColors.negative)),
+              ],
+              const SizedBox(height: Insets.xl),
+              _Macro(l.nutritionProtein, edgeFuel.consumedProtein,
+                  edgeFuel.targetProtein, AppColors.protein),
+              const SizedBox(height: Insets.md),
+              _Macro(l.nutritionCarbs, edgeFuel.consumedCarbs,
+                  edgeFuel.targetCarbs, AppColors.carbs),
+              const SizedBox(height: Insets.md),
+              _Macro(l.nutritionFats, edgeFuel.consumedFats,
+                  edgeFuel.targetFats, AppColors.fats),
+              const SizedBox(height: Insets.md),
+              TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.textSecondary,
+                    minimumSize:
+                        const Size.fromHeight(AppAccessibility.minTouchTarget),
                   ),
-                  _Macro(
-                    l.nutritionCarbs,
-                    edgeFuel.consumedCarbs,
-                    edgeFuel.targetCarbs,
-                    AppColors.carbs,
-                  ),
-                  _Macro(
-                    l.nutritionFats,
-                    edgeFuel.consumedFats,
-                    edgeFuel.targetFats,
-                    AppColors.fats,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        if (FuelWhatIsLeft.appliesTo(edgeFuel)) ...[
-          const SizedBox(height: Insets.md),
-          FuelWhatIsLeft(edgeFuel: edgeFuel),
-        ],
+                  onPressed: () => AppNavigation.push(
+                      context,
+                      edgeFuel.hasCompletedSetup
+                          ? AppRoutes.fuelPlan
+                          : AppRoutes.fuelSetup,
+                      fallbackBuilder: (_) => edgeFuel.hasCompletedSetup
+                          ? const EdgeFuelPlanScreen()
+                          : const EdgeFuelSetupScreen()),
+                  child: Text(
+                      hasTarget ? l.nutritionViewPlan : l.dashboardSetFuel)),
+              if (FuelWhatIsLeft.appliesTo(edgeFuel))
+                FuelWhatIsLeft(edgeFuel: edgeFuel, compact: true),
+            ])),
         const SizedBox(height: Insets.xl),
-        SectionHeader(L.of(context).nutritionMeals),
+        SectionHeader(l.nutritionMeals),
         if (edgeFuel.entries.isEmpty)
-          _QuickStartMeals(edgeFuel: edgeFuel, onSearch: onAdd),
-        for (final entry in edgeFuel.entries)
-          _FoodRow(
-            entry: entry,
-            onToggle: () => onToggle(edgeFuel, entry),
-            onEdit: () => onEdit(edgeFuel, existing: entry),
-            onDelete: () => edgeFuel.deleteEntry(entry),
-            onSaveToggle: () => edgeFuel.toggleSavedFood(entry),
-          ),
+          _QuickStartMeals(edgeFuel: edgeFuel, onSearch: onAdd)
+        else
+          _MealGroup(edgeFuel: edgeFuel, onEdit: onEdit, onToggle: onToggle),
         if (edgeFuel.entries.isNotEmpty) ...[
-          const SizedBox(height: Insets.sm),
-          GhostButton(
-            L.of(context).nutritionAddFood,
-            icon: Icons.add,
-            expand: true,
-            onPressed: onAdd,
-          ),
+          const SizedBox(height: Insets.md),
+          PrimaryButton(l.nutritionAddFood,
+              icon: Icons.add, expand: true, onPressed: onAdd),
         ],
       ],
     );
   }
+}
+
+class _NutritionSegments extends StatelessWidget {
+  final int selected;
+  final ValueChanged<int> onSelected;
+  const _NutritionSegments({required this.selected, required this.onSelected});
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final labels = [
+      l.nutritionTabToday,
+      l.nutritionTabMeals,
+      l.nutritionTabRecipes
+    ];
+    if (AppAccessibility.isLargeText(context)) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        for (final (index, label) in labels.indexed)
+          Semantics(
+              selected: selected == index,
+              child: TextButton(
+                  style: TextButton.styleFrom(
+                      minimumSize: const Size.fromHeight(
+                          AppAccessibility.minTouchTarget),
+                      backgroundColor: selected == index
+                          ? AppColors.surfaceElevated
+                          : AppColors.surface,
+                      foregroundColor: AppColors.textPrimary),
+                  onPressed: () => onSelected(index),
+                  child: Text(label, style: AppType.callout()))),
+      ]);
+    }
+    return SizedBox(
+        width: double.infinity,
+        child: CupertinoSlidingSegmentedControl<int>(
+          groupValue: selected,
+          backgroundColor: AppColors.surface,
+          thumbColor: AppColors.surfaceElevated,
+          padding: const EdgeInsets.all(Insets.xs),
+          onValueChanged: (value) {
+            if (value != null) {
+              AppHaptics.selection();
+              onSelected(value);
+            }
+          },
+          children: {
+            for (final (index, label) in labels.indexed)
+              index: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                      minHeight: AppAccessibility.minTouchTarget),
+                  child: Center(
+                      child: Text(label,
+                          style: AppType.subhead(
+                              color: selected == index
+                                  ? AppColors.textPrimary
+                                  : AppAccessibility.textSecondary(context)))))
+          },
+        ));
+  }
+}
+
+class _MealGroup extends StatelessWidget {
+  final EdgeFuelController edgeFuel;
+  final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
+      onEdit;
+  final void Function(EdgeFuelController, FoodLogEntry) onToggle;
+  const _MealGroup(
+      {required this.edgeFuel, required this.onEdit, required this.onToggle});
+  @override
+  Widget build(BuildContext context) => AppCard(
+      padding: EdgeInsets.zero,
+      child: Column(children: [
+        for (final (index, entry) in edgeFuel.entries.indexed) ...[
+          if (index > 0)
+            Divider(
+                height: Insets.xxs / 2,
+                color: AppAccessibility.border(context)),
+          _FoodRow(
+              entry: entry,
+              onToggle: () => onToggle(edgeFuel, entry),
+              onEdit: () => onEdit(edgeFuel, existing: entry),
+              onDelete: () => edgeFuel.deleteEntry(entry),
+              onSaveToggle: () => edgeFuel.toggleSavedFood(entry)),
+        ],
+      ]));
 }
 
 class _QuickStartMeals extends StatelessWidget {
@@ -625,7 +683,10 @@ class _QuickStartMeals extends StatelessWidget {
               meal: meal,
               onTap: () => _addMeal(context, meal),
             ),
-            if (meal != _meals.last) const SizedBox(height: Insets.sm),
+            if (meal != _meals.last)
+              Divider(
+                  height: Insets.xxs / 2,
+                  color: AppAccessibility.border(context)),
           ],
           const SizedBox(height: Insets.md),
           GhostButton(
@@ -695,49 +756,42 @@ class _QuickMealTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return PressScale(
       onTap: onTap,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundRaised,
-          borderRadius: BorderRadius.circular(Radii.button),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(Insets.md),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(Radii.tile),
-                ),
-                child: Icon(meal.icon, color: AppColors.primary, size: 20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: Insets.md),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.primarySoft,
+                borderRadius: BorderRadius.circular(Radii.tile),
               ),
-              const SizedBox(width: Insets.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(meal.name,
-                        style: AppType.callout(weight: FontWeight.w800)),
-                    const SizedBox(height: Insets.xxs),
-                    Text(meal.notes,
-                        style: AppType.micro(color: AppColors.textMuted)),
-                    const SizedBox(height: Insets.xs),
-                    Text(
-                      '${meal.calories} kcal · ${meal.protein}g protein · ${meal.carbs}g carbs',
-                      style: AppType.micro(
-                          color: AppColors.textSecondary,
-                          weight: FontWeight.w700),
-                    ),
-                  ],
-                ),
+              child: Icon(meal.icon, color: AppColors.primary, size: 20),
+            ),
+            const SizedBox(width: Insets.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(meal.name,
+                      style: AppType.callout(weight: FontWeight.w800)),
+                  const SizedBox(height: Insets.xxs),
+                  Text(meal.notes,
+                      style: AppType.micro(color: AppColors.textMuted)),
+                  const SizedBox(height: Insets.xs),
+                  Text(
+                    '${meal.calories} kcal · ${meal.protein}g protein · ${meal.carbs}g carbs',
+                    style: AppType.micro(
+                        color: AppColors.textSecondary,
+                        weight: FontWeight.w700),
+                  ),
+                ],
               ),
-              const SizedBox(width: Insets.sm),
-              const Icon(Icons.add_circle_outline, color: AppColors.primary),
-            ],
-          ),
+            ),
+            const SizedBox(width: Insets.sm),
+            const Icon(Icons.add_circle_outline, color: AppColors.primary),
+          ],
         ),
       ),
     );
@@ -917,14 +971,8 @@ class _MealsView extends StatelessWidget {
         ],
         SectionHeader('Meals logged - $eaten/${edgeFuel.entries.length}'),
         if (edgeFuel.entries.isEmpty) _QuickStartMeals(edgeFuel: edgeFuel),
-        for (final entry in edgeFuel.entries)
-          _FoodRow(
-            entry: entry,
-            onToggle: () => onToggle(edgeFuel, entry),
-            onEdit: () => onEdit(edgeFuel, existing: entry),
-            onDelete: () => edgeFuel.deleteEntry(entry),
-            onSaveToggle: () => edgeFuel.toggleSavedFood(entry),
-          ),
+        if (edgeFuel.entries.isNotEmpty)
+          _MealGroup(edgeFuel: edgeFuel, onEdit: onEdit, onToggle: onToggle),
       ],
     );
   }
@@ -932,49 +980,37 @@ class _MealsView extends StatelessWidget {
 
 class _Macro extends StatelessWidget {
   final String label;
-  final int value;
-  final int target;
+  final int value, target;
   final Color color;
   const _Macro(this.label, this.value, this.target, this.color);
-
   @override
   Widget build(BuildContext context) {
     final over = target > 0 && value > target;
-    final progress = target <= 0 ? 0.0 : (value / target).clamp(0.0, 1.0);
-    return Expanded(
-      child: Column(
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: AppType.micro(
-              weight: FontWeight.w600,
-              color: AppColors.textMuted,
-            ),
-          ),
-          const SizedBox(height: Insets.sm),
-          Text('$value g', style: AppType.title2()),
-          Text(
-            target <= 0 ? 'set target' : '/ $target g',
-            style: AppType.micro(
-              weight: FontWeight.w500,
-              color: over ? AppColors.negative : AppColors.textMuted,
-            ),
-          ),
-          const SizedBox(height: Insets.sm),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(Radii.chip),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 5,
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          spacing: Insets.sm,
+          runSpacing: Insets.xs,
+          children: [
+            Text(label,
+                style: AppType.subhead(
+                    color: AppAccessibility.textSecondary(context))),
+            Text(
+                target > 0
+                    ? L.of(context).nutritionMacroGrams(value, target)
+                    : L.of(context).nutritionGrams(value),
+                style: AppType.subhead(
+                    color: over ? AppColors.negative : AppColors.textPrimary)),
+          ]),
+      const SizedBox(height: Insets.sm),
+      ClipRRect(
+          borderRadius: BorderRadius.circular(Radii.chip),
+          child: LinearProgressIndicator(
+              value: target <= 0 ? 0 : (value / target).clamp(0.0, 1.0),
+              minHeight: Insets.xs,
               backgroundColor: AppColors.track,
-              valueColor: AlwaysStoppedAnimation(
-                over ? AppColors.negative : color,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+              color: over ? AppColors.negative : color)),
+    ]);
   }
 }
 
@@ -1002,92 +1038,81 @@ class _FoodRow extends StatelessWidget {
     // means everywhere else in the app; eaten/not-eaten moves to its own
     // small control with its own label, below.
     return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.md),
-      child: AppCard(
-        padding: const EdgeInsets.all(Insets.md),
-        child: Row(
-          children: [
-            Expanded(
-              child: Semantics(
-                button: true,
-                label: '${entry.name}, ${entry.notes}, ${entry.calories} kcal'
-                    '${entry.saved ? ', saved' : ''}',
-                child: PressScale(
-                  onTap: onEdit,
-                  child: ExcludeSemantics(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                entry.name,
-                                style: AppType.callout(weight: FontWeight.w700),
-                              ),
+      padding: const EdgeInsets.all(Insets.md),
+      child: Row(
+        children: [
+          Expanded(
+            child: Semantics(
+              button: true,
+              label: '${entry.name}, ${entry.notes}, ${entry.calories} kcal'
+                  '${entry.saved ? ', saved' : ''}',
+              child: PressScale(
+                onTap: onEdit,
+                child: ExcludeSemantics(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              entry.name,
+                              style: AppType.callout(weight: FontWeight.w700),
                             ),
-                            if (entry.saved) ...[
-                              const SizedBox(width: Insets.xs),
-                              const Icon(
-                                Icons.star,
-                                size: 14,
-                                color: AppColors.primary,
-                              ),
-                            ],
-                          ],
-                        ),
-                        const SizedBox(height: Insets.xxs),
-                        Text(
-                          entry.notes,
-                          style: AppType.subhead(
-                            weight: FontWeight.w500,
-                            color: secondary,
                           ),
+                          if (entry.saved) ...[
+                            const SizedBox(width: Insets.xs),
+                            const Icon(
+                              Icons.star,
+                              size: 14,
+                              color: AppColors.primary,
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: Insets.xxs),
+                      Text('${entry.calories} kcal',
+                          style: AppType.subhead(color: secondary)),
+                      Text(
+                        entry.notes,
+                        style: AppType.subhead(
+                          weight: FontWeight.w500,
+                          color: secondary,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-            ExcludeSemantics(
-              child: Text(
-                '${entry.calories} kcal',
-                style: AppType.subhead(
-                  weight: FontWeight.w600,
-                  color: secondary,
-                ),
+          ),
+          _ToggleCheck(checked: entry.consumed, onTap: onToggle),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
+            color: AppColors.surface,
+            onSelected: (value) {
+              if (value == 'edit') onEdit();
+              if (value == 'save') onSaveToggle();
+              if (value == 'delete') onDelete();
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'edit',
+                child: Text(L.of(context).commonEdit),
               ),
-            ),
-            const SizedBox(width: Insets.sm),
-            _ToggleCheck(checked: entry.consumed, onTap: onToggle),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
-              color: AppColors.surface,
-              onSelected: (value) {
-                if (value == 'edit') onEdit();
-                if (value == 'save') onSaveToggle();
-                if (value == 'delete') onDelete();
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Text(L.of(context).commonEdit),
-                ),
-                PopupMenuItem(
-                  value: 'save',
-                  child: Text(entry.saved
-                      ? L.of(context).commonUnsave
-                      : L.of(context).commonSaveMeal),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Text(L.of(context).commonDelete),
-                ),
-              ],
-            ),
-          ],
-        ),
+              PopupMenuItem(
+                value: 'save',
+                child: Text(entry.saved
+                    ? L.of(context).commonUnsave
+                    : L.of(context).commonSaveMeal),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text(L.of(context).commonDelete),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1155,186 +1180,6 @@ class _Check extends StatelessWidget {
                 color: Colors.white,
               )
             : const SizedBox(key: ValueKey('meal-empty')),
-      ),
-    );
-  }
-}
-
-class _EdgeFuelEntryCard extends StatelessWidget {
-  final EdgeFuelController edgeFuel;
-
-  const _EdgeFuelEntryCard({required this.edgeFuel});
-
-  @override
-  Widget build(BuildContext context) {
-    final hasSetup = edgeFuel.hasCompletedSetup;
-    final target = edgeFuel.target;
-    final hasTarget = hasSetup && target != null && target.isSuccess;
-    final consumed = edgeFuel.consumedCalories;
-    final targetCalories = edgeFuel.targetCalories;
-    final remaining = (targetCalories - consumed).clamp(0, targetCalories);
-    final progress =
-        targetCalories <= 0 ? 0.0 : (consumed / targetCalories).clamp(0.0, 1.0);
-    final overTarget = targetCalories > 0 && consumed > targetCalories;
-
-    return AppCard(
-      onTap: () => AppNavigation.push(
-        context,
-        hasSetup ? AppRoutes.fuelPlan : AppRoutes.fuelSetup,
-        fallbackBuilder: (_) =>
-            hasSetup ? const EdgeFuelPlanScreen() : const EdgeFuelSetupScreen(),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(Radii.tile),
-                ),
-                child: const Icon(Icons.bolt, color: AppColors.primary),
-              ),
-              const SizedBox(width: Insets.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      hasTarget ? 'Today\'s EdgeFuel target' : 'EdgeFuel AI',
-                      style: AppType.subhead(weight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: Insets.xxs),
-                    Text(
-                      hasTarget
-                          ? 'Personalized calories and macros for this day.'
-                          : 'Get a personalized daily calorie and macro target.',
-                      style: AppType.subhead(
-                        weight: FontWeight.w500,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right, color: AppColors.textMuted),
-            ],
-          ),
-          if (hasTarget) ...[
-            const SizedBox(height: Insets.lg),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Text(
-                    '$targetCalories kcal',
-                    style: AppType.largeTitle(),
-                  ),
-                ),
-                const SizedBox(width: Insets.md),
-                AnimatedCount(
-                  value: remaining.toDouble(),
-                  formatter: (v) =>
-                      overTarget ? 'Over target' : '${v.round()} left',
-                  style: AppType.callout(
-                    weight: FontWeight.w800,
-                    color: overTarget ? AppColors.negative : AppColors.positive,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: Insets.xs),
-            AnimatedCount(
-              value: consumed.toDouble(),
-              formatter: (v) => '${v.round()} kcal logged',
-              style: AppType.subhead(
-                weight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: Insets.md),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(Radii.chip),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 6,
-                backgroundColor: AppColors.track,
-                valueColor: AlwaysStoppedAnimation(
-                  overTarget ? AppColors.negative : AppColors.primary,
-                ),
-              ),
-            ),
-            const SizedBox(height: Insets.md),
-            Wrap(
-              spacing: Insets.sm,
-              runSpacing: Insets.sm,
-              children: [
-                _TargetMacroChip(
-                  label: 'Protein',
-                  value: '${edgeFuel.targetProtein}g',
-                  color: AppColors.protein,
-                ),
-                _TargetMacroChip(
-                  label: 'Carbs',
-                  value: '${edgeFuel.targetCarbs}g',
-                  color: AppColors.carbs,
-                ),
-                _TargetMacroChip(
-                  label: 'Fats',
-                  value: '${edgeFuel.targetFats}g',
-                  color: AppColors.fats,
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _TargetMacroChip extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-
-  const _TargetMacroChip({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: Insets.sm, vertical: Insets.xs),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundRaised,
-        borderRadius: BorderRadius.circular(Radii.chip),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: Insets.xs),
-          Text(
-            '$label $value',
-            style: AppType.micro(
-              weight: FontWeight.w800,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
       ),
     );
   }

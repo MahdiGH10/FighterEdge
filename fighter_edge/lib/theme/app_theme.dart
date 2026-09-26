@@ -34,6 +34,16 @@ class Radii {
   static const double navItem = 18;
 }
 
+/// Fixed illustrations and layout breakpoints, separate from spacing.
+class LayoutTokens {
+  LayoutTokens._();
+
+  /// Calorie ring leaves room for its label at normal and large text sizes.
+  static const double fuelRing = 176;
+  static const double fuelRingLarge = 240;
+  static const double narrowScreen = 360;
+}
+
 /// Icon sizes. Glyphs sit on the type scale rather than floating free of it.
 class IconSizes {
   IconSizes._();

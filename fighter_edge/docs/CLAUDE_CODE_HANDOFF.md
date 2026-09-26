@@ -1,5 +1,28 @@
 # Fighter Edge — Claude Code Handoff
 
+## UI task slice C: Fuel and Train (2026-09-26)
+
+- Fuel now has one calorie ring (remaining calories with a target, logged
+  calories without one), three macro bars and a quiet filtered recipe row.
+  The plan remains accessible. Removed the duplicate target/macros card.
+- Today/Meals/Recipes use a surface-based segmented control, stacking into
+  48px controls at large text. Previous day / Next day labels remain.
+- Logged meals and starter suggestions are divided rows in one surface.
+  Editing, consumed toggles, Undo, saved meals and menus remain functional.
+- Train highlights today's unfinished session, falling back to the first
+  unfinished slot. Other starts are outlined; completions are neutral checks
+  with Done. Uses stable session IDs because AppState rebuilds slot objects.
+- Verified: format, analyzer, 671 tests (667 before, 4 added), 3 unchanged
+  goldens. Added selection and 320px/200% Fuel regression coverage; existing
+  meal editing/toggle/Undo tests pass. No domain/billing behavior changed.
+- Browser: offline empty states plus synthetic populated in-memory fixtures
+  through ignored build/qa_main.dart; Fuel, Meals and Train at 390x844,
+  320x568 and actual 200% text. C-*.png evidence is outside Git in
+  C:/Users/Mahdi/Downloads/FighterEdge-ui-evidence/. Fresh navigations have
+  no app console errors; hot restart once produced a disposed EngineFlutterView
+  debug-engine error, absent after a fresh navigation.
+- Not verified: real devices, iOS, release builds, Firebase or billing.
+
 ## UI task slice B: dashboard hierarchy (2026-09-26)
 
 - One session/rest/empty/completed hero and one primary action. Fuel is a

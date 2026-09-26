@@ -8,6 +8,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_typography.dart';
 import '../../../../widgets/stat_card.dart';
+import '../../../../widgets/press_scale.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../controllers/recipe_library_controller.dart';
 import '../screens/recipe_library_screen.dart';
@@ -18,8 +19,10 @@ import '../screens/recipe_library_screen.dart';
 /// first (EF3_PLAN §3.1, "Fuel this plan").
 class FuelWhatIsLeft extends StatelessWidget {
   final EdgeFuelController edgeFuel;
+  final bool compact;
 
-  const FuelWhatIsLeft({super.key, required this.edgeFuel});
+  const FuelWhatIsLeft(
+      {super.key, required this.edgeFuel, this.compact = false});
 
   /// Below this, no real meal fits and the card would only point at an
   /// empty list.
@@ -35,6 +38,29 @@ class FuelWhatIsLeft extends StatelessWidget {
   Widget build(BuildContext context) {
     final remaining = edgeFuel.targetCalories - edgeFuel.consumedCalories;
     final filters = RecipeFilters(maxCalories: remaining);
+    if (compact) {
+      return Semantics(
+          button: true,
+          child: PressScale(
+            onTap: () => AppNavigation.push(context, AppRoutes.fuelRecipes,
+                extra: filters,
+                fallbackBuilder: (_) =>
+                    RecipeLibraryScreen(initialFilters: filters)),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                  minHeight: AppAccessibility.minTouchTarget),
+              child: Row(children: [
+                Expanded(
+                    child: Text(L.of(context).nutritionRecipesFit,
+                        style: AppType.callout(
+                            color: AppAccessibility.textSecondary(context)))),
+                Icon(Icons.chevron_right,
+                    size: IconSizes.row,
+                    color: AppAccessibility.textMuted(context)),
+              ]),
+            ),
+          ));
+    }
     return Semantics(
       button: true,
       label: '$remaining calories left today. Find recipes that fit.',

@@ -411,5 +411,44 @@
         "type": "int"
       }
     }
+  },
+  "nutritionKcalLeft": "kcal left",
+  "nutritionOverTarget": "{kcal} kcal above target",
+  "nutritionViewPlan": "View fuel plan",
+  "nutritionRecipesFit": "Recipes that fit",
+  "nutritionMacroGrams": "{value} / {target} g",
+  "nutritionGrams": "{value} g",
+  "trainingSessionDone": "Done",
+  "trainingStartSession": "Start {session}",
+  "@nutritionOverTarget": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutritionMacroGrams": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutritionGrams": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@trainingStartSession": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      }
+    }
   }
 }
