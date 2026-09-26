@@ -19,9 +19,29 @@ on 2026-09-25/26, on top of `main` (`9ce7c23`):
   the sign-in label; OFL declares no Reserved Font Name, see
   `assets/images/google_g.README.md`).
 
+**Pull requests (open, none merged):** #10 this branch → `main`; #11
+`feat/fight-camp-setup` → #10's branch; #12 `feat/fight-camp-weight-path` →
+#11's branch. Merge in that order (after merging #10, retarget #11 to
+`main`; then #12). **Merging to `main` deploys:** `deploy-backend.yml` runs
+on `main` when `functions/**` or `firestore.rules` change, so #10 redeploys
+the Cloud Functions (the prompt moved to `prompt.ts` byte-identical; the
+eval files ship unused) and #11 deploys the `fightCamp` rule, which is the
+rule the fight camp needs before release. Both go through the `production`
+environment and need its credentials.
+
+**CI on #10:** 6/7 green, including Android release and iOS builds. The
+Android emulator job has **never passed** on any branch (`main` included):
+runs stall after the APK installs, or the emulator loses adb. Separately,
+the app flow test itself had a bug found by running it as a widget test at
+the emulator's 320x640: the "Pro is active" snackbar covered Sign out.
+Fixed in `978f19f`; the full flow passes in the VM at 320x640. Whether the
+emulator job now passes is the open question; if it still stalls with no
+output, run `flutter test integration_test/app_flow_test.dart -d <phone>`
+on a real Android phone to tell the app apart from the CI emulator.
+
 **Verified on this branch:** format and analyze clean, 740 tests, 3 goldens,
-functions 90/90. **Not verified:** real devices, iOS, release builds, live
-Firebase, purchases, the CI emulator job (runs on the PR).
+functions 90/90. **Not verified:** real devices, iOS runtime, live
+Firebase, purchases.
 
 **Decisions to respect** (`docs/PRODUCT_PLAN_20260924.md` > "Owner
 decisions (2026-09-26)"): fight camp before the AI features; AI is measured
