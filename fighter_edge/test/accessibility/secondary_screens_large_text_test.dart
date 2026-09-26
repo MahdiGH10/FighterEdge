@@ -21,6 +21,7 @@ const _routes = <String, String>{
   'fuel setup': AppRoutes.fuelSetup,
   'fuel coach': AppRoutes.fuelCoach,
   'fuel recipes': AppRoutes.fuelRecipes,
+  'fight setup': AppRoutes.fightSetup,
 };
 
 void main() {
