@@ -82,9 +82,14 @@ flutter:
     # the file to that single face and make every other weight a synthesized
     # fake; left undeclared, Flutter maps FontWeight onto the font's own `wght`
     # axis (Oswald 200-700, Inter 100-900).
+    # Google Sans is only for the Google sign-in label, which the branding
+    # guidelines set in Google Sans Medium. It ships as a static Medium cut,
+    # subset to Latin (see assets/images/google_g.README.md), not the 5 MB
+    # variable font.
     - family: GoogleSans
       fonts:
-        - asset: assets/fonts/GoogleSans-Variable.ttf
+        - asset: assets/fonts/GoogleSans-Medium-Latin.ttf
+          weight: 500
     - family: Oswald
       fonts:
         - asset: assets/fonts/Oswald-Variable.ttf
