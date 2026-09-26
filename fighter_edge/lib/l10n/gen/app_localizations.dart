@@ -1896,6 +1896,162 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Meals logged · {eaten}/{total}'**
   String fuelMealsLogged(int eaten, int total);
+
+  /// No description provided for @learningStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start here'**
+  String get learningStart;
+
+  /// No description provided for @learningChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a discipline'**
+  String get learningChoose;
+
+  /// No description provided for @learningChooseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We will remember your choice on this account. You can change it any time.'**
+  String get learningChooseHint;
+
+  /// No description provided for @learningChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change path'**
+  String get learningChange;
+
+  /// No description provided for @learningStriking.
+  ///
+  /// In en, this message translates to:
+  /// **'Striking'**
+  String get learningStriking;
+
+  /// No description provided for @learningWrestling.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrestling'**
+  String get learningWrestling;
+
+  /// No description provided for @learningBjj.
+  ///
+  /// In en, this message translates to:
+  /// **'BJJ'**
+  String get learningBjj;
+
+  /// No description provided for @learningClinch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinch'**
+  String get learningClinch;
+
+  /// No description provided for @learningStrikingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn punches, defence and kicks in order.'**
+  String get learningStrikingHint;
+
+  /// No description provided for @learningWrestlingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Build your stance, then learn to take someone down and defend a takedown.'**
+  String get learningWrestlingHint;
+
+  /// No description provided for @learningBjjHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Brazilian jiu-jitsu: learn to move and escape when training on the ground.'**
+  String get learningBjjHint;
+
+  /// No description provided for @learningClinchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn close-range holds, knees and control while standing.'**
+  String get learningClinchHint;
+
+  /// No description provided for @learningFoundations.
+  ///
+  /// In en, this message translates to:
+  /// **'Foundations'**
+  String get learningFoundations;
+
+  /// No description provided for @learningBuilding.
+  ///
+  /// In en, this message translates to:
+  /// **'Building'**
+  String get learningBuilding;
+
+  /// No description provided for @learningSharp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharp'**
+  String get learningSharp;
+
+  /// No description provided for @learningCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} drills sharp'**
+  String learningCount(int completed, int total);
+
+  /// No description provided for @learningLearn.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn: {drill}'**
+  String learningLearn(String drill);
+
+  /// No description provided for @learningLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro drill · path paused'**
+  String get learningLocked;
+
+  /// No description provided for @learningViewPro.
+  ///
+  /// In en, this message translates to:
+  /// **'View Pro options'**
+  String get learningViewPro;
+
+  /// No description provided for @learningComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Path complete'**
+  String get learningComplete;
+
+  /// No description provided for @learningCompleteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep practising these drills, or choose another discipline.'**
+  String get learningCompleteHint;
+
+  /// No description provided for @learningProgressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharp means you can repeat the drill with control.'**
+  String get learningProgressHint;
+
+  /// No description provided for @learningNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next in your path'**
+  String get learningNext;
+
+  /// No description provided for @learningAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After this drill: {drill}'**
+  String learningAfter(String drill);
+
+  /// No description provided for @learningKeepPractising.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep practising this drill. Mark it Sharp when you can repeat it with control to advance your path.'**
+  String get learningKeepPractising;
+
+  /// No description provided for @learningPractiseLast.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the last drill in your path. Keep practising, then mark it Sharp when you are ready.'**
+  String get learningPractiseLast;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

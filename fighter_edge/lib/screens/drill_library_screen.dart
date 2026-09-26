@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../billing/subscription.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../controllers/auth_controller.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
@@ -13,10 +14,12 @@ import '../theme/app_typography.dart';
 import '../training/drills/drill.dart';
 import '../training/drills/drill_catalog.dart';
 import '../training/drills/drill_progress_store.dart';
+import '../training/drills/learning_path.dart';
 import '../training/taxonomy/technique_taxonomy.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/primary_button.dart';
+import '../widgets/learning_path_card.dart';
 import '../widgets/stat_card.dart';
 import 'paywall_screen.dart';
 
@@ -39,6 +42,7 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
   String? _selectedSystemId;
   String? _selectedCategoryId;
   bool _savedOnly = false;
+  bool _choosingPath = false;
   String _query = '';
 
   @override
@@ -158,23 +162,36 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
                 ..._visible.where((d) => d.starter),
                 ..._visible.where((d) => !d.starter),
               ];
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        return ListView(
+          padding: const EdgeInsets.only(bottom: Insets.xxl),
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
-              child: _SearchField(
-                onChanged: (v) => setState(() => _query = v),
+              padding: const EdgeInsets.fromLTRB(
+                  Insets.lg, Insets.none, Insets.lg, Insets.lg),
+              child: LearningPathCard(
+                discipline: _choosingPath ? null : _store.discipline,
+                progress: _store.progress,
+                isPro: isPro,
+                onChoose: (discipline) {
+                  setState(() => _choosingPath = false);
+                  _store.selectDiscipline(discipline);
+                },
+                onChange: () => setState(() => _choosingPath = true),
+                onOpen: (next) =>
+                    next.locked ? _openPaywall() : _showDrill(next.drill),
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+              child: _SearchField(onChanged: (v) => setState(() => _query = v)),
             ),
             const SizedBox(height: Insets.md),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
               child: FilterChips(
-                options: _options,
-                selectedIndex: _selectedOptionIndex,
-                onSelected: _selectPrimaryFilter,
-              ),
+                  options: _options,
+                  selectedIndex: _selectedOptionIndex,
+                  onSelected: _selectPrimaryFilter),
             ),
             const SizedBox(height: Insets.md),
             if (!_savedOnly) ...[
@@ -194,71 +211,52 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
                 child: _SelectedPathSummary(
-                  category: category,
-                  onClear: () => setState(() => _selectedCategoryId = null),
-                ),
+                    category: category,
+                    onClear: () => setState(() => _selectedCategoryId = null)),
               ),
               const SizedBox(height: Insets.md),
             ],
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
               child: Text(
-                '${_store.sharpCount} of ${DrillCatalog.all.length} drills '
-                'sharp',
-                style: AppType.subhead(
-                  weight: FontWeight.w600,
-                  color: AppAccessibility.textSecondary(context),
-                ),
-              ),
+                  '${_store.sharpCount} of ${DrillCatalog.all.length} drills sharp',
+                  style: AppType.subhead(
+                      weight: FontWeight.w600,
+                      color: AppAccessibility.textSecondary(context))),
             ),
             const SizedBox(height: Insets.md),
-            Expanded(
-              child: visible.isEmpty
-                  ? ListView(
-                      padding: const EdgeInsets.all(Insets.lg),
-                      children: [
-                        _savedOnly && _query.trim().isEmpty
-                            ? const EmptyState(
-                                icon: Icons.bookmark_border,
-                                title: 'No saved drills yet',
-                                message: 'Tap the bookmark on any drill to '
-                                    'keep it here for your next session.',
-                              )
-                            : _selectedCategory != null && _query.trim().isEmpty
-                                ? _CurriculumOnlyState(
-                                    category: _selectedCategory!,
-                                  )
-                                : const EmptyState(
-                                    icon: Icons.search_off,
-                                    title: 'No drills match',
-                                    message:
-                                        'Try a different word or clear the '
-                                        'filter.',
-                                  ),
-                      ],
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(
-                          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
-                      itemCount: visible.length,
-                      itemBuilder: (_, i) {
-                        final drill = visible[i];
-                        final locked = !isPro && !drill.starter;
-                        return _DrillCard(
-                          drill: drill,
-                          locked: locked,
-                          progress: _store.progressOf(drill.id),
-                          bookmarked: _store.isBookmarked(drill.id),
-                          onBookmark: () {
-                            AppHaptics.selection();
-                            _store.toggleBookmark(drill.id);
-                          },
-                          onOpen: () =>
-                              locked ? _showLocked(drill) : _showDrill(drill),
-                        );
-                      },
-                    ),
-            ),
+            if (visible.isEmpty)
+              Padding(
+                  padding: const EdgeInsets.all(Insets.lg),
+                  child: _savedOnly && _query.trim().isEmpty
+                      ? const EmptyState(
+                          icon: Icons.bookmark_border,
+                          title: 'No saved drills yet',
+                          message:
+                              'Tap the bookmark on any drill to keep it here for your next session.')
+                      : _selectedCategory != null && _query.trim().isEmpty
+                          ? _CurriculumOnlyState(category: _selectedCategory!)
+                          : const EmptyState(
+                              icon: Icons.search_off,
+                              title: 'No drills match',
+                              message:
+                                  'Try a different word or clear the filter.')),
+            for (final drill in visible)
+              Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+                  child: _DrillCard(
+                    drill: drill,
+                    locked: !isPro && !drill.starter,
+                    progress: _store.progressOf(drill.id),
+                    bookmarked: _store.isBookmarked(drill.id),
+                    onBookmark: () {
+                      AppHaptics.selection();
+                      _store.toggleBookmark(drill.id);
+                    },
+                    onOpen: () => !isPro && !drill.starter
+                        ? _showLocked(drill)
+                        : _showDrill(drill),
+                  )),
           ],
         );
       },
@@ -281,6 +279,7 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
             drill: drill,
             controller: controller,
             progress: _store.progressOf(drill.id),
+            nextInPath: _nextForDetail(drill),
             onProgress: (p) {
               if (p == DrillProgress.sharp) {
                 AppHaptics.success();
@@ -293,6 +292,15 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
         ),
       ),
     );
+  }
+
+  Drill? _nextForDetail(Drill drill) {
+    final discipline = _store.discipline;
+    if (discipline == null) return null;
+    final path = LearningPath.forDiscipline(discipline);
+    final index = path.drillIds.indexOf(drill.id);
+    if (index < 0 || index + 1 >= path.drillIds.length) return null;
+    return DrillCatalog.byId(path.drillIds[index + 1]);
   }
 
   Future<void> _showLocked(Drill drill) {
@@ -840,17 +848,27 @@ class _DrillDetail extends StatelessWidget {
   final ScrollController controller;
   final DrillProgress progress;
   final ValueChanged<DrillProgress> onProgress;
+  final Drill? nextInPath;
 
   const _DrillDetail({
     required this.drill,
     required this.controller,
     required this.progress,
     required this.onProgress,
+    required this.nextInPath,
   });
 
   @override
   Widget build(BuildContext context) {
     final secondary = AppAccessibility.textSecondary(context);
+    Widget choice(DrillProgress p) => _ProgressChoice(
+          progress: p,
+          selected: progress == p,
+          reached: progress.index >= p.index,
+          onTap: () => onProgress(
+            progress == p ? DrillProgress.values[p.index - 1] : p,
+          ),
+        );
     return ListView(
       controller: controller,
       padding: const EdgeInsets.fromLTRB(
@@ -881,29 +899,39 @@ class _DrillDetail extends StatelessWidget {
         ),
         const SizedBox(height: Insets.xl),
         const _SectionLabel('Where are you with it?'),
-        Row(
-          children: [
+        if (AppAccessibility.isLargeText(context))
+          Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            for (final p in const [
+              DrillProgress.studied,
+              DrillProgress.drilled,
+              DrillProgress.sharp,
+            ]) ...[choice(p), const SizedBox(height: Insets.xs)],
+          ])
+        else
+          Row(children: [
             for (final p in const [
               DrillProgress.studied,
               DrillProgress.drilled,
               DrillProgress.sharp,
             ]) ...[
-              Expanded(
-                child: _ProgressChoice(
-                  progress: p,
-                  selected: progress == p,
-                  reached: progress.index >= p.index,
-                  // Tapping the current level again clears back one step,
-                  // so a mis-tap is always undoable.
-                  onTap: () => onProgress(
-                    progress == p ? DrillProgress.values[p.index - 1] : p,
-                  ),
-                ),
-              ),
+              Expanded(child: choice(p)),
               if (p != DrillProgress.sharp) const SizedBox(width: Insets.sm),
             ],
-          ],
-        ),
+          ]),
+        if (progress.index >= DrillProgress.drilled.index) ...[
+          const SizedBox(height: Insets.lg),
+          _SectionLabel(L.of(context).learningNext),
+          Text(
+              nextInPath == null
+                  ? L.of(context).learningPractiseLast
+                  : L.of(context).learningAfter(nextInPath!.title),
+              style: AppType.callout(color: secondary)),
+          if (progress == DrillProgress.drilled)
+            Padding(
+                padding: const EdgeInsets.only(top: Insets.sm),
+                child: Text(L.of(context).learningKeepPractising,
+                    style: AppType.subhead(color: secondary))),
+        ],
       ],
     );
   }

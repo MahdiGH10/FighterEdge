@@ -468,5 +468,34 @@
         "type": "int"
       }
     }
-  }
+  },
+  "learningStart": "Hier starten",
+  "learningChoose": "Wähle eine Disziplin",
+  "learningChooseHint": "Wir speichern deine Wahl für dieses Konto. Du kannst sie jederzeit ändern.",
+  "learningChange": "Lernpfad wechseln",
+  "learningStriking": "Schlagtechniken",
+  "learningWrestling": "Ringen",
+  "learningBjj": "BJJ",
+  "learningClinch": "Clinch",
+  "learningStrikingHint": "Lerne Schläge, Abwehr und Tritte Schritt für Schritt.",
+  "learningWrestlingHint": "Übe deinen Stand, dann lerne, jemanden zu Boden zu bringen und das selbst abzuwehren.",
+  "learningBjjHint": "Brasilianisches Jiu-Jitsu: Lerne, dich am Boden zu bewegen und zu befreien.",
+  "learningClinchHint": "Lerne Haltegriffe, Kniestöße und Kontrolle im engen Standkampf.",
+  "learningFoundations": "Grundlagen",
+  "learningBuilding": "Aufbau",
+  "learningSharp": "Sicher",
+  "learningCount": "{completed} von {total} Techniken sicher",
+  "@learningCount": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "learningLearn": "Lernen: {drill}",
+  "@learningLearn": {"placeholders": {"drill": {"type": "String"}}},
+  "learningLocked": "Pro-Technik · Lernpfad pausiert",
+  "learningViewPro": "Pro-Optionen ansehen",
+  "learningComplete": "Lernpfad abgeschlossen",
+  "learningCompleteHint": "Übe diese Techniken weiter oder wähle eine andere Disziplin.",
+  "learningProgressHint": "Sicher bedeutet, dass du die Technik kontrolliert wiederholen kannst.",
+  "learningNext": "Als Nächstes in deinem Lernpfad",
+  "learningAfter": "Nach dieser Technik: {drill}",
+  "@learningAfter": {"placeholders": {"drill": {"type": "String"}}},
+  "learningKeepPractising": "Übe diese Technik weiter. Markiere sie als sicher, wenn du sie kontrolliert wiederholen kannst, um im Lernpfad weiterzugehen.",
+  "learningPractiseLast": "Dies ist die letzte Technik deines Lernpfads. Übe weiter und markiere sie als sicher, sobald du bereit bist."
 }

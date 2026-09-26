@@ -16,6 +16,10 @@ class DrillProgressStore extends ChangeNotifier {
   final Map<String, DrillProgress> _progress = {};
   final Set<String> _bookmarks = {};
   bool _loaded = false;
+  DrillDiscipline? _discipline;
+
+  DrillDiscipline? get discipline => _discipline;
+  Map<String, DrillProgress> get progress => Map.unmodifiable(_progress);
 
   bool get isLoaded => _loaded;
 
@@ -33,6 +37,9 @@ class DrillProgressStore extends ChangeNotifier {
       final raw = prefs.getString(_key);
       if (raw != null) {
         final json = jsonDecode(raw) as Map<String, dynamic>;
+        _discipline = DrillDiscipline.values
+            .where((d) => d.name == json['discipline'])
+            .firstOrNull;
         final progress = json['progress'] as Map<String, dynamic>? ?? {};
         for (final entry in progress.entries) {
           final value = DrillProgress.values
@@ -62,6 +69,12 @@ class DrillProgressStore extends ChangeNotifier {
     await _save();
   }
 
+  Future<void> selectDiscipline(DrillDiscipline discipline) async {
+    _discipline = discipline;
+    notifyListeners();
+    await _save();
+  }
+
   Future<void> toggleBookmark(String drillId) async {
     if (!_bookmarks.remove(drillId)) _bookmarks.add(drillId);
     notifyListeners();
@@ -78,6 +91,7 @@ class DrillProgressStore extends ChangeNotifier {
             for (final e in _progress.entries) e.key: e.value.name,
           },
           'bookmarks': _bookmarks.toList(),
+          if (_discipline != null) 'discipline': _discipline!.name,
         }),
       );
     } catch (_) {

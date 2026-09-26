@@ -1,5 +1,31 @@
 # Fighter Edge — Claude Code Handoff
 
+## UI task slice F: beginner learning paths (2026-09-26)
+
+- Four pure Dart ordered paths cover all 17 drills. Each begins with the free
+  starter for its discipline. Recommendations stay on the first unfinished
+  prerequisite until it is marked Sharp. A free account pauses at its first Pro
+  drill; the existing entitlement gate still controls access.
+- Train > Drills starts with a discipline choice saved in the account's existing
+  local drill store. The hero shows stage, sharp count, thin progress bar and
+  one Learn action; a locked step shows a quiet Pro route. The full library
+  remains below. Drill detail names the following step after Drilled/Sharp.
+- New path copy is in EN/DE ARBs and generated localizations. At 200% text,
+  detail progress controls stack at full width. Hero actions have independent
+  screen-reader semantics; the progress indicator no longer absorbs Learn.
+- Verified: 690 non-golden tests (679 before, 11 added), format/analyzer clean,
+  three unchanged goldens. New file learning_path.dart has 20/20 instrumented
+  lines covered (100%). Widget tests cover choice, Sharp advancement, free Pro
+  lock/paywall without unlocking, and 320px/200% detail layout.
+- Offline browser: F-*.png in C:/Users/Mahdi/Downloads/FighterEdge-ui-evidence/.
+  Chooser, active path, locked path and drill detail were captured at
+  390x844/320x568 plus actual 200% text; paywall was captured at 200%.
+  Paywall return stayed locked; final fresh browser navigations showed no app
+  console errors.
+- Not verified: real devices, iOS, release builds, Firebase or purchases.
+  Android integration (updated in slice E) still needs CI device execution.
+  No backend, rules, billing or package changes. No push or PR.
+
 ## UI task slice E: grouped rows, copy and tokens (2026-09-26)
 
 - Shared GroupedList/GroupedRow now serve Profile, Settings, dashboard activity

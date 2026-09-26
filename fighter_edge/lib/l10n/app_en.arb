@@ -526,5 +526,34 @@
         "type": "int"
       }
     }
-  }
+  },
+  "learningStart": "Start here",
+  "learningChoose": "Choose a discipline",
+  "learningChooseHint": "We will remember your choice on this account. You can change it any time.",
+  "learningChange": "Change path",
+  "learningStriking": "Striking",
+  "learningWrestling": "Wrestling",
+  "learningBjj": "BJJ",
+  "learningClinch": "Clinch",
+  "learningStrikingHint": "Learn punches, defence and kicks in order.",
+  "learningWrestlingHint": "Build your stance, then learn to take someone down and defend a takedown.",
+  "learningBjjHint": "Brazilian jiu-jitsu: learn to move and escape when training on the ground.",
+  "learningClinchHint": "Learn close-range holds, knees and control while standing.",
+  "learningFoundations": "Foundations",
+  "learningBuilding": "Building",
+  "learningSharp": "Sharp",
+  "learningCount": "{completed} of {total} drills sharp",
+  "@learningCount": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "learningLearn": "Learn: {drill}",
+  "@learningLearn": {"placeholders": {"drill": {"type": "String"}}},
+  "learningLocked": "Pro drill · path paused",
+  "learningViewPro": "View Pro options",
+  "learningComplete": "Path complete",
+  "learningCompleteHint": "Keep practising these drills, or choose another discipline.",
+  "learningProgressHint": "Sharp means you can repeat the drill with control.",
+  "learningNext": "Next in your path",
+  "learningAfter": "After this drill: {drill}",
+  "@learningAfter": {"placeholders": {"drill": {"type": "String"}}},
+  "learningKeepPractising": "Keep practising this drill. Mark it Sharp when you can repeat it with control to advance your path.",
+  "learningPractiseLast": "This is the last drill in your path. Keep practising, then mark it Sharp when you are ready."
 }

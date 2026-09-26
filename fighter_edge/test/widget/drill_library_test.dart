@@ -5,12 +5,16 @@ import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/screens/drill_library_screen.dart';
 import 'package:fighter_edge/screens/paywall_screen.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
+import 'package:fighter_edge/training/drills/drill.dart';
+import 'package:fighter_edge/training/drills/drill_progress_store.dart';
 
 import '../helpers/test_harness.dart';
 
 void main() {
   Future<void> pumpLibrary(WidgetTester tester, Plan plan) async {
     final repo = await makeRepo(signedIn: true, plan: plan);
+    await DrillProgressStore(userId: repo.currentUser!.id)
+        .selectDiscipline(DrillDiscipline.striking);
     await tester.pumpWidget(wrapApp(
       const Scaffold(body: DrillLibraryScreen()),
       repo: repo,
@@ -24,7 +28,7 @@ void main() {
         'sticks', (tester) async {
       await pumpLibrary(tester, Plan.free);
 
-      await tester.tap(find.text('The Jab'));
+      await tester.tap(find.text('Learn: The Jab'));
       await tester.pumpAndSettle();
       expect(find.text('Key points'), findsOneWidget);
       expect(find.text('Common mistakes'), findsOneWidget);
@@ -41,6 +45,8 @@ void main() {
       await tester.tapAt(const Offset(10, 10)); // dismiss the sheet
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(find.text('Drilled'), 200,
+          scrollable: find.byType(Scrollable).first);
       expect(find.text('Drilled'), findsOneWidget,
           reason: 'the card shows the saved progress');
     });
@@ -50,7 +56,7 @@ void main() {
       await pumpLibrary(tester, Plan.free);
 
       await tester.scrollUntilVisible(find.text('The 1-2'), 200,
-          scrollable: find.byType(Scrollable).last);
+          scrollable: find.byType(Scrollable).first);
       await tester.tap(find.text('The 1-2'));
       await tester.pumpAndSettle();
       expect(find.text('Key points'), findsNothing,
@@ -61,6 +67,8 @@ void main() {
     testWidgets('Pro opens every drill', (tester) async {
       await pumpLibrary(tester, Plan.pro);
 
+      await tester.scrollUntilVisible(find.text('The 1-2'), 200,
+          scrollable: find.byType(Scrollable).first);
       await tester.tap(find.text('The 1-2'));
       await tester.pumpAndSettle();
       expect(find.text('Key points'), findsOneWidget);
@@ -69,6 +77,7 @@ void main() {
     testWidgets('the Saved filter explains itself when empty', (tester) async {
       await pumpLibrary(tester, Plan.free);
 
+      await tester.ensureVisible(find.text('Saved'));
       await tester.tap(find.text('Saved'));
       await tester.pumpAndSettle();
       expect(find.text('No saved drills yet'), findsOneWidget);
@@ -79,6 +88,9 @@ void main() {
       await pumpLibrary(tester, Plan.pro);
 
       expect(find.text('Explore technique paths'), findsOneWidget);
+      await tester.scrollUntilVisible(
+          find.byKey(const ValueKey('training-system-striking')), 200,
+          scrollable: find.byType(Scrollable).first);
       await tester.tap(
         find.byKey(const ValueKey('training-system-striking')),
       );
@@ -108,6 +120,9 @@ void main() {
       });
 
       await pumpLibrary(tester, Plan.pro);
+      await tester.scrollUntilVisible(
+          find.byKey(const ValueKey('training-system-striking')), 200,
+          scrollable: find.byType(Scrollable).first);
       await tester.tap(
         find.byKey(const ValueKey('training-system-striking')),
       );

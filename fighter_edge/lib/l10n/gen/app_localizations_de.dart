@@ -1054,4 +1054,97 @@ class LDe extends L {
   String fuelMealsLogged(int eaten, int total) {
     return 'Mahlzeiten erfasst · $eaten/$total';
   }
+
+  @override
+  String get learningStart => 'Hier starten';
+
+  @override
+  String get learningChoose => 'Wähle eine Disziplin';
+
+  @override
+  String get learningChooseHint =>
+      'Wir speichern deine Wahl für dieses Konto. Du kannst sie jederzeit ändern.';
+
+  @override
+  String get learningChange => 'Lernpfad wechseln';
+
+  @override
+  String get learningStriking => 'Schlagtechniken';
+
+  @override
+  String get learningWrestling => 'Ringen';
+
+  @override
+  String get learningBjj => 'BJJ';
+
+  @override
+  String get learningClinch => 'Clinch';
+
+  @override
+  String get learningStrikingHint =>
+      'Lerne Schläge, Abwehr und Tritte Schritt für Schritt.';
+
+  @override
+  String get learningWrestlingHint =>
+      'Übe deinen Stand, dann lerne, jemanden zu Boden zu bringen und das selbst abzuwehren.';
+
+  @override
+  String get learningBjjHint =>
+      'Brasilianisches Jiu-Jitsu: Lerne, dich am Boden zu bewegen und zu befreien.';
+
+  @override
+  String get learningClinchHint =>
+      'Lerne Haltegriffe, Kniestöße und Kontrolle im engen Standkampf.';
+
+  @override
+  String get learningFoundations => 'Grundlagen';
+
+  @override
+  String get learningBuilding => 'Aufbau';
+
+  @override
+  String get learningSharp => 'Sicher';
+
+  @override
+  String learningCount(int completed, int total) {
+    return '$completed von $total Techniken sicher';
+  }
+
+  @override
+  String learningLearn(String drill) {
+    return 'Lernen: $drill';
+  }
+
+  @override
+  String get learningLocked => 'Pro-Technik · Lernpfad pausiert';
+
+  @override
+  String get learningViewPro => 'Pro-Optionen ansehen';
+
+  @override
+  String get learningComplete => 'Lernpfad abgeschlossen';
+
+  @override
+  String get learningCompleteHint =>
+      'Übe diese Techniken weiter oder wähle eine andere Disziplin.';
+
+  @override
+  String get learningProgressHint =>
+      'Sicher bedeutet, dass du die Technik kontrolliert wiederholen kannst.';
+
+  @override
+  String get learningNext => 'Als Nächstes in deinem Lernpfad';
+
+  @override
+  String learningAfter(String drill) {
+    return 'Nach dieser Technik: $drill';
+  }
+
+  @override
+  String get learningKeepPractising =>
+      'Übe diese Technik weiter. Markiere sie als sicher, wenn du sie kontrolliert wiederholen kannst, um im Lernpfad weiterzugehen.';
+
+  @override
+  String get learningPractiseLast =>
+      'Dies ist die letzte Technik deines Lernpfads. Übe weiter und markiere sie als sicher, sobald du bereit bist.';
 }

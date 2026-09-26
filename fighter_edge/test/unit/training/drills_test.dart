@@ -63,6 +63,21 @@ void main() {
       expect(otherAccount.isBookmarked('sprawl'), isFalse);
     });
 
+    test('remembers the selected path per account', () async {
+      final first = DrillProgressStore(userId: 'first');
+      await first.load();
+      expect(first.discipline, isNull);
+      await first.selectDiscipline(DrillDiscipline.bjj);
+      final restored = DrillProgressStore(userId: 'first');
+      await restored.load();
+      expect(restored.discipline, DrillDiscipline.bjj);
+      final other = DrillProgressStore(userId: 'second');
+      await other.load();
+      expect(other.discipline, isNull);
+      await restored.selectDiscipline(DrillDiscipline.wrestling);
+      expect(restored.discipline, DrillDiscipline.wrestling);
+    });
+
     test('counts sharp drills and clears back to none', () async {
       final store = DrillProgressStore(userId: 'a');
       await store.load();

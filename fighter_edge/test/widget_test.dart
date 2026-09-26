@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/main.dart';
@@ -44,7 +45,10 @@ void main() {
 
     await tester.tap(find.text('Drills'));
     await tester.pumpAndSettle();
-    expect(find.text('The Jab'), findsOneWidget);
+    expect(find.text('Choose a discipline'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('choose-path-striking')));
+    await tester.pumpAndSettle();
+    expect(find.text('Learn: The Jab'), findsOneWidget);
 
     await tester.tap(find.text('Fuel'));
     await tester.pumpAndSettle();

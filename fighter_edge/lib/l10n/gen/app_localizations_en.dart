@@ -1049,4 +1049,97 @@ class LEn extends L {
   String fuelMealsLogged(int eaten, int total) {
     return 'Meals logged · $eaten/$total';
   }
+
+  @override
+  String get learningStart => 'Start here';
+
+  @override
+  String get learningChoose => 'Choose a discipline';
+
+  @override
+  String get learningChooseHint =>
+      'We will remember your choice on this account. You can change it any time.';
+
+  @override
+  String get learningChange => 'Change path';
+
+  @override
+  String get learningStriking => 'Striking';
+
+  @override
+  String get learningWrestling => 'Wrestling';
+
+  @override
+  String get learningBjj => 'BJJ';
+
+  @override
+  String get learningClinch => 'Clinch';
+
+  @override
+  String get learningStrikingHint =>
+      'Learn punches, defence and kicks in order.';
+
+  @override
+  String get learningWrestlingHint =>
+      'Build your stance, then learn to take someone down and defend a takedown.';
+
+  @override
+  String get learningBjjHint =>
+      'Brazilian jiu-jitsu: learn to move and escape when training on the ground.';
+
+  @override
+  String get learningClinchHint =>
+      'Learn close-range holds, knees and control while standing.';
+
+  @override
+  String get learningFoundations => 'Foundations';
+
+  @override
+  String get learningBuilding => 'Building';
+
+  @override
+  String get learningSharp => 'Sharp';
+
+  @override
+  String learningCount(int completed, int total) {
+    return '$completed of $total drills sharp';
+  }
+
+  @override
+  String learningLearn(String drill) {
+    return 'Learn: $drill';
+  }
+
+  @override
+  String get learningLocked => 'Pro drill · path paused';
+
+  @override
+  String get learningViewPro => 'View Pro options';
+
+  @override
+  String get learningComplete => 'Path complete';
+
+  @override
+  String get learningCompleteHint =>
+      'Keep practising these drills, or choose another discipline.';
+
+  @override
+  String get learningProgressHint =>
+      'Sharp means you can repeat the drill with control.';
+
+  @override
+  String get learningNext => 'Next in your path';
+
+  @override
+  String learningAfter(String drill) {
+    return 'After this drill: $drill';
+  }
+
+  @override
+  String get learningKeepPractising =>
+      'Keep practising this drill. Mark it Sharp when you can repeat it with control to advance your path.';
+
+  @override
+  String get learningPractiseLast =>
+      'This is the last drill in your path. Keep practising, then mark it Sharp when you are ready.';
 }

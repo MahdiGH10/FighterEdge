@@ -130,6 +130,9 @@ subtraction.
 ## Proposed slices (one per session)
 
 **Status:** slice 1 done 2026-09-26 (see CLAUDE_CODE_HANDOFF.md).
+Task slice F done 2026-09-26: four ordered beginner drill paths, per-account
+discipline choice, next-step detail guidance and retained Pro locks. 690 tests,
+100% instrumented lines on learning_path.dart, three unchanged goldens.
 Task slice E (audit slice 5) done 2026-09-26: shared grouped rows, official
 Google asset, sentence-case copy and remaining UI tokens; 679 tests, three
 reviewed updated goldens. Owner must replace the watermarked login image.
