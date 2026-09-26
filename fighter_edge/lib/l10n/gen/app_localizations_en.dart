@@ -948,4 +948,59 @@ class LEn extends L {
   String trainingStartSession(String session) {
     return 'Start $session';
   }
+
+  @override
+  String get onboardingBack => 'Back';
+
+  @override
+  String onboardingStep(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String onboardingSummary(int days, String level, String goal) {
+    return '$days days a week · $level · $goal';
+  }
+
+  @override
+  String get onboardingLoseFat => 'Lose fat';
+
+  @override
+  String get onboardingMaintain => 'Maintain weight';
+
+  @override
+  String get onboardingGainMuscle => 'Gain muscle';
+
+  @override
+  String get onboardingBeginner => 'Beginner';
+
+  @override
+  String get onboardingIntermediate => 'Intermediate';
+
+  @override
+  String get onboardingAdvanced => 'Advanced';
+
+  @override
+  String get onboardingFighter => 'Fighter';
+
+  @override
+  String get welcomeProgressTitle => 'See your progress.';
+
+  @override
+  String get planReadyExplanation =>
+      'Your plan is based on your goals and training days. You can adjust it as your training changes.';
+
+  @override
+  String get planReadyProTitle => 'More training tools with Pro';
+
+  @override
+  String get planReadyProBody =>
+      'Pro includes a daily Fighter Brief, all drills and recipes, and cues between rounds.';
+
+  @override
+  String get planReadyCalories => 'Daily calories';
+
+  @override
+  String get planReadyMissingTarget =>
+      'Your training week is ready. Add body details in Fuel to calculate a daily target.';
 }

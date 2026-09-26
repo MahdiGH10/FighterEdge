@@ -952,4 +952,59 @@ class LDe extends L {
   String trainingStartSession(String session) {
     return '$session starten';
   }
+
+  @override
+  String get onboardingBack => 'Zurück';
+
+  @override
+  String onboardingStep(int current, int total) {
+    return 'Schritt $current von $total';
+  }
+
+  @override
+  String onboardingSummary(int days, String level, String goal) {
+    return '$days Tage pro Woche · $level · $goal';
+  }
+
+  @override
+  String get onboardingLoseFat => 'Fett verlieren';
+
+  @override
+  String get onboardingMaintain => 'Gewicht halten';
+
+  @override
+  String get onboardingGainMuscle => 'Muskeln aufbauen';
+
+  @override
+  String get onboardingBeginner => 'Anfänger';
+
+  @override
+  String get onboardingIntermediate => 'Fortgeschritten';
+
+  @override
+  String get onboardingAdvanced => 'Erfahren';
+
+  @override
+  String get onboardingFighter => 'Wettkämpfer';
+
+  @override
+  String get welcomeProgressTitle => 'Sieh deine Fortschritte.';
+
+  @override
+  String get planReadyExplanation =>
+      'Dein Plan richtet sich nach deinen Zielen und Trainingstagen. Du kannst ihn anpassen, wenn sich dein Training ändert.';
+
+  @override
+  String get planReadyProTitle => 'Weitere Trainingshilfen mit Pro';
+
+  @override
+  String get planReadyProBody =>
+      'Pro enthält einen täglichen Fighter Brief, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.';
+
+  @override
+  String get planReadyCalories => 'Tägliche Kalorien';
+
+  @override
+  String get planReadyMissingTarget =>
+      'Deine Trainingswoche steht. Ergänze deine Körperdaten unter Fuel, um ein Tagesziel zu berechnen.';
 }

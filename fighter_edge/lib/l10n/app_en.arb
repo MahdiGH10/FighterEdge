@@ -450,5 +450,44 @@
         "type": "String"
       }
     }
+  },
+  "onboardingBack": "Back",
+  "onboardingStep": "Step {current} of {total}",
+  "onboardingSummary": "{days} days a week · {level} · {goal}",
+  "onboardingLoseFat": "Lose fat",
+  "onboardingMaintain": "Maintain weight",
+  "onboardingGainMuscle": "Gain muscle",
+  "onboardingBeginner": "Beginner",
+  "onboardingIntermediate": "Intermediate",
+  "onboardingAdvanced": "Advanced",
+  "onboardingFighter": "Fighter",
+  "welcomeProgressTitle": "See your progress.",
+  "planReadyExplanation": "Your plan is based on your goals and training days. You can adjust it as your training changes.",
+  "planReadyProTitle": "More training tools with Pro",
+  "planReadyProBody": "Pro includes a daily Fighter Brief, all drills and recipes, and cues between rounds.",
+  "planReadyCalories": "Daily calories",
+  "planReadyMissingTarget": "Your training week is ready. Add body details in Fuel to calculate a daily target.",
+  "@onboardingStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@onboardingSummary": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "level": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
   }
 }

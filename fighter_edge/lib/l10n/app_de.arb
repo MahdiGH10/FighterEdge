@@ -392,5 +392,44 @@
         "type": "String"
       }
     }
+  },
+  "onboardingBack": "Zurück",
+  "onboardingStep": "Schritt {current} von {total}",
+  "onboardingSummary": "{days} Tage pro Woche · {level} · {goal}",
+  "onboardingLoseFat": "Fett verlieren",
+  "onboardingMaintain": "Gewicht halten",
+  "onboardingGainMuscle": "Muskeln aufbauen",
+  "onboardingBeginner": "Anfänger",
+  "onboardingIntermediate": "Fortgeschritten",
+  "onboardingAdvanced": "Erfahren",
+  "onboardingFighter": "Wettkämpfer",
+  "welcomeProgressTitle": "Sieh deine Fortschritte.",
+  "planReadyExplanation": "Dein Plan richtet sich nach deinen Zielen und Trainingstagen. Du kannst ihn anpassen, wenn sich dein Training ändert.",
+  "planReadyProTitle": "Weitere Trainingshilfen mit Pro",
+  "planReadyProBody": "Pro enthält einen täglichen Fighter Brief, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.",
+  "planReadyCalories": "Tägliche Kalorien",
+  "planReadyMissingTarget": "Deine Trainingswoche steht. Ergänze deine Körperdaten unter Fuel, um ein Tagesziel zu berechnen.",
+  "@onboardingStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@onboardingSummary": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "level": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
   }
 }

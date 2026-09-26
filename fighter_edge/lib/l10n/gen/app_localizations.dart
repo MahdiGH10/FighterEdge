@@ -1722,6 +1722,102 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Start {session}'**
   String trainingStartSession(String session);
+
+  /// No description provided for @onboardingBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get onboardingBack;
+
+  /// No description provided for @onboardingStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String onboardingStep(int current, int total);
+
+  /// No description provided for @onboardingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days a week · {level} · {goal}'**
+  String onboardingSummary(int days, String level, String goal);
+
+  /// No description provided for @onboardingLoseFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Lose fat'**
+  String get onboardingLoseFat;
+
+  /// No description provided for @onboardingMaintain.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintain weight'**
+  String get onboardingMaintain;
+
+  /// No description provided for @onboardingGainMuscle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gain muscle'**
+  String get onboardingGainMuscle;
+
+  /// No description provided for @onboardingBeginner.
+  ///
+  /// In en, this message translates to:
+  /// **'Beginner'**
+  String get onboardingBeginner;
+
+  /// No description provided for @onboardingIntermediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Intermediate'**
+  String get onboardingIntermediate;
+
+  /// No description provided for @onboardingAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get onboardingAdvanced;
+
+  /// No description provided for @onboardingFighter.
+  ///
+  /// In en, this message translates to:
+  /// **'Fighter'**
+  String get onboardingFighter;
+
+  /// No description provided for @welcomeProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See your progress.'**
+  String get welcomeProgressTitle;
+
+  /// No description provided for @planReadyExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan is based on your goals and training days. You can adjust it as your training changes.'**
+  String get planReadyExplanation;
+
+  /// No description provided for @planReadyProTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'More training tools with Pro'**
+  String get planReadyProTitle;
+
+  /// No description provided for @planReadyProBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro includes a daily Fighter Brief, all drills and recipes, and cues between rounds.'**
+  String get planReadyProBody;
+
+  /// No description provided for @planReadyCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily calories'**
+  String get planReadyCalories;
+
+  /// No description provided for @planReadyMissingTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Your training week is ready. Add body details in Fuel to calculate a daily target.'**
+  String get planReadyMissingTarget;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

@@ -48,7 +48,7 @@ void main() {
     expect(find.text('Fuel that matches the work.'), findsOneWidget);
     await tester.tap(find.text('CONTINUE'));
     await tester.pumpAndSettle();
-    expect(find.text('Watch the edge build.'), findsOneWidget);
+    expect(find.text('See your progress.'), findsOneWidget);
     await tester.tap(find.text('BUILD MY PLAN'));
     await tester.pumpAndSettle();
 

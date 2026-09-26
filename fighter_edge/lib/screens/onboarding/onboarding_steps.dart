@@ -310,14 +310,12 @@ class _SummaryRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: Insets.sm),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.primary, size: 20),
-          const SizedBox(width: Insets.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  label.toUpperCase(),
+                  label,
                   style: AppType.micro(
                     color: AppColors.textMuted,
                     weight: FontWeight.w800,

@@ -64,7 +64,7 @@ void main() {
     await _tapVisible(tester, find.text('CONTINUE'));
     expect(find.text('Fuel that matches the work.'), findsOneWidget);
     await _tapVisible(tester, find.text('CONTINUE'));
-    expect(find.text('Watch the edge build.'), findsOneWidget);
+    expect(find.text('See your progress.'), findsOneWidget);
     await _tapVisible(tester, find.text('BUILD MY PLAN'));
 
     // 4. Explicit consent comes before the first question about the body

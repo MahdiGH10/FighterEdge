@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_accessibility.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_haptics.dart';
 import '../../theme/app_theme.dart';
@@ -55,7 +56,7 @@ const _pages = [
   ),
   _WelcomePage(
     icon: Icons.trending_up,
-    title: 'Watch the edge build.',
+    title: '', // Localized by the page view.
     body: 'Streaks, your weight trend and session history show progress '
         'week over week — not just today.',
     proof: ['Streaks', 'Weight trend', 'History'],
@@ -103,8 +104,12 @@ class _WelcomePagesState extends State<WelcomePages> {
               children: [
                 Row(
                   children: [
-                    const BrandLogo(scale: .7),
-                    const Spacer(),
+                    Expanded(
+                        child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: _page == 0
+                                ? const BrandLogo(scale: .7)
+                                : const SizedBox.shrink())),
                     // Hidden on the last page, where the primary button
                     // already does the same thing.
                     if (!_isLast)
@@ -136,6 +141,7 @@ class _WelcomePagesState extends State<WelcomePages> {
                     },
                     itemBuilder: (context, i) => _WelcomePageView(
                       page: _pages[i],
+                      number: i + 1,
                       // Keyed on activation so the entrance replays each time
                       // a page arrives, instead of only on first build.
                       key: ValueKey('welcome-$i-${i == _page}'),
@@ -168,7 +174,8 @@ class _WelcomePagesState extends State<WelcomePages> {
 
 class _WelcomePageView extends StatelessWidget {
   final _WelcomePage page;
-  const _WelcomePageView({super.key, required this.page});
+  final int number;
+  const _WelcomePageView({super.key, required this.page, required this.number});
 
   @override
   Widget build(BuildContext context) {
@@ -180,11 +187,17 @@ class _WelcomePageView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PremiumReveal(child: _Emblem(icon: page.icon)),
+              ExcludeSemantics(
+                  child: Text('0$number',
+                      style: AppType.heroNumeral(color: AppColors.textMuted))),
               const SizedBox(height: Insets.xxl),
               PremiumReveal(
                 index: 1,
-                child: Text(page.title, style: AppType.largeTitle()),
+                child: Text(
+                    number == 3
+                        ? L.of(context).welcomeProgressTitle
+                        : page.title,
+                    style: AppType.largeTitle()),
               ),
               const SizedBox(height: Insets.md),
               PremiumReveal(
@@ -214,57 +227,12 @@ class _WelcomePageView extends StatelessWidget {
   }
 }
 
-/// The page's one image: an icon in a lit ring. Deliberately not an
-/// illustration — the product's own numbers are the visuals later on, and a
-/// stock illustration here would promise a different app.
-class _Emblem extends StatelessWidget {
-  final IconData icon;
-  const _Emblem({required this.icon});
-
-  static const double _size = 96;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: _size,
-      height: _size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.primarySoft,
-        border: Border.all(color: AppColors.primary, width: 1.5),
-        boxShadow: const [
-          BoxShadow(color: AppColors.primaryGlow, blurRadius: 36),
-        ],
-      ),
-      child: Icon(icon, color: AppColors.primaryBright, size: _size / 2.4),
-    );
-  }
-}
-
 class _ProofChip extends StatelessWidget {
   final String label;
   const _ProofChip({required this.label});
-
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: Insets.md, vertical: Insets.xs + Insets.xxs),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceAlt,
-        borderRadius: BorderRadius.circular(Radii.chip),
-        border: Border.all(color: AppAccessibility.border(context)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.check, size: 14, color: AppColors.positive),
-          const SizedBox(width: Insets.xs),
-          Text(label, style: AppType.subhead(weight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      Text(label, style: AppType.subhead(color: AppColors.textSecondary));
 }
 
 class _PageDots extends StatelessWidget {

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../features/edge_fuel/domain/models/nutrition_enums.dart';
-import '../../features/edge_fuel/presentation/nutrition_copy.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../theme/app_accessibility.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/press_scale.dart';
-import '../../widgets/stat_card.dart';
 
 class OnboardingProgressHeader extends StatelessWidget {
   final int step;
@@ -22,7 +21,7 @@ class OnboardingProgressHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Step $current of $stepCount',
+          L.of(context).onboardingStep(current, stepCount),
           style: AppType.micro(color: AppColors.textMuted),
         ),
         const SizedBox(height: Insets.sm),
@@ -30,7 +29,7 @@ class OnboardingProgressHeader extends StatelessWidget {
           borderRadius: BorderRadius.circular(Radii.chip),
           child: LinearProgressIndicator(
             value: current / stepCount,
-            minHeight: 6,
+            minHeight: Insets.xs,
             backgroundColor: AppColors.surfaceElevated,
             color: AppColors.primary,
           ),
@@ -41,14 +40,12 @@ class OnboardingProgressHeader extends StatelessWidget {
 }
 
 class QuestionStep extends StatelessWidget {
-  final String eyebrow;
   final String title;
   final String subtitle;
   final Widget child;
 
   const QuestionStep({
     super.key,
-    required this.eyebrow,
     required this.title,
     required this.subtitle,
     required this.child,
@@ -56,27 +53,15 @@ class QuestionStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            eyebrow.toUpperCase(),
-            style: AppType.micro(
-              weight: FontWeight.w800,
-              color: AppColors.primary,
-              spacing: 1,
-            ),
-          ),
-          const SizedBox(height: Insets.sm),
-          Text(title, style: AppType.title1()),
-          const SizedBox(height: Insets.sm),
-          Text(subtitle,
-              style: AppType.callout(color: AppColors.textSecondary)),
-          const SizedBox(height: Insets.xl),
-          child,
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: AppType.title1()),
+        const SizedBox(height: Insets.sm),
+        Text(subtitle, style: AppType.callout(color: AppColors.textSecondary)),
+        const SizedBox(height: Insets.xl),
+        child,
+      ],
     );
   }
 }
@@ -143,54 +128,36 @@ class SelectCard<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = value == selected;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.sm),
-      child: AppCard(
+    return Semantics(
+      selected: active,
+      button: true,
+      child: PressScale(
         onTap: () => onSelected(value),
-        padding: const EdgeInsets.all(Insets.md),
-        accent: active ? AppColors.primary : null,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: active ? AppColors.primarySoft : AppColors.surface,
-                borderRadius: BorderRadius.circular(Radii.tile),
-                border: Border.all(
-                  color: active ? AppColors.primary : AppColors.border,
-                ),
-              ),
-              child: Icon(
-                icon,
-                color: active ? AppColors.primary : AppColors.textMuted,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: Insets.md),
-            Expanded(
-              child: Column(
+        child: Container(
+          constraints:
+              const BoxConstraints(minHeight: AppAccessibility.minTouchTarget),
+          padding: const EdgeInsets.symmetric(vertical: Insets.lg),
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: AppColors.border)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                  child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: AppType.callout(weight: FontWeight.w800)),
                   const SizedBox(height: Insets.xxs),
-                  Text(
-                    description,
-                    style: AppType.subhead(
-                      weight: FontWeight.w500,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
+                  Text(description,
+                      style: AppType.subhead(color: AppColors.textSecondary)),
                 ],
-              ),
-            ),
-            const SizedBox(width: Insets.sm),
-            Icon(
-              active ? Icons.check_circle : Icons.circle_outlined,
-              color: active ? AppColors.primary : AppColors.textMuted,
-            ),
-          ],
+              )),
+              const SizedBox(width: Insets.sm),
+              Icon(active ? Icons.check_circle : Icons.circle_outlined,
+                  color: active ? AppColors.accentText : AppColors.textMuted),
+            ],
+          ),
         ),
       ),
     );
@@ -285,27 +252,24 @@ class PlanPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(Radii.tile),
-            ),
-            child: const Icon(Icons.auto_graph, color: AppColors.primary),
-          ),
-          const SizedBox(width: Insets.md),
-          Expanded(
-            child: Text(
-              '$days-day $level camp - ${NutritionCopy.goalLabel(nutritionGoal)} - $campGoal',
-              style: AppType.subhead(weight: FontWeight.w800),
-            ),
-          ),
-        ],
-      ),
+    final l = L.of(context);
+    return Text(
+      l.onboardingSummary(
+          days, onboardingLevel(l, level), onboardingGoal(l, nutritionGoal)),
+      style: AppType.subhead(color: AppColors.textSecondary),
     );
   }
 }
+
+String onboardingGoal(L l, NutritionGoal goal) => switch (goal) {
+      NutritionGoal.loseFat => l.onboardingLoseFat,
+      NutritionGoal.maintain => l.onboardingMaintain,
+      NutritionGoal.gainMuscle => l.onboardingGainMuscle,
+    };
+
+String onboardingLevel(L l, String level) => switch (level) {
+      'Intermediate' => l.onboardingIntermediate,
+      'Advanced' => l.onboardingAdvanced,
+      'Fighter' => l.onboardingFighter,
+      _ => l.onboardingBeginner,
+    };

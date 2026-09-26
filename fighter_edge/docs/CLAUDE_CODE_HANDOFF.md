@@ -1,5 +1,22 @@
 # Fighter Edge — Claude Code Handoff
 
+## UI task slice D: onboarding hierarchy (2026-09-26)
+
+- Logo/tagline appear only on welcome page one. Calm numerals replace the
+  welcome glow hero. Questions have a progress header and back chevron,
+  plain selectable rows/chips and a localized one-line plan summary.
+- Plan ready puts Open dashboard before a quieter Pro offer. Calories/macros
+  share one surface with equal macro columns (stacked at large text). Removed
+  decorative summary icons and the grammatical enum interpolation.
+- Verified: format/analyzer clean, 675 tests (671 before, 4 added), 3 unchanged
+  goldens. New tests cover retained choices after Back and the plan action at
+  320px with 100%/200% text. Full journey remains covered.
+- Browser: all three welcome pages, seven questions and plan ready captured at
+  390x844 and 320x568, plus actual 200% text. D-*.png in the external evidence
+  folder noted below. Full local onboarding completed; no app console errors.
+- Android integration copy finders updated; CI must re-run the device flow.
+  Real devices, iOS, release builds, Firebase and billing are not verified.
+
 ## UI task slice C: Fuel and Train (2026-09-26)
 
 - Fuel now has one calorie ring (remaining calories with a target, logged

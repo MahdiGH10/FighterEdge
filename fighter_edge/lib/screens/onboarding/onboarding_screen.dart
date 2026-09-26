@@ -18,7 +18,7 @@ import '../../state/first_run_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_typography.dart';
-import '../../widgets/brand_logo.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../widgets/premium_effects.dart';
 import '../../widgets/press_scale.dart';
 import '../../widgets/primary_button.dart';
@@ -142,15 +142,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: AppBackground(
         child: SafeArea(
           child: ListView(
-            padding:
-                const EdgeInsets.fromLTRB(Insets.lg, Insets.lg, Insets.lg, 36),
+            padding: const EdgeInsets.fromLTRB(
+                Insets.lg, Insets.lg, Insets.lg, Insets.xxxl),
             children: [
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: BrandLogo(scale: .7),
+              Row(
+                children: [
+                  if (_step > 0) ...[
+                    IconButton(
+                      tooltip: L.of(context).onboardingBack,
+                      onPressed: auth.isBusy ? null : _back,
+                      icon: const Icon(Icons.chevron_left),
+                    ),
+                    const SizedBox(width: Insets.sm),
+                  ],
+                  Expanded(
+                      child: OnboardingProgressHeader(
+                          step: _step, stepCount: _stepCount)),
+                ],
               ),
-              const SizedBox(height: Insets.xl),
-              OnboardingProgressHeader(step: _step, stepCount: _stepCount),
               const SizedBox(height: Insets.xxl),
               AnimatedSwitcher(
                 duration: MediaQuery.disableAnimationsOf(context)
@@ -160,7 +169,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 switchOutCurve: MotionTokens.snap,
                 child: QuestionStep(
                   key: ValueKey(_step),
-                  eyebrow: step.eyebrow,
                   title: step.title,
                   subtitle: step.subtitle,
                   child: step.child,
@@ -184,14 +192,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 expand: true,
                 onPressed: auth.isBusy ? null : _continue,
               ),
-              if (_step > 0) ...[
-                const SizedBox(height: Insets.sm),
-                GhostButton(
-                  'Back',
-                  expand: true,
-                  onPressed: auth.isBusy ? null : _back,
-                ),
-              ],
               const SizedBox(height: Insets.md),
               PressScale(
                 onTap: auth.isBusy ? null : _skipDetailedNutrition,
