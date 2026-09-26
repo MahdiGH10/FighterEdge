@@ -130,7 +130,13 @@ void main() {
     // 10. Sign out from Profile -> back to login.
     await _tapVisible(
         tester, find.byIcon(Icons.chevron_left)); // Paywall -> Profile.
-    await _tapVisible(tester, find.byType(GhostButton));
+    // The "Pro is active" snackbar covers the bottom of the screen for a few
+    // seconds; on the CI emulator's 320x640 screen that is where Sign out
+    // lands, so a tap right away hits the snackbar. Also, the paywall has
+    // GhostButtons of its own: name the one this step means.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.widgetWithText(GhostButton, 'Sign out'));
 
     expect(find.text('Welcome back'), findsOneWidget);
   });
