@@ -20,6 +20,9 @@ import 'package:fighter_edge/features/edge_fuel/data/food_catalog_repository.dar
 import 'package:fighter_edge/features/edge_fuel/data/recipe_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import 'package:fighter_edge/features/fight_camp/data/fight_camp_repository.dart';
+import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
+import 'package:fighter_edge/features/fight_camp/presentation/fight_camp_controller.dart';
 import 'package:fighter_edge/notifications/reminder_gateway.dart';
 import 'package:fighter_edge/notifications/unavailable_reminder_gateway.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
@@ -93,8 +96,10 @@ Widget wrapApp(
   CoachVoice? coachVoice,
   Telemetry telemetry = const NoopTelemetry(),
   ConsentController? consent,
+  FightCampRepository? fightCampRepo,
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
+  final resolvedFightCampRepo = fightCampRepo ?? InMemoryFightCampRepository();
   final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
   // Widget tests have no asset bundle, so the catalogs default to reading the
   // real JSON off disk. Tests get the shipped content unless they pass a fake.
@@ -137,6 +142,13 @@ Widget wrapApp(
             StreakController(clock: () => context.read<AppState>().now),
         update: (context, auth, streak) => (streak ??
             StreakController(clock: () => context.read<AppState>().now))
+          ..setUser(auth.user?.id),
+      ),
+      Provider<FightCampRepository>.value(value: resolvedFightCampRepo),
+      ChangeNotifierProxyProvider<AuthController, FightCampController>(
+        create: (_) => FightCampController(repository: resolvedFightCampRepo),
+        update: (_, auth, controller) => (controller ??
+            FightCampController(repository: resolvedFightCampRepo))
           ..setUser(auth.user?.id),
       ),
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
