@@ -58,6 +58,12 @@ class LayoutTokens {
   static const double quantityColumn = 64;
   static const double stepperValue = 56;
   static const double servingLabel = 26;
+
+  /// Recipe photos: the list thumbnail's width, and the detail hero's
+  /// width-to-height ratio.
+  static const double recipeThumbnail = 96;
+  static const double recipeHeroAspectRatio = 16 / 10;
+
   static const double brandMark = 58;
   static const double brandStroke = 7;
   static const double brandSlash = 48;

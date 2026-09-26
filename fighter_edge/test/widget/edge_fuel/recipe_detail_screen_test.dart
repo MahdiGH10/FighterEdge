@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:fighter_edge/features/edge_fuel/data/asset_food_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/asset_recipe_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/data/recipe_photos.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/calculators/recipe_nutrient_calculator.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_item.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/recipe_library_controller.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/recipe_detail_screen.dart';
+import 'package:fighter_edge/features/edge_fuel/presentation/widgets/recipe_card.dart';
 import 'package:fighter_edge/widgets/press_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -74,6 +76,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await _scrollTo(tester, find.text('Ingredients'));
     expect(find.text('Ingredients'), findsOneWidget);
     await _scrollTo(tester, find.text('Method'));
     expect(find.text('Method'), findsOneWidget);
@@ -95,6 +98,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await _scrollTo(tester, find.text('1 serving'));
     expect(find.text('1 serving'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('More servings'));
@@ -117,6 +121,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await _scrollTo(tester, find.bySemanticsLabel('Fewer servings'));
     await tester.tap(find.bySemanticsLabel('Fewer servings'));
     await tester.pumpAndSettle();
     expect(find.text('0.5 servings'), findsOneWidget);
@@ -154,6 +159,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await _scrollTo(tester, find.bySemanticsLabel('More servings'));
     await tester.tap(find.bySemanticsLabel('More servings'));
     await tester.pumpAndSettle();
     await _scrollTo(tester, find.text('Add to today'));
@@ -200,6 +206,11 @@ void main() {
     // worse than none.
     final (listing, foods) = await _listing('three-egg-veg-scramble');
     final repo = await makeRepo(signedIn: true);
+    // Tall enough for the stepper and the ingredient rows below the photo to
+    // be on screen together.
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
       wrapApp(
@@ -254,5 +265,61 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: recipe.id);
     }
+  });
+
+  testWidgets('leads with the recipe photo and credits it as a link', (
+    tester,
+  ) async {
+    final (listing, foods) = await _listing('three-egg-veg-scramble');
+    final repo = await makeRepo(signedIn: true);
+    final photo = recipePhotoFor('three-egg-veg-scramble')!;
+
+    await tester.pumpWidget(
+      wrapApp(
+        RecipeDetailScreen(listing: listing, foodsById: foods),
+        repo: repo,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final image = tester.widget<Image>(find.byType(Image).first);
+    expect((image.image as ResizeImage).imageProvider,
+        isA<AssetImage>().having((a) => a.assetName, 'asset', photo.assetPath));
+    expect(find.text(photo.credit), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp('^Photo by ${RegExp.escape(photo.author)}')),
+      findsOneWidget,
+    );
+    final credit = tester.getSize(find.ancestor(
+      of: find.text(photo.credit),
+      matching: find.byType(InkWell),
+    ));
+    expect(credit.height, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('the library card leads with a thumbnail', (tester) async {
+    final (listing, _) = await _listing('spiced-chicken-rice-bowl');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            children: [RecipeCard(listing: listing, onTap: () {})],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final image = tester.widget<Image>(find.byType(Image));
+    expect(
+      (image.image as ResizeImage).imageProvider,
+      isA<AssetImage>().having(
+        (a) => a.assetName,
+        'asset',
+        'assets/images/recipes/spiced-chicken-rice-bowl.webp',
+      ),
+    );
+    expect(image.excludeFromSemantics, isTrue);
   });
 }

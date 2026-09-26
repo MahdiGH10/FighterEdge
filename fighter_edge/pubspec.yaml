@@ -74,6 +74,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/login_background.webp
+    - assets/images/recipes/
     - assets/images/google_g.png
     - assets/data/
   fonts:

@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../billing/subscription.dart';
 import '../../../../routing/app_navigation.dart';
 import '../../../../routing/app_router.dart';
 import '../../../../screens/paywall_screen.dart';
+import '../../../../theme/app_accessibility.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_haptics.dart';
 import '../../../../theme/app_theme.dart';
@@ -18,10 +20,12 @@ import '../../domain/models/food_enums.dart';
 import '../../domain/models/food_item.dart';
 import '../../domain/models/food_log_entry.dart';
 import '../../domain/models/recipe.dart';
+import '../../data/recipe_photos.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../controllers/recipe_library_controller.dart';
 import '../recipe_copy.dart';
 import '../widgets/allergen_notice.dart';
+import '../widgets/recipe_photo_image.dart';
 import '../widgets/serving_stepper.dart';
 
 /// Full recipe view with serving scaling and add-to-day (master prompt §5.3).
@@ -79,6 +83,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         padding: const EdgeInsets.fromLTRB(
             Insets.lg, Insets.none, Insets.lg, Insets.xxl),
         children: [
+          if (recipePhotoFor(recipe.id) case final photo?) ...[
+            _RecipeHero(photo: photo),
+            const SizedBox(height: Insets.lg),
+          ],
           Text(
             recipe.description,
             style: AppType.callout(color: AppColors.textSecondary),
@@ -508,4 +516,75 @@ class _Provenance extends StatelessWidget {
         RecipeCopy.draftNotice,
         style: AppType.subhead(color: AppColors.textMuted),
       );
+}
+
+/// The recipe photo with its credit. CC BY requires crediting the author and
+/// licence; tapping the credit opens the photo's own page, which shows both.
+class _RecipeHero extends StatelessWidget {
+  final RecipePhoto photo;
+  const _RecipeHero({required this.photo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(Radii.card),
+          child: AspectRatio(
+            aspectRatio: LayoutTokens.recipeHeroAspectRatio,
+            child: LayoutBuilder(
+              builder: (context, constraints) =>
+                  RecipePhotoImage(photo, displayWidth: constraints.maxWidth),
+            ),
+          ),
+        ),
+        Semantics(
+          link: true,
+          label: 'Photo by ${photo.author}, ${photo.license}. '
+              'Opens the photo page.',
+          excludeSemantics: true,
+          child: InkWell(
+            onTap: () => _openSource(),
+            borderRadius: BorderRadius.circular(Radii.tile),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: AppAccessibility.minTouchTarget,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.photo_camera_outlined,
+                    size: IconSizes.small,
+                    color: AppAccessibility.textMuted(context),
+                  ),
+                  const SizedBox(width: Insets.xs),
+                  Expanded(
+                    child: Text(
+                      photo.credit,
+                      style: AppType.subhead(
+                        color: AppAccessibility.textMuted(context),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _openSource() async {
+    AppHaptics.tap();
+    try {
+      await launchUrl(
+        Uri.parse(photo.sourceUrl),
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (_) {
+      // No browser available: the credit stays visible on screen.
+    }
+  }
 }
