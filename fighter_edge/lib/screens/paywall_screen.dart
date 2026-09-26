@@ -182,14 +182,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
       title: 'FighterEdge Pro',
       showBack: true,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, Insets.xxl),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.xl, Insets.none, Insets.xl, Insets.xxl),
         children: [
           const SizedBox(height: Insets.sm),
-          Text('Unlock your full edge',
+          Text(L.of(context).paywallPlainTitle,
               textAlign: TextAlign.center, style: AppType.title1()),
           const SizedBox(height: Insets.xs),
-          Text(
-              'Sharper coaching, the full drill library, and fuel decisions that make sense.',
+          Text(L.of(context).paywallPlainSubtitle,
               textAlign: TextAlign.center,
               style: AppType.subhead(color: AppColors.textSecondary)),
           const SizedBox(height: Insets.xl),
@@ -217,7 +217,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     style: AppType.title2(color: AppColors.positive)),
                 const SizedBox(height: Insets.lg),
                 GhostButton(
-                  'Refresh Status',
+                  'Refresh status',
                   icon: Icons.refresh,
                   onPressed: auth.isBusy ? null : auth.refreshCurrentUser,
                 ),
@@ -239,7 +239,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   )
                 else
                   GhostButton(
-                    _monthlyLabel(product),
+                    L.of(context).paywallMonthly(product.priceString),
                     icon: Icons.lock_open,
                     expand: true,
                     onPressed: auth.isBusy ? null : () => _purchase(product),
@@ -350,9 +350,6 @@ class _LegalLinksRow extends StatelessWidget {
   }
 }
 
-String _monthlyLabel(BillingProduct product) =>
-    'Monthly - ${product.priceString}';
-
 String? _monthlyEquivalent(BillingProduct product) {
   final price = product.price;
   if (price == null || !price.isFinite || price <= 0) return null;
@@ -419,7 +416,7 @@ class _AnnualPlanOption extends StatelessWidget {
                   borderRadius: BorderRadius.circular(Radii.chip),
                 ),
                 child: Text(
-                  'BEST VALUE',
+                  'Best value',
                   style: AppType.micro(
                     color: AppColors.premium,
                     weight: FontWeight.w900,
@@ -580,7 +577,7 @@ class _LaunchTermsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'FOUNDING PRO PREVIEW',
+            'Founding Pro preview',
             style: AppType.micro(
               weight: FontWeight.w900,
               color: AppColors.premium,
@@ -639,8 +636,8 @@ class _BillingLoadingNotice extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            width: 18,
-            height: 18,
+            width: IconSizes.inline,
+            height: IconSizes.inline,
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
           SizedBox(width: Insets.md),

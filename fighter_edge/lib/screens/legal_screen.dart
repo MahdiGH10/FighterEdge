@@ -42,7 +42,8 @@ class LegalScreen extends StatelessWidget {
       title: document.title,
       showBack: true,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, Insets.xxl),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.xl, Insets.none, Insets.xl, Insets.xxl),
         children: [
           const SizedBox(height: Insets.sm),
           Text(

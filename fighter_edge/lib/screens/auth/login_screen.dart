@@ -1,3 +1,4 @@
+import '../../theme/app_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -171,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: Insets.sm),
                       PrimaryButton(
-                        auth.isBusy ? 'Signing in…' : 'Sign In',
+                        auth.isBusy ? 'Signing in…' : 'Sign in',
                         expand: true,
                         onPressed: auth.isBusy ? null : _signIn,
                       ),
@@ -181,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: Insets.xl),
                         if (auth.supportsGoogle) ...[
                           SocialButton(
-                            icon: Icons.g_mobiledata,
+                            google: true,
                             label: 'Continue with Google',
                             onPressed: auth.isBusy
                                 ? null
@@ -214,8 +215,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                       ],
                       const SizedBox(height: Insets.xl),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text("New here? ",
                               style: AppType.subhead(
@@ -226,10 +228,16 @@ class _LoginScreenState extends State<LoginScreen> {
                               AppRoutes.signup,
                               fallbackBuilder: (_) => const SignupScreen(),
                             ),
-                            child: Text('Create account',
-                                style: AppType.subhead(
-                                    weight: FontWeight.w700,
-                                    color: AppColors.accentText)),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                  minHeight: AppAccessibility.minTouchTarget),
+                              child: Center(
+                                  widthFactor: 1,
+                                  child: Text('Create account',
+                                      style: AppType.subhead(
+                                          weight: FontWeight.w700,
+                                          color: AppColors.accentText))),
+                            ),
                           ),
                         ],
                       ),

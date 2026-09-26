@@ -126,7 +126,7 @@ void main() {
       await tester.enterText(field('Grams'), '2500');
       await tester.pumpAndSettle();
       expect(find.text('Up to 2000 g per entry.'), findsOneWidget);
-      await tester.tap(find.text('ADD TO TODAY'));
+      await tester.tap(find.text('Add to today'));
       await tester.pumpAndSettle();
       expect(fuel.entries, isEmpty,
           reason: 'what is on screen must equal what would be logged');
@@ -134,7 +134,7 @@ void main() {
       await tester.enterText(field('Grams'), '1500');
       await tester.pumpAndSettle();
       expect(find.text('Up to 2000 g per entry.'), findsNothing);
-      await tester.tap(find.text('ADD TO TODAY'));
+      await tester.tap(find.text('Add to today'));
       await tester.pumpAndSettle();
       expect(fuel.entries.single.notes, '1500 g');
     });

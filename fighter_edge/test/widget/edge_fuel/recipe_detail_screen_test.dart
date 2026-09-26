@@ -74,11 +74,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('INGREDIENTS'), findsOneWidget);
-    await _scrollTo(tester, find.text('METHOD'));
-    expect(find.text('METHOD'), findsOneWidget);
-    await _scrollTo(tester, find.text('ALLERGENS'));
-    expect(find.text('ALLERGENS'), findsOneWidget);
+    expect(find.text('Ingredients'), findsOneWidget);
+    await _scrollTo(tester, find.text('Method'));
+    expect(find.text('Method'), findsOneWidget);
+    await _scrollTo(tester, find.text('Allergens'));
+    expect(find.text('Allergens'), findsOneWidget);
     expect(find.textContaining('Eggs'), findsWidgets);
   });
 
@@ -156,8 +156,8 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('More servings'));
     await tester.pumpAndSettle();
-    await _scrollTo(tester, find.text('ADD TO TODAY'));
-    await tester.tap(find.text('ADD TO TODAY'));
+    await _scrollTo(tester, find.text('Add to today'));
+    await tester.tap(find.text('Add to today'));
     await tester.pumpAndSettle();
 
     final userId = repo.currentUser!.id;
@@ -189,7 +189,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await _scrollTo(tester, find.text('ALLERGENS'));
+    await _scrollTo(tester, find.text('Allergens'));
     expect(find.textContaining('which you told us to avoid'), findsOneWidget);
   });
 

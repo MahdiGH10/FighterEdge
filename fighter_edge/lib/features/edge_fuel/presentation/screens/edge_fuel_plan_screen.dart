@@ -104,7 +104,7 @@ class _PlanBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'DAILY TARGET',
+                'Daily target',
                 style: AppType.micro(
                   weight: FontWeight.w700,
                   color: AppColors.textMuted,
@@ -139,7 +139,7 @@ class _PlanBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'HOW THIS WAS CALCULATED',
+                'How this was calculated',
                 style: AppType.micro(
                   weight: FontWeight.w700,
                   color: AppColors.textMuted,
@@ -195,7 +195,7 @@ class _PlanBody extends StatelessWidget {
                 const SizedBox(height: Insets.sm),
                 for (final code in target.warnings)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: Insets.xs),
                     child: Text(
                       '• ${NutritionCopy.warning(code)}',
                       style: AppType.subhead(color: AppColors.textSecondary),
@@ -311,7 +311,7 @@ class _FighterBriefPreviewSectionState
               const SizedBox(width: Insets.sm),
               Expanded(
                 child: Text(
-                  'FIGHTER BRIEF',
+                  'Fighter Brief',
                   style: AppType.micro(
                     weight: FontWeight.w800,
                     color: AppColors.textMuted,
@@ -321,7 +321,7 @@ class _FighterBriefPreviewSectionState
               ),
               if (!isPro)
                 Text(
-                  'FREE PREVIEW',
+                  'Free preview',
                   style: AppType.micro(
                     weight: FontWeight.w800,
                     color: AppColors.premium,
@@ -460,7 +460,7 @@ class _MacroChip extends StatelessWidget {
             const SizedBox(height: Insets.xs),
             Text('${grams ?? 0} g', style: AppType.title2()),
             Text(
-              label.toUpperCase(),
+              label,
               style: AppType.micro(
                 weight: FontWeight.w700,
                 color: AppColors.textMuted,

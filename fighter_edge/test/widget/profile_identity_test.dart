@@ -100,14 +100,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Sessions Completed'), findsOneWidget);
+      expect(find.text('Sessions completed'), findsOneWidget);
       expect(find.text('${state.completedSessionCount}'), findsWidgets);
       final streakDays = StreakEngine.streakDays(
           StreakEngine.completedDateKeys(state.sessions),
           now: state.now);
       expect(find.text('$streakDays days'), findsOneWidget);
       // Straight from the onboarding answer, not a constant.
-      expect(find.text('Training Days / Week'), findsOneWidget);
+      expect(find.text('Training days / week'), findsOneWidget);
       expect(find.text('6'), findsOneWidget);
     });
   });
@@ -144,7 +144,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // The demo seed's completed slots (mock_data.dart).
-      expect(find.text('SESSION HISTORY'), findsOneWidget);
+      expect(find.text('Session history'), findsOneWidget);
       expect(find.text('Striking'), findsOneWidget);
       expect(find.text('Wrestling'), findsOneWidget);
       expect(find.text('Conditioning'), findsOneWidget);

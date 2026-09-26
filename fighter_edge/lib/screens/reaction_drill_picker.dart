@@ -126,7 +126,8 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
     final l = L.of(context);
     final spec = _spec;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
       children: [
         PremiumReveal(
           index: 0,

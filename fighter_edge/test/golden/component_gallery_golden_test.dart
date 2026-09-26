@@ -36,14 +36,15 @@ void main() {
     required double textScale,
   }) async {
     final binding = TestWidgetsFlutterBinding.instance;
-    binding.platformDispatcher.views.first.physicalSize = const Size(390, 1700);
+    final size = Size(390, textScale > 1 ? 2200 : 1700);
+    binding.platformDispatcher.views.first.physicalSize = size;
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.dark(),
         debugShowCheckedModeBanner: false,
         home: MediaQuery(
           data: MediaQueryData(
-            size: const Size(390, 1700),
+            size: size,
             textScaler: TextScaler.linear(textScale),
             disableAnimations: true,
           ),

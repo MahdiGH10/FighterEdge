@@ -20,7 +20,7 @@ class _SkeletonState extends State<Skeleton>
     with SingleTickerProviderStateMixin {
   late final AnimationController _pulse = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1100),
+    duration: MotionTokens.loadingPulse,
   );
 
   @override
@@ -50,7 +50,7 @@ class _SkeletonState extends State<Skeleton>
       excludeSemantics: true,
       child: FadeTransition(
         opacity: Tween<double>(begin: .45, end: 1).animate(
-          CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+          CurvedAnimation(parent: _pulse, curve: MotionTokens.pulse),
         ),
         child: widget.child,
       ),

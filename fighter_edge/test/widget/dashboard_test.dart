@@ -41,7 +41,7 @@ void main() {
     ));
     await tester.pump();
 
-    state.addWeight(wednesday.add(const Duration(days: 30)), 75.0);
+    state.addWeight(state.weights.last.date.add(const Duration(days: 1)), 75.0);
     await tester.pumpAndSettle(MotionTokens.standard);
     expect(find.text('75.0'), findsWidgets);
   });
@@ -71,7 +71,7 @@ void main() {
     expect(find.textContaining('Calories support'), findsOneWidget);
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('START SESSION'));
+    await tester.tap(find.text('Start session'));
     await tester.pumpAndSettle();
     expect(
         tester
@@ -134,8 +134,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('RESEND EMAIL'), findsOneWidget);
-    await tester.tap(find.text('RESEND EMAIL'));
+    expect(find.text('Resend email'), findsOneWidget);
+    await tester.tap(find.text('Resend email'));
     await tester.pump();
 
     expect(repo.verificationSent, isTrue);
@@ -212,7 +212,7 @@ void main() {
       expect(find.text('Streak at risk'), findsOneWidget);
       expect(find.textContaining('(1 left)'), findsOneWidget);
 
-      await tester.tap(find.text('FREEZE'));
+      await tester.tap(find.text('Freeze'));
       await tester.pumpAndSettle();
 
       expect(find.text('Streak at risk'), findsNothing);
@@ -236,9 +236,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Streak at risk'), findsOneWidget);
-      expect(find.text('FREEZE'), findsNothing);
+      expect(find.text('Freeze'), findsNothing);
 
-      await tester.tap(find.text('LOG NOW'));
+      await tester.tap(find.text('Log now'));
       await tester.pump();
       expect(navigatedTo, 1); // Train tab, where sessions are completed
     });

@@ -7,7 +7,7 @@ import 'package:fighter_edge/routing/app_router.dart';
 import 'package:fighter_edge/screens/home_shell.dart';
 import 'package:fighter_edge/screens/settings_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
-import 'package:fighter_edge/widgets/stat_card.dart';
+import 'package:fighter_edge/widgets/grouped_list.dart';
 import 'package:provider/provider.dart';
 
 import '../helpers/test_harness.dart';
@@ -30,7 +30,7 @@ void main() {
   Finder remindersSwitch() => find.descendant(
         of: find.ancestor(
           of: find.text('Camp reminders'),
-          matching: find.byType(AppCard),
+          matching: find.byType(GroupedRow),
         ),
         matching: find.byType(Switch),
       );

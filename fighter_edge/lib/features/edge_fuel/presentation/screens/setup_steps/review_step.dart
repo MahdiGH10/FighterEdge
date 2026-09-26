@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../theme/app_colors.dart';
+import '../../../../../theme/app_accessibility.dart';
 import '../../../../../theme/app_theme.dart';
 import '../../../../../theme/app_typography.dart';
 import '../../../../../widgets/primary_button.dart';
@@ -99,7 +100,7 @@ class _ReviewSuccess extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('DAILY TARGET',
+              Text('Daily target',
                   style: AppType.micro(
                       weight: FontWeight.w700,
                       color: AppColors.textMuted,
@@ -130,7 +131,7 @@ class _ReviewSuccess extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('ASSUMPTIONS',
+              Text('Assumptions',
                   style: AppType.micro(
                       weight: FontWeight.w700,
                       color: AppColors.textMuted,
@@ -176,7 +177,7 @@ class _ReviewSuccess extends StatelessWidget {
                 const SizedBox(height: Insets.sm),
                 for (final code in target.warnings)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: Insets.xs),
                     child: Text('• ${NutritionCopy.warning(code)}',
                         style: AppType.subhead(color: AppColors.textSecondary)),
                   ),
@@ -224,7 +225,7 @@ class _MacroChip extends StatelessWidget {
             ),
             const SizedBox(height: Insets.xs),
             Text('${grams ?? 0} g', style: AppType.title2()),
-            Text(label.toUpperCase(),
+            Text(label,
                 style: AppType.micro(
                     weight: FontWeight.w700, color: AppColors.textMuted)),
           ],
@@ -241,17 +242,22 @@ class _Assumption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final labelText = Text(label,
+        style: AppType.subhead(
+            weight: FontWeight.w500, color: AppColors.textSecondary));
+    final valueText =
+        Text(value, style: AppType.subhead(weight: FontWeight.w700));
     return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.xs),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: AppType.subhead(
-                  weight: FontWeight.w500, color: AppColors.textSecondary)),
-          Text(value, style: AppType.subhead(weight: FontWeight.w700)),
-        ],
-      ),
+      padding: const EdgeInsets.only(bottom: Insets.sm),
+      child: AppAccessibility.isLargeText(context)
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [labelText, valueText])
+          : Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Expanded(child: labelText),
+              const SizedBox(width: Insets.sm),
+              Flexible(child: valueText),
+            ]),
     );
   }
 }

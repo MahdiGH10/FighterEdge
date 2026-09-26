@@ -180,7 +180,7 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
             if (!_savedOnly) ...[
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: Insets.lg),
-                child: _SectionLabel('EXPLORE TECHNIQUE PATHS'),
+                child: _SectionLabel('Explore technique paths'),
               ),
               _TechniquePathRail(
                 selectedSystem: _selectedSystem,
@@ -239,7 +239,7 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(
-                          Insets.lg, 0, Insets.lg, Insets.xxl),
+                          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
                       itemCount: visible.length,
                       itemBuilder: (_, i) {
                         final drill = visible[i];
@@ -303,8 +303,8 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
       builder: (sheetContext) => SafeArea(
         top: false,
         child: Padding(
-          padding:
-              const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, Insets.xl),
+          padding: const EdgeInsets.fromLTRB(
+              Insets.xl, Insets.none, Insets.xl, Insets.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,7 +414,7 @@ class _TechniqueSystemCard extends StatelessWidget {
         ? Icons.sports_mma_outlined
         : Icons.sports_kabaddi_outlined;
     return SizedBox(
-      width: 216,
+      width: LayoutTokens.featuredDrillCard,
       child: Semantics(
         button: true,
         label: '${system.title}, $categoryCount technique paths',
@@ -474,7 +474,7 @@ class _TechniqueCategoryCard extends StatelessWidget {
         : '$writtenDrillCount written ${writtenDrillCount == 1 ? 'drill' : 'drills'}';
     final secondary = AppAccessibility.textSecondary(context);
     return SizedBox(
-      width: 188,
+      width: LayoutTokens.recentDrillCard,
       child: Semantics(
         button: true,
         selected: selected,
@@ -853,7 +853,8 @@ class _DrillDetail extends StatelessWidget {
     final secondary = AppAccessibility.textSecondary(context);
     return ListView(
       controller: controller,
-      padding: const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.xl, Insets.none, Insets.xl, Insets.xxl),
       children: [
         _DrillMeta(drill: drill),
         const SizedBox(height: Insets.xs),
@@ -861,11 +862,11 @@ class _DrillDetail extends StatelessWidget {
         const SizedBox(height: Insets.sm),
         Text(drill.summary, style: AppType.body(color: secondary)),
         const SizedBox(height: Insets.xl),
-        const _SectionLabel('KEY POINTS'),
+        const _SectionLabel('Key points'),
         for (var i = 0; i < drill.keyPoints.length; i++)
           _NumberedPoint(number: i + 1, text: drill.keyPoints[i]),
         const SizedBox(height: Insets.lg),
-        const _SectionLabel('COMMON MISTAKES'),
+        const _SectionLabel('Common mistakes'),
         for (final mistake in drill.commonMistakes)
           _MistakePoint(text: mistake),
         const SizedBox(height: Insets.lg),
@@ -873,13 +874,13 @@ class _DrillDetail extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _SectionLabel('HOW TO DRILL IT'),
+              const _SectionLabel('How to drill it'),
               Text(drill.prescription, style: AppType.callout()),
             ],
           ),
         ),
         const SizedBox(height: Insets.xl),
-        const _SectionLabel('WHERE ARE YOU WITH IT?'),
+        const _SectionLabel('Where are you with it?'),
         Row(
           children: [
             for (final p in const [

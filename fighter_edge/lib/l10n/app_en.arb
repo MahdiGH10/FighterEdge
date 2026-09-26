@@ -25,7 +25,7 @@
   "settingsUpgradePro": "Upgrade to Pro",
   "settingsManageProSubtitle": "Refresh status and manage billing once connected",
   "settingsUpgradeProSubtitle": "AI Fighter Brief, full drill and recipe libraries, corner cues",
-  "settingsSectionTraining": "Training Preferences",
+  "settingsSectionTraining": "Training preferences",
   "settingsMetricUnits": "Metric units",
   "settingsMetricUnitsKg": "Weights show in kg",
   "settingsMetricUnitsLb": "Weights show in lb",
@@ -38,7 +38,7 @@
     "placeholders": { "time": { "type": "String" } }
   },
   "settingsCampRemindersOff": "Get a nudge on the days you train",
-  "settingsSectionSafety": "Safety & Trust",
+  "settingsSectionSafety": "Safety & trust",
   "settingsSafeCut": "Safe cut guidance",
   "settingsSafeCutSubtitle": "Show hydration and non-medical weight-cut reminders",
   "settingsTrustNote": "Fighter Edge guides training and nutrition decisions. It does not replace a coach, doctor, or licensed nutrition professional.",
@@ -54,8 +54,8 @@
   "settingsDeleteAccountSubtitle": "Permanently erase your account and all of your data",
 
   "dashboardTitle": "Dashboard",
-  "dashboardWeeklyOverview": "Weekly Overview",
-  "dashboardNextSession": "Next Session",
+  "dashboardWeeklyOverview": "Weekly overview",
+  "dashboardNextSession": "Next session",
   "dashboardRecentActivity": "Recent activity",
   "dashboardSeeAll": "See all",
   "dashboardStatWeight": "Weight",
@@ -71,7 +71,7 @@
   "dashboardStreakOnFire": "On fire",
   "dashboardStreakLogToday": "Log today",
 
-  "fuelWeekTitle": "FUEL THIS WEEK",
+  "fuelWeekTitle": "Fuel this week",
   "fuelWeekLogged": "{count}/7 logged",
   "@fuelWeekLogged": {
     "placeholders": { "count": { "type": "int" } }
@@ -116,14 +116,14 @@
   "@addFoodTitle": {
     "placeholders": { "day": { "type": "String" } }
   },
-  "addFoodSaved": "SAVED",
-  "addFoodRecent": "RECENT",
+  "addFoodSaved": "Saved",
+  "addFoodRecent": "Recent",
   "addFoodManual": "Enter macros manually",
   "addFoodManualSubtitle": "For a meal out, a label, or anything not listed",
   "addFoodEmptyHint": "Search the food list and pick how much you had — the macros work themselves out. Foods you log show up here next time, one tap away.",
   "addFoodNotFound": "Not in the food list yet",
   "addFoodNotFoundHint": "Try a simpler word (\"rice\", \"chicken\"), or enter the macros yourself below.",
-  "addFoodHowMuch": "HOW MUCH?",
+  "addFoodHowMuch": "How much?",
   "addFoodGrams": "Grams",
   "addFoodAddTo": "Add to {day}",
   "@addFoodAddTo": {
@@ -158,7 +158,7 @@
   "@timerNext": {
     "placeholders": { "label": { "type": "String" } }
   },
-  "timerYourCorner": "YOUR CORNER",
+  "timerYourCorner": "Your corner",
   "timerCornerTeaser": "Pro puts a corner in your rest: a cue for the next round.",
   "timerNextSessionComplete": "Session complete",
   "timerNextFinalRound": "Final round",
@@ -245,9 +245,9 @@
   "reactionLevelIntermediate": "Intermediate",
   "reactionLevelAdvanced": "Advanced",
   "reactionLevelAdvancedPlus": "Advanced+",
-  "reactionStatDuration": "DURATION",
-  "reactionStatMoves": "MOVES",
-  "reactionStatReact": "REACTION",
+  "reactionStatDuration": "Duration",
+  "reactionStatMoves": "Moves",
+  "reactionStatReact": "Reaction",
   "reactionInTheMix": "IN THE MIX · {count}",
   "@reactionInTheMix": {
     "placeholders": { "count": { "type": "int" } }
@@ -487,6 +487,43 @@
       },
       "goal": {
         "type": "String"
+      }
+    }
+  },
+  "profileFreePlan": "Free plan",
+  "profileProActive": "Pro subscription active",
+  "profileProDescription": "Daily brief, all drills and recipes",
+  "profileUpgrade": "Upgrade",
+  "profileManage": "Manage",
+  "settingsProPlan": "Pro",
+  "settingsFreePlan": "Free",
+  "dashboardEffort": "Effort {rating}/10",
+  "paywallPlainTitle": "Training tools with Pro",
+  "paywallPlainSubtitle": "Daily coaching, every drill and recipe, and cues between rounds.",
+  "fuelRecipesTitle": "Recipes for your day",
+  "@dashboardEffort": {
+    "placeholders": {
+      "rating": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallMonthly": "Monthly · {price}",
+  "fuelMealsLogged": "Meals logged · {eaten}/{total}",
+  "@paywallMonthly": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "@fuelMealsLogged": {
+    "placeholders": {
+      "eaten": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
       }
     }
   }

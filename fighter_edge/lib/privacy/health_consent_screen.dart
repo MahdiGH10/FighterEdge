@@ -147,7 +147,7 @@ class _Point extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: last ? 0 : Insets.md),
+      padding: EdgeInsets.only(bottom: last ? Insets.none : Insets.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

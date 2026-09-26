@@ -234,8 +234,8 @@ class _WaitingView extends StatelessWidget {
         Row(
           children: [
             const SizedBox(
-              width: 16,
-              height: 16,
+              width: Insets.lg,
+              height: Insets.lg,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation(AppColors.textMuted),

@@ -43,52 +43,52 @@ void main() {
 
     // The value pages come before any questions.
     expect(find.text('Your camp, organised.'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
+    await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
     expect(find.text('Fuel that matches the work.'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
+    await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
     expect(find.text('See your progress.'), findsOneWidget);
-    await tester.tap(find.text('BUILD MY PLAN'));
+    await tester.tap(find.text('Build my plan'));
     await tester.pumpAndSettle();
 
     // Explicit consent comes before the first question about the body.
     expect(find.text('Your body data, your call'), findsOneWidget);
     expect(repo.currentUser!.hasHealthDataConsent, isFalse);
-    await tester.tap(find.text('I AGREE'));
+    await tester.tap(find.text('I agree'));
     await tester.pumpAndSettle();
     expect(repo.currentUser!.hasHealthDataConsent, isTrue);
 
     // First-run setup creates a clean personal starting point.
     expect(find.text('What should Fighter Edge build first?'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
+    await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
     expect(find.text('What should EdgeFuel optimize for?'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
+    await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
     expect(find.text('Tell us your starting point.'), findsOneWidget);
     await tester.enterText(find.byType(TextField).at(0), '28');
     await tester.enterText(find.byType(TextField).at(1), '178');
     await tester.enterText(find.byType(TextField).at(2), '77.2');
-    await tester.tap(find.text('CONTINUE'));
+    await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
     expect(find.text('Which formula fits your body?'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
+    await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
     expect(find.text('Outside the gym, how active are you?'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
+    await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
     expect(find.text('How many days can you train?'), findsOneWidget);
-    await tester.tap(find.text('CONTINUE'));
+    await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
     expect(find.text('Your first plan is ready.'), findsOneWidget);
-    await tester.tap(find.text('START MY PLAN'));
+    await tester.tap(find.text('Start my plan'));
     await tester.pumpAndSettle();
 
     // Activation moment: the saved target is explained before entering the app.
     expect(find.text('Your first Fighter Edge plan is ready'), findsOneWidget);
     expect(find.textContaining('kcal'), findsWidgets);
-    await tester.tap(find.text('OPEN DASHBOARD'));
+    await tester.tap(find.text('Open dashboard'));
     await tester.pumpAndSettle();
 
     // Dashboard, with the first-week checklist a new account starts with.
@@ -102,9 +102,9 @@ void main() {
       navRect.center.dy,
     ));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('UPGRADE'));
+    await tester.tap(find.text('Upgrade'));
     await tester.pumpAndSettle();
-    expect(find.text('Unlock your full edge'), findsOneWidget);
+    expect(find.text('Training tools with Pro'), findsOneWidget);
 
     // Billing is not wired yet: the CTA records interest honestly and must
     // not grant Pro from the client or pretend to be a checkout.

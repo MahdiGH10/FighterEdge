@@ -34,11 +34,11 @@ void main() {
           alignment: .5);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Improve technique'));
-      await tester.scrollUntilVisible(find.text('CONTINUE'), 250);
-      await Scrollable.ensureVisible(tester.element(find.text('CONTINUE')),
+      await tester.scrollUntilVisible(find.text('Continue'), 250);
+      await Scrollable.ensureVisible(tester.element(find.text('Continue')),
           alignment: .5);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('CONTINUE'));
+      await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(find.byTooltip('Back'), -250);
       await tester.pumpAndSettle();
@@ -84,8 +84,8 @@ void main() {
           repo: repo));
       await tester.pumpAndSettle();
       expect(find.byType(BrandLogo), findsNothing);
-      await tester.scrollUntilVisible(find.text('OPEN DASHBOARD'), 250);
-      final actionY = tester.getTopLeft(find.text('OPEN DASHBOARD')).dy;
+      await tester.scrollUntilVisible(find.text('Open dashboard'), 250);
+      final actionY = tester.getTopLeft(find.text('Open dashboard')).dy;
       if (find.text('More training tools with Pro').evaluate().isNotEmpty) {
         expect(
             actionY,
@@ -94,10 +94,10 @@ void main() {
                 .dy));
       }
       await Scrollable.ensureVisible(
-          tester.element(find.text('OPEN DASHBOARD')),
+          tester.element(find.text('Open dashboard')),
           alignment: .5);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('OPEN DASHBOARD'));
+      await tester.tap(find.text('Open dashboard'));
       await tester.pump();
       expect(opened, isTrue);
       await tester.scrollUntilVisible(find.text('See Pro options'), 250);

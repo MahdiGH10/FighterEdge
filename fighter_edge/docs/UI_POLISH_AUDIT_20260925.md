@@ -130,6 +130,9 @@ subtraction.
 ## Proposed slices (one per session)
 
 **Status:** slice 1 done 2026-09-26 (see CLAUDE_CODE_HANDOFF.md).
+Task slice E (audit slice 5) done 2026-09-26: shared grouped rows, official
+Google asset, sentence-case copy and remaining UI tokens; 679 tests, three
+reviewed updated goldens. Owner must replace the watermarked login image.
 Task slice D (audit slice 4) done 2026-09-26: quiet welcome, progress/back
 header, plain options/summary and dashboard-first plan ready; 675 tests pass.
 Task slice C (audit slice 3) done 2026-09-26: one Fuel hero, segmented tabs,

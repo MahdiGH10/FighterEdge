@@ -37,14 +37,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Talk to your coach'), findsOneWidget);
-      expect(find.text('GET TODAY\'S FIGHTER BRIEF'), findsOneWidget);
-      await tester.tap(find.text('GET TODAY\'S FIGHTER BRIEF').first);
+      expect(find.text('Get today\'s Fighter Brief'), findsOneWidget);
+      await tester.tap(find.text('Get today\'s Fighter Brief').first);
       await tester.pumpAndSettle();
 
-      expect(find.text('NEXT ACTION'), findsOneWidget);
-      expect(find.text('MEAL SUGGESTION'), findsOneWidget);
-      expect(find.text('TRAINING TIMING'), findsOneWidget);
-      expect(find.text('WEEKLY ADJUSTMENT'), findsOneWidget);
+      expect(find.text('Next action'), findsOneWidget);
+      expect(find.text('Meal suggestion'), findsOneWidget);
+      expect(find.text('Training timing'), findsOneWidget);
+      expect(find.text('Weekly adjustment'), findsOneWidget);
     });
 
     testWidgets('keeps a follow-up question in the same conversation',
@@ -89,7 +89,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('BUILD MY FUEL MATCH'), findsOneWidget);
+      expect(find.text('Build my Fuel Match'), findsOneWidget);
       expect(
         find.textContaining('Calculated from our curated food catalog'),
         findsOneWidget,
@@ -109,7 +109,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('SEE PRO'), findsOneWidget);
+      expect(find.text('See Pro'), findsOneWidget);
       expect(find.byType(EditableText), findsNothing);
       expect(find.textContaining('Ask a real question about your plan'),
           findsOneWidget);

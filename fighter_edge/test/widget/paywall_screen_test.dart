@@ -34,7 +34,7 @@ void main() {
     });
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));
-    final monthly = find.textContaining('MONTHLY');
+    final monthly = find.textContaining('Monthly');
     for (var i = 0; i < 8 && monthly.evaluate().isEmpty; i++) {
       await tester.drag(find.byType(ListView), const Offset(0, -600));
       await tester.pumpAndSettle();
@@ -42,7 +42,7 @@ void main() {
     expect(monthly, findsOneWidget);
     expect(find.text('Annual plan'), findsOneWidget);
     expect(find.text(r'About $5.00 / month'), findsOneWidget);
-    expect(find.textContaining('ANNUAL'), findsOneWidget);
+    expect(find.textContaining('Annual'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Restore purchases'), 200,
         scrollable: find.byType(Scrollable).first);
     expect(find.text('Restore purchases'), findsOneWidget);

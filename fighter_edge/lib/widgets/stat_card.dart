@@ -97,7 +97,7 @@ class StatCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              label.toUpperCase(),
+              label,
               style: AppAccessibility.adjustStyle(
                 context,
                 AppType.micro(
@@ -127,9 +127,9 @@ class StatCard extends StatelessWidget {
                   else
                     _AnimatedMetricValue(value: value),
                   if (unit.isNotEmpty) ...[
-                    const SizedBox(width: 3),
+                    const SizedBox(width: Insets.xs),
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 3),
+                      padding: const EdgeInsets.only(bottom: Insets.xs),
                       child: Text(unit,
                           style: AppAccessibility.adjustStyle(
                             context,
@@ -152,8 +152,6 @@ class StatCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       delta!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: AppType.micro(
                         weight: FontWeight.w600,
                         color: deltaColor,

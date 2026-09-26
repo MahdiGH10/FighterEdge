@@ -58,7 +58,7 @@ void main() {
   testWidgets('shows the true position after the phone was locked (P-1)',
       (tester) async {
     await pumpTimer(tester);
-    await tester.tap(find.text('START'));
+    await tester.tap(find.text('Start'));
     await tester.pump();
 
     // Locked for 13:20 with no frames at all, then unlocked.
@@ -75,7 +75,7 @@ void main() {
   testWidgets('calls the round, the ten-second warning and the rest',
       (tester) async {
     await pumpTimer(tester);
-    await tester.tap(find.text('START'));
+    await tester.tap(find.text('Start'));
     await tester.pump();
     expect(voice.lines, ['Round 1']);
 
@@ -99,36 +99,36 @@ void main() {
   testWidgets('pausing freezes the clock however long it waits',
       (tester) async {
     await pumpTimer(tester);
-    await tester.tap(find.text('START'));
+    await tester.tap(find.text('Start'));
     advance(const Duration(seconds: 30));
     await tester.pump(const Duration(milliseconds: 1100));
-    await tester.tap(find.text('PAUSE'));
+    await tester.tap(find.text('Pause'));
     await tester.pump();
 
     advance(const Duration(minutes: 20));
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('04:30'), findsOneWidget);
-    expect(find.text('START'), findsOneWidget);
+    expect(find.text('Start'), findsOneWidget);
   });
 
   testWidgets('a finished session is logged and says Time', (tester) async {
     final state = await pumpTimer(tester, withSession: true);
     final before = state.trainingLog.length;
-    await tester.tap(find.text('START'));
+    await tester.tap(find.text('Start'));
     await tester.pump();
 
     advance(const Duration(hours: 1));
     await tester.pump(const Duration(milliseconds: 1100));
 
     expect(find.text('DONE'), findsOneWidget);
-    expect(find.text('RESTART'), findsOneWidget);
+    expect(find.text('Restart'), findsOneWidget);
     expect(voice.lines.last, 'Time');
     expect(state.trainingLog.length, before + 1);
   });
 
   testWidgets('switching style resets to the new format', (tester) async {
     await pumpTimer(tester);
-    await tester.tap(find.text('START'));
+    await tester.tap(find.text('Start'));
     advance(const Duration(minutes: 2));
     await tester.pump(const Duration(milliseconds: 1100));
 
@@ -136,6 +136,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('1 / 6'), findsOneWidget);
     expect(find.text('05:00'), findsWidgets);
-    expect(find.text('START'), findsOneWidget);
+    expect(find.text('Start'), findsOneWidget);
   });
 }

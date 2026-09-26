@@ -19,7 +19,8 @@ void main() {
 
     expect(find.text('SECRET CONTENT'), findsNothing);
     expect(find.text('Corner Cues is Pro'), findsOneWidget);
-    expect(find.text('UNLOCK WITH PRO'), findsOneWidget); // button upper-cases
+    expect(find.text('Unlock with Pro'),
+        findsOneWidget); // button uses authored case
   });
 
   testWidgets('Pro users see the gated content', (tester) async {

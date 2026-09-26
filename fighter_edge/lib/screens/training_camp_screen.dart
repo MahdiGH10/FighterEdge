@@ -92,7 +92,8 @@ class _WeekView extends StatelessWidget {
     final rangeFormat = DateFormat('MMM d');
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
       children: [
         Text('WEEK $weekNumber', style: AppType.title1()),
         const SizedBox(height: Insets.xxs),
@@ -326,20 +327,21 @@ class _HistoryView extends StatelessWidget {
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, 0),
+          padding: const EdgeInsets.fromLTRB(
+              Insets.lg, Insets.none, Insets.lg, Insets.none),
           sliver: SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('SESSION HISTORY', style: AppType.title1()),
+                Text('Session history', style: AppType.title1()),
                 const SizedBox(height: Insets.lg),
               ],
             ),
           ),
         ),
         SliverPadding(
-          padding:
-              const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+          padding: const EdgeInsets.fromLTRB(
+              Insets.lg, Insets.none, Insets.lg, Insets.xxl),
           sliver: SliverList.builder(
             itemCount: sessions.length,
             itemBuilder: (context, index) => _HistoryRow(sessions[index]),

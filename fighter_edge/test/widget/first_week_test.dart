@@ -69,7 +69,7 @@ void main() {
     expect(find.text('First meal logged.'), findsOneWidget);
     expect(find.text('Want a nudge on training days?'), findsOneWidget);
 
-    await tester.tap(find.text('REMIND ME'));
+    await tester.tap(find.text('Remind me'));
     await tester.pumpAndSettle();
     expect(find.text('First meal logged.'), findsNothing);
     expect(shell.read<AppState>().campReminders, isTrue);

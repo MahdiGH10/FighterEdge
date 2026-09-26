@@ -79,7 +79,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No plan yet'), findsOneWidget);
-    await tester.tap(find.text('START SETUP'));
+    await tester.tap(find.text('Start setup'));
     await tester.pumpAndSettle();
     expect(find.byType(EdgeFuelSetupScreen), findsOneWidget);
   });

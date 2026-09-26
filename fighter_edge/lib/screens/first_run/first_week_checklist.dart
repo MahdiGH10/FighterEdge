@@ -80,8 +80,8 @@ class FirstWeekChecklist extends StatelessWidget {
           type: MaterialType.transparency,
           child: ExpansionTile(
             tilePadding: const EdgeInsets.symmetric(horizontal: Insets.lg),
-            childrenPadding:
-                const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.sm),
+            childrenPadding: const EdgeInsets.fromLTRB(
+                Insets.lg, Insets.none, Insets.lg, Insets.sm),
             title: Text('Your first week', style: AppType.headline()),
             subtitle: Text(
                 L
@@ -182,7 +182,7 @@ class _Progress extends StatelessWidget {
       duration: MediaQuery.disableAnimationsOf(context)
           ? Duration.zero
           : MotionTokens.standard,
-      curve: Curves.easeOutCubic,
+      curve: MotionTokens.count,
       builder: (context, v, _) => ClipRRect(
         borderRadius: BorderRadius.circular(Radii.chip),
         child: LinearProgressIndicator(

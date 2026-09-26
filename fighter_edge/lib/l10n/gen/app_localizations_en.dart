@@ -78,7 +78,7 @@ class LEn extends L {
       'AI Fighter Brief, full drill and recipe libraries, corner cues';
 
   @override
-  String get settingsSectionTraining => 'Training Preferences';
+  String get settingsSectionTraining => 'Training preferences';
 
   @override
   String get settingsMetricUnits => 'Metric units';
@@ -111,7 +111,7 @@ class LEn extends L {
   String get settingsCampRemindersOff => 'Get a nudge on the days you train';
 
   @override
-  String get settingsSectionSafety => 'Safety & Trust';
+  String get settingsSectionSafety => 'Safety & trust';
 
   @override
   String get settingsSafeCut => 'Safe cut guidance';
@@ -161,10 +161,10 @@ class LEn extends L {
   String get dashboardTitle => 'Dashboard';
 
   @override
-  String get dashboardWeeklyOverview => 'Weekly Overview';
+  String get dashboardWeeklyOverview => 'Weekly overview';
 
   @override
-  String get dashboardNextSession => 'Next Session';
+  String get dashboardNextSession => 'Next session';
 
   @override
   String get dashboardRecentActivity => 'Recent activity';
@@ -208,7 +208,7 @@ class LEn extends L {
   String get dashboardStreakLogToday => 'Log today';
 
   @override
-  String get fuelWeekTitle => 'FUEL THIS WEEK';
+  String get fuelWeekTitle => 'Fuel this week';
 
   @override
   String fuelWeekLogged(int count) {
@@ -301,10 +301,10 @@ class LEn extends L {
   }
 
   @override
-  String get addFoodSaved => 'SAVED';
+  String get addFoodSaved => 'Saved';
 
   @override
-  String get addFoodRecent => 'RECENT';
+  String get addFoodRecent => 'Recent';
 
   @override
   String get addFoodManual => 'Enter macros manually';
@@ -325,7 +325,7 @@ class LEn extends L {
       'Try a simpler word (\"rice\", \"chicken\"), or enter the macros yourself below.';
 
   @override
-  String get addFoodHowMuch => 'HOW MUCH?';
+  String get addFoodHowMuch => 'How much?';
 
   @override
   String get addFoodGrams => 'Grams';
@@ -390,7 +390,7 @@ class LEn extends L {
   }
 
   @override
-  String get timerYourCorner => 'YOUR CORNER';
+  String get timerYourCorner => 'Your corner';
 
   @override
   String get timerCornerTeaser =>
@@ -635,13 +635,13 @@ class LEn extends L {
   String get reactionLevelAdvancedPlus => 'Advanced+';
 
   @override
-  String get reactionStatDuration => 'DURATION';
+  String get reactionStatDuration => 'Duration';
 
   @override
-  String get reactionStatMoves => 'MOVES';
+  String get reactionStatMoves => 'Moves';
 
   @override
-  String get reactionStatReact => 'REACTION';
+  String get reactionStatReact => 'Reaction';
 
   @override
   String reactionInTheMix(int count) {
@@ -1003,4 +1003,50 @@ class LEn extends L {
   @override
   String get planReadyMissingTarget =>
       'Your training week is ready. Add body details in Fuel to calculate a daily target.';
+
+  @override
+  String get profileFreePlan => 'Free plan';
+
+  @override
+  String get profileProActive => 'Pro subscription active';
+
+  @override
+  String get profileProDescription => 'Daily brief, all drills and recipes';
+
+  @override
+  String get profileUpgrade => 'Upgrade';
+
+  @override
+  String get profileManage => 'Manage';
+
+  @override
+  String get settingsProPlan => 'Pro';
+
+  @override
+  String get settingsFreePlan => 'Free';
+
+  @override
+  String dashboardEffort(int rating) {
+    return 'Effort $rating/10';
+  }
+
+  @override
+  String get paywallPlainTitle => 'Training tools with Pro';
+
+  @override
+  String get paywallPlainSubtitle =>
+      'Daily coaching, every drill and recipe, and cues between rounds.';
+
+  @override
+  String get fuelRecipesTitle => 'Recipes for your day';
+
+  @override
+  String paywallMonthly(String price) {
+    return 'Monthly · $price';
+  }
+
+  @override
+  String fuelMealsLogged(int eaten, int total) {
+    return 'Meals logged · $eaten/$total';
+  }
 }

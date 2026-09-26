@@ -51,7 +51,7 @@ class PrimaryButton extends StatelessWidget {
             child: _ButtonContent(
               label: label,
               icon: icon,
-              color: Colors.white,
+              color: AppColors.onPrimary,
               expand: expand,
             ),
           ),
@@ -129,6 +129,7 @@ class _ButtonContent extends StatelessWidget {
         return Padding(
           padding: EdgeInsets.symmetric(
             horizontal: compact ? Insets.sm : Insets.xl,
+            vertical: Insets.xs,
           ),
           child: Center(
             widthFactor: expand ? null : 1,
@@ -142,15 +143,13 @@ class _ButtonContent extends StatelessWidget {
                 ],
                 Flexible(
                   child: Text(
-                    label.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    label,
                     style: AppAccessibility.adjustStyle(
                       context,
                       AppType.subhead(
                         weight: FontWeight.w700,
                         color: color,
-                        spacing: 0.8,
+                        spacing: 0,
                       ),
                     ),
                   ),

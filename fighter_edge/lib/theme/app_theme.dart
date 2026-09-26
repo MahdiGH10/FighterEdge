@@ -8,6 +8,13 @@ import 'app_typography.dart';
 /// Spacing tokens (4pt scale).
 class Insets {
   Insets._();
+
+  /// Dividers between rows on one surface.
+  static const double hairline = 1;
+  static const double none = 0;
+
+  /// Clearance below scroll content beside persistent controls.
+  static const double bottomClearance = 80;
   static const double xxs = 2;
   static const double xs = 4;
   static const double sm = 8;
@@ -42,6 +49,23 @@ class LayoutTokens {
   static const double fuelRing = 176;
   static const double fuelRingLarge = 240;
   static const double narrowScreen = 360;
+
+  /// Fixed demo and content regions, not text bounding boxes.
+  static const double navigationPreview = 86;
+  static const double featuredDrillCard = 216;
+  static const double recentDrillCard = 188;
+  static const double weightChart = 200;
+  static const double quantityColumn = 64;
+  static const double stepperValue = 56;
+  static const double servingLabel = 26;
+  static const double brandMark = 58;
+  static const double brandStroke = 7;
+  static const double brandSlash = 48;
+
+  /// Identity provider branding dimensions.
+  static const double googleMark = 20;
+  static const double googleMarkWell = 28;
+  static const double authButton = 52;
 }
 
 /// Icon sizes. Glyphs sit on the type scale rather than floating free of it.
@@ -50,6 +74,7 @@ class IconSizes {
 
   /// Beside a micro label or inline with subhead text.
   static const double inline = 18;
+  static const double small = 16;
 
   /// Leading glyph of a list row or section tile.
   static const double row = 20;
@@ -89,6 +114,12 @@ class MotionTokens {
   MotionTokens._();
 
   // Durations
+  /// Slow loading pulse and monotonic count/scroll transitions.
+  static const Duration loadingPulse = Duration(milliseconds: 1100);
+  static const Curve count = Curves.easeOutCubic;
+  static const Curve scroll = Curves.easeOut;
+  static const Curve pulse = Curves.easeInOut;
+
   static const Duration press = Duration(milliseconds: 90);
   static const Duration fast = Duration(milliseconds: 160);
   static const Duration standard = Duration(milliseconds: 260);

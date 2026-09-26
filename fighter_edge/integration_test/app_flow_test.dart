@@ -61,41 +61,41 @@ void main() {
 
     // 3. The value pages come before any questions.
     expect(find.text('Your camp, organised.'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('Fuel that matches the work.'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('See your progress.'), findsOneWidget);
-    await _tapVisible(tester, find.text('BUILD MY PLAN'));
+    await _tapVisible(tester, find.text('Build my plan'));
 
     // 4. Explicit consent comes before the first question about the body
     // (Art. 9 GDPR — audit finding, fixed in Phase 2 slice 2).
     expect(find.text('Your body data, your call'), findsOneWidget);
     expect(repo.currentUser!.hasHealthDataConsent, isFalse);
-    await _tapVisible(tester, find.text('I AGREE'));
+    await _tapVisible(tester, find.text('I agree'));
     expect(repo.currentUser!.hasHealthDataConsent, isTrue);
 
     // 5. Onboarding questions.
     expect(find.text('What should Fighter Edge build first?'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('What should EdgeFuel optimize for?'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('Tell us your starting point.'), findsOneWidget);
     await _enterTextVisible(tester, find.byType(TextField).at(0), '28');
     await _enterTextVisible(tester, find.byType(TextField).at(1), '178');
     await _enterTextVisible(tester, find.byType(TextField).at(2), '77.2');
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('Which formula fits your body?'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('Outside the gym, how active are you?'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('How many days can you train?'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('Your first plan is ready.'), findsOneWidget);
-    await _tapVisible(tester, find.text('START MY PLAN'));
+    await _tapVisible(tester, find.text('Start my plan'));
 
     // 6. Activation moment, then the dashboard.
     expect(find.text('Your first Fighter Edge plan is ready'), findsOneWidget);
-    await _tapVisible(tester, find.text('OPEN DASHBOARD'));
+    await _tapVisible(tester, find.text('Open dashboard'));
     expect(find.text('DASHBOARD'), findsOneWidget);
 
     // 7. Profile -> the paid upgrade entry point. Computed from the nav
@@ -106,15 +106,15 @@ void main() {
       navRect.center.dy,
     ));
     await tester.pumpAndSettle();
-    await _tapVisible(tester, find.text('UPGRADE'));
-    expect(find.text('Unlock your full edge'), findsOneWidget);
+    await _tapVisible(tester, find.text('Upgrade'));
+    expect(find.text('Training tools with Pro'), findsOneWidget);
 
     // 8. A real store purchase completes, but the client never grants Pro:
     // only the trusted webhook does (a non-negotiable rule, not just a UI
     // choice — this is the property most worth an on-device regression).
     // A single pump (not pumpAndSettle) checks the state right after the
     // tap, before anything else runs.
-    final monthlyPlan = find.text('MONTHLY - \$7.99');
+    final monthlyPlan = find.text('Monthly · \$7.99');
     await _ensureVisible(tester, monthlyPlan);
     await tester.tap(monthlyPlan);
     await tester.pump();

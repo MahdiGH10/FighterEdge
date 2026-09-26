@@ -1,5 +1,36 @@
 # Fighter Edge — Claude Code Handoff
 
+## UI task slice E: grouped rows, copy and tokens (2026-09-26)
+
+- Shared GroupedList/GroupedRow now serve Profile, Settings, dashboard activity
+  and Fuel meals, with hairlines and 48px controls. Settings no longer has
+  icon tiles or a separate card per row. Gallery includes the shared group.
+- Sentence-case buttons/sections and plain recipe/Pro copy; new semantic copy
+  localized EN/DE. Buttons and stat deltas wrap. Login uses the bundled official
+  Google G and Google Sans, with source/license alongside the assets.
+- Owner follow-up: login_background.webp still has the baked-in tiled
+  FIGHTER EDGE CAMP watermark. Supply a replacement image.
+- Remaining raw EdgeInsets/SizedBox pixel values, Colors.* and Curves.* moved
+  into theme tokens. Semantic durations (training timers, dates, auth retries)
+  remain in their owning logic to preserve pure Dart domain boundaries.
+- Browser found a 27px Fuel review overflow at 200% text: assumptions now stack;
+  regression covers 320px/200%. Login account link now has a 48px touch target.
+  Dashboard live-weight regression dates its new entry after the latest fixture
+  weight, so it cannot age out as the machine date advances.
+- Verified: format/analyzer clean; 679 tests (675 before, four added), three
+  regenerated goldens reviewed against their originals. Intended changes are
+  grouped rows, sentence case, wrapped deltas and token spacing; the large-text
+  golden canvas is taller to retain the complete navigation preview.
+- Offline browser screenshots: E-*.png in the external evidence folder below,
+  at 390x844/320x568 and actual 200% text. Includes Settings/Profile, dashboard,
+  Fuel/Meals, Train/history/drills/reaction, timer/weight, Fuel setup/plan/recipes,
+  coach gate/paywall, legal/gallery and login/signup/password/magic-link.
+  Final fresh navigation and Fuel setup run have no app console errors.
+- Not verified in browser: verification-email route (local auth bypasses it),
+  live Pro coaching or purchases; widget coverage passes. Android integration
+  finders updated; CI must re-run. Real devices, iOS, release builds and Firebase
+  remain unverified. No backend, rules or billing changes; no new packages.
+
 ## UI task slice D: onboarding hierarchy (2026-09-26)
 
 - Logo/tagline appear only on welcome page one. Calm numerals replace the

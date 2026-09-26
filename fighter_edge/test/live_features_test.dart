@@ -26,16 +26,16 @@ void main() {
       expect(find.text('05:00'), findsWidgets); // MMA default work
       expect(find.text('1 / 5'), findsOneWidget);
 
-      await tester.tap(find.text('START'));
+      await tester.tap(find.text('Start'));
       await tester.pump(const Duration(seconds: 1));
       await tester.pump(const Duration(seconds: 1));
       expect(find.text('04:58'), findsWidgets);
 
-      await tester.tap(find.text('PAUSE'));
+      await tester.tap(find.text('Pause'));
       await tester.pump(const Duration(seconds: 2));
       expect(find.text('04:58'), findsWidgets); // frozen
 
-      await tester.tap(find.text('RESET'));
+      await tester.tap(find.text('Reset'));
       await tester.pump();
       expect(find.text('05:00'), findsWidgets);
     });
@@ -192,7 +192,7 @@ void main() {
       await tester.pumpWidget(trackerHost(AppState(), fuel: fuel));
       await tester.pumpAndSettle(); // the draft arrives on a stream
       // Seed latest is 77.2 kg: 5.2 to go, to the user's own 72.
-      expect(find.text('GOAL GAP'), findsOneWidget);
+      expect(find.text('Goal gap'), findsOneWidget);
       expect(find.text('5.2'), findsOneWidget);
       expect(find.text('To 72.0 kg'), findsOneWidget);
     });
@@ -202,7 +202,7 @@ void main() {
       await tester.pump();
       expect(find.text('Set in EdgeFuel'), findsOneWidget);
       // The old made-up 74 kg goal is gone.
-      expect(find.text('GOAL GAP'), findsNothing);
+      expect(find.text('Goal gap'), findsNothing);
       expect(find.text('To 74 kg'), findsNothing);
     });
   });

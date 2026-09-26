@@ -232,7 +232,7 @@ abstract class L {
   /// No description provided for @settingsSectionTraining.
   ///
   /// In en, this message translates to:
-  /// **'Training Preferences'**
+  /// **'Training preferences'**
   String get settingsSectionTraining;
 
   /// No description provided for @settingsMetricUnits.
@@ -292,7 +292,7 @@ abstract class L {
   /// No description provided for @settingsSectionSafety.
   ///
   /// In en, this message translates to:
-  /// **'Safety & Trust'**
+  /// **'Safety & trust'**
   String get settingsSectionSafety;
 
   /// No description provided for @settingsSafeCut.
@@ -382,13 +382,13 @@ abstract class L {
   /// No description provided for @dashboardWeeklyOverview.
   ///
   /// In en, this message translates to:
-  /// **'Weekly Overview'**
+  /// **'Weekly overview'**
   String get dashboardWeeklyOverview;
 
   /// No description provided for @dashboardNextSession.
   ///
   /// In en, this message translates to:
-  /// **'Next Session'**
+  /// **'Next session'**
   String get dashboardNextSession;
 
   /// No description provided for @dashboardRecentActivity.
@@ -460,7 +460,7 @@ abstract class L {
   /// No description provided for @fuelWeekTitle.
   ///
   /// In en, this message translates to:
-  /// **'FUEL THIS WEEK'**
+  /// **'Fuel this week'**
   String get fuelWeekTitle;
 
   /// No description provided for @fuelWeekLogged.
@@ -628,13 +628,13 @@ abstract class L {
   /// No description provided for @addFoodSaved.
   ///
   /// In en, this message translates to:
-  /// **'SAVED'**
+  /// **'Saved'**
   String get addFoodSaved;
 
   /// No description provided for @addFoodRecent.
   ///
   /// In en, this message translates to:
-  /// **'RECENT'**
+  /// **'Recent'**
   String get addFoodRecent;
 
   /// No description provided for @addFoodManual.
@@ -670,7 +670,7 @@ abstract class L {
   /// No description provided for @addFoodHowMuch.
   ///
   /// In en, this message translates to:
-  /// **'HOW MUCH?'**
+  /// **'How much?'**
   String get addFoodHowMuch;
 
   /// No description provided for @addFoodGrams.
@@ -784,7 +784,7 @@ abstract class L {
   /// No description provided for @timerYourCorner.
   ///
   /// In en, this message translates to:
-  /// **'YOUR CORNER'**
+  /// **'Your corner'**
   String get timerYourCorner;
 
   /// No description provided for @timerCornerTeaser.
@@ -1210,19 +1210,19 @@ abstract class L {
   /// No description provided for @reactionStatDuration.
   ///
   /// In en, this message translates to:
-  /// **'DURATION'**
+  /// **'Duration'**
   String get reactionStatDuration;
 
   /// No description provided for @reactionStatMoves.
   ///
   /// In en, this message translates to:
-  /// **'MOVES'**
+  /// **'Moves'**
   String get reactionStatMoves;
 
   /// No description provided for @reactionStatReact.
   ///
   /// In en, this message translates to:
-  /// **'REACTION'**
+  /// **'Reaction'**
   String get reactionStatReact;
 
   /// No description provided for @reactionInTheMix.
@@ -1818,6 +1818,84 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Your training week is ready. Add body details in Fuel to calculate a daily target.'**
   String get planReadyMissingTarget;
+
+  /// No description provided for @profileFreePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan'**
+  String get profileFreePlan;
+
+  /// No description provided for @profileProActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro subscription active'**
+  String get profileProActive;
+
+  /// No description provided for @profileProDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily brief, all drills and recipes'**
+  String get profileProDescription;
+
+  /// No description provided for @profileUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get profileUpgrade;
+
+  /// No description provided for @profileManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get profileManage;
+
+  /// No description provided for @settingsProPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get settingsProPlan;
+
+  /// No description provided for @settingsFreePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get settingsFreePlan;
+
+  /// No description provided for @dashboardEffort.
+  ///
+  /// In en, this message translates to:
+  /// **'Effort {rating}/10'**
+  String dashboardEffort(int rating);
+
+  /// No description provided for @paywallPlainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Training tools with Pro'**
+  String get paywallPlainTitle;
+
+  /// No description provided for @paywallPlainSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily coaching, every drill and recipe, and cues between rounds.'**
+  String get paywallPlainSubtitle;
+
+  /// No description provided for @fuelRecipesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes for your day'**
+  String get fuelRecipesTitle;
+
+  /// No description provided for @paywallMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly · {price}'**
+  String paywallMonthly(String price);
+
+  /// No description provided for @fuelMealsLogged.
+  ///
+  /// In en, this message translates to:
+  /// **'Meals logged · {eaten}/{total}'**
+  String fuelMealsLogged(int eaten, int total);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

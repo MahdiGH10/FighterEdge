@@ -210,7 +210,7 @@ class LDe extends L {
   String get dashboardStreakLogToday => 'Heute eintragen';
 
   @override
-  String get fuelWeekTitle => 'ERNÄHRUNG DIESE WOCHE';
+  String get fuelWeekTitle => 'Ernährung diese Woche';
 
   @override
   String fuelWeekLogged(int count) {
@@ -304,10 +304,10 @@ class LDe extends L {
   }
 
   @override
-  String get addFoodSaved => 'GESPEICHERT';
+  String get addFoodSaved => 'Gespeichert';
 
   @override
-  String get addFoodRecent => 'ZULETZT';
+  String get addFoodRecent => 'Zuletzt';
 
   @override
   String get addFoodManual => 'Nährwerte selbst eingeben';
@@ -328,7 +328,7 @@ class LDe extends L {
       'Probier ein einfacheres Wort („Reis“, „Hähnchen“) oder gib die Nährwerte unten selbst ein.';
 
   @override
-  String get addFoodHowMuch => 'WIE VIEL?';
+  String get addFoodHowMuch => 'Wie viel?';
 
   @override
   String get addFoodGrams => 'Gramm';
@@ -393,7 +393,7 @@ class LDe extends L {
   }
 
   @override
-  String get timerYourCorner => 'DEINE ECKE';
+  String get timerYourCorner => 'Deine Ecke';
 
   @override
   String get timerCornerTeaser =>
@@ -639,13 +639,13 @@ class LDe extends L {
   String get reactionLevelAdvancedPlus => 'Fortgeschritten+';
 
   @override
-  String get reactionStatDuration => 'DAUER';
+  String get reactionStatDuration => 'Dauer';
 
   @override
-  String get reactionStatMoves => 'BEWEGUNGEN';
+  String get reactionStatMoves => 'Bewegungen';
 
   @override
-  String get reactionStatReact => 'REAKTION';
+  String get reactionStatReact => 'Reaktion';
 
   @override
   String reactionInTheMix(int count) {
@@ -1007,4 +1007,51 @@ class LDe extends L {
   @override
   String get planReadyMissingTarget =>
       'Deine Trainingswoche steht. Ergänze deine Körperdaten unter Fuel, um ein Tagesziel zu berechnen.';
+
+  @override
+  String get profileFreePlan => 'Kostenloser Plan';
+
+  @override
+  String get profileProActive => 'Pro-Abonnement aktiv';
+
+  @override
+  String get profileProDescription =>
+      'Täglicher Brief, alle Übungen und Rezepte';
+
+  @override
+  String get profileUpgrade => 'Upgrade';
+
+  @override
+  String get profileManage => 'Verwalten';
+
+  @override
+  String get settingsProPlan => 'Pro';
+
+  @override
+  String get settingsFreePlan => 'Kostenlos';
+
+  @override
+  String dashboardEffort(int rating) {
+    return 'Anstrengung $rating/10';
+  }
+
+  @override
+  String get paywallPlainTitle => 'Trainingshilfen mit Pro';
+
+  @override
+  String get paywallPlainSubtitle =>
+      'Tägliches Coaching, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.';
+
+  @override
+  String get fuelRecipesTitle => 'Rezepte für deinen Tag';
+
+  @override
+  String paywallMonthly(String price) {
+    return 'Monatlich · $price';
+  }
+
+  @override
+  String fuelMealsLogged(int eaten, int total) {
+    return 'Mahlzeiten erfasst · $eaten/$total';
+  }
 }

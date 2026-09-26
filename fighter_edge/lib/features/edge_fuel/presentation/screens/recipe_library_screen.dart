@@ -111,7 +111,7 @@ class _Body extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(
             Insets.lg,
-            0,
+            Insets.none,
             Insets.lg,
             Insets.md,
           ),
@@ -130,8 +130,8 @@ class _Body extends StatelessWidget {
               filled: true,
               fillColor: AppColors.surfaceAlt,
               contentPadding: const EdgeInsets.symmetric(
-                vertical: 14,
-                horizontal: 12,
+                vertical: Insets.md + Insets.xxs,
+                horizontal: Insets.md,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(Radii.button),
@@ -148,7 +148,7 @@ class _Body extends StatelessWidget {
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(
                     Insets.lg,
-                    0,
+                    Insets.none,
                     Insets.lg,
                     Insets.xxl,
                   ),
@@ -213,7 +213,8 @@ class _EmptyResults extends StatelessWidget {
   Widget build(BuildContext context) {
     final hiddenByAllergens = controller.hiddenByAllergens;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
       children: [
         _Notices(controller: controller),
         const SizedBox(height: Insets.xl),
@@ -405,7 +406,7 @@ class _Toggle extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(Radii.chip),
                 border: Border.all(
-                  color: selected ? AppColors.primary : Colors.transparent,
+                  color: selected ? AppColors.primary : AppColors.transparent,
                 ),
               ),
               child: Text(
@@ -435,7 +436,8 @@ class _LibrarySkeleton extends StatelessWidget {
     return Skeleton(
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(Insets.lg, Insets.sm, Insets.lg, 0),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.lg, Insets.sm, Insets.lg, Insets.none),
         children: [
           const SkeletonBox(height: 48),
           const SizedBox(height: Insets.md),

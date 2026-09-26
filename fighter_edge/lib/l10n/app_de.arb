@@ -71,7 +71,7 @@
   "dashboardStreakOnFire": "Läuft",
   "dashboardStreakLogToday": "Heute eintragen",
 
-  "fuelWeekTitle": "ERNÄHRUNG DIESE WOCHE",
+  "fuelWeekTitle": "Ernährung diese Woche",
   "fuelWeekLogged": "{count}/7 erfasst",
   "@fuelWeekLogged": {
     "placeholders": { "count": { "type": "int" } }
@@ -116,14 +116,14 @@
   "@addFoodTitle": {
     "placeholders": { "day": { "type": "String" } }
   },
-  "addFoodSaved": "GESPEICHERT",
-  "addFoodRecent": "ZULETZT",
+  "addFoodSaved": "Gespeichert",
+  "addFoodRecent": "Zuletzt",
   "addFoodManual": "Nährwerte selbst eingeben",
   "addFoodManualSubtitle": "Für auswärts essen, eine Verpackung oder alles, was nicht gelistet ist",
   "addFoodEmptyHint": "Such ein Lebensmittel und wähl die Menge — die Nährwerte rechnet die App aus. Was du einträgst, steht beim nächsten Mal hier, einen Tipp entfernt.",
   "addFoodNotFound": "Noch nicht in der Lebensmittelliste",
   "addFoodNotFoundHint": "Probier ein einfacheres Wort („Reis“, „Hähnchen“) oder gib die Nährwerte unten selbst ein.",
-  "addFoodHowMuch": "WIE VIEL?",
+  "addFoodHowMuch": "Wie viel?",
   "addFoodGrams": "Gramm",
   "addFoodAddTo": "Zu {day} hinzufügen",
   "@addFoodAddTo": {
@@ -158,7 +158,7 @@
   "@timerNext": {
     "placeholders": { "label": { "type": "String" } }
   },
-  "timerYourCorner": "DEINE ECKE",
+  "timerYourCorner": "Deine Ecke",
   "timerCornerTeaser": "Mit Pro steht dir in der Pause deine Ecke zur Seite: ein Hinweis für die nächste Runde.",
   "timerNextSessionComplete": "Einheit beendet",
   "timerNextFinalRound": "Letzte Runde",
@@ -230,9 +230,9 @@
   "reactionLevelIntermediate": "Mittelstufe",
   "reactionLevelAdvanced": "Fortgeschritten",
   "reactionLevelAdvancedPlus": "Fortgeschritten+",
-  "reactionStatDuration": "DAUER",
-  "reactionStatMoves": "BEWEGUNGEN",
-  "reactionStatReact": "REAKTION",
+  "reactionStatDuration": "Dauer",
+  "reactionStatMoves": "Bewegungen",
+  "reactionStatReact": "Reaktion",
   "reactionInTheMix": "IM MIX · {count}",
   "reactionStart": "Drill starten",
   "reactionGetInStance": "IN KAMPFSTELLUNG",
@@ -429,6 +429,43 @@
       },
       "goal": {
         "type": "String"
+      }
+    }
+  },
+  "profileFreePlan": "Kostenloser Plan",
+  "profileProActive": "Pro-Abonnement aktiv",
+  "profileProDescription": "Täglicher Brief, alle Übungen und Rezepte",
+  "profileUpgrade": "Upgrade",
+  "profileManage": "Verwalten",
+  "settingsProPlan": "Pro",
+  "settingsFreePlan": "Kostenlos",
+  "dashboardEffort": "Anstrengung {rating}/10",
+  "paywallPlainTitle": "Trainingshilfen mit Pro",
+  "paywallPlainSubtitle": "Tägliches Coaching, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.",
+  "fuelRecipesTitle": "Rezepte für deinen Tag",
+  "@dashboardEffort": {
+    "placeholders": {
+      "rating": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallMonthly": "Monatlich · {price}",
+  "fuelMealsLogged": "Mahlzeiten erfasst · {eaten}/{total}",
+  "@paywallMonthly": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "@fuelMealsLogged": {
+    "placeholders": {
+      "eaten": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
       }
     }
   }

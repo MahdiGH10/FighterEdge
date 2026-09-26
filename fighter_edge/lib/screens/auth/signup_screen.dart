@@ -112,10 +112,11 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
     return ScreenScaffold(
-      title: 'Create Account',
+      title: 'Create account',
       showBack: true,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, Insets.xxl),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.xl, Insets.none, Insets.xl, Insets.xxl),
         child: AutofillGroup(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -181,7 +182,7 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               const SizedBox(height: Insets.md),
               PrimaryButton(
-                auth.isBusy ? 'Creating…' : 'Create Account',
+                auth.isBusy ? 'Creating…' : 'Create account',
                 expand: true,
                 onPressed: auth.isBusy ? null : _signUp,
               ),

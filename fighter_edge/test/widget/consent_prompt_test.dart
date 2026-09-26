@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/privacy/consent.dart';
 import 'package:fighter_edge/screens/settings_screen.dart';
-import 'package:fighter_edge/widgets/stat_card.dart';
+import 'package:fighter_edge/widgets/grouped_list.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -25,7 +25,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('consent-sheet')), findsOneWidget);
-    await tester.tap(find.text("DON'T ALLOW"));
+    await tester.tap(find.text("Don't allow"));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('consent-sheet')), findsNothing);
@@ -41,7 +41,7 @@ void main() {
     await tester.pumpWidget(FighterEdgeApp(authRepo: repo, consent: consent));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('ALLOW'));
+    await tester.tap(find.text('Allow'));
     await tester.pumpAndSettle();
     expect(consent.analyticsAllowed, isTrue);
     expect(consent.crashReportsAllowed, isTrue);
@@ -66,7 +66,7 @@ void main() {
     await tester.scrollUntilVisible(analytics, 200,
         scrollable: find.byType(Scrollable).first);
     final toggle = find.descendant(
-      of: find.ancestor(of: analytics, matching: find.byType(AppCard)),
+      of: find.ancestor(of: analytics, matching: find.byType(GroupedRow)),
       matching: find.byType(Switch),
     );
     await tester.ensureVisible(toggle);

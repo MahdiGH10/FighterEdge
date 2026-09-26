@@ -103,7 +103,8 @@ class PremiumBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+          horizontal: Insets.sm + Insets.xxs, vertical: Insets.xs + Insets.xxs),
       decoration: BoxDecoration(
         color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(Radii.chip),
@@ -113,9 +114,9 @@ class PremiumBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 13, color: AppColors.primaryBright),
-          const SizedBox(width: 5),
+          const SizedBox(width: Insets.xs),
           Text(
-            label.toUpperCase(),
+            label,
             style: AppType.micro(
               weight: FontWeight.w800,
               color: AppColors.primaryBright,

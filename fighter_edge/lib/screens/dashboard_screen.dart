@@ -25,6 +25,7 @@ import '../widgets/number_hero.dart';
 import '../widgets/press_scale.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
+import '../widgets/grouped_list.dart';
 import '../widgets/weekly_overview.dart';
 import 'auth/verify_email_screen.dart';
 import 'first_run/first_week_checklist.dart';
@@ -67,7 +68,8 @@ class DashboardScreen extends StatelessWidget {
     return ScreenScaffold.tab(
       title: l.dashboardTitle,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.lg, Insets.none, Insets.lg, Insets.xxl),
         children: [
           Text(
               user?.displayName.isNotEmpty == true
@@ -140,7 +142,10 @@ class DashboardScreen extends StatelessWidget {
                 child:
                     Text(l.dashboardRecentActivity, style: AppType.headline())),
             TextButton(
-                onPressed: () => onNavigate(1), child: Text(l.dashboardSeeAll)),
+                style: TextButton.styleFrom(
+                    foregroundColor: AppColors.textSecondary),
+                onPressed: () => onNavigate(1),
+                child: Text(l.dashboardSeeAll)),
           ]),
           if (recent.isEmpty)
             Padding(
@@ -149,17 +154,10 @@ class DashboardScreen extends StatelessWidget {
                     style: AppType.callout(
                         color: AppAccessibility.textSecondary(context))))
           else
-            AppCard(
-                padding: EdgeInsets.zero,
-                child: Column(children: [
-                  for (final (index, session) in recent.indexed) ...[
-                    if (index > 0)
-                      Divider(
-                          height: Insets.xxs / 2,
-                          color: AppAccessibility.border(context)),
-                    _ActivityRow(session: session, now: state.now),
-                  ],
-                ])),
+            GroupedList(children: [
+              for (final session in recent)
+                _ActivityRow(session: session, now: state.now),
+            ]),
         ],
       ),
     );
@@ -435,7 +433,10 @@ class _ActivityRow extends StatelessWidget {
                     style: AppType.subhead(
                         color: AppAccessibility.textSecondary(context))),
                 const SizedBox(height: Insets.xs),
-                Text(when,
+                Text(
+                    session.rpe == 0
+                        ? when
+                        : '$when · ${l.dashboardEffort(session.rpe)}',
                     style: AppType.subhead(
                         color: AppAccessibility.textMuted(context))),
               ])),

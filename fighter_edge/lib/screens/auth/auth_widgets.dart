@@ -56,11 +56,16 @@ class OrDivider extends StatelessWidget {
 
 /// Outlined provider button (Google / Apple / email code).
 class SocialButton extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final bool google;
   final String label;
   final VoidCallback? onPressed;
   const SocialButton(
-      {super.key, required this.icon, required this.label, this.onPressed});
+      {super.key,
+      this.icon,
+      this.google = false,
+      required this.label,
+      this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -71,21 +76,36 @@ class SocialButton extends StatelessWidget {
         onTap: onPressed,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: google ? AppColors.googleSurface : AppColors.surface,
             borderRadius: BorderRadius.circular(Radii.button),
           ),
           child: Container(
-            height: 52,
+            constraints:
+                const BoxConstraints(minHeight: LayoutTokens.authButton),
+            padding: const EdgeInsets.symmetric(
+                horizontal: Insets.lg, vertical: Insets.sm),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(Radii.button),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(
+                  color: google ? AppColors.googleBorder : AppColors.border),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 20, color: AppColors.textPrimary),
+                if (google)
+                  Image.asset('assets/images/google_g.png',
+                      width: LayoutTokens.googleMark,
+                      height: LayoutTokens.googleMark,
+                      fit: BoxFit.contain,
+                      excludeFromSemantics: true)
+                else
+                  Icon(icon, size: IconSizes.row, color: AppColors.textPrimary),
                 const SizedBox(width: Insets.md),
-                Text(label, style: AppType.callout(weight: FontWeight.w600)),
+                Flexible(
+                    child: Text(label,
+                        style: google
+                            ? AppType.googleSignIn()
+                            : AppType.callout(weight: FontWeight.w600))),
               ],
             ),
           ),

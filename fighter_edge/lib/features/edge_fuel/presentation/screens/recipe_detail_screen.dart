@@ -76,7 +76,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       title: recipe.title,
       showBack: true,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.lg, Insets.none, Insets.lg, Insets.xxl),
         children: [
           Text(
             recipe.description,
@@ -91,7 +92,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             nutrients: nutrients,
           ),
           const SizedBox(height: Insets.xl),
-          const _SectionTitle('INGREDIENTS'),
+          const _SectionTitle('Ingredients'),
           const SizedBox(height: Insets.sm),
           for (final ingredient in recipe.ingredients)
             _IngredientRow(
@@ -100,13 +101,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               scale: scale,
             ),
           const SizedBox(height: Insets.xl),
-          const _SectionTitle('METHOD'),
+          const _SectionTitle('Method'),
           const SizedBox(height: Insets.sm),
           for (var i = 0; i < recipe.steps.length; i++)
             _StepRow(number: i + 1, text: recipe.steps[i]),
           if (recipe.substitutions.isNotEmpty) ...[
             const SizedBox(height: Insets.xl),
-            const _SectionTitle('SWAPS'),
+            const _SectionTitle('Swaps'),
             const SizedBox(height: Insets.sm),
             for (final sub in recipe.substitutions)
               _SubstitutionRow(
@@ -311,7 +312,7 @@ class _ServingsCard extends StatelessWidget {
                       style: AppType.largeTitle(spacing: -0.5),
                     ),
                     Text(
-                      'KCAL',
+                      'kcal',
                       style: AppType.micro(
                         color: AppColors.textMuted,
                         weight: FontWeight.w700,
@@ -321,9 +322,9 @@ class _ServingsCard extends StatelessWidget {
                   ],
                 ),
               ),
-              _Macro('PROTEIN', nutrients.proteinRounded, AppColors.protein),
-              _Macro('CARBS', nutrients.carbsRounded, AppColors.carbs),
-              _Macro('FAT', nutrients.fatRounded, AppColors.fats),
+              _Macro('Protein', nutrients.proteinRounded, AppColors.protein),
+              _Macro('Carbs', nutrients.carbsRounded, AppColors.carbs),
+              _Macro('Fat', nutrients.fatRounded, AppColors.fats),
             ],
           ),
         ],
@@ -399,7 +400,7 @@ class _IngredientRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 64,
+            width: LayoutTokens.quantityColumn,
             child: Text(
               '${grams.round()} g',
               style: AppType.subhead(
@@ -449,7 +450,7 @@ class _StepRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 26,
+              width: LayoutTokens.servingLabel,
               child: Text(
                 '$number',
                 style: AppType.title2(color: AppColors.primary),

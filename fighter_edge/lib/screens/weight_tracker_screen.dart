@@ -45,7 +45,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
     final losing = delta <= 0;
 
     return ScreenScaffold(
-      title: 'Weight Tracker',
+      title: 'Weight tracker',
       showBack: true,
       // A header action, like Nutrition's "Add food", rather than a stock
       // floating button hovering over the history list.
@@ -229,7 +229,8 @@ class _WeightView extends StatelessWidget {
     // list below used to call it twice per row inside its loop.
     final history = state.weightHistoryDesc;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, 80),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.bottomClearance),
       children: [
         Center(
           child: Column(
@@ -259,7 +260,7 @@ class _WeightView extends StatelessWidget {
                       ),
                     const SizedBox(width: Insets.xs),
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.only(bottom: Insets.sm),
                       child: Text(state.weightUnitLabel,
                           style: AppType.body(
                               weight: FontWeight.w600,
@@ -278,7 +279,7 @@ class _WeightView extends StatelessWidget {
                     Icon(losing ? Icons.arrow_downward : Icons.arrow_upward,
                         size: 14,
                         color: losing ? AppColors.positive : AppColors.primary),
-                    const SizedBox(width: 3),
+                    const SizedBox(width: Insets.xs),
                     Flexible(
                       child: Text(
                           '${_fmt(delta.abs())} ${state.weightUnitLabel} '
@@ -314,7 +315,7 @@ class _WeightView extends StatelessWidget {
         const SizedBox(height: Insets.xl),
         AppCard(
           child: SizedBox(
-            height: 200,
+            height: LayoutTokens.weightChart,
             child: _WeightChart(state: state, goalKg: goalKg),
           ),
         ),
@@ -404,7 +405,7 @@ class _WeightChart extends StatelessWidget {
                 // Show a few labels to avoid crowding.
                 if (entries.length > 6 && i % 2 != 0) return const SizedBox();
                 return Padding(
-                  padding: const EdgeInsets.only(top: 6),
+                  padding: const EdgeInsets.only(top: Insets.xs + Insets.xxs),
                   child: Text(DateFormat('M/d').format(entries[i].date),
                       style: AppType.micro(color: AppColors.textMuted)),
                 );
@@ -479,7 +480,7 @@ class _HistoryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-          horizontal: Insets.lg, vertical: Insets.md + 2),
+          horizontal: Insets.lg, vertical: Insets.md + Insets.xxs),
       child: Row(
         children: [
           // The date takes the leftover space and wraps at large text; the

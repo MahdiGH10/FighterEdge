@@ -30,6 +30,7 @@ import '../widgets/progress_ring.dart';
 import '../widgets/press_scale.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
+import '../widgets/grouped_list.dart';
 
 class NutritionScreen extends StatefulWidget {
   const NutritionScreen({super.key});
@@ -461,7 +462,8 @@ class _TodayView extends StatelessWidget {
     final over =
         hasTarget && edgeFuel.consumedCalories > edgeFuel.targetCalories;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
       children: [
         AppCard(
             child: Column(
@@ -611,22 +613,15 @@ class _MealGroup extends StatelessWidget {
   const _MealGroup(
       {required this.edgeFuel, required this.onEdit, required this.onToggle});
   @override
-  Widget build(BuildContext context) => AppCard(
-      padding: EdgeInsets.zero,
-      child: Column(children: [
-        for (final (index, entry) in edgeFuel.entries.indexed) ...[
-          if (index > 0)
-            Divider(
-                height: Insets.xxs / 2,
-                color: AppAccessibility.border(context)),
+  Widget build(BuildContext context) => GroupedList(children: [
+        for (final entry in edgeFuel.entries)
           _FoodRow(
               entry: entry,
               onToggle: () => onToggle(edgeFuel, entry),
               onEdit: () => onEdit(edgeFuel, existing: entry),
               onDelete: () => edgeFuel.deleteEntry(entry),
               onSaveToggle: () => edgeFuel.toggleSavedFood(entry)),
-        ],
-      ]));
+      ]);
 }
 
 class _QuickStartMeals extends StatelessWidget {
@@ -826,14 +821,15 @@ class _RecipesTab extends StatelessWidget {
     );
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
       children: [
         AppCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'RECIPE LIBRARY',
+                'Recipe library',
                 style: AppType.micro(
                   color: AppColors.textMuted,
                   weight: FontWeight.w700,
@@ -841,7 +837,7 @@ class _RecipesTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: Insets.xs),
-              Text('Food you can actually cook', style: AppType.title1()),
+              Text(L.of(context).fuelRecipesTitle, style: AppType.title1()),
               const SizedBox(height: Insets.sm),
               Text(
                 'Fighter-focused recipes with the macros worked out, built '
@@ -941,7 +937,8 @@ class _MealsView extends StatelessWidget {
     ];
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
       children: [
         if (quickAdds.isNotEmpty) ...[
           const SectionHeader('Quick add'),
@@ -969,7 +966,8 @@ class _MealsView extends StatelessWidget {
           ),
           const SizedBox(height: Insets.lg),
         ],
-        SectionHeader('Meals logged - $eaten/${edgeFuel.entries.length}'),
+        SectionHeader(
+            L.of(context).fuelMealsLogged(eaten, edgeFuel.entries.length)),
         if (edgeFuel.entries.isEmpty) _QuickStartMeals(edgeFuel: edgeFuel),
         if (edgeFuel.entries.isNotEmpty)
           _MealGroup(edgeFuel: edgeFuel, onEdit: onEdit, onToggle: onToggle),
@@ -1160,7 +1158,7 @@ class _Check extends StatelessWidget {
       width: 26,
       height: 26,
       decoration: BoxDecoration(
-        color: checked ? AppColors.positive : Colors.transparent,
+        color: checked ? AppColors.positive : AppColors.transparent,
         shape: BoxShape.circle,
         border: Border.all(
           color: checked ? AppColors.positive : AppColors.border,
@@ -1177,7 +1175,7 @@ class _Check extends StatelessWidget {
                 Icons.check,
                 key: ValueKey('meal-check'),
                 size: 16,
-                color: Colors.white,
+                color: AppColors.onPrimary,
               )
             : const SizedBox(key: ValueKey('meal-empty')),
       ),

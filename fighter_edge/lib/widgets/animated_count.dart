@@ -56,7 +56,7 @@ class AnimatedCount extends StatelessWidget {
       tween: Tween<double>(begin: from ?? value, end: value),
       duration: duration,
       // Decelerate, not spring: the value must never overshoot what it means.
-      curve: Curves.easeOutCubic,
+      curve: MotionTokens.count,
       builder: (context, current, _) => Text(
         formatter(current),
         style: style,

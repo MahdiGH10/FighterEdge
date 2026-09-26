@@ -45,13 +45,13 @@ void main() {
     expect(find.text(a), findsOneWidget);
     expect(find.text('1 of 2'), findsOneWidget);
 
-    await tester.tap(find.text('NEXT'));
+    await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
     expect(find.text(b), findsOneWidget);
     expect(find.text('2 of 2'), findsOneWidget);
     expect(find.text('Skip tour'), findsNothing); // last step: just "Got it"
 
-    await tester.tap(find.text('GOT IT'));
+    await tester.tap(find.text('Got it'));
     await tester.pumpAndSettle();
     expect(find.byType(CoachMarkLayer), findsNothing);
     expect(await result, isTrue);
@@ -77,7 +77,7 @@ void main() {
 
     expect(find.text('Nowhere'), findsNothing);
     expect(find.text(b), findsOneWidget);
-    await tester.tap(find.text('GOT IT'));
+    await tester.tap(find.text('Got it'));
     await tester.pumpAndSettle();
     expect(await result, isTrue);
   });
@@ -92,7 +92,7 @@ void main() {
     ]);
     // One frame is enough when nothing animates.
     expect(find.text(a), findsOneWidget);
-    await tester.tap(find.text('GOT IT'));
+    await tester.tap(find.text('Got it'));
     await tester.pump();
     expect(find.byType(CoachMarkLayer), findsNothing);
   });

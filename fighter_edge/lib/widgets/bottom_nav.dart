@@ -39,7 +39,8 @@ class AppBottomNav extends StatelessWidget {
       color: AppColors.background,
       child: SafeArea(
         top: false,
-        minimum: const EdgeInsets.fromLTRB(12, 6, 12, 8),
+        minimum: const EdgeInsets.fromLTRB(
+            Insets.md, Insets.xs + Insets.xxs, Insets.md, Insets.sm),
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(Radii.nav),
@@ -60,7 +61,7 @@ class AppBottomNav extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
               child: Container(
-                padding: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(Insets.xs),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceGlass,
                   borderRadius: BorderRadius.circular(Radii.nav),
@@ -117,23 +118,24 @@ class _NavButton extends StatelessWidget {
           duration: reduceMotion ? Duration.zero : MotionTokens.standard,
           curve: MotionTokens.snap,
           constraints: const BoxConstraints(minHeight: 52),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+          padding: const EdgeInsets.symmetric(
+              horizontal: Insets.xs, vertical: Insets.xs),
           decoration: BoxDecoration(
-            color: selected ? AppColors.primarySoft : Colors.transparent,
+            color: selected ? AppColors.primarySoft : AppColors.transparent,
             borderRadius: BorderRadius.circular(Radii.navItem),
             border: Border.all(
               color: selected
                   ? AppColors.primary.withValues(alpha: .24)
-                  : Colors.transparent,
+                  : AppColors.transparent,
             ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(item.icon, size: 22, color: color),
-              const SizedBox(height: 2),
+              const SizedBox(height: Insets.xxs),
               SizedBox(
-                height: 14,
+                height: Insets.md + Insets.xxs,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(

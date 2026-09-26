@@ -84,6 +84,16 @@ class AppColors {
   // Text
   // ---------------------------------------------------------------------------
 
+  /// White foreground on primary/semantic fills, and opaque shader masks.
+  static const Color onPrimary = Color(0xFFFFFFFF);
+  static const Color maskOpaque = Color(0xFFFFFFFF);
+  static const Color transparent = Color(0x00000000);
+
+  /// Google's approved light sign-in button palette.
+  static const Color googleSurface = Color(0xFFFFFFFF);
+  static const Color googleText = Color(0xFF1F1F1F);
+  static const Color googleBorder = Color(0xFF747775);
+
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xFFAAAAB5);
   static const Color textMuted = Color(0xFF8A8A96);

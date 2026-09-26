@@ -200,7 +200,8 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: Insets.sm, vertical: 2),
+        padding: const EdgeInsets.symmetric(
+            horizontal: Insets.sm, vertical: Insets.xxs),
         decoration: BoxDecoration(
           color: color.withValues(alpha: .14),
           borderRadius: BorderRadius.circular(Radii.chip),

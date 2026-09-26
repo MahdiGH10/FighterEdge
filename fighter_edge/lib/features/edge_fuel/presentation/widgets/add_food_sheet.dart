@@ -119,7 +119,8 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, 0),
+          padding: const EdgeInsets.fromLTRB(
+              Insets.xl, Insets.none, Insets.xl, Insets.none),
           child: Text(l.addFoodTitle(widget.dayLabel), style: AppType.title1()),
         ),
         const SizedBox(height: Insets.md),
@@ -386,8 +387,8 @@ class _PortionStepState extends State<_PortionStep> {
       children: [
         Expanded(
           child: ListView(
-            padding:
-                const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.xl, Insets.lg),
+            padding: const EdgeInsets.fromLTRB(
+                Insets.lg, Insets.none, Insets.xl, Insets.lg),
             children: [
               Row(
                 children: [
@@ -497,7 +498,9 @@ class _PortionStepState extends State<_PortionStep> {
             padding: const EdgeInsets.fromLTRB(
                 Insets.xl, Insets.sm, Insets.xl, Insets.lg),
             child: PrimaryButton(
-              l.addFoodAddTo(widget.dayLabel),
+              l.addFoodAddTo(widget.dayLabel == l.commonToday
+                  ? widget.dayLabel.toLowerCase()
+                  : widget.dayLabel),
               icon: Icons.add,
               expand: true,
               onPressed: grams <= 0 || _overMax
@@ -568,9 +571,9 @@ class _NutrientSummary extends StatelessWidget {
             const SizedBox(height: Insets.md),
             Row(
               children: [
-                macro('PROTEIN', nutrients.proteinGrams, AppColors.protein),
-                macro('CARBS', nutrients.carbGrams, AppColors.carbs),
-                macro('FAT', nutrients.fatGrams, AppColors.fats),
+                macro('Protein', nutrients.proteinGrams, AppColors.protein),
+                macro('Carbs', nutrients.carbGrams, AppColors.carbs),
+                macro('Fat', nutrients.fatGrams, AppColors.fats),
               ],
             ),
           ],

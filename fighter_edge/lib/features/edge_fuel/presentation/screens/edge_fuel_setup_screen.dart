@@ -195,7 +195,8 @@ class _StepProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.lg),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -246,7 +247,8 @@ class _NavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.lg),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.lg),
       child: Row(
         children: [
           if (onBack != null) ...[
@@ -276,7 +278,8 @@ class _SetupSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Skeleton(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(Insets.lg, Insets.sm, Insets.lg, 0),
+        padding:
+            EdgeInsets.fromLTRB(Insets.lg, Insets.sm, Insets.lg, Insets.none),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

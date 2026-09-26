@@ -156,7 +156,7 @@ class AllergenStatement extends StatelessWidget {
               ),
               const SizedBox(width: Insets.sm),
               Text(
-                'ALLERGENS',
+                'Allergens',
                 style: AppType.micro(
                   color: hasConflict ? AppColors.warning : AppColors.textMuted,
                   weight: FontWeight.w700,
