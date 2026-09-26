@@ -13,6 +13,10 @@ import 'streak_engine.dart';
 /// this is a comfort feature riding on top of the training log, not billing
 /// or account state, so device-local storage is the right weight for it.
 class StreakController extends ChangeNotifier {
+  StreakController({DateTime Function()? clock})
+      : _clock = clock ?? DateTime.now;
+
+  final DateTime Function() _clock;
   String? _userId;
   bool _loaded = false;
   int _freezesAvailable = 0;
@@ -88,7 +92,7 @@ class StreakController extends ChangeNotifier {
     DateTime? now,
   }) {
     if (!_loaded) return;
-    final today = now ?? DateTime.now();
+    final today = now ?? _clock();
     final priorWeekStart =
         StreakEngine.weekStart(today).subtract(const Duration(days: 7));
     final priorWeekKey = StreakEngine.weekKey(priorWeekStart);
@@ -111,7 +115,7 @@ class StreakController extends ChangeNotifier {
   /// if there is no freeze to spend.
   Future<bool> useFreezeForYesterday({DateTime? now}) async {
     if (_freezesAvailable <= 0) return false;
-    final yesterday = (now ?? DateTime.now()).subtract(const Duration(days: 1));
+    final yesterday = (now ?? _clock()).subtract(const Duration(days: 1));
     final key = mealDateKey(yesterday);
     if (_protectedDateKeys.contains(key)) return false;
     _freezesAvailable -= 1;

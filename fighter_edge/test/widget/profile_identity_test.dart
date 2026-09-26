@@ -103,7 +103,8 @@ void main() {
       expect(find.text('Sessions Completed'), findsOneWidget);
       expect(find.text('${state.completedSessionCount}'), findsWidgets);
       final streakDays = StreakEngine.streakDays(
-          StreakEngine.completedDateKeys(state.sessions));
+          StreakEngine.completedDateKeys(state.sessions),
+          now: state.now);
       expect(find.text('$streakDays days'), findsOneWidget);
       // Straight from the onboarding answer, not a constant.
       expect(find.text('Training Days / Week'), findsOneWidget);

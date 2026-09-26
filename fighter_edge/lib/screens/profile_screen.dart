@@ -34,6 +34,7 @@ class ProfileScreen extends StatelessWidget {
     final streakDays = StreakEngine.streakDays(
       state.trainingDayKeys,
       protectedDateKeys: streak.protectedDateKeys,
+      now: state.now,
     );
     final weight = state.latestWeight;
     final auth = context.watch<AuthController>();

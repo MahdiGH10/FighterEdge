@@ -276,9 +276,11 @@ class FighterEdgeApp extends StatelessWidget {
               (firstRun ?? FirstRunController())..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, StreakController>(
-          create: (_) => StreakController(),
-          update: (_, auth, streak) =>
-              (streak ?? StreakController())..setUser(auth.user?.id),
+          create: (context) =>
+              StreakController(clock: () => context.read<AppState>().now),
+          update: (context, auth, streak) => (streak ??
+              StreakController(clock: () => context.read<AppState>().now))
+            ..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
           create: (_) => EdgeFuelController(

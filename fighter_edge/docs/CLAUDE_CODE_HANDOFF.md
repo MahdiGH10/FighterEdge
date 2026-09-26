@@ -1,5 +1,30 @@
 # Fighter Edge — Claude Code Handoff
 
+## UI task slice A: deterministic streak dates (2026-09-26)
+
+Branch `feat/ui-polish-slices-2-5`, isolated worktree `FighterEdge-ui-slices`.
+The owner's original tree and its generated files remain separate.
+
+- AppState exposes its injected date; dashboard/Profile pass that date into
+  StreakEngine. StreakController uses the same injected clock for earning and
+  spending freezes. Production defaults still use wall time.
+- Dashboard tests use Wednesday 2026-09-23. Added a Saturday demo at-risk
+  regression and an injected-clock earn/spend regression.
+- Verified: 664 non-golden tests pass (prior handoff: 660 pass / 2 fail;
+  two tests added), 3 unchanged goldens pass, analyzer clean, format clean.
+  Commands use `--no-pub` after dependencies resolved: Windows Developer Mode
+  is disabled, so pub's desktop symlink step reports an environment error.
+- Browser: offline local account; Dashboard/Profile at 390x844 and 320x568,
+  and actual 200% Flutter text with high contrast/reduced motion using an
+  ignored `build/qa_main.dart` entry point. Evidence is outside Git at
+  `C:/Users/Mahdi/Downloads/FighterEdge-ui-evidence/A-*.png`.
+  Browser text-size emulation alone does not change Flutter's text scale.
+- Existing visual issues observed: the checklist fills the small viewport;
+  Profile's subscription row crowds its action at 320px. Slices B/E address
+  these layouts. No screenshot files or local account data are committed.
+- Not verified: real devices, Android integration, iOS, release builds,
+  Firebase or RevenueCat. No backend/billing changes.
+
 ## UI polish slice 1: shared components (2026-09-26, uncommitted on main)
 
 First slice of `docs/UI_POLISH_AUDIT_20260925.md`. Visual only, no behaviour

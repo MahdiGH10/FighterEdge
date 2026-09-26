@@ -130,6 +130,8 @@ subtraction.
 ## Proposed slices (one per session)
 
 **Status:** slice 1 done 2026-09-26 (see CLAUDE_CODE_HANDOFF.md).
+Task slice A done 2026-09-26: injected streak clock, fixed Wednesday tests,
+Saturday at-risk coverage. 664 tests and 3 unchanged goldens pass.
 
 | # | Slice | Touches | Risk |
 |---|---|---|---|

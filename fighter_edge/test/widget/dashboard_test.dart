@@ -12,9 +12,10 @@ import 'package:fighter_edge/theme/app_theme.dart';
 import '../helpers/test_harness.dart';
 
 void main() {
+  final wednesday = DateTime(2026, 9, 23, 20);
   testWidgets('shows the fighter, sections and live weight', (tester) async {
     final repo = await makeRepo(signedIn: true);
-    final state = AppState();
+    final state = AppState(clock: () => wednesday);
     await tester.pumpWidget(wrapApp(
       DashboardScreen(onNavigate: (_) {}),
       repo: repo,
@@ -30,7 +31,7 @@ void main() {
 
   testWidgets('weight card reacts to AppState changes', (tester) async {
     final repo = await makeRepo(signedIn: true);
-    final state = AppState();
+    final state = AppState(clock: () => wednesday);
     await tester.pumpWidget(wrapApp(
       DashboardScreen(onNavigate: (_) {}),
       repo: repo,
@@ -38,7 +39,7 @@ void main() {
     ));
     await tester.pump();
 
-    state.addWeight(DateTime.now(), 75.0);
+    state.addWeight(wednesday.add(const Duration(days: 30)), 75.0);
     await tester.pumpAndSettle(MotionTokens.standard);
     expect(find.text('75.0'), findsWidgets);
   });
@@ -57,7 +58,7 @@ void main() {
     await tester.pumpWidget(wrapApp(
       DashboardScreen(onNavigate: (_) {}),
       repo: repo,
-      state: AppState(),
+      state: AppState(clock: () => wednesday),
     ));
     await tester.pump();
 
@@ -91,7 +92,7 @@ void main() {
     // — alive through two days ago, nothing logged yesterday or today.
     Future<AppState> atRiskState(String userId) async {
       final repo = InMemoryDataRepository();
-      final now = DateTime.now();
+      final now = wednesday;
       Future<void> seed(String day, int daysAgo) => repo.saveSession(
             userId,
             TrainingSession(
@@ -105,7 +106,8 @@ void main() {
           );
       await seed('a', 2);
       await seed('b', 3);
-      return AppState(dataRepository: repo)..setUser(userId);
+      return AppState(dataRepository: repo, clock: () => wednesday)
+        ..setUser(userId);
     }
 
     testWidgets('is not shown when nothing is at risk', (tester) async {
@@ -113,11 +115,22 @@ void main() {
       await tester.pumpWidget(wrapApp(
         DashboardScreen(onNavigate: (_) {}),
         repo: repo,
-        state: AppState(),
+        state: AppState(clock: () => wednesday),
       ));
       await tester.pump();
 
       expect(find.text('Streak at risk'), findsNothing);
+    });
+
+    testWidgets('demo streak is at risk on Saturday', (tester) async {
+      final repo = await makeRepo(signedIn: true);
+      await tester.pumpWidget(wrapApp(
+        DashboardScreen(onNavigate: (_) {}),
+        repo: repo,
+        state: AppState(clock: () => DateTime(2026, 9, 26, 20)),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text('Streak at risk'), findsOneWidget);
     });
 
     testWidgets('offers to spend a banked freeze, and using it clears it',

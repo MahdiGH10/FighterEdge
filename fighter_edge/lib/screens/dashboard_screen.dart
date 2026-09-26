@@ -63,10 +63,12 @@ class DashboardScreen extends StatelessWidget {
     final streakDays = StreakEngine.streakDays(
       streakCompletedDays,
       protectedDateKeys: streak.protectedDateKeys,
+      now: state.now,
     );
     final streakAtRisk = StreakEngine.isAtRisk(
       streakCompletedDays,
       protectedDateKeys: streak.protectedDateKeys,
+      now: state.now,
     );
     const dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     const dayNames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
@@ -175,7 +177,7 @@ class DashboardScreen extends StatelessWidget {
               child: WeeklyOverview(
                 dayLetters: dayLetters,
                 progress: weeklyProgress,
-                todayIndex: DateTime.now().weekday - 1,
+                todayIndex: state.now.weekday - 1,
               ),
             ),
           ),
@@ -282,6 +284,7 @@ class _TodayFocusCard extends StatelessWidget {
     final streakDays = StreakEngine.streakDays(
       state.trainingDayKeys,
       protectedDateKeys: streak.protectedDateKeys,
+      now: state.now,
     );
 
     return AppCard(

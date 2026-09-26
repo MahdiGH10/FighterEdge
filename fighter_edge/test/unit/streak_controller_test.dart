@@ -38,6 +38,21 @@ void main() {
     expect(controller.protectedDateKeys, isEmpty);
   });
 
+  test('injected clock dates both earning and spending a freeze', () async {
+    final controller = StreakController(clock: () => wednesday)
+      ..setUser('clock');
+    await pumpEventQueue();
+    controller.syncWeeklyEarn(
+      completedDateKeys: priorWeekDays(3),
+      isPro: false,
+    );
+    expect(controller.freezesAvailable, 1);
+    expect(await controller.useFreezeForYesterday(), isTrue);
+    expect(controller.protectedDateKeys,
+        {dateKey(wednesday.subtract(const Duration(days: 1)))});
+    controller.dispose();
+  });
+
   test('state is kept per user', () async {
     final a = await loaded('a');
     a.syncWeeklyEarn(
