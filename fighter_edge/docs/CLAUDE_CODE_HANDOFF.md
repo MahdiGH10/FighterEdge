@@ -1,5 +1,62 @@
 # Fighter Edge — Claude Code Handoff
 
+## START HERE: state as of 2026-09-26 (evening)
+
+**Branch.** `feat/ui-polish-recipes-camp-domain` combines everything finished
+on 2026-09-25/26, on top of `main` (`9ce7c23`):
+
+- `396f0a9` QA-pass fixes and UI polish slice 1 (Claude).
+- `2d729c9`..`2f774de` UI slices A–F (Astra, ChatGPT/Codex): injected streak
+  clock, dashboard, Fuel/Train, onboarding, grouped rows/copy/tokens,
+  beginner learning paths. Their sections follow below.
+- `40cc6d2` openly licensed photos for all 24 recipes, with credits.
+- Merged in: `4abb52d` a11y sweep of 8 secondary screens, `5bff15c` AI
+  scenario evaluation (`functions/`, `npm run eval:ai`), `e9cd884` fight-camp
+  and daily-snapshot domain (pure Dart), `9b6c7ac` owner decisions,
+  `47b398b` fight camp pattern brief.
+- Google Sans ships as a 107 KB static Medium Latin subset instead of the
+  4.97 MB variable font (Google's branding requires Google Sans Medium for
+  the sign-in label; OFL declares no Reserved Font Name, see
+  `assets/images/google_g.README.md`).
+
+**Verified on this branch:** format and analyze clean, 740 tests, 3 goldens,
+functions 90/90. **Not verified:** real devices, iOS, release builds, live
+Firebase, purchases, the CI emulator job (runs on the PR).
+
+**Decisions to respect** (`docs/PRODUCT_PLAN_20260924.md` > "Owner
+decisions (2026-09-26)"): fight camp before the AI features; AI is measured
+with `npm run eval:ai` before any model switch; ads only after launch, never
+on Pro; recipe photos are licensed web photos with credits, never
+AI-generated.
+
+**Owner-only items.** Run `npm run eval:ai` with `OPENROUTER_API_KEY`; legal
+page details (name, contact email, country, Firestore region) for
+`hosting/public/`; a login background without the watermark; 12 testers for
+the Play closed test.
+
+**Next:** fight camp screens per `docs/FIGHT_CAMP_PATTERN_BRIEF.md`, starting
+with persisting a fight and the setup screen, then the dashboard countdown.
+
+## AI evaluation, fight-camp domain, recipe photos (2026-09-26, Claude)
+
+- AI evaluation: 21 synthetic scenarios run through the real facts builder,
+  prompt (moved unchanged from `index.ts` to `prompt.ts`, verified
+  byte-identical) and validator. Tests the deployed chain by default;
+  `--models`, `--runs`, `--only`, `--dry-run`. Reports go to
+  `functions/eval-results/` (git-ignored). Not run live yet (needs the key).
+- Fight-camp domain (`lib/features/fight_camp/domain`): `FightCamp`,
+  `WeightPathCalculator`, `WeightTrend`; `DailySnapshot` in
+  `lib/features/daily_snapshot/domain`. Limits come from the ISSN 2025
+  position stand, cited in `weight_cut_policy.dart`: 0.5–1 kg a week in camp;
+  fight week plans food-only loss (2%); a water cut is flagged
+  `needsSupervision`, never planned; beyond 6.7/5.7/4.4% at 72/48/24 h or the
+  category's sweat allowance is `notSafe`. No plans under 18.
+  `test/unit/domain_purity_test.dart` enforces the pure-Dart rule.
+- Recipe photos: 23 CC BY 2.0 and 1 public domain (Flickr via Openverse),
+  checked by eye against each recipe, 960 px WebP, 1.5 MB total. Credits in
+  `lib/features/edge_fuel/data/recipe_photos.dart`; a photo without a credit
+  is never shown. Detail credit line opens the source page.
+
 ## UI task slice F: beginner learning paths (2026-09-26)
 
 - Four pure Dart ordered paths cover all 17 drills. Each begins with the free
@@ -144,7 +201,7 @@ The owner's original tree and its generated files remain separate.
 - Not verified: real devices, Android integration, iOS, release builds,
   Firebase or RevenueCat. No backend/billing changes.
 
-## UI polish slice 1: shared components (2026-09-26, uncommitted on main)
+## UI polish slice 1: shared components (2026-09-26, committed in 396f0a9)
 
 First slice of `docs/UI_POLISH_AUDIT_20260925.md`. Visual only, no behaviour
 changes.
@@ -170,7 +227,7 @@ and "streak freeze is not shown…" fail on some weekdays. `AppState()` seeds
 Mon–Thu demo sessions, so on Fri–Sun the demo streak is "at risk". The tests
 need a fixed clock. Next slice: dashboard (audit slice 2).
 
-## QA pass fixes: input dialogs, units, empty states (2026-09-25, uncommitted on main)
+## QA pass fixes: input dialogs, units, empty states (2026-09-25, committed in 396f0a9)
 
 A browser QA pass on the offline build (`-t lib/main_local.dart`) found bugs the
 648 existing tests missed. Fixed, with 14 regression tests in
