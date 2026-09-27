@@ -11,6 +11,25 @@ import '../../domain/weight_path.dart';
 import '../fight_camp_controller.dart';
 import '../fight_camp_copy.dart';
 
+/// The tone and icon of a path status, the same on every fight-camp card.
+(Color, IconData) pathStatusStyle(
+        BuildContext context, WeightPathStatus status) =>
+    switch (status) {
+      WeightPathStatus.onTrack || WeightPathStatus.atWeight => (
+          AppColors.positive,
+          Icons.check_circle_outline
+        ),
+      WeightPathStatus.needsSupervision => (
+          AppColors.warning,
+          Icons.warning_amber_rounded
+        ),
+      WeightPathStatus.notSafe => (AppColors.negative, Icons.block),
+      WeightPathStatus.needsMoreData || WeightPathStatus.notSupported => (
+          AppAccessibility.textSecondary(context),
+          Icons.info_outline
+        ),
+    };
+
 /// Three numbers first, then what they mean (pattern brief, pattern 2):
 /// trend weight, limit and what is left, then the path status in words.
 class WeightPathSummary extends StatelessWidget {
@@ -26,21 +45,7 @@ class WeightPathSummary extends StatelessWidget {
     final trend = status.trend.trendKg;
     final limit = status.camp.weightLimitKg;
     final path = status.path;
-    final (tone, icon) = switch (path.status) {
-      WeightPathStatus.onTrack || WeightPathStatus.atWeight => (
-          AppColors.positive,
-          Icons.check_circle_outline
-        ),
-      WeightPathStatus.needsSupervision => (
-          AppColors.warning,
-          Icons.warning_amber_rounded
-        ),
-      WeightPathStatus.notSafe => (AppColors.negative, Icons.block),
-      WeightPathStatus.needsMoreData || WeightPathStatus.notSupported => (
-          AppAccessibility.textSecondary(context),
-          Icons.info_outline
-        ),
-    };
+    final (tone, icon) = pathStatusStyle(context, path.status);
     final message = copy.pathMessage(path);
 
     return AppCard(

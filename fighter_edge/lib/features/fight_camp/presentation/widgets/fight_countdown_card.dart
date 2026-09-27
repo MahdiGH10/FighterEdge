@@ -13,11 +13,14 @@ import '../../../../widgets/grouped_list.dart';
 import '../../../../widgets/stat_card.dart';
 import '../../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../../domain/fight_camp.dart';
+import '../../domain/fight_week_plan.dart';
 import '../../domain/weight_path.dart';
+import '../../domain/weight_trend.dart';
 import '../fight_camp_controller.dart';
 import '../fight_camp_copy.dart';
 import '../screens/fight_path_screen.dart';
 import '../screens/fight_setup_screen.dart';
+import '../screens/fight_week_screen.dart';
 
 void openFightSetup(BuildContext context) => AppNavigation.push<void>(
       context,
@@ -30,6 +33,16 @@ void openFightPath(BuildContext context) => AppNavigation.push<void>(
       AppRoutes.fightPath,
       fallbackBuilder: (_) => const FightPathScreen(),
     );
+
+void openFightWeek(BuildContext context) => AppNavigation.push<void>(
+      context,
+      AppRoutes.fightWeek,
+      fallbackBuilder: (_) => const FightWeekScreen(),
+    );
+
+/// From fight week on, the days matter more than the weekly path.
+bool opensFightWeek(CampPhase phase) =>
+    phase == CampPhase.fightWeek || phase == CampPhase.refuel;
 
 /// The fight the camp is built around, at the top of the dashboard (pattern
 /// brief, screen B). Shown only while the fight is still ahead; afterwards
@@ -47,19 +60,34 @@ class FightCountdownSection extends StatelessWidget {
     final l = L.of(context);
     final copy =
         FightCampCopy(l, state, Localizations.localeOf(context).toString());
+    final ageYears = context.watch<EdgeFuelController>().draft?.ageYears;
     final status = FightCampStatus.of(
       camp,
       weights: state.weights,
       today: state.now,
-      ageYears: context.watch<EdgeFuelController>().draft?.ageYears,
+      ageYears: ageYears,
     );
+    final todaySteps = opensFightWeek(status.phase)
+        ? FightWeekPlan.plan(
+              camp: camp,
+              weights: [
+                for (final w in state.weights) WeightPoint(w.date, w.kg)
+              ],
+              today: state.now,
+              ageYears: ageYears,
+            )?.dayOn(state.now)?.steps ??
+            const <FightWeekStep>[]
+        : const <FightWeekStep>[];
     return Padding(
       padding: const EdgeInsets.only(bottom: Insets.md),
       child: FightCountdownCard(
         status: status,
         copy: copy,
         today: state.now,
-        onTap: () => openFightPath(context),
+        todaySteps: todaySteps,
+        onTap: () => opensFightWeek(status.phase)
+            ? openFightWeek(context)
+            : openFightPath(context),
       ),
     );
   }
@@ -71,12 +99,17 @@ class FightCountdownCard extends StatelessWidget {
   final DateTime today;
   final VoidCallback onTap;
 
+  /// Fight week's steps for [today]. When set, they replace the path line,
+  /// unless the path is a warning: a warning always shows.
+  final List<FightWeekStep> todaySteps;
+
   const FightCountdownCard({
     super.key,
     required this.status,
     required this.copy,
     required this.today,
     required this.onTap,
+    this.todaySteps = const [],
   });
 
   @override
@@ -86,7 +119,11 @@ class FightCountdownCard extends StatelessWidget {
     final days = status.daysToFight;
     final dateLine = l.fightNight(copy.date(camp.fightDate));
     final phaseLine = copy.phaseLine(status, today);
-    final pathLine = copy.pathLine(status.path);
+    final warning = status.path.status == WeightPathStatus.needsSupervision ||
+        status.path.status == WeightPathStatus.notSafe;
+    final pathLine = todaySteps.isEmpty || warning
+        ? copy.pathLine(status.path)
+        : l.fightTodaySteps(todaySteps.map(copy.stepTitle).join(' · '));
     final tone = switch (status.path.status) {
       WeightPathStatus.needsSupervision => AppColors.warning,
       WeightPathStatus.notSafe => AppColors.negative,
@@ -97,7 +134,8 @@ class FightCountdownCard extends StatelessWidget {
       if (days > 0) '$days ${l.fightDaysToGo(days)}',
       phaseLine,
       pathLine,
-      l.fightEdit,
+      // Where the tap goes.
+      opensFightWeek(status.phase) ? l.fightWeekTitle : l.fightPathScreenTitle,
     ].join('. ');
 
     return Semantics(

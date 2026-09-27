@@ -18,11 +18,34 @@ class WeightCutPolicy {
   /// Fight week: the last seven days before the weigh-in.
   static const int fightWeekDays = 7;
 
-  /// Fight-week loss from food alone: glycogen through carbohydrate
-  /// restriction (1–2% of body mass) plus gut content from under 10 g of
-  /// fibre a day for four days (1–2%) (point 9). The low end of each, so a
+  /// Fight-week loss from food alone: gut content from under 10 g of fibre a
+  /// day for four days (1–2% of body mass) plus glycogen through
+  /// carbohydrate restriction (1–2%) (point 9). The low end of each, so a
   /// plan never depends on the best case.
-  static const double dietOnlyAcuteFraction = 0.02;
+  static const double lowFibreAcuteFraction = 0.01;
+  static const double lowCarbAcuteFraction = 0.01;
+  static const double dietOnlyAcuteFraction =
+      lowFibreAcuteFraction + lowCarbAcuteFraction;
+
+  /// "A low-fiber intake of <10 g/day for 4 days" (point 9), ending the day
+  /// before the weigh-in. The stand gives no length for carbohydrate
+  /// restriction, so the plan uses the same days: one date when eating
+  /// changes, not two.
+  static const int lowFibreDays = 4;
+  static const int lowFibreMaxGramsPerDay = 10;
+
+  /// After the weigh-in: an oral rehydration solution at "1 to 1.5 liters/h"
+  /// first (point 12), then fast-acting carbohydrate "at a tolerable rate of
+  /// ≤ 60 g/h", with fibre kept low (point 13).
+  static const double refuelMinLitresPerHour = 1.0;
+  static const double refuelMaxLitresPerHour = 1.5;
+  static const int refuelMaxCarbGramsPerHour = 60;
+
+  /// Carbohydrate between weigh-in and fight: "About 4–7 g/kg may be
+  /// suitable for modest carbohydrate restriction" (point 14). The 8–12 g/kg
+  /// range is for significant glycogen depletion, which the app never plans.
+  static const double refuelMinCarbGramsPerKg = 4;
+  static const double refuelMaxCarbGramsPerKg = 7;
 
   /// The most body mass that can suitably be lost in the days before the
   /// weigh-in, food and water together: "6.7% at 72 h, 5.7% at 48 h, and

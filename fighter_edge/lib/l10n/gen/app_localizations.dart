@@ -2412,6 +2412,234 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Log two weigh-ins to draw your trend.'**
   String get fightChartEmpty;
+
+  /// No description provided for @fightWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight week'**
+  String get fightWeekTitle;
+
+  /// No description provided for @fightWeekOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight week plan'**
+  String get fightWeekOpen;
+
+  /// No description provided for @fightWeekStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts {date}'**
+  String fightWeekStarts(String date);
+
+  /// No description provided for @fightWeekWeighIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Weigh-in · {date}'**
+  String fightWeekWeighIn(String date);
+
+  /// No description provided for @fightWeekCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Food takes about {kg} {unit} off in fight week: low fibre and fewer carbs from {date}.'**
+  String fightWeekCarbs(String kg, String unit, String date);
+
+  /// No description provided for @fightWeekFibre.
+  ///
+  /// In en, this message translates to:
+  /// **'Food takes about {kg} {unit} off in fight week: low fibre from {date}.'**
+  String fightWeekFibre(String kg, String unit, String date);
+
+  /// No description provided for @fightWeekNoCut.
+  ///
+  /// In en, this message translates to:
+  /// **'No cut needed. Eat to your plan and hold your weight.'**
+  String get fightWeekNoCut;
+
+  /// No description provided for @fightWeekSupervision.
+  ///
+  /// In en, this message translates to:
+  /// **'The food steps below cover part of it. The rest needs a water cut, which needs a coach or dietitian. On food alone, the lightest limit you can make is {lightest} {unit}.'**
+  String fightWeekSupervision(String lightest, String unit);
+
+  /// No description provided for @fightWeekNeedsWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Log a weigh-in to plan your fight week.'**
+  String get fightWeekNeedsWeight;
+
+  /// No description provided for @fightWeekWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Drink normally all week. Fighter Edge never plans water cuts.'**
+  String get fightWeekWater;
+
+  /// No description provided for @fightWeekToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get fightWeekToday;
+
+  /// No description provided for @fightTodaySteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Today: {steps}'**
+  String fightTodaySteps(String steps);
+
+  /// No description provided for @fightWeekDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Day by day'**
+  String get fightWeekDays;
+
+  /// No description provided for @fightStepEat.
+  ///
+  /// In en, this message translates to:
+  /// **'Eat to plan'**
+  String get fightStepEat;
+
+  /// No description provided for @fightStepEatBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your usual camp targets.'**
+  String get fightStepEatBody;
+
+  /// No description provided for @fightStepFibre.
+  ///
+  /// In en, this message translates to:
+  /// **'Low fibre'**
+  String get fightStepFibre;
+
+  /// No description provided for @fightStepFibreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Under {grams} g of fibre: white rice, white bread, eggs, meat and fish. Skip beans, wholegrains, nuts and raw vegetables.'**
+  String fightStepFibreBody(int grams);
+
+  /// No description provided for @fightStepCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer carbs'**
+  String get fightStepCarbs;
+
+  /// No description provided for @fightStepCarbsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Smaller portions than usual of rice, bread, pasta and sweets. Keep protein up. If you feel dizzy or weak, eat.'**
+  String get fightStepCarbsBody;
+
+  /// No description provided for @fightStepWeighIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Weigh-in'**
+  String get fightStepWeighIn;
+
+  /// No description provided for @fightStepWeighInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your refuel straight after.'**
+  String get fightStepWeighInBody;
+
+  /// No description provided for @fightStepRefuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuel'**
+  String get fightStepRefuel;
+
+  /// No description provided for @fightStepRefuelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehydration drink first, then fast carbs. Targets below.'**
+  String get fightStepRefuelBody;
+
+  /// No description provided for @fightStepFight.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight'**
+  String get fightStepFight;
+
+  /// No description provided for @fightStepFightBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep fibre low and eat foods you know.'**
+  String get fightStepFightBody;
+
+  /// No description provided for @fightRefuelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'After the weigh-in'**
+  String get fightRefuelTitle;
+
+  /// No description provided for @fightRefuelDrink.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehydration drink'**
+  String get fightRefuelDrink;
+
+  /// No description provided for @fightRefuelDrinkWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'Straight after the weigh-in'**
+  String get fightRefuelDrinkWhen;
+
+  /// No description provided for @fightRefuelPerHour.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} an hour'**
+  String fightRefuelPerHour(String amount);
+
+  /// No description provided for @fightRefuelCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast carbs'**
+  String get fightRefuelCarbs;
+
+  /// No description provided for @fightRefuelCarbsWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'After the drink'**
+  String get fightRefuelCarbsWhen;
+
+  /// No description provided for @fightRefuelUpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {amount} an hour'**
+  String fightRefuelUpTo(String amount);
+
+  /// No description provided for @fightRefuelTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbs in total'**
+  String get fightRefuelTotal;
+
+  /// No description provided for @fightRefuelTotalWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'Between weigh-in and fight'**
+  String get fightRefuelTotalWhen;
+
+  /// No description provided for @fightRefuelFibre.
+  ///
+  /// In en, this message translates to:
+  /// **'Fibre'**
+  String get fightRefuelFibre;
+
+  /// No description provided for @fightRefuelFibreValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it low'**
+  String get fightRefuelFibreValue;
+
+  /// No description provided for @fightRefuelFibreWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'Until the fight'**
+  String get fightRefuelFibreWhen;
+
+  /// No description provided for @fightWeekSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps and targets from the International Society of Sports Nutrition (2025).'**
+  String get fightWeekSource;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

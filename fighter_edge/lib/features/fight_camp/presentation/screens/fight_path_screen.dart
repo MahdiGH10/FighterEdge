@@ -110,6 +110,19 @@ class FightPathScreen extends StatelessWidget {
                 ),
             ]),
           ],
+          const SizedBox(height: Insets.xl),
+          GroupedList(children: [
+            GroupedRow(
+              title: l.fightWeekOpen,
+              subtitle: opensFightWeek(status.phase)
+                  ? copy.phaseLine(status, state.now)
+                  : l.fightWeekStarts(copy.date(camp.fightWeekStart)),
+              leading: Icon(Icons.event_note_outlined,
+                  size: IconSizes.row,
+                  color: AppAccessibility.accentText(context)),
+              onTap: () => openFightWeek(context),
+            ),
+          ]),
         ],
       ),
     );

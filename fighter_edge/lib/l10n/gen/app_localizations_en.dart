@@ -1365,4 +1365,141 @@ class LEn extends L {
 
   @override
   String get fightChartEmpty => 'Log two weigh-ins to draw your trend.';
+
+  @override
+  String get fightWeekTitle => 'Fight week';
+
+  @override
+  String get fightWeekOpen => 'Fight week plan';
+
+  @override
+  String fightWeekStarts(String date) {
+    return 'Starts $date';
+  }
+
+  @override
+  String fightWeekWeighIn(String date) {
+    return 'Weigh-in · $date';
+  }
+
+  @override
+  String fightWeekCarbs(String kg, String unit, String date) {
+    return 'Food takes about $kg $unit off in fight week: low fibre and fewer carbs from $date.';
+  }
+
+  @override
+  String fightWeekFibre(String kg, String unit, String date) {
+    return 'Food takes about $kg $unit off in fight week: low fibre from $date.';
+  }
+
+  @override
+  String get fightWeekNoCut =>
+      'No cut needed. Eat to your plan and hold your weight.';
+
+  @override
+  String fightWeekSupervision(String lightest, String unit) {
+    return 'The food steps below cover part of it. The rest needs a water cut, which needs a coach or dietitian. On food alone, the lightest limit you can make is $lightest $unit.';
+  }
+
+  @override
+  String get fightWeekNeedsWeight => 'Log a weigh-in to plan your fight week.';
+
+  @override
+  String get fightWeekWater =>
+      'Drink normally all week. Fighter Edge never plans water cuts.';
+
+  @override
+  String get fightWeekToday => 'Today';
+
+  @override
+  String fightTodaySteps(String steps) {
+    return 'Today: $steps';
+  }
+
+  @override
+  String get fightWeekDays => 'Day by day';
+
+  @override
+  String get fightStepEat => 'Eat to plan';
+
+  @override
+  String get fightStepEatBody => 'Your usual camp targets.';
+
+  @override
+  String get fightStepFibre => 'Low fibre';
+
+  @override
+  String fightStepFibreBody(int grams) {
+    return 'Under $grams g of fibre: white rice, white bread, eggs, meat and fish. Skip beans, wholegrains, nuts and raw vegetables.';
+  }
+
+  @override
+  String get fightStepCarbs => 'Fewer carbs';
+
+  @override
+  String get fightStepCarbsBody =>
+      'Smaller portions than usual of rice, bread, pasta and sweets. Keep protein up. If you feel dizzy or weak, eat.';
+
+  @override
+  String get fightStepWeighIn => 'Weigh-in';
+
+  @override
+  String get fightStepWeighInBody => 'Start your refuel straight after.';
+
+  @override
+  String get fightStepRefuel => 'Refuel';
+
+  @override
+  String get fightStepRefuelBody =>
+      'Rehydration drink first, then fast carbs. Targets below.';
+
+  @override
+  String get fightStepFight => 'Fight';
+
+  @override
+  String get fightStepFightBody => 'Keep fibre low and eat foods you know.';
+
+  @override
+  String get fightRefuelTitle => 'After the weigh-in';
+
+  @override
+  String get fightRefuelDrink => 'Rehydration drink';
+
+  @override
+  String get fightRefuelDrinkWhen => 'Straight after the weigh-in';
+
+  @override
+  String fightRefuelPerHour(String amount) {
+    return '$amount an hour';
+  }
+
+  @override
+  String get fightRefuelCarbs => 'Fast carbs';
+
+  @override
+  String get fightRefuelCarbsWhen => 'After the drink';
+
+  @override
+  String fightRefuelUpTo(String amount) {
+    return 'Up to $amount an hour';
+  }
+
+  @override
+  String get fightRefuelTotal => 'Carbs in total';
+
+  @override
+  String get fightRefuelTotalWhen => 'Between weigh-in and fight';
+
+  @override
+  String get fightRefuelFibre => 'Fibre';
+
+  @override
+  String get fightRefuelFibreValue => 'Keep it low';
+
+  @override
+  String get fightRefuelFibreWhen => 'Until the fight';
+
+  @override
+  String get fightWeekSource =>
+      'Steps and targets from the International Society of Sports Nutrition (2025).';
 }
