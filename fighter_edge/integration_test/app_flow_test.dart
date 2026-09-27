@@ -34,6 +34,13 @@ void main() {
   testWidgets(
       'signup, onboarding, a store purchase, the server grants Pro, sign out',
       (tester) async {
+    // A tap that misses its target only prints a warning by default, so
+    // _retrying never saw it: once, the signup button was tapped while the
+    // route layer absorbed pointers, and the journey failed two lines later
+    // on a screen that never opened. A fatal miss throws, and the retry
+    // scrolls and taps again.
+    WidgetController.hitTestWarningShouldBeFatal = true;
+    addTearDown(() => WidgetController.hitTestWarningShouldBeFatal = false);
     SharedPreferences.setMockInitialValues({});
     final repo = LocalAuthRepository();
     await repo.init();
