@@ -7,6 +7,7 @@ Static, script-free pages served by Firebase Hosting on the existing project:
 | Privacy Policy | `/privacy` | `/de/datenschutz` |
 | Terms of Use (EULA) | `/terms` | `/de/nutzungsbedingungen` |
 | Account deletion (Google Play requirement) | `/delete-account` | `/de/konto-loeschen` |
+| Ethical Guidelines | `/ethics` | `/de/ethik` |
 
 They were drafted from the app's actual data flows (see `AUDIT.md`), so they
 say what the app really does, including the parts that are uncomfortable
@@ -55,6 +56,26 @@ The policy describes what the app does. Keep them in step:
 3. **Firebase Analytics data retention** set to 2 months (owner setting).
 4. **Data processing agreements** signed with Google (Firebase), RevenueCat
    and OpenRouter (owner).
+
+The Ethical Guidelines are promises about the product. Each one is kept by
+code; change the page in the same pull request as the code:
+
+| Promise (section) | Kept by |
+|---|---|
+| 0.5–1 kg a week in camp; food-only fight week; lightest safe limit (1) | `lib/features/fight_camp/domain/weight_cut_policy.dart`, `weight_path.dart`, `fight_week_plan.dart` |
+| Never plans water cuts; "drink normally" (1) | `fight_week_plan.dart` (no fluid step exists), `fightWeekWater` string |
+| No weight-cut plan under 18 (1) | `WeightCutPolicy.minimumAgeYears` |
+| Safety never behind the paywall (1) | No `Feature` gate in `lib/features/fight_camp/` |
+| Numbers calculated by the app, not AI (2, 3) | `lib/features/edge_fuel/domain/`; `functions/src/validate.ts` rejects numbers the app did not supply |
+| Dangerous methods discarded (3) | `functions/src/validate.ts` `PROHIBITED_PATTERNS`, `systemPrompt.ts` |
+| AI only with consent (3) | `lib/privacy/ai_coach_consent.dart`, `functions/src/consents.ts` |
+| AI tested before a model change (3) | `npm run eval:ai` (`functions/src/aiEvalScenarios.ts`) |
+| No selling, no ads today, Pro ad-free (5, 6) | Owner decision 2026-09-26; adding ads means updating section 6 here and the Privacy Policy |
+| Licensed, credited recipe photos (7) | `lib/features/edge_fuel/data/recipe_photos.dart` |
+| Tested at 200% text, screen readers, high contrast (8) | `test/accessibility/` |
+
+The app opens this page from Settings at the Terms URL's site
+(`TERMS_URL` with `/ethics`), so it needs no build variable of its own.
 
 ## 3. Publish
 

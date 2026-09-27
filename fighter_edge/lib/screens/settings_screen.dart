@@ -198,6 +198,11 @@ class SettingsScreen extends StatelessWidget {
               onTap: () => _openLegal(context, LegalDocument.privacy),
             ),
             _SettingsRow(
+              title: l.settingsEthics,
+              subtitle: l.settingsEthicsSubtitle,
+              onTap: () => _openLegal(context, LegalDocument.ethics),
+            ),
+            _SettingsRow(
               title: l.settingsDeleteAccount,
               subtitle: l.settingsDeleteAccountSubtitle,
               onTap:

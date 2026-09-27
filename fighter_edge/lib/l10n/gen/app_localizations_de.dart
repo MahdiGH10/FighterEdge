@@ -153,6 +153,12 @@ class LDe extends L {
   String get settingsPrivacySubtitle => 'Was wir speichern und warum';
 
   @override
+  String get settingsEthics => 'Ethische Leitlinien';
+
+  @override
+  String get settingsEthicsSubtitle => 'Was Fighter Edge niemals tut';
+
+  @override
   String get settingsDeleteAccount => 'Konto löschen';
 
   @override

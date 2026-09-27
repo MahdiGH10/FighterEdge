@@ -7,6 +7,7 @@ import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/routing/app_router.dart';
 import 'package:fighter_edge/screens/change_password_sheet.dart';
 import 'package:fighter_edge/screens/home_shell.dart';
+import 'package:fighter_edge/screens/legal_screen.dart';
 import 'package:fighter_edge/screens/settings_screen.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
 
@@ -27,6 +28,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(SettingsScreen), findsOneWidget);
   }
+
+  testWidgets('the Ethical Guidelines open from Settings', (tester) async {
+    final repo = await makeRepo(signedIn: true, onboarded: true);
+    await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
+    await tester.pump();
+    await openSettings(tester);
+
+    await tester.tap(find.text('Ethical Guidelines'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LegalScreen), findsOneWidget);
+    expect(find.textContaining('full Ethical Guidelines'), findsOneWidget);
+  });
 
   testWidgets('signing out from Settings lands on login, not a stale Settings',
       (tester) async {

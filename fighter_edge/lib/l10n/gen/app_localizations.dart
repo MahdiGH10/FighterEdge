@@ -361,6 +361,18 @@ abstract class L {
   /// **'What we store and why'**
   String get settingsPrivacySubtitle;
 
+  /// No description provided for @settingsEthics.
+  ///
+  /// In en, this message translates to:
+  /// **'Ethical Guidelines'**
+  String get settingsEthics;
+
+  /// No description provided for @settingsEthicsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What Fighter Edge will never do'**
+  String get settingsEthicsSubtitle;
+
   /// No description provided for @settingsDeleteAccount.
   ///
   /// In en, this message translates to:
