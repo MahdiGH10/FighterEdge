@@ -98,7 +98,10 @@ void main() {
       String message(FightCamp camp, {double? weightKg = 80}) =>
           copy.pathMessage(statusFor(camp, weightKg: weightKg).path);
 
+      // Camp takes a small excess off gently; only fight week holds.
       expect(message(fight(daysToFight: 40, limit: 79.9), weightKg: 80.5),
+          'On pace: lose 0.1 kg a week to reach 79.9 kg by fight week.');
+      expect(message(fight(daysToFight: 5, limit: 79.9), weightKg: 80.5),
           startsWith('Within reach'));
       expect(message(fight(daysToFight: 29)),
           allOf(contains('water cut'), contains('75.5 kg')));

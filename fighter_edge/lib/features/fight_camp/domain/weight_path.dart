@@ -156,7 +156,11 @@ class WeightPathCalculator {
     double rate;
     if (requiredRate <= maxRate + _epsilon) {
       status = WeightPathStatus.onTrack;
-      rate = requiredRate;
+      // Camp does the work, up to the gentle pace, so fight week only needs
+      // food for what is left: often nothing, never more than food can do.
+      final toLimitRate = (current - limit) / weeks;
+      rate = math.max(requiredRate,
+          math.min(WeightCutPolicy.gentleWeeklyLossKg, toLimitRate));
     } else if ((current - supervisedEntry) / weeks <= maxRate + _epsilon) {
       status = WeightPathStatus.needsSupervision;
       rate = maxRate;
@@ -168,7 +172,8 @@ class WeightPathCalculator {
       );
     }
 
-    final entry = current - rate * weeks;
+    // Never below the limit: a camp that reaches it leaves nothing, not -0.0.
+    final entry = math.max(limit, current - rate * weeks);
     return WeightPath._(
       status: status,
       weeklyLossKg: _round(rate, 2),

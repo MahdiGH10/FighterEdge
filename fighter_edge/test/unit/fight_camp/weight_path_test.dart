@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
@@ -106,11 +108,23 @@ void main() {
     expect(plan(70, 40).status, WeightPathStatus.atWeight);
   });
 
-  test('just above the limit holds weight through camp', () {
+  test('just above the limit: camp takes it off gently, fight week has none',
+      () {
     final path = plan(74.5, 40);
     expect(path.status, WeightPathStatus.onTrack);
-    expect(path.weeklyLossKg, 0);
-    expect(path.fightWeekEntryKg, 74.5);
+    expect(path.weeklyLossKg, 0.21, reason: '1 kg over 33 days of camp');
+    expect(path.fightWeekEntryKg, 73.5);
+    expect(path.acuteLossKg, 0);
+    expect(path.acuteLossFraction, closeTo(0, 1e-9));
+  });
+
+  test('camp runs at the gentle pace before fight week needs food', () {
+    // 10 weeks at 0.5 kg reach 76.0; the last 0.5 kg (0.7%) is fight week's.
+    final path = plan(81, 77, limit: 75.5);
+    expect(path.weeklyLossKg, 0.5);
+    expect(path.fightWeekEntryKg, 76.0);
+    expect(path.acuteLossKg, 0.5);
+    expect(path.acuteLossFraction, closeTo(0.5 / 76, 1e-9));
   });
 
   test('never plans for a minor', () {
@@ -142,6 +156,15 @@ void main() {
             expect(path.weeklyLossKg,
                 lessThanOrEqualTo(WeightCutPolicy.maxWeeklyLossKg),
                 reason: reason);
+            if (path.status == WeightPathStatus.onTrack) {
+              // Faster than gentle only when the date leaves no choice.
+              expect(
+                  path.weeklyLossKg,
+                  lessThanOrEqualTo(math.max(WeightCutPolicy.gentleWeeklyLossKg,
+                          path.requiredWeeklyLossKg) +
+                      0.01),
+                  reason: reason);
+            }
             final cap = path.status == WeightPathStatus.onTrack
                 ? WeightCutPolicy.dietOnlyAcuteFraction
                 : WeightCutPolicy.supervisedAcuteFraction(category, days);
