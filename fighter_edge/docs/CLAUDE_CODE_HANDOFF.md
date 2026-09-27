@@ -1,6 +1,26 @@
 # Fighter Edge — Claude Code Handoff
 
-## START HERE: state as of 2026-09-26 (evening)
+## START HERE: state as of 2026-09-27
+
+**Four stacked PRs, none merged.** Merge in order, retargeting each to
+`main` after the one before it lands:
+
+| PR | Branch | What |
+|---|---|---|
+| #10 | `feat/ui-polish-recipes-camp-domain` | UI slices A–F, recipe photos, fight-camp domain, AI evaluation |
+| #11 | `feat/fight-camp-setup` | Save a fight, setup screen, dashboard countdown (screens A, B) |
+| #12 | `feat/fight-camp-weight-path` | Weight path screen (screen C) |
+| #13 | `feat/fight-week` | Fight week plan and screen (screen D); camp pace change |
+
+**CI:** all 7 checks green on #10, #11 and #12, including the Android
+emulator integration test, which passed for the first time after the
+`978f19f` test fix (see below). #13 runs the same workflow.
+
+**Next:** plan step 5 of the pattern brief: send `DailySnapshot.toJson()`
+(and, in fight week, the day's `FightWeekStep`s) to the AI coach, which
+means extending the `aiFacts.ts` whitelist and the eval scenarios.
+
+The rest of this section describes #10.
 
 **Branch.** `feat/ui-polish-recipes-camp-domain` combines everything finished
 on 2026-09-25/26, on top of `main` (`9ce7c23`):
@@ -29,15 +49,14 @@ eval files ship unused) and #11 deploys the `fightCamp` rule, which is the
 rule the fight camp needs before release. Both go through the `production`
 environment and need its credentials.
 
-**CI on #10:** 6/7 green, including Android release and iOS builds. The
-Android emulator job has **never passed** on any branch (`main` included):
-runs stall after the APK installs, or the emulator loses adb. Separately,
-the app flow test itself had a bug found by running it as a widget test at
-the emulator's 320x640: the "Pro is active" snackbar covered Sign out.
-Fixed in `978f19f`; the full flow passes in the VM at 320x640. Whether the
-emulator job now passes is the open question; if it still stalls with no
-output, run `flutter test integration_test/app_flow_test.dart -d <phone>`
-on a real Android phone to tell the app apart from the CI emulator.
+**CI on #10:** 7/7 green. The Android emulator job had never passed on
+any branch before (runs stalled after the APK installed, or the emulator
+lost adb), and the app flow test also had a real bug, found by running it
+as a widget test at the emulator's 320x640: the "Pro is active" snackbar
+covered Sign out. Fixed in `978f19f`; the emulator job then passed on #10,
+#11 and #12. If it stalls again with no output, run
+`flutter test integration_test/app_flow_test.dart -d <phone>` on a real
+Android phone to tell the app apart from the CI emulator.
 
 **Verified on this branch:** format and analyze clean, 740 tests, 3 goldens,
 functions 90/90. **Not verified:** real devices, iOS runtime, live
@@ -55,10 +74,65 @@ page details (name, contact email, country, Firestore region) for
 the Play closed test.
 
 **Stacked on it:** `feat/fight-camp-setup` (screens A and B of
-`docs/FIGHT_CAMP_PATTERN_BRIEF.md`), then `feat/fight-camp-weight-path`
-(screen C). Sections below. **Next:** the fight-week domain additions
-(refuel targets and daily steps from ISSN points 9 and 12–14, tested like
-the weight path) and screen D, then the AI reading `DailySnapshot`.
+`docs/FIGHT_CAMP_PATTERN_BRIEF.md`), `feat/fight-camp-weight-path`
+(screen C), then `feat/fight-week` (screen D). Sections below.
+
+## Fight camp slice 3: fight week (2026-09-27, Claude)
+
+Branch `feat/fight-week` (PR #13), stacked on `feat/fight-camp-weight-path`.
+Build order step 4 of `docs/FIGHT_CAMP_PATTERN_BRIEF.md`.
+
+- **Source.** ISSN 2025 position stand, re-read at PMC11894756 for this
+  slice. Point 9: under 10 g of fibre a day for 4 days, and carbohydrate
+  restriction, each take 1–2% off. Point 12: an oral rehydration solution at
+  1–1.5 L/h first after the weigh-in. Point 13: then fast carbohydrate at
+  up to 60 g/h, fibre kept low. Point 14: 4–7 g/kg of carbohydrate after a
+  modest restriction (8–12 g/kg is for heavy glycogen depletion, which the
+  app never plans). Each value is a cited constant in `WeightCutPolicy`.
+  The stand gives no length for carbohydrate restriction; the plan uses the
+  same 4 days as low fibre, so eating changes on one date. Stated in code.
+- **Domain** (`fight_week_plan.dart`, pure Dart): `FightWeekPlan.plan`
+  picks the cut from the planned fight-week loss: none; up to 1% low fibre;
+  up to 2% low fibre and fewer carbs; not planned when the path is not safe
+  or there is no weight; no plan at all under 18. One `FightWeekDay` per
+  calendar day from fight-week start to fight day, with ordered
+  `FightWeekStep`s (eat to plan, low fibre, fewer carbs, weigh-in, refuel,
+  fight). `RefuelTargets` works out the 4–7 g/kg at the weight limit,
+  rounded to 10 g, and gives rates only for a same-day weigh-in (the gap
+  may be too short to eat the total). **Once fight week starts, the plan is
+  fixed by the trend weight on its first day**, so the steps do not flip as
+  weight comes off mid-week; with no weigh-in before it, today's trend
+  stands in.
+- **Behaviour change in the weight path.** An on-track camp now runs at
+  `max(required, min(0.5 kg/week, pace to the limit))`: camp does the work
+  at the gentle pace and fight week only needs food for what is left. Before,
+  it planned the slowest camp and always left the full 2% for fight week
+  (76 kg against 73.5 over 10 weeks was 0.1 kg/week, then 1.5 kg in fight
+  week; now 0.25 kg/week and nothing to cut). The entry weight never goes
+  below the limit (no "-0.0"). The test "just above the limit" was changed
+  on purpose; the safety grid also checks that on-track pace is only faster
+  than gentle when the date forces it.
+- **Screen** `/fight/week` (`FightWeekScreen`): the weigh-in date and phase;
+  one status line (weight path tones; the supervision copy is fight-week
+  specific) plus the fixed line "Drink normally all week. Fighter Edge never
+  plans water cuts."; a Today card with each step's instructions; every day
+  as a row (past ticked, today marked, weigh-in and fight glyphs); the
+  refuel targets as label, value and timing chip (fl oz in imperial, decimal
+  comma in German); the source line. A vertical list instead of the brief's
+  Mon–Sun strip: 8–10 day cells do not fit 320 px at 200% text.
+- **Ways in.** In fight week and the refuel days, the dashboard countdown
+  opens this screen, and its bottom line shows "Today: Low fibre · Fewer
+  carbs" unless the path is a warning (a warning always wins). The weight
+  path ends with a "Fight week plan" row. The countdown's screen-reader
+  label ended with "Edit fight" although #12 made the tap open the path; it
+  now names where the tap goes.
+- 38 strings EN/DE. Tests: the plan (every cut, lead days, refuel totals,
+  the mid-week anchor, a grid over weights, limits, dates and leads), the
+  screen (on pace, supervision, not safe, before fight week, same-day,
+  under 18, imperial, German formats, both ways in, 320 px / 200%), the
+  route sweep. Rendered and checked by eye at 390 px and at 320 px / 200%.
+- **Verified:** format and analyze clean, 800 tests, 3 goldens, functions
+  90/90. No new stored data, so no rules or privacy change.
 
 ## Fight camp slice 2: weight path screen (2026-09-26, Claude)
 
