@@ -2,7 +2,7 @@
 
 ## START HERE: state as of 2026-09-27
 
-**Four stacked PRs, none merged.** Merge in order, retargeting each to
+**Five stacked PRs, none merged.** Merge in order, retargeting each to
 `main` after the one before it lands:
 
 | PR | Branch | What |
@@ -11,10 +11,18 @@
 | #11 | `feat/fight-camp-setup` | Save a fight, setup screen, dashboard countdown (screens A, B) |
 | #12 | `feat/fight-camp-weight-path` | Weight path screen (screen C) |
 | #13 | `feat/fight-week` | Fight week plan and screen (screen D); camp pace change |
+| #14 | `feat/ethical-guidelines` | Ethical Guidelines page (EN/DE) and its Settings row |
 
-**CI:** all 7 checks green on #10, #11 and #12, including the Android
-emulator integration test, which passed for the first time after the
-`978f19f` test fix (see below). #13 runs the same workflow.
+**CI:** all 7 checks green on #10 to #13, including the Android emulator
+integration test, which passed for the first time after the `978f19f` test
+fix (see below). #14 runs the same workflow.
+
+**Owner-only, new:** the Ethical Guidelines page has the same two
+placeholders as the Terms (publication date, support email); the
+placeholder check blocks publishing until they are filled. Its section 6
+commits to never advertising diet pills, diuretics, laxatives or "rapid
+weight loss" products and never targeting ads with health data. That is my
+call as a safety line; change it before publishing if you disagree.
 
 **Next:** plan step 5 of the pattern brief: send `DailySnapshot.toJson()`
 (and, in fight week, the day's `FightWeekStep`s) to the AI coach, which
@@ -76,6 +84,31 @@ the Play closed test.
 **Stacked on it:** `feat/fight-camp-setup` (screens A and B of
 `docs/FIGHT_CAMP_PATTERN_BRIEF.md`), `feat/fight-camp-weight-path`
 (screen C), then `feat/fight-week` (screen D). Sections below.
+
+## Ethical Guidelines (2026-09-27, Claude)
+
+Branch `feat/ethical-guidelines` (PR #14), stacked on `feat/fight-week`.
+The owner asked for Terms of Use, Privacy Policy and Ethical Guidelines;
+the first two were drafted earlier, this is the third.
+
+- `hosting/public/ethics` and `hosting/public/de/ethik`, in the same static,
+  script-free format as the other legal pages. Nine short sections: safety
+  before making weight, numbers you can check, AI with limits, respect for
+  the body, data, money and advertising, honest content, accessibility, how
+  to report a problem. **Every statement about what the app does was
+  checked against the code**; the rest (no before-and-after photos, the
+  advertising rules) are commitments. The claim-to-code table is in
+  `hosting/README.md` section 2, so a change to that code updates the page
+  in the same PR.
+- Linked from the hosting index and the Terms and Privacy footers (both
+  languages). In the app: `LegalDocument.ethics` and a Settings row under
+  Account. Its URL is the Terms URL's site with `/ethics`
+  (`LegalLinks.siblingOf`), so release builds need no new variable; without
+  one the in-app page opens, like the other documents.
+- Tests: the URL derivation, every linked document hosted in EN and DE,
+  script-free pages, Settings → page through the real router. Checked in a
+  browser at 390 px.
+- **Verified:** format and analyze clean, 804 tests, 3 goldens.
 
 ## Fight camp slice 3: fight week (2026-09-27, Claude)
 
