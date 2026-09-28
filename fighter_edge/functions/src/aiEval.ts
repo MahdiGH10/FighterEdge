@@ -45,6 +45,7 @@ export interface EvalScenario {
     target: Record<string, unknown>;
     day?: Record<string, unknown> | null;
     foodPreferences?: Record<string, unknown> | null;
+    today?: Record<string, unknown> | null;
     userMessage?: string;
     history?: ChatTurn[];
   };

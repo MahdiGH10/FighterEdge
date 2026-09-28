@@ -47,6 +47,46 @@ const TARGET_NUMBERS = [
 const TARGET_STRINGS = ["status", "equationProfileUsed", "confidence"] as const;
 const MACROS = ["calories", "proteinGrams", "carbGrams", "fatGrams"] as const;
 
+/**
+ * The day beyond food, from `DailySnapshot.toJson()` in the app: training
+ * against the plan, the weight trend, and the fight camp. Numbers and names
+ * from fixed lists only; anything else is dropped.
+ */
+const TRAINING_NUMBERS = [
+  "sessionsToday",
+  "trainingDaysThisWeek",
+  "plannedSessionsPerWeek",
+  "trainingDaysLast7Days",
+  "minutesLast7Days",
+  "averageRpeLast7Days",
+] as const;
+const WEIGHT_NUMBERS = ["trendKg", "weeklyChangeKg", "weighInsLast7Days"] as const;
+const CAMP_NUMBERS = [
+  "daysToWeighIn",
+  "daysToFight",
+  "weightLimitKg",
+  "weeklyLossKg",
+  "fightWeekEntryKg",
+] as const;
+const CAMP_PHASES = ["offCamp", "camp", "fightWeek", "refuel", "postFight"];
+const WEIGHT_PATH_STATUSES = [
+  "needsMoreData",
+  "notSupported",
+  "atWeight",
+  "onTrack",
+  "needsSupervision",
+  "notSafe",
+];
+const FIGHT_WEEK_CUTS = ["none", "lowFibre", "lowFibreAndCarbs", "notPlanned"];
+const FIGHT_WEEK_STEPS = [
+  "eatToPlan",
+  "lowFibre",
+  "lowerCarbs",
+  "weighIn",
+  "refuel",
+  "fight",
+];
+
 export interface AiFacts {
   target: Record<string, unknown>;
   day: Record<string, unknown> | null;
@@ -55,6 +95,8 @@ export interface AiFacts {
     allergens: string[];
     dislikedFoods: string[];
   } | null;
+  /** Training, weight trend and fight camp; null when the app sent none. */
+  today: Record<string, unknown> | null;
 }
 
 export type FactsResult =
@@ -140,15 +182,54 @@ function trimPreferences(raw: unknown): AiFacts["foodPreferences"] {
   };
 }
 
+/** [value] when it is one of [allowed], else undefined: never free text. */
+function oneOf(value: unknown, allowed: readonly string[]): string | undefined {
+  return typeof value === "string" && allowed.includes(value) ? value : undefined;
+}
+
+function trimToday(raw: unknown): Record<string, unknown> | null {
+  if (!isRecord(raw)) return null;
+  const today: Record<string, unknown> = {};
+  if (isRecord(raw.training)) {
+    today.training = pickNumbers(raw.training, TRAINING_NUMBERS);
+  }
+  if (isRecord(raw.weight)) today.weight = pickNumbers(raw.weight, WEIGHT_NUMBERS);
+  if (isRecord(raw.camp)) {
+    const source = raw.camp;
+    const camp: Record<string, unknown> = pickNumbers(source, CAMP_NUMBERS);
+    const phase = oneOf(source.phase, CAMP_PHASES);
+    if (phase !== undefined) camp.phase = phase;
+    const status = oneOf(source.weightPathStatus, WEIGHT_PATH_STATUSES);
+    if (status !== undefined) camp.weightPathStatus = status;
+    const cut = oneOf(source.fightWeekCut, FIGHT_WEEK_CUTS);
+    if (cut !== undefined) camp.fightWeekCut = cut;
+    // Bounded like stringList(): a client can't force unbounded work by
+    // sending an oversized array before this ever gets to a length check.
+    const steps: string[] = [];
+    if (Array.isArray(source.todaySteps)) {
+      for (const item of source.todaySteps) {
+        const step = oneOf(item, FIGHT_WEEK_STEPS);
+        if (step !== undefined) steps.push(step);
+        if (steps.length === FIGHT_WEEK_STEPS.length) break;
+      }
+    }
+    camp.todaySteps = steps;
+    today.camp = camp;
+  }
+  return Object.keys(today).length === 0 ? null : today;
+}
+
 /**
- * Trims the client's target, day and preferences to what the model needs.
- * Fails only when the target is missing or has no calorie target, or when
- * the trimmed facts are still larger than [MAX_FACTS_BYTES].
+ * Trims the client's target, day, preferences and today (training, weight,
+ * fight camp) to what the model needs. Fails only when the target is
+ * missing or has no calorie target, or when the trimmed facts are still
+ * larger than [MAX_FACTS_BYTES].
  */
 export function buildAiFacts(request: {
   target?: unknown;
   day?: unknown;
   foodPreferences?: unknown;
+  today?: unknown;
 }): FactsResult {
   if (!isRecord(request.target)) return { ok: false, reason: "missing_target" };
   const target = trimTarget(request.target);
@@ -159,6 +240,7 @@ export function buildAiFacts(request: {
     target,
     day: isRecord(request.day) ? trimDay(request.day) : null,
     foodPreferences: trimPreferences(request.foodPreferences),
+    today: trimToday(request.today),
   };
   const json = JSON.stringify(facts);
   if (Buffer.byteLength(json, "utf8") > MAX_FACTS_BYTES) {
