@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:fighter_edge/features/daily_snapshot/domain/daily_snapshot.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_models.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
@@ -77,6 +78,26 @@ void main() {
       expect(gateway.lastHistory.last.content, 'Coach answer.');
       expect(controller.entries.whereType<CoachUserMessage>(), hasLength(2));
       expect(controller.entries.whereType<CoachReply>(), hasLength(2));
+    });
+
+    test('forwards today to the gateway on both brief and chat', () async {
+      final gateway = _RecordingGateway();
+      final controller = EdgeFuelCoachController(gateway: gateway);
+      final today = DailySnapshot.build(
+        today: DateTime(2026, 10, 1),
+        training: const [],
+        plannedSessionsPerWeek: 4,
+        goal: null,
+        nutritionDays: const [],
+        weights: const [],
+      );
+
+      await controller.requestBrief(target: _successTarget(), today: today);
+      expect(gateway.lastToday, same(today));
+
+      await controller.sendMessage('Hi', target: _successTarget());
+      expect(gateway.lastToday, isNull,
+          reason: 'a call without today must not reuse the last one');
     });
 
     test('allows only one request while a response is in flight', () async {
@@ -192,14 +213,17 @@ class _RecordingGateway implements EdgeFuelAiGateway {
   int chatCalls = 0;
   String? lastMessage;
   List<ChatTurn> lastHistory = const [];
+  DailySnapshot? lastToday;
 
   @override
   Future<EdgeFuelAiResult> generateFighterBrief({
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
+    DailySnapshot? today,
   }) {
     briefCalls++;
+    lastToday = today;
     return _briefFuture?.call() ?? Future.value(_briefResult);
   }
 
@@ -210,10 +234,12 @@ class _RecordingGateway implements EdgeFuelAiGateway {
     NutritionDay? day,
     NutritionSetupDraft? preferences,
     List<ChatTurn> history = const [],
+    DailySnapshot? today,
   }) {
     chatCalls++;
     lastMessage = userMessage;
     lastHistory = List.unmodifiable(history);
+    lastToday = today;
     return _chatFuture?.call() ?? Future.value(_chatResult);
   }
 }
@@ -224,6 +250,7 @@ class _ThrowingGateway implements EdgeFuelAiGateway {
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
+    DailySnapshot? today,
   }) async {
     throw StateError('timeout');
   }
@@ -235,6 +262,7 @@ class _ThrowingGateway implements EdgeFuelAiGateway {
     NutritionDay? day,
     NutritionSetupDraft? preferences,
     List<ChatTurn> history = const [],
+    DailySnapshot? today,
   }) async {
     throw StateError('timeout');
   }

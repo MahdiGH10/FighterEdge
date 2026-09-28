@@ -5,6 +5,7 @@ import '../../ai/edge_fuel_ai_models.dart';
 import '../../domain/models/nutrition_day.dart';
 import '../../domain/models/nutrition_setup_draft.dart';
 import '../../domain/models/nutrition_target.dart';
+import '../../../daily_snapshot/domain/daily_snapshot.dart';
 import '../../../../observability/telemetry.dart';
 
 /// One entry in the EdgeFuel Coach conversation, in display order.
@@ -81,6 +82,7 @@ class EdgeFuelCoachController extends ChangeNotifier {
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
+    DailySnapshot? today,
   }) async {
     if (_sending) return;
     _sending = true;
@@ -93,6 +95,7 @@ class EdgeFuelCoachController extends ChangeNotifier {
         target: target,
         day: day,
         preferences: preferences,
+        today: today,
       );
     } catch (_) {
       result = const EdgeFuelAiResult.unavailable();
@@ -116,6 +119,7 @@ class EdgeFuelCoachController extends ChangeNotifier {
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
+    DailySnapshot? today,
   }) async {
     final trimmed = text.trim();
     if (_sending || trimmed.isEmpty) return;
@@ -136,6 +140,7 @@ class EdgeFuelCoachController extends ChangeNotifier {
         preferences: preferences,
         userMessage: trimmed,
         history: history,
+        today: today,
       );
     } catch (_) {
       result = const EdgeFuelAiResult.unavailable();
