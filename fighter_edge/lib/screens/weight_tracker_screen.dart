@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +14,7 @@ import '../models/weight_entry.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
+import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
@@ -364,7 +367,7 @@ class _WeightChart extends StatelessWidget {
     if (entries.length < 2) {
       return Center(
         child: Text('Add more weigh-ins to see a trend',
-            style: AppType.subhead(color: AppColors.textMuted)),
+            style: AppType.subhead(color: AppAccessibility.textMuted(context))),
       );
     }
     final spots = <FlSpot>[
@@ -372,10 +375,22 @@ class _WeightChart extends StatelessWidget {
         FlSpot(i.toDouble(), state.displayWeight(entries[i].kg)),
     ];
     final values = [for (final spot in spots) spot.y, if (goal != null) goal];
-    final minValue = values.reduce((a, b) => a < b ? a : b);
-    final maxValue = values.reduce((a, b) => a > b ? a : b);
-    final minY = (minValue - 1).floorToDouble();
-    final maxY = (maxValue + 1).ceilToDouble();
+    // Whole-number steps, with both ends on a step, so no two axis labels
+    // land on top of each other (same fix as the fight-camp weight chart).
+    final low = values.reduce(math.min) - 1;
+    final high = values.reduce(math.max) + 1;
+    final interval = math.max(1, ((high - low) / 4).ceil()).toDouble();
+    final minY = (low / interval).floorToDouble() * interval;
+    final maxY = (high / interval).ceilToDouble() * interval;
+    final muted = AppAccessibility.textMuted(context);
+    // A handful of evenly spaced labels regardless of how many weigh-ins
+    // there are: "every other" still crowded three weeks of daily entries
+    // into unreadable overlap, where a few widely spaced dates read fine.
+    final labelCount = math.min(entries.length, 4);
+    final labelled = <int>{
+      for (var k = 0; k < labelCount; k++)
+        (k * (entries.length - 1) / math.max(1, labelCount - 1)).round(),
+    };
 
     return LineChart(
       LineChartData(
@@ -384,9 +399,9 @@ class _WeightChart extends StatelessWidget {
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          horizontalInterval: ((maxY - minY) / 4).clamp(0.5, 100),
-          getDrawingHorizontalLine: (_) =>
-              const FlLine(color: AppColors.border, strokeWidth: 1),
+          horizontalInterval: interval,
+          getDrawingHorizontalLine: (_) => const FlLine(
+              color: AppColors.border, strokeWidth: Insets.hairline),
         ),
         titlesData: FlTitlesData(
           topTitles:
@@ -396,26 +411,30 @@ class _WeightChart extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 32,
-              interval: ((maxY - minY) / 4).clamp(0.5, 100),
+              reservedSize: ChartTokens.valueAxis,
+              interval: interval,
               getTitlesWidget: (v, _) => Text(v.toStringAsFixed(0),
-                  style: AppType.micro(color: AppColors.textMuted)),
+                  style: AppType.micro(color: muted)),
             ),
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 24,
+              reservedSize: ChartTokens.dateAxis,
               interval: 1,
-              getTitlesWidget: (v, _) {
+              getTitlesWidget: (v, meta) {
                 final i = v.toInt();
-                if (i < 0 || i >= entries.length) return const SizedBox();
-                // Show a few labels to avoid crowding.
-                if (entries.length > 6 && i % 2 != 0) return const SizedBox();
-                return Padding(
-                  padding: const EdgeInsets.only(top: Insets.xs + Insets.xxs),
+                if (i < 0 || i >= entries.length || !labelled.contains(i)) {
+                  return const SizedBox();
+                }
+                // Kept inside the chart, so the last date is never cut off
+                // at the card's edge.
+                return SideTitleWidget(
+                  meta: meta,
+                  space: Insets.xs,
+                  fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
                   child: Text(DateFormat('M/d').format(entries[i].date),
-                      style: AppType.micro(color: AppColors.textMuted)),
+                      style: AppType.micro(color: muted)),
                 );
               },
             ),
@@ -426,27 +445,15 @@ class _WeightChart extends StatelessWidget {
           LineChartBarData(
             spots: spots,
             isCurved: true,
-            curveSmoothness: 0.3,
+            curveSmoothness: 0.2,
             color: AppColors.primary,
-            barWidth: 3,
+            barWidth: ChartTokens.line,
             dotData: FlDotData(
               show: true,
               getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
-                radius: 3.5,
+                radius: ChartTokens.dot,
                 color: AppColors.primary,
-                strokeWidth: 2,
-                strokeColor: AppColors.background,
-              ),
-            ),
-            belowBarData: BarAreaData(
-              show: true,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.primary.withValues(alpha: 0.25),
-                  AppColors.primary.withValues(alpha: 0.0),
-                ],
+                strokeWidth: 0,
               ),
             ),
           ),
@@ -456,9 +463,9 @@ class _WeightChart extends StatelessWidget {
             if (goal != null)
               HorizontalLine(
                 y: goal,
-                color: AppColors.warning.withValues(alpha: .82),
-                strokeWidth: 1.5,
-                dashArray: [6, 5],
+                color: AppColors.warning,
+                strokeWidth: ChartTokens.guide,
+                dashArray: ChartTokens.dash,
                 label: HorizontalLineLabel(
                   show: true,
                   alignment: Alignment.topRight,
