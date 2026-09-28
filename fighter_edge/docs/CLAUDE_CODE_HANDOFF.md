@@ -1,8 +1,8 @@
 # Fighter Edge — Claude Code Handoff
 
-## START HERE: state as of 2026-09-27
+## START HERE: state as of 2026-09-28
 
-**Five stacked PRs, none merged.** Merge in order, retargeting each to
+**Six stacked PRs, none merged.** Merge in order, retargeting each to
 `main` after the one before it lands:
 
 | PR | Branch | What |
@@ -12,21 +12,27 @@
 | #12 | `feat/fight-camp-weight-path` | Weight path screen (screen C) |
 | #13 | `feat/fight-week` | Fight week plan and screen (screen D); camp pace change |
 | #14 | `feat/ethical-guidelines` | Ethical Guidelines page (EN/DE) and its Settings row |
+| #15 | `feat/ai-daily-context` | AI coach reads training, weight trend and fight camp (plan step 5) |
 
-**CI:** all 7 checks green on #10 to #13, including the Android emulator
+**CI:** all 7 checks green on #10 to #14, including the Android emulator
 integration test, which passed for the first time after the `978f19f` test
-fix (see below). #14 runs the same workflow.
+fix (see below); #11 and #14 each stalled once on rerun (the known emulator
+hang, no test failure) and passed clean the second time. #15 runs the same
+workflow.
 
 **Owner-only, new:** the Ethical Guidelines page has the same two
 placeholders as the Terms (publication date, support email); the
 placeholder check blocks publishing until they are filled. Its section 6
 commits to never advertising diet pills, diuretics, laxatives or "rapid
 weight loss" products and never targeting ads with health data. That is my
-call as a safety line; change it before publishing if you disagree.
+call as a safety line; change it before publishing if you disagree. #15
+sends more to the AI provider than before (see its section below); nothing
+to configure, but it is worth knowing before the AI eval run.
 
-**Next:** plan step 5 of the pattern brief: send `DailySnapshot.toJson()`
-(and, in fight week, the day's `FightWeekStep`s) to the AI coach, which
-means extending the `aiFacts.ts` whitelist and the eval scenarios.
+**Next:** the fight-week domain and screen exist and the AI can now read
+them, but nothing yet writes a fight-week day as "done" — see
+`docs/LATER.md` > "Fight-week check-offs". Otherwise the fight-camp pattern
+brief's build order (`docs/FIGHT_CAMP_PATTERN_BRIEF.md`) is complete.
 
 The rest of this section describes #10.
 
@@ -83,7 +89,59 @@ the Play closed test.
 
 **Stacked on it:** `feat/fight-camp-setup` (screens A and B of
 `docs/FIGHT_CAMP_PATTERN_BRIEF.md`), `feat/fight-camp-weight-path`
-(screen C), then `feat/fight-week` (screen D). Sections below.
+(screen C), then `feat/fight-week` (screen D), `feat/ethical-guidelines`,
+then `feat/ai-daily-context` (plan step 5). Sections below.
+
+## AI daily context: training, weight and fight camp (2026-09-28, Claude)
+
+Branch `feat/ai-daily-context` (PR #15), stacked on `feat/ethical-guidelines`.
+Plan step 5 of `docs/FIGHT_CAMP_PATTERN_BRIEF.md`: "Send
+`DailySnapshot.toJson()` to the AI once A–C exist" — D exists too now, so
+this also sends today's fight-week steps.
+
+- **`DailySnapshot` gains `fightWeekCut` and `todaySteps`**
+  (`daily_snapshot.dart`): built from `FightWeekPlan.plan(...)` the same way
+  the fight-week screen is, so the AI and the screen never disagree about
+  what today asks for. Null/empty outside a fight or under 18, same as the
+  screen.
+- **Server whitelist** (`aiFacts.ts`): a new optional `today` block —
+  training numbers, the weight trend, and the camp (numbers, plus `phase`,
+  `weightPathStatus`, `fightWeekCut` and `todaySteps` from fixed lists,
+  never free text). `DailySnapshot.nutrition` is deliberately not
+  whitelisted: the target and the day's log already cover it, so sending it
+  again would just be a second, possibly-inconsistent copy. A client that
+  sends garbage names or an oversized array gets an empty/dropped field,
+  never a request rejection — `today` is always optional context.
+- **Coach rules** (`systemPrompt.ts`, version 7): explains `todaySteps` in
+  plain words (`lowFibre`, `lowerCarbs`, `refuel`) and adds none of its own;
+  states plainly that Fighter Edge never plans a water cut and the athlete
+  drinks normally; sends `needsSupervision`/`notSafe` to a professional.
+  Six new scenarios in `aiEvalScenarios.ts` (27 total), including "should I
+  drink less water today?" and a not-safe brief that must set
+  `requiresProfessionalReview`.
+- **AI consent version 2** (`consents.ts`, `data_consent.dart`): training,
+  weight and the fight camp are new categories of data reaching OpenRouter,
+  so every account is asked again. Privacy Policy 2.3 and the in-app consent
+  text (`aiConsentBody`, EN/DE) list the new bullet. Not a breaking change
+  server-side: `hasConsent` just stops accepting the old version, same as
+  any other consent-version bump.
+- **App wiring:** `EdgeFuelAiGateway.generateFighterBrief`/`sendChatMessage`
+  take an optional `DailySnapshot? today`. `buildDailySnapshot()`
+  (`daily_snapshot/presentation/daily_snapshot_builder.dart`) assembles one
+  from live `AppState`/`FightCampController` reads — no new async loading,
+  since both are already watched providers. `EdgeFuelCoachScreen` builds it
+  fresh at each tap (brief, refresh, send, get-brief), never caches it, so
+  the coach never answers from a stale training week or fight-camp day.
+  `goal`/`nutritionDays` are passed empty/null on purpose (see above).
+- Tests: the domain (fight week cut/steps on the snapshot, under 18, JSON
+  shape), the server whitelist (keeps the real fields, drops free text and
+  unknown enum values, bounded iteration like the rest of the file), the
+  controller (forwards `today`, and a call without it never reuses the
+  last one). The existing `data_consent_test.dart` fixture that hardcoded
+  version 1 was updated to read `currentVersion` symbolically, like the
+  rest of that file already did for `healthData`.
+- **Verified:** format and analyze clean, 807 tests, 3 goldens, functions
+  93/93.
 
 ## Ethical Guidelines (2026-09-27, Claude)
 
