@@ -11,9 +11,11 @@ enum DataConsentPurpose {
   /// Storing and using health, body, nutrition and training data.
   healthData('healthData', currentVersion: 1),
 
-  /// Sending plan facts, food preferences and chat messages to the AI
-  /// provider (OpenRouter, USA) when the athlete uses the AI coach.
-  aiCoach('aiCoach', currentVersion: 1);
+  /// Sending plan facts, food preferences, the training week, the weight
+  /// trend, the fight camp and chat messages to the AI provider (OpenRouter,
+  /// USA) when the athlete uses the AI coach. Version 2 (2026-09-28) added
+  /// training, weight and the fight camp, so everyone is asked again.
+  aiCoach('aiCoach', currentVersion: 2);
 
   const DataConsentPurpose(this.key, {required this.currentVersion});
 
