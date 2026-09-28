@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../l10n/decimal_format.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -175,7 +177,18 @@ class _AnimatedMetricValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final numeric = double.tryParse(value);
+    // [value] arrives already formatted for the athlete's language (see
+    // formatFixedDecimal), so both reading it back and counting its decimal
+    // digits must use the same locale — never the '.' Dart's own parser and
+    // toStringAsFixed assume, which a German "79,5" would fail outright.
+    final locale = Localizations.localeOf(context).toString();
+    final format = NumberFormat(null, locale);
+    num? numeric;
+    try {
+      numeric = format.parse(value);
+    } on FormatException {
+      numeric = null;
+    }
     if (numeric == null || MediaQuery.disableAnimationsOf(context)) {
       return Text(
         value,
@@ -183,14 +196,16 @@ class _AnimatedMetricValue extends StatelessWidget {
       );
     }
 
-    final decimals = value.contains('.') ? value.split('.').last.length : 0;
+    final separator = format.symbols.DECIMAL_SEP;
+    final decimals =
+        value.contains(separator) ? value.split(separator).last.length : 0;
     return TweenAnimationBuilder<double>(
-      tween: Tween(end: numeric),
+      tween: Tween(end: numeric.toDouble()),
       duration: MotionTokens.standard,
       curve: MotionTokens.emphasized,
       builder: (context, animated, _) {
         return Text(
-          animated.toStringAsFixed(decimals),
+          formatFixedDecimal(animated, locale, decimals: decimals),
           style: AppAccessibility.adjustStyle(context, AppType.title1()),
         );
       },

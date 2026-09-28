@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+import '../../../l10n/decimal_format.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../state/app_state.dart';
 import '../domain/fight_camp.dart';
@@ -17,7 +18,8 @@ class FightCampCopy {
   final AppState units;
   final String locale;
 
-  String weight(double kg) => units.displayWeight(kg).toStringAsFixed(1);
+  String weight(double kg) =>
+      formatFixedDecimal(units.displayWeight(kg), locale);
 
   String get unit => units.weightUnitLabel;
 

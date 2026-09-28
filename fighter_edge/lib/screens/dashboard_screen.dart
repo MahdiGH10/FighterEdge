@@ -7,6 +7,7 @@ import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../features/edge_fuel/presentation/widgets/fuel_week_card.dart';
 import '../features/fight_camp/presentation/widgets/fight_countdown_card.dart';
+import '../l10n/decimal_format.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../models/training_session.dart';
 import '../routing/app_navigation.dart';
@@ -255,7 +256,8 @@ class _DashboardStats extends StatelessWidget {
     final state = context.watch<AppState>();
     final weight = state.latestWeight == 0
         ? '—'
-        : state.displayWeight(state.latestWeight).toStringAsFixed(1);
+        : formatFixedDecimal(state.displayWeight(state.latestWeight),
+            Localizations.localeOf(context).toString());
     final stats = [
       _Stat(
           label: l.dashboardStatWeight,

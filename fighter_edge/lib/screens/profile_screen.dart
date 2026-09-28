@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../l10n/decimal_format.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
@@ -53,7 +54,7 @@ class ProfileScreen extends StatelessWidget {
     final measurements = [
       if (heightCm != null) '${heightCm.round()} cm',
       if (weight > 0)
-        '${state.displayWeight(weight).toStringAsFixed(1)} '
+        '${formatFixedDecimal(state.displayWeight(weight), Localizations.localeOf(context).toString())} '
             '${state.weightUnitLabel}',
     ].join(' · ');
 
