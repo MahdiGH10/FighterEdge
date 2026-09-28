@@ -2,7 +2,7 @@
 
 ## START HERE: state as of 2026-09-28
 
-**Six stacked PRs, none merged.** Merge in order, retargeting each to
+**Seven stacked PRs, none merged.** Merge in order, retargeting each to
 `main` after the one before it lands:
 
 | PR | Branch | What |
@@ -13,12 +13,13 @@
 | #13 | `feat/fight-week` | Fight week plan and screen (screen D); camp pace change |
 | #14 | `feat/ethical-guidelines` | Ethical Guidelines page (EN/DE) and its Settings row |
 | #15 | `feat/ai-daily-context` | AI coach reads training, weight trend and fight camp (plan step 5) |
+| #16 | `feat/german-decimal-format` | German reads "79,5", not "79.5", everywhere a weight number is genuinely localized |
 
 **CI:** all 7 checks green on #10 to #14, including the Android emulator
 integration test, which passed for the first time after the `978f19f` test
 fix (see below); #11 and #14 each stalled once on rerun (the known emulator
-hang, no test failure) and passed clean the second time. #15 runs the same
-workflow.
+hang, no test failure) and passed clean the second time. #15 and #16 run
+the same workflow.
 
 **Owner-only, new:** the Ethical Guidelines page has the same two
 placeholders as the Terms (publication date, support email); the
@@ -32,7 +33,10 @@ to configure, but it is worth knowing before the AI eval run.
 **Next:** the fight-week domain and screen exist and the AI can now read
 them, but nothing yet writes a fight-week day as "done" — see
 `docs/LATER.md` > "Fight-week check-offs". Otherwise the fight-camp pattern
-brief's build order (`docs/FIGHT_CAMP_PATTERN_BRIEF.md`) is complete.
+brief's build order (`docs/FIGHT_CAMP_PATTERN_BRIEF.md`) is complete. #16
+found several screens (the AI coach chat, the EdgeFuel setup review step,
+recipe/food copy) that are still hardcoded English throughout — real,
+separate work, not touched here; see its section below for the exact list.
 
 The rest of this section describes #10.
 
@@ -90,7 +94,67 @@ the Play closed test.
 **Stacked on it:** `feat/fight-camp-setup` (screens A and B of
 `docs/FIGHT_CAMP_PATTERN_BRIEF.md`), `feat/fight-camp-weight-path`
 (screen C), then `feat/fight-week` (screen D), `feat/ethical-guidelines`,
-then `feat/ai-daily-context` (plan step 5). Sections below.
+`feat/ai-daily-context` (plan step 5), then `feat/german-decimal-format`.
+Sections below.
+
+## German decimal format: "79,5" not "79.5" (2026-09-28, Claude)
+
+Branch `feat/german-decimal-format` (PR #16), stacked on
+`feat/ai-daily-context`. The gap the earlier handoff (2026-09-26) flagged as
+future work: `double.toStringAsFixed` always uses '.', which a German
+reader sees as a thousands separator, so "79.5 kg" reads as "seventy-nine
+thousand, five hundred". 24 call sites used it; 10 were real bugs on
+screens a German-locale athlete actually sees localized, and 6 are
+deliberately untouched — see below for both lists.
+
+- **`lib/l10n/decimal_format.dart`**: `formatFixedDecimal(value, locale,
+  {decimals = 1})`, a one-function file wrapping `NumberFormat` to keep the
+  fixed decimal count `toStringAsFixed` gives while swapping the separator
+  by locale. `fight_camp_copy.dart`'s `fluidRange`/`grams`/`gramsRange`
+  already did this ad hoc with `NumberFormat` directly for point 3 reasons;
+  its `weight()` did not, and was the first thing fixed.
+- **Fixed:** `fight_camp_copy.dart` (`weight()`), `fight_setup_screen.dart`
+  (the weight-limit field pre-fill), `dashboard_screen.dart` (the weight
+  stat), `profile_screen.dart` (the measurements line), and five sites in
+  `weight_tracker_screen.dart` (the weigh-in dialog pre-fill, the hero
+  number, its `AnimatedCount` formatter, the "7-day avg" and "Goal gap"
+  `StatCard`s, and the "To X kg" delta text).
+- **`stat_card.dart`'s `_AnimatedMetricValue`** had to change too: it
+  receives an already-formatted string and reparses it every frame to
+  animate. `double.tryParse` cannot read "79,5" at all — it would have
+  silently stopped animating for every German-locale number without ever
+  showing wrong text (the widget's own fallback path). Now parses and
+  counts decimals with `NumberFormat` in the ambient locale instead.
+- **Real bug found along the way, not a locale issue:** `Localizations
+  .localeOf(context)` throws if called from `initState()` — it needs an
+  ancestor dependency that is not wired up until later. Both editable
+  pre-fills (`fight_setup_screen.dart`'s weight limit,
+  `weight_tracker_screen.dart`'s weigh-in) moved the pre-fill from
+  `initState` into `didChangeDependencies`, guarded by a one-time flag so a
+  later dependency change never overwrites a typed edit. Caught by the
+  existing test suite immediately (assertion failures, not silent), fixed,
+  and now covered by a dedicated test.
+- **Deliberately not touched**, with the reason: `portion_calculator.dart`
+  (pure domain — CLAUDE.md requires `edge_fuel/domain` to stay
+  locale-agnostic) and `catalog_validation.dart` (dev-only diagnostics)
+  never reach a screen; `serving_stepper.dart` and `onboarding_screen.dart`
+  use `toStringAsFixed` as a rounding round-trip through `double.parse`,
+  never as display text; `recipe_copy.dart` and
+  `setup_steps/review_step.dart` feed hardcoded-English words either side
+  of the number (`RecipeCopy` says so explicitly: "the domain layer stays
+  pure Dart and localization-agnostic") — fixing only the number there
+  would read as half-German, half-English, for no one's benefit. These
+  three files are real, separate localization work, not started here.
+- Tests: `decimal_format_test.dart` (the pure function — English, German,
+  `decimals: 0`, rounding parity with `toStringAsFixed`), a new
+  `decimal_format_locale_test.dart` that switches locale the same way
+  Settings does (seeds the `fe_locale` pref `LocaleController` reads) and
+  proves the fix end to end on the dashboard, the weight tracker (hero
+  number, both StatCards, and the weigh-in dialog pre-fill — then saves
+  through it, to prove the comma-prefilled field still parses), profile,
+  and the fight setup screen; `fight_week_test.dart`'s existing German test
+  gained one line for `FightCampCopy.weight()`.
+- **Verified:** format and analyze clean, 816 tests, 3 goldens.
 
 ## AI daily context: training, weight and fight camp (2026-09-28, Claude)
 
