@@ -18,8 +18,10 @@ import {
   usableApiKey,
 } from "./entitlements";
 import {
+  AiProvider,
   aiProvider,
   callOpenRouter,
+  isUsableKey,
   modelChain,
   OpenRouterError,
 } from "./openrouter";
@@ -242,7 +244,13 @@ export const edgeFuelAiExplain = onCall(
     // independent try lifts the success rate to ~94% at the cost of latency
     // only for the unlucky quarter. A provider error or timeout is not
     // retried — a slow provider will not get faster on the second call.
-    const models = modelChain();
+    // Groq only when it is configured AND its key is real; otherwise the
+    // coach keeps working on OpenRouter rather than failing on a 401.
+    const provider: AiProvider =
+      aiProvider() === "groq" && isUsableKey(GROQ_API_KEY.value())
+        ? "groq"
+        : "openrouter";
+    const models = modelChain({ ...process.env, AI_PROVIDER: provider });
     const startedAt = Date.now();
     let parsed: unknown = null;
     let validation: { ok: boolean; reason?: string } = { ok: false };
@@ -254,8 +262,9 @@ export const edgeFuelAiExplain = onCall(
       while (modelIndex < models.length && rawContent === null) {
         try {
           const result = await callOpenRouter({
+            provider,
             apiKey:
-              aiProvider() === "groq"
+              provider === "groq"
                 ? GROQ_API_KEY.value()
                 : OPENROUTER_API_KEY.value(),
             model: models[modelIndex],
@@ -271,6 +280,7 @@ export const edgeFuelAiExplain = onCall(
           const openRouterError =
             error instanceof OpenRouterError ? error : null;
           logger.error("openrouter_call_failed", {
+            provider,
             task: data.task,
             attempt,
             modelIndex,

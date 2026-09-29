@@ -75,9 +75,9 @@ can't calculate a plan without this data, so withdrawing deletes your account
 and its data. Withdrawal does not affect processing that took place before it.</p>
 
 <h3>2.3 AI coach (Pro, optional)</h3>
-<p>If you use the AI Fighter Brief or chat, our server (Google Cloud Functions,
-USA) sends the following to OpenRouter, Inc. (USA), which forwards it to the
-AI model provider it selects:</p>
+<p>If you use the Corner Brief or chat, our server (Google Cloud Functions,
+USA) sends the following to Groq, Inc. or OpenRouter, Inc. (USA), whichever we
+use at the time, which may forward it to the AI model provider it selects:</p>
 <ul>
   <li>your calculated targets and the day's food-log summary,</li>
   <li>your diet type, allergies, and disliked foods,</li>
@@ -157,7 +157,7 @@ we have to keep them by law.</p>
   <tr><th>Recipient</th><th>Role</th><th>What</th></tr>
   <tr><td>Google Ireland Ltd. / Google LLC (Firebase: Authentication, Cloud Firestore, Cloud Functions, Hosting, Analytics, Crashlytics)</td><td>Processor</td><td>Account, app data, technical data; analytics and crash data only with consent</td></tr>
   <tr><td>RevenueCat, Inc.</td><td>Processor</td><td>Account ID, purchase receipts, subscription status</td></tr>
-  <tr><td>OpenRouter, Inc. and the AI model provider it routes to</td><td>Processor / sub-processor</td><td>AI coach input described in 2.3, only when you use it</td></tr>
+  <tr><td>Groq, Inc. or OpenRouter, Inc., and the AI model provider it routes to</td><td>Processor / sub-processor</td><td>AI coach input described in 2.3, only when you use it</td></tr>
   <tr><td>Apple Inc. / Google LLC as app stores</td><td>Independent controllers</td><td>Payments, under their own privacy policies</td></tr>
 </table>
 <p>We don't sell your personal data, and we don't use it for advertising.</p>
@@ -169,8 +169,8 @@ on the EU–US Data Privacy Framework where the recipient is certified, and
 otherwise on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR).
 Your app database is stored in
 <mark class="todo">TODO(owner): Firestore location from the Firebase console, e.g. "the EU (eur3)"</mark>.
-<mark class="todo">TODO(owner): confirm the transfer mechanism for RevenueCat and
-OpenRouter and sign each provider's data processing agreement.</mark></p>
+<mark class="todo">TODO(owner): confirm the transfer mechanism for RevenueCat,
+Groq and OpenRouter and sign each provider's data processing agreement.</mark></p>
 
 <h2>5. How long we keep data</h2>
 <ul>

@@ -79,9 +79,9 @@ berechnen, deshalb löscht ein Widerruf dein Konto und seine Daten. Die
 Rechtmäßigkeit der bis dahin erfolgten Verarbeitung bleibt unberührt.</p>
 
 <h3>2.3 KI-Coach (Pro, optional)</h3>
-<p>Wenn du den KI-Fighter-Brief oder den Chat nutzt, sendet unser Server
-(Google Cloud Functions, USA) Folgendes an OpenRouter, Inc. (USA), das die
-Anfrage an den ausgewählten Anbieter des KI-Modells weiterleitet:</p>
+<p>Wenn du das Ecken-Briefing oder den Chat nutzt, sendet unser Server
+(Google Cloud Functions, USA) Folgendes an Groq, Inc. oder OpenRouter, Inc. (USA),
+je nachdem, welchen wir gerade nutzen, das die Anfrage an den ausgewählten Anbieter des KI-Modells weiterleiten kann:</p>
 <ul>
   <li>deine berechneten Ziele und die Zusammenfassung des Ernährungsprotokolls
   des jeweiligen Tages,</li>
@@ -171,7 +171,7 @@ Abschluss, sofern keine gesetzlichen Aufbewahrungspflichten bestehen.</p>
   <tr><th>Empfänger</th><th>Rolle</th><th>Daten</th></tr>
   <tr><td>Google Ireland Ltd. / Google LLC (Firebase: Authentication, Cloud Firestore, Cloud Functions, Hosting, Analytics, Crashlytics)</td><td>Auftragsverarbeiter</td><td>Konto, App-Daten, technische Daten; Analyse- und Absturzdaten nur mit Einwilligung</td></tr>
   <tr><td>RevenueCat, Inc.</td><td>Auftragsverarbeiter</td><td>Konto-ID, Kaufbelege, Abo-Status</td></tr>
-  <tr><td>OpenRouter, Inc. und der jeweils gewählte Modellanbieter</td><td>Auftragsverarbeiter / Unterauftragsverarbeiter</td><td>Die in 2.3 genannten KI-Coach-Daten, nur bei Nutzung</td></tr>
+  <tr><td>Groq, Inc. oder OpenRouter, Inc. und der jeweils gewählte Modellanbieter</td><td>Auftragsverarbeiter / Unterauftragsverarbeiter</td><td>Die in 2.3 genannten KI-Coach-Daten, nur bei Nutzung</td></tr>
   <tr><td>Apple Inc. / Google LLC als App-Stores</td><td>Eigenständig Verantwortliche</td><td>Zahlungen, nach deren Datenschutzbestimmungen</td></tr>
 </table>
 <p>Wir verkaufen deine personenbezogenen Daten nicht und verwenden sie nicht
@@ -184,7 +184,7 @@ laufen auf Cloud Functions in den USA (Region us-central1). Grundlage der
 zertifiziert ist, andernfalls die EU-Standardvertragsklauseln (Art. 46 Abs. 2
 lit. c DSGVO). Deine App-Datenbank wird gespeichert in
 <mark class="todo">TODO(owner): Firestore-Standort aus der Firebase-Konsole, z. B. „der EU (eur3)“</mark>.
-<mark class="todo">TODO(owner): Übermittlungsgrundlage für RevenueCat und OpenRouter
+<mark class="todo">TODO(owner): Übermittlungsgrundlage für RevenueCat, Groq und OpenRouter
 prüfen und mit jedem Anbieter den Auftragsverarbeitungsvertrag abschließen.</mark></p>
 
 <h2>5. Speicherdauer</h2>

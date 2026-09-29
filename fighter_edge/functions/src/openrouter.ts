@@ -17,6 +17,15 @@ const PROVIDER_URLS: Record<AiProvider, string> = {
   groq: "https://api.groq.com/openai/v1/chat/completions",
 };
 
+/**
+ * Whether a secret holds a real key. "unset" is the placeholder the deploy
+ * notes tell the owner to store until a provider is actually used.
+ */
+export function isUsableKey(key: string | undefined): key is string {
+  const trimmed = (key ?? "").trim();
+  return trimmed.length > 0 && trimmed.toLowerCase() !== "unset";
+}
+
 /** Which provider is configured; anything but "groq" means OpenRouter. */
 export function aiProvider(env: NodeJS.ProcessEnv = process.env): AiProvider {
   return (env.AI_PROVIDER ?? "").trim().toLowerCase() === "groq"
@@ -176,20 +185,22 @@ export interface OpenRouterResult {
 }
 
 export async function callOpenRouter(
-  params: OpenRouterRequest & { apiKey: string },
+  params: OpenRouterRequest & { apiKey: string; provider?: AiProvider },
 ): Promise<OpenRouterResult> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const provider = aiProvider();
+    const provider = params.provider ?? aiProvider();
     const response = await fetch(PROVIDER_URLS[provider], {
       method: "POST",
       headers: {
         Authorization: `Bearer ${params.apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(buildRequestBody(params)),
+      body: JSON.stringify(
+        buildRequestBody(params, { ...process.env, AI_PROVIDER: provider }),
+      ),
       signal: controller.signal,
     });
 

@@ -148,7 +148,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('ai-coach-consent')), findsOneWidget);
-      expect(find.textContaining('OpenRouter (USA)'), findsOneWidget);
+      expect(find.textContaining('Groq or OpenRouter (USA)'), findsOneWidget);
       expect(find.text('Talk to your coach'), findsNothing);
 
       await tester.tap(find.text('I agree'));

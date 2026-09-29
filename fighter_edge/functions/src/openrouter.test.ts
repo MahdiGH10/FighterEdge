@@ -4,11 +4,21 @@ import { describe, it } from "node:test";
 import {
   aiProvider,
   buildRequestBody,
+  isUsableKey,
   DEFAULT_GROQ_CHAIN,
   DEFAULT_MODEL,
   modelChain,
   OpenRouterError,
 } from "./openrouter";
+
+describe("isUsableKey", () => {
+  it("rejects a missing key and the unset placeholder", () => {
+    for (const key of [undefined, "", "  ", "unset", " UNSET "]) {
+      assert.equal(isUsableKey(key), false);
+    }
+    assert.equal(isUsableKey("gsk_example"), true);
+  });
+});
 
 describe("Groq", () => {
   it("is only used when AI_PROVIDER says so", () => {

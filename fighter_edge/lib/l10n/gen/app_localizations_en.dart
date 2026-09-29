@@ -553,7 +553,7 @@ class LEn extends L {
 
   @override
   String get aiConsentBody =>
-      'To answer, our server sends your calorie and macro targets, today\'s food-log summary, your diet type, allergies, disliked foods, your messages, and, if you use them, today\'s planned session, your training days against your plan, your 7-day weight trend, and your fight camp (dates, weight limit and today\'s food-only plan) to OpenRouter (USA), which passes them to an AI model provider. Your name, email address and account ID are never sent.';
+      'To answer, our server sends your calorie and macro targets, today\'s food-log summary, your diet type, allergies, disliked foods, your messages, and, if you use them, today\'s planned session, your training days against your plan, your 7-day weight trend, and your fight camp (dates, weight limit and today\'s food-only plan) to Groq or OpenRouter (USA), which may pass them to an AI model provider. Your name, email address and account ID are never sent.';
 
   @override
   String get aiConsentRetention =>
