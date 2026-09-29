@@ -11,10 +11,19 @@
 // and per day), so every model listed here is usable for free within its
 // limits. Check the current limits at console.groq.com/settings/limits.
 
+// Keys live in functions/.env.local (git-ignored, never deployed). A value
+// already set in the shell wins over the file.
+try {
+  process.loadEnvFile(new URL("../.env.local", import.meta.url));
+} catch {
+  // No file: fall back to whatever the shell has.
+}
+
 const apiKey = process.env.GROQ_API_KEY;
 if (!apiKey) {
   console.error(
-    "GROQ_API_KEY is not set. Set it in this shell (it is never printed).",
+    "GROQ_API_KEY is empty. Paste your key into functions/.env.local " +
+      "(git-ignored; it is never printed).",
   );
   process.exit(2);
 }

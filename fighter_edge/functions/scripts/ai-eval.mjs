@@ -28,6 +28,14 @@ const { aiProvider, callOpenRouter, modelChain } = require("../lib/openrouter.js
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
+// Keys and AI_PROVIDER can live in functions/.env.local (git-ignored, never
+// deployed). A value already set in the shell wins over the file.
+try {
+  process.loadEnvFile(join(root, ".env.local"));
+} catch {
+  // No file: fall back to whatever the shell has.
+}
+
 function argValue(name) {
   const index = process.argv.indexOf(name);
   return index === -1 ? undefined : process.argv[index + 1];

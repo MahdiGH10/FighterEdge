@@ -2,7 +2,7 @@
 
 ## START HERE: state as of 2026-09-28
 
-**Nine stacked PRs, none merged.** Merge in order, retargeting each to
+**Ten stacked PRs, none merged.** Merge in order, retargeting each to
 `main` after the one before it lands:
 
 | PR | Branch | What |
@@ -16,6 +16,7 @@
 | #16 | `feat/german-decimal-format` | German reads "79,5", not "79.5", everywhere a weight number is genuinely localized |
 | #17 | `feat/weight-chart-tokens` | The old weight tracker chart restyled onto `ChartTokens`, matching the fight-camp chart |
 | #19 | `feat/corner-brief` | Daily Corner Brief on Home (plan step 3): a free calculated line, and three coach-written lines for Pro |
+| #20 | `feat/groq-provider` | Optional Groq provider (`AI_PROVIDER=groq`) with a model fallback chain; needs the `GROQ_API_KEY` secret set before merge |
 
 **CI:** all 7 checks green on #10, #12, #13, and now #15 (the Android
 emulator job stalled once on #15's first run — 35 minutes, no output — and

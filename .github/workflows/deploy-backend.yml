@@ -15,7 +15,8 @@ name: Deploy backend
 # fail.
 #
 # Firebase secrets the functions need (set once with
-# `firebase functions:secrets:set NAME`): OPENROUTER_API_KEY,
+# `firebase functions:secrets:set NAME`): OPENROUTER_API_KEY, GROQ_API_KEY
+# ("unset" until Groq is used; AI_PROVIDER=groq switches the coach to it),
 # REVENUECAT_WEBHOOK_AUTH, REVENUECAT_API_KEY ("unset" until RevenueCat
 # exists).
 on:

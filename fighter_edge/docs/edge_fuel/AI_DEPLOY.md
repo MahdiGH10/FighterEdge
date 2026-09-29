@@ -63,8 +63,10 @@ limits). OpenRouter stays the default until you switch.
    ```
    The functions declare this secret, so it must exist before any deploy.
    Until you use Groq, set it to the text `unset`.
-2. Find out which models the key can use, then score them (both read
-   `GROQ_API_KEY` from your shell and never print it):
+2. For the scripts below, paste the key into `functions/.env.local` (it is
+   git-ignored and never deployed; `.env.local.example` shows the format).
+   Find out which models the key can use, then score them (neither prints
+   the key):
    ```bash
    cd fighter_edge/functions
    npm run groq:models
