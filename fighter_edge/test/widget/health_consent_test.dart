@@ -174,7 +174,8 @@ void main() {
         ),
       ));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Get today\'s Fighter Brief').first);
+      await tester.enterText(find.byType(EditableText), 'What should I eat?');
+      await tester.tap(find.bySemanticsLabel('Send'));
       await tester.pumpAndSettle();
 
       expect(

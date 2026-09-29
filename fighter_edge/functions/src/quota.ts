@@ -4,12 +4,13 @@ import { AiTaskType } from "./types";
 
 /**
  * Per-account daily allowance for each AI task (audit D-8), applied after
- * the server-owned entitlement gate. A Fighter Brief is written once a day
- * and refreshed after new logs; chat is the open-ended one. `summarizeTrend`
- * is the only task a free account can call, so it gets the smallest share.
+ * the server-owned entitlement gate. The Corner Brief is written once a day
+ * and rewritten after new logs (breakfast, lunch, a session, dinner, a
+ * weigh-in...); chat is the open-ended one. `summarizeTrend` is the only
+ * task a free account can call, so it gets the smallest share.
  */
 export const TASK_DAILY_LIMITS: Readonly<Record<AiTaskType, number>> = {
-  fighterBrief: 6,
+  cornerBrief: 8,
   chat: 20,
   summarizeTrend: 3,
 };

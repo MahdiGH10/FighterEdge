@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { parseModelJson, validateResponse } from "./validate";
+import { parseModelJson, toClientResponse, validateResponse } from "./validate";
 
 const suppliedFacts = JSON.stringify({
   target: { targetCalories: 2500, proteinGrams: 150, carbGrams: 260, fatGrams: 80 },
@@ -20,21 +20,18 @@ function goodResponse(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function goodBriefResponse(overrides: Record<string, unknown> = {}) {
+function goodCornerBrief(overrides: Record<string, unknown> = {}) {
   return {
-    schemaVersion: 2,
-    summary: "Your Fighter Brief is ready for today.",
-    brief: {
-      nextAction: "Log your next meal so the plan stays specific.",
-      mealSuggestion: "Anchor your next meal around a reliable protein source.",
-      trainingTiming: "Keep your usual training schedule and fuel consistently.",
-      weeklyAdjustment: "Keep this target steady until you have a full week of data.",
-    },
-    actions: [],
+    schemaVersion: 3,
+    lines: [
+      { topic: "fuel", text: "Anchor your next meal around a reliable protein source." },
+      { topic: "training", text: "Keep your usual session today and fuel before it." },
+      { topic: "recovery", text: "Log tonight's sleep-friendly dinner so tomorrow stays specific." },
+    ],
     warnings: [],
     requiresProfessionalReview: false,
     factsUsed: ["targetCalories", "proteinGrams"],
-    contentVersion: "sp2",
+    contentVersion: "sp8",
     ...overrides,
   };
 }
@@ -122,47 +119,91 @@ test("allows numbers that are present in the supplied facts", () => {
   assert.equal(result.ok, true);
 });
 
-test("accepts a complete version-2 Fighter Brief", () => {
-  const result = validateResponse(goodBriefResponse(), suppliedFacts, "fighterBrief");
+test("accepts a Corner Brief of three lines on three topics", () => {
+  const result = validateResponse(goodCornerBrief(), suppliedFacts, "cornerBrief");
   assert.equal(result.ok, true);
 });
 
-test("rejects a Fighter Brief missing a required section", () => {
-  const response = goodBriefResponse();
-  delete (response.brief as Record<string, unknown>).trainingTiming;
-  const result = validateResponse(response, suppliedFacts, "fighterBrief");
+test("rejects a Corner Brief that is not exactly three lines", () => {
+  const lines = goodCornerBrief().lines;
+  for (const wrong of [lines.slice(0, 2), [...lines, { topic: "weight", text: "Weigh in tomorrow." }]]) {
+    const result = validateResponse(goodCornerBrief({ lines: wrong }), suppliedFacts, "cornerBrief");
+    assert.equal(result.ok, false);
+    assert.equal(result.reason, "malformed_schema");
+  }
+});
+
+test("rejects a Corner Brief that repeats a topic", () => {
+  const [first, second] = goodCornerBrief().lines;
+  const result = validateResponse(
+    goodCornerBrief({ lines: [first, second, { ...first, text: "More protein at dinner." }] }),
+    suppliedFacts,
+    "cornerBrief",
+  );
   assert.equal(result.ok, false);
   assert.equal(result.reason, "malformed_schema");
 });
 
-test("rejects prohibited language inside a Fighter Brief section", () => {
+test("rejects a Corner Brief line with an unknown topic, no text, or too much text", () => {
+  const [, second, third] = goodCornerBrief().lines;
+  for (const bad of [
+    { topic: "mindset", text: "Stay sharp." },
+    { topic: "fuel", text: "   " },
+    { topic: "fuel", text: "x".repeat(201) },
+    { topic: "fuel" },
+  ]) {
+    const result = validateResponse(
+      goodCornerBrief({ lines: [bad, second, third] }),
+      suppliedFacts,
+      "cornerBrief",
+    );
+    assert.equal(result.ok, false, JSON.stringify(bad));
+    assert.equal(result.reason, "malformed_schema");
+  }
+});
+
+test("rejects the old Fighter Brief shape for the Corner Brief task", () => {
   const result = validateResponse(
-    goodBriefResponse({
-      brief: {
-        ...goodBriefResponse().brief,
-        mealSuggestion: "Dehydrate before training to make weight.",
-      },
+    goodResponse({ schemaVersion: 2, brief: { nextAction: "Log dinner." } }),
+    suppliedFacts,
+    "cornerBrief",
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "malformed_schema");
+});
+
+test("rejects prohibited language inside a Corner Brief line", () => {
+  const [first, second] = goodCornerBrief().lines;
+  const result = validateResponse(
+    goodCornerBrief({
+      lines: [first, second, { topic: "weight", text: "Sit in the sauna tonight to drop the last kilo." }],
     }),
     suppliedFacts,
-    "fighterBrief",
+    "cornerBrief",
   );
   assert.equal(result.ok, false);
   assert.equal(result.reason, "prohibited_content");
 });
 
-test("rejects fabricated numbers inside a Fighter Brief section", () => {
-  const result = validateResponse(
-    goodBriefResponse({
-      brief: {
-        ...goodBriefResponse().brief,
-        weeklyAdjustment: "Raise tomorrow's target to 4200 kcal.",
-      },
+test("rejects fabricated numbers in a Corner Brief line or warning", () => {
+  const [first, second] = goodCornerBrief().lines;
+  const inLine = validateResponse(
+    goodCornerBrief({
+      lines: [first, second, { topic: "weight", text: "Raise tomorrow's target to 4200 kcal." }],
     }),
     suppliedFacts,
-    "fighterBrief",
+    "cornerBrief",
   );
-  assert.equal(result.ok, false);
-  assert.equal(result.reason, "fabricated_numbers");
+  assert.equal(inLine.ok, false);
+  assert.equal(inLine.reason, "fabricated_numbers");
+
+  const inWarning = validateResponse(
+    goodCornerBrief({ warnings: ["Never drop below 1200 kcal."] }),
+    suppliedFacts,
+    "cornerBrief",
+  );
+  assert.equal(inWarning.ok, false);
+  assert.equal(inWarning.reason, "fabricated_numbers");
 });
 
 test("parseModelJson recovers an object wrapped in a code fence", () => {
@@ -235,18 +276,47 @@ test("rejects prohibited content smuggled into a chat reply", () => {
   assert.equal(result.reason, "prohibited_content");
 });
 
-test("checks Fighter Brief sections with the same number rules", () => {
+test("checks Corner Brief lines with the same number rules", () => {
   const result = validateResponse(
-    goodBriefResponse({
-      brief: {
-        nextAction: "You have about 1,080 kcal left — log dinner.",
-        mealSuggestion: "Lean protein and rice.",
-        trainingTiming: "Eat 2 hours before training.",
-        weeklyAdjustment: "Hold 2,500 kcal this week.",
-      },
+    goodCornerBrief({
+      lines: [
+        { topic: "fuel", text: "About 1,080 kcal left — make dinner protein-first." },
+        { topic: "training", text: "Wrestling today: eat a carb-based meal a few hours before." },
+        { topic: "weight", text: "Hold 2,500 kcal this week while your trend settles." },
+      ],
     }),
     dayFacts,
-    "fighterBrief",
+    "cornerBrief",
   );
   assert.equal(result.ok, true);
+});
+
+test("the app only receives the schema's own fields", () => {
+  const brief = toClientResponse({
+    ...goodCornerBrief(),
+    summary: "An unchecked extra the model added.",
+    lines: goodCornerBrief().lines.map((line) => ({ ...line, emoji: "🥊" })),
+  } as never);
+  assert.deepEqual(Object.keys(brief).sort(), [
+    "contentVersion",
+    "factsUsed",
+    "lines",
+    "requiresProfessionalReview",
+    "schemaVersion",
+    "warnings",
+  ]);
+  assert.deepEqual(Object.keys((brief as { lines: object[] }).lines[0]).sort(), ["text", "topic"]);
+
+  const chat = toClientResponse({
+    ...goodResponse(),
+    brief: { nextAction: "An old field." },
+    actions: [{ type: "logging", title: "Log dinner", reason: "Keeps it specific.", recipeIds: [], extra: 1 }],
+  } as never);
+  assert.equal("brief" in chat, false);
+  assert.deepEqual(Object.keys((chat as { actions: object[] }).actions[0]).sort(), [
+    "reason",
+    "recipeIds",
+    "title",
+    "type",
+  ]);
 });

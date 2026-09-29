@@ -4,7 +4,7 @@
  * lib/features/edge_fuel/ai/edge_fuel_ai_models.dart — keep both in sync.
  */
 
-export type AiTaskType = "chat" | "fighterBrief" | "summarizeTrend";
+export type AiTaskType = "chat" | "cornerBrief" | "summarizeTrend";
 
 export type ChatRole = "user" | "assistant";
 
@@ -47,20 +47,37 @@ export interface AiAction {
   mealSlot?: string;
 }
 
+/** Chat and trend answers. */
 export interface AiResponse {
-  schemaVersion: 1 | 2;
+  schemaVersion: 1;
   summary: string;
   actions: AiAction[];
   warnings: string[];
   requiresProfessionalReview: boolean;
   factsUsed: string[];
   contentVersion: string;
-  brief?: FighterBriefSections;
 }
 
-export interface FighterBriefSections {
-  nextAction: string;
-  mealSuggestion: string;
-  trainingTiming: string;
-  weeklyAdjustment: string;
+export type CornerTopic = "training" | "fuel" | "weight" | "camp" | "recovery";
+
+/** One of the three lines of the daily Corner Brief. */
+export interface CornerLine {
+  topic: CornerTopic;
+  text: string;
 }
+
+/**
+ * The daily Corner Brief (product plan, step 3): three short lines, most
+ * important first, each on a different topic. It replaced the four-section
+ * Fighter Brief (schema version 2).
+ */
+export interface CornerBriefResponse {
+  schemaVersion: 3;
+  lines: CornerLine[];
+  warnings: string[];
+  requiresProfessionalReview: boolean;
+  factsUsed: string[];
+  contentVersion: string;
+}
+
+export type ModelResponse = AiResponse | CornerBriefResponse;

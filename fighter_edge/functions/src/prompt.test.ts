@@ -20,7 +20,7 @@ test("chat carries the history and the new message as data", () => {
 });
 
 test("other tasks never include an athlete message", () => {
-  for (const task of ["fighterBrief", "summarizeTrend"] as const) {
+  for (const task of ["cornerBrief", "summarizeTrend"] as const) {
     const content = buildUserContent({
       task,
       suppliedFactsJson: facts,
@@ -31,14 +31,14 @@ test("other tasks never include an athlete message", () => {
   }
 });
 
-test("the brief asks for the version-2 sections", () => {
-  const content = buildUserContent({ task: "fighterBrief", suppliedFactsJson: facts });
-  assert.ok(content.includes('"schemaVersion":2'));
-  assert.ok(content.includes("For Fighter Brief"));
-  assert.deepEqual(Object.keys(responseShapeFor("fighterBrief").brief as object), [
-    "nextAction",
-    "mealSuggestion",
-    "trainingTiming",
-    "weeklyAdjustment",
-  ]);
+test("the Corner Brief asks for three lines on three topics", () => {
+  const content = buildUserContent({ task: "cornerBrief", suppliedFactsJson: facts });
+  assert.ok(content.includes('"schemaVersion":3'));
+  assert.ok(content.includes("exactly three lines on three different topics"));
+  const lines = responseShapeFor("cornerBrief").lines as { topic: string }[];
+  assert.equal(lines.length, 3);
+  assert.ok(lines[0].topic.includes("training|fuel|weight|camp|recovery"));
+  // No action list and no recipe talk: the brief has neither.
+  assert.equal("actions" in responseShapeFor("cornerBrief"), false);
+  assert.ok(!content.includes("recipeIds"));
 });

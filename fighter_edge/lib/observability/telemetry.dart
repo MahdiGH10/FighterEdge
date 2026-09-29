@@ -16,7 +16,7 @@ enum TelemetryEvent {
   subscriptionCheckoutStarted,
   subscriptionPurchaseResult,
   purchaseRestoreResult,
-  fighterBriefPreviewViewed,
+  cornerBriefPreviewViewed,
   aiRequestResult,
 
   // Activation and habit funnel. Parameters are enums, small counts and 0/1
@@ -41,8 +41,8 @@ extension TelemetryEventName on TelemetryEvent {
         TelemetryEvent.subscriptionPurchaseResult =>
           'subscription_purchase_result',
         TelemetryEvent.purchaseRestoreResult => 'purchase_restore_result',
-        TelemetryEvent.fighterBriefPreviewViewed =>
-          'fighter_brief_preview_viewed',
+        TelemetryEvent.cornerBriefPreviewViewed =>
+          'corner_brief_preview_viewed',
         TelemetryEvent.aiRequestResult => 'ai_request_result',
         TelemetryEvent.onboardingStepViewed => 'onboarding_step_viewed',
         TelemetryEvent.onboardingCompleted => 'onboarding_completed',
@@ -174,7 +174,7 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
           'profile',
           'corner_coach',
           'technique_library',
-          'fighter_brief',
+          'corner_brief',
           'coach',
           'premium_recipe',
         });
@@ -185,7 +185,8 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
         return _oneOf(value, const {
           'plan_ready',
           'paywall_waitlist',
-          'fighter_brief_preview',
+          'corner_brief',
+          'fuel_plan',
         });
       }
       if (key == 'access') return _oneOf(value, const {'free', 'pro'});
@@ -204,19 +205,22 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
     case TelemetryEvent.purchaseRestoreResult:
       if (key == 'status') return _oneOf(value, const {'active', 'none'});
       return false;
-    case TelemetryEvent.fighterBriefPreviewViewed:
+    case TelemetryEvent.cornerBriefPreviewViewed:
       if (key == 'access') return _oneOf(value, const {'free', 'pro'});
       return false;
     case TelemetryEvent.aiRequestResult:
-      if (key == 'task') return _oneOf(value, const {'chat', 'fighter_brief'});
+      if (key == 'task') return _oneOf(value, const {'chat', 'corner_brief'});
       if (key == 'status') {
         return _oneOf(value, const {
           'success',
           'quota_reached',
           'entitlement_required',
+          'consent_required',
           'unavailable',
         });
       }
+      // A Corner Brief rewritten after a log, not asked for.
+      if (key == 'automatic') return _flag(value);
       return false;
     case TelemetryEvent.onboardingStepViewed:
       if (key == 'step') return value is int && value >= 1 && value <= 7;

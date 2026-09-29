@@ -3,8 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
-import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
-import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
@@ -92,32 +90,11 @@ void main() {
       );
     });
 
-    testWidgets('gives a free athlete a real personalized brief preview',
+    testWidgets('offers a free athlete Pro instead of the coach',
         (tester) async {
       final repo = await makeRepo(signedIn: true, plan: Plan.free);
       final edgeFuelRepo = InMemoryEdgeFuelRepository();
       await edgeFuelRepo.saveTarget(repo.currentUser!.id, _successTarget());
-      final now = DateTime.now();
-      await edgeFuelRepo.saveNutritionDay(
-        repo.currentUser!.id,
-        NutritionDay.empty(
-          localDate: now.toIso8601String().substring(0, 10),
-          timeZone: 'UTC',
-          now: now,
-          targetSnapshot: _successTarget(),
-        ).copyWith(entries: [
-          FoodLogEntry(
-            id: 'meal-1',
-            name: 'Chicken and rice',
-            notes: 'test fixture',
-            calories: 650,
-            proteinGrams: 35,
-            carbGrams: 70,
-            fatGrams: 12,
-            loggedAt: now,
-          ),
-        ]),
-      );
 
       await tester.pumpWidget(wrapApp(
         const EdgeFuelPlanScreen(),
@@ -126,20 +103,17 @@ void main() {
       ));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.text('Unlock my Fighter Brief'),
+        find.text('See Pro'),
         300,
         scrollable: find.byType(Scrollable).first,
       );
 
-      expect(find.text('Fighter Brief'), findsOneWidget);
-      expect(find.text('Free preview'), findsOneWidget);
-      expect(find.text('Protein is the main gap in today\'s target.'),
-          findsOneWidget);
-      expect(find.text('Unlock my Fighter Brief'), findsOneWidget);
+      expect(find.text('EdgeFuel Coach'), findsOneWidget);
+      expect(find.text('See Pro'), findsOneWidget);
+      expect(find.text('Ask your coach'), findsNothing);
     });
 
-    testWidgets('routes a Pro athlete to the single Coach experience',
-        (tester) async {
+    testWidgets('routes a Pro athlete to the Coach experience', (tester) async {
       final repo = await makeRepo(signedIn: true, plan: Plan.pro);
       final edgeFuelRepo = InMemoryEdgeFuelRepository();
       await edgeFuelRepo.saveTarget(repo.currentUser!.id, _successTarget());
@@ -151,17 +125,16 @@ void main() {
       ));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.text('Open AI Fighter Brief'),
+        find.text('Ask your coach'),
         300,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.ensureVisible(find.text('Open AI Fighter Brief'));
+      await tester.ensureVisible(find.text('Ask your coach'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Open AI Fighter Brief'));
+      await tester.tap(find.text('Ask your coach'));
       await tester.pumpAndSettle();
 
       expect(find.text('Talk to your coach'), findsOneWidget);
-      expect(find.text('Get today\'s Fighter Brief'), findsOneWidget);
     });
   });
 }

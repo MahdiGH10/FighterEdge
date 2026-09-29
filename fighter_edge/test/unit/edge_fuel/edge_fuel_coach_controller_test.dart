@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fighter_edge/features/daily_snapshot/domain/daily_snapshot.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_models.dart';
-import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
@@ -25,40 +24,6 @@ NutritionTarget _successTarget() => NutritionTarget(
 
 void main() {
   group('EdgeFuelCoachController', () {
-    test('replaces a pending brief with a structured successful brief',
-        () async {
-      const result = EdgeFuelAiResult.success(
-        EdgeFuelAiResponse(
-          summary: 'Today, protect your protein target.',
-          brief: FighterBriefSections(
-            nextAction: 'Log lunch.',
-            mealSuggestion: 'Chicken and rice.',
-            trainingTiming: 'Eat 90 minutes before training.',
-            weeklyAdjustment: 'Hold this target for a week.',
-          ),
-        ),
-      );
-      final gateway = _RecordingGateway(briefResult: result);
-      final telemetry = MemoryTelemetry();
-      final controller = EdgeFuelCoachController(
-        gateway: gateway,
-        telemetry: telemetry,
-      );
-
-      await controller.requestBrief(target: _successTarget());
-
-      expect(gateway.briefCalls, 1);
-      expect(controller.isSending, isFalse);
-      expect(controller.entries, hasLength(1));
-      final brief = controller.entries.single as CoachBrief;
-      expect(brief.result.status, EdgeFuelAiStatus.success);
-      expect(brief.result.response!.brief!.nextAction, 'Log lunch.');
-      expect(
-        telemetry.records.single.parameters,
-        {'task': 'fighter_brief', 'status': 'success'},
-      );
-    });
-
     test('sends the current message once and only prior turns as history',
         () async {
       final gateway = _RecordingGateway();
@@ -80,7 +45,7 @@ void main() {
       expect(controller.entries.whereType<CoachReply>(), hasLength(2));
     });
 
-    test('forwards today to the gateway on both brief and chat', () async {
+    test('forwards today to the gateway on a chat message', () async {
       final gateway = _RecordingGateway();
       final controller = EdgeFuelCoachController(gateway: gateway);
       final today = DailySnapshot.build(
@@ -92,10 +57,11 @@ void main() {
         weights: const [],
       );
 
-      await controller.requestBrief(target: _successTarget(), today: today);
+      await controller.sendMessage('Hi',
+          target: _successTarget(), today: today);
       expect(gateway.lastToday, same(today));
 
-      await controller.sendMessage('Hi', target: _successTarget());
+      await controller.sendMessage('Hi again', target: _successTarget());
       expect(gateway.lastToday, isNull,
           reason: 'a call without today must not reuse the last one');
     });
@@ -112,8 +78,7 @@ void main() {
 
       expect(controller.isSending, isTrue);
       expect(gateway.chatCalls, 1);
-      expect(
-          controller.entries.whereType<CoachPending>().single.isBrief, isFalse);
+      expect(controller.entries.whereType<CoachPending>(), hasLength(1));
 
       waiting.complete(_chatSuccess());
       await Future.wait([first, second]);
@@ -132,47 +97,33 @@ void main() {
       expect(controller.isSending, isFalse);
     });
 
-    test('marks only a successful brief stale after the food log changes',
-        () async {
-      final controller = EdgeFuelCoachController(gateway: _RecordingGateway());
-      final now = DateTime(2026, 9, 19, 12);
-      final empty = NutritionDay.empty(
-        localDate: '2026-09-19',
-        timeZone: 'UTC',
-        now: now,
-      );
-
-      await controller.requestBrief(target: _successTarget(), day: empty);
-      final brief = controller.entries.single as CoachBrief;
-      expect(brief.isStaleFor(empty), isFalse);
-
-      final logged = empty.copyWith(entries: [
-        FoodLogEntry(
-          id: 'meal-1',
-          name: 'Fixture meal',
-          notes: 'test fixture',
-          calories: 500,
-          proteinGrams: 30,
-          carbGrams: 50,
-          fatGrams: 10,
-          loggedAt: now,
-        ),
-      ]);
-      expect(brief.isStaleFor(logged), isTrue);
-    });
-
     test('can be disposed while a request is pending', () async {
       final waiting = Completer<EdgeFuelAiResult>();
       final controller = EdgeFuelCoachController(
-        gateway: _RecordingGateway(briefFuture: () => waiting.future),
+        gateway: _RecordingGateway(chatFuture: () => waiting.future),
       );
 
-      final request = controller.requestBrief(target: _successTarget());
+      final request = controller.sendMessage('Help', target: _successTarget());
       controller.dispose();
-      waiting.complete(_briefSuccess());
+      waiting.complete(_chatSuccess());
 
       await request;
-      expect(controller.entries, hasLength(1));
+      expect(controller.entries, hasLength(2));
+    });
+
+    test('tracks the chat task and status', () async {
+      final telemetry = MemoryTelemetry();
+      final controller = EdgeFuelCoachController(
+        gateway: _RecordingGateway(),
+        telemetry: telemetry,
+      );
+
+      await controller.sendMessage('Hi', target: _successTarget());
+
+      expect(
+        telemetry.records.single.parameters,
+        {'task': 'chat', 'status': 'success'},
+      );
     });
   });
 }
@@ -181,50 +132,29 @@ EdgeFuelAiResult _chatSuccess() => const EdgeFuelAiResult.success(
       EdgeFuelAiResponse(summary: 'Coach answer.'),
     );
 
-EdgeFuelAiResult _briefSuccess() => const EdgeFuelAiResult.success(
-      EdgeFuelAiResponse(
-        summary: 'Brief answer.',
-        brief: FighterBriefSections(
-          nextAction: 'Log your next meal.',
-          mealSuggestion: 'Prioritize protein.',
-          trainingTiming: 'Fuel consistently.',
-          weeklyAdjustment: 'Keep your target steady.',
-        ),
-      ),
-    );
-
 class _RecordingGateway implements EdgeFuelAiGateway {
   _RecordingGateway({
-    EdgeFuelAiResult? briefResult,
     EdgeFuelAiResult? chatResult,
-    Future<EdgeFuelAiResult> Function()? briefFuture,
     Future<EdgeFuelAiResult> Function()? chatFuture,
-  })  : _briefResult = briefResult ?? _briefSuccess(),
-        _chatResult = chatResult ?? _chatSuccess(),
-        _briefFuture = briefFuture,
+  })  : _chatResult = chatResult ?? _chatSuccess(),
         _chatFuture = chatFuture;
 
-  final EdgeFuelAiResult _briefResult;
   final EdgeFuelAiResult _chatResult;
-  final Future<EdgeFuelAiResult> Function()? _briefFuture;
   final Future<EdgeFuelAiResult> Function()? _chatFuture;
 
-  int briefCalls = 0;
   int chatCalls = 0;
   String? lastMessage;
   List<ChatTurn> lastHistory = const [];
   DailySnapshot? lastToday;
 
   @override
-  Future<EdgeFuelAiResult> generateFighterBrief({
+  Future<EdgeFuelAiResult> generateCornerBrief({
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
     DailySnapshot? today,
   }) {
-    briefCalls++;
-    lastToday = today;
-    return _briefFuture?.call() ?? Future.value(_briefResult);
+    return Future.value(const EdgeFuelAiResult.unavailable());
   }
 
   @override
@@ -246,7 +176,7 @@ class _RecordingGateway implements EdgeFuelAiGateway {
 
 class _ThrowingGateway implements EdgeFuelAiGateway {
   @override
-  Future<EdgeFuelAiResult> generateFighterBrief({
+  Future<EdgeFuelAiResult> generateCornerBrief({
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,

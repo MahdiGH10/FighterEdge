@@ -20,7 +20,7 @@ void main() {
     await tester.pumpWidget(wrapApp(
       const PaywallScreen(
         highlight: Feature.edgeFuelAiCoach,
-        trigger: PaywallTrigger.fighterBrief,
+        trigger: PaywallTrigger.cornerBrief,
       ),
       repo: repo,
       billingGateway: billing,
@@ -30,7 +30,7 @@ void main() {
     expect(telemetry.records.single.event, TelemetryEvent.paywallViewed);
     expect(telemetry.records.single.parameters, {
       'feature': 'edgeFuelAiCoach',
-      'trigger': 'fighter_brief',
+      'trigger': 'corner_brief',
     });
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));

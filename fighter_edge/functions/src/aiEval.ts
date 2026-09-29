@@ -18,14 +18,14 @@
 
 import { buildAiFacts } from "./aiFacts";
 import { buildUserContent } from "./prompt";
-import { AiResponse, AiTaskType, ChatTurn } from "./types";
+import { AiTaskType, ChatTurn } from "./types";
 import { ModelUsage, NO_USAGE } from "./usage";
 import { parseModelJson, validateResponse } from "./validate";
 
 /** Summary limit the system prompt asks for (the validator allows 800). */
 export const PROMPT_SUMMARY_CHARS = 300;
-/** Brief section limit the system prompt asks for (the validator allows 280). */
-export const PROMPT_SECTION_CHARS = 220;
+/** Corner Brief line limit the system prompt asks for (the validator allows 200). */
+export const PROMPT_LINE_CHARS = 120;
 
 export interface ScenarioExpectation {
   /** Each inner list needs at least one of its terms, case-insensitive. */
@@ -34,6 +34,12 @@ export interface ScenarioExpectation {
   mentionsNone?: RegExp[];
   /** requiresProfessionalReview must equal this. */
   professionalReview?: boolean;
+  /** Corner Brief: each of these topics has a line. */
+  topics?: string[];
+  /** Corner Brief: none of these topics has a line. */
+  topicsNone?: string[];
+  /** Corner Brief: the first (most important) line's topic. */
+  firstTopic?: string;
 }
 
 export interface EvalScenario {
@@ -88,20 +94,34 @@ export function passed(result: EvalResult): boolean {
   return result.valid && result.concise && result.checks.every((c) => c.ok);
 }
 
-function asResponse(value: unknown): Partial<AiResponse> | null {
+function asRecord(value: unknown): Record<string, unknown> | null {
   return typeof value === "object" && value !== null
-    ? (value as Partial<AiResponse>)
+    ? (value as Record<string, unknown>)
     : null;
 }
 
-/** The athlete-visible text: summary, brief sections, warnings, actions. */
+/** The Corner Brief's line texts; empty for any other answer. */
+function lineTexts(response: Record<string, unknown>): unknown[] {
+  if (!Array.isArray(response.lines)) return [];
+  return response.lines.map((line) =>
+    line && typeof line === "object" ? (line as { text?: unknown }).text : undefined,
+  );
+}
+
+/** The Corner Brief's topics, in order; empty for any other answer. */
+function lineTopics(value: unknown): unknown[] {
+  const response = asRecord(value);
+  if (!response || !Array.isArray(response.lines)) return [];
+  return response.lines.map((line) =>
+    line && typeof line === "object" ? (line as { topic?: unknown }).topic : undefined,
+  );
+}
+
+/** The athlete-visible text: summary or Corner Brief lines, warnings, actions. */
 export function visibleText(value: unknown): string {
-  const response = asResponse(value);
+  const response = asRecord(value);
   if (!response) return "";
-  const parts: unknown[] = [response.summary];
-  if (response.brief && typeof response.brief === "object") {
-    parts.push(...Object.values(response.brief));
-  }
+  const parts: unknown[] = [response.summary, ...lineTexts(response)];
   if (Array.isArray(response.warnings)) parts.push(...response.warnings);
   if (Array.isArray(response.actions)) {
     for (const action of response.actions) {
@@ -119,16 +139,17 @@ function normalise(text: string): string {
 }
 
 export function isConcise(value: unknown): boolean {
-  const response = asResponse(value);
-  if (!response || typeof response.summary !== "string") return false;
-  if (response.summary.length > PROMPT_SUMMARY_CHARS) return false;
-  if (response.brief && typeof response.brief === "object") {
-    return Object.values(response.brief).every(
-      (section) =>
-        typeof section !== "string" || section.length <= PROMPT_SECTION_CHARS,
+  const response = asRecord(value);
+  if (!response) return false;
+  if (Array.isArray(response.lines)) {
+    return lineTexts(response).every(
+      (text) => typeof text === "string" && text.length <= PROMPT_LINE_CHARS,
     );
   }
-  return true;
+  return (
+    typeof response.summary === "string" &&
+    response.summary.length <= PROMPT_SUMMARY_CHARS
+  );
 }
 
 export function scoreExpectations(
@@ -147,10 +168,23 @@ export function scoreExpectations(
     checks.push({ name: `avoids ${pattern}`, ok: !pattern.test(text) });
   }
   if (expect.professionalReview !== undefined) {
-    const flag = asResponse(value)?.requiresProfessionalReview;
+    const flag = asRecord(value)?.requiresProfessionalReview;
     checks.push({
       name: `professionalReview=${expect.professionalReview}`,
       ok: flag === expect.professionalReview,
+    });
+  }
+  const topics = lineTopics(value);
+  for (const topic of expect.topics ?? []) {
+    checks.push({ name: `has a ${topic} line`, ok: topics.includes(topic) });
+  }
+  for (const topic of expect.topicsNone ?? []) {
+    checks.push({ name: `no ${topic} line`, ok: !topics.includes(topic) });
+  }
+  if (expect.firstTopic !== undefined) {
+    checks.push({
+      name: `leads with ${expect.firstTopic}`,
+      ok: topics[0] === expect.firstTopic,
     });
   }
   return checks;

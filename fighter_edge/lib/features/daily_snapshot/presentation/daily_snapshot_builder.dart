@@ -1,5 +1,6 @@
 import '../../fight_camp/domain/weight_trend.dart';
 import '../../fight_camp/presentation/fight_camp_controller.dart';
+import '../../../models/training_session.dart';
 import '../../../state/app_state.dart';
 import '../domain/daily_snapshot.dart';
 
@@ -13,6 +14,7 @@ DailySnapshot buildDailySnapshot(
   FightCampController fightCamp, {
   int? ageYears,
 }) {
+  final planned = plannedSessionToday(state);
   return DailySnapshot.build(
     today: state.now,
     training: [
@@ -27,6 +29,8 @@ DailySnapshot buildDailySnapshot(
         ),
     ],
     plannedSessionsPerWeek: state.sessions.length,
+    plannedToday: planned == null ? null : sessionKindOf(planned),
+    plannedTodayDone: planned?.completed ?? false,
     // Food targets/log reach the AI through NutritionTarget/NutritionDay
     // already; a null goal here just skips the (unused) nutrition summary.
     goal: null,
@@ -36,3 +40,27 @@ DailySnapshot buildDailySnapshot(
     ageYears: ageYears,
   );
 }
+
+const _weekdays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+/// The weekly plan's session for today, done or not; null on a rest day.
+/// Matches the plan's day names the way the dashboard does.
+TrainingSession? plannedSessionToday(AppState state) {
+  final today = _weekdays[state.now.weekday - 1];
+  return state.sessions
+      .where((s) => s.day.toLowerCase().startsWith(today))
+      .firstOrNull;
+}
+
+/// The plan's session titles (`AppState`'s templates) as fixed names. Any
+/// other title is [SessionKind.other]: its words never leave the device.
+SessionKind sessionKindOf(TrainingSession session) =>
+    switch (session.title.trim().toLowerCase()) {
+      'striking' => SessionKind.striking,
+      'wrestling' => SessionKind.wrestling,
+      'conditioning' => SessionKind.conditioning,
+      'bjj' => SessionKind.bjj,
+      'strength' => SessionKind.strength,
+      'recovery' => SessionKind.recovery,
+      _ => SessionKind.other,
+    };

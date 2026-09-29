@@ -209,6 +209,29 @@ test("today's names must come from fixed lists, never free text", () => {
   }
 });
 
+test("today's planned session comes from the fixed list of kinds", () => {
+  const kept = buildAiFacts({
+    target,
+    today: {
+      training: { sessionsToday: 0, plannedToday: "wrestling", plannedTodayDone: false },
+    },
+  });
+  assert.ok(kept.ok);
+  assert.deepEqual(kept.facts.today, {
+    training: { sessionsToday: 0, plannedToday: "wrestling", plannedTodayDone: false },
+  });
+
+  const dropped = buildAiFacts({
+    target,
+    today: {
+      training: { plannedToday: "Sparring with Coach Mike at 6pm", plannedTodayDone: "yes" },
+    },
+  });
+  assert.ok(dropped.ok);
+  assert.deepEqual(dropped.facts.today, { training: {} });
+  assert.equal(dropped.json.includes("Mike"), false);
+});
+
 test("today is optional", () => {
   for (const value of [undefined, null, "today", [], {}]) {
     const result = buildAiFacts({ target, today: value });

@@ -49,22 +49,31 @@ void main() {
       expect(response.actions.single.type, AiActionType.logging);
     });
 
-    test('parses version-2 premium Fighter Brief sections', () {
+    test('parses a Corner Brief\'s lines', () {
       final response = EdgeFuelAiResponse.fromJson({
-        'summary': 'Your brief is ready.',
-        'brief': {
-          'nextAction': 'Log your next meal.',
-          'mealSuggestion': 'Anchor it around protein.',
-          'trainingTiming': 'Keep your planned session time.',
-          'weeklyAdjustment': 'Hold this target for the week.',
-        },
+        'lines': [
+          {'topic': 'fuel', 'text': 'Log your next meal.'},
+          {'topic': 'training', 'text': 'Keep your planned session.'},
+        ],
       });
 
-      expect(response.brief?.nextAction, 'Log your next meal.');
-      expect(response.brief?.mealSuggestion, 'Anchor it around protein.');
-      expect(response.brief?.trainingTiming, 'Keep your planned session time.');
-      expect(
-          response.brief?.weeklyAdjustment, 'Hold this target for the week.');
+      expect(response.lines, hasLength(2));
+      expect(response.lines[0].topic, CornerTopic.fuel);
+      expect(response.lines[0].text, 'Log your next meal.');
+      expect(response.lines[1].topic, CornerTopic.training);
+    });
+
+    test('drops a line with an unknown topic or empty text', () {
+      final response = EdgeFuelAiResponse.fromJson({
+        'lines': [
+          {'topic': 'not-a-real-topic', 'text': 'x'},
+          {'topic': 'fuel', 'text': ''},
+          {'topic': 'weight', 'text': 'Weigh in this morning.'},
+        ],
+      });
+
+      expect(response.lines, hasLength(1));
+      expect(response.lines.single.topic, CornerTopic.weight);
     });
   });
 }

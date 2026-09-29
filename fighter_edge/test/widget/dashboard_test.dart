@@ -27,6 +27,7 @@ void main() {
 
     expect(find.text('DASHBOARD'), findsOneWidget);
     expect(find.text('Ayoub'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('This week'), 300);
     expect(find.text('This week'), findsOneWidget);
     expect(find.text('77.2'), findsWidgets); // weight stat from AppState
   });
@@ -123,6 +124,9 @@ void main() {
     ));
     await tester.pump();
 
+    await tester.scrollUntilVisible(find.text('Verify your email'), 300);
+    await tester.ensureVisible(find.text('Verify your email'));
+    await tester.pump();
     expect(find.text('Verify your email'), findsOneWidget);
 
     // Resend moved off the banner and onto the screen that can actually
@@ -209,9 +213,12 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(find.text('Streak at risk'), 300);
       expect(find.text('Streak at risk'), findsOneWidget);
       expect(find.textContaining('(1 left)'), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Freeze'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Freeze'));
       await tester.pumpAndSettle();
 
@@ -235,9 +242,12 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(find.text('Streak at risk'), 300);
       expect(find.text('Streak at risk'), findsOneWidget);
       expect(find.text('Freeze'), findsNothing);
 
+      await tester.ensureVisible(find.text('Log now'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Log now'));
       await tester.pump();
       expect(navigatedTo, 1); // Train tab, where sessions are completed

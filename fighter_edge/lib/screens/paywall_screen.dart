@@ -28,7 +28,7 @@ enum PaywallTrigger {
   profile,
   cornerCoach,
   techniqueLibrary,
-  fighterBrief,
+  cornerBrief,
   coach,
   premiumRecipe,
 }
@@ -41,7 +41,7 @@ extension PaywallTriggerCode on PaywallTrigger {
         PaywallTrigger.profile => 'profile',
         PaywallTrigger.cornerCoach => 'corner_coach',
         PaywallTrigger.techniqueLibrary => 'technique_library',
-        PaywallTrigger.fighterBrief => 'fighter_brief',
+        PaywallTrigger.cornerBrief => 'corner_brief',
         PaywallTrigger.coach => 'coach',
         PaywallTrigger.premiumRecipe => 'premium_recipe',
       };

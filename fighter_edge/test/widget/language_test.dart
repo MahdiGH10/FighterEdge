@@ -26,7 +26,7 @@ void main() {
 
     expect(find.text('EINSTELLUNGEN'), findsOneWidget);
     expect(find.text('Sprache'), findsOneWidget);
-    expect(find.textContaining('KI-Fighter-Brief'), findsOneWidget);
+    expect(find.textContaining('Ecken-Briefing'), findsOneWidget);
 
     // Back to English from the German screen.
     await tester.tap(find.text('Sprache'));

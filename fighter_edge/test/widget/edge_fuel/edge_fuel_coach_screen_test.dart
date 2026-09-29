@@ -22,7 +22,7 @@ NutritionTarget _successTarget() => NutritionTarget(
 
 void main() {
   group('EdgeFuelCoachScreen', () {
-    testWidgets('lets a Pro athlete create a structured Fighter Brief',
+    testWidgets('opens a Pro athlete straight into the chat intro',
         (tester) async {
       final repo = await makeRepo(signedIn: true, plan: Plan.pro);
       final edgeFuelRepo = InMemoryEdgeFuelRepository();
@@ -37,14 +37,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Talk to your coach'), findsOneWidget);
-      expect(find.text('Get today\'s Fighter Brief'), findsOneWidget);
-      await tester.tap(find.text('Get today\'s Fighter Brief').first);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Next action'), findsOneWidget);
-      expect(find.text('Meal suggestion'), findsOneWidget);
-      expect(find.text('Training timing'), findsOneWidget);
-      expect(find.text('Weekly adjustment'), findsOneWidget);
+      expect(find.byType(EditableText), findsOneWidget);
     });
 
     testWidgets('keeps a follow-up question in the same conversation',

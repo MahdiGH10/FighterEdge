@@ -13,6 +13,7 @@ import 'billing/revenuecat_billing_gateway.dart';
 import 'controllers/auth_controller.dart';
 import 'data/data_repository.dart';
 import 'data/firestore_data_repository.dart';
+import 'features/corner_brief/presentation/corner_brief_controller.dart';
 import 'features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
 import 'features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
 import 'features/edge_fuel/ai/firebase_edge_fuel_ai_gateway.dart';
@@ -323,6 +324,18 @@ class FighterEdgeApp extends StatelessWidget {
             edgeFuel.setUser(auth.user?.id);
             return edgeFuel;
           },
+        ),
+        ChangeNotifierProxyProvider<AuthController, CornerBriefController>(
+          create: (_) => CornerBriefController(
+            gateway: resolvedAiGateway,
+            telemetry: telemetry ?? const NoopTelemetry(),
+          ),
+          update: (_, auth, controller) => (controller ??
+              CornerBriefController(
+                gateway: resolvedAiGateway,
+                telemetry: telemetry ?? const NoopTelemetry(),
+              ))
+            ..setUser(auth.user?.id),
         ),
       ],
       child: const _FighterEdgeMaterialApp(),

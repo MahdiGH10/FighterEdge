@@ -22,6 +22,9 @@ it just is not today's work. Review this list only at Step 8 of
 | Camp Plan | Superseded 2026-09-27: the fight camp (setup, countdown, weight path, fight week; PRs #11–#13) is the camp plan. |
 | Fight-week check-offs | Day ticks mean "past", not "done". Add marking a step done if testers ask for it; it needs storage and a privacy note. |
 | Weight tracker chart date labels in the locale's order | Found 2026-09-28 (PR #17): hardcoded `DateFormat('M/d')` shows US month/day regardless of language. Its own task, not a token one — different label widths per locale can reopen the crowding #17 just fixed, so it needs its own visual check. |
+| Save the Corner Brief | Added 2026-09-29 (PR #18): the brief lives in memory, so a restart costs one more tap and one more of the 8 daily requests. Persist it (per day, per account) if testers restart often. |
+| "Why?" buttons from the Corner Brief into the coach | Added 2026-09-29 (PR #18): each line could open the coach with that line as the question. Not now; "Ask your coach" covers it. |
+| Localize the EdgeFuel Coach screen | Added 2026-09-29 (PR #18): the Coach screen text is English only; the Corner Brief card is EN/DE. |
 | Custom foods / recents / favourites | EF-3c scope note. Add when the food-search UI needs it. |
 | USDA FoodData Central API proxy | V1.5. The bundled 94-food table is enough for 24 recipes. |
 | Recipe photography | Superseded 2026-09-26: licensed web photos with credits, never AI-generated. See `PRODUCT_PLAN_20260924.md` > Owner decisions (2026-09-26). |

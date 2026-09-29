@@ -2,7 +2,7 @@
 
 ## START HERE: state as of 2026-09-28
 
-**Eight stacked PRs, none merged.** Merge in order, retargeting each to
+**Nine stacked PRs, none merged.** Merge in order, retargeting each to
 `main` after the one before it lands:
 
 | PR | Branch | What |
@@ -15,6 +15,7 @@
 | #15 | `feat/ai-daily-context` | AI coach reads training, weight trend and fight camp (plan step 5) |
 | #16 | `feat/german-decimal-format` | German reads "79,5", not "79.5", everywhere a weight number is genuinely localized |
 | #17 | `feat/weight-chart-tokens` | The old weight tracker chart restyled onto `ChartTokens`, matching the fight-camp chart |
+| #18 | `feat/corner-brief` | Daily Corner Brief on Home (plan step 3): a free calculated line, and three coach-written lines for Pro |
 
 **CI:** all 7 checks green on #10, #12, #13, and now #15 (the Android
 emulator job stalled once on #15's first run — 35 minutes, no output — and
@@ -22,6 +23,40 @@ was rerun; the same known intermittent hang as #11/#14, not a test
 failure). #11 and #14 stalled once each too and passed clean on rerun.
 #16 and #17 run the same workflow; watch their emulator job for the same
 pattern before assuming a real failure.
+
+### Corner Brief (PR #18)
+
+The old Fighter Brief (four sections, generated inside the Coach screen) is
+replaced by the **Corner Brief** on Home: three short lines on three different
+topics (training, fuel, weight, camp, recovery), most important first.
+
+- **Free:** one line the app calculates (`CornerBriefCalculator`, pure Dart,
+  reads `FighterBriefCalculator` for the day's gap). No AI, no network.
+- **Pro:** the first brief of a day needs a tap ("Get today's brief"); opening
+  Home never sends anything to the AI provider. After that it is rewritten
+  after each new log, once per change, and only after a successful request
+  (a failure waits for "Try again", so it cannot loop).
+- **Server:** task `cornerBrief`, response schema v3 (exactly 3 lines, distinct
+  topics), system prompt v8, daily allowance 8 of the 25 total. The validator
+  checks every line and warning for prohibited content and made-up numbers.
+- **Breaks old builds:** the task was renamed from `fighterBrief`. An app build
+  from before this PR gets an error for brief requests once the backend deploys
+  this. No build with the old task has shipped to a store.
+- **Consent:** `aiCoach` is now version 3 (`data_consent.dart`, `consents.ts`)
+  because today's planned session kind is new data. Existing users are asked
+  again on their next AI request. Privacy pages (EN/DE) updated.
+- **New fact for the coach:** `plannedToday` (a fixed list of kinds, never the
+  athlete's own title) and `plannedTodayDone`. The plan has no session times,
+  so the coach is told not to invent any.
+- **In memory only:** the brief is not saved; a restart means one more tap.
+- The Coach screen is now chat plus Fuel Match; the brief button there is gone.
+  Its strings are still English only (see `LATER.md`).
+- Leaving the Fuel tab resets its selected day to today, so the Corner Brief
+  never reads another day's log.
+
+Verified locally: `flutter analyze`, 850+ Flutter tests, golden tests, 100
+functions tests. Not verified: a real device, and the real model's output
+(`npm run eval:ai` needs the owner's OpenRouter key).
 
 **Owner-only, new:** the Ethical Guidelines page has the same two
 placeholders as the Terms (publication date, support email); the

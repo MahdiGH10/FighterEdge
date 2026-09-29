@@ -26,7 +26,8 @@ extension PlanInfo on Plan {
 /// earlier paywall sold timer presets and weight history that were free
 /// anyway, and analytics that did not exist.)
 enum Feature {
-  /// The AI Fighter Brief and "Ask EdgeFuel Coach" (master prompt §13.1).
+  /// The daily Corner Brief and the EdgeFuel Coach chat (master prompt
+  /// §13.1).
   /// Gated like every Pro feature, which also keeps per-user AI spend
   /// bounded.
   edgeFuelAiCoach,
@@ -45,7 +46,7 @@ enum Feature {
 extension FeatureInfo on Feature {
   /// Human-readable name shown on the paywall and lock states.
   String get title => switch (this) {
-        Feature.edgeFuelAiCoach => 'AI Fighter Brief',
+        Feature.edgeFuelAiCoach => 'Daily Corner Brief',
         Feature.edgeFuelPremiumRecipes => 'Full Recipe Library',
         Feature.fullTechniqueLibrary => 'Full Drill Library',
         Feature.cornerCoach => 'Corner Cues',
@@ -53,8 +54,9 @@ extension FeatureInfo on Feature {
 
   /// One line on what the feature actually does, for the paywall.
   String get pitch => switch (this) {
-        Feature.edgeFuelAiCoach => 'A daily next-action brief and a plain-'
-            'language plan coach, grounded in your own numbers',
+        Feature.edgeFuelAiCoach => 'Three lines from your corner each day on '
+            'training, fuel and weight, and a coach to ask, grounded in your '
+            'own numbers',
         Feature.edgeFuelPremiumRecipes => 'Every recipe, scaled to your '
             'servings and checked against your allergens',
         Feature.fullTechniqueLibrary => 'Every drill across striking, '

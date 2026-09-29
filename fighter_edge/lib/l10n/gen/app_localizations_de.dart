@@ -75,7 +75,7 @@ class LDe extends L {
 
   @override
   String get settingsUpgradeProSubtitle =>
-      'KI-Fighter-Brief, komplette Drill- und Rezept-Bibliothek, Ecken-Tipps';
+      'Tägliches Ecken-Briefing und Coach, komplette Drill- und Rezept-Bibliothek, Ecken-Tipps';
 
   @override
   String get settingsSectionTraining => 'Trainingseinstellungen';
@@ -557,7 +557,7 @@ class LDe extends L {
 
   @override
   String get aiConsentBody =>
-      'Für eine Antwort sendet unser Server deine Kalorien- und Makroziele, die Zusammenfassung deines heutigen Ernährungsprotokolls, deine Ernährungsweise, Allergien, Abneigungen, deine Nachrichten und, wenn du sie nutzt, deine Trainingstage im Vergleich zu deinem Plan, deinen 7-Tage-Gewichtstrend und dein Fight Camp (Termine, Gewichtslimit und den heutigen rein ernährungsbasierten Plan) an OpenRouter (USA), das sie an einen KI-Modellanbieter weitergibt. Dein Name, deine E-Mail-Adresse und deine Konto-ID werden nie gesendet.';
+      'Für eine Antwort sendet unser Server deine Kalorien- und Makroziele, die Zusammenfassung deines heutigen Ernährungsprotokolls, deine Ernährungsweise, Allergien, Abneigungen, deine Nachrichten und, wenn du sie nutzt, deine heute geplante Einheit, deine Trainingstage im Vergleich zu deinem Plan, deinen 7-Tage-Gewichtstrend und dein Fight Camp (Termine, Gewichtslimit und den heutigen rein ernährungsbasierten Plan) an OpenRouter (USA), das sie an einen KI-Modellanbieter weitergibt. Dein Name, deine E-Mail-Adresse und deine Konto-ID werden nie gesendet.';
 
   @override
   String get aiConsentRetention =>
@@ -1005,7 +1005,7 @@ class LDe extends L {
 
   @override
   String get planReadyProBody =>
-      'Pro enthält einen täglichen Fighter Brief, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.';
+      'Pro enthält ein tägliches Ecken-Briefing mit Coach, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.';
 
   @override
   String get planReadyCalories => 'Tägliche Kalorien';
@@ -1518,4 +1518,115 @@ class LDe extends L {
   @override
   String get fightWeekSource =>
       'Schritte und Ziele nach der International Society of Sports Nutrition (2025).';
+
+  @override
+  String get cornerBriefTitle => 'Ecken-Briefing';
+
+  @override
+  String get cornerCueSeeProfessional =>
+      'Dein Gewichtsplan braucht einen Coach oder eine Ernährungsfachkraft. Sprich vor der Kampfwoche mit jemandem.';
+
+  @override
+  String get cornerCueSetUpFuel =>
+      'Richte EdgeFuel ein, dann kann deine Ecke auch dein Essen lesen.';
+
+  @override
+  String get cornerCueFirstMeal =>
+      'Trag deine erste Mahlzeit ein, dann kann deine Ecke deinen Tag lesen.';
+
+  @override
+  String cornerCueProtein(int grams) {
+    return 'Eiweiß ist heute die Lücke: noch $grams g.';
+  }
+
+  @override
+  String cornerCueCarbsBeforeTraining(int grams) {
+    return 'Noch $grams g Kohlenhydrate. Iss einen Teil davon vor dem Training.';
+  }
+
+  @override
+  String cornerCueCarbs(int grams) {
+    return 'Kohlenhydrate sind heute die Lücke: noch $grams g.';
+  }
+
+  @override
+  String cornerCueCalories(int kcal) {
+    return 'Noch $kcal kcal heute. Plane deine nächste Mahlzeit.';
+  }
+
+  @override
+  String get cornerCueOnTrack =>
+      'Heute im Plan. Halte die nächste Mahlzeit ausgewogen.';
+
+  @override
+  String get cornerBriefFreeHint =>
+      'Mit Pro schreibt deine Ecke das ganze Briefing: Training, Ernährung und Gewicht, aktualisiert bei jedem Eintrag.';
+
+  @override
+  String get cornerBriefUnlock => 'Ganzes Briefing freischalten';
+
+  @override
+  String get cornerBriefProHint =>
+      'Deine Ecke schreibt drei Zeilen für heute: Training, Ernährung und Gewicht.';
+
+  @override
+  String get cornerBriefGet => 'Heutiges Briefing holen';
+
+  @override
+  String get cornerBriefWriting => 'Deine Ecke liest deinen Tag…';
+
+  @override
+  String get cornerBriefUpdating =>
+      'Wird nach deinem letzten Eintrag aktualisiert…';
+
+  @override
+  String get cornerBriefQuota =>
+      'Die Briefings für heute sind aufgebraucht. Morgen wieder.';
+
+  @override
+  String get cornerBriefQuotaStale =>
+      'Die Briefings für heute sind aufgebraucht. Dieses ist von vor deinem letzten Eintrag.';
+
+  @override
+  String get cornerBriefUnavailable =>
+      'Deine Ecke konnte gerade nicht antworten.';
+
+  @override
+  String get cornerBriefSyncing =>
+      'Pro wird noch mit deinem Konto synchronisiert.';
+
+  @override
+  String get cornerBriefTryAgain => 'Nochmal versuchen';
+
+  @override
+  String get cornerBriefVerify =>
+      'Bestätige deine E-Mail-Adresse, um das ganze Briefing zu bekommen.';
+
+  @override
+  String get cornerBriefVerifyAction => 'E-Mail bestätigen';
+
+  @override
+  String get cornerBriefSetUpAction => 'EdgeFuel einrichten';
+
+  @override
+  String get cornerBriefAskCoach => 'Frag deinen Coach';
+
+  @override
+  String get cornerBriefProfessional =>
+      'Bitte sprich mit einer qualifizierten Fachperson, bevor du danach handelst.';
+
+  @override
+  String get cornerTopicTraining => 'Training';
+
+  @override
+  String get cornerTopicFuel => 'Ernährung';
+
+  @override
+  String get cornerTopicWeight => 'Gewicht';
+
+  @override
+  String get cornerTopicCamp => 'Camp';
+
+  @override
+  String get cornerTopicRecovery => 'Erholung';
 }

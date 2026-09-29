@@ -26,7 +26,7 @@ describe("AI usage totals (emulator)", { skip: !emulator && "no Firestore emulat
   it("adds each request to the day's totals without any account ID", async () => {
     const now = new Date("2031-01-02T10:00:00Z");
     await recordUsage(db, now, {
-      task: "fighterBrief",
+      task: "cornerBrief",
       modelCalls: 2,
       usage: { promptTokens: 1500, completionTokens: 300, costUsd: 0.002 },
       answered: true,
@@ -44,7 +44,7 @@ describe("AI usage totals (emulator)", { skip: !emulator && "no Firestore emulat
     assert.equal(stats?.modelCalls, 3);
     assert.equal(stats?.totalTokens, 2700);
     assert.ok(Math.abs((stats?.costUsd as number) - 0.003) < 1e-9);
-    assert.deepEqual(stats?.byTask, { fighterBrief: 1, chat: 1 });
+    assert.deepEqual(stats?.byTask, { cornerBrief: 1, chat: 1 });
     assert.deepEqual(
       Object.keys(stats ?? {}).sort(),
       ["answered", "byTask", "completionTokens", "costUsd", "modelCalls", "promptTokens", "requests", "totalTokens", "updatedAt"],

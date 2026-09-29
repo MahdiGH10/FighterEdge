@@ -14,8 +14,6 @@ import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/empty_state.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../../widgets/stat_card.dart';
-import '../../domain/calculators/fighter_brief_calculator.dart';
-import '../../domain/models/fighter_brief_preview.dart';
 import '../../domain/models/nutrition_target.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../nutrition_copy.dart';
@@ -25,9 +23,9 @@ import 'edge_fuel_setup_screen.dart';
 
 /// Read-only view of the confirmed deterministic EdgeFuel target.
 ///
-/// The plan stays the source of truth for targets. Its Fighter Brief preview
-/// is calculated locally from the target and food log; Pro can then open the
-/// dedicated Coach surface for a server-validated brief or conversation.
+/// The plan stays the source of truth for targets. The daily brief lives on
+/// Home (the Corner Brief); from here Pro opens the EdgeFuel Coach to ask
+/// about the plan.
 class EdgeFuelPlanScreen extends StatelessWidget {
   const EdgeFuelPlanScreen({super.key});
 
@@ -206,7 +204,7 @@ class _PlanBody extends StatelessWidget {
           ),
         ],
         const SizedBox(height: Insets.lg),
-        _FighterBriefPreviewSection(target: target, edgeFuel: edgeFuel),
+        const _CoachSection(),
         if (FuelWhatIsLeft.appliesTo(edgeFuel)) ...[
           const SizedBox(height: Insets.md),
           FuelWhatIsLeft(edgeFuel: edgeFuel),
@@ -227,74 +225,15 @@ class _PlanBody extends StatelessWidget {
   }
 }
 
-class _FighterBriefPreviewSection extends StatefulWidget {
-  final NutritionTarget target;
-  final EdgeFuelController edgeFuel;
-
-  const _FighterBriefPreviewSection({
-    required this.target,
-    required this.edgeFuel,
-  });
-
-  @override
-  State<_FighterBriefPreviewSection> createState() =>
-      _FighterBriefPreviewSectionState();
-}
-
-class _FighterBriefPreviewSectionState
-    extends State<_FighterBriefPreviewSection> {
-  late final Telemetry _telemetry;
-
-  @override
-  void initState() {
-    super.initState();
-    _telemetry = Telemetry.fromContext(context);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final isPro = context.read<AuthController>().allows(
-            Feature.edgeFuelAiCoach,
-          );
-      _telemetry.track(
-        TelemetryEvent.fighterBriefPreviewViewed,
-        parameters: {'access': isPro ? 'pro' : 'free'},
-      );
-    });
-  }
-
-  void _openPaywall() {
-    _telemetry.track(
-      TelemetryEvent.premiumCtaTapped,
-      parameters: {'surface': 'fighter_brief_preview'},
-    );
-    AppNavigation.push(
-      context,
-      AppRoutes.paywall,
-      extra: const PaywallRouteArgs(
-        highlight: Feature.edgeFuelAiCoach,
-        trigger: PaywallTrigger.fighterBrief,
-      ),
-      fallbackBuilder: (_) => const PaywallScreen(
-        highlight: Feature.edgeFuelAiCoach,
-        trigger: PaywallTrigger.fighterBrief,
-      ),
-    );
-  }
-
-  void _openCoach() => AppNavigation.push(
-        context,
-        AppRoutes.fuelCoach,
-        fallbackBuilder: (_) => const EdgeFuelCoachScreen(),
-      );
+/// The way into the EdgeFuel Coach from the plan: open it with Pro, see Pro
+/// without.
+class _CoachSection extends StatelessWidget {
+  const _CoachSection();
 
   @override
   Widget build(BuildContext context) {
-    final preview = FighterBriefCalculator.calculate(
-      target: widget.target,
-      day: widget.edgeFuel.day,
-    );
-    final isPro = context.watch<AuthController>().allows(
-          Feature.edgeFuelAiCoach,
-        );
+    final isPro =
+        context.watch<AuthController>().allows(Feature.edgeFuelAiCoach);
 
     return AppCard(
       accent: AppColors.premium,
@@ -311,7 +250,7 @@ class _FighterBriefPreviewSectionState
               const SizedBox(width: Insets.sm),
               Expanded(
                 child: Text(
-                  'Fighter Brief',
+                  'EdgeFuel Coach',
                   style: AppType.micro(
                     weight: FontWeight.w800,
                     color: AppColors.textMuted,
@@ -319,118 +258,59 @@ class _FighterBriefPreviewSectionState
                   ),
                 ),
               ),
-              if (!isPro)
-                Text(
-                  'Free preview',
-                  style: AppType.micro(
-                    weight: FontWeight.w800,
-                    color: AppColors.premium,
-                    spacing: .6,
-                  ),
-                ),
             ],
           ),
           const SizedBox(height: Insets.sm),
           Text(
-            preview.summary,
+            'Ask about your plan, your day or your fight week.',
             style: AppType.callout(weight: FontWeight.w800),
           ),
           const SizedBox(height: Insets.xs),
           Text(
-            preview.nextAction,
+            isPro
+                ? 'The coach can explain your plan, but it cannot change the '
+                    'calculated target. Your daily Corner Brief is on Home.'
+                : 'Pro adds the coach and a daily Corner Brief on Home, '
+                    'grounded in your own numbers.',
             style: AppType.subhead(color: AppColors.textSecondary),
           ),
-          if (preview.isReady) ...[
-            const SizedBox(height: Insets.md),
-            _BriefRemainingRow(preview: preview),
-          ],
           const SizedBox(height: Insets.md),
-          if (isPro) ...[
-            Text(
-              'Open your full brief or ask a question. The coach can explain '
-              'your plan, but it cannot change the calculated target.',
-              style: AppType.micro(color: AppColors.textMuted),
-            ),
-            const SizedBox(height: Insets.md),
+          if (isPro)
             PrimaryButton(
-              'Open AI Fighter Brief',
+              'Ask your coach',
               icon: Icons.auto_awesome,
               expand: true,
-              onPressed: _openCoach,
-            ),
-          ] else ...[
-            Text(
-              preview.isReady
-                  ? 'Pro adds an exact meal, training timing, and tomorrow\'s adjustment.'
-                  : 'Log your first meal in Fuel to unlock this personalized preview. Pro adds the full plan and explanation.',
-              style: AppType.micro(color: AppColors.textMuted),
-            ),
-            const SizedBox(height: Insets.md),
+              onPressed: () => AppNavigation.push(
+                context,
+                AppRoutes.fuelCoach,
+                fallbackBuilder: (_) => const EdgeFuelCoachScreen(),
+              ),
+            )
+          else
             PrimaryButton(
-              'Unlock my Fighter Brief',
+              'See Pro',
               icon: Icons.lock_open_outlined,
               expand: true,
-              onPressed: _openPaywall,
+              onPressed: () {
+                Telemetry.fromContext(context).track(
+                  TelemetryEvent.premiumCtaTapped,
+                  parameters: {'surface': 'fuel_plan'},
+                );
+                AppNavigation.push(
+                  context,
+                  AppRoutes.paywall,
+                  extra: const PaywallRouteArgs(
+                    highlight: Feature.edgeFuelAiCoach,
+                    trigger: PaywallTrigger.coach,
+                  ),
+                  fallbackBuilder: (_) => const PaywallScreen(
+                    highlight: Feature.edgeFuelAiCoach,
+                    trigger: PaywallTrigger.coach,
+                  ),
+                );
+              },
             ),
-          ],
         ],
-      ),
-    );
-  }
-}
-
-class _BriefRemainingRow extends StatelessWidget {
-  final FighterBriefPreview preview;
-
-  const _BriefRemainingRow({required this.preview});
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: Insets.sm,
-      runSpacing: Insets.sm,
-      children: [
-        _BriefMetric(
-          label: 'Calories left',
-          value: '${preview.caloriesRemaining} kcal',
-        ),
-        _BriefMetric(
-          label: 'Protein left',
-          value: '${preview.proteinRemaining}g',
-        ),
-        _BriefMetric(
-          label: 'Carbs left',
-          value: '${preview.carbohydratesRemaining}g',
-        ),
-      ],
-    );
-  }
-}
-
-class _BriefMetric extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _BriefMetric({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Insets.sm,
-        vertical: Insets.xs,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundRaised,
-        borderRadius: BorderRadius.circular(Radii.chip),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Text(
-        '$label · $value',
-        style: AppType.micro(
-          weight: FontWeight.w700,
-          color: AppColors.textSecondary,
-        ),
       ),
     );
   }
