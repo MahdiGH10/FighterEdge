@@ -13,6 +13,7 @@
     "test": "npm run build && node --test lib/validate.test.js lib/prompt.test.js lib/aiEval.test.js lib/aiFacts.test.js lib/usage.test.js lib/billing.test.js lib/consents.test.js lib/openrouter.test.js lib/quota.test.js lib/entitlements.test.js lib/rules.test.js lib/entitlements.emulator.test.js lib/accountDeletion.emulator.test.js lib/usage.emulator.test.js",
     "test:rules": "npx -y firebase-tools@15.31.0 emulators:exec --only firestore --project fighter-edge-rules-test \"npm run build && node --test lib/rules.test.js lib/entitlements.emulator.test.js lib/accountDeletion.emulator.test.js lib/usage.emulator.test.js\"",
     "eval:ai": "npm run build && node scripts/ai-eval.mjs",
+    "groq:models": "node scripts/groq-models.mjs",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions"
   },

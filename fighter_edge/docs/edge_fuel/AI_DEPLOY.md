@@ -52,6 +52,33 @@ firebase functions:config:set openrouter.model="some/other-model"
 Or set the `OPENROUTER_MODEL` environment variable in the Cloud Functions
 console after first deploy. No code change needed either way.
 
+### Using Groq instead of OpenRouter
+
+The functions can talk to Groq (console.groq.com, free tier with per-model
+limits). OpenRouter stays the default until you switch.
+
+1. Create a key at console.groq.com/keys. Set it in your own terminal:
+   ```bash
+   firebase functions:secrets:set GROQ_API_KEY
+   ```
+   The functions declare this secret, so it must exist before any deploy.
+   Until you use Groq, set it to the text `unset`.
+2. Find out which models the key can use, then score them (both read
+   `GROQ_API_KEY` from your shell and never print it):
+   ```bash
+   cd fighter_edge/functions
+   npm run groq:models
+   AI_PROVIDER=groq npm run eval:ai -- --models id1,id2,id3 --runs 2
+   ```
+3. Set `AI_PROVIDER=groq` and `GROQ_MODELS=best,second,third` (best first)
+   as environment variables for the functions. A model that is busy (429),
+   retired or unsupported (400) or down (5xx) hands over to the next one.
+4. **Before real users:** the consent text and both privacy pages name
+   OpenRouter as the processor. Update them to name Groq and bump the
+   version in `data_consent.dart` and `consents.ts`. Check Groq's own
+   data-retention terms first; the OpenRouter no-retention switch
+   (`OPENROUTER_DATA_COLLECTION`) does not apply to Groq.
+
 ## 5. Deploy
 
 ```bash

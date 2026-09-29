@@ -8,6 +8,11 @@
 // only passed to OpenRouter, never printed or written. Without --models it
 // tests the chain in .env.fighter-edge-app, i.e. what is deployed.
 //
+// For Groq, set AI_PROVIDER=groq and GROQ_API_KEY instead. Groq's free tier
+// allows about 30 requests a minute per model, so calls are spaced out
+// (--delay-ms, default 2500 for Groq). Without --models it tests GROQ_MODELS
+// or the built-in Groq chain.
+//
 // The full report, with every answer, goes to eval-results/ (git-ignored).
 // Scenarios are synthetic; no real athlete data is involved.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -19,7 +24,7 @@ const require = createRequire(import.meta.url);
 const { runEval, renderReport, summarise, passed } = require("../lib/aiEval.js");
 const { SCENARIOS } = require("../lib/aiEvalScenarios.js");
 const { SYSTEM_PROMPT, SYSTEM_PROMPT_VERSION } = require("../lib/systemPrompt.js");
-const { callOpenRouter } = require("../lib/openrouter.js");
+const { aiProvider, callOpenRouter, modelChain } = require("../lib/openrouter.js");
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -44,8 +49,14 @@ function deployedModels() {
 
 const dryRun = process.argv.includes("--dry-run");
 const runs = Number(argValue("--runs") ?? 1);
-const models = list(argValue("--models") ?? process.env.OPENROUTER_MODELS);
-if (models.length === 0) models.push(...deployedModels());
+const provider = aiProvider();
+const models = list(
+  argValue("--models") ??
+    (provider === "groq" ? undefined : process.env.OPENROUTER_MODELS),
+);
+if (models.length === 0) {
+  models.push(...(provider === "groq" ? modelChain() : deployedModels()));
+}
 const only = list(argValue("--only"));
 const scenarios = only.length
   ? SCENARIOS.filter((s) => only.includes(s.id))
@@ -56,14 +67,16 @@ if (models.length === 0 || scenarios.length === 0 || !(runs >= 1)) {
   process.exit(2);
 }
 
-const apiKey = process.env.OPENROUTER_API_KEY;
+const keyName = provider === "groq" ? "GROQ_API_KEY" : "OPENROUTER_API_KEY";
+const apiKey = process.env[keyName];
 if (!dryRun && !apiKey) {
   console.error(
-    "OPENROUTER_API_KEY is not set. Set it in this shell (it is never " +
+    `${keyName} is not set. Set it in this shell (it is never ` +
       "printed), or use --dry-run to check the harness without a model.",
   );
   process.exit(2);
 }
+const delayMs = Number(argValue("--delay-ms") ?? (provider === "groq" ? 2500 : 0));
 
 // --dry-run: a canned, valid answer, to check the harness end to end.
 const dryCall = async (_model, _system, userContent) => {
@@ -95,8 +108,10 @@ const dryCall = async (_model, _system, userContent) => {
   };
 };
 
-const liveCall = (model, systemPrompt, userContent) =>
-  callOpenRouter({ apiKey, model, systemPrompt, userContent });
+const liveCall = async (model, systemPrompt, userContent) => {
+  if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+  return callOpenRouter({ apiKey, model, systemPrompt, userContent });
+};
 
 const startedAt = new Date().toISOString();
 const total = models.length * scenarios.length * runs;

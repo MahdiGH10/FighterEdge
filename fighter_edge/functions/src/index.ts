@@ -17,7 +17,12 @@ import {
   syncEntitlement as syncEntitlementFor,
   usableApiKey,
 } from "./entitlements";
-import { callOpenRouter, modelChain, OpenRouterError } from "./openrouter";
+import {
+  aiProvider,
+  callOpenRouter,
+  modelChain,
+  OpenRouterError,
+} from "./openrouter";
 import { buildUserContent } from "./prompt";
 import { consumeQuota, readAiConfig, refundQuota } from "./quota";
 import { REVENUECAT_API_KEY } from "./secrets";
@@ -31,6 +36,7 @@ initializeApp();
 export { deleteAccount } from "./accountDeletion";
 
 const OPENROUTER_API_KEY = defineSecret("OPENROUTER_API_KEY");
+const GROQ_API_KEY = defineSecret("GROQ_API_KEY");
 const REVENUECAT_WEBHOOK_AUTH = defineSecret("REVENUECAT_WEBHOOK_AUTH");
 /** First attempt plus at most one retry of a rejected answer. */
 const MAX_MODEL_ATTEMPTS = 2;
@@ -82,7 +88,11 @@ function isValidHistory(value: unknown): value is ChatTurn[] {
  * quota is consumed.
  */
 export const edgeFuelAiExplain = onCall(
-  { secrets: [OPENROUTER_API_KEY], cors: true, enforceAppCheck: ENFORCE_APP_CHECK },
+  {
+    secrets: [OPENROUTER_API_KEY, GROQ_API_KEY],
+    cors: true,
+    enforceAppCheck: ENFORCE_APP_CHECK,
+  },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -244,7 +254,10 @@ export const edgeFuelAiExplain = onCall(
       while (modelIndex < models.length && rawContent === null) {
         try {
           const result = await callOpenRouter({
-            apiKey: OPENROUTER_API_KEY.value(),
+            apiKey:
+              aiProvider() === "groq"
+                ? GROQ_API_KEY.value()
+                : OPENROUTER_API_KEY.value(),
             model: models[modelIndex],
             systemPrompt: SYSTEM_PROMPT,
             userContent,
