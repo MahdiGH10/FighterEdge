@@ -15,7 +15,7 @@
 | #15 | `feat/ai-daily-context` | AI coach reads training, weight trend and fight camp (plan step 5) |
 | #16 | `feat/german-decimal-format` | German reads "79,5", not "79.5", everywhere a weight number is genuinely localized |
 | #17 | `feat/weight-chart-tokens` | The old weight tracker chart restyled onto `ChartTokens`, matching the fight-camp chart |
-| #18 | `feat/corner-brief` | Daily Corner Brief on Home (plan step 3): a free calculated line, and three coach-written lines for Pro |
+| #19 | `feat/corner-brief` | Daily Corner Brief on Home (plan step 3): a free calculated line, and three coach-written lines for Pro |
 
 **CI:** all 7 checks green on #10, #12, #13, and now #15 (the Android
 emulator job stalled once on #15's first run — 35 minutes, no output — and
@@ -24,7 +24,7 @@ failure). #11 and #14 stalled once each too and passed clean on rerun.
 #16 and #17 run the same workflow; watch their emulator job for the same
 pattern before assuming a real failure.
 
-### Corner Brief (PR #18)
+### Corner Brief (PR #19)
 
 The old Fighter Brief (four sections, generated inside the Coach screen) is
 replaced by the **Corner Brief** on Home: three short lines on three different
