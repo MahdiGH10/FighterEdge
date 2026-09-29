@@ -61,16 +61,17 @@ export function modelChain(env: NodeJS.ProcessEnv = process.env): string[] {
 }
 
 /**
- * Groq's free tier, best guess first. Limits are per model, so a busy model
+ * Groq's free tier, best first (scored 2026-09-29 with `npm run eval:ai`:
+ * qwen 23/29 passed, gpt-oss-120b 19/29, gpt-oss-20b 18/29). Groq retires
+ * models, so re-run `npm run groq:models` now and then. Limits are per model, so a busy model
  * answering 429 hands over to the next one. This is a starting point:
  * `npm run groq:models` lists what the key can use and `npm run eval:ai`
  * scores them. Set GROQ_MODELS (comma-separated) to override.
  */
 export const DEFAULT_GROQ_CHAIN = [
-  "llama-3.3-70b-versatile",
-  "meta-llama/llama-4-scout-17b-16e-instruct",
+  "qwen/qwen3.8-27b",
+  "openai/gpt-oss-120b",
   "openai/gpt-oss-20b",
-  "llama-3.1-8b-instant",
 ];
 
 /**
