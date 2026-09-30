@@ -2,22 +2,29 @@
 
 ## START HERE: state as of 2026-09-30
 
-**Everything below is merged into `main` (2026-09-30), but the backend is NOT
-deployed.** The Deploy backend workflow only runs its tests: GitHub has no
-deploy credentials for the Firebase project (no `GCP_WORKLOAD_IDENTITY_PROVIDER`
-and `GCP_SERVICE_ACCOUNT` variables, no `FIREBASE_SERVICE_ACCOUNT` secret), so
-its deploy job prints "Deploy credentials are not configured; skipping" and the
-run still shows green. The live project still runs the 2026-09-24 functions
-(`deleteAccount`, `edgeFuelAiExplain` on nodejs20, old task names). So the new
-Corner Brief, Groq, the rewarded-video check and the new rules are **not live**,
-and an app build from `main` cannot get a brief from the live backend.
+**Everything below is merged into `main` (2026-09-30) and the backend was
+deployed by hand the same day** (`firebase deploy --only functions,firestore:rules`
+from `fighter_edge/`, with `FUNCTIONS_DISCOVERY_TIMEOUT=120` because loading
+the function code takes longer than the CLI's default 10 s on a slow PC).
+Live now: `edgeFuelAiExplain` (Corner Brief, Groq first with OpenRouter as the
+fallback), `startRewardedBrief`, `admobRewardCallback`, `revenueCatWebhook`,
+`syncEntitlement`, `reconcileEntitlements` (scheduled; deploying it enabled the
+Cloud Scheduler API), `deleteAccount`, all on Node 22, plus the new rules.
 
-To deploy, from `fighter_edge/` with a logged-in Firebase CLI:
-`firebase deploy --only functions,firestore:rules` (the three secrets it needs
-exist: `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `REVENUECAT_API_KEY` = `unset`;
-`REVENUECAT_WEBHOOK_AUTH` exists too). Or set up the credentials described at
-the top of `.github/workflows/deploy-backend.yml` so merges deploy. Also add a
-Firestore TTL policy on `adRewardTokens.expiresAt`.
+**Merges do not deploy.** The Deploy backend workflow only runs its tests: GitHub
+has no deploy credentials for the Firebase project (no
+`GCP_WORKLOAD_IDENTITY_PROVIDER` / `GCP_SERVICE_ACCOUNT` variables, no
+`FIREBASE_SERVICE_ACCOUNT` secret), so its deploy job prints "Deploy credentials
+are not configured; skipping" and the run still shows green. Until those are
+set up, deploy by hand after any change under `functions/` or to the rules.
+
+Secrets: `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `REVENUECAT_WEBHOOK_AUTH` exist;
+`REVENUECAT_API_KEY` is the placeholder `unset` until RevenueCat is set up.
+
+Still to do by hand: a Firestore TTL policy on `adRewardTokens.expiresAt`
+(Firestore > TTL), and the AdMob setup (see the rewarded-videos section).
+Not verified live: a signed-in Pro call to the Corner Brief against Groq
+(needs a real account; the scoring run used the same key and models).
 
 The PRs merged, in this order (history):
 
