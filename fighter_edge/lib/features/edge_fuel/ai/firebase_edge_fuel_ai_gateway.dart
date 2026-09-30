@@ -1,5 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 
+import '../../daily_snapshot/domain/daily_snapshot.dart';
 import '../domain/models/nutrition_day.dart';
 import '../domain/models/nutrition_setup_draft.dart';
 import '../domain/models/nutrition_target.dart';
@@ -25,12 +26,14 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
+    DailySnapshot? today,
   }) {
     return _call(
       task: 'fighterBrief',
       target: target,
       day: day,
       preferences: preferences,
+      today: today,
     );
   }
 
@@ -41,6 +44,7 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
     NutritionDay? day,
     NutritionSetupDraft? preferences,
     List<ChatTurn> history = const [],
+    DailySnapshot? today,
   }) {
     return _call(
       task: 'chat',
@@ -49,6 +53,7 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
       preferences: preferences,
       userMessage: userMessage,
       history: history,
+      today: today,
     );
   }
 
@@ -59,6 +64,7 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
     NutritionSetupDraft? preferences,
     String? userMessage,
     List<ChatTurn> history = const [],
+    DailySnapshot? today,
   }) async {
     try {
       final callable = _functions.httpsCallable('edgeFuelAiExplain');
@@ -72,6 +78,7 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
             'allergens': preferences.allergens,
             'dislikedFoods': preferences.dislikedFoods,
           },
+        if (today != null) 'today': today.toJson(),
         if (userMessage != null) 'userMessage': userMessage,
         if (history.isNotEmpty)
           'history': [for (final turn in history) turn.toJson()],

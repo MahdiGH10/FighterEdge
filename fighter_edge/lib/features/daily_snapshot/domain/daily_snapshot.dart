@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../../fight_camp/domain/calendar.dart';
 import '../../fight_camp/domain/fight_camp.dart';
+import '../../fight_camp/domain/fight_week_plan.dart';
 import '../../fight_camp/domain/weight_path.dart';
 import '../../fight_camp/domain/weight_trend.dart';
 
@@ -104,6 +105,8 @@ class CampSummary {
     required this.daysToFight,
     required this.weightLimitKg,
     required this.weightPath,
+    this.fightWeekCut,
+    this.todaySteps = const [],
   });
 
   final CampPhase phase;
@@ -111,6 +114,12 @@ class CampSummary {
   final int daysToFight;
   final double weightLimitKg;
   final WeightPath weightPath;
+
+  /// What fight week asks food to do. Null when no plan is made (under 18).
+  final FightWeekCut? fightWeekCut;
+
+  /// Today's fight-week steps, in order. Empty outside fight week.
+  final List<FightWeekStep> todaySteps;
 }
 
 /// Everything calculated about one day of training, food and weight, in
@@ -148,6 +157,10 @@ class DailySnapshot {
   }) {
     final day = calendarDay(today);
     final trend = WeightTrend.from(weights, today: day);
+    final fightWeek = camp == null
+        ? null
+        : FightWeekPlan.plan(
+            camp: camp, weights: weights, today: day, ageYears: ageYears);
     return DailySnapshot._(
       date: day,
       training: _training(day, training, plannedSessionsPerWeek),
@@ -166,6 +179,8 @@ class DailySnapshot {
                 today: day,
                 ageYears: ageYears,
               ),
+              fightWeekCut: fightWeek?.cut,
+              todaySteps: fightWeek?.dayOn(day)?.steps ?? const [],
             ),
     );
   }
@@ -281,6 +296,8 @@ class DailySnapshot {
               'weightPathStatus': camp.weightPath.status.name,
               'weeklyLossKg': camp.weightPath.weeklyLossKg,
               'fightWeekEntryKg': camp.weightPath.fightWeekEntryKg,
+              'fightWeekCut': camp.fightWeekCut?.name,
+              'todaySteps': [for (final step in camp.todaySteps) step.name],
             },
     };
   }

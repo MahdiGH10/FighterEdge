@@ -1,3 +1,4 @@
+import '../../daily_snapshot/domain/daily_snapshot.dart';
 import '../domain/models/nutrition_day.dart';
 import '../domain/models/nutrition_setup_draft.dart';
 import '../domain/models/nutrition_target.dart';
@@ -8,6 +9,11 @@ import 'edge_fuel_ai_models.dart';
 /// The app never calls an AI provider directly and never holds a provider
 /// key — every implementation of this interface talks to our own backend
 /// boundary (or nothing at all, for the fake).
+///
+/// [DailySnapshot? today] on each call is optional context beyond food:
+/// training this week, the weight trend and, with a fight on the calendar,
+/// the camp and today's fight-week steps. Pass it built fresh
+/// (`buildDailySnapshot`) so the coach never answers from stale data.
 abstract class EdgeFuelAiGateway {
   /// Premium structured brief: next action, meal suggestion, training
   /// timing, and weekly adjustment in one call.
@@ -15,6 +21,7 @@ abstract class EdgeFuelAiGateway {
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
+    DailySnapshot? today,
   });
 
   /// A free-text turn in the EdgeFuel Coach conversation. [history] is prior
@@ -27,5 +34,6 @@ abstract class EdgeFuelAiGateway {
     NutritionDay? day,
     NutritionSetupDraft? preferences,
     List<ChatTurn> history = const [],
+    DailySnapshot? today,
   });
 }

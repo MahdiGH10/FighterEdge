@@ -1,3 +1,4 @@
+import '../../daily_snapshot/domain/daily_snapshot.dart';
 import '../domain/models/nutrition_day.dart';
 import '../domain/models/nutrition_setup_draft.dart';
 import '../domain/models/nutrition_target.dart';
@@ -20,6 +21,7 @@ class FakeEdgeFuelAiGateway implements EdgeFuelAiGateway {
     NutritionDay? day,
     NutritionSetupDraft? preferences,
     List<ChatTurn> history = const [],
+    DailySnapshot? today,
   }) async {
     if (nextResult != null) return nextResult!();
     if (!target.isSuccess) return const EdgeFuelAiResult.unavailable();
@@ -45,6 +47,7 @@ class FakeEdgeFuelAiGateway implements EdgeFuelAiGateway {
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
+    DailySnapshot? today,
   }) async {
     if (nextResult != null) return nextResult!();
     if (!target.isSuccess) return const EdgeFuelAiResult.unavailable();

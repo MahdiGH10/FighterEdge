@@ -27,6 +27,10 @@ import '../../../../widgets/primary_button.dart';
 import '../../../../widgets/skeleton.dart';
 import '../../../../widgets/stat_card.dart';
 import '../../../../observability/telemetry.dart';
+import '../../../../state/app_state.dart';
+import '../../../daily_snapshot/domain/daily_snapshot.dart';
+import '../../../daily_snapshot/presentation/daily_snapshot_builder.dart';
+import '../../../fight_camp/presentation/fight_camp_controller.dart';
 import '../../ai/edge_fuel_ai_gateway.dart';
 import '../../ai/edge_fuel_ai_models.dart';
 import '../../data/food_catalog_repository.dart';
@@ -111,6 +115,7 @@ class _CoachBodyState extends State<_CoachBody> {
     EdgeFuelCoachController coach,
     NutritionTarget target,
     EdgeFuelController edgeFuel,
+    DailySnapshot? today,
   ) async {
     final text = _input.text;
     if (text.trim().isEmpty) return;
@@ -121,6 +126,7 @@ class _CoachBodyState extends State<_CoachBody> {
       target: target,
       day: edgeFuel.day,
       preferences: edgeFuel.draft,
+      today: today,
     );
     _scrollToEnd();
   }
@@ -129,12 +135,14 @@ class _CoachBodyState extends State<_CoachBody> {
     EdgeFuelCoachController coach,
     NutritionTarget target,
     EdgeFuelController edgeFuel,
+    DailySnapshot? today,
   ) async {
     _scrollToEnd();
     await coach.requestBrief(
       target: target,
       day: edgeFuel.day,
       preferences: edgeFuel.draft,
+      today: today,
     );
     _scrollToEnd();
     final latest = coach.entries.isEmpty ? null : coach.entries.last;
@@ -191,12 +199,23 @@ class _CoachBodyState extends State<_CoachBody> {
     final matchIsStale = fuelMatch.isStaleFor(target, edgeFuel.day);
     void buildFuelMatch() => _buildFuelMatch(fuelMatch, target, edgeFuel);
 
+    // Built fresh on every request, never cached, so the coach never answers
+    // from a stale training week, weight trend or fight-camp day.
+    final appState = context.watch<AppState>();
+    final fightCamp = context.watch<FightCampController>();
+    DailySnapshot today() => buildDailySnapshot(
+          appState,
+          fightCamp,
+          ageYears: edgeFuel.draft?.ageYears,
+        );
+
     return Column(
       children: [
         Expanded(
           child: coach.entries.isEmpty
               ? _CoachIntro(
-                  onGenerateBrief: () => _requestBrief(coach, target, edgeFuel),
+                  onGenerateBrief: () =>
+                      _requestBrief(coach, target, edgeFuel, today()),
                   fuelMatch: fuelMatch,
                   matchIsStale: matchIsStale,
                   onBuildFuelMatch: buildFuelMatch,
@@ -218,7 +237,7 @@ class _CoachBodyState extends State<_CoachBody> {
                             entry: coach.entries[index - 1],
                             currentDay: edgeFuel.day,
                             onRefreshBrief: () =>
-                                _requestBrief(coach, target, edgeFuel),
+                                _requestBrief(coach, target, edgeFuel, today()),
                             onBuildFuelMatch: buildFuelMatch,
                           ),
                   ),
@@ -228,13 +247,13 @@ class _CoachBodyState extends State<_CoachBody> {
           controller: _input,
           sending: coach.isSending,
           maxChars: _maxMessageChars,
-          onSend: () => _send(coach, target, edgeFuel),
+          onSend: () => _send(coach, target, edgeFuel, today()),
           // The intro already has the primary brief action. After an athlete
           // starts chatting, the compact action in the input bar keeps the
           // brief available without showing the same CTA twice on first open.
           onGetBrief: coach.isSending || coach.entries.isEmpty || coach.hasBrief
               ? null
-              : () => _requestBrief(coach, target, edgeFuel),
+              : () => _requestBrief(coach, target, edgeFuel, today()),
         ),
       ],
     );

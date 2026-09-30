@@ -15,8 +15,14 @@ void main() {
     test('reads the profile map the app and server share', () {
       final at = DateTime.utc(2026, 9, 24, 12);
       final consents = DataConsents.fromProfile({
-        'healthData': {'version': 1, 'grantedAt': at.millisecondsSinceEpoch},
-        'aiCoach': const {'version': 1, 'grantedAt': null},
+        'healthData': {
+          'version': DataConsentPurpose.healthData.currentVersion,
+          'grantedAt': at.millisecondsSinceEpoch,
+        },
+        'aiCoach': {
+          'version': DataConsentPurpose.aiCoach.currentVersion,
+          'grantedAt': null,
+        },
       });
 
       expect(consents.allows(DataConsentPurpose.healthData), isTrue);

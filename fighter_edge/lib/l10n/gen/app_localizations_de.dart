@@ -557,7 +557,7 @@ class LDe extends L {
 
   @override
   String get aiConsentBody =>
-      'Für eine Antwort sendet unser Server deine Kalorien- und Makroziele, die Zusammenfassung deines heutigen Ernährungsprotokolls, deine Ernährungsweise, Allergien, Abneigungen und deine Nachrichten an OpenRouter (USA), das sie an einen KI-Modellanbieter weitergibt. Dein Name, deine E-Mail-Adresse und deine Konto-ID werden nie gesendet.';
+      'Für eine Antwort sendet unser Server deine Kalorien- und Makroziele, die Zusammenfassung deines heutigen Ernährungsprotokolls, deine Ernährungsweise, Allergien, Abneigungen, deine Nachrichten und, wenn du sie nutzt, deine Trainingstage im Vergleich zu deinem Plan, deinen 7-Tage-Gewichtstrend und dein Fight Camp (Termine, Gewichtslimit und den heutigen rein ernährungsbasierten Plan) an OpenRouter (USA), das sie an einen KI-Modellanbieter weitergibt. Dein Name, deine E-Mail-Adresse und deine Konto-ID werden nie gesendet.';
 
   @override
   String get aiConsentRetention =>

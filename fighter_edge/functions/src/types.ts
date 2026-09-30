@@ -23,6 +23,8 @@ export interface AiRequest {
     allergens?: string[];
     dislikedFoods?: string[];
   } | null;
+  /** `DailySnapshot.toJson()`: training, weight trend and fight camp. */
+  today?: Record<string, unknown> | null;
   /** Only for task "chat": the athlete's new message. */
   userMessage?: string;
   /** Only for task "chat": prior turns, oldest first, already bounded by the client. */

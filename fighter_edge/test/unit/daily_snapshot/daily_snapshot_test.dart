@@ -1,6 +1,7 @@
 import 'package:fighter_edge/features/daily_snapshot/domain/daily_snapshot.dart';
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
+import 'package:fighter_edge/features/fight_camp/domain/fight_week_plan.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_path.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_trend.dart';
@@ -110,6 +111,59 @@ void main() {
     expect(c.daysToFight, 78);
     expect(c.weightPath.status, WeightPathStatus.onTrack);
     expect(c.weightPath.weeklyLossKg, 0.5);
+    expect(c.fightWeekCut, FightWeekCut.lowFibreAndCarbs,
+        reason: 'the planned 2% for fight week');
+    expect(c.todaySteps, isEmpty, reason: 'fight week is 10 weeks away');
+  });
+
+  test("in fight week the camp carries today's steps", () {
+    final camp = FightCamp.tryCreate(
+      fightDate: addDays(today, 4),
+      weighInDate: addDays(today, 3),
+      weightLimitKg: 73.5,
+      category: CompetitionCategory.professional,
+    )!;
+    // 75.0 kg on the first day of fight week: 2% to go, food only.
+    final weights = [
+      WeightPoint(addDays(today, -5), 75.2),
+      WeightPoint(addDays(today, -4), 74.8),
+    ];
+    final snapshot = DailySnapshot.build(
+      today: today,
+      training: training,
+      plannedSessionsPerWeek: 4,
+      goal: goal,
+      nutritionDays: nutritionDays,
+      weights: weights,
+      camp: camp,
+    );
+    expect(snapshot.camp!.todaySteps,
+        [FightWeekStep.lowFibre, FightWeekStep.lowerCarbs]);
+    final json = snapshot.toJson()['camp'] as Map<String, Object?>;
+    expect(json['phase'], 'fightWeek');
+    expect(json['fightWeekCut'], 'lowFibreAndCarbs');
+    expect(json['todaySteps'], ['lowFibre', 'lowerCarbs']);
+  });
+
+  test('no fight-week plan for a minor', () {
+    final camp = FightCamp.tryCreate(
+      fightDate: addDays(today, 3),
+      weightLimitKg: 73.5,
+      category: CompetitionCategory.professional,
+    )!;
+    final snapshot = DailySnapshot.build(
+      today: today,
+      training: training,
+      plannedSessionsPerWeek: 4,
+      goal: goal,
+      nutritionDays: nutritionDays,
+      weights: [WeightPoint(today, 75)],
+      camp: camp,
+      ageYears: 17,
+    );
+    expect(snapshot.camp!.fightWeekCut, isNull);
+    expect(snapshot.camp!.todaySteps, isEmpty);
+    expect((snapshot.toJson()['camp'] as Map)['todaySteps'], isEmpty);
   });
 
   test('without a recent weigh-in the path asks for data', () {
