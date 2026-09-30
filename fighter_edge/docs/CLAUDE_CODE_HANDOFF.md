@@ -2,7 +2,7 @@
 
 ## START HERE: state as of 2026-09-28
 
-**Seven stacked PRs, none merged.** Merge in order, retargeting each to
+**Eight stacked PRs, none merged.** Merge in order, retargeting each to
 `main` after the one before it lands:
 
 | PR | Branch | What |
@@ -14,12 +14,14 @@
 | #14 | `feat/ethical-guidelines` | Ethical Guidelines page (EN/DE) and its Settings row |
 | #15 | `feat/ai-daily-context` | AI coach reads training, weight trend and fight camp (plan step 5) |
 | #16 | `feat/german-decimal-format` | German reads "79,5", not "79.5", everywhere a weight number is genuinely localized |
+| #17 | `feat/weight-chart-tokens` | The old weight tracker chart restyled onto `ChartTokens`, matching the fight-camp chart |
 
-**CI:** all 7 checks green on #10 to #14, including the Android emulator
-integration test, which passed for the first time after the `978f19f` test
-fix (see below); #11 and #14 each stalled once on rerun (the known emulator
-hang, no test failure) and passed clean the second time. #15 and #16 run
-the same workflow.
+**CI:** all 7 checks green on #10, #12, #13, and now #15 (the Android
+emulator job stalled once on #15's first run — 35 minutes, no output — and
+was rerun; the same known intermittent hang as #11/#14, not a test
+failure). #11 and #14 stalled once each too and passed clean on rerun.
+#16 and #17 run the same workflow; watch their emulator job for the same
+pattern before assuming a real failure.
 
 **Owner-only, new:** the Ethical Guidelines page has the same two
 placeholders as the Terms (publication date, support email); the
@@ -37,6 +39,10 @@ brief's build order (`docs/FIGHT_CAMP_PATTERN_BRIEF.md`) is complete. #16
 found several screens (the AI coach chat, the EdgeFuel setup review step,
 recipe/food copy) that are still hardcoded English throughout — real,
 separate work, not touched here; see its section below for the exact list.
+#17 found the weight tracker chart's date-axis labels use a hardcoded
+`DateFormat('M/d')` regardless of locale (a German reader should see
+"1.10." not "10/1") — not fixed there; it is a locale-formatting task like
+#16, not a token one, and deserves its own visual verification pass.
 
 The rest of this section describes #10.
 
@@ -94,8 +100,60 @@ the Play closed test.
 **Stacked on it:** `feat/fight-camp-setup` (screens A and B of
 `docs/FIGHT_CAMP_PATTERN_BRIEF.md`), `feat/fight-camp-weight-path`
 (screen C), then `feat/fight-week` (screen D), `feat/ethical-guidelines`,
-`feat/ai-daily-context` (plan step 5), then `feat/german-decimal-format`.
-Sections below.
+`feat/ai-daily-context` (plan step 5), `feat/german-decimal-format`, then
+`feat/weight-chart-tokens`. Sections below.
+
+## Weight tracker chart restyled onto ChartTokens (2026-09-28, Claude)
+
+Branch `feat/weight-chart-tokens` (PR #17), stacked on
+`feat/german-decimal-format`. Fight camp slice 2's handoff note said the
+old weight tracker chart "still uses raw values: move it over when that
+screen is next touched" — #16 had just touched it.
+
+- Loaded the `fighter-edge-ui` skill first, since this is a restyle: its
+  Rule 0 ("never invent a value... if you are typing a raw number... you
+  are doing it wrong") turned out to cover more than line widths — the
+  gradient area fill under the trend line and the dot's ring stroke were
+  each an uncatalogued `withValues(alpha: …)`/`strokeWidth: 2` with no
+  token behind them, and the fight-camp chart's own established pattern
+  has neither. Both are gone; `_WeightChart` now draws plain filled dots
+  and a plain line, matching the fight-camp chart exactly.
+- Every width, dash pattern and axis-reserved-size became the matching
+  `ChartTokens`/`Insets` constant (`ChartTokens.line`, `.dot`, `.guide`,
+  `.dash`, `.valueAxis`, `.dateAxis`, `Insets.hairline`); text colors
+  moved from the static `AppColors.textMuted` to the context-aware
+  `AppAccessibility.textMuted(context)`, so high-contrast mode now
+  strengthens this chart's labels the same way it already does the
+  fight-camp one's.
+- Ported two bugs the fight-camp chart had already found and fixed in its
+  own build (`090dcea`, PR #12), since this is the same chart architecture
+  hitting the same failure modes:
+  - **Y-axis interval.** The old `((maxY - minY) / 4).clamp(0.5, 100)`
+    could land on a fractional step with neither end on a boundary — the
+    same overlapping-label bug PR #12 fixed for the fight-camp chart.
+    Replaced with the identical whole-number, both-ends-on-a-step
+    computation.
+  - **X-axis labels.** `SideTitleWidget` + `fitInside` now keeps the last
+    date from being clipped at the card's edge, matching PR #12's fix.
+  - **New bug found here, not ported from anywhere:** the "every other
+    point" thinning rule (`i % 2 != 0`) still crowded labels into overlap
+    once there were more than about 8–10 weigh-ins — three weeks of daily
+    entries showed 11 overlapping labels. Replaced with up to 4 evenly
+    spaced labels regardless of point count (seen by eye: 21 daily entries
+    now show 4 clean, well-spaced dates).
+- **Not fixed, flagged instead:** the date labels use a hardcoded
+  `DateFormat('M/d')`, so a German-locale reader sees the US month/day
+  order regardless of language — the same class of bug #16 fixed for
+  numbers, not fixed here for dates. It needs its own visual check the
+  way #16 needed one for numbers (different label widths in different
+  locales can reopen the crowding this PR just fixed), so it is left as
+  its own task rather than folded in here.
+- Tests: two new ones lock in the label-thinning fix directly (many
+  entries → exactly the 4 expected dates and none of the ones in between;
+  few entries → every point still gets one). Seen by eye (scratch
+  renders with real fonts, not committed): many entries with a goal line,
+  many entries without one, and the two-entry minimum.
+- **Verified:** format and analyze clean, 818 tests, 3 goldens.
 
 ## German decimal format: "79,5" not "79.5" (2026-09-28, Claude)
 

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
@@ -123,6 +124,45 @@ void main() {
             home: WeightTrackerScreen(),
           ),
         );
+
+    testWidgets(
+        'the chart labels a few evenly spaced dates, not every other point',
+        (tester) async {
+      // 21 daily weigh-ins: "every other" (the old rule) would still crowd
+      // 11 labels into one 390 px-wide chart.
+      final today = DateTime(2026, 10, 1);
+      final state = AppState(dataRepository: InMemoryDataRepository())
+        ..setUser('u1');
+      for (var i = 20; i >= 0; i--) {
+        state.addWeight(today.subtract(Duration(days: i)), 80.0);
+      }
+      await tester.pumpWidget(trackerHost(state));
+      await tester.pumpAndSettle();
+
+      for (final date in ['9/11', '9/18', '9/24', '10/1']) {
+        expect(find.text(date), findsOneWidget, reason: date);
+      }
+      // Not every day in between got a label.
+      for (final date in ['9/12', '9/17', '9/20', '9/30']) {
+        expect(find.text(date), findsNothing, reason: date);
+      }
+    });
+
+    testWidgets('the chart labels every point when there are few',
+        (tester) async {
+      final today = DateTime(2026, 10, 1);
+      final state = AppState(dataRepository: InMemoryDataRepository())
+        ..setUser('u1');
+      state.addWeight(today.subtract(const Duration(days: 2)), 80.0);
+      state.addWeight(today.subtract(const Duration(days: 1)), 79.5);
+      state.addWeight(today, 79.0);
+      await tester.pumpWidget(trackerHost(state));
+      await tester.pumpAndSettle();
+
+      for (final date in ['9/29', '9/30', '10/1']) {
+        expect(find.text(date), findsOneWidget, reason: date);
+      }
+    });
 
     testWidgets('adding a weigh-in updates the number and history',
         (tester) async {
