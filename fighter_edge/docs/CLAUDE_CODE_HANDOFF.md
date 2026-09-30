@@ -1,9 +1,25 @@
 # Fighter Edge — Claude Code Handoff
 
-## START HERE: state as of 2026-09-28
+## START HERE: state as of 2026-09-30
 
-**Thirteen stacked PRs, none merged.** Merge in order, retargeting each to
-`main` after the one before it lands:
+**Everything below is merged into `main` (2026-09-30), but the backend is NOT
+deployed.** The Deploy backend workflow only runs its tests: GitHub has no
+deploy credentials for the Firebase project (no `GCP_WORKLOAD_IDENTITY_PROVIDER`
+and `GCP_SERVICE_ACCOUNT` variables, no `FIREBASE_SERVICE_ACCOUNT` secret), so
+its deploy job prints "Deploy credentials are not configured; skipping" and the
+run still shows green. The live project still runs the 2026-09-24 functions
+(`deleteAccount`, `edgeFuelAiExplain` on nodejs20, old task names). So the new
+Corner Brief, Groq, the rewarded-video check and the new rules are **not live**,
+and an app build from `main` cannot get a brief from the live backend.
+
+To deploy, from `fighter_edge/` with a logged-in Firebase CLI:
+`firebase deploy --only functions,firestore:rules` (the three secrets it needs
+exist: `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `REVENUECAT_API_KEY` = `unset`;
+`REVENUECAT_WEBHOOK_AUTH` exists too). Or set up the credentials described at
+the top of `.github/workflows/deploy-backend.yml` so merges deploy. Also add a
+Firestore TTL policy on `adRewardTokens.expiresAt`.
+
+The PRs merged, in this order (history):
 
 | PR | Branch | What |
 |---|---|---|
