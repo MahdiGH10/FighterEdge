@@ -104,7 +104,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Upgrade'));
     await tester.pumpAndSettle();
-    expect(find.text('Training tools with Pro'), findsOneWidget);
+    expect(find.text('Your corner, every day'), findsOneWidget);
+    expect(find.text('Pro opens soon'), findsOneWidget);
 
     // Billing is not wired yet: the CTA records interest honestly and must
     // not grant Pro from the client or pretend to be a checkout.

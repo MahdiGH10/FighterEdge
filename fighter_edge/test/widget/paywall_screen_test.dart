@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:fighter_edge/billing/billing_gateway.dart';
 import 'package:fighter_edge/billing/fake_billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
@@ -34,22 +35,39 @@ void main() {
     });
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));
-    final monthly = find.textContaining('Monthly');
-    for (var i = 0; i < 8 && monthly.evaluate().isEmpty; i++) {
-      await tester.drag(find.byType(ListView), const Offset(0, -600));
-      await tester.pumpAndSettle();
-    }
-    expect(monthly, findsOneWidget);
+    final scrollable = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(find.text('Monthly plan'), 200,
+        scrollable: scrollable);
     expect(find.text('Annual plan'), findsOneWidget);
+    expect(find.text(r'$59.99 / year'), findsOneWidget);
     expect(find.text(r'About $5.00 / month'), findsOneWidget);
-    expect(find.textContaining('Annual'), findsOneWidget);
+    expect(find.text('Save about 37%'), findsOneWidget);
+    expect(find.text('Monthly plan'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Continue with annual plan'), 200,
+        scrollable: scrollable);
+    expect(find.text('Continue with annual plan'), findsOneWidget,
+        reason: 'annual is preselected');
     await tester.scrollUntilVisible(find.text('Restore purchases'), 200,
         scrollable: find.byType(Scrollable).first);
     expect(find.text('Restore purchases'), findsOneWidget);
 
-    await tester.tap(monthly);
+    // Picking a plan only selects it; the button buys what is selected.
+    await tester.scrollUntilVisible(find.text('Monthly plan'), -200,
+        scrollable: scrollable);
+    await tester.ensureVisible(find.text('Monthly plan'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Monthly plan'));
+    await tester.pumpAndSettle();
+    expect(billing.purchaseCount, 0);
+    await tester.scrollUntilVisible(
+        find.text('Continue with monthly plan'), 200,
+        scrollable: scrollable);
+    await tester.ensureVisible(find.text('Continue with monthly plan'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continue with monthly plan'));
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
+    expect(billing.lastPurchased!.period, BillingProductPeriod.monthly);
 
     // The SDK result is positive, but the local auth repository remains Free;
     // only the server webhook is allowed to change the entitlement.

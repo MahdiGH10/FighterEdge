@@ -14,6 +14,7 @@ import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/empty_state.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../../widgets/stat_card.dart';
+import '../../domain/models/nutrition_enums.dart';
 import '../../domain/models/nutrition_target.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../nutrition_copy.dart';
@@ -160,9 +161,15 @@ class _PlanBody extends StatelessWidget {
                 const SizedBox(height: Insets.sm),
                 Text(
                   NutritionCopy.confidenceLabel(target.confidence!),
+                  // Red reads as a warning; confidence is good news unless
+                  // it is low.
                   style: AppType.micro(
                     weight: FontWeight.w700,
-                    color: AppColors.accentText,
+                    color: switch (target.confidence!) {
+                      ConfidenceLabel.high => AppColors.positive,
+                      ConfidenceLabel.medium => AppColors.textSecondary,
+                      ConfidenceLabel.low => AppColors.warning,
+                    },
                   ),
                 ),
               ],

@@ -14,9 +14,11 @@ import 'legal_screen.dart';
 import '../observability/telemetry.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/press_scale.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
 
@@ -74,6 +76,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
   static const _waitlistKey = 'paywall.waitlistInterest';
   bool _onWaitlist = false;
 
+  /// The plan the athlete picked; null means the default (annual first).
+  BillingProductPeriod? _selectedPeriod;
+
   @override
   void initState() {
     super.initState();
@@ -124,13 +129,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _purchase(BillingProduct product) async {
+    final l = L.of(context);
     final auth = context.read<AuthController>();
     try {
       await auth.startProCheckout(product);
       if (!mounted) return;
-      final message = auth.isPro
-          ? 'Pro is active on your account.'
-          : 'Purchase received. We are confirming your Pro access securely.';
+      final message =
+          auth.isPro ? l.paywallPurchaseActive : l.paywallPurchasePending;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(message),
         behavior: SnackBarBehavior.floating,
@@ -145,14 +150,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _restore() async {
+    final l = L.of(context);
     final auth = context.read<AuthController>();
     try {
       await auth.restorePurchases();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(auth.isPro
-            ? 'Your Pro access is restored.'
-            : 'No active Pro access was found yet.'),
+        content:
+            Text(auth.isPro ? l.paywallRestored : l.paywallNothingToRestore),
         behavior: SnackBarBehavior.floating,
       ));
     } on AuthException catch (e) {
@@ -175,100 +180,102 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final auth = context.watch<AuthController>();
     final isPro = auth.isPro;
     final products = _orderedProducts(auth.billingProducts);
+    final selected =
+        products.where((p) => p.period == _selectedPeriod).firstOrNull ??
+            products.firstOrNull;
+    final secondary = AppAccessibility.textSecondary(context);
+    final quietLink =
+        AppType.subhead(weight: FontWeight.w800, color: secondary);
     return ScreenScaffold(
       title: 'FighterEdge Pro',
       showBack: true,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
-            Insets.xl, Insets.none, Insets.xl, Insets.xxl),
+            Insets.lg, Insets.none, Insets.lg, Insets.xxl),
         children: [
-          const SizedBox(height: Insets.sm),
-          Text(L.of(context).paywallPlainTitle,
+          const SizedBox(height: Insets.xs),
+          Text(l.paywallPlainTitle,
               textAlign: TextAlign.center, style: AppType.title1()),
           const SizedBox(height: Insets.xs),
-          Text(L.of(context).paywallPlainSubtitle,
+          Text(l.paywallPlainSubtitle,
               textAlign: TextAlign.center,
-              style: AppType.subhead(color: AppColors.textSecondary)),
-          const SizedBox(height: Insets.xl),
-          if (widget.highlight != null) ...[
-            _TriggeredFeatureCard(feature: widget.highlight!),
-            const SizedBox(height: Insets.lg),
-          ],
-          const _ValueStack(),
+              style: AppType.subhead(color: secondary)),
           const SizedBox(height: Insets.lg),
-          for (final feature in Feature.values)
-            if (Entitlements.isProOnly(feature))
-              _BenefitRow(
-                title: feature.title,
-                subtitle: feature.pitch,
-                icon: feature.icon,
-                highlighted: widget.highlight == feature,
-              ),
+          _Benefits(highlight: widget.highlight),
           const SizedBox(height: Insets.lg),
           if (isPro)
             Column(
               children: [
-                const Icon(Icons.verified, color: AppColors.positive, size: 32),
+                const Icon(Icons.verified,
+                    color: AppColors.positive, size: IconSizes.badge),
                 const SizedBox(height: Insets.sm),
-                Text('You\'re on Pro',
+                Text(l.paywallOnPro,
                     style: AppType.title2(color: AppColors.positive)),
                 const SizedBox(height: Insets.lg),
                 GhostButton(
-                  'Refresh status',
+                  l.paywallOnProRefresh,
                   icon: Icons.refresh,
                   onPressed: auth.isBusy ? null : auth.refreshCurrentUser,
                 ),
               ],
             )
           else ...[
-            if (auth.billingState.isPro) const _BillingSyncNotice(),
-            if (auth.billingAvailable && products.isNotEmpty) ...[
-              const _LaunchTermsCard(billingActive: true),
-              const SizedBox(height: Insets.lg),
+            if (auth.billingState.isPro) ...[
+              const _BillingSyncNotice(),
+              const SizedBox(height: Insets.md),
+            ],
+            // The price and the one button sit right under the benefits, so
+            // a phone shows what Pro is and what it costs without scrolling.
+            if (auth.billingAvailable && selected != null) ...[
               for (final product in products) ...[
-                if (product.period == BillingProductPeriod.annual)
-                  _AnnualPlanOption(
-                    product: product,
-                    monthlyProduct: products
-                        .where((p) => p.period == BillingProductPeriod.monthly)
-                        .firstOrNull,
-                    onPressed: auth.isBusy ? null : () => _purchase(product),
-                  )
-                else
-                  GhostButton(
-                    L.of(context).paywallMonthly(product.priceString),
-                    icon: Icons.lock_open,
-                    expand: true,
-                    onPressed: auth.isBusy ? null : () => _purchase(product),
-                  ),
+                _PlanTile(
+                  product: product,
+                  monthlyProduct: products
+                      .where((p) => p.period == BillingProductPeriod.monthly)
+                      .firstOrNull,
+                  selected: product.id == selected.id,
+                  onTap: auth.isBusy
+                      ? null
+                      : () => setState(() => _selectedPeriod = product.period),
+                ),
                 const SizedBox(height: Insets.sm),
               ],
+              const SizedBox(height: Insets.xs),
+              PrimaryButton(
+                selected.period == BillingProductPeriod.annual
+                    ? l.paywallContinueAnnual
+                    : l.paywallContinueMonthly,
+                icon: Icons.lock_open,
+                expand: true,
+                onPressed: auth.isBusy ? null : () => _purchase(selected),
+              ),
+              const SizedBox(height: Insets.sm),
+              Text(l.paywallTrust,
+                  textAlign: TextAlign.center,
+                  style: AppType.subhead(color: secondary)),
+              const SizedBox(height: Insets.sm),
               const _RenewalDisclosure(),
             ] else if (auth.billingAvailable && auth.isBusy) ...[
               const _BillingLoadingNotice(),
             ] else ...[
-              const _LaunchTermsCard(billingActive: false),
-              const SizedBox(height: Insets.lg),
+              const _ComingSoonCard(),
+              const SizedBox(height: Insets.md),
               PrimaryButton(
-                _onWaitlist
-                    ? L.of(context).paywallWaitlistJoined
-                    : L.of(context).paywallWaitlistCta,
+                _onWaitlist ? l.paywallWaitlistJoined : l.paywallWaitlistCta,
                 icon: _onWaitlist ? Icons.check : Icons.notifications_active,
                 expand: true,
                 onPressed: _onWaitlist ? null : _joinWaitlist,
               ),
+              const SizedBox(height: Insets.sm),
+              Text(l.paywallNoPaymentToday,
+                  textAlign: TextAlign.center,
+                  style: AppType.subhead(color: secondary)),
             ],
             const SizedBox(height: Insets.sm),
-            Text(
-                auth.billingAvailable
-                    ? 'Your store receipt is verified before Pro is activated.'
-                    : 'No payment today. We will ask again before any charge.',
-                textAlign: TextAlign.center,
-                style: AppType.micro(color: AppColors.textMuted)),
-            const SizedBox(height: Insets.md),
             TextButton(
               onPressed: auth.isBusy
                   ? null
@@ -277,24 +284,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       : auth.refreshCurrentUser,
               child: Text(
                 auth.billingAvailable
-                    ? 'Restore purchases'
-                    : 'Refresh purchase status',
-                style: AppType.subhead(
-                  weight: FontWeight.w800,
-                  color: AppColors.textSecondary,
-                ),
+                    ? l.paywallRestore
+                    : l.paywallRefreshStatus,
+                style: quietLink,
               ),
             ),
             if (auth.billingManagementUrl case final managementUrl?)
               TextButton(
                 onPressed: () => launchUrl(Uri.parse(managementUrl)),
-                child: Text(
-                  'Manage or cancel subscription',
-                  style: AppType.subhead(
-                    weight: FontWeight.w800,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
+                child: Text(l.paywallManage, style: quietLink),
               ),
             const _LegalLinksRow(),
           ],
@@ -350,10 +348,11 @@ class _LegalLinksRow extends StatelessWidget {
   }
 }
 
-String? _monthlyEquivalent(BillingProduct product) {
+String? _monthlyEquivalent(BillingProduct product, String locale) {
   final price = product.price;
   if (price == null || !price.isFinite || price <= 0) return null;
   return NumberFormat.simpleCurrency(
+    locale: locale,
     name: product.currencyCode,
     decimalDigits: 2,
   ).format(price / 12);
@@ -378,172 +377,201 @@ int? _annualSavingsPercent(
   return (savings * 100).round();
 }
 
-class _AnnualPlanOption extends StatelessWidget {
+/// One plan to pick. Tapping selects it; the button below buys it.
+class _PlanTile extends StatelessWidget {
   final BillingProduct product;
   final BillingProduct? monthlyProduct;
-  final VoidCallback? onPressed;
+  final bool selected;
+  final VoidCallback? onTap;
 
-  const _AnnualPlanOption({
+  const _PlanTile({
     required this.product,
     required this.monthlyProduct,
-    required this.onPressed,
+    required this.selected,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final equivalent = _monthlyEquivalent(product);
-    final savings = _annualSavingsPercent(product, monthlyProduct);
-    return AppCard(
-      accent: AppColors.premium,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    final l = L.of(context);
+    final annual = product.period == BillingProductPeriod.annual;
+    final equivalent = annual
+        ? _monthlyEquivalent(
+            product, Localizations.localeOf(context).toLanguageTag())
+        : null;
+    final savings =
+        annual ? _annualSavingsPercent(product, monthlyProduct) : null;
+    final secondary = AppAccessibility.textSecondary(context);
+    return Semantics(
+      button: true,
+      selected: selected,
+      inMutuallyExclusiveGroup: true,
+      child: PressScale(
+        onTap: onTap,
+        haptic: AppHaptics.selection,
+        child: AnimatedContainer(
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : MotionTokens.fast,
+          constraints:
+              const BoxConstraints(minHeight: AppAccessibility.minTouchTarget),
+          padding: const EdgeInsets.all(Insets.md),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.premiumSoft : AppColors.surface,
+            borderRadius: BorderRadius.circular(Radii.card),
+            border: Border.all(
+              color: selected
+                  ? AppColors.premium
+                  : AppAccessibility.border(context),
+            ),
+          ),
+          child: Row(
             children: [
-              Expanded(
-                child: Text(
-                  'Annual plan',
-                  style: AppType.title2(color: AppColors.premium),
-                ),
+              Icon(
+                selected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                color: selected ? AppColors.premium : secondary,
+                size: IconSizes.row,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Insets.sm,
-                  vertical: Insets.xxs,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.premium.withValues(alpha: .14),
-                  borderRadius: BorderRadius.circular(Radii.chip),
-                ),
-                child: Text(
-                  'Best value',
-                  style: AppType.micro(
-                    color: AppColors.premium,
-                    weight: FontWeight.w900,
-                  ),
+              const SizedBox(width: Insets.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: Insets.sm,
+                      runSpacing: Insets.xxs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          annual ? l.paywallAnnualPlan : l.paywallMonthlyPlan,
+                          style: AppType.callout(weight: FontWeight.w800),
+                        ),
+                        if (annual)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: Insets.sm,
+                              vertical: Insets.xxs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.premiumSoft,
+                              borderRadius: BorderRadius.circular(Radii.chip),
+                            ),
+                            child: Text(
+                              l.paywallBestValue,
+                              style: AppType.micro(
+                                color: AppColors.premium,
+                                weight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: Insets.xxs),
+                    Text(
+                      annual
+                          ? l.paywallPerYear(product.priceString)
+                          : l.paywallPerMonth(product.priceString),
+                      style: AppType.subhead(
+                          weight: FontWeight.w700, color: secondary),
+                    ),
+                    if (equivalent != null || savings != null) ...[
+                      const SizedBox(height: Insets.xxs),
+                      Wrap(
+                        spacing: Insets.sm,
+                        children: [
+                          if (equivalent != null)
+                            Text(l.paywallAboutPerMonth(equivalent),
+                                style: AppType.subhead(color: secondary)),
+                          if (savings != null)
+                            Text(l.paywallSave(savings),
+                                style: AppType.subhead(
+                                    weight: FontWeight.w700,
+                                    color: AppColors.premium)),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Insets.xs),
-          Text(
-            '${product.priceString} / year',
-            style: AppType.callout(weight: FontWeight.w800),
-          ),
-          if (equivalent case final monthly?) ...[
-            const SizedBox(height: Insets.xxs),
-            Text(
-              'About $monthly / month',
-              style: AppType.subhead(color: AppColors.textSecondary),
-            ),
-          ],
-          if (savings case final percent?) ...[
-            const SizedBox(height: Insets.xxs),
-            Text(
-              'Save about $percent% versus monthly billing',
-              style: AppType.subhead(color: AppColors.premium),
-            ),
-          ],
-          const SizedBox(height: Insets.md),
-          PrimaryButton(
-            'Choose annual plan',
-            icon: Icons.lock_open,
-            expand: true,
-            onPressed: onPressed,
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _TriggeredFeatureCard extends StatelessWidget {
-  final Feature feature;
-  const _TriggeredFeatureCard({required this.feature});
+/// What Pro unlocks: exactly the gated features, nothing else. The one that
+/// brought the athlete here leads the list.
+class _Benefits extends StatelessWidget {
+  final Feature? highlight;
+  const _Benefits({required this.highlight});
+
+  static (String, String) _copy(L l, Feature feature) => switch (feature) {
+        Feature.edgeFuelAiCoach => (
+            l.paywallBenefitBriefTitle,
+            l.paywallBenefitBriefBody
+          ),
+        Feature.edgeFuelPremiumRecipes => (
+            l.paywallBenefitRecipesTitle,
+            l.paywallBenefitRecipesBody
+          ),
+        Feature.fullTechniqueLibrary => (
+            l.paywallBenefitDrillsTitle,
+            l.paywallBenefitDrillsBody
+          ),
+        Feature.cornerCoach => (
+            l.paywallBenefitCuesTitle,
+            l.paywallBenefitCuesBody
+          ),
+      };
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(Radii.tile),
-            ),
-            child: const Icon(Icons.lock_open, color: AppColors.primary),
-          ),
-          const SizedBox(width: Insets.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('You found a Pro feature', style: AppType.title2()),
-                const SizedBox(height: Insets.xxs),
-                Text(
-                  '${feature.title} is part of the full Fighter Edge system.',
-                  style: AppType.subhead(color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ValueStack extends StatelessWidget {
-  const _ValueStack();
-
-  static const _items = [
-    (
-      Icons.track_changes,
-      'Know what matters today',
-      'Focus on the session, habit, or recovery signal that moves the week.'
-    ),
-    (
-      Icons.restaurant_menu,
-      'Fuel that fits',
-      'Every recipe, scaled to your servings and checked against your '
-          'allergens.'
-    ),
-    (
-      Icons.psychology_alt,
-      'Get explanations',
-      'Pro surfaces explain why the plan says what it says, not just numbers.'
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final features = [
+      for (final feature in Feature.values)
+        if (Entitlements.isProOnly(feature)) feature,
+    ];
+    final first = highlight;
+    if (first != null && features.remove(first)) features.insert(0, first);
     return AppCard(
       child: Column(
         children: [
-          for (final item in _items) _ValueRow(item.$1, item.$2, item.$3),
+          for (final (index, feature) in features.indexed) ...[
+            if (index > 0) const SizedBox(height: Insets.md),
+            _BenefitRow(
+              icon: feature.icon,
+              title: _copy(l, feature).$1,
+              body: _copy(l, feature).$2,
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _ValueRow extends StatelessWidget {
+class _BenefitRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String body;
 
-  const _ValueRow(this.icon, this.title, this.body);
+  const _BenefitRow({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.md),
+    return MergeSemantics(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.primary, size: 20),
+          Icon(icon, color: AppColors.premium, size: IconSizes.row),
           const SizedBox(width: Insets.md),
           Expanded(
             child: Column(
@@ -553,7 +581,8 @@ class _ValueRow extends StatelessWidget {
                 const SizedBox(height: Insets.xxs),
                 Text(
                   body,
-                  style: AppType.subhead(color: AppColors.textSecondary),
+                  style: AppType.subhead(
+                      color: AppAccessibility.textSecondary(context)),
                 ),
               ],
             ),
@@ -564,39 +593,24 @@ class _ValueRow extends StatelessWidget {
   }
 }
 
-class _LaunchTermsCard extends StatelessWidget {
-  final bool billingActive;
-
-  const _LaunchTermsCard({required this.billingActive});
+/// Shown while Pro cannot be bought on this build yet.
+class _ComingSoonCard extends StatelessWidget {
+  const _ComingSoonCard();
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return AppCard(
       accent: AppColors.premium,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(l.paywallSoonTitle, style: AppType.title2()),
+          const SizedBox(height: Insets.xs),
           Text(
-            'Founding Pro preview',
-            style: AppType.micro(
-              weight: FontWeight.w900,
-              color: AppColors.premium,
-              spacing: 0.8,
-            ),
-          ),
-          const SizedBox(height: Insets.sm),
-          Text(
-            billingActive ? 'Secure store checkout' : 'Founding Pro preview',
-            style: AppType.title2(),
-          ),
-          const SizedBox(height: Insets.sm),
-          Text(
-            billingActive
-                ? 'Subscriptions are processed by Apple or Google. Your '
-                    'receipt is verified before Pro access is activated, and '
-                    'you can restore or manage it any time.'
-                : L.of(context).paywallWaitlistBody,
-            style: AppType.subhead(color: AppColors.textSecondary),
+            l.paywallWaitlistBody,
+            style:
+                AppType.subhead(color: AppAccessibility.textSecondary(context)),
           ),
         ],
       ),
@@ -617,8 +631,9 @@ class _BillingSyncNotice extends StatelessWidget {
           const SizedBox(width: Insets.md),
           Expanded(
             child: Text(
-              'Your store purchase is recognized. Pro unlocks after the secure account sync completes.',
-              style: AppType.subhead(color: AppColors.textSecondary),
+              L.of(context).paywallSync,
+              style: AppType.subhead(
+                  color: AppAccessibility.textSecondary(context)),
             ),
           ),
         ],
@@ -632,61 +647,16 @@ class _BillingLoadingNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AppCard(
+    return AppCard(
       child: Row(
         children: [
-          SizedBox(
+          const SizedBox(
             width: IconSizes.inline,
             height: IconSizes.inline,
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
-          SizedBox(width: Insets.md),
-          Expanded(child: Text('Loading store plans…')),
-        ],
-      ),
-    );
-  }
-}
-
-class _BenefitRow extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final bool highlighted;
-  const _BenefitRow({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.highlighted,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: Insets.md),
-      padding: const EdgeInsets.all(Insets.md),
-      decoration: BoxDecoration(
-        color: highlighted ? AppColors.primarySoft : AppColors.surface,
-        borderRadius: BorderRadius.circular(Radii.card),
-        border: Border.all(
-            color: highlighted ? AppColors.primary : AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.primary, size: 22),
           const SizedBox(width: Insets.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AppType.callout(weight: FontWeight.w700)),
-                const SizedBox(height: Insets.xxs),
-                Text(subtitle,
-                    style: AppType.subhead(color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-          const Icon(Icons.check_circle, color: AppColors.positive, size: 20),
+          Expanded(child: Text(L.of(context).paywallLoading)),
         ],
       ),
     );

@@ -68,6 +68,32 @@ void main() {
       );
     });
 
+    testWidgets('a suggested question is asked with one tap', (tester) async {
+      final repo = await makeRepo(signedIn: true, plan: Plan.pro);
+      final edgeFuelRepo = InMemoryEdgeFuelRepository();
+      await edgeFuelRepo.saveTarget(repo.currentUser!.id, _successTarget());
+
+      await tester.pumpWidget(wrapApp(
+        const EdgeFuelCoachScreen(),
+        repo: repo,
+        edgeFuelRepo: edgeFuelRepo,
+        edgeFuelAiGateway: const FakeEdgeFuelAiGateway(),
+      ));
+      await tester.pumpAndSettle();
+
+      const question = 'What should I eat before training?';
+      expect(find.text('Am I on track to make weight?'), findsNothing,
+          reason: 'no fight is set');
+      await tester.tap(find.text(question));
+      await tester.pumpAndSettle();
+
+      expect(find.text(question), findsOneWidget);
+      expect(
+        find.textContaining('Your target is 2500 kcal with 150g protein'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('presents Fuel Match as a catalog-backed Pro action',
         (tester) async {
       final repo = await makeRepo(signedIn: true, plan: Plan.pro);

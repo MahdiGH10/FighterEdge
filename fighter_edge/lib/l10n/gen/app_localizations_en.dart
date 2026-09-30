@@ -1044,18 +1044,121 @@ class LEn extends L {
   }
 
   @override
-  String get paywallPlainTitle => 'Training tools with Pro';
+  String get paywallPlainTitle => 'Your corner, every day';
 
   @override
-  String get paywallPlainSubtitle =>
-      'Daily coaching, every drill and recipe, and cues between rounds.';
+  String get paywallPlainSubtitle => 'One plan. Everything in Fighter Edge.';
 
   @override
   String get fuelRecipesTitle => 'Recipes for your day';
 
   @override
-  String paywallMonthly(String price) {
-    return 'Monthly · $price';
+  String get paywallBenefitBriefTitle => 'Daily Corner Brief';
+
+  @override
+  String get paywallBenefitBriefBody =>
+      'Three lines a day on training, fuel and weight, and a coach to ask.';
+
+  @override
+  String get paywallBenefitRecipesTitle => 'Full Recipe Library';
+
+  @override
+  String get paywallBenefitRecipesBody =>
+      'Every recipe, scaled to your servings and checked for your allergens.';
+
+  @override
+  String get paywallBenefitDrillsTitle => 'Full Drill Library';
+
+  @override
+  String get paywallBenefitDrillsBody =>
+      'Every striking, wrestling, BJJ and clinch drill, with how to train it.';
+
+  @override
+  String get paywallBenefitCuesTitle => 'Corner Cues';
+
+  @override
+  String get paywallBenefitCuesBody =>
+      'A tactical and a recovery cue on every rest in the round timer.';
+
+  @override
+  String get paywallAnnualPlan => 'Annual plan';
+
+  @override
+  String get paywallMonthlyPlan => 'Monthly plan';
+
+  @override
+  String get paywallBestValue => 'Best value';
+
+  @override
+  String get paywallContinueAnnual => 'Continue with annual plan';
+
+  @override
+  String get paywallContinueMonthly => 'Continue with monthly plan';
+
+  @override
+  String get paywallTrust =>
+      'Secure checkout by Google Play or the App Store. Cancel anytime in your store account.';
+
+  @override
+  String get paywallRestore => 'Restore purchases';
+
+  @override
+  String get paywallRefreshStatus => 'Refresh purchase status';
+
+  @override
+  String get paywallManage => 'Manage or cancel subscription';
+
+  @override
+  String get paywallOnPro => 'You\'re on Pro';
+
+  @override
+  String get paywallOnProRefresh => 'Refresh status';
+
+  @override
+  String get paywallLoading => 'Loading store plans…';
+
+  @override
+  String get paywallSync =>
+      'Your store purchase is recognized. Pro unlocks after the secure account sync completes.';
+
+  @override
+  String get paywallSoonTitle => 'Pro opens soon';
+
+  @override
+  String get paywallNoPaymentToday =>
+      'No payment today. We will ask again before any charge.';
+
+  @override
+  String get paywallPurchaseActive => 'Pro is active on your account.';
+
+  @override
+  String get paywallPurchasePending =>
+      'Purchase received. We are confirming your Pro access securely.';
+
+  @override
+  String get paywallRestored => 'Your Pro access is restored.';
+
+  @override
+  String get paywallNothingToRestore => 'No active Pro access was found yet.';
+
+  @override
+  String paywallPerYear(String price) {
+    return '$price / year';
+  }
+
+  @override
+  String paywallPerMonth(String price) {
+    return '$price / month';
+  }
+
+  @override
+  String paywallAboutPerMonth(String price) {
+    return 'About $price / month';
+  }
+
+  @override
+  String paywallSave(int percent) {
+    return 'Save about $percent%';
   }
 
   @override
