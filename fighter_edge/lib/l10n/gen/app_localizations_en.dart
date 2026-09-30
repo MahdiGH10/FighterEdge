@@ -151,6 +151,12 @@ class LEn extends L {
   String get settingsPrivacySubtitle => 'What we store and why';
 
   @override
+  String get settingsEthics => 'Ethical Guidelines';
+
+  @override
+  String get settingsEthicsSubtitle => 'What Fighter Edge will never do';
+
+  @override
   String get settingsDeleteAccount => 'Delete account';
 
   @override

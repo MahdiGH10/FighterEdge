@@ -12,7 +12,8 @@ import '../widgets/primary_button.dart';
 /// The legal documents the app links to. The slug is the route segment.
 enum LegalDocument {
   terms('terms', 'Terms of Service'),
-  privacy('privacy', 'Privacy Policy');
+  privacy('privacy', 'Privacy Policy'),
+  ethics('ethics', 'Ethical Guidelines');
 
   final String slug;
   final String title;

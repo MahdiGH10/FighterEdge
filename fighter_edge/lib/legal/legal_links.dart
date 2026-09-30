@@ -17,11 +17,20 @@ class LegalLinks {
   static const _terms = String.fromEnvironment('TERMS_URL');
   static const _privacy = String.fromEnvironment('PRIVACY_URL');
 
-  static Uri? hostedUrl(LegalDocument doc) {
-    final raw = switch (doc) {
-      LegalDocument.terms => _terms,
-      LegalDocument.privacy => _privacy,
-    };
+  static Uri? hostedUrl(LegalDocument doc) => switch (doc) {
+        LegalDocument.terms => _parse(_terms),
+        LegalDocument.privacy => _parse(_privacy),
+        // Published next to the terms (hosting/public/ethics), so it needs
+        // no build setting of its own.
+        LegalDocument.ethics => siblingOf(_parse(_terms), doc.slug),
+      };
+
+  /// The page [slug] in the same folder as [page]:
+  /// `https://x.web.app/terms` gives `https://x.web.app/ethics`.
+  @visibleForTesting
+  static Uri? siblingOf(Uri? page, String slug) => page?.resolve(slug);
+
+  static Uri? _parse(String raw) {
     final uri = raw.isEmpty ? null : Uri.tryParse(raw);
     return uri != null && uri.hasScheme && uri.host.isNotEmpty ? uri : null;
   }
