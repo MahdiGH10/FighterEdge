@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../theme/app_icons.dart';
 
 import '../../../../../theme/app_colors.dart';
 import '../../../../../theme/app_accessibility.dart';
@@ -27,7 +28,7 @@ class ReviewStep extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!controller.canReview) {
       return const _Message(
-        icon: Icons.assignment_late_outlined,
+        icon: AppIcons.clipboardText,
         title: 'A few steps left',
         message: 'Finish the earlier steps to see your personalized plan.',
       );
@@ -41,14 +42,14 @@ class ReviewStep extends StatelessWidget {
     switch (target.status) {
       case NutritionTargetStatus.unsupported:
         return _Message(
-          icon: Icons.block,
+          icon: AppIcons.prohibit,
           title: "We can't automate this yet",
           message: target.reasons.map(NutritionCopy.reason).join('\n'),
           tone: AppColors.negative,
         );
       case NutritionTargetStatus.needsProfessionalReview:
         return _Message(
-          icon: Icons.health_and_safety_outlined,
+          icon: AppIcons.firstAid,
           title: 'Please check with a professional first',
           message:
               'Based on what you shared, an automated plan isn\'t appropriate here:\n'
@@ -59,7 +60,7 @@ class ReviewStep extends StatelessWidget {
         );
       case NutritionTargetStatus.needsMoreData:
         return const _Message(
-          icon: Icons.assignment_late_outlined,
+          icon: AppIcons.clipboardText,
           title: 'A few steps left',
           message: 'Finish the earlier steps to see your personalized plan.',
         );
@@ -167,7 +168,7 @@ class _ReviewSuccess extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.info_outline,
+                    const Icon(AppIcons.info,
                         color: AppColors.warning, size: 18),
                     const SizedBox(width: Insets.sm),
                     Text('Worth knowing',
@@ -188,7 +189,7 @@ class _ReviewSuccess extends StatelessWidget {
         const SizedBox(height: Insets.xl),
         PrimaryButton(
           'Confirm my plan',
-          icon: Icons.check_circle_outline,
+          icon: AppIcons.checkCircle,
           expand: true,
           onPressed: () => onConfirmed(),
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../theme/app_icons.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../features/edge_fuel/data/edge_fuel_repository.dart';
@@ -151,7 +152,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     IconButton(
                       tooltip: L.of(context).onboardingBack,
                       onPressed: auth.isBusy ? null : _back,
-                      icon: const Icon(Icons.chevron_left),
+                      icon: const Icon(AppIcons.caretLeft),
                     ),
                     const SizedBox(width: Insets.sm),
                   ],
@@ -188,7 +189,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     : isLastStep
                         ? 'Start my plan'
                         : 'Continue',
-                icon: isLastStep ? Icons.flag : Icons.arrow_forward,
+                icon: isLastStep ? AppIconsFill.flag : AppIcons.arrowRight,
                 expand: true,
                 onPressed: auth.isBusy ? null : _continue,
               ),

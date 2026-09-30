@@ -1,3 +1,4 @@
+import 'dart:ui' show Size;
 import 'package:fighter_edge/screens/profile_screen.dart';
 import 'package:fighter_edge/screens/training_camp_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
@@ -90,6 +91,9 @@ void main() {
 
     testWidgets('stats reflect real state and the onboarding answer',
         (tester) async {
+      tester.view.physicalSize = const Size(430, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       final repo = await _repoWithRealUser(weeklyTrainingDays: 6);
       // A default AppState with no repository seeds sample sessions, so build
       // the expectation from the same state the screen reads.

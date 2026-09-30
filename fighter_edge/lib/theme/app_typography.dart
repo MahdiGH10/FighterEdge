@@ -12,10 +12,11 @@ import 'app_colors.dart';
 ///   Oswald (condensed, uppercase-friendly) carries the brand voice — titles,
 ///   hero numerals. Its `wght` axis stops at 700, which is the weight every
 ///   display role uses.
-///   Inter carries everything readable. Its `opsz` (optical size) axis is set
-///   per role: Flutter maps `FontWeight` onto `wght` automatically but never
-///   touches `opsz`, so without this every size rendered with letterforms drawn
-///   for 14px captions.
+///   Barlow carries everything readable. It is a sturdy, slightly squared
+///   grotesque drawn after road signage: it reads as sport and as a working
+///   instrument, and (unlike the default UI sans) it does not look like every
+///   other app. It runs a little small for its size, so the readable ladder is
+///   one point larger than the usual 17/15/13.
 class AppType {
   AppType._();
 
@@ -27,11 +28,6 @@ class AppType {
         fontWeight: FontWeight.w500,
         color: AppColors.googleText,
       );
-
-  // Axis ranges read from the shipped font binaries — values outside these are
-  // synthesized by the rasterizer rather than drawn by the font.
-  static const double _interOpszMin = 14;
-  static const double _interOpszMax = 32;
 
   static TextStyle _oswald(
     double size, {
@@ -50,7 +46,7 @@ class AppType {
     );
   }
 
-  static TextStyle _inter(
+  static TextStyle _barlow(
     double size, {
     FontWeight weight = FontWeight.w500,
     Color? color,
@@ -58,15 +54,12 @@ class AppType {
     double height = 1.35,
   }) {
     return TextStyle(
-      fontFamily: 'Inter',
+      fontFamily: 'Barlow',
       fontSize: size,
       fontWeight: weight,
       color: color ?? AppColors.textPrimary,
       letterSpacing: spacing,
       height: height,
-      fontVariations: [
-        FontVariation('opsz', size.clamp(_interOpszMin, _interOpszMax)),
-      ],
     );
   }
 
@@ -100,45 +93,45 @@ class AppType {
       _oswald(18, color: color, spacing: spacing);
 
   // ---------------------------------------------------------------------------
-  // Inter — everything readable
+  // Barlow — everything readable
   // ---------------------------------------------------------------------------
 
   /// 17/w600 · Emphasized rows and list titles. Same size as [body] by design:
   /// weight carries the emphasis, not scale.
-  static TextStyle headline({Color? color, double? spacing}) => _inter(17,
+  static TextStyle headline({Color? color, double? spacing}) => _barlow(17,
       weight: FontWeight.w600, color: color, spacing: spacing, height: 1.3);
 
   /// 17 · Default body copy. iOS sets body at 17 for a reason — this is the
   /// comfortable reading size the app previously had no role for.
   static TextStyle body({FontWeight? weight, Color? color, double? spacing}) =>
-      _inter(17,
+      _barlow(17,
           weight: weight ?? FontWeight.w500,
           color: color,
           spacing: spacing,
           height: 1.4);
 
-  /// 15 · Secondary copy, supporting descriptions.
+  /// 16 · Secondary copy, supporting descriptions.
   static TextStyle callout(
           {FontWeight? weight, Color? color, double? spacing}) =>
-      _inter(15,
+      _barlow(16,
           weight: weight ?? FontWeight.w500,
           color: color,
           spacing: spacing,
           height: 1.35);
 
-  /// 13 · Metadata, timestamps, captions. The app's densest working size.
+  /// 14 · Metadata, timestamps, captions. The app's densest working size.
   static TextStyle subhead(
           {FontWeight? weight, Color? color, double? spacing}) =>
-      _inter(13,
+      _barlow(14,
           weight: weight ?? FontWeight.w500,
           color: color,
           spacing: spacing,
           height: 1.3);
 
-  /// 11 · Uppercase eyebrow labels only, always tracked. This is the floor —
-  /// nothing in the app renders below 11.
+  /// 12 · Uppercase eyebrow labels only, always tracked. This is the floor —
+  /// nothing in the app renders below 12.
   static TextStyle micro({FontWeight? weight, Color? color, double? spacing}) =>
-      _inter(11,
+      _barlow(12,
           weight: weight ?? FontWeight.w700,
           color: color,
           spacing: spacing ?? 0.8,
@@ -167,7 +160,7 @@ class AppType {
         spacing: spacing,
       );
 
-  /// Inter at a computed size. Same rule as [scaledDisplay]: proportionally
+  /// Barlow at a computed size. Same rule as [scaledDisplay]: proportionally
   /// scaled marks only.
   static TextStyle scaledBody(
     double size, {
@@ -175,5 +168,5 @@ class AppType {
     Color? color,
     double? spacing,
   }) =>
-      _inter(size, weight: weight, color: color, spacing: spacing);
+      _barlow(size, weight: weight, color: color, spacing: spacing);
 }

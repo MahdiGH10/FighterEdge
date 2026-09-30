@@ -26,6 +26,11 @@ class AppCard extends StatelessWidget {
   /// ground.
   final bool elevated;
 
+  /// With [accent], marks the card with a short bar on its left edge, like a
+  /// fight-card rank marker, instead of tinting the whole outline. Use it for
+  /// the one featured card on a screen.
+  final bool edge;
+
   const AppCard({
     super.key,
     required this.child,
@@ -34,13 +39,16 @@ class AppCard extends StatelessWidget {
     this.color,
     this.accent,
     this.elevated = false,
+    this.edge = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final borderColor =
-        accent?.withValues(alpha: .42) ?? AppAccessibility.border(context);
-    final content = DecoratedBox(
+    final barred = edge && accent != null;
+    final borderColor = barred
+        ? AppAccessibility.border(context)
+        : accent?.withValues(alpha: .42) ?? AppAccessibility.border(context);
+    Widget content = DecoratedBox(
       decoration: BoxDecoration(
         color: color ?? (elevated ? AppColors.surfaceAlt : AppColors.surface),
         borderRadius: BorderRadius.circular(Radii.card),
@@ -48,6 +56,27 @@ class AppCard extends StatelessWidget {
       ),
       child: Padding(padding: padding, child: child),
     );
+    if (barred) {
+      content = Stack(
+        children: [
+          content,
+          Positioned(
+            left: 0,
+            top: Insets.md,
+            bottom: Insets.md,
+            width: 3,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: const BorderRadius.horizontal(
+                  right: Radius.circular(Radii.chip),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
     if (onTap == null) return content;
     return Semantics(
       button: true,

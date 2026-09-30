@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../theme/app_accessibility.dart';
@@ -138,13 +139,13 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
               hintText: l.nutritionSearchFoods,
               hintStyle:
                   AppType.body(color: AppAccessibility.textMuted(context)),
-              prefixIcon: Icon(Icons.search,
+              prefixIcon: Icon(AppIcons.magnifyingGlass,
                   color: AppAccessibility.textMuted(context)),
               suffixIcon: _query.isEmpty
                   ? null
                   : IconButton(
                       tooltip: 'Clear search',
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(AppIcons.x),
                       onPressed: () {
                         _search.clear();
                         _onQuery('');
@@ -184,7 +185,7 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
         SafeArea(
           top: false,
           child: _SheetRow(
-            icon: Icons.edit_note,
+            icon: AppIcons.notePencil,
             title: l.addFoodManual,
             subtitle: l.addFoodManualSubtitle,
             onTap: () =>
@@ -252,7 +253,7 @@ class _RememberedRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SheetRow(
-      icon: Icons.add_circle_outline,
+      icon: AppIcons.plusCircle,
       title: food.name,
       subtitle: '${food.calories} kcal · ${food.proteinGrams}g protein'
           '${food.notes.isEmpty ? '' : ' · ${food.notes}'}',
@@ -294,7 +295,7 @@ class _SearchResults extends StatelessWidget {
           itemBuilder: (_, i) {
             final food = foods[i];
             return _SheetRow(
-              icon: Icons.chevron_right,
+              icon: AppIcons.caretRight,
               title: food.name,
               subtitle: L.of(context).addFoodPerHundred(
                     food.kcalPer100g.round(),
@@ -394,7 +395,7 @@ class _PortionStepState extends State<_PortionStep> {
                 children: [
                   IconButton(
                     tooltip: 'Back to search',
-                    icon: const Icon(Icons.arrow_back),
+                    icon: const Icon(AppIcons.arrowLeft),
                     onPressed: widget.onBack,
                   ),
                   const SizedBox(width: Insets.xs),
@@ -413,7 +414,7 @@ class _PortionStepState extends State<_PortionStep> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.warning_amber_rounded,
+                          const Icon(AppIcons.warning,
                               size: IconSizes.inline, color: AppColors.warning),
                           const SizedBox(width: Insets.sm),
                           Expanded(
@@ -501,7 +502,7 @@ class _PortionStepState extends State<_PortionStep> {
               l.addFoodAddTo(widget.dayLabel == l.commonToday
                   ? widget.dayLabel.toLowerCase()
                   : widget.dayLabel),
-              icon: Icons.add,
+              icon: AppIcons.plus,
               expand: true,
               onPressed: grams <= 0 || _overMax
                   ? null

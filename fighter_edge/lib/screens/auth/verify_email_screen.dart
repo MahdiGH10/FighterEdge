@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../theme/app_icons.dart';
 
 import '../../auth/verification_gate.dart';
 import '../../controllers/auth_controller.dart';
@@ -206,7 +207,7 @@ class _WaitingView extends StatelessWidget {
             color: AppColors.primarySoft,
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.mark_email_unread_outlined,
+          child: const Icon(AppIcons.envelopeSimple,
               color: AppColors.primaryBright, size: 28),
         ),
         const SizedBox(height: Insets.xl),
@@ -309,7 +310,7 @@ class _VerifiedView extends StatelessWidget {
             color: AppColors.positiveSoft,
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.check_rounded,
+          child: const Icon(AppIcons.check,
               color: AppColors.positiveStrong, size: 30),
         ),
         const SizedBox(height: Insets.xl),
@@ -323,7 +324,7 @@ class _VerifiedView extends StatelessWidget {
         const SizedBox(height: Insets.xl),
         PrimaryButton(
           'Back to training',
-          icon: Icons.arrow_forward,
+          icon: AppIcons.arrowRight,
           expand: true,
           onPressed: onContinue,
         ),

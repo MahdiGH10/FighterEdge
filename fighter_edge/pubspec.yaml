@@ -33,7 +33,6 @@ dependencies:
   clock: ^1.1.3
   firebase_app_check: ^0.4.8
   google_mobile_ads: ^9.1.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -94,6 +93,22 @@ flutter:
     - family: Oswald
       fonts:
         - asset: assets/fonts/Oswald-Variable.ttf
-    - family: Inter
+    # Barlow (OFL) carries all readable text; static cuts, one per weight
+    # the app uses, so nothing is synthesized.
+    - family: Barlow
       fonts:
-        - asset: assets/fonts/Inter-Variable.ttf
+        - asset: assets/fonts/barlow/Barlow-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/barlow/Barlow-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/barlow/Barlow-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/barlow/Barlow-Bold.ttf
+          weight: 700
+    # Phosphor icons (MIT), vendored; see lib/theme/app_icons.dart.
+    - family: PhosphorRegular
+      fonts:
+        - asset: assets/fonts/phosphor/Phosphor-Regular.ttf
+    - family: PhosphorFill
+      fonts:
+        - asset: assets/fonts/phosphor/Phosphor-Fill.ttf

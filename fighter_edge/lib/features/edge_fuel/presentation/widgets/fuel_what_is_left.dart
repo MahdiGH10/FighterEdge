@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../routing/app_navigation.dart';
 import '../../../../routing/app_router.dart';
@@ -54,7 +55,7 @@ class FuelWhatIsLeft extends StatelessWidget {
                     child: Text(L.of(context).nutritionRecipesFit,
                         style: AppType.callout(
                             color: AppAccessibility.textSecondary(context)))),
-                Icon(Icons.chevron_right,
+                Icon(AppIcons.caretRight,
                     size: IconSizes.row,
                     color: AppAccessibility.textMuted(context)),
               ]),
@@ -81,7 +82,7 @@ class FuelWhatIsLeft extends StatelessWidget {
                 color: AppColors.primarySoft,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.restaurant_menu,
+              child: const Icon(AppIcons.forkKnife,
                   size: IconSizes.inline, color: AppColors.primary),
             ),
             const SizedBox(width: Insets.md),
@@ -100,7 +101,7 @@ class FuelWhatIsLeft extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right,
+            Icon(AppIcons.caretRight,
                 color: AppAccessibility.textMuted(context)),
           ],
         ),

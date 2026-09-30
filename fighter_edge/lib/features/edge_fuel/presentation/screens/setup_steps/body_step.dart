@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../../theme/app_icons.dart';
 
 import '../../../../../theme/app_colors.dart';
 import '../../../../../theme/app_theme.dart';
@@ -80,7 +81,7 @@ class _BodyStepState extends State<BodyStep> {
         AppTextField(
           controller: _age,
           label: 'Age in years',
-          icon: Icons.cake_outlined,
+          icon: AppIcons.cake,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           onChanged: (_) => _commitAge(),
@@ -89,7 +90,7 @@ class _BodyStepState extends State<BodyStep> {
         AppTextField(
           controller: _height,
           label: 'Height in cm',
-          icon: Icons.height,
+          icon: AppIcons.arrowsVertical,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,1}')),
@@ -100,7 +101,7 @@ class _BodyStepState extends State<BodyStep> {
         AppTextField(
           controller: _weight,
           label: 'Current weight in kg',
-          icon: Icons.monitor_weight_outlined,
+          icon: AppIcons.scales,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,1}')),
@@ -112,7 +113,7 @@ class _BodyStepState extends State<BodyStep> {
           AppTextField(
             controller: _targetWeight,
             label: 'Target weight in kg',
-            icon: Icons.flag_outlined,
+            icon: AppIcons.flag,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,1}')),

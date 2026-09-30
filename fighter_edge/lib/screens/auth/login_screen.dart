@@ -2,6 +2,7 @@ import '../../theme/app_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../theme/app_icons.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../l10n/gen/app_localizations.dart';
@@ -122,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             AppTextField(
                               controller: _email,
                               label: l.authEmail,
-                              icon: Icons.mail_outline,
+                              icon: AppIcons.envelopeSimple,
                               keyboardType: TextInputType.emailAddress,
                               autofillHints: const [
                                 AutofillHints.email,
@@ -133,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             AppTextField(
                               controller: _password,
                               label: l.authPassword,
-                              icon: Icons.lock_outline,
+                              icon: AppIcons.lockSimple,
                               obscure: _obscure,
                               autofillHints: const [AutofillHints.password],
                               textInputAction: TextInputAction.done,
@@ -143,9 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ? l.authShowPassword
                                     : l.authHidePassword,
                                 icon: Icon(
-                                    _obscure
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
+                                    _obscure ? AppIcons.eyeSlash : AppIcons.eye,
                                     color: AppColors.textMuted,
                                     size: 20),
                                 onPressed: () =>
@@ -192,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                         if (auth.supportsApple) ...[
                           SocialButton(
-                            icon: Icons.apple,
+                            icon: AppIcons.appleLogo,
                             label: 'Continue with Apple',
                             onPressed: auth.isBusy
                                 ? null
@@ -202,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                         if (auth.supportsMagicLink)
                           SocialButton(
-                            icon: Icons.mail_lock_outlined,
+                            icon: AppIcons.envelopeSimple,
                             label: 'Email me a sign-in code',
                             onPressed: auth.isBusy
                                 ? null

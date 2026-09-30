@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_icons.dart';
 
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
@@ -215,7 +216,7 @@ class AppHeader extends StatelessWidget {
         children: [
           if (showBack)
             _IconBtn(
-              icon: Icons.chevron_left,
+              icon: AppIcons.caretLeft,
               onTap: () => Navigator.of(context).maybePop(),
             ),
           Expanded(

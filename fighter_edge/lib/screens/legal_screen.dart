@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_icons.dart';
 
 import '../l10n/gen/app_localizations.dart';
 import '../legal/legal_links.dart';
@@ -62,7 +63,7 @@ class LegalScreen extends StatelessWidget {
             const SizedBox(height: Insets.lg),
             GhostButton(
               L.of(context).legalOpenPublished,
-              icon: Icons.open_in_new,
+              icon: AppIcons.arrowSquareOut,
               expand: true,
               onPressed: () => LegalLinks.open(context, document),
             ),

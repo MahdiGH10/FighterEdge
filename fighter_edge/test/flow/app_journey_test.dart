@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/widgets/bottom_nav.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -92,7 +93,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Dashboard, with the first-week checklist a new account starts with.
-    expect(find.text('DASHBOARD'), findsOneWidget);
+    expect(find.text('Ayoub'), findsOneWidget);
     expect(find.text('Your first week'), findsOneWidget);
 
     // Profile -> paid upgrade entry point.
@@ -120,7 +121,7 @@ void main() {
     expect(repo.currentUser!.isPro, isFalse);
 
     // Sign out from Profile -> back to login.
-    await tester.tap(find.byIcon(Icons.chevron_left)); // Paywall -> Profile.
+    await tester.tap(find.byIcon(AppIcons.caretLeft)); // Paywall -> Profile.
     await tester.pumpAndSettle();
     final signOut = find.byType(GhostButton);
     await tester.scrollUntilVisible(signOut, 300,

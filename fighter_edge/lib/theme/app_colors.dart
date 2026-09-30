@@ -35,21 +35,11 @@ class AppColors {
   static const Color surfaceAlt = Color(0xFF191922);
   static const Color surfaceElevated = Color(0xFF21212B);
 
-  /// Tint laid over a `BackdropFilter` blur (see `AppBottomNav`).
-  ///
-  /// Deliberately translucent: at the old 95% opacity the blur behind it was
-  /// invisible and the "glass" was just paint. 72% lets content register
-  /// through the bar while keeping label contrast on a dark ground.
-  static const Color surfaceGlass = Color(0xB816161E);
-
   /// Dims everything except what a coach mark is pointing at. Dark enough
   /// that the lit target is unmistakably the subject, light enough that the
   /// user still sees where they are.
   static const Color scrim = Color(0xC7050508);
 
-  /// The one shadow the app keeps: under the floating nav bar, where it is
-  /// the only cue that the bar sits above scrolling content.
-  static const Color floatingShadow = Color(0x66000000);
   static const Color border = Color(0xFF292933);
   static const Color borderStrong = Color(0xFF3A3A46);
 

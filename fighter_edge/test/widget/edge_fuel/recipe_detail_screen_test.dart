@@ -14,6 +14,7 @@ import 'package:fighter_edge/features/edge_fuel/presentation/widgets/recipe_card
 import 'package:fighter_edge/widgets/press_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../../helpers/test_harness.dart';
 
@@ -135,7 +136,7 @@ void main() {
     final decrease = tester.widget<PressScale>(
       find
           .ancestor(
-            of: find.byIcon(Icons.remove),
+            of: find.byIcon(AppIcons.minus),
             matching: find.byType(PressScale),
           )
           .first,

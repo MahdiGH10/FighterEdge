@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/models/training_log_entry.dart';
 import 'package:fighter_edge/models/training_session.dart';
 import 'package:fighter_edge/state/app_state.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 /// Monday 2026-09-14 starts week 1; Monday 2026-09-21 starts week 2.
 final _week1Tue = DateTime(2026, 9, 15, 18);
@@ -14,7 +14,7 @@ const _wrestling = TrainingSession(
   day: 'Tue',
   title: 'Wrestling',
   subtitle: 'Entries, finishes + control',
-  icon: Icons.sports_kabaddi,
+  icon: AppIcons.handGrabbing,
   completed: false,
 );
 

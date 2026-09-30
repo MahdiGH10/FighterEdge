@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../l10n/decimal_format.dart';
 import '../../../../l10n/gen/app_localizations.dart';
@@ -207,7 +208,7 @@ class _FightSetupScreenState extends State<FightSetupScreen> {
           AppTextField(
             controller: _limit,
             label: l.fightLimitLabel(copy.unit),
-            icon: Icons.monitor_weight_outlined,
+            icon: AppIcons.scales,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textInputAction: TextInputAction.done,
             inputFormatters: [
@@ -315,7 +316,7 @@ class _DateField extends StatelessWidget {
                   horizontal: Insets.lg, vertical: Insets.md),
               child: Row(
                 children: [
-                  Icon(Icons.event_outlined,
+                  Icon(AppIcons.calendarBlank,
                       size: IconSizes.row,
                       color: AppAccessibility.textSecondary(context)),
                   const SizedBox(width: Insets.md),

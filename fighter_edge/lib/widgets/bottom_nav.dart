@@ -1,9 +1,7 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_accessibility.dart';
+import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -11,11 +9,17 @@ import 'press_scale.dart';
 
 class NavItem {
   final IconData icon;
+
+  /// Shown while the tab is selected; the heavier weight of [icon].
+  final IconData? activeIcon;
   final String label;
-  const NavItem(this.icon, this.label);
+  const NavItem(this.icon, this.label, {this.activeIcon});
 }
 
-/// Persistent bottom navigation bar matching the mockup.
+/// Persistent bottom navigation: a flat, full-width bar on the screen
+/// background, separated by a hairline. The selected tab is a filled icon, the
+/// accent colour and a short line on the bar's top edge; nothing floats, blurs
+/// or sits in a pill.
 class AppBottomNav extends StatelessWidget {
   final List<NavItem> items;
   final int currentIndex;
@@ -35,56 +39,29 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.background,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundRaised,
+        border: Border(
+          top: BorderSide(color: AppAccessibility.border(context)),
+        ),
+      ),
       child: SafeArea(
         top: false,
-        minimum: const EdgeInsets.fromLTRB(
-            Insets.md, Insets.xs + Insets.xxs, Insets.md, Insets.sm),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Radii.nav),
-            boxShadow: const [
-              BoxShadow(
-                color: AppColors.floatingShadow,
-                blurRadius: 24,
-                offset: Offset(0, 10),
-              ),
-            ],
-          ),
-          // A real material, not paint imitating one. The blur is clipped to
-          // the bar's own rounded bounds and nothing else in the app uses one:
-          // BackdropFilter costs a full-surface read-back, so it stays confined
-          // to this small, static region.
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(Radii.nav),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-              child: Container(
-                padding: const EdgeInsets.all(Insets.xs),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceGlass,
-                  borderRadius: BorderRadius.circular(Radii.nav),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    for (int i = 0; i < items.length; i++)
-                      Expanded(
-                        child: KeyedSubtree(
-                          key: itemKeys?[i],
-                          child: _NavButton(
-                            item: items[i],
-                            selected: i == currentIndex,
-                            onTap: () => onTap(i),
-                          ),
-                        ),
-                      ),
-                  ],
+        child: Row(
+          children: [
+            for (int i = 0; i < items.length; i++)
+              Expanded(
+                child: KeyedSubtree(
+                  key: itemKeys?[i],
+                  child: _NavButton(
+                    item: items[i],
+                    selected: i == currentIndex,
+                    onTap: () => onTap(i),
+                  ),
                 ),
               ),
-            ),
-          ),
+          ],
         ),
       ),
     );
@@ -114,45 +91,52 @@ class _NavButton extends StatelessWidget {
         onTap: onTap,
         haptic: AppHaptics.selection,
         pressedScale: 0.94,
-        child: AnimatedContainer(
-          duration: reduceMotion ? Duration.zero : MotionTokens.standard,
-          curve: MotionTokens.snap,
-          constraints: const BoxConstraints(minHeight: 52),
-          padding: const EdgeInsets.symmetric(
-              horizontal: Insets.xs, vertical: Insets.xs),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primarySoft : AppColors.transparent,
-            borderRadius: BorderRadius.circular(Radii.navItem),
-            border: Border.all(
-              color: selected
-                  ? AppColors.primary.withValues(alpha: .24)
-                  : AppColors.transparent,
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(item.icon, size: 22, color: color),
-              const SizedBox(height: Insets.xxs),
-              SizedBox(
-                height: Insets.md + Insets.xxs,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    item.label,
-                    maxLines: 1,
-                    style: AppAccessibility.adjustStyle(
-                      context,
-                      AppType.micro(
-                        weight: selected ? FontWeight.w700 : FontWeight.w500,
-                        color: color,
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            Container(
+              constraints: const BoxConstraints(minHeight: 56),
+              padding: const EdgeInsets.fromLTRB(
+                  Insets.xs, Insets.sm, Insets.xs, Insets.xs),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    selected ? (item.activeIcon ?? item.icon) : item.icon,
+                    size: 24,
+                    color: color,
+                  ),
+                  const SizedBox(height: Insets.xxs),
+                  SizedBox(
+                    height: Insets.md + Insets.xxs,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        item.label,
+                        maxLines: 1,
+                        style: AppAccessibility.adjustStyle(
+                          context,
+                          AppType.micro(
+                            weight:
+                                selected ? FontWeight.w700 : FontWeight.w500,
+                            color: color,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+            AnimatedContainer(
+              duration: reduceMotion ? Duration.zero : MotionTokens.fast,
+              // Not the spring: an overshoot would push the width below zero.
+              curve: MotionTokens.count,
+              width: selected ? 28 : 0,
+              height: 2,
+              color: AppColors.primary,
+            ),
+          ],
         ),
       ),
     );

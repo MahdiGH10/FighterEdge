@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../billing/subscription.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -230,14 +231,14 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
                   padding: const EdgeInsets.all(Insets.lg),
                   child: _savedOnly && _query.trim().isEmpty
                       ? const EmptyState(
-                          icon: Icons.bookmark_border,
+                          icon: AppIcons.bookmarkSimple,
                           title: 'No saved drills yet',
                           message:
                               'Tap the bookmark on any drill to keep it here for your next session.')
                       : _selectedCategory != null && _query.trim().isEmpty
                           ? _CurriculumOnlyState(category: _selectedCategory!)
                           : const EmptyState(
-                              icon: Icons.search_off,
+                              icon: AppIcons.magnifyingGlass,
                               title: 'No drills match',
                               message:
                                   'Try a different word or clear the filter.')),
@@ -308,9 +309,10 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
       context: context,
       backgroundColor: AppColors.surface,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (sheetContext) => SafeArea(
         top: false,
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
               Insets.xl, Insets.none, Insets.xl, Insets.xl),
           child: Column(
@@ -337,7 +339,7 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
               const SizedBox(height: Insets.lg),
               PrimaryButton(
                 'Unlock the full library',
-                icon: Icons.lock_open_outlined,
+                icon: AppIcons.lockSimpleOpen,
                 expand: true,
                 onPressed: () {
                   Navigator.of(sheetContext).pop();
@@ -419,8 +421,8 @@ class _TechniqueSystemCard extends StatelessWidget {
         TechniqueTaxonomy.categoriesForSystem(system.id).length;
     final secondary = AppAccessibility.textSecondary(context);
     final icon = system.id == TechniqueTaxonomy.strikingSystemId
-        ? Icons.sports_mma_outlined
-        : Icons.sports_kabaddi_outlined;
+        ? AppIcons.boxingGlove
+        : AppIcons.handGrabbing;
     return SizedBox(
       width: LayoutTokens.featuredDrillCard,
       child: Semantics(
@@ -604,7 +606,7 @@ class _CurriculumOnlyState extends StatelessWidget {
     return KeyedSubtree(
       key: ValueKey('curriculum-only-${category.id}'),
       child: EmptyState(
-        icon: Icons.menu_book_outlined,
+        icon: AppIcons.bookOpen,
         title: '${category.title} is mapped',
         message: 'The coach\'s curriculum is here. Written drills are being '
             'added to this path.',
@@ -614,10 +616,10 @@ class _CurriculumOnlyState extends StatelessWidget {
 }
 
 IconData _disciplineIcon(DrillDiscipline d) => switch (d) {
-      DrillDiscipline.striking => Icons.sports_mma,
-      DrillDiscipline.wrestling => Icons.sports_kabaddi,
-      DrillDiscipline.bjj => Icons.sports_martial_arts,
-      DrillDiscipline.clinch => Icons.front_hand_outlined,
+      DrillDiscipline.striking => AppIcons.boxingGlove,
+      DrillDiscipline.wrestling => AppIcons.handGrabbing,
+      DrillDiscipline.bjj => AppIcons.handFist,
+      DrillDiscipline.clinch => AppIcons.hand,
     };
 
 class _SearchField extends StatelessWidget {
@@ -633,7 +635,7 @@ class _SearchField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: 'Search drills',
         hintStyle: AppType.callout(color: AppAccessibility.textMuted(context)),
-        prefixIcon: Icon(Icons.search,
+        prefixIcon: Icon(AppIcons.magnifyingGlass,
             color: AppAccessibility.textMuted(context), size: IconSizes.row),
         filled: true,
         fillColor: AppColors.surface,
@@ -732,7 +734,7 @@ class _DrillCard extends StatelessWidget {
                           ),
                           if (locked) ...[
                             const SizedBox(width: Insets.xs),
-                            const Icon(Icons.lock_outline,
+                            const Icon(AppIcons.lockSimple,
                                 size: IconSizes.inline,
                                 color: AppColors.premium),
                           ],
@@ -780,7 +782,7 @@ class _BookmarkButton extends StatelessWidget {
         child: SizedBox.square(
           dimension: AppAccessibility.minTouchTarget,
           child: Icon(
-            bookmarked ? Icons.bookmark : Icons.bookmark_border,
+            bookmarked ? AppIconsFill.bookmarkSimple : AppIcons.bookmarkSimple,
             color: bookmarked
                 ? AppColors.accentText
                 : AppAccessibility.textMuted(context),
@@ -993,7 +995,7 @@ class _MistakePoint extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.close_rounded,
+          const Icon(AppIcons.x,
               size: IconSizes.inline, color: AppColors.warning),
           const SizedBox(width: Insets.sm),
           Expanded(

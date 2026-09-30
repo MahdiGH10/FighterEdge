@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_icons.dart';
 
 import '../l10n/gen/app_localizations.dart';
 import '../theme/app_accessibility.dart';
@@ -140,7 +141,7 @@ class LearningPathCard extends StatelessWidget {
           Semantics(
             container: true,
             child: GhostButton(l.learningViewPro,
-                icon: Icons.lock_outline,
+                icon: AppIcons.lockSimple,
                 expand: true,
                 onPressed: () => onOpen(next)),
           ),

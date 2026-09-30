@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../billing/subscription.dart';
 import '../../../../routing/app_navigation.dart';
@@ -134,7 +135,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           const SizedBox(height: Insets.xl),
           PrimaryButton(
             _adding ? 'Adding…' : 'Add to today',
-            icon: Icons.add_circle_outline,
+            icon: AppIcons.plusCircle,
             onPressed: _adding ? null : () => _addToDay(nutrients),
           ),
         ],
@@ -201,7 +202,7 @@ class _LockedRecipe extends StatelessWidget {
                 borderRadius: BorderRadius.circular(Radii.card),
               ),
               child: const Icon(
-                Icons.lock_outline,
+                AppIcons.lockSimple,
                 size: 28,
                 color: AppColors.premium,
               ),
@@ -222,7 +223,7 @@ class _LockedRecipe extends StatelessWidget {
             const SizedBox(height: Insets.xl),
             PrimaryButton(
               'See Pro',
-              icon: Icons.bolt,
+              icon: AppIcons.lightning,
               onPressed: () => AppNavigation.push(
                 context,
                 AppRoutes.paywall,
@@ -254,17 +255,17 @@ class _MetaRow extends StatelessWidget {
       spacing: Insets.md,
       runSpacing: Insets.sm,
       children: [
-        _Meta(Icons.schedule, RecipeCopy.timeLabel(recipe.totalMinutes)),
-        _Meta(Icons.restaurant, RecipeCopy.mealTypeLabel(recipe.mealType)),
+        _Meta(AppIcons.clock, RecipeCopy.timeLabel(recipe.totalMinutes)),
+        _Meta(AppIcons.forkKnife, RecipeCopy.mealTypeLabel(recipe.mealType)),
         if (recipe.trainingTiming != TrainingTiming.any)
           _Meta(
-            Icons.fitness_center,
+            AppIcons.barbell,
             RecipeCopy.timingLabel(recipe.trainingTiming),
           ),
-        _Meta(Icons.payments_outlined, RecipeCopy.costLabel(recipe.costBand)),
+        _Meta(AppIcons.creditCard, RecipeCopy.costLabel(recipe.costBand)),
         for (final tag in listing.dietTags)
           if (tag == DietTag.vegan || tag == DietTag.vegetarian)
-            _Meta(Icons.eco_outlined, RecipeCopy.dietLabel(tag)),
+            _Meta(AppIcons.leaf, RecipeCopy.dietLabel(tag)),
       ],
     );
   }
@@ -495,7 +496,8 @@ class _SubstitutionRow extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.swap_horiz, size: 15, color: AppColors.textMuted),
+            const Icon(AppIcons.arrowsLeftRight,
+                size: 15, color: AppColors.textMuted),
             const SizedBox(width: Insets.sm),
             Expanded(
               child: Text(
@@ -554,7 +556,7 @@ class _RecipeHero extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    Icons.photo_camera_outlined,
+                    AppIcons.camera,
                     size: IconSizes.small,
                     color: AppAccessibility.textMuted(context),
                   ),

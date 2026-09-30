@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
@@ -56,7 +57,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
       actions: [
         if (_tab == 0)
           HeaderIcon(
-            Icons.add,
+            AppIcons.plus,
             label: L.of(context).weightAddWeighIn,
             onTap: () => _addWeighIn(context, state),
           ),
@@ -85,13 +86,13 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                   goalKg: goalKg,
                 ),
                 const EmptyState(
-                  icon: Icons.percent,
+                  icon: AppIcons.percent,
                   title: 'Body Fat',
                   message:
                       'Log a body-fat measurement to start\ntracking your composition trend.',
                 ),
                 const EmptyState(
-                  icon: Icons.straighten,
+                  icon: AppIcons.ruler,
                   title: 'Measurements',
                   message:
                       'Track chest, waist, arms and more\nto see where the weight is moving.',
@@ -286,7 +287,7 @@ class _WeightView extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(losing ? Icons.arrow_downward : Icons.arrow_upward,
+                    Icon(losing ? AppIcons.arrowDown : AppIcons.arrowUp,
                         size: 14,
                         color: losing ? AppColors.positive : AppColors.primary),
                     const SizedBox(width: Insets.xs),
@@ -530,7 +531,7 @@ class _GoalCard extends StatelessWidget {
         value: '—',
         delta: 'Set in EdgeFuel',
         deltaColor: AppColors.accentText,
-        deltaIcon: Icons.flag_outlined,
+        deltaIcon: AppIcons.flag,
         onTap: () => AppNavigation.push(
           context,
           AppRoutes.fuelSetup,
@@ -551,7 +552,7 @@ class _GoalCard extends StatelessWidget {
           ? 'At goal'
           : 'To ${formatFixedDecimal(state.displayWeight(goal), locale)} $unit',
       deltaColor: atGoal ? AppColors.positive : AppColors.warning,
-      deltaIcon: atGoal ? Icons.check_circle : Icons.flag_outlined,
+      deltaIcon: atGoal ? AppIconsFill.checkCircle : AppIcons.flag,
     );
   }
 }

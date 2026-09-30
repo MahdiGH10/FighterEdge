@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../theme/app_accessibility.dart';
 import '../../../../theme/app_colors.dart';
@@ -17,16 +18,16 @@ import '../fight_camp_copy.dart';
     switch (status) {
       WeightPathStatus.onTrack || WeightPathStatus.atWeight => (
           AppColors.positive,
-          Icons.check_circle_outline
+          AppIcons.checkCircle
         ),
       WeightPathStatus.needsSupervision => (
           AppColors.warning,
-          Icons.warning_amber_rounded
+          AppIcons.warning
         ),
-      WeightPathStatus.notSafe => (AppColors.negative, Icons.block),
+      WeightPathStatus.notSafe => (AppColors.negative, AppIcons.prohibit),
       WeightPathStatus.needsMoreData || WeightPathStatus.notSupported => (
           AppAccessibility.textSecondary(context),
-          Icons.info_outline
+          AppIcons.info
         ),
     };
 

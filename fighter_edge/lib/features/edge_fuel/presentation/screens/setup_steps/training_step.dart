@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../theme/app_icons.dart';
 
 import '../../../../../theme/app_accessibility.dart';
 import '../../../../../theme/app_colors.dart';
@@ -61,7 +62,7 @@ class _TrainingStepState extends State<TrainingStep> {
         Row(
           children: [
             _StepButton(
-              icon: Icons.remove,
+              icon: AppIcons.minus,
               semanticLabel: 'Fewer training days per week',
               onTap: days <= 0
                   ? null
@@ -77,7 +78,7 @@ class _TrainingStepState extends State<TrainingStep> {
               ),
             ),
             _StepButton(
-              icon: Icons.add,
+              icon: AppIcons.plus,
               semanticLabel: 'More training days per week',
               onTap: days >= 7
                   ? null

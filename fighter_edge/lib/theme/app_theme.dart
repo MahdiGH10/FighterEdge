@@ -27,18 +27,13 @@ class Insets {
 
 class Radii {
   Radii._();
-  static const double card = 16;
-  static const double button = 14;
+  static const double card = 12;
+  static const double button = 10;
 
   /// Small inset surfaces: icon wells, badges, swatches. One step tighter
   /// than [button] so a tile inside a card reads as nested, not parallel.
-  static const double tile = 12;
+  static const double tile = 8;
   static const double chip = 100;
-  static const double nav = 24;
-
-  /// The selected-tab pill inside the nav bar. Concentric with [nav]: the bar
-  /// radius minus the pill's 6pt inset, so the two curves run parallel.
-  static const double navItem = 18;
 }
 
 /// Fixed illustrations and layout breakpoints, separate from spacing.

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../state/app_state.dart';
@@ -60,7 +61,7 @@ class FightPathScreen extends StatelessWidget {
       showBack: true,
       actions: [
         HeaderIcon(
-          Icons.edit_outlined,
+          AppIcons.pencilSimple,
           label: l.fightEdit,
           onTap: () => openFightSetup(context),
         ),
@@ -117,7 +118,7 @@ class FightPathScreen extends StatelessWidget {
               subtitle: opensFightWeek(status.phase)
                   ? copy.phaseLine(status, state.now)
                   : l.fightWeekStarts(copy.date(camp.fightWeekStart)),
-              leading: Icon(Icons.event_note_outlined,
+              leading: Icon(AppIcons.calendarCheck,
                   size: IconSizes.row,
                   color: AppAccessibility.accentText(context)),
               onTap: () => openFightWeek(context),

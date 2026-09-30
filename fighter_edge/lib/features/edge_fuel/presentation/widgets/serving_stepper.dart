@@ -1,5 +1,6 @@
 import '../../../../theme/app_accessibility.dart';
 import 'package:flutter/material.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_haptics.dart';
@@ -56,7 +57,7 @@ class _ServingStepperState extends State<ServingStepper> {
     return Row(
       children: [
         _StepButton(
-          icon: Icons.remove,
+          icon: AppIcons.minus,
           onPressed: _canDecrease ? () => _change(-widget.step) : null,
           semanticLabel: 'Fewer servings',
         ),
@@ -74,7 +75,7 @@ class _ServingStepperState extends State<ServingStepper> {
           ),
         ),
         _StepButton(
-          icon: Icons.add,
+          icon: AppIcons.plus,
           onPressed: _canIncrease ? () => _change(widget.step) : null,
           semanticLabel: 'More servings',
         ),

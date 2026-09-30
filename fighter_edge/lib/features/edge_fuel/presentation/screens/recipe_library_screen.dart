@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../billing/subscription.dart';
 import '../../../../controllers/auth_controller.dart';
@@ -80,7 +81,7 @@ class _RecipeLibraryViewState extends State<_RecipeLibraryView> {
         _ when controller.isLoading => const _LibrarySkeleton(),
         _ when controller.error != null => Center(
             child: EmptyState(
-              icon: Icons.error_outline,
+              icon: AppIcons.warningCircle,
               title: 'Recipes unavailable',
               message: controller.error!,
             ),
@@ -123,7 +124,7 @@ class _Body extends StatelessWidget {
               hintText: 'Search recipes',
               hintStyle: AppType.callout(color: AppColors.textMuted),
               prefixIcon: const Icon(
-                Icons.search,
+                AppIcons.magnifyingGlass,
                 size: 20,
                 color: AppColors.textMuted,
               ),
@@ -219,7 +220,7 @@ class _EmptyResults extends StatelessWidget {
         _Notices(controller: controller),
         const SizedBox(height: Insets.xl),
         EmptyState(
-          icon: Icons.search_off,
+          icon: AppIcons.magnifyingGlass,
           title: 'Nothing matches',
           message: hiddenByAllergens > 0
               ? 'Every recipe matching these filters contains one of your '

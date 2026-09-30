@@ -9,6 +9,7 @@ import 'package:fighter_edge/widgets/primary_button.dart';
 import 'package:fighter_edge/features/fight_camp/presentation/widgets/fight_countdown_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../../helpers/test_harness.dart';
 
@@ -114,7 +115,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(AddFightRow),
-        matching: find.byIcon(Icons.chevron_right),
+        matching: find.byIcon(AppIcons.caretRight),
       ),
       findsOneWidget,
       reason: 'one arrow, not two',

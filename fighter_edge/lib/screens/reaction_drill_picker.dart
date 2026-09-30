@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../theme/app_icons.dart';
 
 import '../l10n/gen/app_localizations.dart';
 import '../theme/app_accessibility.dart';
@@ -145,7 +146,7 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
               const SizedBox(height: Insets.sm),
               GhostButton(
                 l.reactionTestVoice,
-                icon: Icons.volume_up,
+                icon: AppIcons.speakerHigh,
                 onPressed: _testVoice,
               ),
             ],
@@ -189,7 +190,7 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
           index: 5,
           child: PrimaryButton(
             l.reactionStart,
-            icon: Icons.play_arrow,
+            icon: AppIconsFill.play,
             expand: true,
             onPressed: _start,
           ),

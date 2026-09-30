@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -58,7 +59,7 @@ class AiCoachConsentPanel extends StatelessWidget {
         const SizedBox(height: Insets.md),
         PrimaryButton(
           l.aiConsentAgree,
-          icon: Icons.check,
+          icon: AppIcons.check,
           expand: true,
           onPressed: auth.isBusy
               ? null

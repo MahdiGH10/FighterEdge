@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../theme/app_icons.dart';
 
 import '../auth/auth_repository.dart';
 import '../billing/billing_gateway.dart';
@@ -210,7 +211,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           if (isPro)
             Column(
               children: [
-                const Icon(Icons.verified,
+                const Icon(AppIconsFill.sealCheck,
                     color: AppColors.positive, size: IconSizes.badge),
                 const SizedBox(height: Insets.sm),
                 Text(l.paywallOnPro,
@@ -218,7 +219,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 const SizedBox(height: Insets.lg),
                 GhostButton(
                   l.paywallOnProRefresh,
-                  icon: Icons.refresh,
+                  icon: AppIcons.arrowClockwise,
                   onPressed: auth.isBusy ? null : auth.refreshCurrentUser,
                 ),
               ],
@@ -249,7 +250,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 selected.period == BillingProductPeriod.annual
                     ? l.paywallContinueAnnual
                     : l.paywallContinueMonthly,
-                icon: Icons.lock_open,
+                icon: AppIcons.lockSimpleOpen,
                 expand: true,
                 onPressed: auth.isBusy ? null : () => _purchase(selected),
               ),
@@ -266,7 +267,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               const SizedBox(height: Insets.md),
               PrimaryButton(
                 _onWaitlist ? l.paywallWaitlistJoined : l.paywallWaitlistCta,
-                icon: _onWaitlist ? Icons.check : Icons.notifications_active,
+                icon: _onWaitlist ? AppIcons.check : AppIcons.bellRinging,
                 expand: true,
                 onPressed: _onWaitlist ? null : _joinWaitlist,
               ),
@@ -428,9 +429,7 @@ class _PlanTile extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                selected
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_unchecked,
+                selected ? AppIcons.radioButton : AppIcons.circle,
                 color: selected ? AppColors.premium : secondary,
                 size: IconSizes.row,
               ),
@@ -627,7 +626,7 @@ class _BillingSyncNotice extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.sync, color: AppColors.primary),
+          const Icon(AppIcons.arrowsClockwise, color: AppColors.primary),
           const SizedBox(width: Insets.md),
           Expanded(
             child: Text(

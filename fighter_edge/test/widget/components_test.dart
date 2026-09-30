@@ -8,6 +8,7 @@ import 'package:fighter_edge/widgets/filter_chips.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
 import 'package:fighter_edge/widgets/progress_ring.dart';
 import 'package:fighter_edge/widgets/stat_card.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 Widget host(Widget child) =>
     MaterialApp(theme: AppTheme.dark(), home: Scaffold(body: child));
@@ -137,10 +138,10 @@ void main() {
         currentIndex: 0,
         onTap: (index) => picked = index,
         items: const [
-          NavItem(Icons.home_rounded, 'Home'),
-          NavItem(Icons.fitness_center_rounded, 'Train'),
-          NavItem(Icons.local_fire_department_rounded, 'Fuel'),
-          NavItem(Icons.menu_rounded, 'More'),
+          NavItem(AppIcons.house, 'Home'),
+          NavItem(AppIcons.barbell, 'Train'),
+          NavItem(AppIcons.fire, 'Fuel'),
+          NavItem(AppIcons.list, 'More'),
         ],
       )));
 
@@ -161,12 +162,12 @@ void main() {
             children: [
               Expanded(
                 child: PrimaryButton('Start camp',
-                    icon: Icons.play_arrow, expand: true, onPressed: () {}),
+                    icon: AppIconsFill.play, expand: true, onPressed: () {}),
               ),
               const SizedBox(width: Insets.sm),
               Expanded(
                 child: GhostButton('Log meal',
-                    icon: Icons.restaurant, expand: true, onPressed: () {}),
+                    icon: AppIcons.forkKnife, expand: true, onPressed: () {}),
               ),
             ],
           ),
@@ -179,13 +180,13 @@ void main() {
         expect(paragraph.didExceedMaxLines, isFalse, reason: label);
       }
       // Tight on room, the icons give way before the words do.
-      expect(find.byIcon(Icons.play_arrow), findsNothing);
+      expect(find.byIcon(AppIconsFill.play), findsNothing);
     });
 
     testWidgets('keep their icon when there is room', (tester) async {
       await tester.pumpWidget(host(PrimaryButton('Start camp',
-          icon: Icons.play_arrow, expand: true, onPressed: () {})));
-      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+          icon: AppIconsFill.play, expand: true, onPressed: () {})));
+      expect(find.byIcon(AppIconsFill.play), findsOneWidget);
     });
   });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_icons.dart';
 
 class TrainingSession {
   final String id;
@@ -69,24 +70,24 @@ class TrainingSession {
   }
 
   static String _iconName(IconData icon) {
-    if (icon == Icons.sports_kabaddi) return 'sports_kabaddi';
-    if (icon == Icons.sports_martial_arts) return 'sports_martial_arts';
-    if (icon == Icons.bolt) return 'bolt';
-    if (icon == Icons.fitness_center) return 'fitness_center';
-    if (icon == Icons.directions_run) return 'directions_run';
-    if (icon == Icons.spa) return 'spa';
+    if (icon == AppIcons.handGrabbing) return 'sports_kabaddi';
+    if (icon == AppIcons.handFist) return 'sports_martial_arts';
+    if (icon == AppIcons.lightning) return 'bolt';
+    if (icon == AppIcons.barbell) return 'fitness_center';
+    if (icon == AppIcons.personSimpleRun) return 'directions_run';
+    if (icon == AppIcons.flowerLotus) return 'spa';
     return 'sports_mma';
   }
 
   static IconData _iconFromName(String? name) {
     return switch (name) {
-      'sports_kabaddi' => Icons.sports_kabaddi,
-      'sports_martial_arts' => Icons.sports_martial_arts,
-      'bolt' => Icons.bolt,
-      'fitness_center' => Icons.fitness_center,
-      'directions_run' => Icons.directions_run,
-      'spa' => Icons.spa,
-      _ => Icons.sports_mma,
+      'sports_kabaddi' => AppIcons.handGrabbing,
+      'sports_martial_arts' => AppIcons.handFist,
+      'bolt' => AppIcons.lightning,
+      'fitness_center' => AppIcons.barbell,
+      'directions_run' => AppIcons.personSimpleRun,
+      'spa' => AppIcons.flowerLotus,
+      _ => AppIcons.boxingGlove,
     };
   }
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../auth/verification_gate.dart';
 import '../../../../billing/subscription.dart';
@@ -242,7 +243,7 @@ class _CoachNoPlan extends StatelessWidget {
       padding: const EdgeInsets.all(Insets.lg),
       children: [
         const EmptyState(
-          icon: Icons.auto_awesome,
+          icon: AppIcons.clipboardText,
           title: 'No plan yet',
           message: 'Finish EdgeFuel setup first — the coach reads your target '
               'and today\'s log.',
@@ -250,7 +251,7 @@ class _CoachNoPlan extends StatelessWidget {
         const SizedBox(height: Insets.lg),
         PrimaryButton(
           'Start setup',
-          icon: Icons.arrow_forward,
+          icon: AppIcons.arrowRight,
           expand: true,
           onPressed: () => AppNavigation.push(
             context,
@@ -281,7 +282,7 @@ class _CoachLocked extends StatelessWidget {
         const SizedBox(height: Insets.lg),
         PrimaryButton(
           'See Pro',
-          icon: Icons.lock_outline,
+          icon: AppIcons.lockSimple,
           expand: true,
           onPressed: () => AppNavigation.push(
             context,
@@ -318,7 +319,7 @@ class _CoachNeedsVerification extends StatelessWidget {
         const SizedBox(height: Insets.lg),
         PrimaryButton(
           'Verify my email',
-          icon: Icons.mark_email_unread_outlined,
+          icon: AppIcons.envelopeSimple,
           expand: true,
           onPressed: onVerify,
         ),
@@ -360,7 +361,7 @@ class _CoachIntro extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(Insets.lg),
       children: [
-        const Icon(Icons.auto_awesome,
+        const Icon(AppIcons.clipboardText,
             color: AppColors.premium, size: IconSizes.badge),
         const SizedBox(height: Insets.md),
         Text('Talk to your coach', style: AppType.title1()),
@@ -413,7 +414,7 @@ class _FuelMatchPanel extends StatelessWidget {
         accent: AppColors.premium,
         child: Row(
           children: [
-            Icon(Icons.bolt_rounded, color: AppColors.premium),
+            Icon(AppIcons.lightning, color: AppColors.premium),
             SizedBox(width: Insets.sm),
             Expanded(child: SkeletonBox.line(width: 180)),
           ],
@@ -463,7 +464,7 @@ class _FuelMatchPanel extends StatelessWidget {
             const SizedBox(height: Insets.md),
             PrimaryButton(
               isStale ? 'Refresh my Fuel Match' : 'Build my Fuel Match',
-              icon: Icons.bolt_rounded,
+              icon: AppIcons.lightning,
               expand: true,
               onPressed: onBuild,
             ),
@@ -480,7 +481,7 @@ class _FuelMatchPanel extends StatelessWidget {
             foodsById: controller.foodsById,
           ),
         FuelMatchStatus.noMealNeeded => _FuelMatchNotice(
-            icon: Icons.verified_outlined,
+            icon: AppIcons.sealCheck,
             title: 'You\'re close to your calorie target',
             message:
                 'Only ${match.caloriesRemaining} kcal remain. A full meal would be a poor fit right now.',
@@ -488,7 +489,7 @@ class _FuelMatchPanel extends StatelessWidget {
             onAction: onBuild,
           ),
         FuelMatchStatus.noMatch => _FuelMatchNotice(
-            icon: Icons.tune_rounded,
+            icon: AppIcons.slidersHorizontal,
             title: 'No catalog match yet',
             message:
                 'Your current diet, allergen, budget, or time filters left no verified recipe to suggest.',
@@ -496,7 +497,7 @@ class _FuelMatchPanel extends StatelessWidget {
             onAction: onBuild,
           ),
         FuelMatchStatus.needsMoreData => const _FuelMatchNotice(
-            icon: Icons.info_outline,
+            icon: AppIcons.info,
             title: 'Finish your target first',
             message:
                 'Fuel Match needs a complete daily calories and macro target.',
@@ -545,7 +546,7 @@ class _FuelMatchReady extends StatelessWidget {
         if (match.unmatchedAllergenTerms.isNotEmpty) ...[
           const SizedBox(height: Insets.md),
           _InlineNote(
-            icon: Icons.warning_amber_rounded,
+            icon: AppIcons.warning,
             text:
                 'We could not filter ${match.unmatchedAllergenTerms.join(', ')}. Check ingredients before eating.',
             color: AppColors.warning,
@@ -601,7 +602,7 @@ class _FuelMatchOptionCard extends StatelessWidget {
           const SizedBox(height: Insets.md),
           GhostButton(
             'Open recipe',
-            icon: Icons.menu_book_outlined,
+            icon: AppIcons.bookOpen,
             onPressed: () => Navigator.of(context).push(
               CupertinoPageRoute(
                 builder: (_) => RecipeDetailScreen(
@@ -658,7 +659,7 @@ class _FuelMatchNotice extends StatelessWidget {
             const SizedBox(height: Insets.md),
             GhostButton(
               actionLabel!,
-              icon: Icons.refresh,
+              icon: AppIcons.arrowClockwise,
               onPressed: onAction,
             ),
           ],
@@ -783,7 +784,7 @@ class _ReplyCard extends StatelessWidget {
                   const SizedBox(height: Insets.sm),
                   GhostButton(
                     'Build a Fuel Match instead',
-                    icon: Icons.bolt_rounded,
+                    icon: AppIcons.lightning,
                     onPressed: onBuildFuelMatch,
                   ),
                 ],
@@ -934,7 +935,7 @@ class _InputBar extends StatelessWidget {
                             : AppColors.primary,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.arrow_upward_rounded,
+                      child: const Icon(AppIcons.arrowUp,
                           color: AppColors.onPrimary),
                     ),
                   ),

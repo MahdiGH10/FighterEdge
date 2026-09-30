@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
@@ -46,7 +47,7 @@ class ProLock extends StatelessWidget {
                 color: AppColors.primarySoft,
                 borderRadius: BorderRadius.circular(Radii.card),
               ),
-              child: const Icon(Icons.lock_outline,
+              child: const Icon(AppIcons.lockSimple,
                   size: 28, color: AppColors.primary),
             ),
             const SizedBox(height: Insets.lg),
@@ -59,7 +60,7 @@ class ProLock extends StatelessWidget {
             const SizedBox(height: Insets.xl),
             PrimaryButton(
               'Unlock with Pro',
-              icon: Icons.bolt,
+              icon: AppIcons.lightning,
               onPressed: () => AppNavigation.push(
                 context,
                 AppRoutes.paywall,

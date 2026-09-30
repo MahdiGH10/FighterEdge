@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import '../theme/app_icons.dart';
 
 import '../models/timer_style.dart';
 import '../models/fighter.dart';
@@ -33,10 +33,11 @@ class MockData {
 
   static const recentActivity = <ActivityEntry>[
     ActivityEntry(
-        'Strength Training', 'Upper Body', 'Yesterday', Icons.fitness_center),
-    ActivityEntry('Mobility', 'Hip Flow', '2 days ago', Icons.self_improvement),
+        'Strength Training', 'Upper Body', 'Yesterday', AppIcons.barbell),
     ActivityEntry(
-        'BJJ Rolling', 'Guard Retention', '3 days ago', Icons.sports_mma),
+        'Mobility', 'Hip Flow', '2 days ago', AppIcons.personSimpleTaiChi),
+    ActivityEntry(
+        'BJJ Rolling', 'Guard Retention', '3 days ago', AppIcons.boxingGlove),
   ];
 
   static const week = <TrainingSession>[
@@ -44,43 +45,43 @@ class MockData {
         day: 'Mon',
         title: 'Striking',
         subtitle: 'Boxing + Combinations',
-        icon: Icons.sports_mma,
+        icon: AppIcons.boxingGlove,
         completed: true),
     TrainingSession(
         day: 'Tue',
         title: 'Wrestling',
         subtitle: 'Takedowns + Control',
-        icon: Icons.sports_kabaddi,
+        icon: AppIcons.handGrabbing,
         completed: true),
     TrainingSession(
         day: 'Wed',
         title: 'Conditioning',
         subtitle: 'HIIT + Core · 45 min',
-        icon: Icons.bolt,
+        icon: AppIcons.lightning,
         completed: true),
     TrainingSession(
         day: 'Thu',
         title: 'BJJ',
         subtitle: 'Transitions + Submissions · 60 min',
-        icon: Icons.sports_martial_arts,
+        icon: AppIcons.handFist,
         completed: true),
     TrainingSession(
         day: 'Fri',
         title: 'Strength',
         subtitle: 'Upper Body · 60 min',
-        icon: Icons.fitness_center,
+        icon: AppIcons.barbell,
         completed: false),
     TrainingSession(
         day: 'Sat',
         title: 'Conditioning',
         subtitle: 'Endurance + Sprints · 45 min',
-        icon: Icons.directions_run,
+        icon: AppIcons.personSimpleRun,
         completed: false),
     TrainingSession(
         day: 'Sun',
         title: 'Rest / Active Recovery',
         subtitle: 'Mobility + Stretching',
-        icon: Icons.spa,
+        icon: AppIcons.flowerLotus,
         completed: false),
   ];
 

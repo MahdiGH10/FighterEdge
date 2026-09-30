@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../theme/app_icons.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../theme/app_colors.dart';
@@ -49,7 +50,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(_sent ? Icons.mark_email_read_outlined : Icons.lock_reset,
+            Icon(_sent ? AppIcons.envelopeSimpleOpen : AppIcons.lockKey,
                 size: 48, color: AppColors.primary),
             const SizedBox(height: Insets.lg),
             Text(_sent ? 'Check your inbox' : 'Forgot your password?',
@@ -67,7 +68,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               AppTextField(
                 controller: _email,
                 label: 'Email',
-                icon: Icons.mail_outline,
+                icon: AppIcons.envelopeSimple,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
                 textInputAction: TextInputAction.done,

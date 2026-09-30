@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
@@ -44,10 +45,11 @@ class _HomeShellState extends State<HomeShell> {
   List<NavItem> _navItems(BuildContext context) {
     final l = L.of(context);
     return [
-      NavItem(Icons.home_filled, l.navHome),
-      NavItem(Icons.fitness_center, l.navTrain),
-      NavItem(Icons.restaurant, l.navFuel),
-      NavItem(Icons.person, l.navProfile),
+      NavItem(AppIcons.house, l.navHome, activeIcon: AppIconsFill.house),
+      NavItem(AppIcons.barbell, l.navTrain, activeIcon: AppIconsFill.barbell),
+      NavItem(AppIcons.forkKnife, l.navFuel,
+          activeIcon: AppIconsFill.forkKnife),
+      NavItem(AppIcons.user, l.navProfile, activeIcon: AppIconsFill.user),
     ];
   }
 

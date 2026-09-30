@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../routing/app_navigation.dart';
@@ -244,7 +245,7 @@ class AddFightRow extends StatelessWidget {
         GroupedRow(
           title: camp == null ? l.fightAddTitle : l.fightDone,
           subtitle: l.fightAddSubtitle,
-          leading: Icon(Icons.sports_mma_outlined,
+          leading: Icon(AppIcons.boxingGlove,
               size: IconSizes.row, color: AppAccessibility.accentText(context)),
           onTap: () => openFightSetup(context),
         ),

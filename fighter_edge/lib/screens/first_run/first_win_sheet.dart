@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../theme/app_icons.dart';
 
 import '../../notifications/reminder_gateway.dart';
 import '../../notifications/training_reminder_schedule.dart';
@@ -98,7 +99,7 @@ class FirstWinSheet extends StatelessWidget {
               const SizedBox(height: Insets.lg),
               PrimaryButton(
                 'Remind me',
-                icon: Icons.notifications_active_outlined,
+                icon: AppIcons.bellRinging,
                 expand: true,
                 onPressed: () => close(remind: true),
               ),
@@ -145,7 +146,7 @@ class _WinBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(Radii.card),
         border: Border.all(color: AppColors.positive),
       ),
-      child: const Icon(Icons.check_rounded, color: AppColors.positive),
+      child: const Icon(AppIcons.check, color: AppColors.positive),
     );
   }
 }

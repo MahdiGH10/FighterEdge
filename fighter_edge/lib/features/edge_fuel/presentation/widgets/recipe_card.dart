@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
@@ -120,7 +121,7 @@ class RecipeCard extends StatelessWidget {
                                 if (locked) ...[
                                   const SizedBox(width: Insets.sm),
                                   const Icon(
-                                    Icons.lock_outline,
+                                    AppIcons.lockSimple,
                                     size: 16,
                                     color: AppColors.premium,
                                   ),
@@ -163,7 +164,7 @@ class RecipeCard extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Icon(
-                                    Icons.warning_amber_rounded,
+                                    AppIcons.warning,
                                     size: 14,
                                     color: AppColors.warning,
                                   ),

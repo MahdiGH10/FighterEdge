@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -45,7 +46,7 @@ class HealthConsentScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(
                 Insets.lg, Insets.xl, Insets.lg, Insets.xxl),
             children: [
-              Icon(Icons.health_and_safety_outlined,
+              Icon(AppIcons.firstAid,
                   size: 40, color: AppAccessibility.accentText(context)),
               const SizedBox(height: Insets.md),
               Semantics(
@@ -102,7 +103,7 @@ class HealthConsentScreen extends StatelessWidget {
               const SizedBox(height: Insets.md),
               PrimaryButton(
                 l.healthConsentAgree,
-                icon: Icons.check,
+                icon: AppIcons.check,
                 expand: true,
                 onPressed: auth.isBusy
                     ? null
@@ -114,7 +115,7 @@ class HealthConsentScreen extends StatelessWidget {
               const SizedBox(height: Insets.sm),
               GhostButton(
                 l.healthConsentSignOut,
-                icon: Icons.logout,
+                icon: AppIcons.signOut,
                 expand: true,
                 onPressed: auth.isBusy ? null : auth.signOut,
               ),
