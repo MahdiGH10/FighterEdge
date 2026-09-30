@@ -99,7 +99,12 @@ class _HomeShellState extends State<HomeShell> {
     );
   }
 
-  void _goToTab(int i) => setState(() => _index = i);
+  void _goToTab(int i) {
+    // Leaving Fuel on a past/future day would leave Home's Corner Brief
+    // showing that day too, since it reads the same controller.
+    if (_index == _fuelTab && i != _fuelTab) _fuel.showToday();
+    setState(() => _index = i);
+  }
 
   /// Fires the first-win moment the first time a meal shows up in today's log,
   /// however it got there (quick add, food search, a recipe).

@@ -41,6 +41,7 @@ void main() {
       state: state,
     ));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('77,2'), 300);
 
     expect(find.text('77.2'), findsNothing, reason: 'not the English form');
     expect(find.text('77,2'), findsWidgets);

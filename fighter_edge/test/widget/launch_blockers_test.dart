@@ -71,7 +71,7 @@ void main() {
     });
   }
 
-  testWidgets('the AI Fighter Brief with no plan leads straight to setup',
+  testWidgets('the EdgeFuel Coach with no plan leads straight to setup',
       (tester) async {
     phone(tester);
     final repo = await makeRepo(signedIn: true, onboarded: true);

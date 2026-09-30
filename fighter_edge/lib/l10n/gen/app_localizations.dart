@@ -226,7 +226,7 @@ abstract class L {
   /// No description provided for @settingsUpgradeProSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'AI Fighter Brief, full drill and recipe libraries, corner cues'**
+  /// **'Daily Corner Brief and coach, full drill and recipe libraries, corner cues'**
   String get settingsUpgradeProSubtitle;
 
   /// No description provided for @settingsSectionTraining.
@@ -1066,7 +1066,7 @@ abstract class L {
   /// No description provided for @aiConsentBody.
   ///
   /// In en, this message translates to:
-  /// **'To answer, our server sends your calorie and macro targets, today\'s food-log summary, your diet type, allergies, disliked foods, your messages, and, if you use them, your training days against your plan, your 7-day weight trend, and your fight camp (dates, weight limit and today\'s food-only plan) to OpenRouter (USA), which passes them to an AI model provider. Your name, email address and account ID are never sent.'**
+  /// **'To answer, our server sends your calorie and macro targets, today\'s food-log summary, your diet type, allergies, disliked foods, your messages, and, if you use them, today\'s planned session, your training days against your plan, your 7-day weight trend, and your fight camp (dates, weight limit and today\'s food-only plan) to OpenRouter (USA), which passes them to an AI model provider. Your name, email address and account ID are never sent.'**
   String get aiConsentBody;
 
   /// No description provided for @aiConsentRetention.
@@ -1816,7 +1816,7 @@ abstract class L {
   /// No description provided for @planReadyProBody.
   ///
   /// In en, this message translates to:
-  /// **'Pro includes a daily Fighter Brief, all drills and recipes, and cues between rounds.'**
+  /// **'Pro includes a daily Corner Brief and coach, all drills and recipes, and cues between rounds.'**
   String get planReadyProBody;
 
   /// No description provided for @planReadyCalories.
@@ -2652,6 +2652,186 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Steps and targets from the International Society of Sports Nutrition (2025).'**
   String get fightWeekSource;
+
+  /// No description provided for @cornerBriefTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Corner Brief'**
+  String get cornerBriefTitle;
+
+  /// No description provided for @cornerCueSeeProfessional.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cut needs a coach or dietitian. Talk to one before fight week.'**
+  String get cornerCueSeeProfessional;
+
+  /// No description provided for @cornerCueSetUpFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up EdgeFuel and your corner can read your food too.'**
+  String get cornerCueSetUpFuel;
+
+  /// No description provided for @cornerCueFirstMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Log your first meal and your corner can read your day.'**
+  String get cornerCueFirstMeal;
+
+  /// No description provided for @cornerCueProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein is today\'s gap: {grams} g to go.'**
+  String cornerCueProtein(int grams);
+
+  /// No description provided for @cornerCueCarbsBeforeTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g of carbs to go. Get some in before you train.'**
+  String cornerCueCarbsBeforeTraining(int grams);
+
+  /// No description provided for @cornerCueCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbs are today\'s gap: {grams} g to go.'**
+  String cornerCueCarbs(int grams);
+
+  /// No description provided for @cornerCueCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal left today. Plan your next meal.'**
+  String cornerCueCalories(int kcal);
+
+  /// No description provided for @cornerCueOnTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'On track today. Keep the next meal balanced.'**
+  String get cornerCueOnTrack;
+
+  /// No description provided for @cornerBriefFreeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro writes your full brief: training, fuel and weight, updated as you log.'**
+  String get cornerBriefFreeHint;
+
+  /// No description provided for @cornerBriefUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the full brief'**
+  String get cornerBriefUnlock;
+
+  /// No description provided for @cornerBriefProHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your corner writes three lines for today: training, fuel and weight.'**
+  String get cornerBriefProHint;
+
+  /// No description provided for @cornerBriefGet.
+  ///
+  /// In en, this message translates to:
+  /// **'Get today\'s brief'**
+  String get cornerBriefGet;
+
+  /// No description provided for @cornerBriefWriting.
+  ///
+  /// In en, this message translates to:
+  /// **'Your corner is reading your day…'**
+  String get cornerBriefWriting;
+
+  /// No description provided for @cornerBriefUpdating.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating after your last log…'**
+  String get cornerBriefUpdating;
+
+  /// No description provided for @cornerBriefQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s briefs are used up. Back tomorrow.'**
+  String get cornerBriefQuota;
+
+  /// No description provided for @cornerBriefQuotaStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s briefs are used up. This one is from before your last log.'**
+  String get cornerBriefQuotaStale;
+
+  /// No description provided for @cornerBriefUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your corner couldn\'t answer just now.'**
+  String get cornerBriefUnavailable;
+
+  /// No description provided for @cornerBriefSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro is still syncing to your account.'**
+  String get cornerBriefSyncing;
+
+  /// No description provided for @cornerBriefTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get cornerBriefTryAgain;
+
+  /// No description provided for @cornerBriefVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your email to get your full brief.'**
+  String get cornerBriefVerify;
+
+  /// No description provided for @cornerBriefVerifyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify my email'**
+  String get cornerBriefVerifyAction;
+
+  /// No description provided for @cornerBriefSetUpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up EdgeFuel'**
+  String get cornerBriefSetUpAction;
+
+  /// No description provided for @cornerBriefAskCoach.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask your coach'**
+  String get cornerBriefAskCoach;
+
+  /// No description provided for @cornerBriefProfessional.
+  ///
+  /// In en, this message translates to:
+  /// **'Please speak with a qualified professional before acting on this.'**
+  String get cornerBriefProfessional;
+
+  /// No description provided for @cornerTopicTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get cornerTopicTraining;
+
+  /// No description provided for @cornerTopicFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel'**
+  String get cornerTopicFuel;
+
+  /// No description provided for @cornerTopicWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get cornerTopicWeight;
+
+  /// No description provided for @cornerTopicCamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Camp'**
+  String get cornerTopicCamp;
+
+  /// No description provided for @cornerTopicRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery'**
+  String get cornerTopicRecovery;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

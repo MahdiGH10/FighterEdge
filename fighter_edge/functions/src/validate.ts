@@ -1,9 +1,10 @@
 import {
   AiAction,
   AiActionType,
-  AiResponse,
   AiTaskType,
-  FighterBriefSections,
+  CornerLine,
+  CornerTopic,
+  ModelResponse,
 } from "./types";
 
 /**
@@ -35,11 +36,22 @@ const ACTION_TYPES: readonly AiActionType[] = [
   "recovery",
 ];
 
+const CORNER_TOPICS: readonly CornerTopic[] = [
+  "training",
+  "fuel",
+  "weight",
+  "camp",
+  "recovery",
+];
+
+/** A corner's instructions between rounds: three, never a list. */
+export const CORNER_LINE_COUNT = 3;
+
 const MAX_SUMMARY_CHARS = 800;
 const MAX_ACTIONS = 6;
 const MAX_ACTION_TITLE_CHARS = 80;
 const MAX_ACTION_REASON_CHARS = 200;
-const MAX_BRIEF_SECTION_CHARS = 280;
+const MAX_CORNER_LINE_CHARS = 200;
 
 export interface ValidationResult {
   ok: boolean;
@@ -92,43 +104,45 @@ function isValidAction(value: unknown): value is AiAction {
   return true;
 }
 
-function isValidBriefSections(value: unknown): value is FighterBriefSections {
+function isValidCornerLine(value: unknown): value is CornerLine {
   if (typeof value !== "object" || value === null) return false;
-  const brief = value as Record<string, unknown>;
-  return [
-    "nextAction",
-    "mealSuggestion",
-    "trainingTiming",
-    "weeklyAdjustment",
-  ].every((key) => {
-    const section = brief[key];
-    return (
-      typeof section === "string" &&
-      section.length > 0 &&
-      section.length <= MAX_BRIEF_SECTION_CHARS
-    );
-  });
+  const line = value as Record<string, unknown>;
+  return (
+    typeof line.topic === "string" &&
+    CORNER_TOPICS.includes(line.topic as CornerTopic) &&
+    typeof line.text === "string" &&
+    line.text.trim().length > 0 &&
+    line.text.length <= MAX_CORNER_LINE_CHARS
+  );
+}
+
+/** Exactly three lines, each on a different topic. */
+function isValidCornerLines(value: unknown): value is CornerLine[] {
+  if (!Array.isArray(value) || value.length !== CORNER_LINE_COUNT) return false;
+  if (!value.every(isValidCornerLine)) return false;
+  // Three different things to do, not one thing said three ways.
+  return new Set(value.map((line: CornerLine) => line.topic)).size === CORNER_LINE_COUNT;
 }
 
 /** Structural shape check — matches master prompt §13.3's schema exactly. */
 export function isWellFormedResponse(
   value: unknown,
   task: AiTaskType = "chat",
-): value is AiResponse {
+): value is ModelResponse {
   if (typeof value !== "object" || value === null) return false;
   const response = value as Record<string, unknown>;
 
-  if (task === "fighterBrief") {
-    if (response.schemaVersion !== 2 || !isValidBriefSections(response.brief)) {
+  if (task === "cornerBrief") {
+    if (response.schemaVersion !== 3 || !isValidCornerLines(response.lines)) {
       return false;
     }
-  } else if (response.schemaVersion !== 1) {
-    return false;
+  } else {
+    if (response.schemaVersion !== 1) return false;
+    if (typeof response.summary !== "string" || response.summary.length === 0) return false;
+    if (response.summary.length > MAX_SUMMARY_CHARS) return false;
+    if (!Array.isArray(response.actions) || response.actions.length > MAX_ACTIONS) return false;
+    if (!response.actions.every(isValidAction)) return false;
   }
-  if (typeof response.summary !== "string" || response.summary.length === 0) return false;
-  if (response.summary.length > MAX_SUMMARY_CHARS) return false;
-  if (!Array.isArray(response.actions) || response.actions.length > MAX_ACTIONS) return false;
-  if (!response.actions.every(isValidAction)) return false;
   if (!isStringArray(response.warnings)) return false;
   if (typeof response.requiresProfessionalReview !== "boolean") return false;
   if (!isStringArray(response.factsUsed)) return false;
@@ -137,20 +151,20 @@ export function isWellFormedResponse(
   return true;
 }
 
-function containsProhibitedContent(response: AiResponse): boolean {
-  const text = [
+/** Everything the athlete can read in [response]. */
+export function athleteVisibleText(response: ModelResponse): string[] {
+  if (response.schemaVersion === 3) {
+    return [...response.lines.map((line) => line.text), ...response.warnings];
+  }
+  return [
     response.summary,
     ...response.warnings,
     ...response.actions.flatMap((a) => [a.title, a.reason]),
-    ...(response.brief
-      ? [
-          response.brief.nextAction,
-          response.brief.mealSuggestion,
-          response.brief.trainingTiming,
-          response.brief.weeklyAdjustment,
-        ]
-      : []),
-  ].join(" \n ");
+  ];
+}
+
+function containsProhibitedContent(response: ModelResponse): boolean {
+  const text = athleteVisibleText(response).join(" \n ");
   return PROHIBITED_PATTERNS.some((pattern) => pattern.test(text));
 }
 
@@ -160,7 +174,7 @@ function containsProhibitedContent(response: AiResponse): boolean {
  * an honest answer is rejected as fabricated.
  */
 function numbersIn(text: string): number[] {
-  const normalised = text.replace(/(\d)[,\u202f\u00a0'](?=\d{3}\b)/g, "$1");
+  const normalised = text.replace(/(\d)[,  '](?=\d{3}\b)/g, "$1");
   return (normalised.match(/\d{3,}/g) ?? []).map(Number);
 }
 
@@ -171,9 +185,12 @@ function numbersIn(text: string): number[] {
  * (target minus consumed) is the single most useful thing a coach can say, and
  * it is arithmetic on the facts, not invention. Anything else — a plausible
  * calorie figure from nowhere — is still rejected.
+ *
+ * Chat checks its answer; the Corner Brief checks every line and warning,
+ * since all of it sits on the Home screen as fact.
  */
 function containsFabricatedNumbers(
-  response: AiResponse,
+  response: ModelResponse,
   suppliedFacts: string,
 ): boolean {
   const facts = [...new Set(numbersIn(suppliedFacts))];
@@ -183,17 +200,10 @@ function containsFabricatedNumbers(
       if (a > b) allowed.add(a - b);
     }
   }
-  const content = [
-    response.summary,
-    ...(response.brief
-      ? [
-          response.brief.nextAction,
-          response.brief.mealSuggestion,
-          response.brief.trainingTiming,
-          response.brief.weeklyAdjustment,
-        ]
-      : []),
-  ].join(" ");
+  const content =
+    response.schemaVersion === 3
+      ? athleteVisibleText(response).join(" ")
+      : response.summary;
   return numbersIn(content).some((n) => !allowed.has(n));
 }
 
@@ -212,4 +222,37 @@ export function validateResponse(
     return { ok: false, reason: "fabricated_numbers" };
   }
   return { ok: true };
+}
+
+/**
+ * Only the schema's own fields, for the app. A model can add fields of its
+ * own (a stray "summary" on a Corner Brief, say); nothing the checks above
+ * did not read ever reaches the athlete.
+ */
+export function toClientResponse(response: ModelResponse): ModelResponse {
+  const common = {
+    warnings: response.warnings,
+    requiresProfessionalReview: response.requiresProfessionalReview,
+    factsUsed: response.factsUsed,
+    contentVersion: response.contentVersion,
+  };
+  if (response.schemaVersion === 3) {
+    return {
+      schemaVersion: 3,
+      lines: response.lines.map(({ topic, text }) => ({ topic, text })),
+      ...common,
+    };
+  }
+  return {
+    schemaVersion: 1,
+    summary: response.summary,
+    actions: response.actions.map(({ type, title, reason, recipeIds, mealSlot }) => ({
+      type,
+      title,
+      reason,
+      recipeIds,
+      ...(mealSlot === undefined ? {} : { mealSlot }),
+    })),
+    ...common,
+  };
 }

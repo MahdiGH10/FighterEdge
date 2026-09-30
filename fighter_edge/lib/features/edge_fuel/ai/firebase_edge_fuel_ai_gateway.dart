@@ -22,14 +22,14 @@ class FirebaseEdgeFuelAiGateway implements EdgeFuelAiGateway {
   static const _requestTimeout = Duration(seconds: 45);
 
   @override
-  Future<EdgeFuelAiResult> generateFighterBrief({
+  Future<EdgeFuelAiResult> generateCornerBrief({
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
     DailySnapshot? today,
   }) {
     return _call(
-      task: 'fighterBrief',
+      task: 'cornerBrief',
       target: target,
       day: day,
       preferences: preferences,

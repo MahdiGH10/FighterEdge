@@ -4,8 +4,10 @@ import '../models/nutrition_target.dart';
 
 /// Produces the free Fighter Brief preview from trusted local facts.
 ///
-/// The calculator never changes a target and never calls an AI provider. A
-/// premium AI brief can use this output as its factual foundation later.
+/// The calculator never changes a target and never calls an AI provider. The
+/// Corner Brief's free line (`CornerBriefCalculator`) reads its focus and the
+/// grams left from here, so the thresholds that decide the day's gap live in
+/// one place.
 class FighterBriefCalculator {
   FighterBriefCalculator._();
 

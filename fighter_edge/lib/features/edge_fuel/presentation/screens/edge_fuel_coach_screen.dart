@@ -37,7 +37,6 @@ import '../../data/food_catalog_repository.dart';
 import '../../data/recipe_catalog_repository.dart';
 import '../../domain/models/fuel_match.dart';
 import '../../domain/models/food_item.dart';
-import '../../domain/models/nutrition_day.dart';
 import '../../domain/models/nutrition_target.dart';
 import '../controllers/edge_fuel_coach_controller.dart';
 import '../controllers/edge_fuel_controller.dart';
@@ -46,12 +45,10 @@ import '../controllers/recipe_library_controller.dart';
 import 'edge_fuel_setup_screen.dart';
 import 'recipe_detail_screen.dart';
 
-/// The one AI surface (master prompt §13): a running conversation that can
-/// open with the structured Fighter Brief and continue as free-text chat.
-/// Replaces the old Plan-screen split between a "Generate full Fighter
-/// Brief" button and a separate "Ask EdgeFuel Coach" card — two one-shot
-/// requests to the same backend, neither of which let the athlete type a
-/// question.
+/// The EdgeFuel Coach (master prompt §13): a running conversation about the
+/// athlete's plan, day and camp, next to the catalog-backed Fuel Match. The
+/// daily brief lives on Home (the Corner Brief); this is where to ask about
+/// it.
 class EdgeFuelCoachScreen extends StatelessWidget {
   const EdgeFuelCoachScreen({super.key});
 
@@ -73,7 +70,7 @@ class EdgeFuelCoachScreen extends StatelessWidget {
         ),
       ],
       child: const ScreenScaffold(
-        title: 'AI Fighter Brief',
+        title: 'EdgeFuel Coach',
         showBack: true,
         body: _CoachBody(),
       ),
@@ -129,27 +126,6 @@ class _CoachBodyState extends State<_CoachBody> {
       today: today,
     );
     _scrollToEnd();
-  }
-
-  Future<void> _requestBrief(
-    EdgeFuelCoachController coach,
-    NutritionTarget target,
-    EdgeFuelController edgeFuel,
-    DailySnapshot? today,
-  ) async {
-    _scrollToEnd();
-    await coach.requestBrief(
-      target: target,
-      day: edgeFuel.day,
-      preferences: edgeFuel.draft,
-      today: today,
-    );
-    _scrollToEnd();
-    final latest = coach.entries.isEmpty ? null : coach.entries.last;
-    if (latest is CoachBrief &&
-        latest.result.status == EdgeFuelAiStatus.success) {
-      await AppHaptics.success();
-    }
   }
 
   Future<void> _buildFuelMatch(
@@ -214,8 +190,6 @@ class _CoachBodyState extends State<_CoachBody> {
         Expanded(
           child: coach.entries.isEmpty
               ? _CoachIntro(
-                  onGenerateBrief: () =>
-                      _requestBrief(coach, target, edgeFuel, today()),
                   fuelMatch: fuelMatch,
                   matchIsStale: matchIsStale,
                   onBuildFuelMatch: buildFuelMatch,
@@ -235,9 +209,6 @@ class _CoachBodyState extends State<_CoachBody> {
                           )
                         : _EntryTile(
                             entry: coach.entries[index - 1],
-                            currentDay: edgeFuel.day,
-                            onRefreshBrief: () =>
-                                _requestBrief(coach, target, edgeFuel, today()),
                             onBuildFuelMatch: buildFuelMatch,
                           ),
                   ),
@@ -248,12 +219,6 @@ class _CoachBodyState extends State<_CoachBody> {
           sending: coach.isSending,
           maxChars: _maxMessageChars,
           onSend: () => _send(coach, target, edgeFuel, today()),
-          // The intro already has the primary brief action. After an athlete
-          // starts chatting, the compact action in the input bar keeps the
-          // brief available without showing the same CTA twice on first open.
-          onGetBrief: coach.isSending || coach.entries.isEmpty || coach.hasBrief
-              ? null
-              : () => _requestBrief(coach, target, edgeFuel, today()),
         ),
       ],
     );
@@ -301,9 +266,9 @@ class _CoachLocked extends StatelessWidget {
       padding: const EdgeInsets.all(Insets.lg),
       children: [
         Text(
-          'Ask a real question about your plan and get today\'s Fighter '
-          'Brief — a next action, a meal cue, training timing, and your '
-          'weekly adjustment, grounded in your own numbers.',
+          'Ask a real question about your plan, your training or your fight '
+          'week, and get your daily Corner Brief on Home — grounded in your '
+          'own numbers.',
           style:
               AppType.callout(color: AppAccessibility.textSecondary(context)),
         ),
@@ -356,16 +321,14 @@ class _CoachNeedsVerification extends StatelessWidget {
   }
 }
 
-/// Shown before the first message: a way in without having to type, and a
-/// hint that typing is also an option.
+/// Shown before the first message: what to ask, and Fuel Match as a way in
+/// without having to type.
 class _CoachIntro extends StatelessWidget {
-  final VoidCallback onGenerateBrief;
   final FuelMatchController fuelMatch;
   final bool matchIsStale;
   final VoidCallback onBuildFuelMatch;
 
   const _CoachIntro({
-    required this.onGenerateBrief,
     required this.fuelMatch,
     required this.matchIsStale,
     required this.onBuildFuelMatch,
@@ -382,20 +345,14 @@ class _CoachIntro extends StatelessWidget {
         Text('Talk to your coach', style: AppType.title1()),
         const SizedBox(height: Insets.xs),
         Text(
-          'Get today\'s Fighter Brief, or just ask something — "why is my '
-          'carb target lower today?", "what should I eat before training?". '
-          'Answers use only your plan and today\'s log.',
+          'Ask anything about your plan or your day — "why is my carb '
+          'target lower today?", "what should I eat before training?". '
+          'Answers use only your plan, today\'s log, your training, your '
+          'weight trend and your fight camp.',
           style:
               AppType.callout(color: AppAccessibility.textSecondary(context)),
         ),
         const SizedBox(height: Insets.lg),
-        PrimaryButton(
-          'Get today\'s Fighter Brief',
-          icon: Icons.auto_awesome,
-          expand: true,
-          onPressed: onGenerateBrief,
-        ),
-        const SizedBox(height: Insets.md),
         _FuelMatchPanel(
           controller: fuelMatch,
           isStale: matchIsStale,
@@ -683,14 +640,10 @@ class _FuelMatchNotice extends StatelessWidget {
 
 class _EntryTile extends StatelessWidget {
   final EdgeFuelCoachEntry entry;
-  final NutritionDay? currentDay;
-  final VoidCallback onRefreshBrief;
   final VoidCallback onBuildFuelMatch;
 
   const _EntryTile({
     required this.entry,
-    required this.currentDay,
-    required this.onRefreshBrief,
     required this.onBuildFuelMatch,
   });
 
@@ -698,16 +651,10 @@ class _EntryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (entry) {
       CoachUserMessage(:final text) => _UserBubble(text: text),
-      CoachPending(:final isBrief) =>
-        isBrief ? const _BriefBuilding() : const _TypingIndicator(),
+      CoachPending() => const _TypingIndicator(),
       CoachReply(:final result) => _ReplyCard(
           result: result,
           onBuildFuelMatch: onBuildFuelMatch,
-        ),
-      final CoachBrief brief => _BriefCard(
-          entry: brief,
-          stale: brief.isStaleFor(currentDay),
-          onRefresh: onRefreshBrief,
         ),
     };
   }
@@ -756,96 +703,6 @@ class _TypingIndicator extends StatelessWidget {
           child: SkeletonBox.line(width: 160),
         ),
       ),
-    );
-  }
-}
-
-/// The wait for a brief, shaped like what is coming: a summary and four
-/// sections. The line above names what the server is doing, in order,
-/// holding on the last step rather than looping — a loop would claim
-/// progress that is not happening.
-class _BriefBuilding extends StatefulWidget {
-  const _BriefBuilding();
-
-  @override
-  State<_BriefBuilding> createState() => _BriefBuildingState();
-}
-
-class _BriefBuildingState extends State<_BriefBuilding> {
-  static const _stages = [
-    'Reading your plan',
-    'Checking today’s log',
-    'Writing your brief',
-    'Checking it against your numbers',
-  ];
-  static const _stageInterval = Duration(seconds: 3);
-  static const _tileHeight = IconSizes.badge + Insets.md * 2;
-
-  int _stage = 0;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(_stageInterval, (timer) {
-      if (_stage >= _stages.length - 1) {
-        timer.cancel();
-        return;
-      }
-      setState(() => _stage++);
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final label = _stages[_stage];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          liveRegion: true,
-          label: label,
-          excludeSemantics: true,
-          child: AnimatedSwitcher(
-            duration: MediaQuery.disableAnimationsOf(context)
-                ? Duration.zero
-                : MotionTokens.fast,
-            child: Text(
-              '$label…',
-              key: ValueKey(_stage),
-              style: AppType.callout(
-                weight: FontWeight.w600,
-                color: AppColors.premium,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: Insets.md),
-        Skeleton(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SkeletonBox.line(),
-              const SizedBox(height: Insets.sm),
-              const FractionallySizedBox(
-                widthFactor: .6,
-                child: SkeletonBox.line(),
-              ),
-              const SizedBox(height: Insets.lg),
-              for (var i = 0; i < 4; i++) ...[
-                const SkeletonBox(height: _tileHeight, radius: Radii.card),
-                const SizedBox(height: Insets.sm),
-              ],
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -936,251 +793,6 @@ class _ReplyCard extends StatelessWidget {
   }
 }
 
-class _BriefCard extends StatelessWidget {
-  final CoachBrief entry;
-  final bool stale;
-  final VoidCallback onRefresh;
-
-  const _BriefCard({
-    required this.entry,
-    required this.stale,
-    required this.onRefresh,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final secondary = AppAccessibility.textSecondary(context);
-    final result = entry.result;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: AppCard(
-        accent: AppColors.premium,
-        child: switch (result.status) {
-          EdgeFuelAiStatus.quotaReached => const _BriefNotice(
-              icon: Icons.hourglass_bottom_rounded,
-              title: 'Today’s briefs are used up',
-              message: 'The full brief resets tomorrow.',
-            ),
-          EdgeFuelAiStatus.entitlementRequired => _BriefNotice(
-              icon: Icons.sync_rounded,
-              title: 'Pro is still syncing',
-              message: 'Your purchase has not reached our server yet.',
-              actionLabel: 'Refresh my access',
-              onAction: onRefresh,
-            ),
-          EdgeFuelAiStatus.consentRequired => _BriefNotice(
-              icon: Icons.privacy_tip_outlined,
-              title: L.of(context).settingsAiCoach,
-              message: L.of(context).aiConsentRequiredNotice,
-            ),
-          EdgeFuelAiStatus.success when result.response?.brief != null =>
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (result.response!.requiresProfessionalReview)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: Insets.md),
-                    child: _InlineNote(
-                      icon: Icons.health_and_safety_outlined,
-                      text: 'Please speak with a qualified professional '
-                          'before acting on this.',
-                      color: AppColors.warning,
-                    ),
-                  ),
-                if (stale)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: Insets.md),
-                    child: _InlineNote(
-                      icon: Icons.update_rounded,
-                      text: 'You’ve logged since this brief was written.',
-                      color: AppAccessibility.accentText(context),
-                    ),
-                  ),
-                PremiumReveal(
-                  child:
-                      Text(result.response!.summary, style: AppType.headline()),
-                ),
-                const SizedBox(height: Insets.md),
-                PremiumReveal(
-                  index: 1,
-                  child: _BriefSection(
-                    icon: Icons.flag_outlined,
-                    label: 'Next action',
-                    value: result.response!.brief!.nextAction,
-                    lead: true,
-                  ),
-                ),
-                PremiumReveal(
-                  index: 2,
-                  child: _BriefSection(
-                    icon: Icons.restaurant_outlined,
-                    label: 'Meal suggestion',
-                    value: result.response!.brief!.mealSuggestion,
-                  ),
-                ),
-                PremiumReveal(
-                  index: 3,
-                  child: _BriefSection(
-                    icon: Icons.schedule_outlined,
-                    label: 'Training timing',
-                    value: result.response!.brief!.trainingTiming,
-                  ),
-                ),
-                PremiumReveal(
-                  index: 4,
-                  child: _BriefSection(
-                    icon: Icons.calendar_month_outlined,
-                    label: 'Weekly adjustment',
-                    value: result.response!.brief!.weeklyAdjustment,
-                  ),
-                ),
-                for (final warning in result.response!.warnings)
-                  Padding(
-                    padding: const EdgeInsets.only(top: Insets.xs),
-                    child: Text('• $warning',
-                        style: AppType.subhead(color: secondary)),
-                  ),
-                if (stale) ...[
-                  const SizedBox(height: Insets.md),
-                  PrimaryButton(
-                    'Refresh brief',
-                    icon: Icons.refresh,
-                    expand: true,
-                    onPressed: onRefresh,
-                  ),
-                ],
-              ],
-            ),
-          // Unavailable, or a success without brief sections (an older server).
-          _ => _BriefNotice(
-              icon: Icons.cloud_off_rounded,
-              title: 'Couldn’t build your brief',
-              message: 'Try again in a moment.',
-              actionLabel: 'Try again',
-              onAction: onRefresh,
-            ),
-        },
-      ),
-    );
-  }
-}
-
-class _BriefSection extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final bool lead;
-
-  const _BriefSection({
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.lead = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return MergeSemantics(
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: Insets.sm),
-        padding: const EdgeInsets.all(Insets.md),
-        decoration: BoxDecoration(
-          color: lead ? AppColors.surfaceElevated : AppColors.backgroundRaised,
-          borderRadius: BorderRadius.circular(Radii.card),
-          border: Border.all(
-            color:
-                lead ? AppColors.premiumDeep : AppAccessibility.border(context),
-          ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _IconBadge(icon: icon, color: AppColors.premium),
-            const SizedBox(width: Insets.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: AppType.micro(
-                      weight: FontWeight.w800,
-                      color: AppAccessibility.textMuted(context),
-                      spacing: .6,
-                    ),
-                  ),
-                  const SizedBox(height: Insets.xxs),
-                  Text(
-                    value,
-                    style: lead ? AppType.headline() : AppType.callout(),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BriefNotice extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
-  const _BriefNotice({
-    required this.icon,
-    required this.title,
-    required this.message,
-    this.actionLabel,
-    this.onAction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final secondary = AppAccessibility.textSecondary(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        MergeSemantics(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _IconBadge(icon: icon, color: secondary),
-              const SizedBox(width: Insets.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: AppType.headline()),
-                    const SizedBox(height: Insets.xxs),
-                    Text(message, style: AppType.subhead(color: secondary)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (actionLabel != null) ...[
-          const SizedBox(height: Insets.md),
-          GhostButton(
-            actionLabel!,
-            icon: Icons.refresh,
-            expand: true,
-            onPressed: onAction,
-          ),
-        ],
-      ],
-    );
-  }
-}
-
 class _InlineNote extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -1210,39 +822,17 @@ class _InlineNote extends StatelessWidget {
   }
 }
 
-class _IconBadge extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-
-  const _IconBadge({required this.icon, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: IconSizes.badge,
-      height: IconSizes.badge,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: .14),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, size: IconSizes.inline, color: color),
-    );
-  }
-}
-
 class _InputBar extends StatelessWidget {
   final TextEditingController controller;
   final bool sending;
   final int maxChars;
   final VoidCallback onSend;
-  final VoidCallback? onGetBrief;
 
   const _InputBar({
     required this.controller,
     required this.sending,
     required this.maxChars,
     required this.onSend,
-    required this.onGetBrief,
   });
 
   @override
@@ -1255,18 +845,6 @@ class _InputBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (onGetBrief != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: Insets.sm),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: GhostButton(
-                    'Get today\'s Fighter Brief',
-                    icon: Icons.auto_awesome,
-                    onPressed: onGetBrief,
-                  ),
-                ),
-              ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [

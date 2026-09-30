@@ -11,6 +11,7 @@ import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/billing/billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/controllers/auth_controller.dart';
+import 'package:fighter_edge/features/corner_brief/presentation/corner_brief_controller.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/data/asset_food_catalog_repository.dart';
@@ -159,6 +160,14 @@ Widget wrapApp(
           edgeFuel.setUser(auth.user?.id);
           return edgeFuel;
         },
+      ),
+      ChangeNotifierProxyProvider<AuthController, CornerBriefController>(
+        create: (_) => CornerBriefController(
+            gateway: resolvedAiGateway, telemetry: telemetry),
+        update: (_, auth, controller) => (controller ??
+            CornerBriefController(
+                gateway: resolvedAiGateway, telemetry: telemetry))
+          ..setUser(auth.user?.id),
       ),
     ],
     // Mirrors the app: the language switch in Settings has to actually

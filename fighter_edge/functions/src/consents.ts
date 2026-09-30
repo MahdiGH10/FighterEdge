@@ -16,7 +16,9 @@ export const CONSENT_VERSIONS: Readonly<Record<ConsentPurpose, number>> = {
   healthData: 1,
   // 2: the AI coach also receives training, the weight trend and the fight
   // camp (2026-09-28), so every account is asked again.
-  aiCoach: 2,
+  // 3: and the kind of session planned for today, for the Corner Brief
+  // (2026-09-28).
+  aiCoach: 3,
 };
 
 /** Whether [profile] holds [purpose] at (at least) its current version. */

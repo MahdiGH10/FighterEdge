@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../auth/verification_gate.dart';
 import '../controllers/auth_controller.dart';
+import '../features/corner_brief/presentation/corner_brief_card.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../features/edge_fuel/presentation/widgets/fuel_week_card.dart';
 import '../features/fight_camp/presentation/widgets/fight_countdown_card.dart';
@@ -98,6 +99,8 @@ class DashboardScreen extends StatelessWidget {
               today: todaysSession != null,
               hasPlan: state.sessions.isNotEmpty,
               onNavigate: onNavigate),
+          const SizedBox(height: Insets.md),
+          const CornerBriefCard(),
           const SizedBox(height: Insets.md),
           if (auth.supportsEmailVerification &&
               user != null &&

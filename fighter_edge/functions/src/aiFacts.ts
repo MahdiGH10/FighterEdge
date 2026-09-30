@@ -60,6 +60,16 @@ const TRAINING_NUMBERS = [
   "minutesLast7Days",
   "averageRpeLast7Days",
 ] as const;
+/** `DailySnapshot`'s `SessionKind`: what the plan has on today. */
+const SESSION_KINDS = [
+  "striking",
+  "wrestling",
+  "conditioning",
+  "bjj",
+  "strength",
+  "recovery",
+  "other",
+];
 const WEIGHT_NUMBERS = ["trendKg", "weeklyChangeKg", "weighInsLast7Days"] as const;
 const CAMP_NUMBERS = [
   "daysToWeighIn",
@@ -191,7 +201,14 @@ function trimToday(raw: unknown): Record<string, unknown> | null {
   if (!isRecord(raw)) return null;
   const today: Record<string, unknown> = {};
   if (isRecord(raw.training)) {
-    today.training = pickNumbers(raw.training, TRAINING_NUMBERS);
+    const source = raw.training;
+    const training: Record<string, unknown> = pickNumbers(source, TRAINING_NUMBERS);
+    const planned = oneOf(source.plannedToday, SESSION_KINDS);
+    if (planned !== undefined) training.plannedToday = planned;
+    if (typeof source.plannedTodayDone === "boolean") {
+      training.plannedTodayDone = source.plannedTodayDone;
+    }
+    today.training = training;
   }
   if (isRecord(raw.weight)) today.weight = pickNumbers(raw.weight, WEIGHT_NUMBERS);
   if (isRecord(raw.camp)) {

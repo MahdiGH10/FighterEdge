@@ -15,9 +15,9 @@ import 'edge_fuel_ai_models.dart';
 /// the camp and today's fight-week steps. Pass it built fresh
 /// (`buildDailySnapshot`) so the coach never answers from stale data.
 abstract class EdgeFuelAiGateway {
-  /// Premium structured brief: next action, meal suggestion, training
-  /// timing, and weekly adjustment in one call.
-  Future<EdgeFuelAiResult> generateFighterBrief({
+  /// The daily Corner Brief (Pro): three short lines, most important first,
+  /// each on a different topic (`CornerBriefLine`).
+  Future<EdgeFuelAiResult> generateCornerBrief({
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,

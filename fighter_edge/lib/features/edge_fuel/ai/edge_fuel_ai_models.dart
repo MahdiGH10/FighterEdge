@@ -4,7 +4,7 @@
 /// here stays defensive (never crash on an unexpected value).
 library;
 
-enum AiTaskType { chat, fighterBrief, summarizeTrend }
+enum AiTaskType { chat, cornerBrief, summarizeTrend }
 
 enum AiActionType { meal, recipe, timing, shopping, logging, recovery }
 
@@ -62,27 +62,25 @@ class AiAction {
   }
 }
 
-/// Version-2 sections returned only by the premium Fighter Brief task.
-class FighterBriefSections {
-  final String nextAction;
-  final String mealSuggestion;
-  final String trainingTiming;
-  final String weeklyAdjustment;
+/// What a Corner Brief line is about. Mirrors `functions/src/types.ts`.
+enum CornerTopic { training, fuel, weight, camp, recovery }
 
-  const FighterBriefSections({
-    required this.nextAction,
-    required this.mealSuggestion,
-    required this.trainingTiming,
-    required this.weeklyAdjustment,
-  });
+/// One of the three lines of the daily Corner Brief.
+class CornerBriefLine {
+  final CornerTopic topic;
+  final String text;
 
-  factory FighterBriefSections.fromJson(Map<String, dynamic> json) {
-    return FighterBriefSections(
-      nextAction: json['nextAction'] as String? ?? '',
-      mealSuggestion: json['mealSuggestion'] as String? ?? '',
-      trainingTiming: json['trainingTiming'] as String? ?? '',
-      weeklyAdjustment: json['weeklyAdjustment'] as String? ?? '',
-    );
+  const CornerBriefLine({required this.topic, required this.text});
+
+  /// Null for a line the server would never send: an unknown topic or no
+  /// text. Dropping it is safer than guessing what it was about.
+  static CornerBriefLine? tryParse(Object? raw) {
+    if (raw is! Map) return null;
+    final topic =
+        CornerTopic.values.where((t) => t.name == raw['topic']).firstOrNull;
+    final text = raw['text'];
+    if (topic == null || text is! String || text.trim().isEmpty) return null;
+    return CornerBriefLine(topic: topic, text: text);
   }
 }
 
@@ -93,16 +91,18 @@ class EdgeFuelAiResponse {
   final bool requiresProfessionalReview;
   final List<String> factsUsed;
   final String contentVersion;
-  final FighterBriefSections? brief;
+
+  /// The Corner Brief's lines, most important first. Empty for chat.
+  final List<CornerBriefLine> lines;
 
   const EdgeFuelAiResponse({
-    required this.summary,
+    this.summary = '',
     this.actions = const [],
     this.warnings = const [],
     this.requiresProfessionalReview = false,
     this.factsUsed = const [],
     this.contentVersion = '',
-    this.brief,
+    this.lines = const [],
   });
 
   factory EdgeFuelAiResponse.fromJson(Map<String, dynamic> json) {
@@ -117,11 +117,10 @@ class EdgeFuelAiResponse {
           json['requiresProfessionalReview'] as bool? ?? false,
       factsUsed: List<String>.from(json['factsUsed'] as List? ?? const []),
       contentVersion: json['contentVersion'] as String? ?? '',
-      brief: json['brief'] is Map
-          ? FighterBriefSections.fromJson(
-              Map<String, dynamic>.from(json['brief'] as Map),
-            )
-          : null,
+      lines: [
+        for (final raw in json['lines'] as List? ?? const [])
+          if (CornerBriefLine.tryParse(raw) case final line?) line,
+      ],
     );
   }
 }

@@ -67,27 +67,30 @@ if (!dryRun && !apiKey) {
 
 // --dry-run: a canned, valid answer, to check the harness end to end.
 const dryCall = async (_model, _system, userContent) => {
-  const brief = userContent.startsWith("Task: fighterBrief");
+  const common = {
+    warnings: [],
+    requiresProfessionalReview: false,
+    factsUsed: ["targetCalories"],
+    contentVersion: "dry-run",
+  };
+  const answer = userContent.startsWith("Task: cornerBrief")
+    ? {
+        schemaVersion: 3,
+        lines: [
+          { topic: "fuel", text: "Log your next meal and lead with protein." },
+          { topic: "training", text: "Eat two to three hours before training." },
+          { topic: "recovery", text: "Keep tonight's dinner protein-first." },
+        ],
+        ...common,
+      }
+    : {
+        schemaVersion: 1,
+        summary: "Log your next meal and lead with protein.",
+        actions: [],
+        ...common,
+      };
   return {
-    content: JSON.stringify({
-      schemaVersion: brief ? 2 : 1,
-      summary: "Log your next meal and lead with protein.",
-      ...(brief
-        ? {
-            brief: {
-              nextAction: "Log your next meal.",
-              mealSuggestion: "Lead with protein.",
-              trainingTiming: "Eat two to three hours before training.",
-              weeklyAdjustment: "Hold the target this week.",
-            },
-          }
-        : {}),
-      actions: [],
-      warnings: [],
-      requiresProfessionalReview: false,
-      factsUsed: ["targetCalories"],
-      contentVersion: "dry-run",
-    }),
+    content: JSON.stringify(answer),
     usage: { promptTokens: 0, completionTokens: 0, costUsd: 0 },
   };
 };

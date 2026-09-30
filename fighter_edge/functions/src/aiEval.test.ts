@@ -99,23 +99,69 @@ test("forbidden patterns and the review flag are checked", () => {
   );
 });
 
-test("brief sections and warnings count as visible text", () => {
-  const brief = {
-    schemaVersion: 2,
-    summary: "Ready.",
-    brief: {
-      nextAction: "Log dinner.",
-      mealSuggestion: "Lead with protein.",
-      trainingTiming: "Eat before sparring.",
-      weeklyAdjustment: "Hold steady.",
-    },
-    warnings: ["Target confidence is medium."],
-    actions: [],
+function cornerBrief(lines: [string, string][], overrides: Record<string, unknown> = {}) {
+  return {
+    schemaVersion: 3,
+    lines: lines.map(([topic, text]) => ({ topic, text })),
+    warnings: [],
+    requiresProfessionalReview: false,
+    factsUsed: [],
+    contentVersion: "sp8",
+    ...overrides,
   };
+}
+
+test("Corner Brief lines and warnings count as visible text", () => {
+  const brief = cornerBrief(
+    [
+      ["fuel", "Log dinner."],
+      ["training", "Eat before sparring."],
+      ["recovery", "Sleep early."],
+    ],
+    { warnings: ["Target confidence is medium."] },
+  );
   const checks = scoreExpectations(brief, {
     mentionsAnyOf: [["sparring"], ["confidence"]],
   });
   assert.ok(checks.every((c) => c.ok));
+});
+
+test("Corner Brief topics are checked: present, absent, and first", () => {
+  const brief = cornerBrief([
+    ["camp", "See a coach before fight week."],
+    ["fuel", "Protein first at dinner."],
+    ["weight", "Down 0.3 kg this week."],
+  ]);
+  const checks = scoreExpectations(brief, {
+    topics: ["camp", "training"],
+    topicsNone: ["weight", "recovery"],
+    firstTopic: "camp",
+  });
+  assert.deepEqual(
+    checks.map((c) => [c.name, c.ok]),
+    [
+      ["has a camp line", true],
+      ["has a training line", false],
+      ["no weight line", false],
+      ["no recovery line", true],
+      ["leads with camp", true],
+    ],
+  );
+});
+
+test("a Corner Brief is concise only when every line is short", () => {
+  const short = cornerBrief([
+    ["fuel", "Protein first."],
+    ["training", "Wrestling at full pace."],
+    ["recovery", "Early night."],
+  ]);
+  assert.ok(isConcise(short));
+  const long = cornerBrief([
+    ["fuel", "x".repeat(121)],
+    ["training", "Wrestling."],
+    ["recovery", "Early night."],
+  ]);
+  assert.ok(!isConcise(long));
 });
 
 test("answers longer than the prompt asks for are not concise", () => {

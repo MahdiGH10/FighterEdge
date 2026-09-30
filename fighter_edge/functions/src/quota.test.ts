@@ -56,9 +56,9 @@ function quotaDb(initial: Usage = {}) {
 }
 
 test("each task has its own allowance within the daily total", async () => {
-  const store = quotaDb({ count: 5, byTask: { fighterBrief: TASK_DAILY_LIMITS.fighterBrief } });
+  const store = quotaDb({ count: 5, byTask: { cornerBrief: TASK_DAILY_LIMITS.cornerBrief } });
 
-  const brief = await consumeQuota(store.db, "athlete", now, "fighterBrief");
+  const brief = await consumeQuota(store.db, "athlete", now, "cornerBrief");
   const chat = await consumeQuota(store.db, "athlete", now, "chat");
 
   assert.equal(brief.allowed, false, "the brief allowance is spent");
@@ -70,7 +70,7 @@ test("each task has its own allowance within the daily total", async () => {
 
 test("the daily total caps every task", async () => {
   const store = quotaDb({ count: DAILY_QUOTA });
-  for (const task of ["chat", "fighterBrief", "summarizeTrend"] as const) {
+  for (const task of ["chat", "cornerBrief", "summarizeTrend"] as const) {
     const result = await consumeQuota(store.db, "athlete", now, task);
     assert.equal(result.allowed, false, task);
   }
@@ -99,12 +99,12 @@ test("refundQuota preserves other successful reservations", async () => {
   const store = quotaDb();
 
   await consumeQuota(store.db, "athlete", now, "chat");
-  await consumeQuota(store.db, "athlete", now, "fighterBrief");
+  await consumeQuota(store.db, "athlete", now, "cornerBrief");
   await refundQuota(store.db, "athlete", now, "chat");
 
   assert.equal(store.count, 1);
   assert.equal(store.byTask("chat"), 0);
-  assert.equal(store.byTask("fighterBrief"), 1);
+  assert.equal(store.byTask("cornerBrief"), 1);
 });
 
 test("refundQuota never creates negative usage", async () => {

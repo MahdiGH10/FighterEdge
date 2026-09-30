@@ -75,7 +75,7 @@ class LEn extends L {
 
   @override
   String get settingsUpgradeProSubtitle =>
-      'AI Fighter Brief, full drill and recipe libraries, corner cues';
+      'Daily Corner Brief and coach, full drill and recipe libraries, corner cues';
 
   @override
   String get settingsSectionTraining => 'Training preferences';
@@ -553,7 +553,7 @@ class LEn extends L {
 
   @override
   String get aiConsentBody =>
-      'To answer, our server sends your calorie and macro targets, today\'s food-log summary, your diet type, allergies, disliked foods, your messages, and, if you use them, your training days against your plan, your 7-day weight trend, and your fight camp (dates, weight limit and today\'s food-only plan) to OpenRouter (USA), which passes them to an AI model provider. Your name, email address and account ID are never sent.';
+      'To answer, our server sends your calorie and macro targets, today\'s food-log summary, your diet type, allergies, disliked foods, your messages, and, if you use them, today\'s planned session, your training days against your plan, your 7-day weight trend, and your fight camp (dates, weight limit and today\'s food-only plan) to OpenRouter (USA), which passes them to an AI model provider. Your name, email address and account ID are never sent.';
 
   @override
   String get aiConsentRetention =>
@@ -1001,7 +1001,7 @@ class LEn extends L {
 
   @override
   String get planReadyProBody =>
-      'Pro includes a daily Fighter Brief, all drills and recipes, and cues between rounds.';
+      'Pro includes a daily Corner Brief and coach, all drills and recipes, and cues between rounds.';
 
   @override
   String get planReadyCalories => 'Daily calories';
@@ -1508,4 +1508,109 @@ class LEn extends L {
   @override
   String get fightWeekSource =>
       'Steps and targets from the International Society of Sports Nutrition (2025).';
+
+  @override
+  String get cornerBriefTitle => 'Corner Brief';
+
+  @override
+  String get cornerCueSeeProfessional =>
+      'Your cut needs a coach or dietitian. Talk to one before fight week.';
+
+  @override
+  String get cornerCueSetUpFuel =>
+      'Set up EdgeFuel and your corner can read your food too.';
+
+  @override
+  String get cornerCueFirstMeal =>
+      'Log your first meal and your corner can read your day.';
+
+  @override
+  String cornerCueProtein(int grams) {
+    return 'Protein is today\'s gap: $grams g to go.';
+  }
+
+  @override
+  String cornerCueCarbsBeforeTraining(int grams) {
+    return '$grams g of carbs to go. Get some in before you train.';
+  }
+
+  @override
+  String cornerCueCarbs(int grams) {
+    return 'Carbs are today\'s gap: $grams g to go.';
+  }
+
+  @override
+  String cornerCueCalories(int kcal) {
+    return '$kcal kcal left today. Plan your next meal.';
+  }
+
+  @override
+  String get cornerCueOnTrack => 'On track today. Keep the next meal balanced.';
+
+  @override
+  String get cornerBriefFreeHint =>
+      'Pro writes your full brief: training, fuel and weight, updated as you log.';
+
+  @override
+  String get cornerBriefUnlock => 'Unlock the full brief';
+
+  @override
+  String get cornerBriefProHint =>
+      'Your corner writes three lines for today: training, fuel and weight.';
+
+  @override
+  String get cornerBriefGet => 'Get today\'s brief';
+
+  @override
+  String get cornerBriefWriting => 'Your corner is reading your day…';
+
+  @override
+  String get cornerBriefUpdating => 'Updating after your last log…';
+
+  @override
+  String get cornerBriefQuota => 'Today\'s briefs are used up. Back tomorrow.';
+
+  @override
+  String get cornerBriefQuotaStale =>
+      'Today\'s briefs are used up. This one is from before your last log.';
+
+  @override
+  String get cornerBriefUnavailable => 'Your corner couldn\'t answer just now.';
+
+  @override
+  String get cornerBriefSyncing => 'Pro is still syncing to your account.';
+
+  @override
+  String get cornerBriefTryAgain => 'Try again';
+
+  @override
+  String get cornerBriefVerify => 'Confirm your email to get your full brief.';
+
+  @override
+  String get cornerBriefVerifyAction => 'Verify my email';
+
+  @override
+  String get cornerBriefSetUpAction => 'Set up EdgeFuel';
+
+  @override
+  String get cornerBriefAskCoach => 'Ask your coach';
+
+  @override
+  String get cornerBriefProfessional =>
+      'Please speak with a qualified professional before acting on this.';
+
+  @override
+  String get cornerTopicTraining => 'Training';
+
+  @override
+  String get cornerTopicFuel => 'Fuel';
+
+  @override
+  String get cornerTopicWeight => 'Weight';
+
+  @override
+  String get cornerTopicCamp => 'Camp';
+
+  @override
+  String get cornerTopicRecovery => 'Recovery';
 }

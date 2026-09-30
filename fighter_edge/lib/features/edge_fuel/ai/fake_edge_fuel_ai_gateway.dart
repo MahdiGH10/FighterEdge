@@ -43,7 +43,7 @@ class FakeEdgeFuelAiGateway implements EdgeFuelAiGateway {
   }
 
   @override
-  Future<EdgeFuelAiResult> generateFighterBrief({
+  Future<EdgeFuelAiResult> generateCornerBrief({
     required NutritionTarget target,
     NutritionDay? day,
     NutritionSetupDraft? preferences,
@@ -53,23 +53,25 @@ class FakeEdgeFuelAiGateway implements EdgeFuelAiGateway {
     if (!target.isSuccess) return const EdgeFuelAiResult.unavailable();
 
     return const EdgeFuelAiResult.success(EdgeFuelAiResponse(
-      summary: 'Your Fighter Brief is ready for today.',
-      brief: FighterBriefSections(
-        nextAction: 'Log your next meal so the brief can stay specific.',
-        mealSuggestion:
-            'Anchor the next meal around a reliable protein source.',
-        trainingTiming:
-            'Keep your usual training schedule and fuel consistently.',
-        weeklyAdjustment:
-            'Keep this target steady until you have a full week of data.',
-      ),
+      lines: [
+        CornerBriefLine(
+          topic: CornerTopic.fuel,
+          text: 'Log your next meal so your corner can stay specific.',
+        ),
+        CornerBriefLine(
+          topic: CornerTopic.training,
+          text: 'Keep your usual session and eat a few hours before it.',
+        ),
+        CornerBriefLine(
+          topic: CornerTopic.recovery,
+          text: "Make tonight's dinner protein-first.",
+        ),
+      ],
       factsUsed: [
         'targetCalories',
         'proteinGrams',
-        'carbGrams',
-        'fatGrams',
       ],
-      contentVersion: 'fake-brief',
+      contentVersion: 'fake-corner-brief',
     ));
   }
 }

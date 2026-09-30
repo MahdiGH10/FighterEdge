@@ -7,6 +7,28 @@ import 'package:fighter_edge/observability/telemetry.dart';
 
 void main() {
   group('EdgeFuelController daily logging', () {
+    test('showToday brings a moved day back, and does nothing on today',
+        () async {
+      final controller = EdgeFuelController(
+        repository: InMemoryEdgeFuelRepository(),
+      )..setUser('u1');
+      await Future<void>.delayed(Duration.zero);
+
+      var notified = 0;
+      controller.addListener(() => notified++);
+      controller.showToday();
+      expect(notified, 0, reason: 'already today');
+
+      controller.shiftDate(-2);
+      expect(controller.isToday, isFalse);
+      notified = 0;
+
+      controller.showToday();
+      expect(controller.isToday, isTrue);
+      expect(notified, 1);
+      controller.dispose();
+    });
+
     test('adds, toggles, edits, and deletes entries', () async {
       final repo = InMemoryEdgeFuelRepository();
       final telemetry = MemoryTelemetry();

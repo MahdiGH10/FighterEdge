@@ -22,9 +22,9 @@ import { buildUserContent } from "./prompt";
 import { consumeQuota, readAiConfig, refundQuota } from "./quota";
 import { REVENUECAT_API_KEY } from "./secrets";
 import { SYSTEM_PROMPT, SYSTEM_PROMPT_VERSION } from "./systemPrompt";
-import { AiRequest, ChatTurn, AiTaskType } from "./types";
+import { AiRequest, ChatTurn, AiTaskType, ModelResponse } from "./types";
 import { addUsage, dailyBudgetReached, NO_USAGE, recordUsage } from "./usage";
-import { parseModelJson, validateResponse } from "./validate";
+import { parseModelJson, toClientResponse, validateResponse } from "./validate";
 
 initializeApp();
 
@@ -44,7 +44,7 @@ const RETRY_CUTOFF_MS = 18_000;
 
 const ALLOWED_TASKS: readonly AiTaskType[] = [
   "chat",
-  "fighterBrief",
+  "cornerBrief",
   "summarizeTrend",
 ];
 
@@ -291,6 +291,8 @@ export const edgeFuelAiExplain = onCall(
       return unavailableAfterRefund("response_rejected");
     }
 
+    // validateResponse accepted it, so it has this shape.
+    const answer = parsed as ModelResponse;
     await recordUsageSafely(true);
     logger.info("ai_request_completed", {
       task: data.task,
@@ -298,15 +300,13 @@ export const edgeFuelAiExplain = onCall(
       modelCalls,
       promptTokens: usage.promptTokens,
       completionTokens: usage.completionTokens,
-      requiresProfessionalReview:
-        (parsed as { requiresProfessionalReview?: unknown })
-          .requiresProfessionalReview === true,
+      requiresProfessionalReview: answer.requiresProfessionalReview,
     });
     quotaReserved = false;
     return {
       status: "success" as const,
       response: {
-        ...(parsed as object),
+        ...toClientResponse(answer),
         contentVersion: `sp${SYSTEM_PROMPT_VERSION}`,
       },
     };

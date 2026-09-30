@@ -130,6 +130,17 @@ class EdgeFuelController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Resets the selected day back to today, if it was moved. Home reads
+  /// [isToday]/[day] for the Corner Brief, so leaving Fuel on a past or
+  /// future day must not leave Home showing that day too.
+  void showToday() {
+    if (isToday) return;
+    _selectedDate = DateTime.now();
+    _day = null;
+    _watchSelectedDay();
+    notifyListeners();
+  }
+
   /// Applies the entry at once. The returned future completes only when
   /// storage confirms the write, which Firestore never does while offline,
   /// so UI flows should not wait on it (audit A-4). It never throws: a

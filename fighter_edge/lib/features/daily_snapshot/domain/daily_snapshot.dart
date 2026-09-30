@@ -27,6 +27,18 @@ class TrainingRecord {
   final int rpe;
 }
 
+/// What the weekly plan has on a day. The plan's own session titles map
+/// onto these, so only a fixed name ever leaves the device.
+enum SessionKind {
+  striking,
+  wrestling,
+  conditioning,
+  bjj,
+  strength,
+  recovery,
+  other,
+}
+
 /// One day's food totals.
 class NutritionDayTotals {
   const NutritionDayTotals({
@@ -56,9 +68,17 @@ class TrainingSummary {
     required this.trainingDaysLast7Days,
     required this.minutesLast7Days,
     required this.averageRpeLast7Days,
+    this.plannedToday,
+    this.plannedTodayDone = false,
   });
 
   final int sessionsToday;
+
+  /// The session the weekly plan has today; null on a rest day.
+  final SessionKind? plannedToday;
+
+  /// Whether that planned session has been done.
+  final bool plannedTodayDone;
 
   /// Distinct training days since Monday.
   final int trainingDaysThisWeek;
@@ -149,6 +169,8 @@ class DailySnapshot {
     required DateTime today,
     required List<TrainingRecord> training,
     required int plannedSessionsPerWeek,
+    SessionKind? plannedToday,
+    bool plannedTodayDone = false,
     required NutritionGoal? goal,
     required List<NutritionDayTotals> nutritionDays,
     required List<WeightPoint> weights,
@@ -163,7 +185,9 @@ class DailySnapshot {
             camp: camp, weights: weights, today: day, ageYears: ageYears);
     return DailySnapshot._(
       date: day,
-      training: _training(day, training, plannedSessionsPerWeek),
+      training: _training(day, training, plannedSessionsPerWeek,
+          plannedToday: plannedToday,
+          plannedTodayDone: plannedToday != null && plannedTodayDone),
       nutrition: goal == null ? null : _nutrition(day, goal, nutritionDays),
       weight: trend,
       camp: camp == null
@@ -193,8 +217,10 @@ class DailySnapshot {
   static TrainingSummary _training(
     DateTime today,
     List<TrainingRecord> records,
-    int planned,
-  ) {
+    int planned, {
+    required SessionKind? plannedToday,
+    required bool plannedTodayDone,
+  }) {
     final monday = weekStart(today);
     var sessionsToday = 0;
     var minutes = 0;
@@ -222,6 +248,8 @@ class DailySnapshot {
       minutesLast7Days: minutes,
       averageRpeLast7Days:
           rpes.isEmpty ? null : rpes.reduce((a, b) => a + b) / rpes.length,
+      plannedToday: plannedToday,
+      plannedTodayDone: plannedTodayDone,
     );
   }
 
@@ -267,6 +295,8 @@ class DailySnapshot {
         'trainingDaysLast7Days': training.trainingDaysLast7Days,
         'minutesLast7Days': training.minutesLast7Days,
         'averageRpeLast7Days': oneDecimal(training.averageRpeLast7Days),
+        'plannedToday': training.plannedToday?.name,
+        'plannedTodayDone': training.plannedTodayDone,
       },
       'nutrition': nutrition == null
           ? null

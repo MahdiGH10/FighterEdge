@@ -8,17 +8,14 @@ import { AiTaskType, ChatTurn } from "./types";
 
 /** The JSON shape the model must return for [task]. */
 export function responseShapeFor(task: AiTaskType): Record<string, unknown> {
-  return task === "fighterBrief"
+  return task === "cornerBrief"
     ? {
-        schemaVersion: 2,
-        summary: "string",
-        brief: {
-          nextAction: "string",
-          mealSuggestion: "string",
-          trainingTiming: "string",
-          weeklyAdjustment: "string",
-        },
-        actions: [],
+        schemaVersion: 3,
+        lines: [
+          { topic: "training|fuel|weight|camp|recovery", text: "string" },
+          { topic: "a different topic", text: "string" },
+          { topic: "a third topic", text: "string" },
+        ],
         warnings: ["string"],
         requiresProfessionalReview: false,
         factsUsed: ["fact-name-from-supplied-facts"],
@@ -66,12 +63,14 @@ export function buildUserContent(input: UserContentInput): string {
       : "",
     "\nRespond with exactly one JSON object matching this shape:",
     JSON.stringify(responseShapeFor(task)),
-    task === "fighterBrief"
-      ? "For Fighter Brief, make each brief section specific, concise, and grounded only in the supplied facts."
+    task === "cornerBrief"
+      ? "For the Corner Brief, write exactly three lines on three different topics, most important first, each grounded only in the supplied facts."
       : "",
     task === "chat"
       ? "For chat, put your direct answer to the athlete's new message in \"summary\", grounded only in the supplied facts and the conversation."
       : "",
-    "\nThis deployment has no recipe catalog yet — recipeIds must always be an empty array.",
+    task === "cornerBrief"
+      ? ""
+      : "\nThis deployment has no recipe catalog yet — recipeIds must always be an empty array.",
   ].join(" ");
 }
