@@ -19,9 +19,29 @@ on 2026-09-25/26, on top of `main` (`9ce7c23`):
   the sign-in label; OFL declares no Reserved Font Name, see
   `assets/images/google_g.README.md`).
 
+**Pull requests (open, none merged):** #10 this branch → `main`; #11
+`feat/fight-camp-setup` → #10's branch; #12 `feat/fight-camp-weight-path` →
+#11's branch. Merge in that order (after merging #10, retarget #11 to
+`main`; then #12). **Merging to `main` deploys:** `deploy-backend.yml` runs
+on `main` when `functions/**` or `firestore.rules` change, so #10 redeploys
+the Cloud Functions (the prompt moved to `prompt.ts` byte-identical; the
+eval files ship unused) and #11 deploys the `fightCamp` rule, which is the
+rule the fight camp needs before release. Both go through the `production`
+environment and need its credentials.
+
+**CI on #10:** 6/7 green, including Android release and iOS builds. The
+Android emulator job has **never passed** on any branch (`main` included):
+runs stall after the APK installs, or the emulator loses adb. Separately,
+the app flow test itself had a bug found by running it as a widget test at
+the emulator's 320x640: the "Pro is active" snackbar covered Sign out.
+Fixed in `978f19f`; the full flow passes in the VM at 320x640. Whether the
+emulator job now passes is the open question; if it still stalls with no
+output, run `flutter test integration_test/app_flow_test.dart -d <phone>`
+on a real Android phone to tell the app apart from the CI emulator.
+
 **Verified on this branch:** format and analyze clean, 740 tests, 3 goldens,
-functions 90/90. **Not verified:** real devices, iOS, release builds, live
-Firebase, purchases, the CI emulator job (runs on the PR).
+functions 90/90. **Not verified:** real devices, iOS runtime, live
+Firebase, purchases.
 
 **Decisions to respect** (`docs/PRODUCT_PLAN_20260924.md` > "Owner
 decisions (2026-09-26)"): fight camp before the AI features; AI is measured
@@ -34,10 +54,36 @@ page details (name, contact email, country, Firestore region) for
 `hosting/public/`; a login background without the watermark; 12 testers for
 the Play closed test.
 
-**Stacked on it:** `feat/fight-camp-setup` (section below): screens A and
-B of `docs/FIGHT_CAMP_PATTERN_BRIEF.md`. **Next:** screen C (weight path
-chart), then the fight-week domain additions and screen D, then the AI
-reading `DailySnapshot`.
+**Stacked on it:** `feat/fight-camp-setup` (screens A and B of
+`docs/FIGHT_CAMP_PATTERN_BRIEF.md`), then `feat/fight-camp-weight-path`
+(screen C). Sections below. **Next:** the fight-week domain additions
+(refuel targets and daily steps from ISSN points 9 and 12–14, tested like
+the weight path) and screen D, then the AI reading `DailySnapshot`.
+
+## Fight camp slice 2: weight path screen (2026-09-26, Claude)
+
+Branch `feat/fight-camp-weight-path`, stacked on `feat/fight-camp-setup`.
+
+- `/fight/path` (`FightPathScreen`): tapping the dashboard countdown now
+  opens the plan; "Edit fight" is the header action. Shows the fight and
+  phase, `WeightPathSummary`, a chart and the weekly targets (last row:
+  "Fight week starts").
+- `WeightPathChart`: last 28 days plus the plan on one date axis; weigh-ins
+  as faint dots, `WeightTrend.series` (7-day mean per day, gaps left open)
+  as the solid line, the plan dashed in its status colour (green on pace,
+  amber needs supervision, none when not safe), the limit dashed. Whole
+  number axis steps; end labels kept inside; dates in the locale's order.
+  Hidden from screen readers: the summary card states the same facts.
+- `ChartTokens` in `app_theme.dart` (line, guide, dash, dot sizes, axis
+  space). The older weight tracker chart still uses raw values: move it
+  over when that screen is next touched.
+- Weekly checkpoints skip a week that would land within 3 days of the
+  fight-week start (it showed "Oct 17 / Oct 18"); the safety grid test now
+  checks pace per day between checkpoints.
+- Removing a fight returns to the first route (past the path screen).
+- Tests: series, the screen on pace / not safe / one weigh-in, countdown →
+  plan → edit, 320 px / 200% for `/fight/path`. Seen by eye on pace and
+  needs-supervision; the fixes above came from that review.
 
 ## Fight camp slice 1: save a fight, setup screen, dashboard countdown (2026-09-26, Claude)
 

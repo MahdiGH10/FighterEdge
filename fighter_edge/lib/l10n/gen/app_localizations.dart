@@ -2358,6 +2358,60 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Not safe by this date. Tap to review.'**
   String get fightPathShortNotSafe;
+
+  /// No description provided for @fightPathScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight path'**
+  String get fightPathScreenTitle;
+
+  /// No description provided for @fightCheckpointsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly targets'**
+  String get fightCheckpointsTitle;
+
+  /// No description provided for @fightCheckpointFightWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight week starts'**
+  String get fightCheckpointFightWeek;
+
+  /// No description provided for @fightChartLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit {value}'**
+  String fightChartLimit(String value);
+
+  /// No description provided for @fightChartToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get fightChartToday;
+
+  /// No description provided for @fightChartWeighIns.
+  ///
+  /// In en, this message translates to:
+  /// **'Weigh-ins'**
+  String get fightChartWeighIns;
+
+  /// No description provided for @fightChartTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'7-day trend'**
+  String get fightChartTrend;
+
+  /// No description provided for @fightChartPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get fightChartPlan;
+
+  /// No description provided for @fightChartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Log two weigh-ins to draw your trend.'**
+  String get fightChartEmpty;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

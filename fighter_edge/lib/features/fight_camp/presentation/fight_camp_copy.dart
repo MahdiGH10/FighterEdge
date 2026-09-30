@@ -23,6 +23,10 @@ class FightCampCopy {
   String date(DateTime date) => DateFormat.MMMEd(locale)
       .format(DateTime(date.year, date.month, date.day));
 
+  /// Day and month only, in the locale's order ("8/30", "30.8.").
+  String shortDate(DateTime date) =>
+      DateFormat.Md(locale).format(DateTime(date.year, date.month, date.day));
+
   String category(CompetitionCategory category) => switch (category) {
         CompetitionCategory.grappling => l.fightCategoryGrappling,
         CompetitionCategory.amateurStriking => l.fightCategoryAmateur,

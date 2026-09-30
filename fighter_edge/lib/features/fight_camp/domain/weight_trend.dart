@@ -60,6 +60,34 @@ class WeightTrend {
     );
   }
 
+  /// The trend for every day from [from] to [to] that has a weigh-in in its
+  /// own [windowDays]-day window: the line a chart draws through the noisy
+  /// weigh-ins. Days with no recent weigh-in are left out, not interpolated.
+  static List<WeightPoint> series(
+    List<WeightPoint> points, {
+    required DateTime from,
+    required DateTime to,
+  }) {
+    final valid = [
+      for (final p in points)
+        if (p.kg.isFinite && p.kg > 0) WeightPoint(calendarDay(p.date), p.kg),
+    ];
+    final out = <WeightPoint>[];
+    for (var day = calendarDay(from);
+        !day.isAfter(calendarDay(to));
+        day = addDays(day, 1)) {
+      final window = [
+        for (final p in valid)
+          if (daysBetween(p.date, day) >= 0 &&
+              daysBetween(p.date, day) < windowDays)
+            p.kg,
+      ];
+      final mean = _mean(window);
+      if (mean != null) out.add(WeightPoint(day, mean));
+    }
+    return out;
+  }
+
   static double? _mean(List<double> values) =>
       values.isEmpty ? null : values.reduce((a, b) => a + b) / values.length;
 }

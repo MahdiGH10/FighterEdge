@@ -48,4 +48,24 @@ void main() {
     expect(trend.latestKg, isNull);
     expect(trend.weighInsLast7Days, 0);
   });
+
+  test('series gives one trend point per day with recent weigh-ins', () {
+    final series = WeightTrend.series(
+      [daysAgo(10, 82), daysAgo(9, 81), daysAgo(1, 80), daysAgo(0, 79)],
+      from: addDays(today, -10),
+      to: addDays(today, 1),
+    );
+    final byAge = {
+      for (final p in series) daysBetween(p.date, calendarDay(today)): p.kg,
+    };
+    expect(byAge[10], 82);
+    expect(byAge[9], 81.5);
+    expect(byAge[4], 81.5, reason: 'both old weigh-ins are within 7 days');
+    expect(byAge[3], 81, reason: 'only the 9-days-ago weigh-in is in range');
+    expect(byAge.containsKey(2), isFalse, reason: 'no weigh-in in 7 days');
+    expect(byAge[1], 80);
+    expect(byAge[0], 79.5);
+    expect(byAge[-1], 79.5, reason: 'tomorrow still sees the last week');
+    expect(series.map((p) => p.date).toSet().length, series.length);
+  });
 }

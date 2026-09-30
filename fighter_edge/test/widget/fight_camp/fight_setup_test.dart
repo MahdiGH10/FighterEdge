@@ -95,6 +95,8 @@ void main() {
     expect(find.text('30'), findsOneWidget);
     await tester.tap(find.textContaining('Fight night'));
     await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Edit fight'));
+    await tester.pumpAndSettle();
 
     expect(find.text('77.1'), findsOneWidget, reason: 'limit prefilled');
     expect(saveButton(tester).onPressed, isNotNull);

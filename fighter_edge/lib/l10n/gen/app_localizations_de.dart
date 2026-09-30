@@ -1342,4 +1342,34 @@ class LDe extends L {
   @override
   String get fightPathShortNotSafe =>
       'Bis zu diesem Termin nicht sicher. Zum Prüfen tippen.';
+
+  @override
+  String get fightPathScreenTitle => 'Gewichtsweg';
+
+  @override
+  String get fightCheckpointsTitle => 'Wochenziele';
+
+  @override
+  String get fightCheckpointFightWeek => 'Kampfwoche beginnt';
+
+  @override
+  String fightChartLimit(String value) {
+    return 'Limit $value';
+  }
+
+  @override
+  String get fightChartToday => 'Heute';
+
+  @override
+  String get fightChartWeighIns => 'Wiegungen';
+
+  @override
+  String get fightChartTrend => '7-Tage-Trend';
+
+  @override
+  String get fightChartPlan => 'Plan';
+
+  @override
+  String get fightChartEmpty =>
+      'Trag zwei Gewichte ein, um deinen Trend zu sehen.';
 }
