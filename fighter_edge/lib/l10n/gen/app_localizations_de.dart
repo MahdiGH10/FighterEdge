@@ -1147,4 +1147,199 @@ class LDe extends L {
   @override
   String get learningPractiseLast =>
       'Dies ist die letzte Technik deines Lernpfads. Übe weiter und markiere sie als sicher, sobald du bereit bist.';
+
+  @override
+  String get fightAddTitle => 'Nächsten Kampf eintragen';
+
+  @override
+  String get fightAddSubtitle => 'Countdown und ein sicherer Gewichtsweg';
+
+  @override
+  String get fightSetupTitle => 'Dein Kampf';
+
+  @override
+  String get fightDateLabel => 'Kampftag';
+
+  @override
+  String get fightDatePick => 'Datum wählen';
+
+  @override
+  String get fightWeighInLabel => 'Wiegen';
+
+  @override
+  String get fightWeighInSameDay => 'Am selben Tag';
+
+  @override
+  String get fightWeighInDayBefore => 'Am Vortag';
+
+  @override
+  String get fightWeighInTwoDays => '2 Tage vorher';
+
+  @override
+  String fightLimitLabel(String unit) {
+    return 'Gewichtslimit ($unit)';
+  }
+
+  @override
+  String fightLimitError(String min, String max, String unit) {
+    return 'Gib ein Limit zwischen $min und $max $unit ein.';
+  }
+
+  @override
+  String get fightCategoryLabel => 'Wettkampf';
+
+  @override
+  String get fightCategoryWhy =>
+      'Das legt fest, wie viel in den letzten Tagen sicher runter darf.';
+
+  @override
+  String get fightCategoryGrappling => 'Ringen und Grappling';
+
+  @override
+  String get fightCategoryGrapplingHint => 'Ringen, BJJ, ADCC';
+
+  @override
+  String get fightCategoryAmateur => 'Amateur-Schlagsport';
+
+  @override
+  String get fightCategoryAmateurHint => 'Amateurboxen, Amateur-Muay-Thai';
+
+  @override
+  String get fightCategoryOlympic => 'Olympischer Kampfsport';
+
+  @override
+  String get fightCategoryOlympicHint => 'Judo, olympisches Boxen, Taekwondo';
+
+  @override
+  String get fightCategoryPro => 'Profi';
+
+  @override
+  String get fightCategoryProHint => 'Profi-MMA, Boxen, Kickboxen, Muay Thai';
+
+  @override
+  String get fightCampLabel => 'Camp-Dauer';
+
+  @override
+  String fightCampWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Wochen',
+      one: '1 Woche',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fightPathTitle => 'Dein Gewichtsweg';
+
+  @override
+  String get fightPathNow => 'Jetzt';
+
+  @override
+  String get fightPathLimit => 'Limit';
+
+  @override
+  String get fightPathToGo => 'Noch';
+
+  @override
+  String fightPathOnPace(String rate, String entry, String unit) {
+    return 'Im Plan: $rate $unit pro Woche, damit du zur Kampfwoche bei $entry $unit bist.';
+  }
+
+  @override
+  String get fightPathHold =>
+      'In Reichweite: Halte dein Gewicht, den Rest schafft die Ernährung in der Kampfwoche.';
+
+  @override
+  String fightPathSupervision(String lightest, String unit) {
+    return 'Nur mit einem Wasser-Cut in den letzten Tagen möglich, und der gehört in die Hände eines Coaches oder Ernährungsberaters. Dein Camp ist im schnellsten sicheren Tempo geplant. Allein über die Ernährung schaffst du bis dahin höchstens $lightest $unit.';
+  }
+
+  @override
+  String fightPathNotSafe(String lightest, String unit) {
+    return 'Bis zu diesem Termin nicht sicher machbar. Das leichteste sichere Limit ist $lightest $unit: Wähle eine höhere Gewichtsklasse oder einen späteren Kampf.';
+  }
+
+  @override
+  String get fightPathAtWeight => 'Du bist im Limit. Halte dein Gewicht.';
+
+  @override
+  String get fightPathNeedsWeight =>
+      'Trag diese Woche ein Gewicht ein, um deinen Weg zu sehen.';
+
+  @override
+  String get fightPathAdultsOnly =>
+      'Gewichtspläne gibt es nur für Erwachsene. Plane dein Gewicht mit deinem Coach.';
+
+  @override
+  String get fightPathSource =>
+      'Grenzwerte der International Society of Sports Nutrition (2025).';
+
+  @override
+  String get fightSave => 'Kampf speichern';
+
+  @override
+  String get fightRemove => 'Kampf entfernen';
+
+  @override
+  String get fightRemoveTitle => 'Diesen Kampf entfernen?';
+
+  @override
+  String get fightRemoveBody =>
+      'Countdown und Gewichtsweg werden gelöscht. Du kannst jederzeit wieder einen Kampf eintragen.';
+
+  @override
+  String fightNight(String date) {
+    return 'Kampfabend · $date';
+  }
+
+  @override
+  String fightDaysToGo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tage bis zum Kampf',
+      one: 'Tag bis zum Kampf',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fightPhaseCamp(int week, int total) {
+    return 'Camp · Woche $week von $total';
+  }
+
+  @override
+  String fightPhaseBeforeCamp(String date) {
+    return 'Camp beginnt am $date';
+  }
+
+  @override
+  String fightPhaseFightWeek(int day) {
+    return 'Kampfwoche · Tag $day von 7';
+  }
+
+  @override
+  String get fightPhaseWeighIn => 'Heute ist Wiegen';
+
+  @override
+  String get fightPhaseRefuel => 'Gewogen: jetzt auffüllen';
+
+  @override
+  String get fightPhaseFightDay => 'Kampftag';
+
+  @override
+  String get fightDone => 'Kampf vorbei. Trag deinen nächsten ein.';
+
+  @override
+  String get fightEdit => 'Kampf bearbeiten';
+
+  @override
+  String get fightPathShortSupervision =>
+      'Nur mit betreutem Wasser-Cut machbar. Zum Prüfen tippen.';
+
+  @override
+  String get fightPathShortNotSafe =>
+      'Bis zu diesem Termin nicht sicher. Zum Prüfen tippen.';
 }

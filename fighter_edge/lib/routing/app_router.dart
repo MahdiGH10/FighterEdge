@@ -10,6 +10,7 @@ import '../features/edge_fuel/presentation/screens/edge_fuel_coach_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../features/edge_fuel/presentation/screens/recipe_library_screen.dart';
+import '../features/fight_camp/presentation/screens/fight_setup_screen.dart';
 import '../screens/auth/auth_gate.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/magic_link_screen.dart';
@@ -42,6 +43,7 @@ class AppRoutes {
   static const fuelSetup = '/fuel/setup';
   static const fuelRecipes = '/fuel/recipes';
   static const fuelCoach = '/fuel/coach';
+  static const fightSetup = '/fight/setup';
 }
 
 /// Routes a signed-out user may sit on. Everything else needs a session.
@@ -236,6 +238,13 @@ GoRouter createAppRouter({AuthController? auth}) {
             child: RecipeLibraryScreen(initialFilters: filters),
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.fightSetup,
+        pageBuilder: (context, state) => _appPage(
+          state: state,
+          child: const FightSetupScreen(),
+        ),
       ),
       if (kDebugMode)
         GoRoute(

@@ -2052,6 +2052,312 @@ abstract class L {
   /// In en, this message translates to:
   /// **'This is the last drill in your path. Keep practising, then mark it Sharp when you are ready.'**
   String get learningPractiseLast;
+
+  /// No description provided for @fightAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your next fight'**
+  String get fightAddTitle;
+
+  /// No description provided for @fightAddSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown and a safe weight path'**
+  String get fightAddSubtitle;
+
+  /// No description provided for @fightSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your fight'**
+  String get fightSetupTitle;
+
+  /// No description provided for @fightDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight date'**
+  String get fightDateLabel;
+
+  /// No description provided for @fightDatePick.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose date'**
+  String get fightDatePick;
+
+  /// No description provided for @fightWeighInLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weigh-in'**
+  String get fightWeighInLabel;
+
+  /// No description provided for @fightWeighInSameDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Same day'**
+  String get fightWeighInSameDay;
+
+  /// No description provided for @fightWeighInDayBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Day before'**
+  String get fightWeighInDayBefore;
+
+  /// No description provided for @fightWeighInTwoDays.
+  ///
+  /// In en, this message translates to:
+  /// **'2 days before'**
+  String get fightWeighInTwoDays;
+
+  /// No description provided for @fightLimitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight limit ({unit})'**
+  String fightLimitLabel(String unit);
+
+  /// No description provided for @fightLimitError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a limit between {min} and {max} {unit}.'**
+  String fightLimitError(String min, String max, String unit);
+
+  /// No description provided for @fightCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Competition'**
+  String get fightCategoryLabel;
+
+  /// No description provided for @fightCategoryWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'This sets how much can safely come off in the final days.'**
+  String get fightCategoryWhy;
+
+  /// No description provided for @fightCategoryGrappling.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrestling and grappling'**
+  String get fightCategoryGrappling;
+
+  /// No description provided for @fightCategoryGrapplingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrestling, BJJ, ADCC'**
+  String get fightCategoryGrapplingHint;
+
+  /// No description provided for @fightCategoryAmateur.
+  ///
+  /// In en, this message translates to:
+  /// **'Amateur striking'**
+  String get fightCategoryAmateur;
+
+  /// No description provided for @fightCategoryAmateurHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Amateur boxing, amateur Muay Thai'**
+  String get fightCategoryAmateurHint;
+
+  /// No description provided for @fightCategoryOlympic.
+  ///
+  /// In en, this message translates to:
+  /// **'Olympic combat sports'**
+  String get fightCategoryOlympic;
+
+  /// No description provided for @fightCategoryOlympicHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Judo, Olympic boxing, taekwondo'**
+  String get fightCategoryOlympicHint;
+
+  /// No description provided for @fightCategoryPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional'**
+  String get fightCategoryPro;
+
+  /// No description provided for @fightCategoryProHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro MMA, boxing, kickboxing, Muay Thai'**
+  String get fightCategoryProHint;
+
+  /// No description provided for @fightCampLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Camp length'**
+  String get fightCampLabel;
+
+  /// No description provided for @fightCampWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week} other{{count} weeks}}'**
+  String fightCampWeeks(int count);
+
+  /// No description provided for @fightPathTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your weight path'**
+  String get fightPathTitle;
+
+  /// No description provided for @fightPathNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get fightPathNow;
+
+  /// No description provided for @fightPathLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit'**
+  String get fightPathLimit;
+
+  /// No description provided for @fightPathToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'To go'**
+  String get fightPathToGo;
+
+  /// No description provided for @fightPathOnPace.
+  ///
+  /// In en, this message translates to:
+  /// **'On pace: lose {rate} {unit} a week to reach {entry} {unit} by fight week.'**
+  String fightPathOnPace(String rate, String entry, String unit);
+
+  /// No description provided for @fightPathHold.
+  ///
+  /// In en, this message translates to:
+  /// **'Within reach: hold your weight, and fight-week eating covers the rest.'**
+  String get fightPathHold;
+
+  /// No description provided for @fightPathSupervision.
+  ///
+  /// In en, this message translates to:
+  /// **'Only possible with a water cut in the last days, which needs a coach or dietitian. Your camp is planned at the fastest safe pace. On food alone, the lightest limit you can make by then is {lightest} {unit}.'**
+  String fightPathSupervision(String lightest, String unit);
+
+  /// No description provided for @fightPathNotSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Not safe by this date. The lightest limit you can make safely is {lightest} {unit}: choose a heavier class or a later fight.'**
+  String fightPathNotSafe(String lightest, String unit);
+
+  /// No description provided for @fightPathAtWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re at weight. Hold steady.'**
+  String get fightPathAtWeight;
+
+  /// No description provided for @fightPathNeedsWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Log a weigh-in this week to see your path.'**
+  String get fightPathNeedsWeight;
+
+  /// No description provided for @fightPathAdultsOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight cut plans are for adults. Plan your weight with your coach.'**
+  String get fightPathAdultsOnly;
+
+  /// No description provided for @fightPathSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Limits from the International Society of Sports Nutrition (2025).'**
+  String get fightPathSource;
+
+  /// No description provided for @fightSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save fight'**
+  String get fightSave;
+
+  /// No description provided for @fightRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove fight'**
+  String get fightRemove;
+
+  /// No description provided for @fightRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this fight?'**
+  String get fightRemoveTitle;
+
+  /// No description provided for @fightRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your countdown and weight path are cleared. You can add a fight again any time.'**
+  String get fightRemoveBody;
+
+  /// No description provided for @fightNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight night · {date}'**
+  String fightNight(String date);
+
+  /// No description provided for @fightDaysToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{day to go} other{days to go}}'**
+  String fightDaysToGo(int count);
+
+  /// No description provided for @fightPhaseCamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Camp · week {week} of {total}'**
+  String fightPhaseCamp(int week, int total);
+
+  /// No description provided for @fightPhaseBeforeCamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Camp starts {date}'**
+  String fightPhaseBeforeCamp(String date);
+
+  /// No description provided for @fightPhaseFightWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight week · day {day} of 7'**
+  String fightPhaseFightWeek(int day);
+
+  /// No description provided for @fightPhaseWeighIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Weigh-in today'**
+  String get fightPhaseWeighIn;
+
+  /// No description provided for @fightPhaseRefuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighed in: refuel'**
+  String get fightPhaseRefuel;
+
+  /// No description provided for @fightPhaseFightDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight day'**
+  String get fightPhaseFightDay;
+
+  /// No description provided for @fightDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight done. Add your next one.'**
+  String get fightDone;
+
+  /// No description provided for @fightEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit fight'**
+  String get fightEdit;
+
+  /// No description provided for @fightPathShortSupervision.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a supervised water cut. Tap to review.'**
+  String get fightPathShortSupervision;
+
+  /// No description provided for @fightPathShortNotSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Not safe by this date. Tap to review.'**
+  String get fightPathShortNotSafe;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

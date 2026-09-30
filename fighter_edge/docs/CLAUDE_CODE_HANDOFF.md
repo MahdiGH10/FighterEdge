@@ -34,8 +34,48 @@ page details (name, contact email, country, Firestore region) for
 `hosting/public/`; a login background without the watermark; 12 testers for
 the Play closed test.
 
-**Next:** fight camp screens per `docs/FIGHT_CAMP_PATTERN_BRIEF.md`, starting
-with persisting a fight and the setup screen, then the dashboard countdown.
+**Stacked on it:** `feat/fight-camp-setup` (section below): screens A and
+B of `docs/FIGHT_CAMP_PATTERN_BRIEF.md`. **Next:** screen C (weight path
+chart), then the fight-week domain additions and screen D, then the AI
+reading `DailySnapshot`.
+
+## Fight camp slice 1: save a fight, setup screen, dashboard countdown (2026-09-26, Claude)
+
+Branch `feat/fight-camp-setup`, stacked on `feat/ui-polish-recipes-camp-domain`.
+
+- **Storage.** `FightCampRepository` (Firestore `users/{uid}/fightCamp/current`,
+  in-memory for tests and `main_local.dart`), `FightCampController` wired in
+  `main.dart` and the test harness (`AppDependencies.fightCampRepo`, checked by
+  `bootstrap_wiring_test.dart`). Optimistic writes; failures go to the error
+  reporter. `FightCamp.toJson`/`fromJson` (a corrupt document reads as "no
+  fight"), `campWeekOn`, `fightWeekDayOn`.
+- **Rules: NOT DEPLOYED — ship blocker.** `firestore.rules` gains an
+  owner-only `fightCamp` match, with two emulator tests in
+  `functions/src/rules.test.ts` (run by CI's "Firestore rules" job; this PC
+  has Java 17, the emulator needs 21). Deploy the rules (owner approval)
+  before a build with this code reaches users, or every save is denied.
+- **Setup screen** (`/fight/setup`, `FightSetupScreen`): date picker, weigh-in
+  lead, weight limit in the user's unit (decimal comma accepted, 35–220 kg),
+  competition type (no default: it sets the safety limit), camp length. The
+  weight path previews live under the form (`WeightPathSummary`: now / limit
+  / to go, status in words, ISSN source line). Edit and remove.
+- **Dashboard.** `FightCountdownSection` above today's session while a fight is
+  ahead: date, days to go (not animated), phase line, camp-week segments,
+  one-line path status (warnings shorten to "Tap to review"). `AddFightRow`
+  below the stats otherwise, including after the fight.
+- **Copy.** 51 new strings, EN and DE. Privacy policy drafts list the new data.
+- **Tests.** Domain storage/calendar, controller (load, switch account,
+  optimistic save/clear, reported failures), flow from dashboard to saved
+  countdown and back (checked by planting a bug), edit/remove, inline limit
+  error, every path message in kg and lb, every countdown phase, 320 px / 200%
+  text / high contrast for the countdown and the full setup screen.
+- **Seen by eye** (scratch renders with real fonts, not committed): dashboard
+  with an on-pace fight and setup with a not-safe limit. Chip rows were
+  truncating ("2 days be…") and now use two columns.
+- German checked by eye at 320 px (countdown, setup, not-safe message). App-wide
+  follow-up, not specific to this slice: numbers use a decimal point in German
+  ("75.5 kg"); `toStringAsFixed` is used everywhere, so fix it in one pass.
+- **Not verified:** real devices, live Firestore, the rules emulator run (CI).
 
 ## AI evaluation, fight-camp domain, recipe photos (2026-09-26, Claude)
 

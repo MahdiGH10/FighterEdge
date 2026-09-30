@@ -33,6 +33,11 @@ service cloud.firestore {
         allow read, write: if isOwner(uid);
       }
 
+      // The athlete's next fight (date, weigh-in, weight limit). Owner-only.
+      match /fightCamp/{docId} {
+        allow read, write: if isOwner(uid);
+      }
+
       match /nutritionProfile/{docId} {
         allow read, write: if isOwner(uid);
       }

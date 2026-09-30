@@ -1,0 +1,82 @@
+import 'package:intl/intl.dart';
+
+import '../../../l10n/gen/app_localizations.dart';
+import '../../../state/app_state.dart';
+import '../domain/fight_camp.dart';
+import '../domain/weight_cut_policy.dart';
+import '../domain/weight_path.dart';
+import 'fight_camp_controller.dart';
+
+/// Words for fight-camp numbers. Every number comes from the domain; this
+/// only formats it in the athlete's unit and language.
+class FightCampCopy {
+  FightCampCopy(this.l, this.units, this.locale);
+
+  final L l;
+  final AppState units;
+  final String locale;
+
+  String weight(double kg) => units.displayWeight(kg).toStringAsFixed(1);
+
+  String get unit => units.weightUnitLabel;
+
+  String date(DateTime date) => DateFormat.MMMEd(locale)
+      .format(DateTime(date.year, date.month, date.day));
+
+  String category(CompetitionCategory category) => switch (category) {
+        CompetitionCategory.grappling => l.fightCategoryGrappling,
+        CompetitionCategory.amateurStriking => l.fightCategoryAmateur,
+        CompetitionCategory.olympic => l.fightCategoryOlympic,
+        CompetitionCategory.professional => l.fightCategoryPro,
+      };
+
+  String categoryHint(CompetitionCategory category) => switch (category) {
+        CompetitionCategory.grappling => l.fightCategoryGrapplingHint,
+        CompetitionCategory.amateurStriking => l.fightCategoryAmateurHint,
+        CompetitionCategory.olympic => l.fightCategoryOlympicHint,
+        CompetitionCategory.professional => l.fightCategoryProHint,
+      };
+
+  /// The full explanation of a weight path, for the setup screen.
+  String pathMessage(WeightPath path) => switch (path.status) {
+        WeightPathStatus.onTrack => path.weeklyLossKg > 0 &&
+                path.fightWeekEntryKg != null
+            ? l.fightPathOnPace(
+                weight(path.weeklyLossKg), weight(path.fightWeekEntryKg!), unit)
+            : l.fightPathHold,
+        WeightPathStatus.needsSupervision =>
+          l.fightPathSupervision(weight(path.lightestSafeLimitKg!), unit),
+        WeightPathStatus.notSafe =>
+          l.fightPathNotSafe(weight(path.lightestSafeLimitKg!), unit),
+        WeightPathStatus.atWeight => l.fightPathAtWeight,
+        WeightPathStatus.needsMoreData => l.fightPathNeedsWeight,
+        WeightPathStatus.notSupported => l.fightPathAdultsOnly,
+      };
+
+  /// One line for the dashboard: the full message when it is short, a
+  /// pointer to the setup screen when it is a warning.
+  String pathLine(WeightPath path) => switch (path.status) {
+        WeightPathStatus.needsSupervision => l.fightPathShortSupervision,
+        WeightPathStatus.notSafe => l.fightPathShortNotSafe,
+        _ => pathMessage(path),
+      };
+
+  /// Where the athlete is in the camp, in words.
+  String phaseLine(FightCampStatus status, DateTime today) {
+    final camp = status.camp;
+    return switch (status.phase) {
+      CampPhase.camp =>
+        l.fightPhaseCamp(camp.campWeekOn(today)!, camp.campWeeks),
+      CampPhase.fightWeek => status.daysToWeighIn == 0
+          ? (status.daysToFight == 0
+              ? l.fightPhaseFightDay
+              : l.fightPhaseWeighIn)
+          : l.fightPhaseFightWeek(camp.fightWeekDayOn(today)!),
+      CampPhase.refuel =>
+        status.daysToFight == 0 ? l.fightPhaseFightDay : l.fightPhaseRefuel,
+      CampPhase.offCamp => l.fightPhaseBeforeCamp(date(camp.fightWeekStart
+          .subtract(Duration(days: (camp.campWeeks - 1) * 7)))),
+      CampPhase.postFight => l.fightDone,
+    };
+  }
+}

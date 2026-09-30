@@ -97,4 +97,77 @@ class FightCamp {
     if (toWeighIn <= campWeeks * 7) return CampPhase.camp;
     return CampPhase.offCamp;
   }
+
+  /// The camp week [today] falls in, 1-based, or null outside the camp
+  /// phase. Week 1 starts [campWeeks] weeks before the weigh-in.
+  int? campWeekOn(DateTime today) {
+    if (phaseOn(today) != CampPhase.camp) return null;
+    final daysIntoCamp = campWeeks * 7 - daysToWeighIn(today);
+    return (daysIntoCamp ~/ 7 + 1).clamp(1, campWeeks);
+  }
+
+  /// Fight-week day [today] falls on, 1–7 (7 is the day before the
+  /// weigh-in), 8 on the weigh-in day itself, or null outside fight week.
+  int? fightWeekDayOn(DateTime today) {
+    if (phaseOn(today) != CampPhase.fightWeek) return null;
+    return WeightCutPolicy.fightWeekDays - daysToWeighIn(today) + 1;
+  }
+
+  Map<String, Object> toJson() => {
+        'fightDate': _dateKey(fightDate),
+        'weighInDate': _dateKey(weighInDate),
+        'weightLimitKg': weightLimitKg,
+        'category': category.name,
+        'campWeeks': campWeeks,
+      };
+
+  /// Null for anything [tryCreate] would refuse, so a corrupt or hand-edited
+  /// document reads as "no fight" instead of throwing.
+  static FightCamp? fromJson(Map<String, dynamic> json) {
+    final fight = _parseDateKey(json['fightDate']);
+    final weighIn = _parseDateKey(json['weighInDate']);
+    final limit = json['weightLimitKg'];
+    final category = CompetitionCategory.values
+        .where((c) => c.name == json['category'])
+        .firstOrNull;
+    final weeks = json['campWeeks'];
+    if (fight == null || limit is! num || category == null) return null;
+    return tryCreate(
+      fightDate: fight,
+      weighInDate: weighIn ?? fight,
+      weightLimitKg: limit.toDouble(),
+      category: category,
+      campWeeks: weeks is int ? weeks : defaultCampWeeks,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is FightCamp &&
+      other.fightDate == fightDate &&
+      other.weighInDate == weighInDate &&
+      other.weightLimitKg == weightLimitKg &&
+      other.category == category &&
+      other.campWeeks == campWeeks;
+
+  @override
+  int get hashCode =>
+      Object.hash(fightDate, weighInDate, weightLimitKg, category, campWeeks);
+}
+
+String _dateKey(DateTime date) => '${date.year.toString().padLeft(4, '0')}-'
+    '${date.month.toString().padLeft(2, '0')}-'
+    '${date.day.toString().padLeft(2, '0')}';
+
+DateTime? _parseDateKey(Object? value) {
+  if (value is! String) return null;
+  final match = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(value);
+  if (match == null) return null;
+  final year = int.parse(match.group(1)!);
+  final month = int.parse(match.group(2)!);
+  final day = int.parse(match.group(3)!);
+  final date = DateTime.utc(year, month, day);
+  // Rejects "2026-02-31", which DateTime would silently roll into March.
+  if (date.month != month || date.day != day) return null;
+  return date;
 }

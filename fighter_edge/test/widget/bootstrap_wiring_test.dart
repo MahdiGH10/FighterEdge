@@ -8,6 +8,8 @@ import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/data/edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'package:fighter_edge/features/fight_camp/data/fight_camp_repository.dart';
+import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/notifications/reminder_gateway.dart';
 import 'package:fighter_edge/observability/error_reporter.dart';
@@ -53,6 +55,7 @@ void main() {
     final telemetry = MemoryTelemetry();
     const reporter = _MarkedReporter();
     final edgeFuelRepo = InMemoryEdgeFuelRepository();
+    final fightCampRepo = InMemoryFightCampRepository();
     const aiGateway = FakeEdgeFuelAiGateway();
     final consent = ConsentController.decided(ConsentChoices.all);
 
@@ -60,6 +63,7 @@ void main() {
       authRepo: await makeRepo(),
       dataRepo: InMemoryDataRepository(),
       edgeFuelRepo: edgeFuelRepo,
+      fightCampRepo: fightCampRepo,
       edgeFuelAiGateway: aiGateway,
       billingGateway: FakeBillingGateway(),
       reminderGateway: reminders,
@@ -80,6 +84,7 @@ void main() {
     expect(identical(read<Telemetry>(), telemetry), isTrue);
     expect(identical(read<ErrorReporter>(), reporter), isTrue);
     expect(identical(read<EdgeFuelRepository>(), edgeFuelRepo), isTrue);
+    expect(identical(read<FightCampRepository>(), fightCampRepo), isTrue);
     expect(identical(read<EdgeFuelAiGateway>(), aiGateway), isTrue);
     expect(identical(read<ConsentController>(), consent), isTrue);
   });

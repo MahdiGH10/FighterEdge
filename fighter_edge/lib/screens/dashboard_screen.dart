@@ -6,6 +6,7 @@ import '../auth/verification_gate.dart';
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../features/edge_fuel/presentation/widgets/fuel_week_card.dart';
+import '../features/fight_camp/presentation/widgets/fight_countdown_card.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../models/training_session.dart';
 import '../routing/app_navigation.dart';
@@ -90,6 +91,7 @@ class DashboardScreen extends StatelessWidget {
                 onTrain: () => onNavigate(1)),
             const SizedBox(height: Insets.md),
           ],
+          const FightCountdownSection(),
           _SessionHero(
               session: next,
               today: todaysSession != null,
@@ -108,6 +110,7 @@ class DashboardScreen extends StatelessWidget {
           ],
           const DevMessageCard(),
           _DashboardStats(streakDays: streakDays),
+          const AddFightRow(),
           const SizedBox(height: Insets.xl),
           Text(l.dashboardThisWeek, style: AppType.headline()),
           const SizedBox(height: Insets.md),

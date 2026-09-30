@@ -138,4 +138,70 @@ void main() {
       expect(dayBefore.daysToFight(today), 11);
     });
   });
+
+  group('FightCamp storage and calendar', () {
+    FightCamp camp() => FightCamp.tryCreate(
+          fightDate: DateTime(2026, 12, 12),
+          weighInDate: DateTime(2026, 12, 11),
+          weightLimitKg: 70.3,
+          category: CompetitionCategory.olympic,
+          campWeeks: 10,
+        )!;
+
+    test('round-trips through JSON', () {
+      final json = camp().toJson();
+      expect(json, {
+        'fightDate': '2026-12-12',
+        'weighInDate': '2026-12-11',
+        'weightLimitKg': 70.3,
+        'category': 'olympic',
+        'campWeeks': 10,
+      });
+      expect(FightCamp.fromJson(json), camp());
+    });
+
+    test('reads a corrupt document as no fight', () {
+      final good = camp().toJson();
+      Map<String, dynamic> edited(String key, Object? value) =>
+          {...good, key: value};
+      expect(FightCamp.fromJson(edited('fightDate', '2026-02-31')), isNull);
+      expect(FightCamp.fromJson(edited('fightDate', 'soon')), isNull);
+      expect(FightCamp.fromJson(edited('fightDate', null)), isNull);
+      expect(FightCamp.fromJson(edited('category', 'street')), isNull);
+      expect(FightCamp.fromJson(edited('weightLimitKg', '70')), isNull);
+      expect(FightCamp.fromJson(edited('weightLimitKg', 400)), isNull);
+      expect(FightCamp.fromJson(edited('weighInDate', '2026-12-13')), isNull);
+      expect(FightCamp.fromJson(edited('campWeeks', 40)), isNull);
+    });
+
+    test('an older document without optional fields still loads', () {
+      final json = camp().toJson()
+        ..remove('weighInDate')
+        ..remove('campWeeks');
+      final loaded = FightCamp.fromJson(json)!;
+      expect(loaded.weighInDate, loaded.fightDate);
+      expect(loaded.campWeeks, FightCamp.defaultCampWeeks);
+    });
+
+    test('counts camp weeks from the start of camp', () {
+      final c = camp(); // 10 weeks, weigh-in 11 Dec
+      final weighIn = DateTime(2026, 12, 11);
+      expect(c.campWeekOn(addDays(weighIn, -71)), isNull);
+      expect(c.campWeekOn(addDays(weighIn, -70)), 1);
+      expect(c.campWeekOn(addDays(weighIn, -64)), 1);
+      expect(c.campWeekOn(addDays(weighIn, -63)), 2);
+      expect(c.campWeekOn(addDays(weighIn, -8)), 9);
+      expect(c.campWeekOn(addDays(weighIn, -7)), isNull);
+    });
+
+    test('numbers fight-week days up to the weigh-in', () {
+      final c = camp();
+      final weighIn = DateTime(2026, 12, 11);
+      expect(c.fightWeekDayOn(addDays(weighIn, -8)), isNull);
+      expect(c.fightWeekDayOn(addDays(weighIn, -7)), 1);
+      expect(c.fightWeekDayOn(addDays(weighIn, -1)), 7);
+      expect(c.fightWeekDayOn(weighIn), 8);
+      expect(c.fightWeekDayOn(DateTime(2026, 12, 12)), isNull);
+    });
+  });
 }

@@ -24,6 +24,10 @@ import 'features/edge_fuel/data/recipe_catalog_repository.dart';
 import 'features/edge_fuel/data/firestore_edge_fuel_repository.dart';
 import 'features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import 'features/fight_camp/data/fight_camp_repository.dart';
+import 'features/fight_camp/data/firestore_fight_camp_repository.dart';
+import 'features/fight_camp/data/in_memory_fight_camp_repository.dart';
+import 'features/fight_camp/presentation/fight_camp_controller.dart';
 import 'firebase_options.dart';
 import 'notifications/local_reminder_gateway.dart';
 import 'notifications/reminder_gateway.dart';
@@ -127,6 +131,7 @@ Future<AppDependencies> _initializeProductionDependencies() async {
     authRepo: authRepo,
     dataRepo: FirestoreDataRepository(),
     edgeFuelRepo: FirestoreEdgeFuelRepository(),
+    fightCampRepo: FirestoreFightCampRepository(),
     edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
     billingGateway: RevenueCatBillingGateway(),
     reminderGateway: LocalReminderGateway(),
@@ -149,6 +154,7 @@ class AppDependencies {
   final AuthRepository authRepo;
   final DataRepository dataRepo;
   final EdgeFuelRepository edgeFuelRepo;
+  final FightCampRepository fightCampRepo;
   final EdgeFuelAiGateway edgeFuelAiGateway;
   final BillingGateway billingGateway;
   final ReminderGateway reminderGateway;
@@ -161,6 +167,7 @@ class AppDependencies {
     required this.authRepo,
     required this.dataRepo,
     required this.edgeFuelRepo,
+    required this.fightCampRepo,
     required this.edgeFuelAiGateway,
     required this.billingGateway,
     required this.reminderGateway,
@@ -175,6 +182,7 @@ class FighterEdgeApp extends StatelessWidget {
   final AuthRepository authRepo;
   final DataRepository? dataRepo;
   final EdgeFuelRepository? edgeFuelRepo;
+  final FightCampRepository? fightCampRepo;
   final EdgeFuelAiGateway? edgeFuelAiGateway;
   final FoodCatalogRepository? foodCatalogRepo;
   final RecipeCatalogRepository? recipeCatalogRepo;
@@ -192,6 +200,7 @@ class FighterEdgeApp extends StatelessWidget {
     required this.authRepo,
     this.dataRepo,
     this.edgeFuelRepo,
+    this.fightCampRepo,
     this.edgeFuelAiGateway,
     this.foodCatalogRepo,
     this.recipeCatalogRepo,
@@ -210,6 +219,7 @@ class FighterEdgeApp extends StatelessWidget {
           authRepo: dependencies.authRepo,
           dataRepo: dependencies.dataRepo,
           edgeFuelRepo: dependencies.edgeFuelRepo,
+          fightCampRepo: dependencies.fightCampRepo,
           edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
           billingGateway: dependencies.billingGateway,
           reminderGateway: dependencies.reminderGateway,
@@ -222,6 +232,8 @@ class FighterEdgeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
+    final resolvedFightCampRepo =
+        fightCampRepo ?? InMemoryFightCampRepository();
     final resolvedAiGateway =
         edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
     // The catalogs are bundled assets, so the asset-backed implementations are
@@ -266,6 +278,7 @@ class FighterEdgeApp extends StatelessWidget {
           },
         ),
         Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
+        Provider<FightCampRepository>.value(value: resolvedFightCampRepo),
         Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
         Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
         Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
@@ -280,6 +293,18 @@ class FighterEdgeApp extends StatelessWidget {
               StreakController(clock: () => context.read<AppState>().now),
           update: (context, auth, streak) => (streak ??
               StreakController(clock: () => context.read<AppState>().now))
+            ..setUser(auth.user?.id),
+        ),
+        ChangeNotifierProxyProvider<AuthController, FightCampController>(
+          create: (_) => FightCampController(
+            repository: resolvedFightCampRepo,
+            errorReporter: errorReporter ?? const NoopErrorReporter(),
+          ),
+          update: (_, auth, controller) => (controller ??
+              FightCampController(
+                repository: resolvedFightCampRepo,
+                errorReporter: errorReporter ?? const NoopErrorReporter(),
+              ))
             ..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(

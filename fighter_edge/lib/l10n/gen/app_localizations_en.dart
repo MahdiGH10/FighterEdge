@@ -1142,4 +1142,198 @@ class LEn extends L {
   @override
   String get learningPractiseLast =>
       'This is the last drill in your path. Keep practising, then mark it Sharp when you are ready.';
+
+  @override
+  String get fightAddTitle => 'Add your next fight';
+
+  @override
+  String get fightAddSubtitle => 'Countdown and a safe weight path';
+
+  @override
+  String get fightSetupTitle => 'Your fight';
+
+  @override
+  String get fightDateLabel => 'Fight date';
+
+  @override
+  String get fightDatePick => 'Choose date';
+
+  @override
+  String get fightWeighInLabel => 'Weigh-in';
+
+  @override
+  String get fightWeighInSameDay => 'Same day';
+
+  @override
+  String get fightWeighInDayBefore => 'Day before';
+
+  @override
+  String get fightWeighInTwoDays => '2 days before';
+
+  @override
+  String fightLimitLabel(String unit) {
+    return 'Weight limit ($unit)';
+  }
+
+  @override
+  String fightLimitError(String min, String max, String unit) {
+    return 'Enter a limit between $min and $max $unit.';
+  }
+
+  @override
+  String get fightCategoryLabel => 'Competition';
+
+  @override
+  String get fightCategoryWhy =>
+      'This sets how much can safely come off in the final days.';
+
+  @override
+  String get fightCategoryGrappling => 'Wrestling and grappling';
+
+  @override
+  String get fightCategoryGrapplingHint => 'Wrestling, BJJ, ADCC';
+
+  @override
+  String get fightCategoryAmateur => 'Amateur striking';
+
+  @override
+  String get fightCategoryAmateurHint => 'Amateur boxing, amateur Muay Thai';
+
+  @override
+  String get fightCategoryOlympic => 'Olympic combat sports';
+
+  @override
+  String get fightCategoryOlympicHint => 'Judo, Olympic boxing, taekwondo';
+
+  @override
+  String get fightCategoryPro => 'Professional';
+
+  @override
+  String get fightCategoryProHint => 'Pro MMA, boxing, kickboxing, Muay Thai';
+
+  @override
+  String get fightCampLabel => 'Camp length';
+
+  @override
+  String fightCampWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '1 week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fightPathTitle => 'Your weight path';
+
+  @override
+  String get fightPathNow => 'Now';
+
+  @override
+  String get fightPathLimit => 'Limit';
+
+  @override
+  String get fightPathToGo => 'To go';
+
+  @override
+  String fightPathOnPace(String rate, String entry, String unit) {
+    return 'On pace: lose $rate $unit a week to reach $entry $unit by fight week.';
+  }
+
+  @override
+  String get fightPathHold =>
+      'Within reach: hold your weight, and fight-week eating covers the rest.';
+
+  @override
+  String fightPathSupervision(String lightest, String unit) {
+    return 'Only possible with a water cut in the last days, which needs a coach or dietitian. Your camp is planned at the fastest safe pace. On food alone, the lightest limit you can make by then is $lightest $unit.';
+  }
+
+  @override
+  String fightPathNotSafe(String lightest, String unit) {
+    return 'Not safe by this date. The lightest limit you can make safely is $lightest $unit: choose a heavier class or a later fight.';
+  }
+
+  @override
+  String get fightPathAtWeight => 'You\'re at weight. Hold steady.';
+
+  @override
+  String get fightPathNeedsWeight =>
+      'Log a weigh-in this week to see your path.';
+
+  @override
+  String get fightPathAdultsOnly =>
+      'Weight cut plans are for adults. Plan your weight with your coach.';
+
+  @override
+  String get fightPathSource =>
+      'Limits from the International Society of Sports Nutrition (2025).';
+
+  @override
+  String get fightSave => 'Save fight';
+
+  @override
+  String get fightRemove => 'Remove fight';
+
+  @override
+  String get fightRemoveTitle => 'Remove this fight?';
+
+  @override
+  String get fightRemoveBody =>
+      'Your countdown and weight path are cleared. You can add a fight again any time.';
+
+  @override
+  String fightNight(String date) {
+    return 'Fight night · $date';
+  }
+
+  @override
+  String fightDaysToGo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days to go',
+      one: 'day to go',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fightPhaseCamp(int week, int total) {
+    return 'Camp · week $week of $total';
+  }
+
+  @override
+  String fightPhaseBeforeCamp(String date) {
+    return 'Camp starts $date';
+  }
+
+  @override
+  String fightPhaseFightWeek(int day) {
+    return 'Fight week · day $day of 7';
+  }
+
+  @override
+  String get fightPhaseWeighIn => 'Weigh-in today';
+
+  @override
+  String get fightPhaseRefuel => 'Weighed in: refuel';
+
+  @override
+  String get fightPhaseFightDay => 'Fight day';
+
+  @override
+  String get fightDone => 'Fight done. Add your next one.';
+
+  @override
+  String get fightEdit => 'Edit fight';
+
+  @override
+  String get fightPathShortSupervision =>
+      'Needs a supervised water cut. Tap to review.';
+
+  @override
+  String get fightPathShortNotSafe => 'Not safe by this date. Tap to review.';
 }

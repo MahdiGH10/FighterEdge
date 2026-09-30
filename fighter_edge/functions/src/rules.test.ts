@@ -80,6 +80,39 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
     );
   });
 
+  const fight = {
+    fightDate: "2026-12-12",
+    weighInDate: "2026-12-11",
+    weightLimitKg: 70.3,
+    category: "professional",
+    campWeeks: 8,
+  };
+  const fightDoc = (uid: string, db: ReturnType<typeof ownerDb>) =>
+    db.collection("users").doc(uid).collection("fightCamp").doc("current");
+
+  it("lets an athlete save, read and remove their own fight", async () => {
+    const db = ownerDb("alice");
+    await assertSucceeds(fightDoc("alice", db).set(fight));
+    await assertSucceeds(fightDoc("alice", db).get());
+    await assertSucceeds(fightDoc("alice", db).delete());
+  });
+
+  it("keeps everyone else out of an athlete's fight", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore()
+        .collection("users").doc("alice")
+        .collection("fightCamp").doc("current").set(fight);
+    });
+    const mallory = ownerDb("mallory");
+    await assertFails(fightDoc("alice", mallory).get());
+    await assertFails(fightDoc("alice", mallory).set({ ...fight, weightLimitKg: 99 }));
+    const anon = env.unauthenticatedContext().firestore();
+    await assertFails(
+      anon.collection("users").doc("alice")
+        .collection("fightCamp").doc("current").get(),
+    );
+  });
+
   // --- Billing is server-owned (audit T-3): the client must never be able
   // to grant, extend, or fake a paid entitlement, only the Admin SDK.
 
