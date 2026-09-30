@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../l10n/decimal_format.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../state/app_state.dart';
 import '../../../../theme/app_accessibility.dart';
@@ -43,6 +44,8 @@ class _FightSetupScreenState extends State<FightSetupScreen> {
   final _limit = TextEditingController();
   bool _limitTouched = false;
   FightCamp? _existing;
+  double? _existingLimitDisplay;
+  bool _limitPrefilled = false;
 
   @override
   void initState() {
@@ -55,8 +58,21 @@ class _FightSetupScreenState extends State<FightSetupScreen> {
       _weighInLead = daysBetween(existing.weighInDate, existing.fightDate);
       _category = existing.category;
       _campWeeks = existing.campWeeks;
+      _existingLimitDisplay = units.displayWeight(existing.weightLimitKg);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Localizations is not reachable until dependencies are wired up, so
+    // the locale-formatted pre-fill happens here, not in initState; the
+    // flag keeps a later dependency change from overwriting a typed edit.
+    final limit = _existingLimitDisplay;
+    if (!_limitPrefilled && limit != null) {
+      _limitPrefilled = true;
       _limit.text =
-          units.displayWeight(existing.weightLimitKg).toStringAsFixed(1);
+          formatFixedDecimal(limit, Localizations.localeOf(context).toString());
     }
   }
 

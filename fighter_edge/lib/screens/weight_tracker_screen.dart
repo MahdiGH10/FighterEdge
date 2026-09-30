@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
+import '../l10n/decimal_format.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../models/weight_entry.dart';
 import '../routing/app_navigation.dart';
@@ -128,18 +129,22 @@ class _WeighInDialog extends StatefulWidget {
 }
 
 class _WeighInDialogState extends State<_WeighInDialog> {
-  late final TextEditingController _controller;
+  final _controller = TextEditingController();
   String? _error;
+  bool _prefilled = false;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Localizations is not reachable until dependencies are wired up, so
+    // the locale-formatted pre-fill happens here, not in initState; the
+    // flag keeps a later dependency change from overwriting a typed edit.
     final s = widget.state;
-    _controller = TextEditingController(
-      text: s.latestWeight == 0
-          ? ''
-          : s.displayWeight(s.latestWeight).toStringAsFixed(1),
-    );
+    if (!_prefilled && s.latestWeight != 0) {
+      _prefilled = true;
+      _controller.text = formatFixedDecimal(s.displayWeight(s.latestWeight),
+          Localizations.localeOf(context).toString());
+    }
   }
 
   @override
@@ -221,13 +226,15 @@ class _WeightView extends StatelessWidget {
     required this.goalKg,
   });
 
-  String _fmt(double kg) => state.displayWeight(kg).toStringAsFixed(1);
+  String _fmt(double kg, String locale) =>
+      formatFixedDecimal(state.displayWeight(kg), locale);
 
   @override
   Widget build(BuildContext context) {
     // Read once: the getter is O(n) per call (audit P-4), and the history
     // list below used to call it twice per row inside its loop.
     final history = state.weightHistoryDesc;
+    final locale = Localizations.localeOf(context).toString();
     return ListView(
       padding: const EdgeInsets.fromLTRB(
           Insets.lg, Insets.none, Insets.lg, Insets.bottomClearance),
@@ -249,12 +256,12 @@ class _WeightView extends StatelessWidget {
                     else
                       NumberHero(
                         tag: weightHeroTag,
-                        text: _fmt(state.latestWeight),
+                        text: _fmt(state.latestWeight, locale),
                         style: AppType.display(),
                         // Counts when a new weigh-in lands; static otherwise.
                         child: AnimatedCount(
                           value: state.displayWeight(state.latestWeight),
-                          formatter: (v) => v.toStringAsFixed(1),
+                          formatter: (v) => formatFixedDecimal(v, locale),
                           style: AppType.display(),
                         ),
                       ),
@@ -282,7 +289,7 @@ class _WeightView extends StatelessWidget {
                     const SizedBox(width: Insets.xs),
                     Flexible(
                       child: Text(
-                          '${_fmt(delta.abs())} ${state.weightUnitLabel} '
+                          '${_fmt(delta.abs(), locale)} ${state.weightUnitLabel} '
                           'vs last weigh-in',
                           textAlign: TextAlign.center,
                           style: AppType.subhead(
@@ -303,8 +310,9 @@ class _WeightView extends StatelessWidget {
             Expanded(
               child: StatCard(
                 label: '7-day avg',
-                value:
-                    state.weights.isEmpty ? '—' : _fmt(state.sevenDayAverage),
+                value: state.weights.isEmpty
+                    ? '—'
+                    : _fmt(state.sevenDayAverage, locale),
                 unit: state.weightUnitLabel,
               ),
             ),
@@ -331,7 +339,7 @@ class _WeightView extends StatelessWidget {
                         height: 1, thickness: 1, color: AppColors.border),
                   _HistoryRow(
                     entry: history[i],
-                    display: _fmt(history[i].kg),
+                    display: _fmt(history[i].kg, locale),
                     unit: state.weightUnitLabel,
                   ),
                 ],
@@ -527,13 +535,14 @@ class _GoalCard extends StatelessWidget {
     // Within a tenth of the unit counts as there; a scale is not that precise.
     final atGoal = state.displayWeight(gap.abs()) < 0.1;
     final unit = state.weightUnitLabel;
+    final locale = Localizations.localeOf(context).toString();
     return StatCard(
       label: 'Goal gap',
-      value: state.displayWeight(gap.abs()).toStringAsFixed(1),
+      value: formatFixedDecimal(state.displayWeight(gap.abs()), locale),
       unit: unit,
       delta: atGoal
           ? 'At goal'
-          : 'To ${state.displayWeight(goal).toStringAsFixed(1)} $unit',
+          : 'To ${formatFixedDecimal(state.displayWeight(goal), locale)} $unit',
       deltaColor: atGoal ? AppColors.positive : AppColors.warning,
       deltaIcon: atGoal ? Icons.check_circle : Icons.flag_outlined,
     );

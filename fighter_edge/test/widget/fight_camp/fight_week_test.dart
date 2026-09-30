@@ -164,6 +164,7 @@ void main() {
     final copy = FightCampCopy(lookupL(const Locale('de')), state, 'de');
     expect(copy.fluidRange(1, 1.5), '1–1,5 L');
     expect(copy.gramsRange(1290, 2510), '1.290–2.510 g');
+    expect(copy.weight(79.5), '79,5', reason: 'not "79.5"');
   });
 
   testWidgets('in fight week the dashboard countdown opens fight week',
