@@ -21,6 +21,7 @@ import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_typography.dart';
 import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/empty_state.dart';
+import '../../../../widgets/grouped_list.dart';
 import '../../../../widgets/premium_effects.dart';
 import '../../../../widgets/press_scale.dart';
 import '../../../../widgets/primary_button.dart';
@@ -190,6 +191,11 @@ class _CoachBodyState extends State<_CoachBody> {
         Expanded(
           child: coach.entries.isEmpty
               ? _CoachIntro(
+                  hasFight: fightCamp.camp != null,
+                  onAsk: (question) {
+                    _input.text = question;
+                    _send(coach, target, edgeFuel, today());
+                  },
                   fuelMatch: fuelMatch,
                   matchIsStale: matchIsStale,
                   onBuildFuelMatch: buildFuelMatch,
@@ -328,7 +334,22 @@ class _CoachIntro extends StatelessWidget {
   final bool matchIsStale;
   final VoidCallback onBuildFuelMatch;
 
+  /// Sends a suggested question as if the athlete had typed it.
+  final ValueChanged<String> onAsk;
+
+  /// Whether a fight is set, so the weight question makes sense.
+  final bool hasFight;
+
+  static const _questions = [
+    'What should I eat before training?',
+    'What should my next meal look like?',
+    'How is my training week going?',
+  ];
+  static const _fightQuestion = 'Am I on track to make weight?';
+
   const _CoachIntro({
+    required this.onAsk,
+    required this.hasFight,
     required this.fuelMatch,
     required this.matchIsStale,
     required this.onBuildFuelMatch,
@@ -345,13 +366,20 @@ class _CoachIntro extends StatelessWidget {
         Text('Talk to your coach', style: AppType.title1()),
         const SizedBox(height: Insets.xs),
         Text(
-          'Ask anything about your plan or your day — "why is my carb '
-          'target lower today?", "what should I eat before training?". '
-          'Answers use only your plan, today\'s log, your training, your '
-          'weight trend and your fight camp.',
+          'Tap a question or type your own. Answers use only your plan, '
+          "today's log, your training, your weight trend and your fight "
+          'camp.',
           style:
               AppType.callout(color: AppAccessibility.textSecondary(context)),
         ),
+        const SizedBox(height: Insets.lg),
+        GroupedList(children: [
+          for (final question in [
+            if (hasFight) _fightQuestion,
+            ..._questions,
+          ])
+            GroupedRow(title: question, onTap: () => onAsk(question)),
+        ]),
         const SizedBox(height: Insets.lg),
         _FuelMatchPanel(
           controller: fuelMatch,

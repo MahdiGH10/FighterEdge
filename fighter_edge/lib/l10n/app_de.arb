@@ -444,8 +444,8 @@
   "settingsProPlan": "Pro",
   "settingsFreePlan": "Kostenlos",
   "dashboardEffort": "Anstrengung {rating}/10",
-  "paywallPlainTitle": "Trainingshilfen mit Pro",
-  "paywallPlainSubtitle": "Tägliches Coaching, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.",
+  "paywallPlainTitle": "Deine Ecke, jeden Tag",
+  "paywallPlainSubtitle": "Ein Abo. Alles in Fighter Edge.",
   "fuelRecipesTitle": "Rezepte für deinen Tag",
   "@dashboardEffort": {
     "placeholders": {
@@ -454,15 +454,38 @@
       }
     }
   },
-  "paywallMonthly": "Monatlich · {price}",
+  "paywallBenefitBriefTitle": "Tägliches Ecken-Briefing",
+  "paywallBenefitBriefBody": "Drei Zeilen täglich zu Training, Ernährung und Gewicht, plus ein Coach für deine Fragen.",
+  "paywallBenefitRecipesTitle": "Alle Rezepte",
+  "paywallBenefitRecipesBody": "Jedes Rezept, auf deine Portionen skaliert und auf deine Allergene geprüft.",
+  "paywallBenefitDrillsTitle": "Alle Drills",
+  "paywallBenefitDrillsBody": "Jeder Drill für Striking, Ringen, BJJ und Clinch, mit Trainingsanleitung.",
+  "paywallBenefitCuesTitle": "Ecken-Tipps",
+  "paywallBenefitCuesBody": "Ein taktischer und ein Erholungs-Tipp in jeder Pause des Runden-Timers.",
+  "paywallAnnualPlan": "Jahresabo",
+  "paywallMonthlyPlan": "Monatsabo",
+  "paywallBestValue": "Bester Preis",
+  "paywallContinueAnnual": "Weiter mit Jahresabo",
+  "paywallContinueMonthly": "Weiter mit Monatsabo",
+  "paywallTrust": "Sichere Zahlung über Google Play oder den App Store. Jederzeit im Store-Konto kündbar.",
+  "paywallRestore": "Käufe wiederherstellen",
+  "paywallRefreshStatus": "Kaufstatus aktualisieren",
+  "paywallManage": "Abo verwalten oder kündigen",
+  "paywallOnPro": "Du hast Pro",
+  "paywallOnProRefresh": "Status aktualisieren",
+  "paywallLoading": "Store-Preise werden geladen…",
+  "paywallSync": "Dein Store-Kauf ist erkannt. Pro wird freigeschaltet, sobald der sichere Kontoabgleich fertig ist.",
+  "paywallSoonTitle": "Pro startet bald",
+  "paywallNoPaymentToday": "Heute keine Zahlung. Vor jeder Abbuchung fragen wir noch einmal.",
+  "paywallPurchaseActive": "Pro ist in deinem Konto aktiv.",
+  "paywallPurchasePending": "Kauf erhalten. Wir bestätigen deinen Pro-Zugang sicher.",
+  "paywallRestored": "Dein Pro-Zugang ist wiederhergestellt.",
+  "paywallNothingToRestore": "Bisher wurde kein aktiver Pro-Zugang gefunden.",
+  "paywallPerYear": "{price} / Jahr",
+  "paywallPerMonth": "{price} / Monat",
+  "paywallAboutPerMonth": "Etwa {price} / Monat",
+  "paywallSave": "Spare etwa {percent} %",
   "fuelMealsLogged": "Mahlzeiten erfasst · {eaten}/{total}",
-  "@paywallMonthly": {
-    "placeholders": {
-      "price": {
-        "type": "String"
-      }
-    }
-  },
   "@fuelMealsLogged": {
     "placeholders": {
       "eaten": {

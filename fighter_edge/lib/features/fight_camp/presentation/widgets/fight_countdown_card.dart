@@ -246,8 +246,6 @@ class AddFightRow extends StatelessWidget {
           subtitle: l.fightAddSubtitle,
           leading: Icon(Icons.sports_mma_outlined,
               size: IconSizes.row, color: AppAccessibility.accentText(context)),
-          trailing: Icon(Icons.chevron_right,
-              color: AppAccessibility.textMuted(context)),
           onTap: () => openFightSetup(context),
         ),
       ]),

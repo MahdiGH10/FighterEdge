@@ -6,6 +6,7 @@ import 'package:fighter_edge/features/fight_camp/presentation/screens/fight_setu
 import 'package:fighter_edge/screens/dashboard_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
+import 'package:fighter_edge/features/fight_camp/presentation/widgets/fight_countdown_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -110,6 +111,14 @@ void main() {
     expect(find.byType(FightSetupScreen), findsNothing);
     expect(find.textContaining('Fight night'), findsNothing);
     expect(find.text('Add your next fight'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AddFightRow),
+        matching: find.byIcon(Icons.chevron_right),
+      ),
+      findsOneWidget,
+      reason: 'one arrow, not two',
+    );
     expect(await fights.watchFight(userId).first, isNull);
   });
 

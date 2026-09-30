@@ -512,12 +512,16 @@ class _TodayView extends StatelessWidget {
               _Macro(l.nutritionFats, edgeFuel.consumedFats,
                   edgeFuel.targetFats, AppColors.fats),
               const SizedBox(height: Insets.md),
-              TextButton(
+              // Accent colour and an arrow, so it reads as a link and not
+              // as a caption under the macros.
+              TextButton.icon(
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.textSecondary,
+                    foregroundColor: AppAccessibility.accentText(context),
                     minimumSize:
                         const Size.fromHeight(AppAccessibility.minTouchTarget),
                   ),
+                  iconAlignment: IconAlignment.end,
+                  icon: const Icon(Icons.chevron_right, size: IconSizes.row),
                   onPressed: () => AppNavigation.push(
                       context,
                       edgeFuel.hasCompletedSetup
@@ -526,7 +530,7 @@ class _TodayView extends StatelessWidget {
                       fallbackBuilder: (_) => edgeFuel.hasCompletedSetup
                           ? const EdgeFuelPlanScreen()
                           : const EdgeFuelSetupScreen()),
-                  child: Text(
+                  label: Text(
                       hasTarget ? l.nutritionViewPlan : l.dashboardSetFuel)),
               if (FuelWhatIsLeft.appliesTo(edgeFuel))
                 FuelWhatIsLeft(edgeFuel: edgeFuel, compact: true),

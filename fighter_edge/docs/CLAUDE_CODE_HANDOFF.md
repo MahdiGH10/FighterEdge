@@ -2,7 +2,7 @@
 
 ## START HERE: state as of 2026-09-28
 
-**Eleven stacked PRs, none merged.** Merge in order, retargeting each to
+**Twelve stacked PRs, none merged.** Merge in order, retargeting each to
 `main` after the one before it lands:
 
 | PR | Branch | What |
@@ -18,6 +18,7 @@
 | #19 | `feat/corner-brief` | Daily Corner Brief on Home (plan step 3): a free calculated line, and three coach-written lines for Pro |
 | #20 | `feat/groq-provider` | Optional Groq provider (`AI_PROVIDER=groq`) with a model fallback chain; needs the `GROQ_API_KEY` secret set before merge |
 | #21 | `feat/rewarded-ads` | Rewarded video for free accounts: one a day unlocks that day's full Corner Brief. Test ads only until AdMob is set up |
+| #22 | `feat/ux-polish` | Paywall redesign (benefits, both plans and one buy button on one phone screen; fully EN/DE), tappable coach questions, small Home/Fuel/Plan fixes |
 
 **CI:** all 7 checks green on #10, #12, #13, and now #15 (the Android
 emulator job stalled once on #15's first run — 35 minutes, no output — and
@@ -25,6 +26,24 @@ was rerun; the same known intermittent hang as #11/#14, not a test
 failure). #11 and #14 stalled once each too and passed clean on rerun.
 #16 and #17 run the same workflow; watch their emulator job for the same
 pattern before assuming a real failure.
+
+### UX pass (PR #22)
+
+From a visual review of every main screen rendered at phone size.
+
+- **Paywall:** was two benefit lists, an internal "Founding Pro preview" card
+  and the price more than a screen down. Now one benefit card (the four gated
+  features, the one that led here first), two selectable plan tiles (annual
+  preselected, "Best value", monthly equivalent and saving), one buy button,
+  a trust line, then the renewal disclosure. Everything through the button
+  fits 390x844 in English and German. All paywall text is localized; the
+  monthly equivalent uses the locale's currency format.
+- **Coach:** three suggested questions (four with a fight set) send with one
+  tap instead of being example text to retype.
+- **Small fixes:** one arrow, not two, on Home's "Add your next fight";
+  "High confidence" on the plan is green, not red; the Fuel tab's "View fuel
+  plan" reads as a link.
+- No free trial is promised: the store products define that, and none exists.
 
 ### Rewarded videos (PR #21)
 

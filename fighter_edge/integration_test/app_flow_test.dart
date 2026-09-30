@@ -114,16 +114,20 @@ void main() {
     ));
     await tester.pumpAndSettle();
     await _tapVisible(tester, find.text('Upgrade'));
-    expect(find.text('Training tools with Pro'), findsOneWidget);
+    expect(find.text('Your corner, every day'), findsOneWidget);
 
     // 8. A real store purchase completes, but the client never grants Pro:
     // only the trusted webhook does (a non-negotiable rule, not just a UI
     // choice — this is the property most worth an on-device regression).
     // A single pump (not pumpAndSettle) checks the state right after the
     // tap, before anything else runs.
-    final monthlyPlan = find.text('Monthly · \$7.99');
-    await _ensureVisible(tester, monthlyPlan);
-    await tester.tap(monthlyPlan);
+    // Picking a plan only selects it; the button buys the selected one.
+    await _tapVisible(tester, find.text('Monthly plan'));
+    final buy = find.text('Continue with monthly plan');
+    await _ensureVisible(tester, buy);
+    await tester.ensureVisible(buy);
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(buy);
     await tester.pump();
     expect(billing.purchaseCount, 1);
     expect(repo.currentUser!.isPro, isFalse);
@@ -175,6 +179,10 @@ Future<void> _retrying(Future<void> Function() action) async {
 Future<void> _tapVisible(WidgetTester tester, Finder finder) =>
     _retrying(() async {
       await _ensureVisible(tester, finder);
+      // scrollUntilVisible stops as soon as the widget exists, which on a
+      // 320x640 screen can leave it half off the edge; bring all of it in.
+      await tester.ensureVisible(finder);
+      await tester.pumpAndSettle();
       // A brief real-time pause before tapping — twice, a tap right after
       // scrolling missed its target the instant the emulator's software
       // (SwiftShader) renderer logged a "Failed to find ColorBuffer" error,

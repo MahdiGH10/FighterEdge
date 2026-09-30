@@ -1049,18 +1049,122 @@ class LDe extends L {
   }
 
   @override
-  String get paywallPlainTitle => 'Trainingshilfen mit Pro';
+  String get paywallPlainTitle => 'Deine Ecke, jeden Tag';
 
   @override
-  String get paywallPlainSubtitle =>
-      'Tägliches Coaching, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.';
+  String get paywallPlainSubtitle => 'Ein Abo. Alles in Fighter Edge.';
 
   @override
   String get fuelRecipesTitle => 'Rezepte für deinen Tag';
 
   @override
-  String paywallMonthly(String price) {
-    return 'Monatlich · $price';
+  String get paywallBenefitBriefTitle => 'Tägliches Ecken-Briefing';
+
+  @override
+  String get paywallBenefitBriefBody =>
+      'Drei Zeilen täglich zu Training, Ernährung und Gewicht, plus ein Coach für deine Fragen.';
+
+  @override
+  String get paywallBenefitRecipesTitle => 'Alle Rezepte';
+
+  @override
+  String get paywallBenefitRecipesBody =>
+      'Jedes Rezept, auf deine Portionen skaliert und auf deine Allergene geprüft.';
+
+  @override
+  String get paywallBenefitDrillsTitle => 'Alle Drills';
+
+  @override
+  String get paywallBenefitDrillsBody =>
+      'Jeder Drill für Striking, Ringen, BJJ und Clinch, mit Trainingsanleitung.';
+
+  @override
+  String get paywallBenefitCuesTitle => 'Ecken-Tipps';
+
+  @override
+  String get paywallBenefitCuesBody =>
+      'Ein taktischer und ein Erholungs-Tipp in jeder Pause des Runden-Timers.';
+
+  @override
+  String get paywallAnnualPlan => 'Jahresabo';
+
+  @override
+  String get paywallMonthlyPlan => 'Monatsabo';
+
+  @override
+  String get paywallBestValue => 'Bester Preis';
+
+  @override
+  String get paywallContinueAnnual => 'Weiter mit Jahresabo';
+
+  @override
+  String get paywallContinueMonthly => 'Weiter mit Monatsabo';
+
+  @override
+  String get paywallTrust =>
+      'Sichere Zahlung über Google Play oder den App Store. Jederzeit im Store-Konto kündbar.';
+
+  @override
+  String get paywallRestore => 'Käufe wiederherstellen';
+
+  @override
+  String get paywallRefreshStatus => 'Kaufstatus aktualisieren';
+
+  @override
+  String get paywallManage => 'Abo verwalten oder kündigen';
+
+  @override
+  String get paywallOnPro => 'Du hast Pro';
+
+  @override
+  String get paywallOnProRefresh => 'Status aktualisieren';
+
+  @override
+  String get paywallLoading => 'Store-Preise werden geladen…';
+
+  @override
+  String get paywallSync =>
+      'Dein Store-Kauf ist erkannt. Pro wird freigeschaltet, sobald der sichere Kontoabgleich fertig ist.';
+
+  @override
+  String get paywallSoonTitle => 'Pro startet bald';
+
+  @override
+  String get paywallNoPaymentToday =>
+      'Heute keine Zahlung. Vor jeder Abbuchung fragen wir noch einmal.';
+
+  @override
+  String get paywallPurchaseActive => 'Pro ist in deinem Konto aktiv.';
+
+  @override
+  String get paywallPurchasePending =>
+      'Kauf erhalten. Wir bestätigen deinen Pro-Zugang sicher.';
+
+  @override
+  String get paywallRestored => 'Dein Pro-Zugang ist wiederhergestellt.';
+
+  @override
+  String get paywallNothingToRestore =>
+      'Bisher wurde kein aktiver Pro-Zugang gefunden.';
+
+  @override
+  String paywallPerYear(String price) {
+    return '$price / Jahr';
+  }
+
+  @override
+  String paywallPerMonth(String price) {
+    return '$price / Monat';
+  }
+
+  @override
+  String paywallAboutPerMonth(String price) {
+    return 'Etwa $price / Monat';
+  }
+
+  @override
+  String paywallSave(int percent) {
+    return 'Spare etwa $percent %';
   }
 
   @override

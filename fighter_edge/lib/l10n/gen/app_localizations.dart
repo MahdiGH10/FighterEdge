@@ -1894,13 +1894,13 @@ abstract class L {
   /// No description provided for @paywallPlainTitle.
   ///
   /// In en, this message translates to:
-  /// **'Training tools with Pro'**
+  /// **'Your corner, every day'**
   String get paywallPlainTitle;
 
   /// No description provided for @paywallPlainSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Daily coaching, every drill and recipe, and cues between rounds.'**
+  /// **'One plan. Everything in Fighter Edge.'**
   String get paywallPlainSubtitle;
 
   /// No description provided for @fuelRecipesTitle.
@@ -1909,11 +1909,191 @@ abstract class L {
   /// **'Recipes for your day'**
   String get fuelRecipesTitle;
 
-  /// No description provided for @paywallMonthly.
+  /// No description provided for @paywallBenefitBriefTitle.
   ///
   /// In en, this message translates to:
-  /// **'Monthly · {price}'**
-  String paywallMonthly(String price);
+  /// **'Daily Corner Brief'**
+  String get paywallBenefitBriefTitle;
+
+  /// No description provided for @paywallBenefitBriefBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Three lines a day on training, fuel and weight, and a coach to ask.'**
+  String get paywallBenefitBriefBody;
+
+  /// No description provided for @paywallBenefitRecipesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Recipe Library'**
+  String get paywallBenefitRecipesTitle;
+
+  /// No description provided for @paywallBenefitRecipesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every recipe, scaled to your servings and checked for your allergens.'**
+  String get paywallBenefitRecipesBody;
+
+  /// No description provided for @paywallBenefitDrillsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Drill Library'**
+  String get paywallBenefitDrillsTitle;
+
+  /// No description provided for @paywallBenefitDrillsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every striking, wrestling, BJJ and clinch drill, with how to train it.'**
+  String get paywallBenefitDrillsBody;
+
+  /// No description provided for @paywallBenefitCuesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Corner Cues'**
+  String get paywallBenefitCuesTitle;
+
+  /// No description provided for @paywallBenefitCuesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A tactical and a recovery cue on every rest in the round timer.'**
+  String get paywallBenefitCuesBody;
+
+  /// No description provided for @paywallAnnualPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual plan'**
+  String get paywallAnnualPlan;
+
+  /// No description provided for @paywallMonthlyPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly plan'**
+  String get paywallMonthlyPlan;
+
+  /// No description provided for @paywallBestValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Best value'**
+  String get paywallBestValue;
+
+  /// No description provided for @paywallContinueAnnual.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with annual plan'**
+  String get paywallContinueAnnual;
+
+  /// No description provided for @paywallContinueMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with monthly plan'**
+  String get paywallContinueMonthly;
+
+  /// No description provided for @paywallTrust.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure checkout by Google Play or the App Store. Cancel anytime in your store account.'**
+  String get paywallTrust;
+
+  /// No description provided for @paywallRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get paywallRestore;
+
+  /// No description provided for @paywallRefreshStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh purchase status'**
+  String get paywallRefreshStatus;
+
+  /// No description provided for @paywallManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage or cancel subscription'**
+  String get paywallManage;
+
+  /// No description provided for @paywallOnPro.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on Pro'**
+  String get paywallOnPro;
+
+  /// No description provided for @paywallOnProRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh status'**
+  String get paywallOnProRefresh;
+
+  /// No description provided for @paywallLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading store plans…'**
+  String get paywallLoading;
+
+  /// No description provided for @paywallSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Your store purchase is recognized. Pro unlocks after the secure account sync completes.'**
+  String get paywallSync;
+
+  /// No description provided for @paywallSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro opens soon'**
+  String get paywallSoonTitle;
+
+  /// No description provided for @paywallNoPaymentToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment today. We will ask again before any charge.'**
+  String get paywallNoPaymentToday;
+
+  /// No description provided for @paywallPurchaseActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro is active on your account.'**
+  String get paywallPurchaseActive;
+
+  /// No description provided for @paywallPurchasePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase received. We are confirming your Pro access securely.'**
+  String get paywallPurchasePending;
+
+  /// No description provided for @paywallRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Pro access is restored.'**
+  String get paywallRestored;
+
+  /// No description provided for @paywallNothingToRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'No active Pro access was found yet.'**
+  String get paywallNothingToRestore;
+
+  /// No description provided for @paywallPerYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / year'**
+  String paywallPerYear(String price);
+
+  /// No description provided for @paywallPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / month'**
+  String paywallPerMonth(String price);
+
+  /// No description provided for @paywallAboutPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'About {price} / month'**
+  String paywallAboutPerMonth(String price);
+
+  /// No description provided for @paywallSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save about {percent}%'**
+  String paywallSave(int percent);
 
   /// No description provided for @fuelMealsLogged.
   ///

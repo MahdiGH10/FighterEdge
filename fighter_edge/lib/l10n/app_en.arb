@@ -502,8 +502,8 @@
   "settingsProPlan": "Pro",
   "settingsFreePlan": "Free",
   "dashboardEffort": "Effort {rating}/10",
-  "paywallPlainTitle": "Training tools with Pro",
-  "paywallPlainSubtitle": "Daily coaching, every drill and recipe, and cues between rounds.",
+  "paywallPlainTitle": "Your corner, every day",
+  "paywallPlainSubtitle": "One plan. Everything in Fighter Edge.",
   "fuelRecipesTitle": "Recipes for your day",
   "@dashboardEffort": {
     "placeholders": {
@@ -512,15 +512,42 @@
       }
     }
   },
-  "paywallMonthly": "Monthly · {price}",
+  "paywallBenefitBriefTitle": "Daily Corner Brief",
+  "paywallBenefitBriefBody": "Three lines a day on training, fuel and weight, and a coach to ask.",
+  "paywallBenefitRecipesTitle": "Full Recipe Library",
+  "paywallBenefitRecipesBody": "Every recipe, scaled to your servings and checked for your allergens.",
+  "paywallBenefitDrillsTitle": "Full Drill Library",
+  "paywallBenefitDrillsBody": "Every striking, wrestling, BJJ and clinch drill, with how to train it.",
+  "paywallBenefitCuesTitle": "Corner Cues",
+  "paywallBenefitCuesBody": "A tactical and a recovery cue on every rest in the round timer.",
+  "paywallAnnualPlan": "Annual plan",
+  "paywallMonthlyPlan": "Monthly plan",
+  "paywallBestValue": "Best value",
+  "paywallContinueAnnual": "Continue with annual plan",
+  "paywallContinueMonthly": "Continue with monthly plan",
+  "paywallTrust": "Secure checkout by Google Play or the App Store. Cancel anytime in your store account.",
+  "paywallRestore": "Restore purchases",
+  "paywallRefreshStatus": "Refresh purchase status",
+  "paywallManage": "Manage or cancel subscription",
+  "paywallOnPro": "You're on Pro",
+  "paywallOnProRefresh": "Refresh status",
+  "paywallLoading": "Loading store plans…",
+  "paywallSync": "Your store purchase is recognized. Pro unlocks after the secure account sync completes.",
+  "paywallSoonTitle": "Pro opens soon",
+  "paywallNoPaymentToday": "No payment today. We will ask again before any charge.",
+  "paywallPurchaseActive": "Pro is active on your account.",
+  "paywallPurchasePending": "Purchase received. We are confirming your Pro access securely.",
+  "paywallRestored": "Your Pro access is restored.",
+  "paywallNothingToRestore": "No active Pro access was found yet.",
+  "paywallPerYear": "{price} / year",
+  "@paywallPerYear": {"placeholders": {"price": {"type": "String"}}},
+  "paywallPerMonth": "{price} / month",
+  "@paywallPerMonth": {"placeholders": {"price": {"type": "String"}}},
+  "paywallAboutPerMonth": "About {price} / month",
+  "@paywallAboutPerMonth": {"placeholders": {"price": {"type": "String"}}},
+  "paywallSave": "Save about {percent}%",
+  "@paywallSave": {"placeholders": {"percent": {"type": "int"}}},
   "fuelMealsLogged": "Meals logged · {eaten}/{total}",
-  "@paywallMonthly": {
-    "placeholders": {
-      "price": {
-        "type": "String"
-      }
-    }
-  },
   "@fuelMealsLogged": {
     "placeholders": {
       "eaten": {

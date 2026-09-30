@@ -42,6 +42,7 @@ class FakeBillingGateway implements BillingGateway {
   Stream<BillingCustomerState> get customerInfoUpdates => _updates.stream;
   int purchaseCount = 0;
   int restoreCount = 0;
+  BillingProduct? lastPurchased;
 
   @override
   bool get isAvailable => true;
@@ -55,6 +56,7 @@ class FakeBillingGateway implements BillingGateway {
   @override
   Future<BillingCustomerState> purchase(BillingProduct product) async {
     purchaseCount++;
+    lastPurchased = product;
     return purchaseState;
   }
 
