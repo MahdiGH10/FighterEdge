@@ -23,6 +23,7 @@ const _routes = <String, String>{
   'fuel recipes': AppRoutes.fuelRecipes,
   'fight setup': AppRoutes.fightSetup,
   'fight path': AppRoutes.fightPath,
+  'fight week': AppRoutes.fightWeek,
 };
 
 void main() {

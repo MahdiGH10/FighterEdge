@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../state/app_state.dart';
 import '../domain/fight_camp.dart';
+import '../domain/fight_week_plan.dart';
 import '../domain/weight_cut_policy.dart';
 import '../domain/weight_path.dart';
 import 'fight_camp_controller.dart';
@@ -83,4 +84,62 @@ class FightCampCopy {
       CampPhase.postFight => l.fightDone,
     };
   }
+
+  /// What fight week asks for, in one message. Warnings reuse the weight
+  /// path's words, adjusted for a week that has already started.
+  String fightWeekMessage(FightWeekPlan plan) {
+    final path = plan.path;
+    final start = plan.cutStart;
+    return switch (plan.status) {
+      WeightPathStatus.needsSupervision =>
+        l.fightWeekSupervision(weight(path.lightestSafeLimitKg!), unit),
+      WeightPathStatus.notSafe => pathMessage(path),
+      WeightPathStatus.notSupported => l.fightPathAdultsOnly,
+      _ => switch (plan.cut) {
+          FightWeekCut.lowFibreAndCarbs when start != null =>
+            l.fightWeekCarbs(weight(plan.acuteLossKg), unit, date(start)),
+          FightWeekCut.lowFibre when start != null =>
+            l.fightWeekFibre(weight(plan.acuteLossKg), unit, date(start)),
+          FightWeekCut.notPlanned => l.fightWeekNeedsWeight,
+          _ => l.fightWeekNoCut,
+        },
+    };
+  }
+
+  String stepTitle(FightWeekStep step) => switch (step) {
+        FightWeekStep.eatToPlan => l.fightStepEat,
+        FightWeekStep.lowFibre => l.fightStepFibre,
+        FightWeekStep.lowerCarbs => l.fightStepCarbs,
+        FightWeekStep.weighIn => l.fightStepWeighIn,
+        FightWeekStep.refuel => l.fightStepRefuel,
+        FightWeekStep.fight => l.fightStepFight,
+      };
+
+  String stepBody(FightWeekStep step) => switch (step) {
+        FightWeekStep.eatToPlan => l.fightStepEatBody,
+        FightWeekStep.lowFibre =>
+          l.fightStepFibreBody(WeightCutPolicy.lowFibreMaxGramsPerDay),
+        FightWeekStep.lowerCarbs => l.fightStepCarbsBody,
+        FightWeekStep.weighIn => l.fightStepWeighInBody,
+        FightWeekStep.refuel => l.fightStepRefuelBody,
+        FightWeekStep.fight => l.fightStepFightBody,
+      };
+
+  /// A fluid range in the athlete's units: "1–1.5 L", "34–51 fl oz".
+  String fluidRange(double minLitres, double maxLitres) {
+    if (units.useMetricUnits) {
+      final f = NumberFormat('0.#', locale);
+      return '${f.format(minLitres)}–${f.format(maxLitres)} L';
+    }
+    const flOzPerLitre = 33.814;
+    return '${(minLitres * flOzPerLitre).round()}–'
+        '${(maxLitres * flOzPerLitre).round()} fl oz';
+  }
+
+  String grams(int grams) =>
+      '${NumberFormat.decimalPattern(locale).format(grams)} g';
+
+  String gramsRange(int min, int max) =>
+      '${NumberFormat.decimalPattern(locale).format(min)}–'
+      '${NumberFormat.decimalPattern(locale).format(max)} g';
 }

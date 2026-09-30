@@ -1372,4 +1372,144 @@ class LDe extends L {
   @override
   String get fightChartEmpty =>
       'Trag zwei Gewichte ein, um deinen Trend zu sehen.';
+
+  @override
+  String get fightWeekTitle => 'Kampfwoche';
+
+  @override
+  String get fightWeekOpen => 'Plan für die Kampfwoche';
+
+  @override
+  String fightWeekStarts(String date) {
+    return 'Beginnt am $date';
+  }
+
+  @override
+  String fightWeekWeighIn(String date) {
+    return 'Wiegen · $date';
+  }
+
+  @override
+  String fightWeekCarbs(String kg, String unit, String date) {
+    return 'Die Ernährung bringt in der Kampfwoche etwa $kg $unit: ab $date ballaststoffarm und weniger Kohlenhydrate.';
+  }
+
+  @override
+  String fightWeekFibre(String kg, String unit, String date) {
+    return 'Die Ernährung bringt in der Kampfwoche etwa $kg $unit: ab $date ballaststoffarm.';
+  }
+
+  @override
+  String get fightWeekNoCut =>
+      'Kein Cut nötig. Iss nach Plan und halte dein Gewicht.';
+
+  @override
+  String fightWeekSupervision(String lightest, String unit) {
+    return 'Die Schritte unten schaffen einen Teil davon. Der Rest braucht einen Wasser-Cut, und der gehört in die Hände eines Coaches oder Ernährungsberaters. Allein über die Ernährung schaffst du höchstens $lightest $unit.';
+  }
+
+  @override
+  String get fightWeekNeedsWeight =>
+      'Trag ein Gewicht ein, um deine Kampfwoche zu planen.';
+
+  @override
+  String get fightWeekWater =>
+      'Trink die ganze Woche normal. Fighter Edge plant nie einen Wasser-Cut.';
+
+  @override
+  String get fightWeekToday => 'Heute';
+
+  @override
+  String fightTodaySteps(String steps) {
+    return 'Heute: $steps';
+  }
+
+  @override
+  String get fightWeekDays => 'Tag für Tag';
+
+  @override
+  String get fightStepEat => 'Nach Plan essen';
+
+  @override
+  String get fightStepEatBody => 'Deine normalen Camp-Ziele.';
+
+  @override
+  String get fightStepFibre => 'Ballaststoffarm';
+
+  @override
+  String fightStepFibreBody(int grams) {
+    return 'Unter $grams g Ballaststoffe: weißer Reis, Weißbrot, Eier, Fleisch und Fisch. Lass Hülsenfrüchte, Vollkorn, Nüsse und rohes Gemüse weg.';
+  }
+
+  @override
+  String get fightStepCarbs => 'Weniger Kohlenhydrate';
+
+  @override
+  String get fightStepCarbsBody =>
+      'Kleinere Portionen Reis, Brot, Nudeln und Süßes als sonst. Halte das Protein hoch. Wenn dir schwindlig wird oder du dich schwach fühlst: iss.';
+
+  @override
+  String get fightStepWeighIn => 'Wiegen';
+
+  @override
+  String get fightStepWeighInBody =>
+      'Direkt danach mit dem Auffüllen beginnen.';
+
+  @override
+  String get fightStepRefuel => 'Auffüllen';
+
+  @override
+  String get fightStepRefuelBody =>
+      'Zuerst ein Rehydrationsgetränk, dann schnelle Kohlenhydrate. Ziele siehe unten.';
+
+  @override
+  String get fightStepFight => 'Kampf';
+
+  @override
+  String get fightStepFightBody =>
+      'Wenig Ballaststoffe, und iss nur, was du kennst.';
+
+  @override
+  String get fightRefuelTitle => 'Nach dem Wiegen';
+
+  @override
+  String get fightRefuelDrink => 'Rehydrationsgetränk';
+
+  @override
+  String get fightRefuelDrinkWhen => 'Direkt nach dem Wiegen';
+
+  @override
+  String fightRefuelPerHour(String amount) {
+    return '$amount pro Stunde';
+  }
+
+  @override
+  String get fightRefuelCarbs => 'Schnelle Kohlenhydrate';
+
+  @override
+  String get fightRefuelCarbsWhen => 'Nach dem Getränk';
+
+  @override
+  String fightRefuelUpTo(String amount) {
+    return 'Bis zu $amount pro Stunde';
+  }
+
+  @override
+  String get fightRefuelTotal => 'Kohlenhydrate gesamt';
+
+  @override
+  String get fightRefuelTotalWhen => 'Zwischen Wiegen und Kampf';
+
+  @override
+  String get fightRefuelFibre => 'Ballaststoffe';
+
+  @override
+  String get fightRefuelFibreValue => 'Niedrig halten';
+
+  @override
+  String get fightRefuelFibreWhen => 'Bis zum Kampf';
+
+  @override
+  String get fightWeekSource =>
+      'Schritte und Ziele nach der International Society of Sports Nutrition (2025).';
 }
