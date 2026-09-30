@@ -7,6 +7,17 @@ import { HttpsError, onCall, onRequest } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as logger from "firebase-functions/logger";
 
+import {
+  createRewardToken,
+  fetchVerifierKeys,
+  grantReward,
+  hasUnusedReward,
+  refundReward,
+  REWARD_CUSTOM_DATA,
+  rewardState,
+  useReward,
+  verifyRewardCallback,
+} from "./adRewards";
 import { buildAiFacts } from "./aiFacts";
 import { hasActivePro, RevenueCatEvent } from "./billing";
 import { ENFORCE_APP_CHECK } from "./config";
@@ -158,9 +169,16 @@ export const edgeFuelAiExplain = onCall(
       return { status: "consentRequired" as const };
     }
     // Expiry-aware (audit M-4): `plan` alone let a missed EXPIRATION
-    // webhook keep paid AI on forever.
+    // webhook keep paid AI on forever. A free account may write one Corner
+    // Brief a day after a rewarded video that AdMob confirmed to us
+    // (adRewards.ts); the app cannot grant that itself.
+    let usesReward = false;
     if (data.task !== "summarizeTrend" && !hasActivePro(profile, Date.now())) {
-      return { status: "entitlementRequired" as const };
+      if (data.task === "cornerBrief" && (await hasUnusedReward(db, uid, new Date()))) {
+        usesReward = true;
+      } else {
+        return { status: "entitlementRequired" as const };
+      }
     }
 
     // Across all accounts: pauses the AI for the rest of the UTC day if
@@ -170,8 +188,23 @@ export const edgeFuelAiExplain = onCall(
       return { status: "unavailable" as const };
     }
 
+    // Taken before quota so two parallel calls can't share one video.
+    if (usesReward && !(await useReward(db, uid, new Date()))) {
+      return { status: "entitlementRequired" as const };
+    }
+    const giveRewardBack = async (reason: string) => {
+      if (!usesReward) return;
+      usesReward = false;
+      try {
+        await refundReward(db, uid, new Date());
+      } catch (error) {
+        logger.error("ad_reward_refund_failed", { reason, error: String(error) });
+      }
+    };
+
     const quota = await consumeQuota(db, uid, new Date(), task);
     if (!quota.allowed) {
+      await giveRewardBack("quota_reached");
       logger.info("ai_request_blocked", {
         task: data.task,
         reason: "quota_reached",
@@ -201,6 +234,7 @@ export const edgeFuelAiExplain = onCall(
     };
     const unavailableAfterRefund = async (reason: string) => {
       await recordUsageSafely(false);
+      await giveRewardBack(reason);
       if (quotaReserved) {
         quotaReserved = false;
         try {
@@ -326,6 +360,7 @@ export const edgeFuelAiExplain = onCall(
       requiresProfessionalReview: answer.requiresProfessionalReview,
     });
     quotaReserved = false;
+    if (usesReward) logger.info("ad_reward_used", { task });
     return {
       status: "success" as const,
       response: {
@@ -333,6 +368,100 @@ export const edgeFuelAiExplain = onCall(
         contentVersion: `sp${SYSTEM_PROMPT_VERSION}`,
       },
     };
+  },
+);
+
+/**
+ * Before a free account watches a rewarded video: says whether one can still
+ * earn today's Corner Brief and, if so, hands out the one-time token the app
+ * passes to AdMob. Checks the same gates as the brief itself, so nobody
+ * watches a video that could not pay off.
+ */
+export const startRewardedBrief = onCall(
+  { cors: true, enforceAppCheck: ENFORCE_APP_CHECK },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+    if (request.auth.token.email_verified !== true) {
+      return { status: "notEligible" as const };
+    }
+    const uid = request.auth.uid;
+    const db = getFirestore();
+    if (!(await readAiConfig(db)).enabled) {
+      return { status: "unavailable" as const };
+    }
+    const profile = (await db.collection("users").doc(uid).get()).data();
+    if (hasActivePro(profile, Date.now())) {
+      return { status: "notEligible" as const };
+    }
+    if (!hasConsent(profile, "aiCoach")) {
+      return { status: "consentRequired" as const };
+    }
+    const now = new Date();
+    const state = await rewardState(db, uid, now);
+    if (state === "unused") return { status: "unused" as const };
+    if (state === "usedToday") return { status: "usedToday" as const };
+    return {
+      status: "ready" as const,
+      token: await createRewardToken(db, uid, now),
+    };
+  },
+);
+
+/**
+ * AdMob's server-side verification callback for rewarded videos. Google calls
+ * this URL (set per ad unit in the AdMob console) after a video is watched to
+ * the end, signed with its own keys. Only then does the account get its free
+ * Corner Brief. Always answers 200 to a correctly signed call, so AdMob does
+ * not retry a reward we chose not to grant; nothing identifying is logged.
+ */
+export const admobRewardCallback = onRequest(
+  { cors: false },
+  async (request, response) => {
+    if (request.method !== "GET") {
+      response.status(405).send("Method not allowed");
+      return;
+    }
+    const url = request.originalUrl ?? request.url ?? "";
+    const rawQuery = url.includes("?") ? url.slice(url.indexOf("?") + 1) : "";
+
+    let reward;
+    try {
+      reward = verifyRewardCallback(rawQuery, await fetchVerifierKeys());
+    } catch (error) {
+      logger.error("ad_reward_keys_failed", { error: String(error) });
+      response.status(503).send("Try again");
+      return;
+    }
+    if (!reward) {
+      logger.warn("ad_reward_rejected", { reason: "bad_signature" });
+      response.status(403).send("Invalid signature");
+      return;
+    }
+
+    // AdMob's "verify URL" check sends a signed call with no user.
+    const expectedUnit = (process.env.ADMOB_REWARDED_AD_UNIT ?? "").trim();
+    if (
+      !reward.userId ||
+      !reward.transactionId ||
+      reward.customData !== REWARD_CUSTOM_DATA ||
+      (expectedUnit.length > 0 && reward.adUnit !== expectedUnit)
+    ) {
+      logger.info("ad_reward_ignored", { reason: "not_a_brief_reward" });
+      response.status(200).send("ok");
+      return;
+    }
+
+    // user_id is our one-time token, never the account ID.
+    const result = await grantReward(
+      getFirestore(),
+      reward.userId,
+      reward.transactionId,
+      new Date(),
+    );
+    logger.info("ad_reward_callback", { result });
+    response.status(200).send("ok");
   },
 );
 

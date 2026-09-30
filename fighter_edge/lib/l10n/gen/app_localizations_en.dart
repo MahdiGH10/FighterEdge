@@ -603,6 +603,13 @@ class LEn extends L {
       'Sends your plan facts and messages to our AI provider (USA) when you use the coach.';
 
   @override
+  String get settingsAdPrivacy => 'Ad privacy choices';
+
+  @override
+  String get settingsAdPrivacySubtitle =>
+      'Change what you agreed to for the optional videos';
+
+  @override
   String get deleteAccountSubscriptionWarning =>
       'Deleting your account doesn\'t cancel your subscription. Cancel it first in your App Store or Google Play account settings, or it keeps renewing.';
 
@@ -1598,6 +1605,28 @@ class LEn extends L {
   @override
   String get cornerBriefProfessional =>
       'Please speak with a qualified professional before acting on this.';
+
+  @override
+  String get cornerBriefWatchVideo =>
+      'Watch a short video for today\'s full brief';
+
+  @override
+  String get cornerBriefRewardedNote =>
+      'Today\'s free brief. Pro rewrites it after every log.';
+
+  @override
+  String get cornerBriefRewardUsed =>
+      'You\'ve had today\'s free brief. Back tomorrow, or go Pro.';
+
+  @override
+  String get cornerBriefVideoClosed => 'Watch to the end to unlock the brief.';
+
+  @override
+  String get cornerBriefNoVideo => 'No video right now. Try again later.';
+
+  @override
+  String get cornerBriefRewardFailed =>
+      'Your corner couldn\'t write it just now. Tap again later, no new video needed.';
 
   @override
   String get cornerTopicTraining => 'Training';

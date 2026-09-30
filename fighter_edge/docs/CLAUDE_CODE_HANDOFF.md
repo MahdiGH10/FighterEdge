@@ -2,7 +2,7 @@
 
 ## START HERE: state as of 2026-09-28
 
-**Ten stacked PRs, none merged.** Merge in order, retargeting each to
+**Eleven stacked PRs, none merged.** Merge in order, retargeting each to
 `main` after the one before it lands:
 
 | PR | Branch | What |
@@ -17,6 +17,7 @@
 | #17 | `feat/weight-chart-tokens` | The old weight tracker chart restyled onto `ChartTokens`, matching the fight-camp chart |
 | #19 | `feat/corner-brief` | Daily Corner Brief on Home (plan step 3): a free calculated line, and three coach-written lines for Pro |
 | #20 | `feat/groq-provider` | Optional Groq provider (`AI_PROVIDER=groq`) with a model fallback chain; needs the `GROQ_API_KEY` secret set before merge |
+| #21 | `feat/rewarded-ads` | Rewarded video for free accounts: one a day unlocks that day's full Corner Brief. Test ads only until AdMob is set up |
 
 **CI:** all 7 checks green on #10, #12, #13, and now #15 (the Android
 emulator job stalled once on #15's first run — 35 minutes, no output — and
@@ -24,6 +25,41 @@ was rerun; the same known intermittent hang as #11/#14, not a test
 failure). #11 and #14 stalled once each too and passed clean on rerun.
 #16 and #17 run the same workflow; watch their emulator job for the same
 pattern before assuming a real failure.
+
+### Rewarded videos (PR #21)
+
+The only ad in the app. A free adult with a plan and a verified email can tap
+"Watch a short video" on the Corner Brief card, at most once a day, to get
+that day's full brief. Pro never sees ads; nothing plays unless tapped; no
+ads during logging or workouts; nobody under 18 (or with no age) is offered one.
+
+- **Trust:** the app never grants the reward. `startRewardedBrief` checks the
+  account and hands out a one-time token; the app passes the token (never the
+  account ID) to AdMob; AdMob calls `admobRewardCallback` with a signed
+  confirmation (server-side verification); only then may `edgeFuelAiExplain`
+  write one `cornerBrief` for a free account. A failed brief gives the reward
+  back. `users/{uid}/adRewards/{day}` is server-written only (rules + test).
+- **Privacy:** non-personalised ads, rated PG, the advertising ID permission
+  stays removed. Google's consent form (UMP) runs before the first video, not
+  at app start. Settings shows "Ad privacy choices" where Google requires it.
+  Privacy pages (EN/DE) have a new 2.10 and an AdMob recipient row.
+- **Test ads until the owner acts.** Debug builds use Google's public test
+  units; a release build shows the offer only with
+  `--dart-define=ADMOB_REWARDED_UNIT_ID=...`.
+- **Owner steps (AdMob console, no code):** create the AdMob account and app;
+  create a rewarded ad unit; set its server-side verification callback URL to
+  the deployed `admobRewardCallback` function URL; set the GDPR message in
+  Privacy & messaging; put the app ID in `ADMOB_APP_ID` (Android, env or
+  `admobAppId` in `key.properties`) and `GADApplicationIdentifier` (iOS
+  Info.plist); build releases with the unit ID dart-define; optionally set
+  `ADMOB_REWARDED_AD_UNIT` (the numeric unit ID) in
+  `functions/.env.fighter-edge-app`; turn on a Firestore TTL policy on
+  `adRewardTokens.expiresAt`; update the Play Data safety form (ads,
+  device IDs, approximate location via IP) and declare "contains ads".
+
+Not verified: a real video on a phone (Windows here cannot build Android
+plugins without Developer Mode; CI builds Android and iOS), the AdMob callback
+end to end, and the emulator tests for `adRewards` (they run in CI).
 
 ### Corner Brief (PR #19)
 

@@ -93,8 +93,12 @@ void main() {
     expect(brief.requiresProfessionalReview, isTrue);
     expect(controller.lastStatusFor(monday), EdgeFuelAiStatus.success);
     expect(controller.isLoading, isFalse);
-    expect(telemetry.records.single.parameters,
-        {'task': 'corner_brief', 'status': 'success', 'automatic': 0});
+    expect(telemetry.records.single.parameters, {
+      'task': 'corner_brief',
+      'status': 'success',
+      'automatic': 0,
+      'rewarded': 0,
+    });
   });
 
   test('yesterday has no brief or status today', () async {

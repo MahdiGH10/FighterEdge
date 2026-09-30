@@ -18,6 +18,7 @@ enum TelemetryEvent {
   purchaseRestoreResult,
   cornerBriefPreviewViewed,
   aiRequestResult,
+  rewardedAdResult,
 
   // Activation and habit funnel. Parameters are enums, small counts and 0/1
   // flags only — never a body measurement, a food, or anything typed.
@@ -44,6 +45,7 @@ extension TelemetryEventName on TelemetryEvent {
         TelemetryEvent.cornerBriefPreviewViewed =>
           'corner_brief_preview_viewed',
         TelemetryEvent.aiRequestResult => 'ai_request_result',
+        TelemetryEvent.rewardedAdResult => 'rewarded_ad_result',
         TelemetryEvent.onboardingStepViewed => 'onboarding_step_viewed',
         TelemetryEvent.onboardingCompleted => 'onboarding_completed',
         TelemetryEvent.planRevealed => 'plan_revealed',
@@ -221,6 +223,13 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
       }
       // A Corner Brief rewritten after a log, not asked for.
       if (key == 'automatic') return _flag(value);
+      // A free account's brief unlocked by a rewarded video.
+      if (key == 'rewarded') return _flag(value);
+      return false;
+    case TelemetryEvent.rewardedAdResult:
+      if (key == 'status') {
+        return _oneOf(value, const {'earned', 'closed_early', 'unavailable'});
+      }
       return false;
     case TelemetryEvent.onboardingStepViewed:
       if (key == 'step') return value is int && value >= 1 && value <= 7;

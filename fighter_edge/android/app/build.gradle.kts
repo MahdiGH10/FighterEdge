@@ -63,6 +63,14 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // AdMob app ID (not a secret; it ships inside every app). Set
+        // ADMOB_APP_ID in the environment or admobAppId in key.properties for
+        // real ads. Without one, Google's sample ID is used, which only ever
+        // serves test ads, so the SDK can start without crashing.
+        manifestPlaceholders["admobAppId"] =
+            (keystoreProperties.getProperty("admobAppId") ?: System.getenv("ADMOB_APP_ID"))
+                ?.takeIf { it.isNotBlank() }
+                ?: "ca-app-pub-3940256099942544~3347511713"
     }
 
     signingConfigs {

@@ -607,6 +607,13 @@ class LDe extends L {
       'Sendet deine Planwerte und Nachrichten an unseren KI-Anbieter (USA), wenn du den Coach nutzt.';
 
   @override
+  String get settingsAdPrivacy => 'Datenschutz bei Werbung';
+
+  @override
+  String get settingsAdPrivacySubtitle =>
+      'Ändere deine Einwilligung für die freiwilligen Videos';
+
+  @override
   String get deleteAccountSubscriptionWarning =>
       'Das Löschen deines Kontos kündigt dein Abo nicht. Kündige es zuerst in deinen App-Store- oder Google-Play-Einstellungen, sonst verlängert es sich weiter.';
 
@@ -1614,6 +1621,30 @@ class LDe extends L {
   @override
   String get cornerBriefProfessional =>
       'Bitte sprich mit einer qualifizierten Fachperson, bevor du danach handelst.';
+
+  @override
+  String get cornerBriefWatchVideo =>
+      'Kurzes Video ansehen für das ganze Briefing heute';
+
+  @override
+  String get cornerBriefRewardedNote =>
+      'Dein kostenloses Briefing für heute. Mit Pro wird es nach jedem Eintrag neu geschrieben.';
+
+  @override
+  String get cornerBriefRewardUsed =>
+      'Dein kostenloses Briefing für heute ist genutzt. Morgen wieder, oder hol dir Pro.';
+
+  @override
+  String get cornerBriefVideoClosed =>
+      'Schau das Video bis zum Ende, um das Briefing freizuschalten.';
+
+  @override
+  String get cornerBriefNoVideo =>
+      'Gerade kein Video verfügbar. Versuch es später noch mal.';
+
+  @override
+  String get cornerBriefRewardFailed =>
+      'Deine Ecke konnte es gerade nicht schreiben. Tipp später noch mal, ohne neues Video.';
 
   @override
   String get cornerTopicTraining => 'Training';

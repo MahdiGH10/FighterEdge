@@ -283,6 +283,15 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
     await assertFails(usage.delete());
   });
 
+  it("never lets an athlete grant themselves a rewarded brief", async () => {
+    const reward = ownerDb("alice").collection("users").doc("alice")
+      .collection("adRewards").doc("2026-09-30");
+    await assertSucceeds(reward.get());
+    await assertFails(reward.set({ granted: 5, used: 0 }));
+    await assertFails(ownerDb("bob").collection("users").doc("alice")
+      .collection("adRewards").doc("2026-09-30").get());
+  });
+
   it("keeps server config and the billing ledger closed to clients", async () => {
     const db = ownerDb("alice");
     await assertFails(db.collection("config").doc("edgeFuelAi").get());

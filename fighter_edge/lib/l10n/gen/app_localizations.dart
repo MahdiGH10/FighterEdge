@@ -1147,6 +1147,18 @@ abstract class L {
   /// **'Sends your plan facts and messages to our AI provider (USA) when you use the coach.'**
   String get settingsAiCoachSubtitle;
 
+  /// No description provided for @settingsAdPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad privacy choices'**
+  String get settingsAdPrivacy;
+
+  /// No description provided for @settingsAdPrivacySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change what you agreed to for the optional videos'**
+  String get settingsAdPrivacySubtitle;
+
   /// No description provided for @deleteAccountSubscriptionWarning.
   ///
   /// In en, this message translates to:
@@ -2802,6 +2814,42 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Please speak with a qualified professional before acting on this.'**
   String get cornerBriefProfessional;
+
+  /// No description provided for @cornerBriefWatchVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch a short video for today\'s full brief'**
+  String get cornerBriefWatchVideo;
+
+  /// No description provided for @cornerBriefRewardedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s free brief. Pro rewrites it after every log.'**
+  String get cornerBriefRewardedNote;
+
+  /// No description provided for @cornerBriefRewardUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve had today\'s free brief. Back tomorrow, or go Pro.'**
+  String get cornerBriefRewardUsed;
+
+  /// No description provided for @cornerBriefVideoClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch to the end to unlock the brief.'**
+  String get cornerBriefVideoClosed;
+
+  /// No description provided for @cornerBriefNoVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'No video right now. Try again later.'**
+  String get cornerBriefNoVideo;
+
+  /// No description provided for @cornerBriefRewardFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your corner couldn\'t write it just now. Tap again later, no new video needed.'**
+  String get cornerBriefRewardFailed;
 
   /// No description provided for @cornerTopicTraining.
   ///
