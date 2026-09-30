@@ -41,7 +41,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('No plan yet'), findsOneWidget);
-      expect(find.text('START SETUP'), findsOneWidget);
+      expect(find.text('Start setup'), findsOneWidget);
     });
 
     testWidgets('renders the deterministic target and calculation context',
@@ -126,16 +126,16 @@ void main() {
       ));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.text('UNLOCK MY FIGHTER BRIEF'),
+        find.text('Unlock my Fighter Brief'),
         300,
         scrollable: find.byType(Scrollable).first,
       );
 
-      expect(find.text('FIGHTER BRIEF'), findsOneWidget);
-      expect(find.text('FREE PREVIEW'), findsOneWidget);
+      expect(find.text('Fighter Brief'), findsOneWidget);
+      expect(find.text('Free preview'), findsOneWidget);
       expect(find.text('Protein is the main gap in today\'s target.'),
           findsOneWidget);
-      expect(find.text('UNLOCK MY FIGHTER BRIEF'), findsOneWidget);
+      expect(find.text('Unlock my Fighter Brief'), findsOneWidget);
     });
 
     testWidgets('routes a Pro athlete to the single Coach experience',
@@ -151,17 +151,17 @@ void main() {
       ));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.text('OPEN AI FIGHTER BRIEF'),
+        find.text('Open AI Fighter Brief'),
         300,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.ensureVisible(find.text('OPEN AI FIGHTER BRIEF'));
+      await tester.ensureVisible(find.text('Open AI Fighter Brief'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('OPEN AI FIGHTER BRIEF'));
+      await tester.tap(find.text('Open AI Fighter Brief'));
       await tester.pumpAndSettle();
 
       expect(find.text('Talk to your coach'), findsOneWidget);
-      expect(find.text('GET TODAY\'S FIGHTER BRIEF'), findsOneWidget);
+      expect(find.text('Get today\'s Fighter Brief'), findsOneWidget);
     });
   });
 }

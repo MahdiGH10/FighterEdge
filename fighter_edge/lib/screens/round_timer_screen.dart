@@ -282,7 +282,8 @@ class _RoundTimerScreenState extends State<RoundTimerScreen>
       title: l.timerTitle,
       showBack: true,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.lg, Insets.none, Insets.lg, Insets.xxl),
         child: Column(
           children: [
             FilterChips(

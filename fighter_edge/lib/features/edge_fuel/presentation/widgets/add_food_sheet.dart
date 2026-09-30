@@ -119,7 +119,8 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, 0),
+          padding: const EdgeInsets.fromLTRB(
+              Insets.xl, Insets.none, Insets.xl, Insets.none),
           child: Text(l.addFoodTitle(widget.dayLabel), style: AppType.title1()),
         ),
         const SizedBox(height: Insets.md),
@@ -350,8 +351,14 @@ class _PortionStepState extends State<_PortionStep> {
     super.dispose();
   }
 
-  double get _currentGrams => (double.tryParse(_grams.text.trim()) ?? 0)
-      .clamp(0, PortionCalculator.maxGrams);
+  double get _typedGrams => double.tryParse(_grams.text.trim()) ?? 0;
+
+  /// The amount actually calculated and logged. Anything typed above the
+  /// limit is flagged in the field and blocks Add, so the number on screen is
+  /// always the number that lands in the log.
+  double get _currentGrams => _typedGrams.clamp(0, PortionCalculator.maxGrams);
+
+  bool get _overMax => _typedGrams > PortionCalculator.maxGrams;
 
   void _setGrams(double grams, {HouseholdUnit? unit, double count = 1}) {
     AppHaptics.selection();
@@ -380,8 +387,8 @@ class _PortionStepState extends State<_PortionStep> {
       children: [
         Expanded(
           child: ListView(
-            padding:
-                const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.xl, Insets.lg),
+            padding: const EdgeInsets.fromLTRB(
+                Insets.lg, Insets.none, Insets.xl, Insets.lg),
             children: [
               Row(
                 children: [
@@ -468,6 +475,9 @@ class _PortionStepState extends State<_PortionStep> {
                       decoration: InputDecoration(
                         labelText: l.addFoodGrams,
                         suffixText: 'g',
+                        errorText: _overMax
+                            ? 'Up to ${PortionCalculator.maxGrams.toInt()} g per entry.'
+                            : null,
                         labelStyle: AppType.callout(color: secondary),
                         focusedBorder: const UnderlineInputBorder(
                           borderSide: BorderSide(color: AppColors.primary),
@@ -488,10 +498,12 @@ class _PortionStepState extends State<_PortionStep> {
             padding: const EdgeInsets.fromLTRB(
                 Insets.xl, Insets.sm, Insets.xl, Insets.lg),
             child: PrimaryButton(
-              l.addFoodAddTo(widget.dayLabel),
+              l.addFoodAddTo(widget.dayLabel == l.commonToday
+                  ? widget.dayLabel.toLowerCase()
+                  : widget.dayLabel),
               icon: Icons.add,
               expand: true,
-              onPressed: grams <= 0
+              onPressed: grams <= 0 || _overMax
                   ? null
                   : () => widget.onAdd(
                         FoodLogEntry(
@@ -559,9 +571,9 @@ class _NutrientSummary extends StatelessWidget {
             const SizedBox(height: Insets.md),
             Row(
               children: [
-                macro('PROTEIN', nutrients.proteinGrams, AppColors.protein),
-                macro('CARBS', nutrients.carbGrams, AppColors.carbs),
-                macro('FAT', nutrients.fatGrams, AppColors.fats),
+                macro('Protein', nutrients.proteinGrams, AppColors.protein),
+                macro('Carbs', nutrients.carbGrams, AppColors.carbs),
+                macro('Fat', nutrients.fatGrams, AppColors.fats),
               ],
             ),
           ],

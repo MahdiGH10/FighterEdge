@@ -121,7 +121,7 @@ class _StepButton extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Radii.tile),
           ),
           child: SizedBox.square(
             dimension: AppAccessibility.minTouchTarget,

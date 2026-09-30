@@ -3,17 +3,18 @@ import 'package:flutter/material.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_typography.dart';
+import '../../data/recipe_photos.dart';
 import '../../domain/models/food_enums.dart';
 import '../controllers/recipe_library_controller.dart';
 import '../recipe_copy.dart';
 import '../../../../widgets/press_scale.dart';
+import 'recipe_photo_image.dart';
 
 /// A recipe in the library list.
 ///
-/// No photography in V1 (EF3_PLAN.md §8 decision 2). Instead of a grey image
-/// placeholder — which reads as broken — each card carries a meal-type accent
-/// stripe and leans on typography for hierarchy. A deliberate typographic card
-/// looks finished; a placeholder never does.
+/// A recipe with a credited photo leads with a thumbnail. One without keeps
+/// the meal-type accent stripe rather than a grey placeholder, which reads as
+/// broken; a deliberate typographic card looks finished.
 class RecipeCard extends StatelessWidget {
   final RecipeListing listing;
   final bool locked;
@@ -38,6 +39,7 @@ class RecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final recipe = listing.recipe;
+    final photo = recipePhotoFor(recipe.id);
     final hasConflict = conflictingAllergens.isNotEmpty;
 
     // Without this a screen reader reads title, description, three macro
@@ -75,17 +77,31 @@ class RecipeCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Accent stripe stands in for the image, keyed to meal type so
-                    // the list is scannable by colour without a legend.
-                    Container(
-                      width: 4,
-                      decoration: BoxDecoration(
-                        color: _accent,
-                        borderRadius: const BorderRadius.horizontal(
-                          left: Radius.circular(Radii.card),
+                    if (photo != null)
+                      SizedBox(
+                        width: LayoutTokens.recipeThumbnail,
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(Radii.card),
+                          ),
+                          child: RecipePhotoImage(
+                            photo,
+                            displayWidth: LayoutTokens.recipeThumbnail,
+                          ),
+                        ),
+                      )
+                    else
+                      // Without a photo, an accent stripe keyed to meal type
+                      // keeps the list scannable by colour.
+                      Container(
+                        width: 4,
+                        decoration: BoxDecoration(
+                          color: _accent,
+                          borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(Radii.card),
+                          ),
                         ),
                       ),
-                    ),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(Insets.lg),
@@ -200,7 +216,8 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: Insets.sm, vertical: 2),
+        padding: const EdgeInsets.symmetric(
+            horizontal: Insets.sm, vertical: Insets.xxs),
         decoration: BoxDecoration(
           color: color.withValues(alpha: .14),
           borderRadius: BorderRadius.circular(Radii.chip),

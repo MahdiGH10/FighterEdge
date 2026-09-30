@@ -1,3 +1,4 @@
+import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
@@ -14,8 +15,8 @@ class BrandLogo extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          width: 58 * scale,
-          height: 58 * scale,
+          width: LayoutTokens.brandMark * scale,
+          height: LayoutTokens.brandMark * scale,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -24,23 +25,16 @@ class BrandLogo extends StatelessWidget {
                   color: AppColors.backgroundRaised,
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.primary, width: 2),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: AppColors.primaryGlow,
-                      blurRadius: 18,
-                      offset: Offset(0, 8),
-                    ),
-                  ],
                 ),
               ),
               Transform.rotate(
                 angle: .56,
                 child: Container(
-                  width: 7 * scale,
-                  height: 48 * scale,
+                  width: LayoutTokens.brandStroke * scale,
+                  height: LayoutTokens.brandSlash * scale,
                   decoration: BoxDecoration(
                     color: AppColors.primaryBright,
-                    borderRadius: BorderRadius.circular(8 * scale),
+                    borderRadius: BorderRadius.circular(Radii.tile * scale),
                   ),
                 ),
               ),
@@ -50,7 +44,7 @@ class BrandLogo extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 14 * scale),
+        SizedBox(height: Insets.md + Insets.xxs * scale),
         RichText(
           text: TextSpan(
             children: [
@@ -60,12 +54,12 @@ class BrandLogo extends StatelessWidget {
               TextSpan(
                   text: 'EDGE',
                   style: AppType.scaledDisplay(28 * scale,
-                      color: AppColors.primary, spacing: 1.5)),
+                      color: AppColors.accentText, spacing: 1.5)),
             ],
           ),
         ),
         if (showTagline) ...[
-          SizedBox(height: 4 * scale),
+          SizedBox(height: Insets.xs * scale),
           Text('YOUR EDGE. EVERY DAY.',
               style: AppType.scaledBody(11 * scale,
                   weight: FontWeight.w600,

@@ -26,16 +26,16 @@ void main() {
       expect(find.text('05:00'), findsWidgets); // MMA default work
       expect(find.text('1 / 5'), findsOneWidget);
 
-      await tester.tap(find.text('START'));
+      await tester.tap(find.text('Start'));
       await tester.pump(const Duration(seconds: 1));
       await tester.pump(const Duration(seconds: 1));
       expect(find.text('04:58'), findsWidgets);
 
-      await tester.tap(find.text('PAUSE'));
+      await tester.tap(find.text('Pause'));
       await tester.pump(const Duration(seconds: 2));
       expect(find.text('04:58'), findsWidgets); // frozen
 
-      await tester.tap(find.text('RESET'));
+      await tester.tap(find.text('Reset'));
       await tester.pump();
       expect(find.text('05:00'), findsWidgets);
     });
@@ -117,7 +117,11 @@ void main() {
                   ),
             ),
           ],
-          child: const MaterialApp(home: WeightTrackerScreen()),
+          child: const MaterialApp(
+            localizationsDelegates: L.localizationsDelegates,
+            supportedLocales: L.supportedLocales,
+            home: WeightTrackerScreen(),
+          ),
         );
 
     testWidgets('adding a weigh-in updates the number and history',
@@ -126,7 +130,7 @@ void main() {
       await tester.pump();
       expect(find.text('77.2'), findsWidgets);
 
-      await tester.tap(find.byType(FloatingActionButton));
+      await tester.tap(find.bySemanticsLabel('Add weigh-in'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), '75.0');
       await tester.tap(find.text('Save'));
@@ -142,16 +146,16 @@ void main() {
       expect(find.text('75.0 kg'), findsOneWidget); // history row
     });
 
-    testWidgets('non-weight tabs show an empty state and hide the FAB',
+    testWidgets('non-weight tabs show an empty state and hide the add action',
         (tester) async {
       await tester.pumpWidget(trackerHost(AppState()));
       await tester.pump();
-      expect(find.byType(FloatingActionButton), findsOneWidget);
+      expect(find.bySemanticsLabel('Add weigh-in'), findsOneWidget);
 
       await tester.tap(find.text('Body Fat'));
-      await tester.pumpAndSettle(); // let the FAB exit animation finish
+      await tester.pumpAndSettle();
       expect(find.text('Body Fat'), findsWidgets);
-      expect(find.byType(FloatingActionButton), findsNothing);
+      expect(find.bySemanticsLabel('Add weigh-in'), findsNothing);
     });
 
     testWidgets('reads and records in pounds when metric is off',
@@ -167,7 +171,7 @@ void main() {
       expect(find.text('170.2'), findsWidgets);
       expect(find.text('lb'), findsWidgets);
 
-      await tester.tap(find.byType(FloatingActionButton));
+      await tester.tap(find.bySemanticsLabel('Add weigh-in'));
       await tester.pumpAndSettle();
       expect(find.text('lb'), findsWidgets); // the input's suffix
       await tester.enterText(find.byType(TextField), '165.0');
@@ -188,7 +192,7 @@ void main() {
       await tester.pumpWidget(trackerHost(AppState(), fuel: fuel));
       await tester.pumpAndSettle(); // the draft arrives on a stream
       // Seed latest is 77.2 kg: 5.2 to go, to the user's own 72.
-      expect(find.text('GOAL GAP'), findsOneWidget);
+      expect(find.text('Goal gap'), findsOneWidget);
       expect(find.text('5.2'), findsOneWidget);
       expect(find.text('To 72.0 kg'), findsOneWidget);
     });
@@ -198,7 +202,7 @@ void main() {
       await tester.pump();
       expect(find.text('Set in EdgeFuel'), findsOneWidget);
       // The old made-up 74 kg goal is gone.
-      expect(find.text('GOAL GAP'), findsNothing);
+      expect(find.text('Goal gap'), findsNothing);
       expect(find.text('To 74 kg'), findsNothing);
     });
   });

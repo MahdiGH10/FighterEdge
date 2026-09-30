@@ -31,7 +31,7 @@ class WeeklyOverview extends StatelessWidget {
                 style: AppType.micro(
                     weight: FontWeight.w600,
                     color: i == todayIndex
-                        ? AppColors.primary
+                        ? AppColors.accentText
                         : AppColors.textMuted),
               ),
               const SizedBox(height: Insets.sm),

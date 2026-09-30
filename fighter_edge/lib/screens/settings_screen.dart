@@ -17,7 +17,7 @@ import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
-import '../widgets/stat_card.dart';
+import '../widgets/grouped_list.dart';
 import 'change_password_sheet.dart';
 import 'delete_account_flow.dart';
 import 'legal_screen.dart';
@@ -56,180 +56,154 @@ class SettingsScreen extends StatelessWidget {
       title: l.settingsTitle,
       showBack: true,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.lg, Insets.none, Insets.lg, Insets.xxl),
         children: [
-          AppCard(
-            accent: auth.isPro ? AppColors.premium : AppColors.primary,
-            child: Row(
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceElevated,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    auth.isPro ? Icons.verified : Icons.person_outline,
-                    color: auth.isPro ? AppColors.premium : AppColors.primary,
-                  ),
-                ),
-                const SizedBox(width: Insets.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.displayName.isNotEmpty
-                            ? user.displayName
-                            : user.email.split('@').first,
-                        style: AppType.body(weight: FontWeight.w800),
-                      ),
-                      const SizedBox(height: Insets.xxs),
-                      Text(
-                        user.email,
-                        style: AppType.subhead(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _PlanPill(label: auth.isPro ? 'PRO' : 'FREE'),
-              ],
-            ),
-          ),
+          GroupedList(children: [
+            GroupedRow(
+              title: user.displayName.isNotEmpty
+                  ? user.displayName
+                  : user.email.split('@').first,
+              subtitle: user.email,
+              trailing: Text(
+                  auth.isPro ? l.settingsProPlan : l.settingsFreePlan,
+                  style: AppType.subhead(
+                      color: auth.isPro
+                          ? AppColors.premium
+                          : AppColors.textSecondary)),
+            )
+          ]),
           const SizedBox(height: Insets.xl),
           _SectionLabel(l.settingsSectionApp),
-          _SettingsRow(
-            icon: Icons.translate,
-            title: l.settingsLanguage,
-            subtitle: _languageLabel(context, l),
-            onTap: () => _pickLanguage(context),
-          ),
+          GroupedList(children: [
+            _SettingsRow(
+              title: l.settingsLanguage,
+              subtitle: _languageLabel(context, l),
+              onTap: () => _pickLanguage(context),
+            ),
+          ]),
           const SizedBox(height: Insets.xl),
           _SectionLabel(l.settingsSectionSubscription),
-          _SettingsRow(
-            icon: Icons.workspace_premium_outlined,
-            title: auth.isPro ? l.settingsManagePro : l.settingsUpgradePro,
-            subtitle: auth.isPro
-                ? l.settingsManageProSubtitle
-                : l.settingsUpgradeProSubtitle,
-            onTap: () => AppNavigation.push(
-              context,
-              AppRoutes.paywall,
-              extra: const PaywallRouteArgs(trigger: PaywallTrigger.settings),
-              fallbackBuilder: (_) => const PaywallScreen(
-                trigger: PaywallTrigger.settings,
+          GroupedList(children: [
+            _SettingsRow(
+              title: auth.isPro ? l.settingsManagePro : l.settingsUpgradePro,
+              subtitle: auth.isPro
+                  ? l.settingsManageProSubtitle
+                  : l.settingsUpgradeProSubtitle,
+              onTap: () => AppNavigation.push(
+                context,
+                AppRoutes.paywall,
+                extra: const PaywallRouteArgs(trigger: PaywallTrigger.settings),
+                fallbackBuilder: (_) => const PaywallScreen(
+                  trigger: PaywallTrigger.settings,
+                ),
               ),
             ),
-          ),
+          ]),
           const SizedBox(height: Insets.xl),
           _SectionLabel(l.settingsSectionTraining),
-          _SwitchRow(
-            icon: Icons.straighten,
-            title: l.settingsMetricUnits,
-            subtitle: state.useMetricUnits
-                ? l.settingsMetricUnitsKg
-                : l.settingsMetricUnitsLb,
-            value: state.useMetricUnits,
-            onChanged: state.setUseMetricUnits,
-          ),
-          _SwitchRow(
-            icon: Icons.vibration,
-            title: l.settingsTimerHaptics,
-            subtitle: l.settingsTimerHapticsSubtitle,
-            value: state.timerHaptics,
-            onChanged: state.setTimerHaptics,
-          ),
-          _SwitchRow(
-            icon: Icons.notifications_active_outlined,
-            title: l.settingsCampReminders,
-            subtitle: !reminders.isAvailable
-                ? l.settingsCampRemindersUnavailable
-                : state.campReminders
-                    ? l.settingsCampRemindersOn(
-                        TrainingReminderSchedule.defaultTime.format(context))
-                    : l.settingsCampRemindersOff,
-            value: state.campReminders,
-            onChanged: reminders.isAvailable
-                ? (value) => _setCampReminders(context, state, reminders, value)
-                : null,
-          ),
+          GroupedList(children: [
+            _SwitchRow(
+              title: l.settingsMetricUnits,
+              subtitle: state.useMetricUnits
+                  ? l.settingsMetricUnitsKg
+                  : l.settingsMetricUnitsLb,
+              value: state.useMetricUnits,
+              onChanged: state.setUseMetricUnits,
+            ),
+            _SwitchRow(
+              title: l.settingsTimerHaptics,
+              subtitle: l.settingsTimerHapticsSubtitle,
+              value: state.timerHaptics,
+              onChanged: state.setTimerHaptics,
+            ),
+            _SwitchRow(
+              title: l.settingsCampReminders,
+              subtitle: !reminders.isAvailable
+                  ? l.settingsCampRemindersUnavailable
+                  : state.campReminders
+                      ? l.settingsCampRemindersOn(
+                          TrainingReminderSchedule.defaultTime.format(context))
+                      : l.settingsCampRemindersOff,
+              value: state.campReminders,
+              onChanged: reminders.isAvailable
+                  ? (value) =>
+                      _setCampReminders(context, state, reminders, value)
+                  : null,
+            ),
+          ]),
           const SizedBox(height: Insets.xl),
           _SectionLabel(l.settingsSectionSafety),
-          _SwitchRow(
-            icon: Icons.health_and_safety_outlined,
-            title: l.settingsSafeCut,
-            subtitle: l.settingsSafeCutSubtitle,
-            value: state.safeCutGuidance,
-            onChanged: state.setSafeCutGuidance,
-          ),
-          const _TrustCard(),
+          GroupedList(children: [
+            _SwitchRow(
+              title: l.settingsSafeCut,
+              subtitle: l.settingsSafeCutSubtitle,
+              value: state.safeCutGuidance,
+              onChanged: state.setSafeCutGuidance,
+            ),
+            const _TrustCard(),
+          ]),
           const SizedBox(height: Insets.xl),
           _SectionLabel(l.settingsSectionPrivacy),
-          _SettingsRow(
-            icon: Icons.monitor_heart_outlined,
-            title: l.settingsHealthData,
-            subtitle: _healthConsentSummary(context, user),
-            onTap: auth.isBusy ? null : () => _withdrawHealthConsent(context),
-          ),
-          _SwitchRow(
-            icon: Icons.smart_toy_outlined,
-            title: l.settingsAiCoach,
-            subtitle: l.settingsAiCoachSubtitle,
-            value: user.hasAiCoachConsent,
-            onChanged: auth.isBusy
-                ? null
-                : (allowed) => allowed
-                    ? showAiCoachConsentSheet(context)
-                    : auth.setDataConsent(
-                        DataConsentPurpose.aiCoach,
-                        granted: false,
-                      ),
-          ),
-          _SwitchRow(
-            icon: Icons.insights_outlined,
-            title: l.settingsAnalytics,
-            subtitle: l.settingsAnalyticsSubtitle,
-            value: consent.analyticsAllowed,
-            onChanged: consent.setAnalytics,
-          ),
-          _SwitchRow(
-            icon: Icons.bug_report_outlined,
-            title: l.settingsCrashReports,
-            subtitle: l.settingsCrashReportsSubtitle,
-            value: consent.crashReportsAllowed,
-            onChanged: consent.setCrashReports,
-          ),
+          GroupedList(children: [
+            _SettingsRow(
+              title: l.settingsHealthData,
+              subtitle: _healthConsentSummary(context, user),
+              onTap: auth.isBusy ? null : () => _withdrawHealthConsent(context),
+            ),
+            _SwitchRow(
+              title: l.settingsAiCoach,
+              subtitle: l.settingsAiCoachSubtitle,
+              value: user.hasAiCoachConsent,
+              onChanged: auth.isBusy
+                  ? null
+                  : (allowed) => allowed
+                      ? showAiCoachConsentSheet(context)
+                      : auth.setDataConsent(
+                          DataConsentPurpose.aiCoach,
+                          granted: false,
+                        ),
+            ),
+            _SwitchRow(
+              title: l.settingsAnalytics,
+              subtitle: l.settingsAnalyticsSubtitle,
+              value: consent.analyticsAllowed,
+              onChanged: consent.setAnalytics,
+            ),
+            _SwitchRow(
+              title: l.settingsCrashReports,
+              subtitle: l.settingsCrashReportsSubtitle,
+              value: consent.crashReportsAllowed,
+              onChanged: consent.setCrashReports,
+            ),
+          ]),
           const SizedBox(height: Insets.xl),
           _SectionLabel(l.settingsSectionAccount),
-          _SettingsRow(
-            icon: Icons.lock_outline,
-            title: l.settingsChangePassword,
-            subtitle: auth.canChangePassword
-                ? l.settingsChangePasswordSubtitle
-                : l.settingsChangePasswordGoogle,
-            onTap: auth.isBusy ? null : () => _changePassword(context),
-          ),
-          _SettingsRow(
-            icon: Icons.description_outlined,
-            title: l.settingsTerms,
-            subtitle: l.settingsTermsSubtitle,
-            onTap: () => _openLegal(context, LegalDocument.terms),
-          ),
-          _SettingsRow(
-            icon: Icons.privacy_tip_outlined,
-            title: l.settingsPrivacy,
-            subtitle: l.settingsPrivacySubtitle,
-            onTap: () => _openLegal(context, LegalDocument.privacy),
-          ),
-          _SettingsRow(
-            icon: Icons.delete_outline,
-            title: l.settingsDeleteAccount,
-            subtitle: l.settingsDeleteAccountSubtitle,
-            onTap: auth.isBusy ? null : () => confirmAndDeleteAccount(context),
-          ),
+          GroupedList(children: [
+            _SettingsRow(
+              title: l.settingsChangePassword,
+              subtitle: auth.canChangePassword
+                  ? l.settingsChangePasswordSubtitle
+                  : l.settingsChangePasswordGoogle,
+              onTap: auth.isBusy ? null : () => _changePassword(context),
+            ),
+            _SettingsRow(
+              title: l.settingsTerms,
+              subtitle: l.settingsTermsSubtitle,
+              onTap: () => _openLegal(context, LegalDocument.terms),
+            ),
+            _SettingsRow(
+              title: l.settingsPrivacy,
+              subtitle: l.settingsPrivacySubtitle,
+              onTap: () => _openLegal(context, LegalDocument.privacy),
+            ),
+            _SettingsRow(
+              title: l.settingsDeleteAccount,
+              subtitle: l.settingsDeleteAccountSubtitle,
+              onTap:
+                  auth.isBusy ? null : () => confirmAndDeleteAccount(context),
+            ),
+          ]),
           const SizedBox(height: Insets.lg),
           GhostButton(
             auth.isBusy ? l.commonSigningOut : l.commonSignOut,
@@ -310,7 +284,6 @@ class SettingsScreen extends StatelessWidget {
     final proceed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface,
         title: Text(l.settingsHealthDataWithdrawTitle),
         content: Text(
           l.settingsHealthDataWithdrawBody,
@@ -369,34 +342,6 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class _PlanPill extends StatelessWidget {
-  final String label;
-  const _PlanPill({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Insets.md, vertical: 6),
-      decoration: BoxDecoration(
-        color: label == 'PRO'
-            ? AppColors.premium.withValues(alpha: .16)
-            : AppColors.primarySoft,
-        borderRadius: BorderRadius.circular(Radii.chip),
-        border: Border.all(
-            color: label == 'PRO' ? AppColors.premium : AppColors.primary),
-      ),
-      child: Text(
-        label,
-        style: AppType.micro(
-          weight: FontWeight.w900,
-          color: label == 'PRO' ? AppColors.premium : AppColors.primary,
-          spacing: 1.1,
-        ),
-      ),
-    );
-  }
-}
-
 class _SectionLabel extends StatelessWidget {
   final String label;
   const _SectionLabel(this.label);
@@ -406,7 +351,7 @@ class _SectionLabel extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: Insets.sm),
       child: Text(
-        label.toUpperCase(),
+        label,
         style: AppType.micro(
           weight: FontWeight.w800,
           color: AppColors.textMuted,
@@ -418,139 +363,47 @@ class _SectionLabel extends StatelessWidget {
 }
 
 class _SettingsRow extends StatelessWidget {
-  final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
-
-  const _SettingsRow({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
+  const _SettingsRow(
+      {required this.title, required this.subtitle, required this.onTap});
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.md),
-      child: AppCard(
-        onTap: onTap,
-        padding: const EdgeInsets.all(Insets.md),
-        child: Row(
-          children: [
-            _RowIcon(icon),
-            const SizedBox(width: Insets.md),
-            Expanded(child: _RowText(title: title, subtitle: subtitle)),
-            const Icon(Icons.chevron_right, color: AppColors.textMuted),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      GroupedRow(title: title, subtitle: subtitle, onTap: onTap);
 }
 
 class _SwitchRow extends StatelessWidget {
-  final IconData icon;
   final String title;
   final String subtitle;
   final bool value;
   final ValueChanged<bool>? onChanged;
-
-  const _SwitchRow({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.onChanged,
-  });
-
+  const _SwitchRow(
+      {required this.title,
+      required this.subtitle,
+      required this.value,
+      required this.onChanged});
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.md),
-      child: AppCard(
-        padding: const EdgeInsets.all(Insets.md),
-        child: Row(
-          children: [
-            _RowIcon(icon),
-            const SizedBox(width: Insets.md),
-            Expanded(child: _RowText(title: title, subtitle: subtitle)),
-            Switch.adaptive(
+  Widget build(BuildContext context) => GroupedRow(
+      title: title,
+      subtitle: subtitle,
+      trailing: Semantics(
+          label: title,
+          child: Switch.adaptive(
               value: value,
-              activeThumbColor: AppColors.primary,
-              onChanged: onChanged,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RowIcon extends StatelessWidget {
-  final IconData icon;
-  const _RowIcon(this.icon);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 42,
-      height: 42,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(11),
-      ),
-      child: Icon(icon, color: AppColors.primary, size: 21),
-    );
-  }
-}
-
-class _RowText extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  const _RowText({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: AppType.callout(weight: FontWeight.w800)),
-        const SizedBox(height: 3),
-        Text(
-          subtitle,
-          style: AppType.subhead(color: AppColors.textSecondary),
-        ),
-      ],
-    );
-  }
+              activeTrackColor: AppColors.textSecondary,
+              onChanged: onChanged)));
 }
 
 class _TrustCard extends StatelessWidget {
   const _TrustCard();
-
   @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      accent: AppColors.warning,
-      padding: const EdgeInsets.all(Insets.md),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.info_outline, color: AppColors.warning, size: 22),
-          const SizedBox(width: Insets.md),
-          Expanded(
-            child: Text(
-              L.of(context).settingsTrustNote,
-              style: AppType.subhead(
-                  color: AppAccessibility.textSecondary(context)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(Insets.lg),
+        child: Text(L.of(context).settingsTrustNote,
+            style: AppType.subhead(
+                color: AppAccessibility.textSecondary(context))),
+      );
 }
 
 String _languageLabel(BuildContext context, L l) {
@@ -579,8 +432,8 @@ Future<void> _pickLanguage(BuildContext context) async {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding:
-                const EdgeInsets.fromLTRB(Insets.xl, 0, Insets.xl, Insets.sm),
+            padding: const EdgeInsets.fromLTRB(
+                Insets.xl, Insets.none, Insets.xl, Insets.sm),
             child: Text(l.settingsLanguage, style: AppType.title1()),
           ),
           for (final option in [

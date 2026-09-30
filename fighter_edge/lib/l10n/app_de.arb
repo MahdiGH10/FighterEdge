@@ -56,7 +56,7 @@
   "dashboardTitle": "Übersicht",
   "dashboardWeeklyOverview": "Wochenübersicht",
   "dashboardNextSession": "Nächste Einheit",
-  "dashboardRecentActivity": "Letzte Aktivität",
+  "dashboardRecentActivity": "Letzte Aktivitäten",
   "dashboardSeeAll": "Alle ansehen",
   "dashboardStatWeight": "Gewicht",
   "dashboardStatSessions": "Einheiten",
@@ -71,7 +71,7 @@
   "dashboardStreakOnFire": "Läuft",
   "dashboardStreakLogToday": "Heute eintragen",
 
-  "fuelWeekTitle": "ERNÄHRUNG DIESE WOCHE",
+  "fuelWeekTitle": "Ernährung diese Woche",
   "fuelWeekLogged": "{count}/7 erfasst",
   "@fuelWeekLogged": {
     "placeholders": { "count": { "type": "int" } }
@@ -93,6 +93,12 @@
   "nutritionCalories": "Kalorien",
   "nutritionMeals": "Mahlzeiten",
   "nutritionAddFood": "Essen hinzufügen",
+  "nutritionPreviousDay": "Vorheriger Tag",
+  "nutritionNextDay": "Nächster Tag",
+  "trainingLogSession": "Einheit erfassen",
+  "trainingEditSessionLog": "Einheitsprotokoll bearbeiten",
+  "weightFieldLabel": "Gewicht",
+  "weightAddWeighIn": "Gewicht erfassen",
   "nutritionSearchFoods": "Lebensmittel suchen",
   "nutritionLoggedToday": "heute erfasst",
   "nutritionProtein": "Protein",
@@ -110,14 +116,14 @@
   "@addFoodTitle": {
     "placeholders": { "day": { "type": "String" } }
   },
-  "addFoodSaved": "GESPEICHERT",
-  "addFoodRecent": "ZULETZT",
+  "addFoodSaved": "Gespeichert",
+  "addFoodRecent": "Zuletzt",
   "addFoodManual": "Nährwerte selbst eingeben",
   "addFoodManualSubtitle": "Für auswärts essen, eine Verpackung oder alles, was nicht gelistet ist",
   "addFoodEmptyHint": "Such ein Lebensmittel und wähl die Menge — die Nährwerte rechnet die App aus. Was du einträgst, steht beim nächsten Mal hier, einen Tipp entfernt.",
   "addFoodNotFound": "Noch nicht in der Lebensmittelliste",
   "addFoodNotFoundHint": "Probier ein einfacheres Wort („Reis“, „Hähnchen“) oder gib die Nährwerte unten selbst ein.",
-  "addFoodHowMuch": "WIE VIEL?",
+  "addFoodHowMuch": "Wie viel?",
   "addFoodGrams": "Gramm",
   "addFoodAddTo": "Zu {day} hinzufügen",
   "@addFoodAddTo": {
@@ -152,7 +158,7 @@
   "@timerNext": {
     "placeholders": { "label": { "type": "String" } }
   },
-  "timerYourCorner": "DEINE ECKE",
+  "timerYourCorner": "Deine Ecke",
   "timerCornerTeaser": "Mit Pro steht dir in der Pause deine Ecke zur Seite: ein Hinweis für die nächste Runde.",
   "timerNextSessionComplete": "Einheit beendet",
   "timerNextFinalRound": "Letzte Runde",
@@ -224,9 +230,9 @@
   "reactionLevelIntermediate": "Mittelstufe",
   "reactionLevelAdvanced": "Fortgeschritten",
   "reactionLevelAdvancedPlus": "Fortgeschritten+",
-  "reactionStatDuration": "DAUER",
-  "reactionStatMoves": "BEWEGUNGEN",
-  "reactionStatReact": "REAKTION",
+  "reactionStatDuration": "Dauer",
+  "reactionStatMoves": "Bewegungen",
+  "reactionStatReact": "Reaktion",
   "reactionInTheMix": "IM MIX · {count}",
   "reactionStart": "Drill starten",
   "reactionGetInStance": "IN KAMPFSTELLUNG",
@@ -285,5 +291,211 @@
   "authNoAccount": "Neu hier?",
   "authCreateAccount": "Konto erstellen",
   "authShowPassword": "Passwort anzeigen",
-  "authHidePassword": "Passwort verbergen"
+  "authHidePassword": "Passwort verbergen",
+  "dashboardThisWeek": "Diese Woche",
+  "dashboardFighter": "Athlet",
+  "dashboardToday": "Heute",
+  "dashboardNoPlan": "Noch keine Einheiten geplant",
+  "dashboardWeekDone": "Woche abgeschlossen",
+  "dashboardRestDay": "Ruhetag",
+  "dashboardRecovery": "Deine geplanten Einheiten sind erledigt. Nimm dir Zeit zur Erholung.",
+  "dashboardPlanHint": "Öffne Training, um deine Woche zu planen.",
+  "dashboardNextUp": "Als Nächstes: {day} · {session}",
+  "dashboardStartSession": "Einheit starten",
+  "dashboardOpenCamp": "Trainingsplan öffnen",
+  "dashboardSetFuel": "Ernährungsziel festlegen",
+  "dashboardFuelInfo": "Warum dieses Ziel wichtig ist",
+  "dashboardFuelExplanation": "Kalorien unterstützen dein Ziel. Eiweiß unterstützt Erholung und Muskeln. Kohlenhydrate liefern Energie fürs Training.",
+  "commonClose": "Schließen",
+  "dashboardNoActivity": "Schließe deine erste Einheit ab, um deinen Verlauf zu starten.",
+  "dashboardVerifyEmail": "E-Mail bestätigen",
+  "dashboardConfirmEmail": "E-Mail bestätigen",
+  "dashboardRiskTitle": "Serie gefährdet",
+  "dashboardFreezeHint": "Gestern fehlt ein Eintrag. Schütze den Tag mit einem Schutz ({count} übrig).",
+  "dashboardLogHint": "Kein Schutz verfügbar. Trage heute eine Einheit ein, um neu zu starten.",
+  "dashboardFreeze": "Schützen",
+  "dashboardLogNow": "Jetzt eintragen",
+  "dashboardFreezeUsed": "Schutz verwendet — gestern ist geschützt.",
+  "dashboardLogged": "Eingetragen",
+  "dashboardYesterday": "Gestern",
+  "dashboardDaysAgo": "Vor {count} Tagen",
+  "@dashboardNextUp": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashboardFreezeHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashboardDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardChecklistProgress": "{done} von {total} erledigt",
+  "@dashboardChecklistProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionKcalLeft": "kcal übrig",
+  "nutritionOverTarget": "{kcal} kcal über dem Ziel",
+  "nutritionViewPlan": "Ernährungsplan ansehen",
+  "nutritionRecipesFit": "Passende Rezepte",
+  "nutritionMacroGrams": "{value} / {target} g",
+  "nutritionGrams": "{value} g",
+  "trainingSessionDone": "Erledigt",
+  "trainingStartSession": "{session} starten",
+  "@nutritionOverTarget": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutritionMacroGrams": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutritionGrams": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@trainingStartSession": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingBack": "Zurück",
+  "onboardingStep": "Schritt {current} von {total}",
+  "onboardingSummary": "{days} Tage pro Woche · {level} · {goal}",
+  "onboardingLoseFat": "Fett verlieren",
+  "onboardingMaintain": "Gewicht halten",
+  "onboardingGainMuscle": "Muskeln aufbauen",
+  "onboardingBeginner": "Anfänger",
+  "onboardingIntermediate": "Fortgeschritten",
+  "onboardingAdvanced": "Erfahren",
+  "onboardingFighter": "Wettkämpfer",
+  "welcomeProgressTitle": "Sieh deine Fortschritte.",
+  "planReadyExplanation": "Dein Plan richtet sich nach deinen Zielen und Trainingstagen. Du kannst ihn anpassen, wenn sich dein Training ändert.",
+  "planReadyProTitle": "Weitere Trainingshilfen mit Pro",
+  "planReadyProBody": "Pro enthält einen täglichen Fighter Brief, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.",
+  "planReadyCalories": "Tägliche Kalorien",
+  "planReadyMissingTarget": "Deine Trainingswoche steht. Ergänze deine Körperdaten unter Fuel, um ein Tagesziel zu berechnen.",
+  "@onboardingStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@onboardingSummary": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "level": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "profileFreePlan": "Kostenloser Plan",
+  "profileProActive": "Pro-Abonnement aktiv",
+  "profileProDescription": "Täglicher Brief, alle Übungen und Rezepte",
+  "profileUpgrade": "Upgrade",
+  "profileManage": "Verwalten",
+  "settingsProPlan": "Pro",
+  "settingsFreePlan": "Kostenlos",
+  "dashboardEffort": "Anstrengung {rating}/10",
+  "paywallPlainTitle": "Trainingshilfen mit Pro",
+  "paywallPlainSubtitle": "Tägliches Coaching, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.",
+  "fuelRecipesTitle": "Rezepte für deinen Tag",
+  "@dashboardEffort": {
+    "placeholders": {
+      "rating": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallMonthly": "Monatlich · {price}",
+  "fuelMealsLogged": "Mahlzeiten erfasst · {eaten}/{total}",
+  "@paywallMonthly": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "@fuelMealsLogged": {
+    "placeholders": {
+      "eaten": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "learningStart": "Hier starten",
+  "learningChoose": "Wähle eine Disziplin",
+  "learningChooseHint": "Wir speichern deine Wahl für dieses Konto. Du kannst sie jederzeit ändern.",
+  "learningChange": "Lernpfad wechseln",
+  "learningStriking": "Schlagtechniken",
+  "learningWrestling": "Ringen",
+  "learningBjj": "BJJ",
+  "learningClinch": "Clinch",
+  "learningStrikingHint": "Lerne Schläge, Abwehr und Tritte Schritt für Schritt.",
+  "learningWrestlingHint": "Übe deinen Stand, dann lerne, jemanden zu Boden zu bringen und das selbst abzuwehren.",
+  "learningBjjHint": "Brasilianisches Jiu-Jitsu: Lerne, dich am Boden zu bewegen und zu befreien.",
+  "learningClinchHint": "Lerne Haltegriffe, Kniestöße und Kontrolle im engen Standkampf.",
+  "learningFoundations": "Grundlagen",
+  "learningBuilding": "Aufbau",
+  "learningSharp": "Sicher",
+  "learningCount": "{completed} von {total} Techniken sicher",
+  "@learningCount": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "learningLearn": "Lernen: {drill}",
+  "@learningLearn": {"placeholders": {"drill": {"type": "String"}}},
+  "learningLocked": "Pro-Technik · Lernpfad pausiert",
+  "learningViewPro": "Pro-Optionen ansehen",
+  "learningComplete": "Lernpfad abgeschlossen",
+  "learningCompleteHint": "Übe diese Techniken weiter oder wähle eine andere Disziplin.",
+  "learningProgressHint": "Sicher bedeutet, dass du die Technik kontrolliert wiederholen kannst.",
+  "learningNext": "Als Nächstes in deinem Lernpfad",
+  "learningAfter": "Nach dieser Technik: {drill}",
+  "@learningAfter": {"placeholders": {"drill": {"type": "String"}}},
+  "learningKeepPractising": "Übe diese Technik weiter. Markiere sie als sicher, wenn du sie kontrolliert wiederholen kannst, um im Lernpfad weiterzugehen.",
+  "learningPractiseLast": "Dies ist die letzte Technik deines Lernpfads. Übe weiter und markiere sie als sicher, sobald du bereit bist."
 }

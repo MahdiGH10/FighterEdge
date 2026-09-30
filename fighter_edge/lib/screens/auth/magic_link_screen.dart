@@ -88,7 +88,7 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
               ),
               const SizedBox(height: Insets.lg),
               PrimaryButton(
-                auth.isBusy ? 'Sending…' : 'Send Code',
+                auth.isBusy ? 'Sending…' : 'Send code',
                 expand: true,
                 onPressed: auth.isBusy ? null : _sendCode,
               ),
@@ -122,7 +122,7 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
               ],
               const SizedBox(height: Insets.lg),
               PrimaryButton(
-                auth.isBusy ? 'Verifying…' : 'Verify & Continue',
+                auth.isBusy ? 'Verifying…' : 'Verify & continue',
                 expand: true,
                 onPressed: auth.isBusy ? null : _verify,
               ),

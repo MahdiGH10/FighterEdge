@@ -101,7 +101,7 @@ class _FoodStepState extends State<FoodStep> {
                       mealsPerDay: mealsPerDay - 1),
             ),
             SizedBox(
-              width: 56,
+              width: LayoutTokens.stepperValue,
               child: Text('$mealsPerDay',
                   textAlign: TextAlign.center, style: AppType.title1()),
             ),
@@ -209,7 +209,7 @@ class _StepButton extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Radii.tile),
           ),
           child: SizedBox.square(
             dimension: AppAccessibility.minTouchTarget,

@@ -50,7 +50,9 @@ void main() {
     expect(find.text('Your first week'), findsOneWidget);
 
     // The tour runs from the checklist, and skipping still counts as seen.
-    await tester.tap(find.text('Take the 30-second tour'));
+    await tester.tap(find.text('Your first week'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Take the 30-second tour').last);
     await tester.pumpAndSettle();
     expect(find.byType(CoachMarkLayer), findsOneWidget);
     expect(find.text('1 of 4'), findsOneWidget);
@@ -67,7 +69,7 @@ void main() {
     expect(find.text('First meal logged.'), findsOneWidget);
     expect(find.text('Want a nudge on training days?'), findsOneWidget);
 
-    await tester.tap(find.text('REMIND ME'));
+    await tester.tap(find.text('Remind me'));
     await tester.pumpAndSettle();
     expect(find.text('First meal logged.'), findsNothing);
     expect(shell.read<AppState>().campReminders, isTrue);

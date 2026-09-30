@@ -78,7 +78,7 @@ class LEn extends L {
       'AI Fighter Brief, full drill and recipe libraries, corner cues';
 
   @override
-  String get settingsSectionTraining => 'Training Preferences';
+  String get settingsSectionTraining => 'Training preferences';
 
   @override
   String get settingsMetricUnits => 'Metric units';
@@ -111,7 +111,7 @@ class LEn extends L {
   String get settingsCampRemindersOff => 'Get a nudge on the days you train';
 
   @override
-  String get settingsSectionSafety => 'Safety & Trust';
+  String get settingsSectionSafety => 'Safety & trust';
 
   @override
   String get settingsSafeCut => 'Safe cut guidance';
@@ -161,13 +161,13 @@ class LEn extends L {
   String get dashboardTitle => 'Dashboard';
 
   @override
-  String get dashboardWeeklyOverview => 'Weekly Overview';
+  String get dashboardWeeklyOverview => 'Weekly overview';
 
   @override
-  String get dashboardNextSession => 'Next Session';
+  String get dashboardNextSession => 'Next session';
 
   @override
-  String get dashboardRecentActivity => 'Recent Activity';
+  String get dashboardRecentActivity => 'Recent activity';
 
   @override
   String get dashboardSeeAll => 'See all';
@@ -208,7 +208,7 @@ class LEn extends L {
   String get dashboardStreakLogToday => 'Log today';
 
   @override
-  String get fuelWeekTitle => 'FUEL THIS WEEK';
+  String get fuelWeekTitle => 'Fuel this week';
 
   @override
   String fuelWeekLogged(int count) {
@@ -258,6 +258,24 @@ class LEn extends L {
   String get nutritionAddFood => 'Add food';
 
   @override
+  String get nutritionPreviousDay => 'Previous day';
+
+  @override
+  String get nutritionNextDay => 'Next day';
+
+  @override
+  String get trainingLogSession => 'Log session';
+
+  @override
+  String get trainingEditSessionLog => 'Edit session log';
+
+  @override
+  String get weightFieldLabel => 'Weight';
+
+  @override
+  String get weightAddWeighIn => 'Add weigh-in';
+
+  @override
   String get nutritionSearchFoods => 'Search foods';
 
   @override
@@ -283,10 +301,10 @@ class LEn extends L {
   }
 
   @override
-  String get addFoodSaved => 'SAVED';
+  String get addFoodSaved => 'Saved';
 
   @override
-  String get addFoodRecent => 'RECENT';
+  String get addFoodRecent => 'Recent';
 
   @override
   String get addFoodManual => 'Enter macros manually';
@@ -307,7 +325,7 @@ class LEn extends L {
       'Try a simpler word (\"rice\", \"chicken\"), or enter the macros yourself below.';
 
   @override
-  String get addFoodHowMuch => 'HOW MUCH?';
+  String get addFoodHowMuch => 'How much?';
 
   @override
   String get addFoodGrams => 'Grams';
@@ -372,7 +390,7 @@ class LEn extends L {
   }
 
   @override
-  String get timerYourCorner => 'YOUR CORNER';
+  String get timerYourCorner => 'Your corner';
 
   @override
   String get timerCornerTeaser =>
@@ -617,13 +635,13 @@ class LEn extends L {
   String get reactionLevelAdvancedPlus => 'Advanced+';
 
   @override
-  String get reactionStatDuration => 'DURATION';
+  String get reactionStatDuration => 'Duration';
 
   @override
-  String get reactionStatMoves => 'MOVES';
+  String get reactionStatMoves => 'Moves';
 
   @override
-  String get reactionStatReact => 'REACTION';
+  String get reactionStatReact => 'Reaction';
 
   @override
   String reactionInTheMix(int count) {
@@ -802,4 +820,326 @@ class LEn extends L {
 
   @override
   String get authHidePassword => 'Hide password';
+
+  @override
+  String get dashboardThisWeek => 'This week';
+
+  @override
+  String get dashboardFighter => 'Fighter';
+
+  @override
+  String get dashboardToday => 'Today';
+
+  @override
+  String get dashboardNoPlan => 'No sessions planned';
+
+  @override
+  String get dashboardWeekDone => 'Week complete';
+
+  @override
+  String get dashboardRestDay => 'Rest day';
+
+  @override
+  String get dashboardRecovery =>
+      'Your planned sessions are done. Take time to recover.';
+
+  @override
+  String get dashboardPlanHint => 'Open Train to set up your week.';
+
+  @override
+  String dashboardNextUp(String day, String session) {
+    return 'Next: $day · $session';
+  }
+
+  @override
+  String get dashboardStartSession => 'Start session';
+
+  @override
+  String get dashboardOpenCamp => 'Open camp';
+
+  @override
+  String get dashboardSetFuel => 'Set a fuel target';
+
+  @override
+  String get dashboardFuelInfo => 'Why this target matters';
+
+  @override
+  String get dashboardFuelExplanation =>
+      'Calories support your goal. Protein supports recovery and muscle. Carbohydrates provide energy for training.';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get dashboardNoActivity =>
+      'Complete your first session to start your history.';
+
+  @override
+  String get dashboardVerifyEmail => 'Verify your email';
+
+  @override
+  String get dashboardConfirmEmail => 'Confirm your email';
+
+  @override
+  String get dashboardRiskTitle => 'Streak at risk';
+
+  @override
+  String dashboardFreezeHint(int count) {
+    return 'Yesterday is unlogged. Protect it with a freeze ($count left).';
+  }
+
+  @override
+  String get dashboardLogHint =>
+      'No freeze is available. Log a session today to start again.';
+
+  @override
+  String get dashboardFreeze => 'Freeze';
+
+  @override
+  String get dashboardLogNow => 'Log now';
+
+  @override
+  String get dashboardFreezeUsed => 'Freeze used — yesterday is protected.';
+
+  @override
+  String get dashboardLogged => 'Logged';
+
+  @override
+  String get dashboardYesterday => 'Yesterday';
+
+  @override
+  String dashboardDaysAgo(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String dashboardChecklistProgress(int done, int total) {
+    return '$done of $total complete';
+  }
+
+  @override
+  String get nutritionKcalLeft => 'kcal left';
+
+  @override
+  String nutritionOverTarget(int kcal) {
+    return '$kcal kcal above target';
+  }
+
+  @override
+  String get nutritionViewPlan => 'View fuel plan';
+
+  @override
+  String get nutritionRecipesFit => 'Recipes that fit';
+
+  @override
+  String nutritionMacroGrams(int value, int target) {
+    return '$value / $target g';
+  }
+
+  @override
+  String nutritionGrams(int value) {
+    return '$value g';
+  }
+
+  @override
+  String get trainingSessionDone => 'Done';
+
+  @override
+  String trainingStartSession(String session) {
+    return 'Start $session';
+  }
+
+  @override
+  String get onboardingBack => 'Back';
+
+  @override
+  String onboardingStep(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String onboardingSummary(int days, String level, String goal) {
+    return '$days days a week · $level · $goal';
+  }
+
+  @override
+  String get onboardingLoseFat => 'Lose fat';
+
+  @override
+  String get onboardingMaintain => 'Maintain weight';
+
+  @override
+  String get onboardingGainMuscle => 'Gain muscle';
+
+  @override
+  String get onboardingBeginner => 'Beginner';
+
+  @override
+  String get onboardingIntermediate => 'Intermediate';
+
+  @override
+  String get onboardingAdvanced => 'Advanced';
+
+  @override
+  String get onboardingFighter => 'Fighter';
+
+  @override
+  String get welcomeProgressTitle => 'See your progress.';
+
+  @override
+  String get planReadyExplanation =>
+      'Your plan is based on your goals and training days. You can adjust it as your training changes.';
+
+  @override
+  String get planReadyProTitle => 'More training tools with Pro';
+
+  @override
+  String get planReadyProBody =>
+      'Pro includes a daily Fighter Brief, all drills and recipes, and cues between rounds.';
+
+  @override
+  String get planReadyCalories => 'Daily calories';
+
+  @override
+  String get planReadyMissingTarget =>
+      'Your training week is ready. Add body details in Fuel to calculate a daily target.';
+
+  @override
+  String get profileFreePlan => 'Free plan';
+
+  @override
+  String get profileProActive => 'Pro subscription active';
+
+  @override
+  String get profileProDescription => 'Daily brief, all drills and recipes';
+
+  @override
+  String get profileUpgrade => 'Upgrade';
+
+  @override
+  String get profileManage => 'Manage';
+
+  @override
+  String get settingsProPlan => 'Pro';
+
+  @override
+  String get settingsFreePlan => 'Free';
+
+  @override
+  String dashboardEffort(int rating) {
+    return 'Effort $rating/10';
+  }
+
+  @override
+  String get paywallPlainTitle => 'Training tools with Pro';
+
+  @override
+  String get paywallPlainSubtitle =>
+      'Daily coaching, every drill and recipe, and cues between rounds.';
+
+  @override
+  String get fuelRecipesTitle => 'Recipes for your day';
+
+  @override
+  String paywallMonthly(String price) {
+    return 'Monthly · $price';
+  }
+
+  @override
+  String fuelMealsLogged(int eaten, int total) {
+    return 'Meals logged · $eaten/$total';
+  }
+
+  @override
+  String get learningStart => 'Start here';
+
+  @override
+  String get learningChoose => 'Choose a discipline';
+
+  @override
+  String get learningChooseHint =>
+      'We will remember your choice on this account. You can change it any time.';
+
+  @override
+  String get learningChange => 'Change path';
+
+  @override
+  String get learningStriking => 'Striking';
+
+  @override
+  String get learningWrestling => 'Wrestling';
+
+  @override
+  String get learningBjj => 'BJJ';
+
+  @override
+  String get learningClinch => 'Clinch';
+
+  @override
+  String get learningStrikingHint =>
+      'Learn punches, defence and kicks in order.';
+
+  @override
+  String get learningWrestlingHint =>
+      'Build your stance, then learn to take someone down and defend a takedown.';
+
+  @override
+  String get learningBjjHint =>
+      'Brazilian jiu-jitsu: learn to move and escape when training on the ground.';
+
+  @override
+  String get learningClinchHint =>
+      'Learn close-range holds, knees and control while standing.';
+
+  @override
+  String get learningFoundations => 'Foundations';
+
+  @override
+  String get learningBuilding => 'Building';
+
+  @override
+  String get learningSharp => 'Sharp';
+
+  @override
+  String learningCount(int completed, int total) {
+    return '$completed of $total drills sharp';
+  }
+
+  @override
+  String learningLearn(String drill) {
+    return 'Learn: $drill';
+  }
+
+  @override
+  String get learningLocked => 'Pro drill · path paused';
+
+  @override
+  String get learningViewPro => 'View Pro options';
+
+  @override
+  String get learningComplete => 'Path complete';
+
+  @override
+  String get learningCompleteHint =>
+      'Keep practising these drills, or choose another discipline.';
+
+  @override
+  String get learningProgressHint =>
+      'Sharp means you can repeat the drill with control.';
+
+  @override
+  String get learningNext => 'Next in your path';
+
+  @override
+  String learningAfter(String drill) {
+    return 'After this drill: $drill';
+  }
+
+  @override
+  String get learningKeepPractising =>
+      'Keep practising this drill. Mark it Sharp when you can repeat it with control to advance your path.';
+
+  @override
+  String get learningPractiseLast =>
+      'This is the last drill in your path. Keep practising, then mark it Sharp when you are ready.';
 }

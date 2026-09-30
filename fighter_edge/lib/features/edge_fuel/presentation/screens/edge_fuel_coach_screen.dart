@@ -102,7 +102,7 @@ class _CoachBodyState extends State<_CoachBody> {
       _scroll.animateTo(
         _scroll.position.maxScrollExtent,
         duration: MotionTokens.standard,
-        curve: Curves.easeOut,
+        curve: MotionTokens.scroll,
       );
     });
   }
@@ -425,7 +425,7 @@ class _FuelMatchPanel extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'FUEL MATCH',
+              'Fuel Match',
               style: AppType.micro(
                 color: AppColors.premium,
                 weight: FontWeight.w800,
@@ -520,7 +520,7 @@ class _FuelMatchReady extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'YOUR FUEL MATCH',
+          'Your Fuel Match',
           style: AppType.micro(
             color: AppColors.premium,
             weight: FontWeight.w800,
@@ -715,7 +715,7 @@ class _UserBubble extends StatelessWidget {
           ),
           child: Text(
             text,
-            style: AppType.body(color: Colors.white),
+            style: AppType.body(color: AppColors.onPrimary),
           ),
         ),
       ),
@@ -987,7 +987,7 @@ class _BriefCard extends StatelessWidget {
                   index: 1,
                   child: _BriefSection(
                     icon: Icons.flag_outlined,
-                    label: 'NEXT ACTION',
+                    label: 'Next action',
                     value: result.response!.brief!.nextAction,
                     lead: true,
                   ),
@@ -996,7 +996,7 @@ class _BriefCard extends StatelessWidget {
                   index: 2,
                   child: _BriefSection(
                     icon: Icons.restaurant_outlined,
-                    label: 'MEAL SUGGESTION',
+                    label: 'Meal suggestion',
                     value: result.response!.brief!.mealSuggestion,
                   ),
                 ),
@@ -1004,7 +1004,7 @@ class _BriefCard extends StatelessWidget {
                   index: 3,
                   child: _BriefSection(
                     icon: Icons.schedule_outlined,
-                    label: 'TRAINING TIMING',
+                    label: 'Training timing',
                     value: result.response!.brief!.trainingTiming,
                   ),
                 ),
@@ -1012,7 +1012,7 @@ class _BriefCard extends StatelessWidget {
                   index: 4,
                   child: _BriefSection(
                     icon: Icons.calendar_month_outlined,
-                    label: 'WEEKLY ADJUSTMENT',
+                    label: 'Weekly adjustment',
                     value: result.response!.brief!.weeklyAdjustment,
                   ),
                 ),
@@ -1310,7 +1310,7 @@ class _InputBar extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.arrow_upward_rounded,
-                          color: Colors.white),
+                          color: AppColors.onPrimary),
                     ),
                   ),
                 ),

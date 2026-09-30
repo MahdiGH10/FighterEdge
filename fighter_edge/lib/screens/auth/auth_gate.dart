@@ -62,7 +62,7 @@ class _Splash extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: AppColors.background,
-      body: PremiumBackground(
+      body: AppBackground(
         child: Center(
           child: PremiumReveal(child: BrandLogo(scale: 1.2)),
         ),

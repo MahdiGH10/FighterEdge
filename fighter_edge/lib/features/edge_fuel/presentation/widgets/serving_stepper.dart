@@ -1,3 +1,4 @@
+import '../../../../theme/app_accessibility.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../theme/app_colors.dart';
@@ -113,10 +114,9 @@ class _StepButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(Radii.button),
           ),
           child: SizedBox(
-            // 44px minimum touch target, per the project's standing
-            // accessibility rule in ROADMAP.md.
-            width: 48,
-            height: 48,
+            // Shared minimum touch target for every platform.
+            width: AppAccessibility.minTouchTarget,
+            height: AppAccessibility.minTouchTarget,
             child: Icon(
               icon,
               size: 20,

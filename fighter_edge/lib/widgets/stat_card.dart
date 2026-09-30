@@ -13,8 +13,15 @@ class AppCard extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
   final Color? color;
+
+  /// Tints the border to carry *state or meaning*: a selected option, a
+  /// warning, a Pro surface. Never decoration: when every card is outlined in
+  /// red, none of them reads as the important one.
   final Color? accent;
-  final Gradient? gradient;
+
+  /// Lifts the card one step up the surface ramp. Depth comes from the
+  /// surfaces, not from shadows or gradients, which read as noise on a dark
+  /// ground.
   final bool elevated;
 
   const AppCard({
@@ -24,7 +31,6 @@ class AppCard extends StatelessWidget {
     this.onTap,
     this.color,
     this.accent,
-    this.gradient,
     this.elevated = false,
   });
 
@@ -34,19 +40,9 @@ class AppCard extends StatelessWidget {
         accent?.withValues(alpha: .42) ?? AppAccessibility.border(context);
     final content = DecoratedBox(
       decoration: BoxDecoration(
-        color: gradient == null ? color ?? AppColors.surface : null,
-        gradient: gradient,
+        color: color ?? (elevated ? AppColors.surfaceAlt : AppColors.surface),
         borderRadius: BorderRadius.circular(Radii.card),
         border: Border.all(color: borderColor),
-        boxShadow: elevated
-            ? [
-                BoxShadow(
-                  color: (accent ?? Colors.black).withValues(alpha: .16),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : null,
       ),
       child: Padding(padding: padding, child: child),
     );
@@ -101,7 +97,7 @@ class StatCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              label.toUpperCase(),
+              label,
               style: AppAccessibility.adjustStyle(
                 context,
                 AppType.micro(
@@ -131,9 +127,9 @@ class StatCard extends StatelessWidget {
                   else
                     _AnimatedMetricValue(value: value),
                   if (unit.isNotEmpty) ...[
-                    const SizedBox(width: 3),
+                    const SizedBox(width: Insets.xs),
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 3),
+                      padding: const EdgeInsets.only(bottom: Insets.xs),
                       child: Text(unit,
                           style: AppAccessibility.adjustStyle(
                             context,
@@ -156,8 +152,6 @@ class StatCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       delta!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: AppType.micro(
                         weight: FontWeight.w600,
                         color: deltaColor,

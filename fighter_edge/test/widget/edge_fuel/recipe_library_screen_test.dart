@@ -102,9 +102,9 @@ void main() {
       await tester.tap(find.text('Labneh bowl with cucumber and olives'));
       await tester.pumpAndSettle();
 
-      expect(find.text('SEE PRO'), findsOneWidget);
+      expect(find.text('See Pro'), findsOneWidget);
       // The method must not be readable through the lock.
-      expect(find.text('METHOD'), findsNothing);
+      expect(find.text('Method'), findsNothing);
     },
   );
 

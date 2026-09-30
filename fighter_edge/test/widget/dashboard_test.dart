@@ -6,15 +6,18 @@ import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/models/training_session.dart';
 import 'package:fighter_edge/screens/dashboard_screen.dart';
+import 'package:fighter_edge/screens/round_timer_screen.dart';
+import 'package:fighter_edge/widgets/primary_button.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/theme/app_theme.dart';
 
 import '../helpers/test_harness.dart';
 
 void main() {
+  final wednesday = DateTime(2026, 9, 23, 20);
   testWidgets('shows the fighter, sections and live weight', (tester) async {
     final repo = await makeRepo(signedIn: true);
-    final state = AppState();
+    final state = AppState(clock: () => wednesday);
     await tester.pumpWidget(wrapApp(
       DashboardScreen(onNavigate: (_) {}),
       repo: repo,
@@ -24,13 +27,13 @@ void main() {
 
     expect(find.text('DASHBOARD'), findsOneWidget);
     expect(find.text('Ayoub'), findsOneWidget);
-    expect(find.text('WEEKLY OVERVIEW'), findsOneWidget);
+    expect(find.text('This week'), findsOneWidget);
     expect(find.text('77.2'), findsWidgets); // weight stat from AppState
   });
 
   testWidgets('weight card reacts to AppState changes', (tester) async {
     final repo = await makeRepo(signedIn: true);
-    final state = AppState();
+    final state = AppState(clock: () => wednesday);
     await tester.pumpWidget(wrapApp(
       DashboardScreen(onNavigate: (_) {}),
       repo: repo,
@@ -38,10 +41,69 @@ void main() {
     ));
     await tester.pump();
 
-    state.addWeight(DateTime.now(), 75.0);
+    state.addWeight(state.weights.last.date.add(const Duration(days: 1)), 75.0);
     await tester.pumpAndSettle(MotionTokens.standard);
     expect(find.text('75.0'), findsWidgets);
   });
+
+  testWidgets('one hero starts the exact session planned for today',
+      (tester) async {
+    final repo = await makeRepo(signedIn: true);
+    final data = InMemoryDataRepository();
+    const session = TrainingSession(
+        day: 'Wed',
+        title: 'Boxing',
+        subtitle: 'Jab practice',
+        completed: false,
+        icon: Icons.sports_mma);
+    await data.saveSession(repo.currentUser!.id, session);
+    final state = AppState(dataRepository: data, clock: () => wednesday)
+      ..setUser(repo.currentUser!.id);
+    await tester.pumpWidget(
+        wrapApp(DashboardScreen(onNavigate: (_) {}), repo: repo, state: state));
+    await tester.pumpAndSettle();
+    expect(find.byType(PrimaryButton), findsOneWidget);
+    expect(find.text('Boxing'), findsOneWidget);
+    expect(find.text('Streak'), findsOneWidget);
+    expect(find.text('Why this target matters'), findsNothing);
+    await tester.tap(find.byTooltip('Why this target matters'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Calories support'), findsOneWidget);
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start session'));
+    await tester.pumpAndSettle();
+    expect(
+        tester
+            .widget<RoundTimerScreen>(find.byType(RoundTimerScreen))
+            .session
+            ?.id,
+        session.id);
+  });
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets('dashboard labels fit at 320px and text scale $scale',
+        (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = scale;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final repo = await makeRepo(signedIn: true);
+      await tester.pumpWidget(wrapApp(DashboardScreen(onNavigate: (_) {}),
+          repo: repo,
+          state: AppState(
+              dataRepository: InMemoryDataRepository(),
+              clock: () => wednesday)));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('Add weigh-in'), 150);
+      final label = tester.widget<Text>(find.text('Add weigh-in'));
+      expect(label.maxLines, isNull);
+      expect(label.overflow, isNot(TextOverflow.ellipsis));
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('unverified users can request another verification email',
       (tester) async {
@@ -57,7 +119,7 @@ void main() {
     await tester.pumpWidget(wrapApp(
       DashboardScreen(onNavigate: (_) {}),
       repo: repo,
-      state: AppState(),
+      state: AppState(clock: () => wednesday),
     ));
     await tester.pump();
 
@@ -72,8 +134,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('RESEND EMAIL'), findsOneWidget);
-    await tester.tap(find.text('RESEND EMAIL'));
+    expect(find.text('Resend email'), findsOneWidget);
+    await tester.tap(find.text('Resend email'));
     await tester.pump();
 
     expect(repo.verificationSent, isTrue);
@@ -91,7 +153,7 @@ void main() {
     // — alive through two days ago, nothing logged yesterday or today.
     Future<AppState> atRiskState(String userId) async {
       final repo = InMemoryDataRepository();
-      final now = DateTime.now();
+      final now = wednesday;
       Future<void> seed(String day, int daysAgo) => repo.saveSession(
             userId,
             TrainingSession(
@@ -105,7 +167,8 @@ void main() {
           );
       await seed('a', 2);
       await seed('b', 3);
-      return AppState(dataRepository: repo)..setUser(userId);
+      return AppState(dataRepository: repo, clock: () => wednesday)
+        ..setUser(userId);
     }
 
     testWidgets('is not shown when nothing is at risk', (tester) async {
@@ -113,11 +176,22 @@ void main() {
       await tester.pumpWidget(wrapApp(
         DashboardScreen(onNavigate: (_) {}),
         repo: repo,
-        state: AppState(),
+        state: AppState(clock: () => wednesday),
       ));
       await tester.pump();
 
       expect(find.text('Streak at risk'), findsNothing);
+    });
+
+    testWidgets('demo streak is at risk on Saturday', (tester) async {
+      final repo = await makeRepo(signedIn: true);
+      await tester.pumpWidget(wrapApp(
+        DashboardScreen(onNavigate: (_) {}),
+        repo: repo,
+        state: AppState(clock: () => DateTime(2026, 9, 26, 20)),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text('Streak at risk'), findsOneWidget);
     });
 
     testWidgets('offers to spend a banked freeze, and using it clears it',
@@ -138,7 +212,7 @@ void main() {
       expect(find.text('Streak at risk'), findsOneWidget);
       expect(find.textContaining('(1 left)'), findsOneWidget);
 
-      await tester.tap(find.text('FREEZE'));
+      await tester.tap(find.text('Freeze'));
       await tester.pumpAndSettle();
 
       expect(find.text('Streak at risk'), findsNothing);
@@ -162,9 +236,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Streak at risk'), findsOneWidget);
-      expect(find.text('FREEZE'), findsNothing);
+      expect(find.text('Freeze'), findsNothing);
 
-      await tester.tap(find.text('LOG NOW'));
+      await tester.tap(find.text('Log now'));
       await tester.pump();
       expect(navigatedTo, 1); // Train tab, where sessions are completed
     });

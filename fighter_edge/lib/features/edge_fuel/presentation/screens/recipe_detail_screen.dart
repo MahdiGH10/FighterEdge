@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../billing/subscription.dart';
 import '../../../../routing/app_navigation.dart';
 import '../../../../routing/app_router.dart';
 import '../../../../screens/paywall_screen.dart';
+import '../../../../theme/app_accessibility.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_haptics.dart';
 import '../../../../theme/app_theme.dart';
@@ -18,10 +20,12 @@ import '../../domain/models/food_enums.dart';
 import '../../domain/models/food_item.dart';
 import '../../domain/models/food_log_entry.dart';
 import '../../domain/models/recipe.dart';
+import '../../data/recipe_photos.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../controllers/recipe_library_controller.dart';
 import '../recipe_copy.dart';
 import '../widgets/allergen_notice.dart';
+import '../widgets/recipe_photo_image.dart';
 import '../widgets/serving_stepper.dart';
 
 /// Full recipe view with serving scaling and add-to-day (master prompt §5.3).
@@ -76,8 +80,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       title: recipe.title,
       showBack: true,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+        padding: const EdgeInsets.fromLTRB(
+            Insets.lg, Insets.none, Insets.lg, Insets.xxl),
         children: [
+          if (recipePhotoFor(recipe.id) case final photo?) ...[
+            _RecipeHero(photo: photo),
+            const SizedBox(height: Insets.lg),
+          ],
           Text(
             recipe.description,
             style: AppType.callout(color: AppColors.textSecondary),
@@ -91,7 +100,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             nutrients: nutrients,
           ),
           const SizedBox(height: Insets.xl),
-          const _SectionTitle('INGREDIENTS'),
+          const _SectionTitle('Ingredients'),
           const SizedBox(height: Insets.sm),
           for (final ingredient in recipe.ingredients)
             _IngredientRow(
@@ -100,13 +109,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               scale: scale,
             ),
           const SizedBox(height: Insets.xl),
-          const _SectionTitle('METHOD'),
+          const _SectionTitle('Method'),
           const SizedBox(height: Insets.sm),
           for (var i = 0; i < recipe.steps.length; i++)
             _StepRow(number: i + 1, text: recipe.steps[i]),
           if (recipe.substitutions.isNotEmpty) ...[
             const SizedBox(height: Insets.xl),
-            const _SectionTitle('SWAPS'),
+            const _SectionTitle('Swaps'),
             const SizedBox(height: Insets.sm),
             for (final sub in recipe.substitutions)
               _SubstitutionRow(
@@ -189,7 +198,7 @@ class _LockedRecipe extends StatelessWidget {
               height: 64,
               decoration: BoxDecoration(
                 color: AppColors.premium.withValues(alpha: .16),
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(Radii.card),
               ),
               child: const Icon(
                 Icons.lock_outline,
@@ -311,7 +320,7 @@ class _ServingsCard extends StatelessWidget {
                       style: AppType.largeTitle(spacing: -0.5),
                     ),
                     Text(
-                      'KCAL',
+                      'kcal',
                       style: AppType.micro(
                         color: AppColors.textMuted,
                         weight: FontWeight.w700,
@@ -321,9 +330,9 @@ class _ServingsCard extends StatelessWidget {
                   ],
                 ),
               ),
-              _Macro('PROTEIN', nutrients.proteinRounded, AppColors.protein),
-              _Macro('CARBS', nutrients.carbsRounded, AppColors.carbs),
-              _Macro('FAT', nutrients.fatRounded, AppColors.fats),
+              _Macro('Protein', nutrients.proteinRounded, AppColors.protein),
+              _Macro('Carbs', nutrients.carbsRounded, AppColors.carbs),
+              _Macro('Fat', nutrients.fatRounded, AppColors.fats),
             ],
           ),
         ],
@@ -399,7 +408,7 @@ class _IngredientRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 64,
+            width: LayoutTokens.quantityColumn,
             child: Text(
               '${grams.round()} g',
               style: AppType.subhead(
@@ -449,7 +458,7 @@ class _StepRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 26,
+              width: LayoutTokens.servingLabel,
               child: Text(
                 '$number',
                 style: AppType.title2(color: AppColors.primary),
@@ -507,4 +516,75 @@ class _Provenance extends StatelessWidget {
         RecipeCopy.draftNotice,
         style: AppType.subhead(color: AppColors.textMuted),
       );
+}
+
+/// The recipe photo with its credit. CC BY requires crediting the author and
+/// licence; tapping the credit opens the photo's own page, which shows both.
+class _RecipeHero extends StatelessWidget {
+  final RecipePhoto photo;
+  const _RecipeHero({required this.photo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(Radii.card),
+          child: AspectRatio(
+            aspectRatio: LayoutTokens.recipeHeroAspectRatio,
+            child: LayoutBuilder(
+              builder: (context, constraints) =>
+                  RecipePhotoImage(photo, displayWidth: constraints.maxWidth),
+            ),
+          ),
+        ),
+        Semantics(
+          link: true,
+          label: 'Photo by ${photo.author}, ${photo.license}. '
+              'Opens the photo page.',
+          excludeSemantics: true,
+          child: InkWell(
+            onTap: () => _openSource(),
+            borderRadius: BorderRadius.circular(Radii.tile),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: AppAccessibility.minTouchTarget,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.photo_camera_outlined,
+                    size: IconSizes.small,
+                    color: AppAccessibility.textMuted(context),
+                  ),
+                  const SizedBox(width: Insets.xs),
+                  Expanded(
+                    child: Text(
+                      photo.credit,
+                      style: AppType.subhead(
+                        color: AppAccessibility.textMuted(context),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _openSource() async {
+    AppHaptics.tap();
+    try {
+      await launchUrl(
+        Uri.parse(photo.sourceUrl),
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (_) {
+      // No browser available: the credit stays visible on screen.
+    }
+  }
 }

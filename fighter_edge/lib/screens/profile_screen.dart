@@ -14,9 +14,9 @@ import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
-import '../widgets/press_scale.dart';
+import '../widgets/grouped_list.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../widgets/section_header.dart';
-import '../widgets/stat_card.dart';
 import 'dashboard_screen.dart';
 import 'paywall_screen.dart';
 import 'round_timer_screen.dart';
@@ -34,6 +34,7 @@ class ProfileScreen extends StatelessWidget {
     final streakDays = StreakEngine.streakDays(
       state.trainingDayKeys,
       protectedDateKeys: streak.protectedDateKeys,
+      now: state.now,
     );
     final weight = state.latestWeight;
     final auth = context.watch<AuthController>();
@@ -41,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
     // Height lives in the EdgeFuel setup draft — it is the only place the app
     // actually asks for it. Absent until the user completes nutrition setup.
     final heightCm = context.watch<EdgeFuelController>().draft?.heightCm;
-    final largeText = MediaQuery.textScalerOf(context).scale(14) / 14 >= 1.4;
+    final largeText = AppAccessibility.isLargeText(context);
 
     final displayName =
         (user?.displayName.isNotEmpty ?? false) ? user!.displayName : 'Fighter';
@@ -51,7 +52,9 @@ class ProfileScreen extends StatelessWidget {
     final goalLine = (user?.goal.isNotEmpty ?? false) ? user!.goal : null;
     final measurements = [
       if (heightCm != null) '${heightCm.round()} cm',
-      if (weight > 0) '${weight.toStringAsFixed(1)} ${state.weightUnitLabel}',
+      if (weight > 0)
+        '${state.displayWeight(weight).toStringAsFixed(1)} '
+            '${state.weightUnitLabel}',
     ].join(' · ');
 
     final details = Column(
@@ -75,7 +78,8 @@ class ProfileScreen extends StatelessWidget {
       ],
     );
     final body = ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xxl),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
       children: [
         if (largeText)
           Column(
@@ -99,54 +103,41 @@ class ProfileScreen extends StatelessWidget {
         _SubscriptionCard(auth: auth),
         const SizedBox(height: Insets.xl),
         const SectionHeader('Tools'),
-        const AppCard(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              _ToolRow(
-                icon: Icons.timer_outlined,
-                title: 'Round Timer',
-                subtitle: 'Open intervals for sparring, MMA, boxing or BJJ',
-                route: AppRoutes.roundTimer,
-                screen: RoundTimerScreen(),
-              ),
-              Divider(height: 1, thickness: 1, color: AppColors.border),
-              _ToolRow(
-                icon: Icons.monitor_weight_outlined,
-                title: 'Weight Tracker',
-                subtitle: 'Log weigh-ins and monitor the cut or gain',
-                route: AppRoutes.weightTracker,
-                screen: WeightTrackerScreen(),
-              ),
-              Divider(height: 1, thickness: 1, color: AppColors.border),
-              _ToolRow(
-                icon: Icons.settings_outlined,
-                title: 'Settings',
-                subtitle: 'Units, safety, reminders and account controls',
-                route: AppRoutes.settings,
-                screen: SettingsScreen(),
-              ),
-            ],
-          ),
+        const GroupedList(
+          children: [
+            _ToolRow(
+              title: 'Round timer',
+              subtitle: 'Open intervals for sparring, MMA, boxing or BJJ',
+              route: AppRoutes.roundTimer,
+              screen: RoundTimerScreen(),
+            ),
+            _ToolRow(
+              title: 'Weight tracker',
+              subtitle: 'Log weigh-ins and monitor the cut or gain',
+              route: AppRoutes.weightTracker,
+              screen: WeightTrackerScreen(),
+            ),
+            _ToolRow(
+              title: 'Settings',
+              subtitle: 'Units, safety, reminders and account controls',
+              route: AppRoutes.settings,
+              screen: SettingsScreen(),
+            ),
+          ],
         ),
         const SizedBox(height: Insets.xl),
         const SectionHeader('Stats'),
-        AppCard(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              _StatRow('Sessions Completed', '${state.completedSessionCount}'),
-              _divider(),
-              _StatRow('Current Streak', '$streakDays days'),
-              _divider(),
-              _StatRow(
-                  'Training Days / Week', '${user?.weeklyTrainingDays ?? 0}'),
-            ],
-          ),
+        GroupedList(
+          children: [
+            _StatRow('Sessions completed', '${state.completedSessionCount}'),
+            _StatRow('Current streak', '$streakDays days'),
+            _StatRow(
+                'Training days / week', '${user?.weeklyTrainingDays ?? 0}'),
+          ],
         ),
         const SizedBox(height: Insets.xl),
         GhostButton(
-          'Sign Out',
+          'Sign out',
           icon: Icons.logout,
           expand: true,
           onPressed: () async {
@@ -163,20 +154,15 @@ class ProfileScreen extends StatelessWidget {
     }
     return ScreenScaffold(title: 'Profile', showBack: true, body: body);
   }
-
-  static Widget _divider() =>
-      const Divider(height: 1, thickness: 1, color: AppColors.border);
 }
 
 class _ToolRow extends StatelessWidget {
-  final IconData icon;
   final String title;
   final String subtitle;
   final String route;
   final Widget screen;
 
   const _ToolRow({
-    required this.icon,
     required this.title,
     required this.subtitle,
     required this.route,
@@ -185,44 +171,11 @@ class _ToolRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PressScale(
-      onTap: () => AppNavigation.push(
-        context,
-        route,
-        fallbackBuilder: (_) => screen,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(Insets.lg),
-        child: Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(11),
-              ),
-              child: Icon(icon, color: AppColors.primary, size: 21),
-            ),
-            const SizedBox(width: Insets.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: AppType.callout(weight: FontWeight.w800)),
-                  const SizedBox(height: Insets.xxs),
-                  Text(
-                    subtitle,
-                    style: AppType.subhead(color: AppColors.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: AppColors.textMuted),
-          ],
-        ),
-      ),
-    );
+    return GroupedRow(
+        title: title,
+        subtitle: subtitle,
+        onTap: () =>
+            AppNavigation.push(context, route, fallbackBuilder: (_) => screen));
   }
 }
 
@@ -234,59 +187,20 @@ class _SubscriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPro = auth.isPro;
-    return AppCard(
-      onTap: () => AppNavigation.push(
-        context,
-        AppRoutes.paywall,
-        extra: const PaywallRouteArgs(trigger: PaywallTrigger.profile),
-        fallbackBuilder: (_) =>
-            const PaywallScreen(trigger: PaywallTrigger.profile),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(11),
-            ),
-            child: Icon(isPro ? Icons.verified : Icons.bolt,
-                color: AppColors.primary, size: 22),
-          ),
-          const SizedBox(width: Insets.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(isPro ? 'FighterEdge Pro' : 'Free Plan',
-                    style: AppType.callout(weight: FontWeight.w700)),
-                const SizedBox(height: Insets.xxs),
-                Text(
-                    isPro
-                        ? 'All features unlocked'
-                        : 'Upgrade to unlock everything',
-                    style: AppType.subhead(color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-          if (!isPro)
-            Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: Insets.md, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(Radii.chip),
-              ),
-              child: Text('UPGRADE',
-                  style: AppType.micro(
-                      weight: FontWeight.w700, color: Colors.white)),
-            )
-          else
-            const Icon(Icons.chevron_right, color: AppColors.textMuted),
-        ],
-      ),
-    );
+    final l = L.of(context);
+    return GroupedList(children: [
+      GroupedRow(
+        title: isPro ? 'FighterEdge Pro' : l.profileFreePlan,
+        subtitle: isPro ? l.profileProActive : l.profileProDescription,
+        trailing: Text(isPro ? l.profileManage : l.profileUpgrade,
+            style: AppType.subhead(
+                color: AppColors.premium, weight: FontWeight.w600)),
+        onTap: () => AppNavigation.push(context, AppRoutes.paywall,
+            extra: const PaywallRouteArgs(trigger: PaywallTrigger.profile),
+            fallbackBuilder: (_) =>
+                const PaywallScreen(trigger: PaywallTrigger.profile)),
+      )
+    ]);
   }
 }
 
@@ -297,18 +211,8 @@ class _StatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: Insets.lg, vertical: Insets.md + 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: AppType.callout(
-                  weight: FontWeight.w500, color: AppColors.textSecondary)),
-          Text(value, style: AppType.callout(weight: FontWeight.w700)),
-        ],
-      ),
-    );
+    return GroupedRow(
+        title: label,
+        trailing: Text(value, style: AppType.callout(weight: FontWeight.w700)));
   }
 }

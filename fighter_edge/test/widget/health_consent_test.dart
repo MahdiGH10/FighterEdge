@@ -45,7 +45,7 @@ void main() {
       expect(find.byType(HomeShell), findsNothing);
       expect(find.text('Delete my account instead'), findsOneWidget);
 
-      await tester.tap(find.text('I AGREE'));
+      await tester.tap(find.text('I agree'));
       await tester.pumpAndSettle();
 
       expect(repo.currentUser!.hasHealthDataConsent, isTrue);
@@ -61,11 +61,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(OnboardingScreen), findsOneWidget);
-      await tester.tap(find.text('CONTINUE'));
+      await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('CONTINUE'));
+      await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('BUILD MY PLAN'));
+      await tester.tap(find.text('Build my plan'));
       await tester.pumpAndSettle();
 
       expect(find.byType(HealthConsentScreen), findsOneWidget);
@@ -73,7 +73,7 @@ void main() {
       expect(find.text('Delete my account instead'), findsNothing,
           reason: 'a new account holds no data to delete yet');
 
-      await tester.tap(find.text('I AGREE'));
+      await tester.tap(find.text('I agree'));
       await tester.pumpAndSettle();
       expect(
           find.text('What should Fighter Edge build first?'), findsOneWidget);
@@ -89,7 +89,7 @@ void main() {
       await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('NOT NOW, SIGN OUT'));
+      await tester.tap(find.text('Not now, sign out'));
       await tester.pumpAndSettle();
 
       expect(repo.currentUser, isNull);
@@ -151,7 +151,7 @@ void main() {
       expect(find.textContaining('OpenRouter (USA)'), findsOneWidget);
       expect(find.text('Talk to your coach'), findsNothing);
 
-      await tester.tap(find.text('I AGREE'));
+      await tester.tap(find.text('I agree'));
       await tester.pumpAndSettle();
 
       expect(repo.currentUser!.hasAiCoachConsent, isTrue);
@@ -174,7 +174,7 @@ void main() {
         ),
       ));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('GET TODAY\'S FIGHTER BRIEF').first);
+      await tester.tap(find.text('Get today\'s Fighter Brief').first);
       await tester.pumpAndSettle();
 
       expect(
@@ -220,7 +220,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('ai-coach-consent')), findsOneWidget);
       expect(repo.currentUser!.hasAiCoachConsent, isFalse);
-      await tester.tap(find.text('I AGREE'));
+      await tester.tap(find.text('I agree'));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('ai-coach-consent')), findsNothing);

@@ -46,6 +46,10 @@ class AppColors {
   /// that the lit target is unmistakably the subject, light enough that the
   /// user still sees where they are.
   static const Color scrim = Color(0xC7050508);
+
+  /// The one shadow the app keeps: under the floating nav bar, where it is
+  /// the only cue that the bar sits above scrolling content.
+  static const Color floatingShadow = Color(0x66000000);
   static const Color border = Color(0xFF292933);
   static const Color borderStrong = Color(0xFF3A3A46);
 
@@ -64,6 +68,14 @@ class AppColors {
   /// body-sized text.
   static const Color accentText = primaryBright;
   static const Color primaryDark = Color(0xFFC22A20);
+
+  /// A red fill that carries white text: the primary button.
+  ///
+  /// White on [primary] measures 4.31:1, under AA for the button's 13pt label.
+  /// The button used to hide that behind a gradient that ended on
+  /// [primaryDark]; flat, it needs a fill that passes on its own. This is
+  /// [crimson600] at 5.23:1, the closest step to the brand red that does.
+  static const Color primaryFill = crimson600;
   static const Color primarySoft = Color(0x22E63328);
   static const Color primaryGlow = Color(0x38E63328);
   static const Color premium = Color(0xFFF2C879);
@@ -71,6 +83,16 @@ class AppColors {
   // ---------------------------------------------------------------------------
   // Text
   // ---------------------------------------------------------------------------
+
+  /// White foreground on primary/semantic fills, and opaque shader masks.
+  static const Color onPrimary = Color(0xFFFFFFFF);
+  static const Color maskOpaque = Color(0xFFFFFFFF);
+  static const Color transparent = Color(0x00000000);
+
+  /// Google's approved light sign-in button palette.
+  static const Color googleSurface = Color(0xFFFFFFFF);
+  static const Color googleText = Color(0xFF1F1F1F);
+  static const Color googleBorder = Color(0xFF747775);
 
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xFFAAAAB5);

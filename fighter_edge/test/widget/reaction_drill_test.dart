@@ -41,7 +41,7 @@ void main() {
 
     // Buttons render their label in capitals.
     await tester.scrollUntilVisible(
-      find.text('START DRILL'),
+      find.text('Start drill'),
       200,
       scrollable: find
           .descendant(
@@ -50,7 +50,7 @@ void main() {
           .first,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('START DRILL'));
+    await tester.tap(find.text('Start drill'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(ReactionDrillScreen), findsOneWidget);
@@ -78,7 +78,7 @@ void main() {
     await tester.pump();
     expect(find.text('3'), findsOneWidget);
     expect(find.text('0:30'), findsOneWidget);
-    expect(find.text('STOP'), findsOneWidget);
+    expect(find.text('Stop'), findsOneWidget);
     expect(find.text('No voice on this device. Follow the calls on screen.'),
         findsOneWidget,
         reason: 'the test harness has no speech engine, and says so');
@@ -93,19 +93,19 @@ void main() {
     await tester.pump(const Duration(seconds: 31));
     await tester.pump(_callSettle);
     expect(find.text('TIME'), findsOneWidget);
-    expect(find.text('GO AGAIN'), findsOneWidget);
+    expect(find.text('Go again'), findsOneWidget);
     expect(telemetry.records, hasLength(1));
     expect(
         telemetry.records.single.event, TelemetryEvent.reactionDrillFinished);
     expect(telemetry.records.single.parameters,
         {'discipline': 'striking', 'level': 'beginner'});
 
-    await tester.tap(find.text('GO AGAIN'));
+    await tester.tap(find.text('Go again'));
     await tester.pump();
     expect(find.text('GET IN STANCE'), findsOneWidget);
-    await tester.tap(find.text('STOP'));
+    await tester.tap(find.text('Stop'));
     await tester.pump();
-    expect(find.text('START DRILL'), findsOneWidget);
+    expect(find.text('Start drill'), findsOneWidget);
     expect(telemetry.records, hasLength(1),
         reason: 'stopping a restarted drill does not count as a finish');
   });
@@ -139,16 +139,16 @@ void main() {
   testWidgets('pause and resume from the drill screen', (tester) async {
     await openDrill(tester);
     await tester.pump(const Duration(seconds: 3 + 10));
-    await tester.tap(find.text('PAUSE'));
+    await tester.tap(find.text('Pause'));
     await tester.pump(_callSettle);
     expect(find.text('PAUSED'), findsOneWidget);
     expect(find.text('0:20 left'), findsOneWidget);
-    expect(find.text('RESUME'), findsOneWidget);
+    expect(find.text('Resume'), findsOneWidget);
 
     await tester.pump(const Duration(minutes: 1));
     expect(find.text('PAUSED'), findsOneWidget, reason: 'it waits');
 
-    await tester.tap(find.text('RESUME'));
+    await tester.tap(find.text('Resume'));
     await tester.pump(_callSettle);
     expect(find.text('GET IN STANCE'), findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
@@ -175,7 +175,7 @@ void main() {
     await tester.pump(const Duration(seconds: 10));
     expect(find.text('PAUSED'), findsOneWidget,
         reason: 'coming back does not restart the drill behind the athlete');
-    await tester.tap(find.text('STOP'));
+    await tester.tap(find.text('Stop'));
     await tester.pump(_callSettle);
   });
 
@@ -203,12 +203,12 @@ void main() {
       (tester) async {
     await openDrill(tester);
     await tester.pump(const Duration(seconds: 3 + 12));
-    await tester.tap(find.text('STOP'));
+    await tester.tap(find.text('Stop'));
     await tester.pump(_callSettle);
     expect(find.textContaining('Stopped at 0:12'), findsOneWidget);
     expect(find.text('0:30'), findsOneWidget, reason: 'ready for a full run');
 
-    await tester.tap(find.text('START DRILL'));
+    await tester.tap(find.text('Start drill'));
     await tester.pump(const Duration(seconds: 3 + 31));
     await tester.pump(_callSettle);
     expect(find.textContaining(' in 0:30'), findsOneWidget);
@@ -232,7 +232,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Wrestling'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('TEST VOICE'));
+    await tester.tap(find.text('Test voice'));
     await tester.pumpAndSettle();
     expect(voice.lines, hasLength(1));
     final wrestling = {
@@ -249,7 +249,7 @@ void main() {
       repo: repo,
     ));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('TEST VOICE'));
+    await tester.tap(find.text('Test voice'));
     await tester.pump();
     expect(find.text('No voice on this device. Follow the calls on screen.'),
         findsOneWidget);

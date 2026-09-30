@@ -25,7 +25,7 @@ void main() {
         onTap: () => tapped = true,
       )));
 
-      expect(find.text('WEIGHT'), findsOneWidget); // label is upper-cased
+      expect(find.text('Weight'), findsOneWidget); // authored sentence case
       expect(find.text('77.2'), findsOneWidget);
       expect(find.text('kg'), findsOneWidget);
       expect(find.text('0.3 kg'), findsOneWidget);
@@ -173,7 +173,7 @@ void main() {
         ),
       )));
 
-      for (final label in ['START CAMP', 'LOG MEAL']) {
+      for (final label in ['Start camp', 'Log meal']) {
         final paragraph =
             tester.renderObject<RenderParagraph>(find.text(label));
         expect(paragraph.didExceedMaxLines, isFalse, reason: label);

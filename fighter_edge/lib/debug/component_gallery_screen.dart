@@ -12,6 +12,7 @@ import '../widgets/press_scale.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/progress_ring.dart';
 import '../widgets/stat_card.dart';
+import '../widgets/grouped_list.dart';
 
 /// Debug-only component gallery used by Phase 3 golden tests.
 ///
@@ -31,7 +32,7 @@ class ComponentGalleryCanvas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const PremiumBackground(
+    return const AppBackground(
       child: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(Insets.lg),
@@ -45,6 +46,16 @@ class ComponentGalleryCanvas extends StatelessWidget {
                 child: _ButtonStates(),
               ),
               SizedBox(height: Insets.lg),
+              GroupedList(children: [
+                GroupedRow(
+                    title: 'Round timer',
+                    subtitle:
+                        'Open intervals for sparring, MMA, boxing or BJJ'),
+                GroupedRow(
+                    title: 'Weight tracker',
+                    subtitle: 'Log weigh-ins and monitor the cut or gain'),
+              ]),
+              SizedBox(height: Insets.lg),
               _GallerySection(
                 title: 'Cards',
                 child: _CardStates(),
@@ -56,12 +67,12 @@ class ComponentGalleryCanvas extends StatelessWidget {
               ),
               SizedBox(height: Insets.lg),
               _GallerySection(
-                title: 'Password Strength',
+                title: 'Password strength',
                 child: _PasswordStrengthStates(),
               ),
               SizedBox(height: Insets.lg),
               _GallerySection(
-                title: 'Motion and Status',
+                title: 'Motion and status',
                 child: _MotionStates(),
               ),
               SizedBox(height: Insets.lg),
@@ -118,7 +129,7 @@ class _GallerySection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title.toUpperCase(),
+          Text(title,
               style: AppType.micro(
                   color: AppColors.textMuted,
                   weight: FontWeight.w700,
@@ -140,7 +151,7 @@ class _ButtonStates extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PrimaryButton(
-          'Start Session',
+          'Start session',
           icon: Icons.play_arrow_rounded,
           expand: true,
           onPressed: () {},
@@ -153,7 +164,7 @@ class _ButtonStates extends StatelessWidget {
         ),
         const SizedBox(height: Insets.sm),
         GhostButton(
-          'Review Plan',
+          'Review plan',
           icon: Icons.insights_rounded,
           expand: true,
           onPressed: () {},
@@ -323,7 +334,7 @@ class _NavigationStates extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 86,
+      height: LayoutTokens.navigationPreview,
       child: Align(
         alignment: Alignment.bottomCenter,
         child: AppBottomNav(

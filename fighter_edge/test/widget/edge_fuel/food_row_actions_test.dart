@@ -42,7 +42,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Banana, raw'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('ADD TO TODAY'));
+    await tester.tap(find.text('Add to today'));
     await tester.pumpAndSettle();
   }
 

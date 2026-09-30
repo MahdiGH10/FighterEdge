@@ -34,6 +34,13 @@ void main() {
   testWidgets(
       'signup, onboarding, a store purchase, the server grants Pro, sign out',
       (tester) async {
+    // A tap that misses its target only prints a warning by default, so
+    // _retrying never saw it: once, the signup button was tapped while the
+    // route layer absorbed pointers, and the journey failed two lines later
+    // on a screen that never opened. A fatal miss throws, and the retry
+    // scrolls and taps again.
+    WidgetController.hitTestWarningShouldBeFatal = true;
+    addTearDown(() => WidgetController.hitTestWarningShouldBeFatal = false);
     SharedPreferences.setMockInitialValues({});
     final repo = LocalAuthRepository();
     await repo.init();
@@ -61,41 +68,41 @@ void main() {
 
     // 3. The value pages come before any questions.
     expect(find.text('Your camp, organised.'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('Fuel that matches the work.'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
-    expect(find.text('Watch the edge build.'), findsOneWidget);
-    await _tapVisible(tester, find.text('BUILD MY PLAN'));
+    await _tapVisible(tester, find.text('Continue'));
+    expect(find.text('See your progress.'), findsOneWidget);
+    await _tapVisible(tester, find.text('Build my plan'));
 
     // 4. Explicit consent comes before the first question about the body
     // (Art. 9 GDPR — audit finding, fixed in Phase 2 slice 2).
     expect(find.text('Your body data, your call'), findsOneWidget);
     expect(repo.currentUser!.hasHealthDataConsent, isFalse);
-    await _tapVisible(tester, find.text('I AGREE'));
+    await _tapVisible(tester, find.text('I agree'));
     expect(repo.currentUser!.hasHealthDataConsent, isTrue);
 
     // 5. Onboarding questions.
     expect(find.text('What should Fighter Edge build first?'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('What should EdgeFuel optimize for?'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('Tell us your starting point.'), findsOneWidget);
     await _enterTextVisible(tester, find.byType(TextField).at(0), '28');
     await _enterTextVisible(tester, find.byType(TextField).at(1), '178');
     await _enterTextVisible(tester, find.byType(TextField).at(2), '77.2');
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('Which formula fits your body?'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('Outside the gym, how active are you?'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('How many days can you train?'), findsOneWidget);
-    await _tapVisible(tester, find.text('CONTINUE'));
+    await _tapVisible(tester, find.text('Continue'));
     expect(find.text('Your first plan is ready.'), findsOneWidget);
-    await _tapVisible(tester, find.text('START MY PLAN'));
+    await _tapVisible(tester, find.text('Start my plan'));
 
     // 6. Activation moment, then the dashboard.
     expect(find.text('Your first Fighter Edge plan is ready'), findsOneWidget);
-    await _tapVisible(tester, find.text('OPEN DASHBOARD'));
+    await _tapVisible(tester, find.text('Open dashboard'));
     expect(find.text('DASHBOARD'), findsOneWidget);
 
     // 7. Profile -> the paid upgrade entry point. Computed from the nav
@@ -106,15 +113,15 @@ void main() {
       navRect.center.dy,
     ));
     await tester.pumpAndSettle();
-    await _tapVisible(tester, find.text('UPGRADE'));
-    expect(find.text('Unlock your full edge'), findsOneWidget);
+    await _tapVisible(tester, find.text('Upgrade'));
+    expect(find.text('Training tools with Pro'), findsOneWidget);
 
     // 8. A real store purchase completes, but the client never grants Pro:
     // only the trusted webhook does (a non-negotiable rule, not just a UI
     // choice — this is the property most worth an on-device regression).
     // A single pump (not pumpAndSettle) checks the state right after the
     // tap, before anything else runs.
-    final monthlyPlan = find.text('MONTHLY - \$7.99');
+    final monthlyPlan = find.text('Monthly · \$7.99');
     await _ensureVisible(tester, monthlyPlan);
     await tester.tap(monthlyPlan);
     await tester.pump();
@@ -130,7 +137,13 @@ void main() {
     // 10. Sign out from Profile -> back to login.
     await _tapVisible(
         tester, find.byIcon(Icons.chevron_left)); // Paywall -> Profile.
-    await _tapVisible(tester, find.byType(GhostButton));
+    // The "Pro is active" snackbar covers the bottom of the screen for a few
+    // seconds; on the CI emulator's 320x640 screen that is where Sign out
+    // lands, so a tap right away hits the snackbar. Also, the paywall has
+    // GhostButtons of its own: name the one this step means.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.widgetWithText(GhostButton, 'Sign out'));
 
     expect(find.text('Welcome back'), findsOneWidget);
   });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/gen/app_localizations.dart';
 import '../../state/app_state.dart';
 import '../../state/first_run_controller.dart';
 import '../../theme/app_accessibility.dart';
@@ -21,12 +22,14 @@ class FirstWeekChecklist extends StatelessWidget {
   final VoidCallback onStartTour;
   final VoidCallback onLogMeal;
   final VoidCallback onTrain;
+  final bool compact;
 
   const FirstWeekChecklist({
     super.key,
     required this.onStartTour,
     required this.onLogMeal,
     required this.onTrain,
+    this.compact = false,
   });
 
   @override
@@ -69,8 +72,35 @@ class FirstWeekChecklist extends StatelessWidget {
     // there is always exactly one obvious next step.
     final nextIndex = items.indexWhere((i) => !i.done);
 
+    if (compact) {
+      if (allDone) return const SizedBox.shrink();
+      return AppCard(
+        padding: EdgeInsets.zero,
+        child: Material(
+          type: MaterialType.transparency,
+          child: ExpansionTile(
+            tilePadding: const EdgeInsets.symmetric(horizontal: Insets.lg),
+            childrenPadding: const EdgeInsets.fromLTRB(
+                Insets.lg, Insets.none, Insets.lg, Insets.sm),
+            title: Text('Your first week', style: AppType.headline()),
+            subtitle: Text(
+                L
+                    .of(context)
+                    .dashboardChecklistProgress(doneCount, items.length),
+                style: AppType.subhead(color: AppColors.textSecondary)),
+            iconColor: AppColors.textSecondary,
+            collapsedIconColor: AppColors.textSecondary,
+            children: [
+              for (var i = 0; i < items.length; i++)
+                _ItemRow(item: items[i], isNext: i == nextIndex),
+            ],
+          ),
+        ),
+      );
+    }
+
     return AppCard(
-      accent: allDone ? AppColors.positive : AppColors.primary,
+      accent: allDone ? AppColors.positive : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -152,7 +182,7 @@ class _Progress extends StatelessWidget {
       duration: MediaQuery.disableAnimationsOf(context)
           ? Duration.zero
           : MotionTokens.standard,
-      curve: Curves.easeOutCubic,
+      curve: MotionTokens.count,
       builder: (context, v, _) => ClipRRect(
         borderRadius: BorderRadius.circular(Radii.chip),
         child: LinearProgressIndicator(

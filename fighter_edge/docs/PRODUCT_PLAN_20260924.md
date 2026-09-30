@@ -66,3 +66,24 @@ photos, guilt notifications, AI without consent.
 8. Paywall moments and the trial; measure trial conversion.
 
 Each step is its own PR with tests.
+
+## Owner decisions (2026-09-26)
+
+- **Fight camp moves ahead of the AI features.** New order after step 1:
+  2, 6, 3, 4, 5, 7, 8. Every competing fight-nutrition app (CutCoach,
+  OnWeight, TFD Fight Camp) has a fight date and cut plan, and the AI
+  features need those facts. The domain for steps 2 and 6 is done
+  (`lib/features/daily_snapshot/domain`, `lib/features/fight_camp/domain`,
+  commit `e9cd884`); no screen uses it yet.
+- **AI quality is measured before it is changed.** `functions/`:
+  `npm run eval:ai` runs 21 fixed scenarios through the real prompt and
+  validator (commit `5bff15c`). Run it on the deployed free chain and on a
+  paid no-retention candidate before switching.
+- **Ads: later, not before launch.** The owner wants well-paying sport or
+  nutrition advertisers. Before any ad work: the Android `AD_ID` permission
+  was removed on purpose, ads need a consent flow, a Data safety update and
+  a Privacy Policy change, and Pro must stay ad-free.
+- **Recipe images: no AI-generated images and no own photos.** The owner
+  wants photos from the web. Only images whose licence allows use in a paid
+  app, with the source and credit kept per image. This replaces "never
+  stock" in `LATER.md`.

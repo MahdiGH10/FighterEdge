@@ -75,13 +75,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
               const SizedBox(height: Insets.lg),
               PrimaryButton(
-                auth.isBusy ? 'Sending…' : 'Send Reset Link',
+                auth.isBusy ? 'Sending…' : 'Send reset link',
                 expand: true,
                 onPressed: auth.isBusy ? null : _send,
               ),
             ] else
               PrimaryButton(
-                'Back to Sign In',
+                'Back to sign in',
                 expand: true,
                 onPressed: () => Navigator.of(context).pop(),
               ),

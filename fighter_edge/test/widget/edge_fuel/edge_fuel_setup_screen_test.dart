@@ -27,7 +27,7 @@ void main() {
       expect(find.text('Step 1 of 6 · Goal'), findsOneWidget);
       await tester.tap(find.text('Maintain'));
       await tester.pump();
-      await tester.tap(find.text('NEXT'));
+      await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
       // Step 2 — Body.
@@ -39,35 +39,35 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('Male physiology'));
       await tester.pump();
-      await tester.tap(find.text('NEXT'));
+      await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
       // Step 3 — Activity.
       expect(find.text('Step 3 of 6 · Activity'), findsOneWidget);
       await tester.tap(find.text('Moderate'));
       await tester.pump();
-      await tester.tap(find.text('NEXT'));
+      await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
       // Step 4 — Training (default 4 days/week is auto-committed).
       expect(find.text('Step 4 of 6 · Training'), findsOneWidget);
-      await tester.tap(find.text('NEXT'));
+      await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
       // Step 5 — Food preferences (optional, skip).
       expect(find.text('Step 5 of 6 · Food'), findsOneWidget);
-      await tester.tap(find.text('NEXT'));
+      await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
       // Step 6 — Review.
       expect(find.text('Step 6 of 6 · Review'), findsOneWidget);
-      await tester.scrollUntilVisible(find.text('CONFIRM MY PLAN'), 300,
+      await tester.scrollUntilVisible(find.text('Confirm my plan'), 300,
           scrollable: find.byType(Scrollable).first);
-      await tester.tap(find.text('CONFIRM MY PLAN'));
+      await tester.tap(find.text('Confirm my plan'));
       await tester.pumpAndSettle();
 
       expect(find.byType(EdgeFuelPlanScreen), findsOneWidget);
-      expect(find.text('DAILY TARGET'), findsOneWidget);
+      expect(find.text('Daily target'), findsOneWidget);
 
       final saved = await edgeFuelRepo.watchTarget(repo.currentUser!.id).first;
       expect(saved, isNotNull);
@@ -101,6 +101,39 @@ void main() {
       expect(find.text('Step 3 of 6 · Activity'), findsOneWidget);
     });
 
+    testWidgets('review assumptions wrap at 320px and 200% text',
+        (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final repo = await makeRepo(signedIn: true);
+      final fuel = InMemoryEdgeFuelRepository();
+      await fuel.saveProfileDraft(
+          repo.currentUser!.id,
+          const NutritionSetupDraft(
+            currentStep: 5,
+            goal: NutritionGoal.maintain,
+            ageYears: 30,
+            heightCm: 180,
+            currentWeightKg: 80,
+            equationProfile: EquationProfile.neutral,
+            normalActivityLevel: ActivityLevel.moderate,
+            weeklyTrainingDays: 4,
+          ));
+      await tester.pumpWidget(wrapApp(
+          const MediaQuery(
+              data: MediaQueryData(textScaler: TextScaler.linear(2)),
+              child: EdgeFuelSetupScreen()),
+          repo: repo,
+          edgeFuelRepo: fuel));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('Confirm my plan'), 200,
+          scrollable: find.byType(Scrollable).first);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Confirm my plan'), findsOneWidget);
+    });
+
     testWidgets('a clinical safety flag blocks the automated plan on review',
         (tester) async {
       final repo = await makeRepo(signedIn: true);
@@ -130,7 +163,7 @@ void main() {
 
       expect(
           find.text('Please check with a professional first'), findsOneWidget);
-      expect(find.text('CONFIRM MY PLAN'), findsNothing);
+      expect(find.text('Confirm my plan'), findsNothing);
     });
   });
 }

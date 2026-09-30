@@ -19,6 +19,15 @@ import 'app_colors.dart';
 class AppType {
   AppType._();
 
+  /// Provider-owned typography for the official Google sign-in treatment.
+  static TextStyle googleSignIn() => const TextStyle(
+        fontFamily: 'GoogleSans',
+        fontSize: 14,
+        height: 20 / 14,
+        fontWeight: FontWeight.w500,
+        color: AppColors.googleText,
+      );
+
   // Axis ranges read from the shipped font binaries — values outside these are
   // synthesized by the rasterizer rather than drawn by the font.
   static const double _interOpszMin = 14;

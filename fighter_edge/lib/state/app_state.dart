@@ -32,6 +32,9 @@ class AppState extends ChangeNotifier {
   /// Injected so tests can move through weeks without waiting for them.
   final DateTime Function() _clock;
 
+  /// The same clock used to date training history and evaluate its streak.
+  DateTime get now => _clock();
+
   List<WeightEntry> _weights;
 
   /// [_weights] sorted both ways, recomputed only when it changes (audit

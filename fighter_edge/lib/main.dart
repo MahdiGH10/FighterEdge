@@ -51,7 +51,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
+      statusBarColor: AppColors.transparent,
       statusBarIconBrightness: Brightness.light,
     ),
   );
@@ -276,9 +276,11 @@ class FighterEdgeApp extends StatelessWidget {
               (firstRun ?? FirstRunController())..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, StreakController>(
-          create: (_) => StreakController(),
-          update: (_, auth, streak) =>
-              (streak ?? StreakController())..setUser(auth.user?.id),
+          create: (context) =>
+              StreakController(clock: () => context.read<AppState>().now),
+          update: (context, auth, streak) => (streak ??
+              StreakController(clock: () => context.read<AppState>().now))
+            ..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
           create: (_) => EdgeFuelController(
@@ -376,7 +378,7 @@ class _BrandedBootScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: AppColors.background,
-      body: PremiumBackground(
+      body: AppBackground(
         child: Center(
           child: PremiumReveal(
             child: BrandLogo(scale: 1.15),
@@ -396,7 +398,7 @@ class _BootFailureScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: PremiumBackground(
+      body: AppBackground(
         child: SafeArea(
           child: Center(
             child: Padding(

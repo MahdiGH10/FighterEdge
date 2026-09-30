@@ -1,10 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../models/weight_entry.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
@@ -43,15 +45,18 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
     final losing = delta <= 0;
 
     return ScreenScaffold(
-      title: 'Weight Tracker',
+      title: 'Weight tracker',
       showBack: true,
-      floatingActionButton: _tab == 0
-          ? FloatingActionButton(
-              backgroundColor: AppColors.primary,
-              onPressed: () => _addWeighIn(context, state),
-              child: const Icon(Icons.add, color: Colors.white),
-            )
-          : null,
+      // A header action, like Nutrition's "Add food", rather than a stock
+      // floating button hovering over the history list.
+      actions: [
+        if (_tab == 0)
+          HeaderIcon(
+            Icons.add,
+            label: L.of(context).weightAddWeighIn,
+            onTap: () => _addWeighIn(context, state),
+          ),
+      ],
       body: Column(
         children: [
           Padding(
@@ -96,52 +101,110 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
   }
 
   Future<void> _addWeighIn(BuildContext context, AppState state) async {
-    // Typed in the user's unit, stored in kg.
-    final controller = TextEditingController(
-      text: state.latestWeight == 0
-          ? ''
-          : state.displayWeight(state.latestWeight).toStringAsFixed(1),
-    );
     final value = await showDialog<double>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text('Add Weigh-In', style: AppType.title2()),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          style: AppType.body(),
-          cursorColor: AppColors.primary,
-          decoration: InputDecoration(
-            suffixText: state.weightUnitLabel,
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.primary),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: AppType.callout(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(
-              ctx,
-              double.tryParse(controller.text.trim().replaceAll(',', '.')),
-            ),
-            child: Text('Save',
-                style: AppType.callout(
-                    weight: FontWeight.w700, color: AppColors.accentText)),
-          ),
-        ],
-      ),
+      builder: (_) => _WeighInDialog(state: state),
     );
-    if (value != null && value > 0) {
+    if (value != null) {
       state.addWeight(DateTime.now(), state.weightToKg(value));
       AppHaptics.commit();
     }
+  }
+}
+
+/// The realistic weigh-in range, in kg. Same limits the onboarding form
+/// enforces, so the tracker cannot be fed what setup would have refused.
+const double _minWeighInKg = 35;
+const double _maxWeighInKg = 220;
+
+/// Owns its controller, so it is disposed with the dialog, after the exit
+/// animation. Typed in the user's unit; the caller converts to kg.
+class _WeighInDialog extends StatefulWidget {
+  final AppState state;
+  const _WeighInDialog({required this.state});
+
+  @override
+  State<_WeighInDialog> createState() => _WeighInDialogState();
+}
+
+class _WeighInDialogState extends State<_WeighInDialog> {
+  late final TextEditingController _controller;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    final s = widget.state;
+    _controller = TextEditingController(
+      text: s.latestWeight == 0
+          ? ''
+          : s.displayWeight(s.latestWeight).toStringAsFixed(1),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final s = widget.state;
+    final value = double.tryParse(_controller.text.trim().replaceAll(',', '.'));
+    final kg = value == null ? null : s.weightToKg(value);
+    if (kg == null || kg < _minWeighInKg || kg > _maxWeighInKg) {
+      final lo = s.displayWeight(_minWeighInKg).round();
+      final hi = s.displayWeight(_maxWeighInKg).round();
+      setState(() =>
+          _error = 'Enter a weight from $lo to $hi ${s.weightUnitLabel}.');
+      return;
+    }
+    Navigator.pop(context, value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return AlertDialog(
+      title: Text('Add Weigh-In', style: AppType.title2()),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+          LengthLimitingTextInputFormatter(6),
+        ],
+        onChanged: (_) {
+          if (_error != null) setState(() => _error = null);
+        },
+        onSubmitted: (_) => _save(),
+        style: AppType.body(),
+        cursorColor: AppColors.primary,
+        decoration: InputDecoration(
+          labelText: l.weightFieldLabel,
+          suffixText: widget.state.weightUnitLabel,
+          errorText: _error,
+          errorMaxLines: 2,
+          focusedBorder: const UnderlineInputBorder(
+            borderSide: BorderSide(color: AppColors.primary),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel',
+              style: AppType.callout(color: AppColors.textSecondary)),
+        ),
+        TextButton(
+          onPressed: _save,
+          child: Text('Save',
+              style: AppType.callout(
+                  weight: FontWeight.w700, color: AppColors.accentText)),
+        ),
+      ],
+    );
   }
 }
 
@@ -166,7 +229,8 @@ class _WeightView extends StatelessWidget {
     // list below used to call it twice per row inside its loop.
     final history = state.weightHistoryDesc;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, 80),
+      padding: const EdgeInsets.fromLTRB(
+          Insets.lg, Insets.none, Insets.lg, Insets.bottomClearance),
       children: [
         Center(
           child: Column(
@@ -196,7 +260,7 @@ class _WeightView extends StatelessWidget {
                       ),
                     const SizedBox(width: Insets.xs),
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.only(bottom: Insets.sm),
                       child: Text(state.weightUnitLabel,
                           style: AppType.body(
                               weight: FontWeight.w600,
@@ -205,27 +269,31 @@ class _WeightView extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: Insets.xs),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(losing ? Icons.arrow_downward : Icons.arrow_upward,
-                      size: 14,
-                      color: losing ? AppColors.positive : AppColors.primary),
-                  const SizedBox(width: 3),
-                  Flexible(
-                    child: Text(
-                        '${_fmt(delta.abs())} ${state.weightUnitLabel} '
-                        'vs last weigh-in',
-                        textAlign: TextAlign.center,
-                        style: AppType.subhead(
-                            weight: FontWeight.w600,
-                            color: losing
-                                ? AppColors.positive
-                                : AppColors.primary)),
-                  ),
-                ],
-              ),
+              // A change needs something to compare with: at least two
+              // weigh-ins, never a fabricated 0.0.
+              if (state.weights.length >= 2) ...[
+                const SizedBox(height: Insets.xs),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(losing ? Icons.arrow_downward : Icons.arrow_upward,
+                        size: 14,
+                        color: losing ? AppColors.positive : AppColors.primary),
+                    const SizedBox(width: Insets.xs),
+                    Flexible(
+                      child: Text(
+                          '${_fmt(delta.abs())} ${state.weightUnitLabel} '
+                          'vs last weigh-in',
+                          textAlign: TextAlign.center,
+                          style: AppType.subhead(
+                              weight: FontWeight.w600,
+                              color: losing
+                                  ? AppColors.positive
+                                  : AppColors.primary)),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
@@ -235,7 +303,8 @@ class _WeightView extends StatelessWidget {
             Expanded(
               child: StatCard(
                 label: '7-day avg',
-                value: _fmt(state.sevenDayAverage),
+                value:
+                    state.weights.isEmpty ? '—' : _fmt(state.sevenDayAverage),
                 unit: state.weightUnitLabel,
               ),
             ),
@@ -246,28 +315,30 @@ class _WeightView extends StatelessWidget {
         const SizedBox(height: Insets.xl),
         AppCard(
           child: SizedBox(
-            height: 200,
+            height: LayoutTokens.weightChart,
             child: _WeightChart(state: state, goalKg: goalKg),
           ),
         ),
-        const SizedBox(height: Insets.xl),
-        AppCard(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              for (int i = 0; i < history.length; i++) ...[
-                if (i > 0)
-                  const Divider(
-                      height: 1, thickness: 1, color: AppColors.border),
-                _HistoryRow(
-                  entry: history[i],
-                  display: _fmt(history[i].kg),
-                  unit: state.weightUnitLabel,
-                ),
+        if (history.isNotEmpty) ...[
+          const SizedBox(height: Insets.xl),
+          AppCard(
+            padding: EdgeInsets.zero,
+            child: Column(
+              children: [
+                for (int i = 0; i < history.length; i++) ...[
+                  if (i > 0)
+                    const Divider(
+                        height: 1, thickness: 1, color: AppColors.border),
+                  _HistoryRow(
+                    entry: history[i],
+                    display: _fmt(history[i].kg),
+                    unit: state.weightUnitLabel,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -334,7 +405,7 @@ class _WeightChart extends StatelessWidget {
                 // Show a few labels to avoid crowding.
                 if (entries.length > 6 && i % 2 != 0) return const SizedBox();
                 return Padding(
-                  padding: const EdgeInsets.only(top: 6),
+                  padding: const EdgeInsets.only(top: Insets.xs + Insets.xxs),
                   child: Text(DateFormat('M/d').format(entries[i].date),
                       style: AppType.micro(color: AppColors.textMuted)),
                 );
@@ -409,7 +480,7 @@ class _HistoryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-          horizontal: Insets.lg, vertical: Insets.md + 2),
+          horizontal: Insets.lg, vertical: Insets.md + Insets.xxs),
       child: Row(
         children: [
           // The date takes the leftover space and wraps at large text; the

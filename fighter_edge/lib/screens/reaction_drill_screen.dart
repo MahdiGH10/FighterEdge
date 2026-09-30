@@ -107,7 +107,6 @@ class _ReactionDrillScreenState extends State<ReactionDrillScreen>
     final leave = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
         title: Text(l.reactionLeaveTitle),
         content: Text(l.reactionLeaveBody),
         actions: [
@@ -154,8 +153,8 @@ class _ReactionDrillScreenState extends State<ReactionDrillScreen>
             '${reactionDisciplineLabel(l, spec.discipline)} · ${reactionLevelLabel(l, spec.level)}',
         showBack: true,
         body: Padding(
-          padding:
-              const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.xl),
+          padding: const EdgeInsets.fromLTRB(
+              Insets.lg, Insets.none, Insets.lg, Insets.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -330,7 +329,8 @@ class _Call extends StatelessWidget {
             children: [
               for (var i = 0; i < commands.length; i++)
                 Padding(
-                  padding: EdgeInsets.only(top: i == 0 ? 0 : Insets.xs),
+                  padding:
+                      EdgeInsets.only(top: i == 0 ? Insets.none : Insets.xs),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: _MoveLine(

@@ -1,5 +1,256 @@
 # Fighter Edge — Claude Code Handoff
 
+## START HERE: state as of 2026-09-26 (evening)
+
+**Branch.** `feat/ui-polish-recipes-camp-domain` combines everything finished
+on 2026-09-25/26, on top of `main` (`9ce7c23`):
+
+- `396f0a9` QA-pass fixes and UI polish slice 1 (Claude).
+- `2d729c9`..`2f774de` UI slices A–F (Astra, ChatGPT/Codex): injected streak
+  clock, dashboard, Fuel/Train, onboarding, grouped rows/copy/tokens,
+  beginner learning paths. Their sections follow below.
+- `40cc6d2` openly licensed photos for all 24 recipes, with credits.
+- Merged in: `4abb52d` a11y sweep of 8 secondary screens, `5bff15c` AI
+  scenario evaluation (`functions/`, `npm run eval:ai`), `e9cd884` fight-camp
+  and daily-snapshot domain (pure Dart), `9b6c7ac` owner decisions,
+  `47b398b` fight camp pattern brief.
+- Google Sans ships as a 107 KB static Medium Latin subset instead of the
+  4.97 MB variable font (Google's branding requires Google Sans Medium for
+  the sign-in label; OFL declares no Reserved Font Name, see
+  `assets/images/google_g.README.md`).
+
+**Verified on this branch:** format and analyze clean, 740 tests, 3 goldens,
+functions 90/90. **Not verified:** real devices, iOS, release builds, live
+Firebase, purchases, the CI emulator job (runs on the PR).
+
+**Decisions to respect** (`docs/PRODUCT_PLAN_20260924.md` > "Owner
+decisions (2026-09-26)"): fight camp before the AI features; AI is measured
+with `npm run eval:ai` before any model switch; ads only after launch, never
+on Pro; recipe photos are licensed web photos with credits, never
+AI-generated.
+
+**Owner-only items.** Run `npm run eval:ai` with `OPENROUTER_API_KEY`; legal
+page details (name, contact email, country, Firestore region) for
+`hosting/public/`; a login background without the watermark; 12 testers for
+the Play closed test.
+
+**Next:** fight camp screens per `docs/FIGHT_CAMP_PATTERN_BRIEF.md`, starting
+with persisting a fight and the setup screen, then the dashboard countdown.
+
+## AI evaluation, fight-camp domain, recipe photos (2026-09-26, Claude)
+
+- AI evaluation: 21 synthetic scenarios run through the real facts builder,
+  prompt (moved unchanged from `index.ts` to `prompt.ts`, verified
+  byte-identical) and validator. Tests the deployed chain by default;
+  `--models`, `--runs`, `--only`, `--dry-run`. Reports go to
+  `functions/eval-results/` (git-ignored). Not run live yet (needs the key).
+- Fight-camp domain (`lib/features/fight_camp/domain`): `FightCamp`,
+  `WeightPathCalculator`, `WeightTrend`; `DailySnapshot` in
+  `lib/features/daily_snapshot/domain`. Limits come from the ISSN 2025
+  position stand, cited in `weight_cut_policy.dart`: 0.5–1 kg a week in camp;
+  fight week plans food-only loss (2%); a water cut is flagged
+  `needsSupervision`, never planned; beyond 6.7/5.7/4.4% at 72/48/24 h or the
+  category's sweat allowance is `notSafe`. No plans under 18.
+  `test/unit/domain_purity_test.dart` enforces the pure-Dart rule.
+- Recipe photos: 23 CC BY 2.0 and 1 public domain (Flickr via Openverse),
+  checked by eye against each recipe, 960 px WebP, 1.5 MB total. Credits in
+  `lib/features/edge_fuel/data/recipe_photos.dart`; a photo without a credit
+  is never shown. Detail credit line opens the source page.
+
+## UI task slice F: beginner learning paths (2026-09-26)
+
+- Four pure Dart ordered paths cover all 17 drills. Each begins with the free
+  starter for its discipline. Recommendations stay on the first unfinished
+  prerequisite until it is marked Sharp. A free account pauses at its first Pro
+  drill; the existing entitlement gate still controls access.
+- Train > Drills starts with a discipline choice saved in the account's existing
+  local drill store. The hero shows stage, sharp count, thin progress bar and
+  one Learn action; a locked step shows a quiet Pro route. The full library
+  remains below. Drill detail names the following step after Drilled/Sharp.
+- New path copy is in EN/DE ARBs and generated localizations. At 200% text,
+  detail progress controls stack at full width. Hero actions have independent
+  screen-reader semantics; the progress indicator no longer absorbs Learn.
+- Verified: 690 non-golden tests (679 before, 11 added), format/analyzer clean,
+  three unchanged goldens. New file learning_path.dart has 20/20 instrumented
+  lines covered (100%). Widget tests cover choice, Sharp advancement, free Pro
+  lock/paywall without unlocking, and 320px/200% detail layout.
+- Offline browser: F-*.png in C:/Users/Mahdi/Downloads/FighterEdge-ui-evidence/.
+  Chooser, active path, locked path and drill detail were captured at
+  390x844/320x568 plus actual 200% text; paywall was captured at 200%.
+  Paywall return stayed locked; final fresh browser navigations showed no app
+  console errors.
+- Not verified: real devices, iOS, release builds, Firebase or purchases.
+  Android integration (updated in slice E) still needs CI device execution.
+  No backend, rules, billing or package changes. No push or PR.
+
+## UI task slice E: grouped rows, copy and tokens (2026-09-26)
+
+- Shared GroupedList/GroupedRow now serve Profile, Settings, dashboard activity
+  and Fuel meals, with hairlines and 48px controls. Settings no longer has
+  icon tiles or a separate card per row. Gallery includes the shared group.
+- Sentence-case buttons/sections and plain recipe/Pro copy; new semantic copy
+  localized EN/DE. Buttons and stat deltas wrap. Login uses the bundled official
+  Google G and Google Sans, with source/license alongside the assets.
+- Owner follow-up: login_background.webp still has the baked-in tiled
+  FIGHTER EDGE CAMP watermark. Supply a replacement image.
+- Remaining raw EdgeInsets/SizedBox pixel values, Colors.* and Curves.* moved
+  into theme tokens. Semantic durations (training timers, dates, auth retries)
+  remain in their owning logic to preserve pure Dart domain boundaries.
+- Browser found a 27px Fuel review overflow at 200% text: assumptions now stack;
+  regression covers 320px/200%. Login account link now has a 48px touch target.
+  Dashboard live-weight regression dates its new entry after the latest fixture
+  weight, so it cannot age out as the machine date advances.
+- Verified: format/analyzer clean; 679 tests (675 before, four added), three
+  regenerated goldens reviewed against their originals. Intended changes are
+  grouped rows, sentence case, wrapped deltas and token spacing; the large-text
+  golden canvas is taller to retain the complete navigation preview.
+- Offline browser screenshots: E-*.png in the external evidence folder below,
+  at 390x844/320x568 and actual 200% text. Includes Settings/Profile, dashboard,
+  Fuel/Meals, Train/history/drills/reaction, timer/weight, Fuel setup/plan/recipes,
+  coach gate/paywall, legal/gallery and login/signup/password/magic-link.
+  Final fresh navigation and Fuel setup run have no app console errors.
+- Not verified in browser: verification-email route (local auth bypasses it),
+  live Pro coaching or purchases; widget coverage passes. Android integration
+  finders updated; CI must re-run. Real devices, iOS, release builds and Firebase
+  remain unverified. No backend, rules or billing changes; no new packages.
+
+## UI task slice D: onboarding hierarchy (2026-09-26)
+
+- Logo/tagline appear only on welcome page one. Calm numerals replace the
+  welcome glow hero. Questions have a progress header and back chevron,
+  plain selectable rows/chips and a localized one-line plan summary.
+- Plan ready puts Open dashboard before a quieter Pro offer. Calories/macros
+  share one surface with equal macro columns (stacked at large text). Removed
+  decorative summary icons and the grammatical enum interpolation.
+- Verified: format/analyzer clean, 675 tests (671 before, 4 added), 3 unchanged
+  goldens. New tests cover retained choices after Back and the plan action at
+  320px with 100%/200% text. Full journey remains covered.
+- Browser: all three welcome pages, seven questions and plan ready captured at
+  390x844 and 320x568, plus actual 200% text. D-*.png in the external evidence
+  folder noted below. Full local onboarding completed; no app console errors.
+- Android integration copy finders updated; CI must re-run the device flow.
+  Real devices, iOS, release builds, Firebase and billing are not verified.
+
+## UI task slice C: Fuel and Train (2026-09-26)
+
+- Fuel now has one calorie ring (remaining calories with a target, logged
+  calories without one), three macro bars and a quiet filtered recipe row.
+  The plan remains accessible. Removed the duplicate target/macros card.
+- Today/Meals/Recipes use a surface-based segmented control, stacking into
+  48px controls at large text. Previous day / Next day labels remain.
+- Logged meals and starter suggestions are divided rows in one surface.
+  Editing, consumed toggles, Undo, saved meals and menus remain functional.
+- Train highlights today's unfinished session, falling back to the first
+  unfinished slot. Other starts are outlined; completions are neutral checks
+  with Done. Uses stable session IDs because AppState rebuilds slot objects.
+- Verified: format, analyzer, 671 tests (667 before, 4 added), 3 unchanged
+  goldens. Added selection and 320px/200% Fuel regression coverage; existing
+  meal editing/toggle/Undo tests pass. No domain/billing behavior changed.
+- Browser: offline empty states plus synthetic populated in-memory fixtures
+  through ignored build/qa_main.dart; Fuel, Meals and Train at 390x844,
+  320x568 and actual 200% text. C-*.png evidence is outside Git in
+  C:/Users/Mahdi/Downloads/FighterEdge-ui-evidence/. Fresh navigations have
+  no app console errors; hot restart once produced a disposed EngineFlutterView
+  debug-engine error, absent after a fresh navigation.
+- Not verified: real devices, iOS, release builds, Firebase or billing.
+
+## UI task slice B: dashboard hierarchy (2026-09-26)
+
+- One session/rest/empty/completed hero and one primary action. Fuel is a
+  single status line with its explanation behind an info button. Weight,
+  sessions and streak appear once; stats stack at large text and labels wrap.
+- First-week checklist starts collapsed and hides after all items are done.
+  All actions remain available on expansion. Verification, streak-risk and
+  account messages follow the hero, keeping it visible at 390x844.
+- Training and fuel weeks share one surface. Recent activity uses divided
+  rows. Removed Camp mode, repeated session cards and repeated streak/fuel
+  summaries. New dashboard copy is localized in English and German.
+- Behavior covered: today's hero opens its exact session; the checklist
+  expands before its tour action; fuel info opens a dialog. Freeze feedback
+  now holds the ScaffoldMessenger across removal of the resolved banner.
+- Verified: 667 tests (664 before, 3 added), analyzer and format clean,
+  3 unchanged goldens. Browser screenshots: B-dashboard-390/320/large and
+  scrolled stats in `C:/Users/Mahdi/Downloads/FighterEdge-ui-evidence/`.
+  Actual 200% Flutter text, high contrast and reduced motion verified.
+  No app console errors; reconnecting the debug server produced DWDS
+  WebSocket transport warnings, cleared on the fresh large-text load.
+- Not verified: real devices, iOS, release builds, Firebase or billing.
+
+## UI task slice A: deterministic streak dates (2026-09-26)
+
+Branch `feat/ui-polish-slices-2-5`, isolated worktree `FighterEdge-ui-slices`.
+The owner's original tree and its generated files remain separate.
+
+- AppState exposes its injected date; dashboard/Profile pass that date into
+  StreakEngine. StreakController uses the same injected clock for earning and
+  spending freezes. Production defaults still use wall time.
+- Dashboard tests use Wednesday 2026-09-23. Added a Saturday demo at-risk
+  regression and an injected-clock earn/spend regression.
+- Verified: 664 non-golden tests pass (prior handoff: 660 pass / 2 fail;
+  two tests added), 3 unchanged goldens pass, analyzer clean, format clean.
+  Commands use `--no-pub` after dependencies resolved: Windows Developer Mode
+  is disabled, so pub's desktop symlink step reports an environment error.
+- Browser: offline local account; Dashboard/Profile at 390x844 and 320x568,
+  and actual 200% Flutter text with high contrast/reduced motion using an
+  ignored `build/qa_main.dart` entry point. Evidence is outside Git at
+  `C:/Users/Mahdi/Downloads/FighterEdge-ui-evidence/A-*.png`.
+  Browser text-size emulation alone does not change Flutter's text scale.
+- Existing visual issues observed: the checklist fills the small viewport;
+  Profile's subscription row crowds its action at 320px. Slices B/E address
+  these layouts. No screenshot files or local account data are committed.
+- Not verified: real devices, Android integration, iOS, release builds,
+  Firebase or RevenueCat. No backend/billing changes.
+
+## UI polish slice 1: shared components (2026-09-26, committed in 396f0a9)
+
+First slice of `docs/UI_POLISH_AUDIT_20260925.md`. Visual only, no behaviour
+changes.
+
+- **Background:** `PremiumBackground` (red + blue radial glow) is now
+  `AppBackground`, a flat `AppColors.background`. `GradientText` deleted (unused).
+- **Cards:** `AppCard.gradient` removed; `elevated` now lifts one surface step
+  (`surfaceAlt`) instead of casting a shadow. 18 decorative accents removed.
+  Accents that carry meaning stay: selection state, warnings, Pro gold.
+- **Primary button:** flat, no gradient or glow. New `AppColors.primaryFill`
+  (`crimson600`, 5.23:1 with white): flat `primary` was 4.31:1, under AA.
+- **Dialogs:** `dialogTheme` in `AppTheme` (card radius, hairline edge, scrim);
+  per-dialog background overrides removed.
+- **Tokens:** `Radii.tile` (12) and `Radii.navItem` (18); all raw radii now use
+  tokens. `AppColors.floatingShadow` for the nav bar. The avatar is a flat circle.
+- **Fixes:** header title centring (back-button spacer was 38 not 48); weight
+  tracker "+" moved from a stock FAB into the header; reduced motion honoured in
+  the onboarding step switch and the EdgeFuel setup progress bar.
+
+Goldens regenerated and reviewed by eye (only the intended changes).
+**Pre-existing, not from this slice:** `dashboard_test.dart` "shows the fighter…"
+and "streak freeze is not shown…" fail on some weekdays. `AppState()` seeds
+Mon–Thu demo sessions, so on Fri–Sun the demo streak is "at risk". The tests
+need a fixed clock. Next slice: dashboard (audit slice 2).
+
+## QA pass fixes: input dialogs, units, empty states (2026-09-25, committed in 396f0a9)
+
+A browser QA pass on the offline build (`-t lib/main_local.dart`) found bugs the
+648 existing tests missed. Fixed, with 14 regression tests in
+`test/widget/input_dialogs_test.dart` (all fail on the old code, pass now):
+
+- **Crash:** the manual-food and session-log dialogs disposed their
+  `TextEditingController`s right after `showDialog` returned, while the dialog
+  was still animating out. Typing then saving froze the dialog (debug builds).
+  Both are now StatefulWidgets that own their controllers.
+- **Validation:** manual food has inline errors, digits-only numbers and limits
+  (10000 kcal, 1000 g per macro). The weigh-in dialog has a 35-220 kg range
+  (stated in the user's unit). A portion over 2000 g is flagged and blocks Add
+  instead of being silently clamped.
+- **Profile header** converted the label to lb but not the number; fixed.
+- **Empty states:** Train > Week, the dashboard cards and the weight tracker no
+  longer show a blank week, "Week complete", or an invented "0.0 kg" change.
+- **Accessibility:** named the Nutrition day arrows, the session-log buttons,
+  the weigh-in FAB and the weigh-in field (EN + DE).
+
+**Not verified:** release builds, real Firebase, device behaviour. The last small
+change (hiding the empty weight-history card) was covered by the test suite but
+not re-checked in the browser. Not committed: ask before committing.
+
 ## Phase 1 (closed-test hardening), slice 1: no fake data, no silent stream failures (2026-09-24, PR after #8)
 
 PR #8 is merged (`70e3ed6`). This starts the roadmap in

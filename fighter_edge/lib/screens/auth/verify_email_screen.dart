@@ -134,7 +134,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
       canPop: !widget.blocking,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: PremiumBackground(
+        body: AppBackground(
           child: SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -234,8 +234,8 @@ class _WaitingView extends StatelessWidget {
         Row(
           children: [
             const SizedBox(
-              width: 16,
-              height: 16,
+              width: Insets.lg,
+              height: Insets.lg,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation(AppColors.textMuted),

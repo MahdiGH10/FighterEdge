@@ -18,9 +18,7 @@ class SectionHeader extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              title.toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              title,
               style: AppAccessibility.adjustStyle(
                 context,
                 AppType.subhead(

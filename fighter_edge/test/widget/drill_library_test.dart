@@ -5,12 +5,16 @@ import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/screens/drill_library_screen.dart';
 import 'package:fighter_edge/screens/paywall_screen.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
+import 'package:fighter_edge/training/drills/drill.dart';
+import 'package:fighter_edge/training/drills/drill_progress_store.dart';
 
 import '../helpers/test_harness.dart';
 
 void main() {
   Future<void> pumpLibrary(WidgetTester tester, Plan plan) async {
     final repo = await makeRepo(signedIn: true, plan: plan);
+    await DrillProgressStore(userId: repo.currentUser!.id)
+        .selectDiscipline(DrillDiscipline.striking);
     await tester.pumpWidget(wrapApp(
       const Scaffold(body: DrillLibraryScreen()),
       repo: repo,
@@ -24,13 +28,13 @@ void main() {
         'sticks', (tester) async {
       await pumpLibrary(tester, Plan.free);
 
-      await tester.tap(find.text('The Jab'));
+      await tester.tap(find.text('Learn: The Jab'));
       await tester.pumpAndSettle();
-      expect(find.text('KEY POINTS'), findsOneWidget);
-      expect(find.text('COMMON MISTAKES'), findsOneWidget);
-      await tester.scrollUntilVisible(find.text('HOW TO DRILL IT'), 200,
+      expect(find.text('Key points'), findsOneWidget);
+      expect(find.text('Common mistakes'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('How to drill it'), 200,
           scrollable: find.byType(Scrollable).last);
-      expect(find.text('HOW TO DRILL IT'), findsOneWidget);
+      expect(find.text('How to drill it'), findsOneWidget);
 
       await tester.scrollUntilVisible(find.text('Drilled'), 200,
           scrollable: find.byType(Scrollable).last);
@@ -41,6 +45,8 @@ void main() {
       await tester.tapAt(const Offset(10, 10)); // dismiss the sheet
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(find.text('Drilled'), 200,
+          scrollable: find.byType(Scrollable).first);
       expect(find.text('Drilled'), findsOneWidget,
           reason: 'the card shows the saved progress');
     });
@@ -50,25 +56,28 @@ void main() {
       await pumpLibrary(tester, Plan.free);
 
       await tester.scrollUntilVisible(find.text('The 1-2'), 200,
-          scrollable: find.byType(Scrollable).last);
+          scrollable: find.byType(Scrollable).first);
       await tester.tap(find.text('The 1-2'));
       await tester.pumpAndSettle();
-      expect(find.text('KEY POINTS'), findsNothing,
+      expect(find.text('Key points'), findsNothing,
           reason: 'locked drills do not give away the content');
-      expect(find.text('UNLOCK THE FULL LIBRARY'), findsOneWidget);
+      expect(find.text('Unlock the full library'), findsOneWidget);
     });
 
     testWidgets('Pro opens every drill', (tester) async {
       await pumpLibrary(tester, Plan.pro);
 
+      await tester.scrollUntilVisible(find.text('The 1-2'), 200,
+          scrollable: find.byType(Scrollable).first);
       await tester.tap(find.text('The 1-2'));
       await tester.pumpAndSettle();
-      expect(find.text('KEY POINTS'), findsOneWidget);
+      expect(find.text('Key points'), findsOneWidget);
     });
 
     testWidgets('the Saved filter explains itself when empty', (tester) async {
       await pumpLibrary(tester, Plan.free);
 
+      await tester.ensureVisible(find.text('Saved'));
       await tester.tap(find.text('Saved'));
       await tester.pumpAndSettle();
       expect(find.text('No saved drills yet'), findsOneWidget);
@@ -78,7 +87,10 @@ void main() {
         (tester) async {
       await pumpLibrary(tester, Plan.pro);
 
-      expect(find.text('EXPLORE TECHNIQUE PATHS'), findsOneWidget);
+      expect(find.text('Explore technique paths'), findsOneWidget);
+      await tester.scrollUntilVisible(
+          find.byKey(const ValueKey('training-system-striking')), 200,
+          scrollable: find.byType(Scrollable).first);
       await tester.tap(
         find.byKey(const ValueKey('training-system-striking')),
       );
@@ -108,6 +120,9 @@ void main() {
       });
 
       await pumpLibrary(tester, Plan.pro);
+      await tester.scrollUntilVisible(
+          find.byKey(const ValueKey('training-system-striking')), 200,
+          scrollable: find.byType(Scrollable).first);
       await tester.tap(
         find.byKey(const ValueKey('training-system-striking')),
       );
@@ -125,7 +140,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Boxing'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('START'));
+      await tester.tap(find.text('Start'));
       // Boxing preset: 3-minute rounds.
       for (var i = 0; i < 181; i++) {
         await tester.pump(const Duration(seconds: 1));
@@ -136,13 +151,13 @@ void main() {
     testWidgets('Pro gets a corner cue on the rest', (tester) async {
       await runToFirstRest(tester, Plan.pro);
       expect(find.text('REST'), findsOneWidget);
-      expect(find.text('YOUR CORNER'), findsOneWidget);
+      expect(find.text('Your corner'), findsOneWidget);
       expect(find.textContaining('Establish the jab'), findsOneWidget);
     });
 
     testWidgets('free sees a quiet teaser, not a lock', (tester) async {
       await runToFirstRest(tester, Plan.free);
-      expect(find.text('YOUR CORNER'), findsNothing);
+      expect(find.text('Your corner'), findsNothing);
       expect(find.textContaining('Pro puts a corner in your rest'),
           findsOneWidget);
     });

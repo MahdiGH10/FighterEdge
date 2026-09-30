@@ -25,7 +25,7 @@
   "settingsUpgradePro": "Upgrade to Pro",
   "settingsManageProSubtitle": "Refresh status and manage billing once connected",
   "settingsUpgradeProSubtitle": "AI Fighter Brief, full drill and recipe libraries, corner cues",
-  "settingsSectionTraining": "Training Preferences",
+  "settingsSectionTraining": "Training preferences",
   "settingsMetricUnits": "Metric units",
   "settingsMetricUnitsKg": "Weights show in kg",
   "settingsMetricUnitsLb": "Weights show in lb",
@@ -38,7 +38,7 @@
     "placeholders": { "time": { "type": "String" } }
   },
   "settingsCampRemindersOff": "Get a nudge on the days you train",
-  "settingsSectionSafety": "Safety & Trust",
+  "settingsSectionSafety": "Safety & trust",
   "settingsSafeCut": "Safe cut guidance",
   "settingsSafeCutSubtitle": "Show hydration and non-medical weight-cut reminders",
   "settingsTrustNote": "Fighter Edge guides training and nutrition decisions. It does not replace a coach, doctor, or licensed nutrition professional.",
@@ -54,9 +54,9 @@
   "settingsDeleteAccountSubtitle": "Permanently erase your account and all of your data",
 
   "dashboardTitle": "Dashboard",
-  "dashboardWeeklyOverview": "Weekly Overview",
-  "dashboardNextSession": "Next Session",
-  "dashboardRecentActivity": "Recent Activity",
+  "dashboardWeeklyOverview": "Weekly overview",
+  "dashboardNextSession": "Next session",
+  "dashboardRecentActivity": "Recent activity",
   "dashboardSeeAll": "See all",
   "dashboardStatWeight": "Weight",
   "dashboardStatSessions": "Sessions",
@@ -71,7 +71,7 @@
   "dashboardStreakOnFire": "On fire",
   "dashboardStreakLogToday": "Log today",
 
-  "fuelWeekTitle": "FUEL THIS WEEK",
+  "fuelWeekTitle": "Fuel this week",
   "fuelWeekLogged": "{count}/7 logged",
   "@fuelWeekLogged": {
     "placeholders": { "count": { "type": "int" } }
@@ -93,6 +93,12 @@
   "nutritionCalories": "Calories",
   "nutritionMeals": "Meals",
   "nutritionAddFood": "Add food",
+  "nutritionPreviousDay": "Previous day",
+  "nutritionNextDay": "Next day",
+  "trainingLogSession": "Log session",
+  "trainingEditSessionLog": "Edit session log",
+  "weightFieldLabel": "Weight",
+  "weightAddWeighIn": "Add weigh-in",
   "nutritionSearchFoods": "Search foods",
   "nutritionLoggedToday": "logged today",
   "nutritionProtein": "Protein",
@@ -110,14 +116,14 @@
   "@addFoodTitle": {
     "placeholders": { "day": { "type": "String" } }
   },
-  "addFoodSaved": "SAVED",
-  "addFoodRecent": "RECENT",
+  "addFoodSaved": "Saved",
+  "addFoodRecent": "Recent",
   "addFoodManual": "Enter macros manually",
   "addFoodManualSubtitle": "For a meal out, a label, or anything not listed",
   "addFoodEmptyHint": "Search the food list and pick how much you had — the macros work themselves out. Foods you log show up here next time, one tap away.",
   "addFoodNotFound": "Not in the food list yet",
   "addFoodNotFoundHint": "Try a simpler word (\"rice\", \"chicken\"), or enter the macros yourself below.",
-  "addFoodHowMuch": "HOW MUCH?",
+  "addFoodHowMuch": "How much?",
   "addFoodGrams": "Grams",
   "addFoodAddTo": "Add to {day}",
   "@addFoodAddTo": {
@@ -152,7 +158,7 @@
   "@timerNext": {
     "placeholders": { "label": { "type": "String" } }
   },
-  "timerYourCorner": "YOUR CORNER",
+  "timerYourCorner": "Your corner",
   "timerCornerTeaser": "Pro puts a corner in your rest: a cue for the next round.",
   "timerNextSessionComplete": "Session complete",
   "timerNextFinalRound": "Final round",
@@ -239,9 +245,9 @@
   "reactionLevelIntermediate": "Intermediate",
   "reactionLevelAdvanced": "Advanced",
   "reactionLevelAdvancedPlus": "Advanced+",
-  "reactionStatDuration": "DURATION",
-  "reactionStatMoves": "MOVES",
-  "reactionStatReact": "REACTION",
+  "reactionStatDuration": "Duration",
+  "reactionStatMoves": "Moves",
+  "reactionStatReact": "Reaction",
   "reactionInTheMix": "IN THE MIX · {count}",
   "@reactionInTheMix": {
     "placeholders": { "count": { "type": "int" } }
@@ -343,5 +349,211 @@
   "authNoAccount": "New here?",
   "authCreateAccount": "Create account",
   "authShowPassword": "Show password",
-  "authHidePassword": "Hide password"
+  "authHidePassword": "Hide password",
+  "dashboardThisWeek": "This week",
+  "dashboardFighter": "Fighter",
+  "dashboardToday": "Today",
+  "dashboardNoPlan": "No sessions planned",
+  "dashboardWeekDone": "Week complete",
+  "dashboardRestDay": "Rest day",
+  "dashboardRecovery": "Your planned sessions are done. Take time to recover.",
+  "dashboardPlanHint": "Open Train to set up your week.",
+  "dashboardNextUp": "Next: {day} · {session}",
+  "dashboardStartSession": "Start session",
+  "dashboardOpenCamp": "Open camp",
+  "dashboardSetFuel": "Set a fuel target",
+  "dashboardFuelInfo": "Why this target matters",
+  "dashboardFuelExplanation": "Calories support your goal. Protein supports recovery and muscle. Carbohydrates provide energy for training.",
+  "commonClose": "Close",
+  "dashboardNoActivity": "Complete your first session to start your history.",
+  "dashboardVerifyEmail": "Verify your email",
+  "dashboardConfirmEmail": "Confirm your email",
+  "dashboardRiskTitle": "Streak at risk",
+  "dashboardFreezeHint": "Yesterday is unlogged. Protect it with a freeze ({count} left).",
+  "dashboardLogHint": "No freeze is available. Log a session today to start again.",
+  "dashboardFreeze": "Freeze",
+  "dashboardLogNow": "Log now",
+  "dashboardFreezeUsed": "Freeze used — yesterday is protected.",
+  "dashboardLogged": "Logged",
+  "dashboardYesterday": "Yesterday",
+  "dashboardDaysAgo": "{count} days ago",
+  "@dashboardNextUp": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashboardFreezeHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashboardDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardChecklistProgress": "{done} of {total} complete",
+  "@dashboardChecklistProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionKcalLeft": "kcal left",
+  "nutritionOverTarget": "{kcal} kcal above target",
+  "nutritionViewPlan": "View fuel plan",
+  "nutritionRecipesFit": "Recipes that fit",
+  "nutritionMacroGrams": "{value} / {target} g",
+  "nutritionGrams": "{value} g",
+  "trainingSessionDone": "Done",
+  "trainingStartSession": "Start {session}",
+  "@nutritionOverTarget": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutritionMacroGrams": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutritionGrams": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@trainingStartSession": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingBack": "Back",
+  "onboardingStep": "Step {current} of {total}",
+  "onboardingSummary": "{days} days a week · {level} · {goal}",
+  "onboardingLoseFat": "Lose fat",
+  "onboardingMaintain": "Maintain weight",
+  "onboardingGainMuscle": "Gain muscle",
+  "onboardingBeginner": "Beginner",
+  "onboardingIntermediate": "Intermediate",
+  "onboardingAdvanced": "Advanced",
+  "onboardingFighter": "Fighter",
+  "welcomeProgressTitle": "See your progress.",
+  "planReadyExplanation": "Your plan is based on your goals and training days. You can adjust it as your training changes.",
+  "planReadyProTitle": "More training tools with Pro",
+  "planReadyProBody": "Pro includes a daily Fighter Brief, all drills and recipes, and cues between rounds.",
+  "planReadyCalories": "Daily calories",
+  "planReadyMissingTarget": "Your training week is ready. Add body details in Fuel to calculate a daily target.",
+  "@onboardingStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@onboardingSummary": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "level": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "profileFreePlan": "Free plan",
+  "profileProActive": "Pro subscription active",
+  "profileProDescription": "Daily brief, all drills and recipes",
+  "profileUpgrade": "Upgrade",
+  "profileManage": "Manage",
+  "settingsProPlan": "Pro",
+  "settingsFreePlan": "Free",
+  "dashboardEffort": "Effort {rating}/10",
+  "paywallPlainTitle": "Training tools with Pro",
+  "paywallPlainSubtitle": "Daily coaching, every drill and recipe, and cues between rounds.",
+  "fuelRecipesTitle": "Recipes for your day",
+  "@dashboardEffort": {
+    "placeholders": {
+      "rating": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallMonthly": "Monthly · {price}",
+  "fuelMealsLogged": "Meals logged · {eaten}/{total}",
+  "@paywallMonthly": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "@fuelMealsLogged": {
+    "placeholders": {
+      "eaten": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "learningStart": "Start here",
+  "learningChoose": "Choose a discipline",
+  "learningChooseHint": "We will remember your choice on this account. You can change it any time.",
+  "learningChange": "Change path",
+  "learningStriking": "Striking",
+  "learningWrestling": "Wrestling",
+  "learningBjj": "BJJ",
+  "learningClinch": "Clinch",
+  "learningStrikingHint": "Learn punches, defence and kicks in order.",
+  "learningWrestlingHint": "Build your stance, then learn to take someone down and defend a takedown.",
+  "learningBjjHint": "Brazilian jiu-jitsu: learn to move and escape when training on the ground.",
+  "learningClinchHint": "Learn close-range holds, knees and control while standing.",
+  "learningFoundations": "Foundations",
+  "learningBuilding": "Building",
+  "learningSharp": "Sharp",
+  "learningCount": "{completed} of {total} drills sharp",
+  "@learningCount": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "learningLearn": "Learn: {drill}",
+  "@learningLearn": {"placeholders": {"drill": {"type": "String"}}},
+  "learningLocked": "Pro drill · path paused",
+  "learningViewPro": "View Pro options",
+  "learningComplete": "Path complete",
+  "learningCompleteHint": "Keep practising these drills, or choose another discipline.",
+  "learningProgressHint": "Sharp means you can repeat the drill with control.",
+  "learningNext": "Next in your path",
+  "learningAfter": "After this drill: {drill}",
+  "@learningAfter": {"placeholders": {"drill": {"type": "String"}}},
+  "learningKeepPractising": "Keep practising this drill. Mark it Sharp when you can repeat it with control to advance your path.",
+  "learningPractiseLast": "This is the last drill in your path. Keep practising, then mark it Sharp when you are ready."
 }

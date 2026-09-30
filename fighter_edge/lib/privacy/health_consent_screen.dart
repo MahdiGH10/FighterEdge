@@ -39,7 +39,7 @@ class HealthConsentScreen extends StatelessWidget {
     return Scaffold(
       key: const ValueKey('health-consent-screen'),
       backgroundColor: AppColors.background,
-      body: PremiumBackground(
+      body: AppBackground(
         child: SafeArea(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(
@@ -85,6 +85,12 @@ class HealthConsentScreen extends StatelessWidget {
                 child: TextButton(
                   onPressed: () =>
                       LegalLinks.open(context, LegalDocument.privacy),
+                  // No side padding, so the link lines up with the text above
+                  // and below it; the tap target keeps its full height.
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, AppAccessibility.minTouchTarget),
+                  ),
                   child: Text(l.legalPrivacyLink),
                 ),
               ),
@@ -141,7 +147,7 @@ class _Point extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: last ? 0 : Insets.md),
+      padding: EdgeInsets.only(bottom: last ? Insets.none : Insets.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

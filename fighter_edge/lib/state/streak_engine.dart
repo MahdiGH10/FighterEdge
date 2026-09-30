@@ -37,9 +37,9 @@ class StreakEngine {
   static int streakDays(
     Set<String> completedDateKeys, {
     Set<String> protectedDateKeys = const {},
-    DateTime? now,
+    required DateTime now,
   }) {
-    final today = _dateOnly(now ?? DateTime.now());
+    final today = _dateOnly(now);
     var cursor = today;
     var streak = 0;
     while (true) {
@@ -69,9 +69,9 @@ class StreakEngine {
   static bool isAtRisk(
     Set<String> completedDateKeys, {
     Set<String> protectedDateKeys = const {},
-    DateTime? now,
+    required DateTime now,
   }) {
-    final today = _dateOnly(now ?? DateTime.now());
+    final today = _dateOnly(now);
     final yesterday = today.subtract(const Duration(days: 1));
     final todayKey = mealDateKey(today);
     final yesterdayKey = mealDateKey(yesterday);

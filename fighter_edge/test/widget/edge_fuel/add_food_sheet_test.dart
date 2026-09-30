@@ -43,13 +43,13 @@ void main() {
     await tester.tap(find.text('Chicken breast, skinless, raw'));
     await tester.pumpAndSettle();
 
-    expect(find.text('HOW MUCH?'), findsOneWidget);
+    expect(find.text('How much?'), findsOneWidget);
     expect(find.text('113 kcal'), findsOneWidget, reason: '100 g default');
     await tester.tap(find.text('150 g'));
     await tester.pumpAndSettle();
     expect(find.text('170 kcal'), findsOneWidget);
 
-    await tester.tap(find.text('ADD TO TODAY'));
+    await tester.tap(find.text('Add to today'));
     await tester.pumpAndSettle();
 
     expect(fuel(tester).consumedCalories, 170);
@@ -70,7 +70,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Banana, raw'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('ADD TO TODAY'));
+    await tester.tap(find.text('Add to today'));
     await tester.pumpAndSettle();
 
     // Tomorrow, the log is empty but the banana is remembered.
@@ -80,7 +80,7 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.add).first);
     await tester.pumpAndSettle();
-    expect(find.text('RECENT'), findsOneWidget);
+    expect(find.text('Recent'), findsOneWidget);
     await tester.tap(find.text('Banana, raw'));
     await tester.pumpAndSettle();
 

@@ -22,7 +22,8 @@ it just is not today's work. Review this list only at Step 8 of
 | Camp Plan | Placeholder. Hide it for v1. |
 | Custom foods / recents / favourites | EF-3c scope note. Add when the food-search UI needs it. |
 | USDA FoodData Central API proxy | V1.5. The bundled 94-food table is enough for 24 recipes. |
-| Recipe photography | Typographic cards ship instead. Revisit only with real photos, never stock. |
+| Recipe photography | Superseded 2026-09-26: licensed web photos with credits, never AI-generated. See `PRODUCT_PLAN_20260924.md` > Owner decisions (2026-09-26). |
+| In-app ads | Owner wants sport/nutrition advertisers after launch. Needs consent, the AD_ID permission back, Data safety and Privacy Policy updates; Pro stays ad-free. |
 | Golden / screenshot tests | Worth having. Not worth blocking launch. |
 | Declarative routing (go_router) | The app works on `Navigator.push`. No concrete problem to solve yet. |
 | Localization | Structure is ready-ish. Do it when there is a second market. |

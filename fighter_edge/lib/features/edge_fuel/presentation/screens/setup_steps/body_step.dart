@@ -217,7 +217,7 @@ class _SafetyCheck extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 2),
+      padding: const EdgeInsets.only(bottom: Insets.xxs),
       child: CheckboxListTile(
         value: value,
         onChanged: (v) => onChanged(v ?? false),

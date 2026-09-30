@@ -175,7 +175,8 @@ class _ScrollingChipsState extends State<_ScrollingChips> {
             Padding(
               key: _keys[i],
               padding: EdgeInsets.only(
-                  right: i == widget.chips.length - 1 ? 0 : Insets.sm),
+                  right:
+                      i == widget.chips.length - 1 ? Insets.none : Insets.sm),
               child: widget.chips[i],
             ),
         ],
@@ -200,10 +201,10 @@ class _ScrollingChipsState extends State<_ScrollingChips> {
             final fade = (Insets.xxl / bounds.width).clamp(0.0, 0.5);
             return LinearGradient(
               colors: [
-                _moreBefore ? Colors.transparent : Colors.white,
-                Colors.white,
-                Colors.white,
-                _moreAfter ? Colors.transparent : Colors.white,
+                _moreBefore ? AppColors.transparent : AppColors.maskOpaque,
+                AppColors.maskOpaque,
+                AppColors.maskOpaque,
+                _moreAfter ? AppColors.transparent : AppColors.maskOpaque,
               ],
               stops: [0, fade, 1 - fade, 1],
             ).createShader(bounds);
@@ -255,7 +256,7 @@ class _Chip extends StatelessWidget {
             ),
           ),
           padding: const EdgeInsets.symmetric(
-              horizontal: Insets.lg, vertical: Insets.sm + 2),
+              horizontal: Insets.lg, vertical: Insets.sm + Insets.xxs),
           child: Center(
             widthFactor: 1,
             child: ExcludeSemantics(
@@ -269,7 +270,7 @@ class _Chip extends StatelessWidget {
                   AppType.subhead(
                     weight: FontWeight.w600,
                     color: selected
-                        ? Colors.white
+                        ? AppColors.onPrimary
                         : AppAccessibility.textSecondary(context),
                   ),
                 ),
