@@ -6,6 +6,7 @@ import 'package:fighter_edge/screens/drill_library_screen.dart';
 import 'package:fighter_edge/screens/paywall_screen.dart';
 import 'package:fighter_edge/training/drills/drill.dart';
 import 'package:fighter_edge/training/drills/drill_progress_store.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -73,7 +74,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(PaywallScreen), findsOneWidget);
     expect(repo.currentUser!.plan, Plan.free);
-    await tester.tap(find.byIcon(Icons.chevron_left));
+    await tester.tap(find.byIcon(AppIcons.caretLeft));
     await tester.pumpAndSettle();
     expect(find.text('Pro drill · path paused'), findsOneWidget);
     expect(repo.currentUser!.plan, Plan.free);

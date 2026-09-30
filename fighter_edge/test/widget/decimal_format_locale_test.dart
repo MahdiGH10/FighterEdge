@@ -11,6 +11,7 @@ import 'package:fighter_edge/state/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -71,7 +72,7 @@ void main() {
 
     // The header action is an icon-only HeaderIcon (its label is a
     // semantics string, localized, not visible text), so it's found by icon.
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.tap(find.byIcon(AppIcons.plus));
     await tester.pumpAndSettle();
     final field = tester.widget<TextField>(find.byType(TextField).first);
     expect(field.controller!.text, '77,2',
@@ -130,7 +131,7 @@ void main() {
     // too, so both are found by type/icon instead.
     await tester.tap(find.byType(FightCountdownCard));
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.edit_outlined));
+    await tester.tap(find.byIcon(AppIcons.pencilSimple));
     await tester.pumpAndSettle();
     expect(find.byType(FightSetupScreen), findsOneWidget);
 

@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../auth/verification_gate.dart';
 import '../controllers/auth_controller.dart';
@@ -68,8 +70,11 @@ class DashboardScreen extends StatelessWidget {
         .firstOrNull;
     final next = todaysSession ?? unfinished.firstOrNull;
     final recent = state.completedSessionsDesc.take(3).toList();
+    // The header says what day it is, which is more use than the word
+    // "Dashboard" on the screen the bottom bar already calls Home.
+    final locale = Localizations.localeOf(context).toString();
     return ScreenScaffold.tab(
-      title: l.dashboardTitle,
+      title: DateFormat.MMMEd(locale).format(state.now),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
             Insets.lg, Insets.none, Insets.lg, Insets.xxl),
@@ -192,61 +197,63 @@ class _SessionHero extends StatelessWidget {
             ? session!.title
             : l.dashboardRestDay;
     return AppCard(
+        accent: AppColors.primary,
+        edge: true,
         child:
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Text(l.dashboardToday,
-          style:
-              AppType.subhead(color: AppAccessibility.textSecondary(context))),
-      const SizedBox(height: Insets.xs),
-      Text(title, style: AppType.largeTitle()),
-      const SizedBox(height: Insets.sm),
-      Text(
-          session == null
-              ? (hasPlan ? l.dashboardRecovery : l.dashboardPlanHint)
-              : today
-                  ? session!.subtitle
-                  : l.dashboardNextUp(session!.day, session!.title),
-          style:
-              AppType.callout(color: AppAccessibility.textSecondary(context))),
-      const SizedBox(height: Insets.lg),
-      PrimaryButton(today ? l.dashboardStartSession : l.dashboardOpenCamp,
-          expand: true,
-          onPressed: today
-              ? () => Navigator.of(context).push(CupertinoPageRoute<void>(
-                  builder: (_) => RoundTimerScreen(session: session)))
-              : () => onNavigate(1)),
-      const SizedBox(height: Insets.sm),
-      Row(children: [
-        Expanded(
-            child: TextButton(
-          style: TextButton.styleFrom(
-              alignment: Alignment.centerLeft, padding: EdgeInsets.zero),
-          onPressed: () => onNavigate(2),
-          child: Text(
-              fuel.hasUsableTarget
-                  ? l.fuelLeftToday(
-                      (fuel.targetCalories - fuel.consumedCalories)
-                          .clamp(0, fuel.targetCalories))
-                  : l.dashboardSetFuel,
-              style: AppType.subhead(
+          Text(l.dashboardToday.toUpperCase(),
+              style:
+                  AppType.micro(color: AppAccessibility.accentText(context))),
+          const SizedBox(height: Insets.xs),
+          Text(title, style: AppType.display()),
+          const SizedBox(height: Insets.sm),
+          Text(
+              session == null
+                  ? (hasPlan ? l.dashboardRecovery : l.dashboardPlanHint)
+                  : today
+                      ? session!.subtitle
+                      : l.dashboardNextUp(session!.day, session!.title),
+              style: AppType.callout(
                   color: AppAccessibility.textSecondary(context))),
-        )),
-        IconButton(
-            tooltip: l.dashboardFuelInfo,
-            icon: const Icon(Icons.info_outline, size: IconSizes.row),
-            onPressed: () => showDialog<void>(
-                context: context,
-                builder: (context) => AlertDialog(
-                      title: Text(l.dashboardFuelInfo),
-                      content: Text(l.dashboardFuelExplanation),
-                      actions: [
-                        TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text(l.commonClose))
-                      ],
-                    ))),
-      ]),
-    ]));
+          const SizedBox(height: Insets.lg),
+          PrimaryButton(today ? l.dashboardStartSession : l.dashboardOpenCamp,
+              expand: true,
+              onPressed: today
+                  ? () => Navigator.of(context).push(CupertinoPageRoute<void>(
+                      builder: (_) => RoundTimerScreen(session: session)))
+                  : () => onNavigate(1)),
+          const SizedBox(height: Insets.sm),
+          Row(children: [
+            Expanded(
+                child: TextButton(
+              style: TextButton.styleFrom(
+                  alignment: Alignment.centerLeft, padding: EdgeInsets.zero),
+              onPressed: () => onNavigate(2),
+              child: Text(
+                  fuel.hasUsableTarget
+                      ? l.fuelLeftToday(
+                          (fuel.targetCalories - fuel.consumedCalories)
+                              .clamp(0, fuel.targetCalories))
+                      : l.dashboardSetFuel,
+                  style: AppType.subhead(
+                      color: AppAccessibility.textSecondary(context))),
+            )),
+            IconButton(
+                tooltip: l.dashboardFuelInfo,
+                icon: const Icon(AppIcons.info, size: IconSizes.row),
+                onPressed: () => showDialog<void>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: Text(l.dashboardFuelInfo),
+                          content: Text(l.dashboardFuelExplanation),
+                          actions: [
+                            TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(l.commonClose))
+                          ],
+                        ))),
+          ]),
+        ]));
   }
 }
 
@@ -363,7 +370,7 @@ class _VerificationBanner extends StatelessWidget {
               child: Text(
                   urgent ? l.dashboardConfirmEmail : l.dashboardVerifyEmail,
                   style: AppType.callout())),
-          const Icon(Icons.chevron_right,
+          const Icon(AppIcons.caretRight,
               size: IconSizes.row, color: AppColors.textSecondary),
         ]));
   }
@@ -462,6 +469,6 @@ class FighterAvatar extends StatelessWidget {
       height: size,
       decoration: const BoxDecoration(
           shape: BoxShape.circle, color: AppColors.surfaceElevated),
-      child:
-          Icon(Icons.person, size: size * .55, color: AppColors.textSecondary));
+      child: Icon(AppIcons.user,
+          size: size * .55, color: AppColors.textSecondary));
 }

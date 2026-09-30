@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../theme/app_icons.dart';
 
 import '../data/data_repository.dart';
 import '../data/mock_data.dart';
@@ -416,10 +417,10 @@ class AppState extends ChangeNotifier {
   }
 
   static IconData _sourceIcon(TrainingSource source) => switch (source) {
-        TrainingSource.planned => Icons.sports_mma,
-        TrainingSource.timer => Icons.timer,
-        TrainingSource.reaction => Icons.flash_on,
-        TrainingSource.manual => Icons.fitness_center,
+        TrainingSource.planned => AppIcons.boxingGlove,
+        TrainingSource.timer => AppIcons.timer,
+        TrainingSource.reaction => AppIcons.lightning,
+        TrainingSource.manual => AppIcons.barbell,
       };
 
   void _upsertLocal(TrainingLogEntry entry) {
@@ -562,42 +563,42 @@ class AppState extends ChangeNotifier {
         day: 'Mon',
         title: 'Striking',
         subtitle: 'Boxing fundamentals + combinations',
-        icon: Icons.sports_mma,
+        icon: AppIcons.boxingGlove,
         completed: false,
       ),
       const TrainingSession(
         day: 'Tue',
         title: 'Wrestling',
         subtitle: 'Entries, finishes + control',
-        icon: Icons.sports_kabaddi,
+        icon: AppIcons.handGrabbing,
         completed: false,
       ),
       const TrainingSession(
         day: 'Wed',
         title: 'Conditioning',
         subtitle: 'Intervals + core',
-        icon: Icons.bolt,
+        icon: AppIcons.lightning,
         completed: false,
       ),
       const TrainingSession(
         day: 'Thu',
         title: 'BJJ',
         subtitle: 'Guard, transitions + submissions',
-        icon: Icons.sports_martial_arts,
+        icon: AppIcons.handFist,
         completed: false,
       ),
       const TrainingSession(
         day: 'Fri',
         title: 'Strength',
         subtitle: 'Explosive upper/lower body',
-        icon: Icons.fitness_center,
+        icon: AppIcons.barbell,
         completed: false,
       ),
       const TrainingSession(
         day: 'Sat',
         title: 'Recovery',
         subtitle: 'Mobility + easy zone 2',
-        icon: Icons.spa,
+        icon: AppIcons.flowerLotus,
         completed: false,
       ),
     ];

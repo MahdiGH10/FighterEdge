@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../theme/app_icons.dart';
 
 import '../../l10n/gen/app_localizations.dart';
 import '../../state/app_state.dart';
@@ -41,27 +42,27 @@ class FirstWeekChecklist extends StatelessWidget {
       const _Item(
         title: 'Build your plan',
         subtitle: 'Your target and training week are set.',
-        icon: Icons.flag_outlined,
+        icon: AppIcons.flag,
         done: true,
       ),
       _Item(
         title: 'Take the 30-second tour',
         subtitle: 'See where everything lives.',
-        icon: Icons.explore_outlined,
+        icon: AppIcons.compass,
         done: firstRun.tourDone,
         onTap: onStartTour,
       ),
       _Item(
         title: 'Log your first meal',
         subtitle: 'One tap from Fuel. It starts your day’s score.',
-        icon: Icons.restaurant_outlined,
+        icon: AppIcons.forkKnife,
         done: firstRun.firstMealLogged,
         onTap: onLogMeal,
       ),
       _Item(
         title: 'Complete a session',
         subtitle: 'Tick one off in Train to start your streak.',
-        icon: Icons.sports_mma,
+        icon: AppIcons.boxingGlove,
         done: state.completedSessionCount > 0,
         onTap: onTrain,
       ),
@@ -138,7 +139,7 @@ class FirstWeekChecklist extends StatelessWidget {
             const SizedBox(height: Insets.lg),
             PrimaryButton(
               'Done',
-              icon: Icons.check,
+              icon: AppIcons.check,
               expand: true,
               onPressed: () {
                 AppHaptics.commit();
@@ -236,7 +237,7 @@ class _ItemRow extends StatelessWidget {
                 AnimatedSwitcher(
                   duration: duration,
                   child: Icon(
-                    item.done ? Icons.check_circle : item.icon,
+                    item.done ? AppIconsFill.checkCircle : item.icon,
                     key: ValueKey(item.done),
                     size: 22,
                     color: item.done
@@ -275,7 +276,7 @@ class _ItemRow extends StatelessWidget {
                 ),
                 if (tappable)
                   Icon(
-                    Icons.chevron_right,
+                    AppIcons.caretRight,
                     color: isNext ? AppColors.accentText : muted,
                   ),
               ],

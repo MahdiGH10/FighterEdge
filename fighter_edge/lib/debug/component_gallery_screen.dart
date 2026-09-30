@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_icons.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -152,20 +153,20 @@ class _ButtonStates extends StatelessWidget {
       children: [
         PrimaryButton(
           'Start session',
-          icon: Icons.play_arrow_rounded,
+          icon: AppIconsFill.play,
           expand: true,
           onPressed: () {},
         ),
         const SizedBox(height: Insets.sm),
         const PrimaryButton(
           'Saving',
-          icon: Icons.lock_rounded,
+          icon: AppIcons.lockSimple,
           expand: true,
         ),
         const SizedBox(height: Insets.sm),
         GhostButton(
           'Review plan',
-          icon: Icons.insights_rounded,
+          icon: AppIcons.chartLineUp,
           expand: true,
           onPressed: () {},
         ),
@@ -189,7 +190,7 @@ class _CardStates extends StatelessWidget {
                 value: '77.2',
                 unit: 'kg',
                 delta: '-0.4 this week',
-                deltaIcon: Icons.trending_down_rounded,
+                deltaIcon: AppIcons.trendDown,
                 accent: AppColors.primary,
                 onTap: () {},
               ),
@@ -219,7 +220,7 @@ class _CardStates extends StatelessWidget {
                 progress: .72,
                 size: 52,
                 strokeWidth: 5,
-                child: Icon(Icons.flash_on_rounded,
+                child: Icon(AppIcons.lightning,
                     color: AppColors.primaryBright, size: 20),
               ),
               const SizedBox(width: Insets.md),
@@ -297,7 +298,7 @@ class _MotionStates extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         const PremiumBadge('Pro'),
-        const PremiumBadge('Camp mode', icon: Icons.sports_mma_rounded),
+        const PremiumBadge('Camp mode', icon: AppIcons.boxingGlove),
         PressScale(
           onTap: () {},
           child: DecoratedBox(
@@ -341,10 +342,10 @@ class _NavigationStates extends StatelessWidget {
           currentIndex: 1,
           onTap: (_) {},
           items: const [
-            NavItem(Icons.home_rounded, 'Home'),
-            NavItem(Icons.fitness_center_rounded, 'Train'),
-            NavItem(Icons.local_fire_department_rounded, 'Fuel'),
-            NavItem(Icons.person_rounded, 'Profile'),
+            NavItem(AppIcons.house, 'Home'),
+            NavItem(AppIcons.barbell, 'Train'),
+            NavItem(AppIcons.fire, 'Fuel'),
+            NavItem(AppIcons.user, 'Profile'),
           ],
         ),
       ),

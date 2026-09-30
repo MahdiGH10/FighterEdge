@@ -14,6 +14,9 @@ void main() {
   group('EdgeFuelSetupScreen', () {
     testWidgets('complete setup for a maintenance goal reaches the Plan screen',
         (tester) async {
+      tester.view.physicalSize = const Size(430, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       final repo = await makeRepo(signedIn: true);
       final edgeFuelRepo = InMemoryEdgeFuelRepository();
       await tester.pumpWidget(wrapApp(

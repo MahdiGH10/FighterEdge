@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_icons.dart';
 
 import '../../auth/auth_repository.dart';
 import '../../theme/app_colors.dart';
@@ -22,7 +23,8 @@ void showAuthMessage(BuildContext context, String message) {
       backgroundColor: AppColors.surfaceElevated,
       content: Row(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.primary, size: 20),
+          const Icon(AppIcons.warningCircle,
+              color: AppColors.primary, size: 20),
           const SizedBox(width: Insets.md),
           Expanded(
             child:

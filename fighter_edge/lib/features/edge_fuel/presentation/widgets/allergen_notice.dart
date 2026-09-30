@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
@@ -46,9 +47,7 @@ class AllergenFilterBanner extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            showingConflicts
-                ? Icons.visibility_outlined
-                : Icons.filter_alt_outlined,
+            showingConflicts ? AppIcons.eye : AppIcons.funnel,
             size: 16,
             color: AppColors.warning,
           ),
@@ -100,7 +99,7 @@ class UnmatchedAllergenNotice extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline, size: 16, color: AppColors.textMuted),
+          const Icon(AppIcons.info, size: 16, color: AppColors.textMuted),
           const SizedBox(width: Insets.sm),
           Expanded(
             child: Text(
@@ -148,9 +147,7 @@ class AllergenStatement extends StatelessWidget {
           Row(
             children: [
               Icon(
-                hasConflict
-                    ? Icons.warning_amber_rounded
-                    : Icons.shield_outlined,
+                hasConflict ? AppIcons.warning : AppIcons.shield,
                 size: 16,
                 color: hasConflict ? AppColors.warning : AppColors.textMuted,
               ),

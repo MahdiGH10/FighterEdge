@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -241,7 +242,7 @@ class _SessionRow extends StatelessWidget {
       if (s.completed) ...[
         const SizedBox(height: Insets.sm),
         Row(children: [
-          const Icon(Icons.check,
+          const Icon(AppIcons.check,
               size: IconSizes.inline, color: AppColors.textSecondary),
           const SizedBox(width: Insets.xs),
           Flexible(
@@ -253,7 +254,7 @@ class _SessionRow extends StatelessWidget {
     final actions = Row(mainAxisSize: MainAxisSize.min, children: [
       if (!s.completed)
         _StartIconButton(label: s.title, primary: isNext, onTap: onStart),
-      HeaderIcon(s.completed ? Icons.edit_note : Icons.check_circle_outline,
+      HeaderIcon(s.completed ? AppIcons.notePencil : AppIcons.checkCircle,
           label: s.completed
               ? L.of(context).trainingEditSessionLog
               : L.of(context).trainingLogSession,
@@ -305,7 +306,7 @@ class _StartIconButton extends StatelessWidget {
                   shape: BoxShape.circle),
               child: SizedBox.square(
                   dimension: AppAccessibility.minTouchTarget,
-                  child: Icon(Icons.play_arrow,
+                  child: Icon(AppIconsFill.play,
                       color: primary
                           ? AppColors.textPrimary
                           : AppColors.textSecondary,

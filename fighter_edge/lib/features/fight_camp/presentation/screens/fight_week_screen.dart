@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../state/app_state.dart';
@@ -65,7 +66,7 @@ class FightWeekScreen extends StatelessWidget {
       showBack: true,
       actions: [
         HeaderIcon(
-          Icons.edit_outlined,
+          AppIcons.pencilSimple,
           label: l.fightEdit,
           onTap: () => openFightSetup(context),
         ),
@@ -142,7 +143,7 @@ class _PlanMessage extends StatelessWidget {
           if (plan != null) ...[
             const SizedBox(height: Insets.md),
             _IconLine(
-              icon: Icons.water_drop_outlined,
+              icon: AppIcons.drop,
               color: AppAccessibility.textSecondary(context),
               text: copy.l.fightWeekWater,
             ),
@@ -184,12 +185,12 @@ class _IconLine extends StatelessWidget {
 }
 
 IconData _stepIcon(FightWeekStep step) => switch (step) {
-      FightWeekStep.eatToPlan => Icons.restaurant_outlined,
-      FightWeekStep.lowFibre => Icons.rice_bowl_outlined,
-      FightWeekStep.lowerCarbs => Icons.bakery_dining_outlined,
-      FightWeekStep.weighIn => Icons.monitor_weight_outlined,
-      FightWeekStep.refuel => Icons.local_drink_outlined,
-      FightWeekStep.fight => Icons.sports_mma_outlined,
+      FightWeekStep.eatToPlan => AppIcons.forkKnife,
+      FightWeekStep.lowFibre => AppIcons.bowlFood,
+      FightWeekStep.lowerCarbs => AppIcons.bread,
+      FightWeekStep.weighIn => AppIcons.scales,
+      FightWeekStep.refuel => AppIcons.drop,
+      FightWeekStep.fight => AppIcons.boxingGlove,
     };
 
 /// Today's steps in full, in the order they happen (pattern 3).
@@ -254,14 +255,14 @@ class _DayRow extends StatelessWidget {
     final muted = AppAccessibility.textMuted(context);
     final accent = AppAccessibility.accentText(context);
     final (icon, color) = day.isFight
-        ? (Icons.sports_mma_outlined, isToday ? accent : muted)
+        ? (AppIcons.boxingGlove, isToday ? accent : muted)
         : day.isWeighIn
-            ? (Icons.monitor_weight_outlined, isToday ? accent : muted)
+            ? (AppIcons.scales, isToday ? accent : muted)
             : offset < 0
-                ? (Icons.check_circle_outline, muted)
+                ? (AppIcons.checkCircle, muted)
                 : isToday
-                    ? (Icons.radio_button_checked, accent)
-                    : (Icons.circle_outlined, muted);
+                    ? (AppIcons.radioButton, accent)
+                    : (AppIcons.circle, muted);
     return GroupedRow(
       title: copy.date(day.date),
       subtitle:
@@ -291,27 +292,27 @@ class _RefuelTargets extends StatelessWidget {
     final max = refuel.totalCarbMaxGrams;
     return GroupedList(children: [
       _TargetRow(
-        icon: Icons.local_drink_outlined,
+        icon: AppIcons.drop,
         label: l.fightRefuelDrink,
         value: l.fightRefuelPerHour(
             copy.fluidRange(refuel.minLitresPerHour, refuel.maxLitresPerHour)),
         timing: l.fightRefuelDrinkWhen,
       ),
       _TargetRow(
-        icon: Icons.bolt_outlined,
+        icon: AppIcons.lightning,
         label: l.fightRefuelCarbs,
         value: l.fightRefuelUpTo(copy.grams(refuel.maxCarbGramsPerHour)),
         timing: l.fightRefuelCarbsWhen,
       ),
       if (min != null && max != null)
         _TargetRow(
-          icon: Icons.bakery_dining_outlined,
+          icon: AppIcons.bread,
           label: l.fightRefuelTotal,
           value: copy.gramsRange(min, max),
           timing: l.fightRefuelTotalWhen,
         ),
       _TargetRow(
-        icon: Icons.rice_bowl_outlined,
+        icon: AppIcons.bowlFood,
         label: l.fightRefuelFibre,
         value: l.fightRefuelFibreValue,
         timing: l.fightRefuelFibreWhen,

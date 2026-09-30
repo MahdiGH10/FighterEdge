@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_icons.dart';
 
 import '../theme/app_colors.dart';
 
@@ -66,10 +67,10 @@ extension FeatureInfo on Feature {
       };
 
   IconData get icon => switch (this) {
-        Feature.edgeFuelAiCoach => Icons.auto_awesome,
-        Feature.edgeFuelPremiumRecipes => Icons.restaurant_menu,
-        Feature.fullTechniqueLibrary => Icons.sports_martial_arts,
-        Feature.cornerCoach => Icons.record_voice_over,
+        Feature.edgeFuelAiCoach => AppIcons.clipboardText,
+        Feature.edgeFuelPremiumRecipes => AppIcons.forkKnife,
+        Feature.fullTechniqueLibrary => AppIcons.handFist,
+        Feature.cornerCoach => AppIcons.megaphoneSimple,
       };
 }
 

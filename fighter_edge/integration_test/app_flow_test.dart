@@ -7,6 +7,7 @@ import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/billing/fake_billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/main.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 import 'package:fighter_edge/widgets/bottom_nav.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
 
@@ -103,7 +104,7 @@ void main() {
     // 6. Activation moment, then the dashboard.
     expect(find.text('Your first Fighter Edge plan is ready'), findsOneWidget);
     await _tapVisible(tester, find.text('Open dashboard'));
-    expect(find.text('DASHBOARD'), findsOneWidget);
+    expect(find.text('Ayoub'), findsOneWidget);
 
     // 7. Profile -> the paid upgrade entry point. Computed from the nav
     // bar's own rect, so it needs no scrolling regardless of screen size.
@@ -140,7 +141,7 @@ void main() {
 
     // 10. Sign out from Profile -> back to login.
     await _tapVisible(
-        tester, find.byIcon(Icons.chevron_left)); // Paywall -> Profile.
+        tester, find.byIcon(AppIcons.caretLeft)); // Paywall -> Profile.
     // The "Pro is active" snackbar covers the bottom of the screen for a few
     // seconds; on the CI emulator's 320x640 screen that is where Sign out
     // lands, so a tap right away hits the snackbar. Also, the paywall has

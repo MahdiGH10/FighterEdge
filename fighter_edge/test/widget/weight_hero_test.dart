@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/screens/weight_tracker_screen.dart';
 import 'package:fighter_edge/widgets/number_hero.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -30,7 +31,7 @@ void main() {
     expect(find.byType(NumberHero), findsOneWidget);
 
     // And back again.
-    await tester.tap(find.byIcon(Icons.chevron_left)); // header back
+    await tester.tap(find.byIcon(AppIcons.caretLeft)); // header back
     await tester.pumpAndSettle();
     expect(find.byType(WeightTrackerScreen), findsNothing);
     expect(tester.takeException(), isNull);

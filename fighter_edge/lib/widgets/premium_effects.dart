@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../theme/app_icons.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -98,7 +99,7 @@ class PremiumBadge extends StatelessWidget {
   final String label;
   final IconData icon;
 
-  const PremiumBadge(this.label, {super.key, this.icon = Icons.bolt_rounded});
+  const PremiumBadge(this.label, {super.key, this.icon = AppIcons.lightning});
 
   @override
   Widget build(BuildContext context) {

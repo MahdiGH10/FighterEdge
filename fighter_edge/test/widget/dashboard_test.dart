@@ -10,6 +10,7 @@ import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/theme/app_theme.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -25,7 +26,7 @@ void main() {
     ));
     await tester.pump();
 
-    expect(find.text('DASHBOARD'), findsOneWidget);
+    expect(find.text('Ayoub'), findsOneWidget);
     expect(find.text('Ayoub'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('This week'), 300);
     expect(find.text('This week'), findsOneWidget);
@@ -33,6 +34,9 @@ void main() {
   });
 
   testWidgets('weight card reacts to AppState changes', (tester) async {
+    tester.view.physicalSize = const Size(430, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final repo = await makeRepo(signedIn: true);
     final state = AppState(clock: () => wednesday);
     await tester.pumpWidget(wrapApp(
@@ -49,6 +53,9 @@ void main() {
 
   testWidgets('one hero starts the exact session planned for today',
       (tester) async {
+    tester.view.physicalSize = const Size(430, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final repo = await makeRepo(signedIn: true);
     final data = InMemoryDataRepository();
     const session = TrainingSession(
@@ -56,7 +63,7 @@ void main() {
         title: 'Boxing',
         subtitle: 'Jab practice',
         completed: false,
-        icon: Icons.sports_mma);
+        icon: AppIcons.boxingGlove);
     await data.saveSession(repo.currentUser!.id, session);
     final state = AppState(dataRepository: data, clock: () => wednesday)
       ..setUser(repo.currentUser!.id);
@@ -164,7 +171,7 @@ void main() {
               day: day,
               title: day,
               subtitle: '',
-              icon: Icons.sports_mma,
+              icon: AppIcons.boxingGlove,
               completed: true,
               completedAt: now.subtract(Duration(days: daysAgo)),
             ),
@@ -188,6 +195,9 @@ void main() {
     });
 
     testWidgets('demo streak is at risk on Saturday', (tester) async {
+      tester.view.physicalSize = const Size(430, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       final repo = await makeRepo(signedIn: true);
       await tester.pumpWidget(wrapApp(
         DashboardScreen(onNavigate: (_) {}),

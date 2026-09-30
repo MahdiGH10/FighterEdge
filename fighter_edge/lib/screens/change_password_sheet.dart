@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../auth/auth_repository.dart';
 import '../auth/password_policy.dart';
@@ -115,7 +116,7 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
     final busy = context.watch<AuthController>().isBusy;
     final toggle = IconButton(
       tooltip: _obscure ? 'Show passwords' : 'Hide passwords',
-      icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility,
+      icon: Icon(_obscure ? AppIcons.eyeSlash : AppIcons.eye,
           color: AppColors.textMuted, size: 20),
       onPressed: () => setState(() => _obscure = !_obscure),
     );
@@ -142,7 +143,7 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
                 AppTextField(
                   controller: _current,
                   label: 'Current password',
-                  icon: Icons.lock_outline,
+                  icon: AppIcons.lockSimple,
                   obscure: _obscure,
                   autofocus: true,
                   autofillHints: const [AutofillHints.password],
@@ -158,7 +159,7 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
                 AppTextField(
                   controller: _next,
                   label: 'New password',
-                  icon: Icons.lock_reset,
+                  icon: AppIcons.lockKey,
                   obscure: _obscure,
                   autofillHints: const [AutofillHints.newPassword],
                   errorText: _nextError,
@@ -169,7 +170,7 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
                 AppTextField(
                   controller: _confirm,
                   label: 'Confirm new password',
-                  icon: Icons.lock_reset,
+                  icon: AppIcons.lockKey,
                   obscure: _obscure,
                   autofillHints: const [AutofillHints.newPassword],
                   textInputAction: TextInputAction.done,

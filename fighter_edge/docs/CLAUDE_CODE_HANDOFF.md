@@ -2,7 +2,7 @@
 
 ## START HERE: state as of 2026-09-28
 
-**Twelve stacked PRs, none merged.** Merge in order, retargeting each to
+**Thirteen stacked PRs, none merged.** Merge in order, retargeting each to
 `main` after the one before it lands:
 
 | PR | Branch | What |
@@ -19,6 +19,7 @@
 | #20 | `feat/groq-provider` | Optional Groq provider (`AI_PROVIDER=groq`) with a model fallback chain; needs the `GROQ_API_KEY` secret set before merge |
 | #21 | `feat/rewarded-ads` | Rewarded video for free accounts: one a day unlocks that day's full Corner Brief. Test ads only until AdMob is set up |
 | #22 | `feat/ux-polish` | Paywall redesign (benefits, both plans and one buy button on one phone screen; fully EN/DE), tappable coach questions, small Home/Fuel/Plan fixes |
+| #23 | `feat/design-identity` | Less generic look: Phosphor icons, Barlow body font, flat nav, inverted chips, sharper corners, dated Home header and bold hero |
 
 **CI:** all 7 checks green on #10, #12, #13, and now #15 (the Android
 emulator job stalled once on #15's first run — 35 minutes, no output — and
@@ -26,6 +27,35 @@ was rerun; the same known intermittent hang as #11/#14, not a test
 failure). #11 and #14 stalled once each too and passed clean on rerun.
 #16 and #17 run the same workflow; watch their emulator job for the same
 pattern before assuming a real failure.
+
+### Design identity (PR #23)
+
+The owner's first-glance complaint was that the screens read as AI-made. What
+made them read that way, and what replaced it:
+
+- **Stock Material icons everywhere, plus sparkle icons for every AI feature.**
+  Now one icon language: Phosphor (MIT), a boxing glove for sessions, a barbell
+  for Train, a clipboard for the Corner Brief, a megaphone for corner cues. No
+  sparkles. `lib/theme/app_icons.dart` (`AppIcons` regular, `AppIconsFill` for
+  selected states) is generated from the vendored font in
+  `assets/fonts/phosphor/`. **Do not add `phosphor_flutter`:** 2.1.0 no longer
+  compiles (Flutter made `IconData` final) and the analyzer does not say so.
+  To add an icon, add its name and code point to `app_icons.dart` (code points
+  are in that package's `phosphor_icons_regular.dart` / `_fill.dart`).
+- **Inter** (every generated UI's default) is replaced by **Barlow** (OFL, four
+  static cuts). It runs small, so the readable ladder is 17/16/14/12 (was
+  17/15/13/11).
+- **Floating blurred pill nav** is now a flat full-width bar: hairline on top,
+  filled icon and a short accent line on the active tab. No blur, no shadow.
+- **Red pill chips** are now outlined square-ish chips; selected is inverted
+  (near-white, dark text).
+- **Corners** are tighter (card 12, button 10, tile 8) for a harder feel.
+- **Home:** the header is the date instead of the word "Dashboard"; the
+  "Today" card is a rank-marked hero (`AppCard(accent:, edge: true)`, a short
+  bar on the left edge) with the session name at display size.
+- Not done, owner-only: real photography (your own gym, your friend) is the
+  strongest remaining fix; the recipe photos are the only real images today.
+  No AI images, by decision.
 
 ### UX pass (PR #22)
 

@@ -6,6 +6,7 @@ import 'package:fighter_edge/features/edge_fuel/data/asset_recipe_catalog_reposi
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/recipe_library_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../../helpers/test_harness.dart';
 
@@ -78,7 +79,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Labneh bowl with cucumber and olives'), findsOneWidget);
-    expect(find.byIcon(Icons.lock_outline), findsWidgets);
+    expect(find.byIcon(AppIcons.lockSimple), findsWidgets);
   });
 
   testWidgets('a Pro user sees no lock', (tester) async {
@@ -88,7 +89,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Labneh bowl with cucumber and olives'), findsOneWidget);
-    expect(find.byIcon(Icons.lock_outline), findsNothing);
+    expect(find.byIcon(AppIcons.lockSimple), findsNothing);
   });
 
   testWidgets(

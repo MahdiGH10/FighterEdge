@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:fighter_edge/features/edge_fuel/data/food_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/screens/nutrition_screen.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../../helpers/test_harness.dart';
 
@@ -36,7 +37,7 @@ void main() {
         .loadAll());
 
     // Log one real meal through the same add flow a user would use.
-    await tester.tap(find.byIcon(Icons.add).first);
+    await tester.tap(find.byIcon(AppIcons.plus).first);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'banana');
     await tester.pumpAndSettle();

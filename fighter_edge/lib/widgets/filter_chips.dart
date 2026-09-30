@@ -243,15 +243,14 @@ class _Chip extends StatelessWidget {
           constraints:
               const BoxConstraints(minHeight: AppAccessibility.minTouchTarget),
           decoration: BoxDecoration(
-            // primaryDark, not primary: white 13 pt text on primary is
-            // 4.31:1, under WCAG AA. On primaryDark it is 5.76:1 — and the
-            // selected chip no longer competes with the screen's one primary
-            // button, which keeps the brighter red.
-            color: selected ? AppColors.primaryDark : AppColors.surfaceAlt,
-            borderRadius: BorderRadius.circular(Radii.chip),
+            // Selection is an inverted chip: near-white with dark text, well
+            // over AA, and it never competes with the screen's one red
+            // primary button. Unselected chips are outlined, not filled.
+            color: selected ? AppColors.textPrimary : AppColors.transparent,
+            borderRadius: BorderRadius.circular(Radii.tile),
             border: Border.all(
               color: selected
-                  ? AppColors.primaryBright.withValues(alpha: .48)
+                  ? AppColors.textPrimary
                   : AppAccessibility.border(context),
             ),
           ),
@@ -270,7 +269,7 @@ class _Chip extends StatelessWidget {
                   AppType.subhead(
                     weight: FontWeight.w600,
                     color: selected
-                        ? AppColors.onPrimary
+                        ? AppColors.background
                         : AppAccessibility.textSecondary(context),
                   ),
                 ),

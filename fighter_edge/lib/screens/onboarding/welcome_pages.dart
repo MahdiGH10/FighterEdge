@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_icons.dart';
 
 import '../../theme/app_accessibility.dart';
 import '../../l10n/gen/app_localizations.dart';
@@ -41,21 +42,21 @@ class _WelcomePage {
 
 const _pages = [
   _WelcomePage(
-    icon: Icons.sports_mma,
+    icon: AppIcons.boxingGlove,
     title: 'Your camp, organised.',
     body: 'Training week, weight and fuel in one place — built around the '
         'days you can actually train.',
     proof: ['Weekly plan', 'Session log', 'Round timer'],
   ),
   _WelcomePage(
-    icon: Icons.bolt,
+    icon: AppIcons.lightning,
     title: 'Fuel that matches the work.',
     body: 'EdgeFuel sets your calories and macros from your body and your '
         'training load, then keeps score as you log.',
     proof: ['Daily target', 'Macro split', 'Meal log'],
   ),
   _WelcomePage(
-    icon: Icons.trending_up,
+    icon: AppIcons.trendUp,
     title: '', // Localized by the page view.
     body: 'Streaks, your weight trend and session history show progress '
         'week over week — not just today.',
@@ -152,7 +153,7 @@ class _WelcomePagesState extends State<WelcomePages> {
                 const SizedBox(height: Insets.xl),
                 PrimaryButton(
                   _isLast ? 'Build my plan' : 'Continue',
-                  icon: _isLast ? Icons.flag : Icons.arrow_forward,
+                  icon: _isLast ? AppIconsFill.flag : AppIcons.arrowRight,
                   expand: true,
                   onPressed: _next,
                 ),

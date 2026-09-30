@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../features/edge_fuel/domain/models/food_log_entry.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
@@ -72,7 +73,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
       title: l.nutritionTitle,
       actions: [
         HeaderIcon(
-          Icons.add,
+          AppIcons.plus,
           label: l.nutritionAddFood,
           onTap: () => _addFood(edgeFuel),
         ),
@@ -193,7 +194,7 @@ class _DateSwitcher extends StatelessWidget {
       child: Row(
         children: [
           HeaderIcon(
-            Icons.chevron_left,
+            AppIcons.caretLeft,
             label: l.nutritionPreviousDay,
             onTap: () => edgeFuel.shiftDate(-1),
           ),
@@ -208,7 +209,7 @@ class _DateSwitcher extends StatelessWidget {
             ),
           ),
           HeaderIcon(
-            Icons.chevron_right,
+            AppIcons.caretRight,
             label: l.nutritionNextDay,
             onTap: () => edgeFuel.shiftDate(1),
           ),
@@ -521,7 +522,7 @@ class _TodayView extends StatelessWidget {
                         const Size.fromHeight(AppAccessibility.minTouchTarget),
                   ),
                   iconAlignment: IconAlignment.end,
-                  icon: const Icon(Icons.chevron_right, size: IconSizes.row),
+                  icon: const Icon(AppIcons.caretRight, size: IconSizes.row),
                   onPressed: () => AppNavigation.push(
                       context,
                       edgeFuel.hasCompletedSetup
@@ -544,7 +545,7 @@ class _TodayView extends StatelessWidget {
         if (edgeFuel.entries.isNotEmpty) ...[
           const SizedBox(height: Insets.md),
           PrimaryButton(l.nutritionAddFood,
-              icon: Icons.add, expand: true, onPressed: onAdd),
+              icon: AppIcons.plus, expand: true, onPressed: onAdd),
         ],
       ],
     );
@@ -642,7 +643,7 @@ class _QuickStartMeals extends StatelessWidget {
       protein: 28,
       carbs: 52,
       fats: 10,
-      icon: Icons.breakfast_dining,
+      icon: AppIcons.egg,
     ),
     _QuickMeal(
       name: 'Chicken rice bowl',
@@ -651,7 +652,7 @@ class _QuickStartMeals extends StatelessWidget {
       protein: 46,
       carbs: 72,
       fats: 14,
-      icon: Icons.rice_bowl,
+      icon: AppIcons.bowlFood,
     ),
   ];
 
@@ -671,7 +672,7 @@ class _QuickStartMeals extends StatelessWidget {
           if (onSearch != null) ...[
             PrimaryButton(
               L.of(context).nutritionSearchFoods,
-              icon: Icons.search,
+              icon: AppIcons.magnifyingGlass,
               expand: true,
               onPressed: onSearch,
             ),
@@ -690,7 +691,7 @@ class _QuickStartMeals extends StatelessWidget {
           const SizedBox(height: Insets.md),
           GhostButton(
             'Browse recipes',
-            icon: Icons.menu_book_outlined,
+            icon: AppIcons.bookOpen,
             expand: true,
             onPressed: () => AppNavigation.push(
               context,
@@ -789,7 +790,7 @@ class _QuickMealTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: Insets.sm),
-            const Icon(Icons.add_circle_outline, color: AppColors.primary),
+            const Icon(AppIcons.plusCircle, color: AppColors.primary),
           ],
         ),
       ),
@@ -810,14 +811,14 @@ class _RecipesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final largeText = MediaQuery.textScalerOf(context).scale(14) / 14 >= 1.4;
     const beforeTraining = _RecipeShortcut(
-      icon: Icons.bolt,
+      icon: AppIcons.lightning,
       label: 'Before training',
       filters: RecipeFilters(
         trainingTiming: TrainingTiming.preTraining,
       ),
     );
     const afterTraining = _RecipeShortcut(
-      icon: Icons.restart_alt,
+      icon: AppIcons.arrowCounterClockwise,
       label: 'After training',
       filters: RecipeFilters(
         trainingTiming: TrainingTiming.postTraining,
@@ -852,7 +853,7 @@ class _RecipesTab extends StatelessWidget {
               const SizedBox(height: Insets.lg),
               PrimaryButton(
                 'Browse recipes',
-                icon: Icons.menu_book_outlined,
+                icon: AppIcons.bookOpen,
                 onPressed: () => AppNavigation.push(
                   context,
                   AppRoutes.fuelRecipes,
@@ -955,8 +956,8 @@ class _MealsView extends StatelessWidget {
                   label: Text(entry.name),
                   avatar: Icon(
                     savedKeys.contains(entry.name.trim().toLowerCase())
-                        ? Icons.star
-                        : Icons.history,
+                        ? AppIconsFill.star
+                        : AppIcons.clockCounterClockwise,
                     size: IconSizes.inline,
                     color: AppColors.primary,
                   ),
@@ -1065,7 +1066,7 @@ class _FoodRow extends StatelessWidget {
                           if (entry.saved) ...[
                             const SizedBox(width: Insets.xs),
                             const Icon(
-                              Icons.star,
+                              AppIconsFill.star,
                               size: 14,
                               color: AppColors.primary,
                             ),
@@ -1090,7 +1091,8 @@ class _FoodRow extends StatelessWidget {
           ),
           _ToggleCheck(checked: entry.consumed, onTap: onToggle),
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
+            icon: const Icon(AppIcons.dotsThreeVertical,
+                color: AppColors.textMuted),
             color: AppColors.surface,
             onSelected: (value) {
               if (value == 'edit') onEdit();
@@ -1176,7 +1178,7 @@ class _Check extends StatelessWidget {
         },
         child: checked
             ? const Icon(
-                Icons.check,
+                AppIcons.check,
                 key: ValueKey('meal-check'),
                 size: 16,
                 color: AppColors.onPrimary,

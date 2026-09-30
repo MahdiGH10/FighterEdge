@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../theme/app_icons.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../theme/app_colors.dart';
@@ -62,7 +63,7 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.mail_lock_outlined,
+            const Icon(AppIcons.envelopeSimple,
                 size: 48, color: AppColors.primary),
             const SizedBox(height: Insets.lg),
             Text(_codeSent ? 'Enter your code' : 'Passwordless sign-in',
@@ -80,7 +81,7 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
               AppTextField(
                 controller: _email,
                 label: 'Email',
-                icon: Icons.mail_outline,
+                icon: AppIcons.envelopeSimple,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
                 textInputAction: TextInputAction.done,
@@ -96,7 +97,7 @@ class _MagicLinkScreenState extends State<MagicLinkScreen> {
               AppTextField(
                 controller: _code,
                 label: '6-digit code',
-                icon: Icons.pin_outlined,
+                icon: AppIcons.password,
                 keyboardType: TextInputType.number,
                 // Lets iOS and Android offer the code straight from the
                 // email or message notification.

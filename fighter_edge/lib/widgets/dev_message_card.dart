@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -89,7 +90,7 @@ class _DevMessageCardState extends State<DevMessageCard> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.campaign_outlined,
+                  const Icon(AppIcons.megaphoneSimple,
                       size: IconSizes.inline, color: AppColors.premium),
                   const SizedBox(width: Insets.sm),
                   Expanded(

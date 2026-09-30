@@ -13,11 +13,24 @@ void main() {
   setUpAll(() async {
     final oswald = FontLoader('Oswald')
       ..addFont(rootBundle.load('assets/fonts/Oswald-Variable.ttf'));
-    final inter = FontLoader('Inter')
-      ..addFont(rootBundle.load('assets/fonts/Inter-Variable.ttf'));
+    final barlow = FontLoader('Barlow')
+      ..addFont(rootBundle.load('assets/fonts/barlow/Barlow-Regular.ttf'))
+      ..addFont(rootBundle.load('assets/fonts/barlow/Barlow-Medium.ttf'))
+      ..addFont(rootBundle.load('assets/fonts/barlow/Barlow-SemiBold.ttf'))
+      ..addFont(rootBundle.load('assets/fonts/barlow/Barlow-Bold.ttf'));
     final materialIcons = FontLoader('MaterialIcons')
       ..addFont(_loadMaterialIconsFont());
-    await Future.wait([oswald.load(), inter.load(), materialIcons.load()]);
+    final phosphorRegular = FontLoader('PhosphorRegular')
+      ..addFont(rootBundle.load('assets/fonts/phosphor/Phosphor-Regular.ttf'));
+    final phosphorFill = FontLoader('PhosphorFill')
+      ..addFont(rootBundle.load('assets/fonts/phosphor/Phosphor-Fill.ttf'));
+    await Future.wait([
+      oswald.load(),
+      barlow.load(),
+      materialIcons.load(),
+      phosphorRegular.load(),
+      phosphorFill.load(),
+    ]);
   });
 
   setUp(() {

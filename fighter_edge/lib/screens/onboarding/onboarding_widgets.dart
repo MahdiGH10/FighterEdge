@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_icons.dart';
 
 import '../../features/edge_fuel/domain/models/nutrition_enums.dart';
 import '../../l10n/gen/app_localizations.dart';
@@ -154,7 +155,7 @@ class SelectCard<T> extends StatelessWidget {
                 ],
               )),
               const SizedBox(width: Insets.sm),
-              Icon(active ? Icons.check_circle : Icons.circle_outlined,
+              Icon(active ? AppIconsFill.checkCircle : AppIcons.circle,
                   color: active ? AppColors.accentText : AppColors.textMuted),
             ],
           ),
@@ -174,7 +175,7 @@ class DayStepper extends StatelessWidget {
     return Row(
       children: [
         _StepButton(
-          icon: Icons.remove,
+          icon: AppIcons.minus,
           semanticLabel: 'Fewer days',
           onTap: value <= 2 ? null : () => onChanged(value - 1),
         ),
@@ -190,7 +191,7 @@ class DayStepper extends StatelessWidget {
           ),
         ),
         _StepButton(
-          icon: Icons.add,
+          icon: AppIcons.plus,
           semanticLabel: 'More days',
           onTap: value >= 6 ? null : () => onChanged(value + 1),
         ),

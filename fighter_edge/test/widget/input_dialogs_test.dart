@@ -10,6 +10,7 @@ import 'package:fighter_edge/state/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -37,7 +38,7 @@ void main() {
         wrapApp(const Scaffold(body: NutritionScreen()), repo: repo),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.add).first);
+      await tester.tap(find.byIcon(AppIcons.plus).first);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Enter macros manually'));
       await tester.pumpAndSettle();
@@ -116,7 +117,7 @@ void main() {
           .element(find.byType(NutritionScreen))
           .read<EdgeFuelController>();
 
-      await tester.tap(find.byIcon(Icons.add).first);
+      await tester.tap(find.byIcon(AppIcons.plus).first);
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'chicken breast');
       await tester.pumpAndSettle();

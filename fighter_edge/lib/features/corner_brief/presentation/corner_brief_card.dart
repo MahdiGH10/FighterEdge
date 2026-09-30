@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../theme/app_icons.dart';
 
 import '../../../auth/verification_gate.dart';
 import '../../../billing/subscription.dart';
@@ -177,7 +178,7 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
         _FreeLine(line: freeLine),
         const SizedBox(height: Insets.md),
         GhostButton(l.cornerBriefSetUpAction,
-            icon: Icons.arrow_forward,
+            icon: AppIcons.arrowRight,
             expand: true,
             onPressed: () => AppNavigation.push(context, AppRoutes.fuelSetup,
                 fallbackBuilder: (_) => const EdgeFuelSetupScreen())),
@@ -185,12 +186,11 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
     }
 
     return AppCard(
-      accent: AppColors.premium,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(children: [
-            const Icon(Icons.auto_awesome,
+            const Icon(AppIcons.clipboardText,
                 color: AppColors.premium, size: IconSizes.inline),
             const SizedBox(width: Insets.sm),
             Expanded(
@@ -221,7 +221,7 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
     CornerLine freeLine,
   ) {
     final unlock = GhostButton(l.cornerBriefUnlock,
-        icon: Icons.lock_open_outlined, expand: true, onPressed: _openPaywall);
+        icon: AppIcons.lockSimpleOpen, expand: true, onPressed: _openPaywall);
 
     final written = corner.briefFor(today.date);
     if (written != null) {
@@ -253,7 +253,7 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
       const SizedBox(height: Insets.md),
       if (canWatch) ...[
         GhostButton(l.cornerBriefWatchVideo,
-            icon: Icons.smart_display_outlined,
+            icon: AppIcons.monitorPlay,
             expand: true,
             onPressed: () =>
                 _watchForBrief(target: target, today: today, day: day)),
@@ -266,7 +266,7 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
   List<Widget> _lines(WrittenCornerBrief written) => [
         if (written.requiresProfessionalReview) ...[
           _Note(
-            icon: Icons.health_and_safety_outlined,
+            icon: AppIcons.firstAid,
             text: L.of(context).cornerBriefProfessional,
             color: AppColors.warning,
           ),
@@ -300,7 +300,7 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
         _Hint(l.cornerBriefVerify),
         const SizedBox(height: Insets.md),
         GhostButton(l.cornerBriefVerifyAction,
-            icon: Icons.mark_email_unread_outlined,
+            icon: AppIcons.envelopeSimple,
             expand: true,
             onPressed: () => AppNavigation.push(context, AppRoutes.verifyEmail,
                 fallbackBuilder: (_) => const VerifyEmailScreen())),
@@ -337,12 +337,12 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
         _FreeLine(line: freeLine),
         const SizedBox(height: Insets.xs),
         switch (status) {
-          EdgeFuelAiStatus.quotaReached => _Note(
-              icon: Icons.hourglass_bottom_rounded, text: l.cornerBriefQuota),
-          EdgeFuelAiStatus.unavailable => _Note(
-              icon: Icons.cloud_off_rounded, text: l.cornerBriefUnavailable),
+          EdgeFuelAiStatus.quotaReached =>
+            _Note(icon: AppIcons.hourglassMedium, text: l.cornerBriefQuota),
+          EdgeFuelAiStatus.unavailable =>
+            _Note(icon: AppIcons.cloudSlash, text: l.cornerBriefUnavailable),
           EdgeFuelAiStatus.entitlementRequired =>
-            _Note(icon: Icons.sync_rounded, text: l.cornerBriefSyncing),
+            _Note(icon: AppIcons.arrowsClockwise, text: l.cornerBriefSyncing),
           _ => _Hint(l.cornerBriefProHint),
         },
         if (status != EdgeFuelAiStatus.quotaReached) ...[
@@ -351,9 +351,13 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
             EdgeFuelAiStatus.unavailable ||
             EdgeFuelAiStatus.entitlementRequired =>
               GhostButton(l.cornerBriefTryAgain,
-                  icon: Icons.refresh, expand: true, onPressed: getBrief),
+                  icon: AppIcons.arrowClockwise,
+                  expand: true,
+                  onPressed: getBrief),
             _ => GhostButton(l.cornerBriefGet,
-                icon: Icons.auto_awesome, expand: true, onPressed: getBrief),
+                icon: AppIcons.clipboardText,
+                expand: true,
+                onPressed: getBrief),
           },
         ],
       ];
@@ -367,23 +371,22 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
         const SizedBox(height: Insets.md),
         Semantics(
           liveRegion: true,
-          child: _Note(icon: Icons.update_rounded, text: l.cornerBriefUpdating),
+          child: _Note(
+              icon: AppIcons.arrowsClockwise, text: l.cornerBriefUpdating),
         ),
       ] else if (stale && status == EdgeFuelAiStatus.quotaReached) ...[
         const SizedBox(height: Insets.md),
-        _Note(
-            icon: Icons.hourglass_bottom_rounded,
-            text: l.cornerBriefQuotaStale),
+        _Note(icon: AppIcons.hourglassMedium, text: l.cornerBriefQuotaStale),
       ] else if (stale) ...[
         const SizedBox(height: Insets.md),
-        _Note(icon: Icons.cloud_off_rounded, text: l.cornerBriefUnavailable),
+        _Note(icon: AppIcons.cloudSlash, text: l.cornerBriefUnavailable),
         const SizedBox(height: Insets.sm),
         GhostButton(l.cornerBriefTryAgain,
-            icon: Icons.refresh, expand: true, onPressed: getBrief),
+            icon: AppIcons.arrowClockwise, expand: true, onPressed: getBrief),
       ],
       const SizedBox(height: Insets.md),
       GhostButton(l.cornerBriefAskCoach,
-          icon: Icons.chat_bubble_outline,
+          icon: AppIcons.chatTeardropText,
           expand: true,
           onPressed: () => AppNavigation.push(context, AppRoutes.fuelCoach,
               fallbackBuilder: (_) => const EdgeFuelCoachScreen())),
@@ -452,14 +455,11 @@ class _BriefLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final (icon, label) = switch (line.topic) {
-      CornerTopic.training => (Icons.sports_mma, l.cornerTopicTraining),
-      CornerTopic.fuel => (Icons.restaurant, l.cornerTopicFuel),
-      CornerTopic.weight => (
-          Icons.monitor_weight_outlined,
-          l.cornerTopicWeight
-        ),
-      CornerTopic.camp => (Icons.flag_outlined, l.cornerTopicCamp),
-      CornerTopic.recovery => (Icons.bedtime_outlined, l.cornerTopicRecovery),
+      CornerTopic.training => (AppIcons.boxingGlove, l.cornerTopicTraining),
+      CornerTopic.fuel => (AppIcons.forkKnife, l.cornerTopicFuel),
+      CornerTopic.weight => (AppIcons.scales, l.cornerTopicWeight),
+      CornerTopic.camp => (AppIcons.flag, l.cornerTopicCamp),
+      CornerTopic.recovery => (AppIcons.moon, l.cornerTopicRecovery),
     };
     return MergeSemantics(
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [

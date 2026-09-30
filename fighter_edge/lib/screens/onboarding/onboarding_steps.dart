@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../theme/app_icons.dart';
 
 import '../../features/edge_fuel/domain/models/nutrition_enums.dart';
 import '../../features/edge_fuel/presentation/nutrition_copy.dart';
@@ -71,9 +72,9 @@ class OnboardingStepContent {
                   title: NutritionCopy.goalLabel(goal),
                   description: NutritionCopy.goalDescription(goal),
                   icon: switch (goal) {
-                    NutritionGoal.loseFat => Icons.trending_down,
-                    NutritionGoal.maintain => Icons.balance,
-                    NutritionGoal.gainMuscle => Icons.trending_up,
+                    NutritionGoal.loseFat => AppIcons.trendDown,
+                    NutritionGoal.maintain => AppIcons.scales,
+                    NutritionGoal.gainMuscle => AppIcons.trendUp,
                   },
                   onSelected: onNutritionGoal,
                 ),
@@ -108,7 +109,7 @@ class OnboardingStepContent {
                   selected: equationProfile,
                   title: NutritionCopy.equationLabel(profile),
                   description: NutritionCopy.equationDescription(profile),
-                  icon: Icons.calculate_outlined,
+                  icon: AppIcons.calculator,
                   onSelected: onEquationProfile,
                 ),
             ],
@@ -127,7 +128,7 @@ class OnboardingStepContent {
                   selected: activity,
                   title: NutritionCopy.activityLabel(level),
                   description: NutritionCopy.activityDescription(level),
-                  icon: Icons.directions_walk,
+                  icon: AppIcons.personSimpleWalk,
                   onSelected: onActivity,
                 ),
             ],
@@ -201,7 +202,7 @@ class BodyInputs extends StatelessWidget {
               child: AppTextField(
                 controller: age,
                 label: 'Age',
-                icon: Icons.cake_outlined,
+                icon: AppIcons.cake,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
@@ -211,7 +212,7 @@ class BodyInputs extends StatelessWidget {
               child: AppTextField(
                 controller: height,
                 label: 'Height cm',
-                icon: Icons.straighten,
+                icon: AppIcons.ruler,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [_decimalInput],
@@ -223,7 +224,7 @@ class BodyInputs extends StatelessWidget {
         AppTextField(
           controller: currentWeight,
           label: 'Current weight kg',
-          icon: Icons.monitor_weight_outlined,
+          icon: AppIcons.scales,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [_decimalInput],
         ),
@@ -233,8 +234,8 @@ class BodyInputs extends StatelessWidget {
             controller: targetWeight,
             label: targetLabel,
             icon: nutritionGoal == NutritionGoal.loseFat
-                ? Icons.south_east
-                : Icons.north_east,
+                ? AppIcons.arrowDownRight
+                : AppIcons.arrowUpRight,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [_decimalInput],
           ),
@@ -282,15 +283,15 @@ class ReviewSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _SummaryRow('Camp', campGoal, Icons.flag_outlined),
+        _SummaryRow('Camp', campGoal, AppIcons.flag),
         _SummaryRow('Nutrition', NutritionCopy.goalLabel(nutritionGoal),
-            Icons.restaurant),
-        _SummaryRow('Experience', level, Icons.workspace_premium_outlined),
-        _SummaryRow('Training', '$days days per week', Icons.sports_mma),
+            AppIcons.forkKnife),
+        _SummaryRow('Experience', level, AppIcons.medal),
+        _SummaryRow('Training', '$days days per week', AppIcons.boxingGlove),
         _SummaryRow(
           'Daily activity',
           NutritionCopy.activityLabel(activity),
-          Icons.directions_walk,
+          AppIcons.personSimpleWalk,
         ),
       ],
     );

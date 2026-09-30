@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../theme/app_icons.dart';
 
 import '../../auth/password_policy.dart';
 import '../../controllers/auth_controller.dart';
@@ -130,7 +131,7 @@ class _SignupScreenState extends State<SignupScreen> {
               AppTextField(
                 controller: _name,
                 label: 'Name',
-                icon: Icons.person_outline,
+                icon: AppIcons.user,
                 textCapitalization: TextCapitalization.words,
                 autofillHints: const [AutofillHints.name],
               ),
@@ -139,7 +140,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 controller: _email,
                 focusNode: _emailFocus,
                 label: 'Email',
-                icon: Icons.mail_outline,
+                icon: AppIcons.envelopeSimple,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
                 errorText: _emailError,
@@ -149,14 +150,14 @@ class _SignupScreenState extends State<SignupScreen> {
               AppTextField(
                 controller: _password,
                 label: 'Password',
-                icon: Icons.lock_outline,
+                icon: AppIcons.lockSimple,
                 obscure: _obscure,
                 autofillHints: const [AutofillHints.newPassword],
                 errorText: _passwordError,
                 onChanged: (_) => setState(() {}),
                 suffix: IconButton(
                   tooltip: _obscure ? 'Show password' : 'Hide password',
-                  icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility,
+                  icon: Icon(_obscure ? AppIcons.eyeSlash : AppIcons.eye,
                       color: AppColors.textMuted, size: 20),
                   onPressed: () => setState(() => _obscure = !_obscure),
                 ),
@@ -166,7 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
               AppTextField(
                 controller: _confirm,
                 label: 'Confirm password',
-                icon: Icons.lock_outline,
+                icon: AppIcons.lockSimple,
                 obscure: _obscure,
                 autofillHints: const [AutofillHints.newPassword],
                 textInputAction: TextInputAction.done,

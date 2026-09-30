@@ -1,15 +1,15 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/models/training_session.dart';
 import 'package:fighter_edge/notifications/training_reminder_schedule.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 void main() {
   TrainingSession session(String day) => TrainingSession(
         day: day,
         title: 't',
         subtitle: '',
-        icon: Icons.circle,
+        icon: AppIconsFill.circle,
         completed: false,
       );
 
@@ -44,7 +44,7 @@ void main() {
         day: 'Mon',
         title: 'other',
         subtitle: '',
-        icon: Icons.circle,
+        icon: AppIconsFill.circle,
         completed: true,
         completedAt: DateTime.now(),
       ),

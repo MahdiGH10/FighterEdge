@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../ads/rewarded_ad_gateway.dart';
 import '../controllers/auth_controller.dart';
@@ -220,7 +221,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: Insets.lg),
           GhostButton(
             auth.isBusy ? l.commonSigningOut : l.commonSignOut,
-            icon: Icons.logout,
+            icon: AppIcons.signOut,
             expand: true,
             onPressed: auth.isBusy ? null : auth.signOut,
           ),
@@ -509,7 +510,7 @@ class _LanguageOption extends StatelessWidget {
               children: [
                 Expanded(child: Text(label, style: AppType.body())),
                 if (selected)
-                  const Icon(Icons.check, color: AppColors.accentText),
+                  const Icon(AppIcons.check, color: AppColors.accentText),
               ],
             ),
           ),

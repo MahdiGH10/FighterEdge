@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../theme/app_icons.dart';
 
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
@@ -393,8 +394,8 @@ class _RoundTimerScreenState extends State<RoundTimerScreen>
                         ? l.timerRestart
                         : (_running ? l.timerPause : l.timerStart),
                     icon: _done
-                        ? Icons.refresh
-                        : (_running ? Icons.pause : Icons.play_arrow),
+                        ? AppIcons.arrowClockwise
+                        : (_running ? AppIconsFill.pause : AppIconsFill.play),
                     expand: true,
                     color: _running ? AppColors.primaryDark : AppColors.primary,
                     onPressed: _toggle,
@@ -403,7 +404,7 @@ class _RoundTimerScreenState extends State<RoundTimerScreen>
                 const SizedBox(width: Insets.md),
                 Expanded(
                   child: GhostButton(l.timerReset,
-                      icon: Icons.stop, expand: true, onPressed: _reset),
+                      icon: AppIconsFill.stop, expand: true, onPressed: _reset),
                 ),
               ],
             ),
@@ -447,7 +448,7 @@ class _CornerCueCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.air_rounded,
+                Icon(AppIcons.wind,
                     size: IconSizes.inline,
                     color: AppAccessibility.textSecondary(context)),
                 const SizedBox(width: Insets.sm),
@@ -489,7 +490,7 @@ class _CornerCueTeaser extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.record_voice_over,
+          const Icon(AppIcons.megaphoneSimple,
               size: IconSizes.inline, color: AppColors.premium),
           const SizedBox(width: Insets.sm),
           Expanded(
@@ -499,7 +500,7 @@ class _CornerCueTeaser extends StatelessWidget {
                   color: AppAccessibility.textSecondary(context)),
             ),
           ),
-          Icon(Icons.chevron_right, color: AppAccessibility.textMuted(context)),
+          Icon(AppIcons.caretRight, color: AppAccessibility.textMuted(context)),
         ],
       ),
     );

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
@@ -8,13 +7,14 @@ import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repos
 import 'package:fighter_edge/features/fight_camp/presentation/fight_camp_controller.dart';
 import 'package:fighter_edge/models/training_session.dart';
 import 'package:fighter_edge/state/app_state.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 TrainingSession _session(String day, String title, {bool completed = false}) =>
     TrainingSession(
       day: day,
       title: title,
       subtitle: '',
-      icon: Icons.sports_mma,
+      icon: AppIcons.boxingGlove,
       completed: completed,
     );
 

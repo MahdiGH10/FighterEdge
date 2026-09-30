@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/models/training_session.dart';
 import 'package:fighter_edge/state/streak_engine.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 
 void main() {
   // A fixed Wednesday so "week" math in these tests never depends on the
@@ -16,7 +16,7 @@ void main() {
               day: 'x',
               title: 't',
               subtitle: '',
-              icon: Icons.circle,
+              icon: AppIconsFill.circle,
               completed: true,
               completedAt: (from ?? wednesday).subtract(Duration(days: n)),
             ),
@@ -30,7 +30,7 @@ void main() {
           day: 'Mon',
           title: 'a',
           subtitle: '',
-          icon: Icons.circle,
+          icon: AppIconsFill.circle,
           completed: true,
           completedAt: wednesday,
         ),
@@ -38,7 +38,7 @@ void main() {
           day: 'Tue',
           title: 'b',
           subtitle: '',
-          icon: Icons.circle,
+          icon: AppIconsFill.circle,
           completed: false,
         ),
       ];
@@ -85,7 +85,7 @@ void main() {
             day: 'x',
             title: 't',
             subtitle: '',
-            icon: Icons.circle,
+            icon: AppIconsFill.circle,
             completed: true,
             completedAt: wednesday.subtract(const Duration(days: 1)),
           ),
@@ -121,7 +121,7 @@ void main() {
             day: 'x',
             title: 't',
             subtitle: '',
-            icon: Icons.circle,
+            icon: AppIconsFill.circle,
             completed: true,
             completedAt: wednesday.subtract(const Duration(days: 1)),
           ),
@@ -178,7 +178,7 @@ void main() {
               day: 'x',
               title: 't',
               subtitle: '',
-              icon: Icons.circle,
+              icon: AppIconsFill.circle,
               completed: true,
               completedAt: monday.add(Duration(days: n)),
             ),

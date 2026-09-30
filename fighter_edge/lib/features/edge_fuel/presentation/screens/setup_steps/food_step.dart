@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../theme/app_icons.dart';
 
 import '../../../../../theme/app_accessibility.dart';
 import '../../../../../theme/app_colors.dart';
@@ -75,7 +76,7 @@ class _FoodStepState extends State<FoodStep> {
         AppTextField(
           controller: _allergens,
           label: 'Allergens (comma-separated)',
-          icon: Icons.warning_amber_outlined,
+          icon: AppIcons.warning,
           onChanged: (_) => _commitList(_allergens,
               (list) => controller.setFoodPreferences(allergens: list)),
         ),
@@ -83,7 +84,7 @@ class _FoodStepState extends State<FoodStep> {
         AppTextField(
           controller: _dislikes,
           label: 'Disliked foods (comma-separated)',
-          icon: Icons.thumb_down_outlined,
+          icon: AppIcons.thumbsDown,
           onChanged: (_) => _commitList(_dislikes,
               (list) => controller.setFoodPreferences(dislikedFoods: list)),
         ),
@@ -93,7 +94,7 @@ class _FoodStepState extends State<FoodStep> {
         Row(
           children: [
             _StepButton(
-              icon: Icons.remove,
+              icon: AppIcons.minus,
               semanticLabel: 'Fewer meals per day',
               onTap: mealsPerDay <= 2
                   ? null
@@ -106,7 +107,7 @@ class _FoodStepState extends State<FoodStep> {
                   textAlign: TextAlign.center, style: AppType.title1()),
             ),
             _StepButton(
-              icon: Icons.add,
+              icon: AppIcons.plus,
               semanticLabel: 'More meals per day',
               onTap: mealsPerDay >= 6
                   ? null

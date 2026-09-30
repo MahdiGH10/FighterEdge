@@ -30,7 +30,7 @@ void main() {
     await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
     await tester.pumpAndSettle();
 
-    expect(find.text('DASHBOARD'), findsOneWidget);
+    expect(find.text('Ayoub'), findsOneWidget);
     expectNoFlutterException(tester);
 
     await tester.tap(find.text('Train'));

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../controllers/auth_controller.dart';
 import '../../../../routing/app_navigation.dart';
@@ -252,13 +253,13 @@ class _NavBar extends StatelessWidget {
       child: Row(
         children: [
           if (onBack != null) ...[
-            GhostButton('Back', icon: Icons.chevron_left, onPressed: onBack),
+            GhostButton('Back', icon: AppIcons.caretLeft, onPressed: onBack),
             const SizedBox(width: Insets.md),
           ],
           Expanded(
             child: PrimaryButton(
               'Next',
-              icon: Icons.chevron_right,
+              icon: AppIcons.caretRight,
               expand: true,
               onPressed: canAdvance ? onNext : null,
             ),

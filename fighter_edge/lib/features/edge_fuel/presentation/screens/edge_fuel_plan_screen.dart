@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../billing/subscription.dart';
 import '../../../../controllers/auth_controller.dart';
@@ -61,14 +62,14 @@ class _EmptyPlan extends StatelessWidget {
       ),
       children: [
         const EmptyState(
-          icon: Icons.restaurant_menu,
+          icon: AppIcons.forkKnife,
           title: 'No plan yet',
           message: 'Run the EdgeFuel setup to get a personalized daily target.',
         ),
         const SizedBox(height: Insets.lg),
         PrimaryButton(
           'Start setup',
-          icon: Icons.arrow_forward,
+          icon: AppIcons.arrowRight,
           expand: true,
           onPressed: userId == null
               ? null
@@ -186,7 +187,7 @@ class _PlanBody extends StatelessWidget {
                 Row(
                   children: [
                     const Icon(
-                      Icons.info_outline,
+                      AppIcons.info,
                       color: AppColors.warning,
                       size: 18,
                     ),
@@ -219,7 +220,7 @@ class _PlanBody extends StatelessWidget {
         const SizedBox(height: Insets.lg),
         GhostButton(
           'Redo setup',
-          icon: Icons.tune,
+          icon: AppIcons.slidersHorizontal,
           expand: true,
           onPressed: () => AppNavigation.push(
             context,
@@ -250,7 +251,7 @@ class _CoachSection extends StatelessWidget {
           Row(
             children: [
               const Icon(
-                Icons.auto_awesome,
+                AppIcons.clipboardText,
                 color: AppColors.premium,
                 size: IconSizes.inline,
               ),
@@ -285,7 +286,7 @@ class _CoachSection extends StatelessWidget {
           if (isPro)
             PrimaryButton(
               'Ask your coach',
-              icon: Icons.auto_awesome,
+              icon: AppIcons.clipboardText,
               expand: true,
               onPressed: () => AppNavigation.push(
                 context,
@@ -296,7 +297,7 @@ class _CoachSection extends StatelessWidget {
           else
             PrimaryButton(
               'See Pro',
-              icon: Icons.lock_open_outlined,
+              icon: AppIcons.lockSimpleOpen,
               expand: true,
               onPressed: () {
                 Telemetry.fromContext(context).track(

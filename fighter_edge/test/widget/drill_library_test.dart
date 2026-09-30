@@ -123,10 +123,15 @@ void main() {
       await tester.scrollUntilVisible(
           find.byKey(const ValueKey('training-system-striking')), 200,
           scrollable: find.byType(Scrollable).first);
+      await tester.ensureVisible(
+          find.byKey(const ValueKey('training-system-striking')));
+      await tester.pumpAndSettle();
       await tester.tap(
         find.byKey(const ValueKey('training-system-striking')),
       );
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('Punches'), 200,
+          scrollable: find.byType(Scrollable).first);
 
       expect(find.text('Punches'), findsOneWidget);
       expect(tester.takeException(), isNull);

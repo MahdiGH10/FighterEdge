@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
@@ -139,7 +140,7 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: Insets.xl),
         GhostButton(
           'Sign out',
-          icon: Icons.logout,
+          icon: AppIcons.signOut,
           expand: true,
           onPressed: () async {
             await auth.signOut();

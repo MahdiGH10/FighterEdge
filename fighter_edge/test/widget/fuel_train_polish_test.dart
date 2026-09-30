@@ -11,6 +11,7 @@ import 'package:fighter_edge/screens/nutrition_screen.dart';
 import 'package:fighter_edge/screens/training_camp_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/widgets/progress_ring.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 import '../helpers/test_harness.dart';
 
 void main() {
@@ -30,7 +31,7 @@ void main() {
                 day: day,
                 title: day,
                 subtitle: 'Practice',
-                icon: Icons.sports_mma,
+                icon: AppIcons.boxingGlove,
                 completed: false));
       }
       final state = AppState(

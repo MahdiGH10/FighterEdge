@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../theme/app_icons.dart';
 
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
@@ -49,7 +50,7 @@ class ChoiceCard extends StatelessWidget {
             ),
             const SizedBox(width: Insets.sm),
             Icon(
-              selected ? Icons.radio_button_checked : Icons.radio_button_off,
+              selected ? AppIcons.radioButton : AppIcons.circle,
               color: selected ? AppColors.primary : AppColors.textMuted,
               size: 22,
             ),

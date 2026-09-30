@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../theme/app_icons.dart';
 
 import '../l10n/gen/app_localizations.dart';
 import '../observability/telemetry.dart';
@@ -436,29 +437,42 @@ class _Finished extends StatelessWidget {
     final next = spec.level.index + 1 < ReactionLevel.values.length
         ? ReactionLevel.values[spec.level.index + 1]
         : null;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(l.reactionTimeUp,
-            style: AppType.display(color: AppColors.positive)),
-        const SizedBox(height: Insets.xs),
-        Text(
-          l.reactionFinishedSummary(
-              drill.calls, formatDrillClock(spec.duration)),
-          textAlign: TextAlign.center,
-          style:
-              AppType.headline(color: AppAccessibility.textSecondary(context)),
-        ),
-        // Where to go from here: the natural next step is the next level.
-        if (next != null) ...[
-          const SizedBox(height: Insets.xs),
-          Text(
-            l.reactionNextLevel(reactionLevelLabel(l, next)),
-            textAlign: TextAlign.center,
-            style: AppType.callout(color: AppAccessibility.accentText(context)),
+    // Centred when it fits; scrolls instead of overflowing at the largest
+    // text sizes.
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(l.reactionTimeUp,
+                    style: AppType.display(color: AppColors.positive)),
+                const SizedBox(height: Insets.xs),
+                Text(
+                  l.reactionFinishedSummary(
+                      drill.calls, formatDrillClock(spec.duration)),
+                  textAlign: TextAlign.center,
+                  style: AppType.headline(
+                      color: AppAccessibility.textSecondary(context)),
+                ),
+                // Where to go from here: the natural next step is the next
+                // level.
+                if (next != null) ...[
+                  const SizedBox(height: Insets.xs),
+                  Text(
+                    l.reactionNextLevel(reactionLevelLabel(l, next)),
+                    textAlign: TextAlign.center,
+                    style: AppType.callout(
+                        color: AppAccessibility.accentText(context)),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ],
-      ],
+        ),
+      ),
     );
   }
 }
@@ -474,13 +488,13 @@ class _Actions extends StatelessWidget {
       ReactionDrillPhase.countdown || ReactionDrillPhase.live => _Pair(
           first: GhostButton(
             l.reactionPause,
-            icon: Icons.pause,
+            icon: AppIconsFill.pause,
             expand: true,
             onPressed: drill.pause,
           ),
           second: GhostButton(
             l.reactionStop,
-            icon: Icons.stop,
+            icon: AppIconsFill.stop,
             expand: true,
             onPressed: drill.stop,
           ),
@@ -488,27 +502,27 @@ class _Actions extends StatelessWidget {
       ReactionDrillPhase.paused => _Pair(
           first: PrimaryButton(
             l.reactionResume,
-            icon: Icons.play_arrow,
+            icon: AppIconsFill.play,
             expand: true,
             onPressed: drill.resume,
           ),
           second: GhostButton(
             l.reactionStop,
-            icon: Icons.stop,
+            icon: AppIconsFill.stop,
             expand: true,
             onPressed: drill.stop,
           ),
         ),
       ReactionDrillPhase.ready => PrimaryButton(
           l.reactionStart,
-          icon: Icons.play_arrow,
+          icon: AppIconsFill.play,
           expand: true,
           onPressed: drill.start,
         ),
       ReactionDrillPhase.finished => _Pair(
           first: PrimaryButton(
             l.reactionAgain,
-            icon: Icons.refresh,
+            icon: AppIcons.arrowClockwise,
             expand: true,
             onPressed: drill.start,
           ),

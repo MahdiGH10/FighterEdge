@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_icons.dart';
 
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
@@ -74,7 +75,7 @@ class GroupedRow extends StatelessWidget {
         ],
         if (onTap != null) ...[
           const SizedBox(width: Insets.sm),
-          const Icon(Icons.chevron_right,
+          const Icon(AppIcons.caretRight,
               color: AppColors.textMuted, size: IconSizes.row),
         ],
       ]),
