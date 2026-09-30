@@ -7,6 +7,7 @@ import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/billing/fake_billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/main.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 import 'package:fighter_edge/widgets/bottom_nav.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
 
@@ -103,7 +104,7 @@ void main() {
     // 6. Activation moment, then the dashboard.
     expect(find.text('Your first Fighter Edge plan is ready'), findsOneWidget);
     await _tapVisible(tester, find.text('Open dashboard'));
-    expect(find.text('DASHBOARD'), findsOneWidget);
+    expect(find.text('Ayoub'), findsOneWidget);
 
     // 7. Profile -> the paid upgrade entry point. Computed from the nav
     // bar's own rect, so it needs no scrolling regardless of screen size.
@@ -114,16 +115,20 @@ void main() {
     ));
     await tester.pumpAndSettle();
     await _tapVisible(tester, find.text('Upgrade'));
-    expect(find.text('Training tools with Pro'), findsOneWidget);
+    expect(find.text('Your corner, every day'), findsOneWidget);
 
     // 8. A real store purchase completes, but the client never grants Pro:
     // only the trusted webhook does (a non-negotiable rule, not just a UI
     // choice — this is the property most worth an on-device regression).
     // A single pump (not pumpAndSettle) checks the state right after the
     // tap, before anything else runs.
-    final monthlyPlan = find.text('Monthly · \$7.99');
+    final monthlyPlan = find.text('Monthly plan');
     await _ensureVisible(tester, monthlyPlan);
     await tester.tap(monthlyPlan);
+    await tester.pumpAndSettle();
+    final buy = find.text('Continue with monthly plan');
+    await _ensureVisible(tester, buy);
+    await tester.tap(buy);
     await tester.pump();
     expect(billing.purchaseCount, 1);
     expect(repo.currentUser!.isPro, isFalse);
@@ -136,7 +141,7 @@ void main() {
 
     // 10. Sign out from Profile -> back to login.
     await _tapVisible(
-        tester, find.byIcon(Icons.chevron_left)); // Paywall -> Profile.
+        tester, find.byIcon(AppIcons.caretLeft)); // Paywall -> Profile.
     // The "Pro is active" snackbar covers the bottom of the screen for a few
     // seconds; on the CI emulator's 320x640 screen that is where Sign out
     // lands, so a tap right away hits the snackbar. Also, the paywall has
