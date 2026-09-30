@@ -205,7 +205,7 @@
   "healthConsentSignOut": "Jetzt nicht, abmelden",
   "healthConsentDeleteAccount": "Stattdessen mein Konto löschen",
   "aiConsentTitle": "Bevor du mit dem Coach sprichst",
-  "aiConsentBody": "Für eine Antwort sendet unser Server deine Kalorien- und Makroziele, die Zusammenfassung deines heutigen Ernährungsprotokolls, deine Ernährungsweise, Allergien, Abneigungen, deine Nachrichten und, wenn du sie nutzt, deine heute geplante Einheit, deine Trainingstage im Vergleich zu deinem Plan, deinen 7-Tage-Gewichtstrend und dein Fight Camp (Termine, Gewichtslimit und den heutigen rein ernährungsbasierten Plan) an OpenRouter (USA), das sie an einen KI-Modellanbieter weitergibt. Dein Name, deine E-Mail-Adresse und deine Konto-ID werden nie gesendet.",
+  "aiConsentBody": "Für eine Antwort sendet unser Server deine Kalorien- und Makroziele, die Zusammenfassung deines heutigen Ernährungsprotokolls, deine Ernährungsweise, Allergien, Abneigungen, deine Nachrichten und, wenn du sie nutzt, deine heute geplante Einheit, deine Trainingstage im Vergleich zu deinem Plan, deinen 7-Tage-Gewichtstrend und dein Fight Camp (Termine, Gewichtslimit und den heutigen rein ernährungsbasierten Plan) an Groq oder OpenRouter (USA), das sie an einen KI-Modellanbieter weitergeben kann. Dein Name, deine E-Mail-Adresse und deine Konto-ID werden nie gesendet.",
   "aiConsentRetention": "Manche Anbieter, besonders kostenlose Modelle, können Eingaben nach ihren eigenen Bedingungen speichern. Schreib nichts, was du nicht teilen möchtest.",
   "aiConsentStatement": "Ich willige ein, dass diese Daten wie beschrieben an den KI-Anbieter übermittelt werden, auch in die USA.",
   "aiConsentAgree": "Ich willige ein",

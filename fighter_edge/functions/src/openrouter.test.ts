@@ -1,7 +1,69 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 
-import { buildRequestBody, DEFAULT_MODEL, modelChain, OpenRouterError } from "./openrouter";
+import {
+  aiProvider,
+  buildRequestBody,
+  isUsableKey,
+  DEFAULT_GROQ_CHAIN,
+  DEFAULT_MODEL,
+  modelChain,
+  OpenRouterError,
+} from "./openrouter";
+
+describe("isUsableKey", () => {
+  it("rejects a missing key and the unset placeholder", () => {
+    for (const key of [undefined, "", "  ", "unset", " UNSET "]) {
+      assert.equal(isUsableKey(key), false);
+    }
+    assert.equal(isUsableKey("gsk_example"), true);
+  });
+});
+
+describe("Groq", () => {
+  it("is only used when AI_PROVIDER says so", () => {
+    assert.equal(aiProvider({}), "openrouter");
+    assert.equal(aiProvider({ AI_PROVIDER: "openrouter" }), "openrouter");
+    assert.equal(aiProvider({ AI_PROVIDER: " Groq " }), "groq");
+  });
+
+  it("has its own model chain, so OpenRouter model names never reach Groq", () => {
+    const env = {
+      AI_PROVIDER: "groq",
+      OPENROUTER_MODELS: "deepseek/deepseek-v4-flash:free",
+    };
+    assert.deepEqual(modelChain(env), DEFAULT_GROQ_CHAIN);
+    assert.deepEqual(modelChain({ ...env, GROQ_MODELS: "a, b" }), ["a", "b"]);
+  });
+
+  it("sends only fields Groq accepts", () => {
+    const body = buildRequestBody(
+      { model: "llama-3.3-70b-versatile", systemPrompt: "s", userContent: "u" },
+      { AI_PROVIDER: "groq", OPENROUTER_DATA_COLLECTION: "deny" },
+    );
+    assert.equal(body.usage, undefined);
+    assert.equal(body.reasoning, undefined);
+    assert.equal(body.provider, undefined);
+    assert.equal(body.reasoning_effort, undefined);
+    assert.deepEqual(body.response_format, { type: "json_object" });
+    assert.equal(body.max_tokens, 900);
+  });
+
+  it("keeps reasoning models short", () => {
+    const body = buildRequestBody(
+      { model: "openai/gpt-oss-20b", systemPrompt: "s", userContent: "u" },
+      { AI_PROVIDER: "groq" },
+    );
+    assert.equal(body.reasoning_effort, "low");
+  });
+
+  it("hands a 400 to the next model, unlike OpenRouter", () => {
+    assert.equal(new OpenRouterError("x", 400, "groq").isModelFault, true);
+    assert.equal(new OpenRouterError("x", 400).isModelFault, false);
+    assert.equal(new OpenRouterError("x", 401, "groq").isModelFault, false);
+    assert.equal(new OpenRouterError("x", 429, "groq").isModelFault, true);
+  });
+});
 
 describe("modelChain", () => {
   it("reads a comma-separated list in order", () => {

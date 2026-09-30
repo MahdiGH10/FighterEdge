@@ -52,6 +52,41 @@ firebase functions:config:set openrouter.model="some/other-model"
 Or set the `OPENROUTER_MODEL` environment variable in the Cloud Functions
 console after first deploy. No code change needed either way.
 
+### Using Groq instead of OpenRouter
+
+The functions can talk to Groq (console.groq.com, free tier with per-model
+limits). OpenRouter stays the default until you switch.
+
+1. Create a key at console.groq.com/keys. Store it as the secret the
+   deployed functions read, either in a terminal:
+   ```bash
+   firebase functions:secrets:set GROQ_API_KEY
+   ```
+   or with no terminal: Google Cloud console, project `fighter-edge-app`,
+   Secret Manager, Create secret, name `GROQ_API_KEY`, paste the key.
+   The functions declare this secret, so it must exist before any deploy.
+   Until you use Groq, its value can be the text `unset`. Never put the key
+   in the Flutter app: anyone can extract it from the APK.
+2. For the scripts below, paste the key into `functions/.env.local` (it is
+   git-ignored and never deployed; `.env.local.example` shows the format).
+   Find out which models the key can use, then score them (neither prints
+   the key):
+   ```bash
+   cd fighter_edge/functions
+   npm run groq:models
+   AI_PROVIDER=groq npm run eval:ai -- --models id1,id2,id3 --runs 2
+   ```
+3. `functions/.env.fighter-edge-app` already sets `AI_PROVIDER=groq` and
+   `GROQ_MODELS` (best first); edit that list after scoring. A model that
+   is busy (429), retired or unsupported (400) or down (5xx) hands over to
+   the next one. If the `GROQ_API_KEY` secret is missing or `unset`, the
+   function uses OpenRouter instead, so the coach never breaks on a key.
+4. **Before real users:** the consent text and both privacy pages now say
+   "Groq or OpenRouter". Check Groq's own data-retention terms and sign its
+   data processing agreement (the privacy pages keep a TODO for that). The
+   OpenRouter no-retention switch (`OPENROUTER_DATA_COLLECTION`) does not
+   apply to Groq.
+
 ## 5. Deploy
 
 ```bash
