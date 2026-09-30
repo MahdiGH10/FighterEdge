@@ -166,16 +166,42 @@ Geräts. Diese Daten sind nicht in Geräte-Backups enthalten.</p>
 zur Beantwortung (Art. 6 Abs. 1 lit. b oder f DSGVO) und löschen sie nach
 Abschluss, sofern keine gesetzlichen Aufbewahrungspflichten bestehen.</p>
 
+<h3>2.10 Freiwillige Videos (kostenlose Konten)</h3>
+<p>Ohne Pro kannst du freiwillig ein kurzes Video pro Tag ansehen, um das
+ganze Ecken-Briefing des Tages freizuschalten. Es läuft nur, wenn du auf
+<em>Kurzes Video ansehen</em> tippst; Pro-Konten sehen nie Videos, und unter
+18-Jährigen wird das Angebot nicht gezeigt. Das Video kommt von Google AdMob
+(Google Ireland Ltd. / Google LLC). Google erhält dabei die Daten, die es zum
+Zeigen und Messen des Videos und gegen Betrug braucht: deine IP-Adresse,
+Geräte- und App-Informationen und wie du mit dem Video interagierst. Wir
+fordern bei Google nur nicht personalisierte Werbung an, und die App gibt
+keine Werbe-ID weiter.</p>
+<p>Wir geben Google nie deine Konto-ID, deinen Namen, deine E-Mail oder
+Gesundheits-, Ernährungs-, Gewichts- oder Trainingsdaten. Stattdessen erzeugt
+unser Server einen einmaligen Zufallscode, die App gibt ihn an Google weiter,
+und Google schickt ihn mit einer signierten Bestätigung an unseren Server
+zurück, sobald du das Video zu Ende gesehen hast. Wir speichern nur, dass an
+diesem Tag eine Belohnung verdient und genutzt wurde.</p>
+<p><em>Rechtsgrundlage:</em> für das Video deine Einwilligung (Art. 6 Abs. 1
+lit. a DSGVO; § 25 Abs. 1 TDDDG). Im EWR und im Vereinigten Königreich fragt
+dich Googles Einwilligungsformular vor dem ersten Video; ändern kannst du
+deine Wahl unter <em>Einstellungen &gt; Datenschutz &gt; Datenschutz bei
+Werbung</em>. Das Briefing selbst ist der KI-Coach aus 2.3 und braucht auch
+dessen Einwilligung. Google verarbeitet diese Daten auch nach seiner eigenen
+Datenschutzerklärung (policies.google.com/privacy).</p>
+
 <h2>3. Empfänger</h2>
 <table>
   <tr><th>Empfänger</th><th>Rolle</th><th>Daten</th></tr>
   <tr><td>Google Ireland Ltd. / Google LLC (Firebase: Authentication, Cloud Firestore, Cloud Functions, Hosting, Analytics, Crashlytics)</td><td>Auftragsverarbeiter</td><td>Konto, App-Daten, technische Daten; Analyse- und Absturzdaten nur mit Einwilligung</td></tr>
   <tr><td>RevenueCat, Inc.</td><td>Auftragsverarbeiter</td><td>Konto-ID, Kaufbelege, Abo-Status</td></tr>
   <tr><td>Groq, Inc. oder OpenRouter, Inc. und der jeweils gewählte Modellanbieter</td><td>Auftragsverarbeiter / Unterauftragsverarbeiter</td><td>Die in 2.3 genannten KI-Coach-Daten, nur bei Nutzung</td></tr>
+  <tr><td>Google Ireland Ltd. / Google LLC (AdMob)</td><td>Eigenständig Verantwortlicher</td><td>Die in 2.10 genannten Geräte- und Werbe-Interaktionsdaten, nur wenn du ein Video ansiehst</td></tr>
   <tr><td>Apple Inc. / Google LLC als App-Stores</td><td>Eigenständig Verantwortliche</td><td>Zahlungen, nach deren Datenschutzbestimmungen</td></tr>
 </table>
 <p>Wir verkaufen deine personenbezogenen Daten nicht und verwenden sie nicht
-für Werbung.</p>
+für Werbung. Die freiwilligen Videos aus 2.10 sind nicht personalisiert und
+erhalten keine deiner App-Daten.</p>
 
 <h2>4. Übermittlung in Drittländer</h2>
 <p>Einige Empfänger verarbeiten Daten in den USA. KI-Anfragen und Abo-Webhooks
@@ -185,7 +211,7 @@ zertifiziert ist, andernfalls die EU-Standardvertragsklauseln (Art. 46 Abs. 2
 lit. c DSGVO). Deine App-Datenbank wird gespeichert in
 <mark class="todo">TODO(owner): Firestore-Standort aus der Firebase-Konsole, z. B. „der EU (eur3)“</mark>.
 <mark class="todo">TODO(owner): Übermittlungsgrundlage für RevenueCat, Groq und OpenRouter
-prüfen und mit jedem Anbieter den Auftragsverarbeitungsvertrag abschließen.</mark></p>
+prüfen und mit jedem Anbieter den Auftragsverarbeitungsvertrag abschließen. Vor dem Start der Videos die AdMob-Bedingungen für Verantwortliche akzeptieren und die DSGVO-Nachricht in AdMob (Datenschutz &amp; Mitteilungen) einrichten.</mark></p>
 
 <h2>5. Speicherdauer</h2>
 <ul>

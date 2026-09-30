@@ -50,6 +50,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- AdMob (rewarded videos, free accounts, opt-in). The ID comes from
+             build.gradle.kts. The advertising ID permission above stays
+             removed: the app asks only for non-personalised ads. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}"/>
         <!-- Privacy by default (audit M-2): Analytics and Crashlytics collect
              nothing until the athlete consents in the app, which then enables
              them at runtime (lib/privacy/consent.dart). Consent Mode v2

@@ -6,6 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'ads/google_rewarded_ad_gateway.dart';
+import 'ads/reward_ticket_gateway.dart';
+import 'ads/rewarded_ad_gateway.dart';
 import 'auth/auth_repository.dart';
 import 'auth/firebase_auth_repository.dart';
 import 'billing/billing_gateway.dart';
@@ -135,6 +138,10 @@ Future<AppDependencies> _initializeProductionDependencies() async {
     fightCampRepo: FirestoreFightCampRepository(),
     edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
     billingGateway: RevenueCatBillingGateway(),
+    rewardedAds: kIsWeb
+        ? const UnavailableRewardedAdGateway()
+        : GoogleRewardedAdGateway(),
+    rewardTickets: FirebaseRewardTicketGateway(),
     reminderGateway: LocalReminderGateway(),
     coachVoice: TtsCoachVoice(),
     telemetry: kIsWeb
@@ -158,6 +165,8 @@ class AppDependencies {
   final FightCampRepository fightCampRepo;
   final EdgeFuelAiGateway edgeFuelAiGateway;
   final BillingGateway billingGateway;
+  final RewardedAdGateway rewardedAds;
+  final RewardTicketGateway rewardTickets;
   final ReminderGateway reminderGateway;
   final CoachVoice coachVoice;
   final Telemetry telemetry;
@@ -171,6 +180,8 @@ class AppDependencies {
     required this.fightCampRepo,
     required this.edgeFuelAiGateway,
     required this.billingGateway,
+    required this.rewardedAds,
+    required this.rewardTickets,
     required this.reminderGateway,
     required this.coachVoice,
     required this.telemetry,
@@ -188,6 +199,8 @@ class FighterEdgeApp extends StatelessWidget {
   final FoodCatalogRepository? foodCatalogRepo;
   final RecipeCatalogRepository? recipeCatalogRepo;
   final BillingGateway? billingGateway;
+  final RewardedAdGateway? rewardedAds;
+  final RewardTicketGateway? rewardTickets;
   final ReminderGateway? reminderGateway;
   final CoachVoice? coachVoice;
   final Telemetry? telemetry;
@@ -206,6 +219,8 @@ class FighterEdgeApp extends StatelessWidget {
     this.foodCatalogRepo,
     this.recipeCatalogRepo,
     this.billingGateway,
+    this.rewardedAds,
+    this.rewardTickets,
     this.reminderGateway,
     this.coachVoice,
     this.telemetry,
@@ -223,6 +238,8 @@ class FighterEdgeApp extends StatelessWidget {
           fightCampRepo: dependencies.fightCampRepo,
           edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
           billingGateway: dependencies.billingGateway,
+          rewardedAds: dependencies.rewardedAds,
+          rewardTickets: dependencies.rewardTickets,
           reminderGateway: dependencies.reminderGateway,
           coachVoice: dependencies.coachVoice,
           telemetry: dependencies.telemetry,
@@ -237,6 +254,9 @@ class FighterEdgeApp extends StatelessWidget {
         fightCampRepo ?? InMemoryFightCampRepository();
     final resolvedAiGateway =
         edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
+    final resolvedAds = rewardedAds ?? const UnavailableRewardedAdGateway();
+    final resolvedTickets =
+        rewardTickets ?? const UnavailableRewardTicketGateway();
     // The catalogs are bundled assets, so the asset-backed implementations are
     // the right default everywhere -- there is no Firebase variant to swap in.
     // They stay injectable so tests can supply fixtures without an asset
@@ -281,6 +301,8 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
         Provider<FightCampRepository>.value(value: resolvedFightCampRepo),
         Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
+        Provider<RewardedAdGateway>.value(value: resolvedAds),
+        Provider<RewardTicketGateway>.value(value: resolvedTickets),
         Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
         Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
         ChangeNotifierProvider(create: (_) => LocaleController()..load()),
@@ -329,11 +351,15 @@ class FighterEdgeApp extends StatelessWidget {
           create: (_) => CornerBriefController(
             gateway: resolvedAiGateway,
             telemetry: telemetry ?? const NoopTelemetry(),
+            tickets: resolvedTickets,
+            ads: resolvedAds,
           ),
           update: (_, auth, controller) => (controller ??
               CornerBriefController(
                 gateway: resolvedAiGateway,
                 telemetry: telemetry ?? const NoopTelemetry(),
+                tickets: resolvedTickets,
+                ads: resolvedAds,
               ))
             ..setUser(auth.user?.id),
         ),

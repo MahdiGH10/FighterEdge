@@ -28,7 +28,7 @@ it just is not today's work. Review this list only at Step 8 of
 | Custom foods / recents / favourites | EF-3c scope note. Add when the food-search UI needs it. |
 | USDA FoodData Central API proxy | V1.5. The bundled 94-food table is enough for 24 recipes. |
 | Recipe photography | Superseded 2026-09-26: licensed web photos with credits, never AI-generated. See `PRODUCT_PLAN_20260924.md` > Owner decisions (2026-09-26). |
-| In-app ads | Owner wants sport/nutrition advertisers after launch. Needs consent, the AD_ID permission back, Data safety and Privacy Policy updates; Pro stays ad-free. |
+| More ad types or sponsors | Rewarded videos for free accounts shipped in PR #21 (opt-in, once a day). Banners, full-screen ads and direct sport/nutrition sponsors wait until there are enough daily users to matter; each needs its own consent and Data safety check. Pro stays ad-free. |
 | Golden / screenshot tests | Worth having. Not worth blocking launch. |
 | Declarative routing (go_router) | The app works on `Navigator.push`. No concrete problem to solve yet. |
 | Localization | Structure is ready-ish. Do it when there is a second market. |

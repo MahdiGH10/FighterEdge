@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:fighter_edge/ads/reward_ticket_gateway.dart';
+import 'package:fighter_edge/ads/rewarded_ad_gateway.dart';
 import 'package:fighter_edge/l10n/gen/app_localizations.dart';
 import 'package:fighter_edge/state/locale_controller.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
@@ -98,6 +100,9 @@ Widget wrapApp(
   Telemetry telemetry = const NoopTelemetry(),
   ConsentController? consent,
   FightCampRepository? fightCampRepo,
+  RewardedAdGateway rewardedAds = const UnavailableRewardedAdGateway(),
+  RewardTicketGateway rewardTickets = const UnavailableRewardTicketGateway(),
+  Duration rewardPollInterval = Duration.zero,
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
   final resolvedFightCampRepo = fightCampRepo ?? InMemoryFightCampRepository();
@@ -121,6 +126,8 @@ Widget wrapApp(
       ChangeNotifierProvider(create: (_) => state ?? AppState()),
       Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
       Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
+      Provider<RewardedAdGateway>.value(value: rewardedAds),
+      Provider<RewardTicketGateway>.value(value: rewardTickets),
       Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
       Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
       Provider<ReminderGateway>.value(
@@ -163,10 +170,20 @@ Widget wrapApp(
       ),
       ChangeNotifierProxyProvider<AuthController, CornerBriefController>(
         create: (_) => CornerBriefController(
-            gateway: resolvedAiGateway, telemetry: telemetry),
+          gateway: resolvedAiGateway,
+          telemetry: telemetry,
+          tickets: rewardTickets,
+          ads: rewardedAds,
+          rewardPollInterval: rewardPollInterval,
+        ),
         update: (_, auth, controller) => (controller ??
             CornerBriefController(
-                gateway: resolvedAiGateway, telemetry: telemetry))
+              gateway: resolvedAiGateway,
+              telemetry: telemetry,
+              tickets: rewardTickets,
+              ads: rewardedAds,
+              rewardPollInterval: rewardPollInterval,
+            ))
           ..setUser(auth.user?.id),
       ),
     ],

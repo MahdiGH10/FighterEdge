@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../ads/rewarded_ad_gateway.dart';
 import '../controllers/auth_controller.dart';
 import '../notifications/reminder_gateway.dart';
 import '../notifications/training_reminder_schedule.dart';
@@ -164,6 +165,13 @@ class SettingsScreen extends StatelessWidget {
                           granted: false,
                         ),
             ),
+            if (context.read<RewardedAdGateway>().privacyOptionsRequired)
+              _SettingsRow(
+                title: l.settingsAdPrivacy,
+                subtitle: l.settingsAdPrivacySubtitle,
+                onTap: () =>
+                    context.read<RewardedAdGateway>().showPrivacyOptions(),
+              ),
             _SwitchRow(
               title: l.settingsAnalytics,
               subtitle: l.settingsAnalyticsSubtitle,

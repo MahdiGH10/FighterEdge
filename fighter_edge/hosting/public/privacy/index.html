@@ -152,15 +152,39 @@ backups.</p>
 (Art. 6(1)(b) or (f) GDPR) and delete them when the matter is closed, unless
 we have to keep them by law.</p>
 
+<h3>2.10 Optional videos (free accounts)</h3>
+<p>If you don't have Pro, you can choose to watch one short video a day to
+unlock that day's full Corner Brief. Nothing plays unless you tap
+<em>Watch a short video</em>, Pro accounts never see videos, and the offer
+is not shown to anyone under 18. The video is provided by Google AdMob
+(Google Ireland Ltd. / Google LLC), which receives the data it needs to show
+and measure the video and to prevent fraud: your IP address, device and app
+information, and how you interact with the video. We ask Google for
+non-personalised ads only, and the app doesn't share its advertising ID.</p>
+<p>We never give Google your account ID, name, email, or any health, food,
+weight, or training data. Instead our server creates a one-time random code,
+the app passes it to Google, and Google sends it back to our server with a
+signed confirmation once you have watched to the end. We store only that a
+reward was earned and used on that day.</p>
+<p><em>Legal basis:</em> for the video, your consent (Art. 6(1)(a) GDPR;
+§ 25(1) TDDDG). In the EEA and the UK, Google's consent form asks you before
+the first video, and you can change your choice in
+<em>Settings &gt; Privacy &gt; Ad privacy choices</em>. The brief itself is the
+AI coach described in 2.3 and needs its consent too. Google also processes
+this data under its own privacy policy (policies.google.com/privacy).</p>
+
 <h2>3. Who receives your data</h2>
 <table>
   <tr><th>Recipient</th><th>Role</th><th>What</th></tr>
   <tr><td>Google Ireland Ltd. / Google LLC (Firebase: Authentication, Cloud Firestore, Cloud Functions, Hosting, Analytics, Crashlytics)</td><td>Processor</td><td>Account, app data, technical data; analytics and crash data only with consent</td></tr>
   <tr><td>RevenueCat, Inc.</td><td>Processor</td><td>Account ID, purchase receipts, subscription status</td></tr>
   <tr><td>Groq, Inc. or OpenRouter, Inc., and the AI model provider it routes to</td><td>Processor / sub-processor</td><td>AI coach input described in 2.3, only when you use it</td></tr>
+  <tr><td>Google Ireland Ltd. / Google LLC (AdMob)</td><td>Independent controller</td><td>Device and ad-interaction data described in 2.10, only when you choose to watch a video</td></tr>
   <tr><td>Apple Inc. / Google LLC as app stores</td><td>Independent controllers</td><td>Payments, under their own privacy policies</td></tr>
 </table>
-<p>We don't sell your personal data, and we don't use it for advertising.</p>
+<p>We don't sell your personal data, and we don't use it for advertising.
+The optional videos in 2.10 are non-personalised and get none of your app
+data.</p>
 
 <h2>4. Transfers outside the EU</h2>
 <p>Some recipients process data in the USA. Our AI requests and subscription
@@ -170,7 +194,9 @@ otherwise on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR).
 Your app database is stored in
 <mark class="todo">TODO(owner): Firestore location from the Firebase console, e.g. "the EU (eur3)"</mark>.
 <mark class="todo">TODO(owner): confirm the transfer mechanism for RevenueCat,
-Groq and OpenRouter and sign each provider's data processing agreement.</mark></p>
+Groq and OpenRouter and sign each provider's data processing agreement.
+Accept Google's AdMob controller terms and set up the GDPR message in AdMob
+(Privacy &amp; messaging) before videos go live.</mark></p>
 
 <h2>5. How long we keep data</h2>
 <ul>

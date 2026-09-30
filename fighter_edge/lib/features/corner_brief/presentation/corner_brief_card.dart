@@ -35,8 +35,9 @@ import '../domain/corner_brief.dart';
 import 'corner_brief_controller.dart';
 
 /// The daily Corner Brief on Home (product plan, step 3). Free: the one line
-/// the app calculates. Pro: three lines the coach writes from today's
-/// training, food, weight and camp, rewritten after each new log.
+/// the app calculates, and, if they choose, one short video a day for the
+/// full brief. Pro: three lines the coach writes from today's training,
+/// food, weight and camp, rewritten after each new log, and no ads.
 class CornerBriefCard extends StatefulWidget {
   const CornerBriefCard({super.key});
 
@@ -82,6 +83,48 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
     );
   }
 
+  /// Free accounts only, adults only, and only when the athlete taps: one
+  /// video for today's full brief.
+  Future<void> _watchForBrief({
+    required NutritionTarget target,
+    required DailySnapshot today,
+    required NutritionDay? day,
+  }) async {
+    final l = L.of(context);
+    final auth = context.read<AuthController>();
+    final corner = context.read<CornerBriefController>();
+    final preferences = context.read<EdgeFuelController>().draft;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    // Asked before the video, so nobody watches one for a brief that can't
+    // be written.
+    if (!auth.hasConsent(DataConsentPurpose.aiCoach)) {
+      await showAiCoachConsentSheet(context);
+      if (!mounted || !auth.hasConsent(DataConsentPurpose.aiCoach)) return;
+    }
+    final outcome = await corner.watchForBrief(
+      target: target,
+      today: today,
+      day: day,
+      preferences: preferences,
+    );
+    if (!mounted) return;
+    final message = switch (outcome) {
+      RewardedBriefOutcome.written => null,
+      RewardedBriefOutcome.usedToday => l.cornerBriefRewardUsed,
+      RewardedBriefOutcome.closedEarly => l.cornerBriefVideoClosed,
+      RewardedBriefOutcome.noVideo => l.cornerBriefNoVideo,
+      RewardedBriefOutcome.failed => l.cornerBriefRewardFailed,
+      RewardedBriefOutcome.consentRequired => null,
+    };
+    if (outcome == RewardedBriefOutcome.written) {
+      await AppHaptics.success();
+    } else if (outcome == RewardedBriefOutcome.consentRequired) {
+      await showAiCoachConsentSheet(context);
+    } else if (message != null) {
+      messenger?.showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
   Future<void> _getBrief({
     required NutritionTarget target,
     required DailySnapshot today,
@@ -125,16 +168,7 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
 
     final List<Widget> body;
     if (!isPro) {
-      body = [
-        _FreeLine(line: freeLine),
-        const SizedBox(height: Insets.xs),
-        _Hint(l.cornerBriefFreeHint),
-        const SizedBox(height: Insets.md),
-        GhostButton(l.cornerBriefUnlock,
-            icon: Icons.lock_open_outlined,
-            expand: true,
-            onPressed: _openPaywall),
-      ];
+      body = _freeBody(context, l, auth, corner, fuel, today, day, freeLine);
     } else if (fuel.target case final target? when target.isSuccess) {
       body = _proBody(
           context, l, auth, corner, target, today, day, freeLine, fuel.isToday);
@@ -175,6 +209,78 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
       ),
     );
   }
+
+  List<Widget> _freeBody(
+    BuildContext context,
+    L l,
+    AuthController auth,
+    CornerBriefController corner,
+    EdgeFuelController fuel,
+    DailySnapshot today,
+    NutritionDay? day,
+    CornerLine freeLine,
+  ) {
+    final unlock = GhostButton(l.cornerBriefUnlock,
+        icon: Icons.lock_open_outlined, expand: true, onPressed: _openPaywall);
+
+    final written = corner.briefFor(today.date);
+    if (written != null) {
+      return [
+        ..._lines(written),
+        const SizedBox(height: Insets.md),
+        _Hint(l.cornerBriefRewardedNote),
+        const SizedBox(height: Insets.md),
+        unlock,
+      ];
+    }
+    if (corner.isWatching || corner.isLoading) return [const _Writing()];
+
+    final target = fuel.target;
+    final age = fuel.draft?.ageYears;
+    final canWatch = corner.rewardedAdsAvailable &&
+        fuel.isToday &&
+        target != null &&
+        target.isSuccess &&
+        // No ads for minors, and none when the age is unknown.
+        age != null &&
+        age >= 18 &&
+        auth.allowsVerified(VerifiedAction.aiCoach) &&
+        !corner.rewardUsedToday(today.date);
+    return [
+      _FreeLine(line: freeLine),
+      const SizedBox(height: Insets.xs),
+      _Hint(l.cornerBriefFreeHint),
+      const SizedBox(height: Insets.md),
+      if (canWatch) ...[
+        GhostButton(l.cornerBriefWatchVideo,
+            icon: Icons.smart_display_outlined,
+            expand: true,
+            onPressed: () =>
+                _watchForBrief(target: target, today: today, day: day)),
+        const SizedBox(height: Insets.sm),
+      ],
+      unlock,
+    ];
+  }
+
+  List<Widget> _lines(WrittenCornerBrief written) => [
+        if (written.requiresProfessionalReview) ...[
+          _Note(
+            icon: Icons.health_and_safety_outlined,
+            text: L.of(context).cornerBriefProfessional,
+            color: AppColors.warning,
+          ),
+          const SizedBox(height: Insets.md),
+        ],
+        for (final (index, line) in written.lines.indexed) ...[
+          if (index > 0) const SizedBox(height: Insets.md),
+          PremiumReveal(
+            key: ValueKey((written, index)),
+            index: index,
+            child: _BriefLine(line: line),
+          ),
+        ],
+      ];
 
   List<Widget> _proBody(
     BuildContext context,
@@ -255,22 +361,7 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
 
     final stale = written.basis != basis;
     return [
-      if (written.requiresProfessionalReview) ...[
-        _Note(
-          icon: Icons.health_and_safety_outlined,
-          text: l.cornerBriefProfessional,
-          color: AppColors.warning,
-        ),
-        const SizedBox(height: Insets.md),
-      ],
-      for (final (index, line) in written.lines.indexed) ...[
-        if (index > 0) const SizedBox(height: Insets.md),
-        PremiumReveal(
-          key: ValueKey((written, index)),
-          index: index,
-          child: _BriefLine(line: line),
-        ),
-      ],
+      ..._lines(written),
       if (corner.isLoading ||
           (stale && status == EdgeFuelAiStatus.success)) ...[
         const SizedBox(height: Insets.md),

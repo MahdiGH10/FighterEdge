@@ -57,6 +57,14 @@ service cloud.firestore {
         allow read: if isOwner(uid);
         allow write: if false;
       }
+
+      // Rewarded-video credits, granted only by the admobRewardCallback
+      // Cloud Function after Google confirms a watched video. A client that
+      // could write here could give itself free AI briefs.
+      match /adRewards/{dateKey} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
     }
 
     // Server-only feature flags (e.g. the EdgeFuel AI kill switch). Read by
