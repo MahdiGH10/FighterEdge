@@ -397,7 +397,9 @@ class _RoundTimerScreenState extends State<RoundTimerScreen>
                         ? AppIcons.arrowClockwise
                         : (_running ? AppIconsFill.pause : AppIconsFill.play),
                     expand: true,
-                    color: _running ? AppColors.primaryDark : AppColors.primary,
+                    color: _running
+                        ? AppColors.primaryDark
+                        : AppColors.primaryFill,
                     onPressed: _toggle,
                   ),
                 ),

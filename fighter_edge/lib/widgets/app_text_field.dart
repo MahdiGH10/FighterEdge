@@ -73,7 +73,7 @@ class AppTextField extends StatelessWidget {
         floatingLabelStyle: WidgetStateTextStyle.resolveWith((states) {
           final color = states.contains(WidgetState.error)
               ? AppColors.negative
-              : AppColors.primary;
+              : AppAccessibility.accentText(context);
           return AppType.subhead(color: color);
         }),
         prefixIcon:
