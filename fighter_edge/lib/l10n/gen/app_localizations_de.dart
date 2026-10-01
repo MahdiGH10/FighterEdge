@@ -1584,6 +1584,10 @@ class LDe extends L {
       'Direkt danach mit dem Auffüllen beginnen.';
 
   @override
+  String get fightStepWeighInBodyNoRefuel =>
+      'Wiegen. Danach folge dem Rat deines Trainers oder deiner Ernährungsfachkraft.';
+
+  @override
   String get fightStepRefuel => 'Auffüllen';
 
   @override
@@ -1640,6 +1644,14 @@ class LDe extends L {
   @override
   String get fightWeekSource =>
       'Schritte und Ziele nach der International Society of Sports Nutrition (2025).';
+
+  @override
+  String get fightWeekSourceSteps =>
+      'Schritte nach der International Society of Sports Nutrition (2025).';
+
+  @override
+  String get fightRefuelOff =>
+      'Ziele fürs Auffüllen sind in dieser Version nicht enthalten. Eine Sporternährungsberatung muss sie erst prüfen.';
 
   @override
   String get cornerBriefTitle => 'Ecken-Briefing';

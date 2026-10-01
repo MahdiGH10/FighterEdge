@@ -1574,6 +1574,10 @@ class LEn extends L {
   String get fightStepWeighInBody => 'Start your refuel straight after.';
 
   @override
+  String get fightStepWeighInBodyNoRefuel =>
+      'Weigh in. Afterwards, follow your coach\'s or dietitian\'s advice.';
+
+  @override
   String get fightStepRefuel => 'Refuel';
 
   @override
@@ -1629,6 +1633,14 @@ class LEn extends L {
   @override
   String get fightWeekSource =>
       'Steps and targets from the International Society of Sports Nutrition (2025).';
+
+  @override
+  String get fightWeekSourceSteps =>
+      'Steps from the International Society of Sports Nutrition (2025).';
+
+  @override
+  String get fightRefuelOff =>
+      'Refuel targets are not in this version. A sports dietitian has to review them first.';
 
   @override
   String get cornerBriefTitle => 'Corner Brief';

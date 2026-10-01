@@ -31,6 +31,9 @@ FightWeekPlan? planFor(
   CompetitionCategory category = CompetitionCategory.professional,
   int? age = 30,
   CampScreening screening = CampScreening.cleared,
+  // The plan's own default is off. Most tests here describe the plan with
+  // refuel on; the group "refuel guidance is off unless asked for" covers off.
+  bool refuel = true,
 }) =>
     FightWeekPlan.plan(
       camp: campIn(daysToWeighIn, lead: lead, limit: limit, category: category),
@@ -38,6 +41,7 @@ FightWeekPlan? planFor(
       today: today,
       ageYears: age,
       screening: screening,
+      refuelGuidance: refuel,
     );
 
 List<List<FightWeekStep>> stepsOf(FightWeekPlan plan) =>
@@ -148,6 +152,86 @@ void main() {
       final refuel = planFor(80, 77)!.refuel!;
       expect(refuel.totalCarbMinGrams, isNull);
       expect(refuel.totalCarbMaxGrams, isNull);
+    });
+  });
+
+  // The refuel numbers are not reviewed by a sports dietitian yet (launch
+  // audit SAFE-2/3), so a plan only carries them when a caller asks.
+  group('refuel guidance is off unless asked for', () {
+    List<FightWeekStep> withoutRefuel(List<FightWeekStep> steps) => [
+          for (final s in steps)
+            if (s != FightWeekStep.refuel) s
+        ];
+
+    test('the default plan has no refuel steps and no targets', () {
+      final plan = FightWeekPlan.plan(
+        camp: campIn(77, lead: 1),
+        weights: [WeightPoint(today, 80)],
+        today: today,
+        ageYears: 30,
+        screening: CampScreening.cleared,
+      )!;
+      expect(plan.status, WeightPathStatus.onTrack);
+      expect(plan.refuel, isNull);
+      expect(plan.days.expand((d) => d.steps),
+          isNot(contains(FightWeekStep.refuel)));
+    });
+
+    test('the weigh-in and the days after carry no refuel step', () {
+      final plan = planFor(80, 77, lead: 2, refuel: false)!;
+      expect(plan.days[7].steps, [FightWeekStep.weighIn]);
+      expect(plan.days[8].steps, isEmpty);
+      expect(plan.days[9].steps, [FightWeekStep.fight]);
+      expect(plan.dayOn(addDays(today, 77))!.steps, [FightWeekStep.weighIn]);
+    });
+
+    test('the food steps before the weigh-in do not change', () {
+      final on = planFor(80, 77)!;
+      final off = planFor(80, 77, refuel: false)!;
+      expect(off.cut, on.cut);
+      expect(off.acuteLossKg, on.acuteLossKg);
+      expect(off.cutStart, on.cutStart);
+      expect(stepsOf(off).take(7), stepsOf(on).take(7));
+    });
+
+    test('off is exactly on, minus the refuel, across the whole grid', () {
+      var checked = 0;
+      for (var current = 55.0; current <= 110; current += 5) {
+        for (var limit = 52.0; limit <= 100; limit += 6.2) {
+          for (var days = 0; days <= 90; days += 6) {
+            for (var lead = 0; lead <= 2; lead++) {
+              final on = planFor(current, days, lead: lead, limit: limit)!;
+              final off = planFor(current, days,
+                  lead: lead, limit: limit, refuel: false)!;
+              final reason = '$current kg, $limit limit, $days days, +$lead';
+              checked++;
+              expect(off.refuel, isNull, reason: reason);
+              expect(off.status, on.status, reason: reason);
+              expect(off.cut, on.cut, reason: reason);
+              expect(off.acuteLossKg, on.acuteLossKg, reason: reason);
+              expect(off.days, hasLength(on.days.length), reason: reason);
+              for (var i = 0; i < on.days.length; i++) {
+                expect(off.days[i].steps, withoutRefuel(on.days[i].steps),
+                    reason: '$reason, day $i');
+              }
+              // With it on, the targets exist exactly when food is planned.
+              expect(on.refuel != null, on.cut != FightWeekCut.notPlanned,
+                  reason: reason);
+            }
+          }
+        }
+      }
+      expect(checked, greaterThan(1000));
+    });
+
+    test('a plan that was never made stays never made', () {
+      for (final refuel in [true, false]) {
+        expect(planFor(80, 77, age: 17, refuel: refuel), isNull);
+        expect(planFor(80, 77, age: null, refuel: refuel), isNull);
+        expect(
+            planFor(80, 77, screening: CampScreening.pending, refuel: refuel),
+            isNull);
+      }
     });
   });
 

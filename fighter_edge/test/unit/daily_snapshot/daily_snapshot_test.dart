@@ -150,6 +150,40 @@ void main() {
     expect(json['todaySteps'], ['lowFibre', 'lowerCarbs']);
   });
 
+  test('the refuel step reaches the AI only when refuel guidance is on', () {
+    final camp = FightCamp.tryCreate(
+      fightDate: addDays(today, 1),
+      weighInDate: today,
+      weightLimitKg: 73.5,
+      category: CompetitionCategory.professional,
+    )!;
+    // Weigh-in day, 74.0 kg trend: under 1% to lose, food only.
+    DailySnapshot onWeighInDay({bool? refuelGuidance}) => DailySnapshot.build(
+          today: today,
+          training: training,
+          plannedSessionsPerWeek: 4,
+          goal: goal,
+          nutritionDays: nutritionDays,
+          weights: [
+            WeightPoint(addDays(today, -1), 74.2),
+            WeightPoint(today, 73.8),
+          ],
+          camp: camp,
+          ageYears: 30,
+          screening: CampScreening.cleared,
+          refuelGuidance: refuelGuidance ?? false,
+        );
+
+    final off = onWeighInDay();
+    expect(off.camp!.fightWeekCut, FightWeekCut.lowFibre);
+    expect(off.camp!.todaySteps, [FightWeekStep.weighIn]);
+    expect((off.toJson()['camp'] as Map)['todaySteps'], ['weighIn']);
+
+    final on = onWeighInDay(refuelGuidance: true);
+    expect(on.camp!.todaySteps, [FightWeekStep.weighIn, FightWeekStep.refuel]);
+    expect((on.toJson()['camp'] as Map)['todaySteps'], ['weighIn', 'refuel']);
+  });
+
   test('no fight-week plan for a minor', () {
     final camp = FightCamp.tryCreate(
       fightDate: addDays(today, 3),

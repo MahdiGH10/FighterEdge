@@ -178,6 +178,7 @@ class DailySnapshot {
     FightCamp? camp,
     int? ageYears,
     CampScreening screening = CampScreening.pending,
+    bool refuelGuidance = false,
   }) {
     final day = calendarDay(today);
     final trend = WeightTrend.from(weights, today: day);
@@ -188,7 +189,8 @@ class DailySnapshot {
             weights: weights,
             today: day,
             ageYears: ageYears,
-            screening: screening);
+            screening: screening,
+            refuelGuidance: refuelGuidance);
     return DailySnapshot._(
       date: day,
       training: _training(day, training, plannedSessionsPerWeek,

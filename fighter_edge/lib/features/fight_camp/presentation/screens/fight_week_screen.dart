@@ -34,9 +34,11 @@ class FightWeekScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final state = context.watch<AppState>();
-    final camp = context.watch<FightCampController>().camp;
-    final copy =
-        FightCampCopy(l, state, Localizations.localeOf(context).toString());
+    final fights = context.watch<FightCampController>();
+    final camp = fights.camp;
+    final copy = FightCampCopy(
+        l, state, Localizations.localeOf(context).toString(),
+        refuelGuidance: fights.refuelGuidance);
 
     if (camp == null) {
       return ScreenScaffold(
@@ -59,6 +61,7 @@ class FightWeekScreen extends StatelessWidget {
       today: today,
       ageYears: ageYears,
       screening: screening,
+      refuelGuidance: fights.refuelGuidance,
     );
     final status = FightCampStatus.of(camp,
         weights: state.weights,
@@ -113,10 +116,22 @@ class FightWeekScreen extends StatelessWidget {
               Text(l.fightRefuelTitle, style: AppType.headline()),
               const SizedBox(height: Insets.md),
               _RefuelTargets(refuel: refuel, copy: copy),
+            ] else if (!fights.refuelGuidance &&
+                plan.cut != FightWeekCut.notPlanned) ...[
+              const SizedBox(height: Insets.xl),
+              AppCard(
+                child: _IconLine(
+                  icon: AppIcons.info,
+                  color: AppAccessibility.textSecondary(context),
+                  text: l.fightRefuelOff,
+                ),
+              ),
             ],
             const SizedBox(height: Insets.md),
             Text(
-              l.fightWeekSource,
+              fights.refuelGuidance
+                  ? l.fightWeekSource
+                  : l.fightWeekSourceSteps,
               style:
                   AppType.subhead(color: AppAccessibility.textMuted(context)),
             ),

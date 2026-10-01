@@ -1,5 +1,6 @@
+import '../../edge_fuel/domain/models/nutrition_setup_draft.dart';
 import '../../fight_camp/domain/weight_trend.dart';
-import '../../fight_camp/domain/camp_screening.dart';
+import '../../fight_camp/presentation/camp_screening_from_draft.dart';
 import '../../fight_camp/presentation/fight_camp_controller.dart';
 import '../../../models/training_session.dart';
 import '../../../state/app_state.dart';
@@ -10,11 +11,16 @@ import '../domain/daily_snapshot.dart';
 /// the model this way — food targets and the day's log already reach it
 /// through `NutritionTarget`/`NutritionDay`, so [DailySnapshot.nutrition] is
 /// left out of what gets sent (`aiFacts.ts` does not whitelist it either).
+///
+/// Age and the camp screening gate both come from [fuelDraft], so a caller
+/// cannot pass one and forget the other. Without a confirmed draft the camp
+/// reads as "needs screening", which the model is told to answer with "finish
+/// Fuel setup". Refuel guidance follows [FightCampController.refuelGuidance],
+/// the same switch the screens use.
 DailySnapshot buildDailySnapshot(
   AppState state,
   FightCampController fightCamp, {
-  int? ageYears,
-  CampScreening screening = CampScreening.pending,
+  NutritionSetupDraft? fuelDraft,
 }) {
   final planned = plannedSessionToday(state);
   return DailySnapshot.build(
@@ -39,8 +45,9 @@ DailySnapshot buildDailySnapshot(
     nutritionDays: const [],
     weights: [for (final w in state.weights) WeightPoint(w.date, w.kg)],
     camp: fightCamp.camp,
-    ageYears: ageYears,
-    screening: screening,
+    ageYears: fuelDraft?.ageYears,
+    screening: campScreeningFromDraft(fuelDraft),
+    refuelGuidance: fightCamp.refuelGuidance,
   );
 }
 

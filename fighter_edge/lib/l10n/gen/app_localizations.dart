@@ -2761,6 +2761,12 @@ abstract class L {
   /// **'Start your refuel straight after.'**
   String get fightStepWeighInBody;
 
+  /// No description provided for @fightStepWeighInBodyNoRefuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weigh in. Afterwards, follow your coach\'s or dietitian\'s advice.'**
+  String get fightStepWeighInBodyNoRefuel;
+
   /// No description provided for @fightStepRefuel.
   ///
   /// In en, this message translates to:
@@ -2862,6 +2868,18 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Steps and targets from the International Society of Sports Nutrition (2025).'**
   String get fightWeekSource;
+
+  /// No description provided for @fightWeekSourceSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps from the International Society of Sports Nutrition (2025).'**
+  String get fightWeekSourceSteps;
+
+  /// No description provided for @fightRefuelOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuel targets are not in this version. A sports dietitian has to review them first.'**
+  String get fightRefuelOff;
 
   /// No description provided for @cornerBriefTitle.
   ///

@@ -15,7 +15,9 @@ import '../../fight_camp/domain/weight_path.dart';
 /// Fight week's own steps are not a cue: the fight countdown card right above
 /// the brief on Home already shows them.
 enum CornerCue {
-  /// The weight path needs supervision or is not safe.
+  /// The weight path needs supervision or is not safe, or the athlete's
+  /// health answers need a professional's review. Matches the Pro brief, which
+  /// leads with the same advice for these statuses.
   seeProfessional,
 
   /// No EdgeFuel target yet.
@@ -73,7 +75,8 @@ class CornerBriefCalculator {
     final camp = today.camp;
     final pathStatus = camp?.weightPath.status;
     if (pathStatus == WeightPathStatus.needsSupervision ||
-        pathStatus == WeightPathStatus.notSafe) {
+        pathStatus == WeightPathStatus.notSafe ||
+        pathStatus == WeightPathStatus.needsProfessionalReview) {
       return const CornerLine(CornerCue.seeProfessional);
     }
     if (target?.isSuccess != true) return const CornerLine(CornerCue.setUpFuel);

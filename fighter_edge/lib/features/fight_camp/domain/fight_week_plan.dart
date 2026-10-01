@@ -37,7 +37,8 @@ enum FightWeekStep {
 
   weighIn,
 
-  /// Rehydrate, then refuel ([RefuelTargets]).
+  /// Rehydrate, then refuel ([RefuelTargets]). Only planned when the plan is
+  /// made with `refuelGuidance` on.
   refuel,
 
   fight,
@@ -117,7 +118,8 @@ class FightWeekPlan {
   /// From the first day of fight week to fight day, one per calendar day.
   final List<FightWeekDay> days;
 
-  /// Omitted whenever inputs or screening need review, or the path is unsafe.
+  /// Omitted whenever inputs or screening need review, the path is unsafe, or
+  /// the plan was made without `refuelGuidance`.
   final RefuelTargets? refuel;
 
   /// The first day eating changes, or null when it never does.
@@ -139,12 +141,17 @@ class FightWeekPlan {
   /// the steps do not change as weight comes off during the week; without a
   /// weigh-in in the week before, today's trend stands in. Null for
   /// athletes under [WeightCutPolicy.minimumAgeYears].
+  ///
+  /// [refuelGuidance] adds the refuel steps and [RefuelTargets]. It is off by
+  /// default: those numbers have not been reviewed by a qualified sports
+  /// dietitian yet (launch audit SAFE-2), so a caller has to ask for them.
   static FightWeekPlan? plan({
     required FightCamp camp,
     required List<WeightPoint> weights,
     required DateTime today,
     int? ageYears,
     CampScreening screening = CampScreening.pending,
+    bool refuelGuidance = false,
   }) {
     final start = camp.fightWeekStart;
     var at = daysBetween(today, start) <= 0 ? start : today;
@@ -160,14 +167,16 @@ class FightWeekPlan {
       ageYears: ageYears,
       screening: screening,
     );
-    return build(camp: camp, path: path);
+    return build(camp: camp, path: path, refuelGuidance: refuelGuidance);
   }
 
   /// The plan [path] leads to. Null when [path] is
   /// [WeightPathStatus.notSupported] or screening is unfinished/requires review.
+  /// See [plan] for [refuelGuidance].
   static FightWeekPlan? build({
     required FightCamp camp,
     required WeightPath path,
+    bool refuelGuidance = false,
   }) {
     final cut = _cutFor(path);
     if (cut == null) return null;
@@ -183,11 +192,13 @@ class FightWeekPlan {
             date: addDays(camp.fightWeekStart, i),
             daysToWeighIn: week - i,
             daysToFight: week + lead - i,
-            steps: _stepsFor(cut, week - i, week + lead - i),
+            steps: _stepsFor(cut, week - i, week + lead - i,
+                refuel: refuelGuidance),
           ),
       ],
-      refuel:
-          cut == FightWeekCut.notPlanned ? null : RefuelTargets.forCamp(camp),
+      refuel: refuelGuidance && cut != FightWeekCut.notPlanned
+          ? RefuelTargets.forCamp(camp)
+          : null,
     );
   }
 
@@ -218,8 +229,10 @@ class FightWeekPlan {
   static List<FightWeekStep> _stepsFor(
     FightWeekCut cut,
     int toWeighIn,
-    int toFight,
-  ) {
+    int toFight, {
+    required bool refuel,
+  }) {
+    final refuelStep = refuel && cut != FightWeekCut.notPlanned;
     if (toWeighIn > 0) {
       return switch (cut) {
         FightWeekCut.notPlanned => const [],
@@ -237,14 +250,14 @@ class FightWeekPlan {
     if (toWeighIn == 0) {
       return [
         FightWeekStep.weighIn,
-        if (cut != FightWeekCut.notPlanned) FightWeekStep.refuel,
+        if (refuelStep) FightWeekStep.refuel,
         if (toFight == 0) FightWeekStep.fight,
       ];
     }
     return toFight == 0
         ? const [FightWeekStep.fight]
-        : cut == FightWeekCut.notPlanned
-            ? const []
-            : const [FightWeekStep.refuel];
+        : refuelStep
+            ? const [FightWeekStep.refuel]
+            : const [];
   }
 }

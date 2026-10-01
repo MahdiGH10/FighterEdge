@@ -159,8 +159,7 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
     final fuel = context.watch<EdgeFuelController>();
     final corner = context.watch<CornerBriefController>();
 
-    final today =
-        buildDailySnapshot(state, fightCamp, ageYears: fuel.draft?.ageYears);
+    final today = buildDailySnapshot(state, fightCamp, fuelDraft: fuel.draft);
     // Fuel can be showing another day; the brief is only ever about today.
     final day = fuel.isToday ? fuel.day : null;
     final freeLine =

@@ -112,6 +112,21 @@ void main() {
     expect(reporter.reasons, ['fight_save_failed', 'fight_delete_failed']);
   });
 
+  test('refuel guidance is off by default and on only when asked', () {
+    // The default reads --dart-define=FIGHT_WEEK_REFUEL; no build that
+    // reaches testers sets it (launch audit SAFE-2/3).
+    expect(
+        FightCampController(repository: InMemoryFightCampRepository())
+            .refuelGuidance,
+        isFalse,
+        reason: 'unless this test run passes FIGHT_WEEK_REFUEL=true');
+    expect(
+        FightCampController(
+                repository: InMemoryFightCampRepository(), refuelGuidance: true)
+            .refuelGuidance,
+        isTrue);
+  });
+
   test('does nothing without a signed-in account', () {
     final controller =
         FightCampController(repository: InMemoryFightCampRepository());

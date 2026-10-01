@@ -12,11 +12,15 @@ import 'fight_camp_controller.dart';
 /// Words for fight-camp numbers. Every number comes from the domain; this
 /// only formats it in the athlete's unit and language.
 class FightCampCopy {
-  FightCampCopy(this.l, this.units, this.locale);
+  FightCampCopy(this.l, this.units, this.locale, {this.refuelGuidance = false});
 
   final L l;
   final AppState units;
   final String locale;
+
+  /// Mirrors [FightCampController.refuelGuidance]: step text must not point to
+  /// a refuel the screen does not show.
+  final bool refuelGuidance;
 
   String weight(double kg) =>
       formatFixedDecimal(units.displayWeight(kg), locale);
@@ -135,7 +139,9 @@ class FightCampCopy {
         FightWeekStep.lowFibre =>
           l.fightStepFibreBody(WeightCutPolicy.lowFibreMaxGramsPerDay),
         FightWeekStep.lowerCarbs => l.fightStepCarbsBody,
-        FightWeekStep.weighIn => l.fightStepWeighInBody,
+        FightWeekStep.weighIn => refuelGuidance
+            ? l.fightStepWeighInBody
+            : l.fightStepWeighInBodyNoRefuel,
         FightWeekStep.refuel => l.fightStepRefuelBody,
         FightWeekStep.fight => l.fightStepFightBody,
       };

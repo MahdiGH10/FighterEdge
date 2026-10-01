@@ -49,6 +49,9 @@ void main() {
     bool? screeningConfirmed,
     NutritionSafetyFlags safetyFlags = const NutritionSafetyFlags(),
     Widget? home,
+    // The shipped default is off; most tests here describe the plan with the
+    // refuel on, and the "refuel off" group below covers the default.
+    bool refuelGuidance = true,
   }) async {
     tester.view.physicalSize = const Size(800, 3200);
     tester.view.devicePixelRatio = 1;
@@ -85,6 +88,7 @@ void main() {
       state: state,
       fightCampRepo: fights,
       edgeFuelRepo: edgeFuel,
+      refuelGuidance: refuelGuidance,
     ));
     await tester.pumpAndSettle();
   }
@@ -255,5 +259,109 @@ void main() {
         scrollable: list);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  // Refuel numbers have not been reviewed by a sports dietitian, so builds
+  // that reach testers leave them out (launch audit SAFE-2/3).
+  group('refuel guidance off (the shipped default)', () {
+    const refuelNote = 'Refuel targets are not in this version. '
+        'A sports dietitian has to review them first.';
+
+    testWidgets('the week stays; refuel steps and targets go', (tester) async {
+      await pumpWeek(tester,
+          weighIns: [...entryAt(75), (0, 74.0)], refuelGuidance: false);
+
+      // Fight week itself is untouched.
+      expect(find.textContaining('Food takes about 1.5 kg off in fight week'),
+          findsOneWidget);
+      expect(find.text('Low fibre'), findsOneWidget);
+      expect(find.text('Day by day'), findsOneWidget);
+      expect(find.text('Weigh-in'), findsOneWidget);
+
+      // No refuel step, section or number anywhere.
+      expect(find.text('Weigh-in · Refuel'), findsNothing);
+      expect(find.text('After the weigh-in'), findsNothing);
+      expect(find.text('1–1.5 L an hour'), findsNothing);
+      expect(find.text('Up to 60 g an hour'), findsNothing);
+      expect(find.text('290–510 g'), findsNothing);
+      expect(find.text('Keep it low'), findsNothing);
+
+      // The one place the word appears is the note that says why.
+      expect(find.textContaining(RegExp('refuel', caseSensitive: false)),
+          findsOneWidget);
+      expect(find.text(refuelNote), findsOneWidget);
+      expect(
+          find.text('Steps from the International Society of Sports '
+              'Nutrition (2025).'),
+          findsOneWidget);
+    });
+
+    testWidgets('no note where there is no food plan to attach it to',
+        (tester) async {
+      await pumpWeek(tester, weighIns: entryAt(77), refuelGuidance: false);
+      expect(
+          find.textContaining(
+              'The rest needs a water cut, which needs a coach'),
+          findsOneWidget);
+      expect(find.text(refuelNote), findsNothing);
+    });
+
+    testWidgets('weigh-in day: the step no longer points to a refuel',
+        (tester) async {
+      await pumpWeek(tester,
+          daysToWeighIn: 0,
+          limit: 74.5,
+          weighIns: entryAt(75),
+          refuelGuidance: false);
+      expect(find.textContaining('Today · '), findsOneWidget);
+      expect(
+          find.text("Weigh in. Afterwards, follow your coach's or "
+              "dietitian's advice."),
+          findsOneWidget);
+      expect(find.text('Start your refuel straight after.'), findsNothing);
+    });
+
+    testWidgets('the dashboard card names no refuel step', (tester) async {
+      await pumpWeek(tester,
+          daysToWeighIn: 0,
+          limit: 74.5,
+          weighIns: entryAt(75),
+          refuelGuidance: false,
+          home: DashboardScreen(onNavigate: (_) {}));
+      expect(find.text('Today: Weigh-in'), findsOneWidget);
+      expect(find.textContaining('Refuel'), findsNothing);
+    });
+
+    testWidgets('switched on, the same day does name it', (tester) async {
+      await pumpWeek(tester,
+          daysToWeighIn: 0,
+          limit: 74.5,
+          weighIns: entryAt(75),
+          home: DashboardScreen(onNavigate: (_) {}));
+      expect(find.text('Today: Weigh-in · Refuel'), findsOneWidget);
+    });
+
+    testWidgets('fits a 320 px phone at 200% text', (tester) async {
+      await pumpWeek(tester,
+          weighIns: [...entryAt(75), (0, 74.0)], refuelGuidance: false);
+      tester.view.physicalSize = const Size(320, 640);
+      tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(boldText: true, highContrast: true);
+      addTearDown(() {
+        tester.platformDispatcher.clearTextScaleFactorTestValue();
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue();
+      });
+      await tester.pumpAndSettle();
+      final list = find
+          .descendant(
+              of: find.byType(FightWeekScreen),
+              matching: find.byType(Scrollable))
+          .first;
+      await tester.scrollUntilVisible(find.text(refuelNote), 400,
+          scrollable: list);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
   });
 }

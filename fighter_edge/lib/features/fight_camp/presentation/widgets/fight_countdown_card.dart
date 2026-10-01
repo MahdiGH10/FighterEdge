@@ -61,14 +61,16 @@ class FightCountdownSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final camp = context.watch<FightCampController>().camp;
+    final fights = context.watch<FightCampController>();
+    final camp = fights.camp;
     final state = context.watch<AppState>();
     if (camp == null || camp.daysToFight(state.now) < 0) {
       return const SizedBox.shrink();
     }
     final l = L.of(context);
-    final copy =
-        FightCampCopy(l, state, Localizations.localeOf(context).toString());
+    final copy = FightCampCopy(
+        l, state, Localizations.localeOf(context).toString(),
+        refuelGuidance: fights.refuelGuidance);
     final fuelDraft = context.watch<EdgeFuelController>().draft;
     final ageYears = fuelDraft?.ageYears;
     final screening = campScreeningFromDraft(fuelDraft);
@@ -88,6 +90,7 @@ class FightCountdownSection extends StatelessWidget {
               today: state.now,
               ageYears: ageYears,
               screening: screening,
+              refuelGuidance: fights.refuelGuidance,
             )?.dayOn(state.now)?.steps ??
             const <FightWeekStep>[]
         : const <FightWeekStep>[];
