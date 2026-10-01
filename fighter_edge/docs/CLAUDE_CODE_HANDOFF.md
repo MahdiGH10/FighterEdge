@@ -2799,4 +2799,4 @@ what is connected, and measurable in production.
 
 ## UI review contrast slice (2026-10-01)
 
-Branch ui-review/contrast-role-usage changes only floating-label and Round timer button color roles. Uses existing accentText/primaryFill; values and timer behavior are unchanged. Three targeted tests, 911 non-golden tests, 82.2% coverage, format, l10n diff, analyze and three unchanged goldens pass. See docs/ui_review_20261001/DESIGN.md and VALIDATION.md. Remaining accent uses and native review are separate work. No merge/deploy or readiness claim.
+Branch ui-review/contrast-role-usage changes only floating-label and Round timer button color roles. Uses existing accentText/primaryFill; values and timer behavior are unchanged. Three targeted tests, 911 non-golden tests, 82.2% coverage, format, l10n diff, analyze and three unchanged goldens pass. See docs/ui_review_20261001/DESIGN_CONTRAST.md and CONTRAST_VALIDATION.md. Remaining accent uses and native review are separate work. No merge/deploy or readiness claim.
