@@ -9,10 +9,13 @@ import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_typography.dart';
 import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/grouped_list.dart';
+import '../../../../widgets/primary_button.dart';
 import '../../../../widgets/stat_card.dart';
 import '../../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../../domain/weight_path.dart';
 import '../fight_camp_controller.dart';
 import '../fight_camp_copy.dart';
+import '../camp_screening_from_draft.dart';
 import '../widgets/fight_countdown_card.dart';
 import '../widgets/weight_path_chart.dart';
 import '../widgets/weight_path_summary.dart';
@@ -42,11 +45,13 @@ class FightPathScreen extends StatelessWidget {
       );
     }
 
+    final fuelDraft = context.watch<EdgeFuelController>().draft;
     final status = FightCampStatus.of(
       camp,
       weights: state.weights,
       today: state.now,
-      ageYears: context.watch<EdgeFuelController>().draft?.ageYears,
+      ageYears: fuelDraft?.ageYears,
+      screening: campScreeningFromDraft(fuelDraft),
     );
     final checkpoints = status.path.checkpoints;
     final chart = WeightPathChart(
@@ -78,6 +83,15 @@ class FightPathScreen extends StatelessWidget {
           ),
           const SizedBox(height: Insets.md),
           WeightPathSummary(status: status, copy: copy),
+          if (status.path.status == WeightPathStatus.needsScreening) ...[
+            const SizedBox(height: Insets.md),
+            PrimaryButton(
+              l.fightPathStartScreening,
+              icon: Icons.arrow_forward,
+              expand: true,
+              onPressed: () => openCampScreening(context),
+            ),
+          ],
           const SizedBox(height: Insets.xl),
           AppCard(
             child: Column(

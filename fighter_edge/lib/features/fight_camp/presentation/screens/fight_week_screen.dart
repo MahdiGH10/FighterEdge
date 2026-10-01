@@ -10,6 +10,7 @@ import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_typography.dart';
 import '../../../../widgets/app_scaffold.dart';
 import '../../../../widgets/grouped_list.dart';
+import '../../../../widgets/primary_button.dart';
 import '../../../../widgets/stat_card.dart';
 import '../../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../../domain/calendar.dart';
@@ -19,6 +20,7 @@ import '../../domain/weight_path.dart';
 import '../../domain/weight_trend.dart';
 import '../fight_camp_controller.dart';
 import '../fight_camp_copy.dart';
+import '../camp_screening_from_draft.dart';
 import '../widgets/fight_countdown_card.dart';
 import '../widgets/weight_path_summary.dart';
 
@@ -48,15 +50,21 @@ class FightWeekScreen extends StatelessWidget {
     }
 
     final today = state.now;
-    final ageYears = context.watch<EdgeFuelController>().draft?.ageYears;
+    final fuelDraft = context.watch<EdgeFuelController>().draft;
+    final ageYears = fuelDraft?.ageYears;
+    final screening = campScreeningFromDraft(fuelDraft);
     final plan = FightWeekPlan.plan(
       camp: camp,
       weights: [for (final w in state.weights) WeightPoint(w.date, w.kg)],
       today: today,
       ageYears: ageYears,
+      screening: screening,
     );
     final status = FightCampStatus.of(camp,
-        weights: state.weights, today: today, ageYears: ageYears);
+        weights: state.weights,
+        today: today,
+        ageYears: ageYears,
+        screening: screening);
     final inWeek =
         status.phase == CampPhase.fightWeek || status.phase == CampPhase.refuel;
     final todayPlan = plan?.dayOn(today);
@@ -83,7 +91,7 @@ class FightWeekScreen extends StatelessWidget {
           ),
           const SizedBox(height: Insets.md),
           if (plan == null)
-            _PlanMessage(status: WeightPathStatus.notSupported, copy: copy)
+            _PlanMessage(status: status.path.status, copy: copy)
           else ...[
             _PlanMessage(status: plan.status, copy: copy, plan: plan),
             if (todayPlan != null && todayPlan.steps.isNotEmpty) ...[
@@ -100,15 +108,26 @@ class FightWeekScreen extends StatelessWidget {
               for (final day in plan.days)
                 _DayRow(day: day, today: today, copy: copy),
             ]),
-            const SizedBox(height: Insets.xl),
-            Text(l.fightRefuelTitle, style: AppType.headline()),
-            const SizedBox(height: Insets.md),
-            _RefuelTargets(refuel: plan.refuel, copy: copy),
+            if (plan.refuel case final refuel?) ...[
+              const SizedBox(height: Insets.xl),
+              Text(l.fightRefuelTitle, style: AppType.headline()),
+              const SizedBox(height: Insets.md),
+              _RefuelTargets(refuel: refuel, copy: copy),
+            ],
             const SizedBox(height: Insets.md),
             Text(
               l.fightWeekSource,
               style:
                   AppType.subhead(color: AppAccessibility.textMuted(context)),
+            ),
+          ],
+          if (status.path.status == WeightPathStatus.needsScreening) ...[
+            const SizedBox(height: Insets.md),
+            PrimaryButton(
+              l.fightPathStartScreening,
+              icon: Icons.arrow_forward,
+              expand: true,
+              onPressed: () => openCampScreening(context),
             ),
           ],
         ],
@@ -130,9 +149,11 @@ class _PlanMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final plan = this.plan;
     final (tone, icon) = pathStatusStyle(context, status);
-    final message =
-        plan == null ? copy.l.fightPathAdultsOnly : copy.fightWeekMessage(plan);
+    final message = plan == null
+        ? copy.pathMessageForStatus(status)
+        : copy.fightWeekMessage(plan);
     final warning = status == WeightPathStatus.needsSupervision ||
+        status == WeightPathStatus.needsProfessionalReview ||
         status == WeightPathStatus.notSafe;
     return AppCard(
       accent: warning ? tone : null,

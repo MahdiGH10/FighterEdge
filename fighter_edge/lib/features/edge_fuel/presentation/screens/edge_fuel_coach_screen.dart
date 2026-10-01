@@ -33,6 +33,7 @@ import '../../../../state/app_state.dart';
 import '../../../daily_snapshot/domain/daily_snapshot.dart';
 import '../../../daily_snapshot/presentation/daily_snapshot_builder.dart';
 import '../../../fight_camp/presentation/fight_camp_controller.dart';
+import '../../../fight_camp/presentation/camp_screening_from_draft.dart';
 import '../../ai/edge_fuel_ai_gateway.dart';
 import '../../ai/edge_fuel_ai_models.dart';
 import '../../data/food_catalog_repository.dart';
@@ -185,6 +186,7 @@ class _CoachBodyState extends State<_CoachBody> {
           appState,
           fightCamp,
           ageYears: edgeFuel.draft?.ageYears,
+          screening: campScreeningFromDraft(edgeFuel.draft),
         );
 
     return Column(

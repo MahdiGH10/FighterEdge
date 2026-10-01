@@ -57,7 +57,18 @@ class FightCampCopy {
           l.fightPathNotSafe(weight(path.lightestSafeLimitKg!), unit),
         WeightPathStatus.atWeight => l.fightPathAtWeight,
         WeightPathStatus.needsMoreData => l.fightPathNeedsWeight,
+        WeightPathStatus.needsScreening => l.fightPathNeedsScreening,
+        WeightPathStatus.needsProfessionalReview =>
+          l.fightPathProfessionalReview,
         WeightPathStatus.notSupported => l.fightPathAdultsOnly,
+      };
+
+  String pathMessageForStatus(WeightPathStatus status) => switch (status) {
+        WeightPathStatus.needsScreening => l.fightPathNeedsScreening,
+        WeightPathStatus.needsProfessionalReview =>
+          l.fightPathProfessionalReview,
+        WeightPathStatus.notSupported => l.fightPathAdultsOnly,
+        _ => l.fightPathNeedsWeight,
       };
 
   /// One line for the dashboard: the full message when it is short, a
@@ -97,6 +108,8 @@ class FightCampCopy {
         l.fightWeekSupervision(weight(path.lightestSafeLimitKg!), unit),
       WeightPathStatus.notSafe => pathMessage(path),
       WeightPathStatus.notSupported => l.fightPathAdultsOnly,
+      WeightPathStatus.needsScreening => l.fightPathNeedsScreening,
+      WeightPathStatus.needsProfessionalReview => l.fightPathProfessionalReview,
       _ => switch (plan.cut) {
           FightWeekCut.lowFibreAndCarbs when start != null =>
             l.fightWeekCarbs(weight(plan.acuteLossKg), unit, date(start)),

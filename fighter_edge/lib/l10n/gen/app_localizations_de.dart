@@ -1386,6 +1386,17 @@ class LDe extends L {
       'Trag diese Woche ein Gewicht ein, um deinen Weg zu sehen.';
 
   @override
+  String get fightPathNeedsScreening =>
+      'Schließe die Fuel-Einrichtung ab, um Alter und Gesundheit zu prüfen, bevor du Hinweise zum Gewicht erhältst.';
+
+  @override
+  String get fightPathStartScreening => 'Fuel-Einrichtung abschließen';
+
+  @override
+  String get fightPathProfessionalReview =>
+      'Deine Gesundheitsangaben müssen von einer qualifizierten medizinischen Fachperson oder Ernährungsfachkraft geprüft werden. Fighter Edge kann für dich keinen Gewichtsplan erstellen.';
+
+  @override
   String get fightPathAdultsOnly =>
       'Gewichtspläne gibt es nur für Erwachsene. Plane dein Gewicht mit deinem Coach.';
 

@@ -1,4 +1,5 @@
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
+import 'package:fighter_edge/features/fight_camp/domain/camp_screening.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_path.dart';
@@ -33,6 +34,8 @@ FightCampStatus statusFor(FightCamp camp, {double? weightKg = 80}) =>
       camp,
       weights: [if (weightKg != null) WeightEntry(today, weightKg)],
       today: today,
+      ageYears: 30,
+      screening: CampScreening.cleared,
     );
 
 /// A localized [FightCampCopy], and the card when [status] is given.

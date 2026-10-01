@@ -1,4 +1,5 @@
 import 'calendar.dart';
+import 'camp_screening.dart';
 import 'fight_camp.dart';
 import 'weight_cut_policy.dart';
 import 'weight_path.dart';
@@ -115,7 +116,9 @@ class FightWeekPlan {
 
   /// From the first day of fight week to fight day, one per calendar day.
   final List<FightWeekDay> days;
-  final RefuelTargets refuel;
+
+  /// Omitted whenever inputs or screening need review, or the path is unsafe.
+  final RefuelTargets? refuel;
 
   /// The first day eating changes, or null when it never does.
   DateTime? get cutStart => days
@@ -141,6 +144,7 @@ class FightWeekPlan {
     required List<WeightPoint> weights,
     required DateTime today,
     int? ageYears,
+    CampScreening screening = CampScreening.pending,
   }) {
     final start = camp.fightWeekStart;
     var at = daysBetween(today, start) <= 0 ? start : today;
@@ -154,12 +158,13 @@ class FightWeekPlan {
       camp: camp,
       today: at,
       ageYears: ageYears,
+      screening: screening,
     );
     return build(camp: camp, path: path);
   }
 
   /// The plan [path] leads to. Null when [path] is
-  /// [WeightPathStatus.notSupported].
+  /// [WeightPathStatus.notSupported] or screening is unfinished/requires review.
   static FightWeekPlan? build({
     required FightCamp camp,
     required WeightPath path,
@@ -181,7 +186,8 @@ class FightWeekPlan {
             steps: _stepsFor(cut, week - i, week + lead - i),
           ),
       ],
-      refuel: RefuelTargets.forCamp(camp),
+      refuel:
+          cut == FightWeekCut.notPlanned ? null : RefuelTargets.forCamp(camp),
     );
   }
 
@@ -189,14 +195,17 @@ class FightWeekPlan {
     const epsilon = 1e-9;
     switch (path.status) {
       case WeightPathStatus.notSupported:
+      case WeightPathStatus.needsScreening:
+      case WeightPathStatus.needsProfessionalReview:
         return null;
       case WeightPathStatus.needsMoreData:
       case WeightPathStatus.notSafe:
         return FightWeekCut.notPlanned;
       case WeightPathStatus.atWeight:
         return FightWeekCut.none;
-      case WeightPathStatus.onTrack:
       case WeightPathStatus.needsSupervision:
+        return FightWeekCut.notPlanned;
+      case WeightPathStatus.onTrack:
         final fraction = path.acuteLossFraction;
         if (fraction <= epsilon) return FightWeekCut.none;
         if (fraction <= WeightCutPolicy.lowFibreAcuteFraction + epsilon) {
@@ -228,12 +237,14 @@ class FightWeekPlan {
     if (toWeighIn == 0) {
       return [
         FightWeekStep.weighIn,
-        FightWeekStep.refuel,
+        if (cut != FightWeekCut.notPlanned) FightWeekStep.refuel,
         if (toFight == 0) FightWeekStep.fight,
       ];
     }
     return toFight == 0
         ? const [FightWeekStep.fight]
-        : const [FightWeekStep.refuel];
+        : cut == FightWeekCut.notPlanned
+            ? const []
+            : const [FightWeekStep.refuel];
   }
 }

@@ -2455,6 +2455,24 @@ abstract class L {
   /// **'Log a weigh-in this week to see your path.'**
   String get fightPathNeedsWeight;
 
+  /// No description provided for @fightPathNeedsScreening.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Fuel setup to confirm adult eligibility and health screening before viewing weight guidance.'**
+  String get fightPathNeedsScreening;
+
+  /// No description provided for @fightPathStartScreening.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Fuel setup'**
+  String get fightPathStartScreening;
+
+  /// No description provided for @fightPathProfessionalReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your health answers need review by a qualified clinician or sports dietitian. Fighter Edge cannot plan a weight cut for you.'**
+  String get fightPathProfessionalReview;
+
   /// No description provided for @fightPathAdultsOnly.
   ///
   /// In en, this message translates to:

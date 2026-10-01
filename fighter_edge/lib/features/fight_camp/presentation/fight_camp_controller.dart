@@ -6,6 +6,7 @@ import '../../../models/weight_entry.dart';
 import '../../../observability/error_reporter.dart';
 import '../data/fight_camp_repository.dart';
 import '../domain/fight_camp.dart';
+import '../domain/camp_screening.dart';
 import '../domain/weight_path.dart';
 import '../domain/weight_trend.dart';
 
@@ -116,6 +117,7 @@ class FightCampStatus {
     required List<WeightEntry> weights,
     required DateTime today,
     int? ageYears,
+    CampScreening screening = CampScreening.pending,
   }) {
     final trend = WeightTrend.from(
       [for (final w in weights) WeightPoint(w.date, w.kg)],
@@ -132,6 +134,7 @@ class FightCampStatus {
         camp: camp,
         today: today,
         ageYears: ageYears,
+        screening: screening,
       ),
     );
   }

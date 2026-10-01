@@ -1,10 +1,17 @@
 import 'dart:math' as math;
 
+import 'camp_screening.dart';
 import 'calendar.dart';
 import 'fight_camp.dart';
 import 'weight_cut_policy.dart';
 
 enum WeightPathStatus {
+  /// Adult eligibility or health screening has not been confirmed.
+  needsScreening,
+
+  /// A health flag requires a qualified person, not an automated weight plan.
+  needsProfessionalReview,
+
   /// No current weight, or the weigh-in has passed.
   needsMoreData,
 
@@ -20,8 +27,8 @@ enum WeightPathStatus {
   onTrack,
 
   /// Reachable only if the last days include a water cut, which needs a
-  /// qualified coach or dietitian. The app plans the camp part at the
-  /// fastest safe pace and does not plan the water cut.
+  /// qualified coach or dietitian. The app does not provide checkpoints for
+  /// this route.
   needsSupervision,
 
   /// Beyond the position stand's limits even with a supervised water cut.
@@ -103,8 +110,8 @@ double _round(double value, int decimals) {
   return (value * factor).roundToDouble() / factor;
 }
 
-/// Plans a safe route to the weigh-in. Every number comes from
-/// [WeightCutPolicy]; nothing here is a guess or a model's output.
+/// Estimates a route to the weigh-in from [WeightCutPolicy]. This is not an
+/// individual safety assessment; it requires an adult and a completed screen.
 class WeightPathCalculator {
   WeightPathCalculator._();
 
@@ -116,9 +123,19 @@ class WeightPathCalculator {
     required FightCamp camp,
     required DateTime today,
     int? ageYears,
+    CampScreening screening = CampScreening.pending,
   }) {
     if (ageYears != null && ageYears < WeightCutPolicy.minimumAgeYears) {
       return const WeightPath._(status: WeightPathStatus.notSupported);
+    }
+    if (ageYears == null ||
+        ageYears > 120 ||
+        screening == CampScreening.pending) {
+      return const WeightPath._(status: WeightPathStatus.needsScreening);
+    }
+    if (screening == CampScreening.needsProfessionalReview) {
+      return const WeightPath._(
+          status: WeightPathStatus.needsProfessionalReview);
     }
     final daysToWeighIn = camp.daysToWeighIn(today);
     final current = currentWeightKg;
@@ -183,7 +200,9 @@ class WeightPathCalculator {
       acuteLossFraction: (entry - limit) / entry,
       lightestSafeLimitKg:
           status == WeightPathStatus.onTrack ? null : lightestSafe,
-      checkpoints: _checkpoints(today, camp.fightWeekStart, current, rate),
+      checkpoints: status == WeightPathStatus.onTrack
+          ? _checkpoints(today, camp.fightWeekStart, current, rate)
+          : const [],
     );
   }
 

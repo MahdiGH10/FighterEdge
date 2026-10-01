@@ -1,6 +1,8 @@
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_profile.dart';
+import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
@@ -44,6 +46,8 @@ void main() {
     double limit = 73.5,
     required List<(int, double)> weighIns,
     int? ageYears,
+    bool? screeningConfirmed,
+    NutritionSafetyFlags safetyFlags = const NutritionSafetyFlags(),
     Widget? home,
   }) async {
     tester.view.physicalSize = const Size(800, 3200);
@@ -64,9 +68,16 @@ void main() {
       )!,
     );
     final edgeFuel = InMemoryEdgeFuelRepository();
-    if (ageYears != null) {
+    if (ageYears != null || screeningConfirmed != null || safetyFlags.any) {
       await edgeFuel.saveProfileDraft(
-          uid, NutritionSetupDraft(ageYears: ageYears));
+          uid,
+          NutritionSetupDraft(
+              ageYears: ageYears ?? 30,
+              confirmed: screeningConfirmed ?? true,
+              safetyFlags: safetyFlags));
+    } else {
+      await edgeFuel.saveProfileDraft(
+          uid, const NutritionSetupDraft(ageYears: 30, confirmed: true));
     }
     await tester.pumpWidget(wrapApp(
       home ?? const FightWeekScreen(),
@@ -112,21 +123,23 @@ void main() {
     expect(find.text('Keep it low'), findsOneWidget);
   });
 
-  testWidgets('a supervised cut keeps the food steps under a warning',
+  testWidgets('a supervised cut hides the automated food/refuel steps',
       (tester) async {
     await pumpWeek(tester, weighIns: entryAt(77));
     expect(
         find.textContaining('The rest needs a water cut, which needs a coach'),
         findsOneWidget);
-    expect(find.text('Low fibre'), findsOneWidget);
+    expect(find.text('Low fibre'), findsNothing);
+    expect(find.text('After the weigh-in'), findsNothing);
   });
 
-  testWidgets('not safe: no food plan, the refuel still shows', (tester) async {
+  testWidgets('not safe: no food or refuel prescription', (tester) async {
     await pumpWeek(tester, weighIns: entryAt(80));
     expect(find.textContaining('Not safe by this date'), findsOneWidget);
     expect(find.text('Low fibre'), findsNothing);
     expect(find.text('Low fibre · Fewer carbs'), findsNothing);
-    expect(find.text('Keep it low'), findsOneWidget);
+    expect(find.text('Keep it low'), findsNothing);
+    expect(find.text('After the weigh-in'), findsNothing);
   });
 
   testWidgets('before fight week: when it starts, and no today card',
@@ -148,6 +161,26 @@ void main() {
     await pumpWeek(tester, weighIns: entryAt(75), ageYears: 17);
     expect(
         find.textContaining('Weight cut plans are for adults'), findsOneWidget);
+    expect(find.text('Day by day'), findsNothing);
+    expect(find.text('After the weigh-in'), findsNothing);
+  });
+
+  testWidgets('unconfirmed screening shows no plan', (tester) async {
+    await pumpWeek(tester, weighIns: entryAt(75), screeningConfirmed: false);
+    expect(find.textContaining('confirm adult eligibility'), findsOneWidget);
+    await tester.tap(find.text('Complete Fuel setup'));
+    await tester.pumpAndSettle();
+    expect(find.byType(EdgeFuelSetupScreen), findsOneWidget);
+    expect(find.text('Day by day'), findsNothing);
+    expect(find.text('After the weigh-in'), findsNothing);
+  });
+
+  testWidgets('clinical flag shows no plan', (tester) async {
+    await pumpWeek(tester,
+        weighIns: entryAt(75),
+        safetyFlags:
+            const NutritionSafetyFlags(otherClinicianManagedDiet: true));
+    expect(find.textContaining('need review by a qualified'), findsOneWidget);
     expect(find.text('Day by day'), findsNothing);
     expect(find.text('After the weigh-in'), findsNothing);
   });

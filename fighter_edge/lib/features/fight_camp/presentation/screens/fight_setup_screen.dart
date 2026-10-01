@@ -22,6 +22,7 @@ import '../../domain/fight_camp.dart';
 import '../../domain/weight_cut_policy.dart';
 import '../fight_camp_controller.dart';
 import '../fight_camp_copy.dart';
+import '../camp_screening_from_draft.dart';
 import '../widgets/weight_path_summary.dart';
 
 /// Sets or edits the athlete's next fight (docs/FIGHT_CAMP_PATTERN_BRIEF.md,
@@ -163,13 +164,15 @@ class _FightSetupScreenState extends State<FightSetupScreen> {
     final copy =
         FightCampCopy(l, state, Localizations.localeOf(context).toString());
     final draft = _draft;
+    final fuelDraft = context.watch<EdgeFuelController>().draft;
     final status = draft == null
         ? null
         : FightCampStatus.of(
             draft,
             weights: state.weights,
             today: state.now,
-            ageYears: context.watch<EdgeFuelController>().draft?.ageYears,
+            ageYears: fuelDraft?.ageYears,
+            screening: campScreeningFromDraft(fuelDraft),
           );
     final limitError = _limitTouched && _limit.text.isNotEmpty && !_limitValid
         ? l.fightLimitError(

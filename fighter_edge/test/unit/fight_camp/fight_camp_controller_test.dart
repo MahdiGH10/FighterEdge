@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fighter_edge/features/fight_camp/data/fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
+import 'package:fighter_edge/features/fight_camp/domain/camp_screening.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_path.dart';
@@ -128,6 +129,8 @@ void main() {
         WeightEntry(addDays(today, -30), 90), // outside the trend window
       ],
       today: today,
+      ageYears: 30,
+      screening: CampScreening.cleared,
     );
     expect(status.trend.trendKg, closeTo(80.0, 1e-9));
     expect(status.phase, CampPhase.camp);

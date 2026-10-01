@@ -1380,6 +1380,17 @@ class LEn extends L {
       'Log a weigh-in this week to see your path.';
 
   @override
+  String get fightPathNeedsScreening =>
+      'Complete Fuel setup to confirm adult eligibility and health screening before viewing weight guidance.';
+
+  @override
+  String get fightPathStartScreening => 'Complete Fuel setup';
+
+  @override
+  String get fightPathProfessionalReview =>
+      'Your health answers need review by a qualified clinician or sports dietitian. Fighter Edge cannot plan a weight cut for you.';
+
+  @override
   String get fightPathAdultsOnly =>
       'Weight cut plans are for adults. Plan your weight with your coach.';
 

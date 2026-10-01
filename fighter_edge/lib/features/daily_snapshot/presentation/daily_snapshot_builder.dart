@@ -1,4 +1,5 @@
 import '../../fight_camp/domain/weight_trend.dart';
+import '../../fight_camp/domain/camp_screening.dart';
 import '../../fight_camp/presentation/fight_camp_controller.dart';
 import '../../../models/training_session.dart';
 import '../../../state/app_state.dart';
@@ -13,6 +14,7 @@ DailySnapshot buildDailySnapshot(
   AppState state,
   FightCampController fightCamp, {
   int? ageYears,
+  CampScreening screening = CampScreening.pending,
 }) {
   final planned = plannedSessionToday(state);
   return DailySnapshot.build(
@@ -38,6 +40,7 @@ DailySnapshot buildDailySnapshot(
     weights: [for (final w in state.weights) WeightPoint(w.date, w.kg)],
     camp: fightCamp.camp,
     ageYears: ageYears,
+    screening: screening,
   );
 }
 

@@ -20,15 +20,14 @@ import '../fight_camp_copy.dart';
           AppColors.positive,
           AppIcons.checkCircle
         ),
-      WeightPathStatus.needsSupervision => (
-          AppColors.warning,
-          AppIcons.warning
-        ),
+      WeightPathStatus.needsSupervision ||
+      WeightPathStatus.needsProfessionalReview =>
+        (AppColors.warning, AppIcons.warning),
       WeightPathStatus.notSafe => (AppColors.negative, AppIcons.prohibit),
-      WeightPathStatus.needsMoreData || WeightPathStatus.notSupported => (
-          AppAccessibility.textSecondary(context),
-          AppIcons.info
-        ),
+      WeightPathStatus.needsMoreData ||
+      WeightPathStatus.needsScreening ||
+      WeightPathStatus.notSupported =>
+        (AppAccessibility.textSecondary(context), AppIcons.info),
     };
 
 /// Three numbers first, then what they mean (pattern brief, pattern 2):
