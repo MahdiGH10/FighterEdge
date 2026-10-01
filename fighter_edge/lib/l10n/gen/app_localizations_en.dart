@@ -1449,6 +1449,9 @@ class LEn extends L {
   String get fightPhaseRefuel => 'Weighed in: refuel';
 
   @override
+  String get fightPhaseWeighedIn => 'Weighed in';
+
+  @override
   String get fightPhaseFightDay => 'Fight day';
 
   @override

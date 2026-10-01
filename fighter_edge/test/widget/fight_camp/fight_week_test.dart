@@ -341,6 +341,35 @@ void main() {
       expect(find.text('Today: Weigh-in · Refuel'), findsOneWidget);
     });
 
+    // The weigh-in was yesterday and the fight is tomorrow.
+    const staleWeighInPrompt = 'Log a weigh-in this week to see your path.';
+
+    testWidgets('the day after the weigh-in: no refuel label, no stale prompt',
+        (tester) async {
+      await pumpWeek(tester,
+          daysToWeighIn: -1,
+          lead: 2,
+          limit: 74.5,
+          weighIns: entryAt(75),
+          refuelGuidance: false,
+          home: DashboardScreen(onNavigate: (_) {}));
+      expect(find.text('Weighed in'), findsOneWidget);
+      expect(find.text('Weighed in: refuel'), findsNothing);
+      expect(find.text(staleWeighInPrompt), findsNothing);
+    });
+
+    testWidgets('switched on, that day keeps its label, and no stale prompt',
+        (tester) async {
+      await pumpWeek(tester,
+          daysToWeighIn: -1,
+          lead: 2,
+          limit: 74.5,
+          weighIns: entryAt(75),
+          home: DashboardScreen(onNavigate: (_) {}));
+      expect(find.text('Weighed in: refuel'), findsOneWidget);
+      expect(find.text(staleWeighInPrompt), findsNothing);
+    });
+
     testWidgets('fits a 320 px phone at 200% text', (tester) async {
       await pumpWeek(tester,
           weighIns: [...entryAt(75), (0, 74.0)], refuelGuidance: false);

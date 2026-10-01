@@ -1455,6 +1455,9 @@ class LDe extends L {
   String get fightPhaseRefuel => 'Gewogen: jetzt auffüllen';
 
   @override
+  String get fightPhaseWeighedIn => 'Gewogen';
+
+  @override
   String get fightPhaseFightDay => 'Kampftag';
 
   @override

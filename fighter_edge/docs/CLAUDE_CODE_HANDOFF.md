@@ -23,7 +23,10 @@ switch, and two Corner Brief fixes.**
   `--dart-define=FIGHT_WEEK_REFUEL=true`, and **off in every build by default**
   (debug too). Off means: no refuel steps, no refuel targets, the weigh-in step no
   longer says "start your refuel", the Fight week screen shows a one-line note
-  where the targets were, and the AI coach never receives a `refuel` step. One
+  where the targets were, the phase label after the weigh-in reads "Weighed in"
+  instead of "Weighed in: refuel", the Home card drops the "log a weigh-in"
+  prompt on that day (it was wrong after the weigh-in anyway), and the AI coach
+  never receives a `refuel` step. One
   flag feeds `FightWeekPlan.plan(refuelGuidance:)`, so the Fight week screen, the
   Home card and the AI snapshot cannot disagree. The plan's own default is off
   too, so a new caller that forgets it shows nothing. Why: the refuel numbers
@@ -49,16 +52,18 @@ switch, and two Corner Brief fixes.**
   does. Two Corner Brief tests had no age and only passed because of the old bug;
   they now build a confirmed adult.
 
-**Verified locally:** format and analyze clean; 906 Flutter tests and 3 goldens
+**Verified locally:** format and analyze clean; 908 Flutter tests and 3 goldens
 pass; functions 113/113 (`npm test`; the emulator suites run in CI). **Not
-verified:** prompt v9 against a live model, a real device, the three new German
-strings by a native speaker (`fightStepWeighInBodyNoRefuel`, `fightRefuelOff`,
-`fightWeekSourceSteps`), and the deploy: merges do not deploy, so prompt v9 is
-not live until the backend is deployed by hand (see the 2026-09-30 section).
+verified:** prompt v9 against a live model, a real device or a browser look at
+the new Fight week note (the widget tests cover it at 320 px and 200% text), the
+four new German strings by a native speaker (`fightStepWeighInBodyNoRefuel`,
+`fightRefuelOff`, `fightWeekSourceSteps`, `fightPhaseWeighedIn`), and the
+deploy: merges do not deploy, so prompt v9 is not live until the backend is
+deployed by hand (see the 2026-09-30 section).
 
 **Owner steps.** (1) A qualified sports dietitian or clinician reviews
 `weight_cut_policy.dart` and the fight-week and refuel wording; only then build
-with `FIGHT_WEEK_REFUEL=true`. (2) The German friend reads the three new strings.
+with `FIGHT_WEEK_REFUEL=true`. (2) The German friend reads the four new strings.
 (3) Carried over, none started: AdMob setup (app, rewarded unit, callback URL
 `https://us-central1-fighter-edge-app.cloudfunctions.net/admobRewardCallback`, GDPR
 message, `ADMOB_APP_ID` and the unit-ID define, Play "contains ads" and Data

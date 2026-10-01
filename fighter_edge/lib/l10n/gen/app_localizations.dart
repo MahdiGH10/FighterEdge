@@ -2551,6 +2551,12 @@ abstract class L {
   /// **'Weighed in: refuel'**
   String get fightPhaseRefuel;
 
+  /// No description provided for @fightPhaseWeighedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighed in'**
+  String get fightPhaseWeighedIn;
+
   /// No description provided for @fightPhaseFightDay.
   ///
   /// In en, this message translates to:

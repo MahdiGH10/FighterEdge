@@ -647,6 +647,7 @@
   "@fightPhaseFightWeek": {"placeholders": {"day": {"type": "int"}}},
   "fightPhaseWeighIn": "Weigh-in today",
   "fightPhaseRefuel": "Weighed in: refuel",
+  "fightPhaseWeighedIn": "Weighed in",
   "fightPhaseFightDay": "Fight day",
   "fightDone": "Fight done. Add your next one.",
   "fightEdit": "Edit fight",

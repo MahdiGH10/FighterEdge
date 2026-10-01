@@ -138,8 +138,12 @@ class FightCountdownCard extends StatelessWidget {
     final warning = status.path.status == WeightPathStatus.needsSupervision ||
         status.path.status == WeightPathStatus.needsProfessionalReview ||
         status.path.status == WeightPathStatus.notSafe;
-    final pathLine = todaySteps.isEmpty || warning
-        ? copy.pathLine(status.path)
+    // After the weigh-in the path has nothing left to say, and its "log a
+    // weigh-in" prompt would be wrong. With no step to show either, say nothing.
+    final weighedIn = status.phase == CampPhase.refuel &&
+        status.path.status == WeightPathStatus.needsMoreData;
+    final String? pathLine = todaySteps.isEmpty || warning
+        ? (weighedIn ? null : copy.pathLine(status.path))
         : l.fightTodaySteps(todaySteps.map(copy.stepTitle).join(' · '));
     final tone = switch (status.path.status) {
       WeightPathStatus.needsSupervision => AppColors.warning,
@@ -151,7 +155,7 @@ class FightCountdownCard extends StatelessWidget {
       dateLine,
       if (days > 0) '$days ${l.fightDaysToGo(days)}',
       phaseLine,
-      pathLine,
+      if (pathLine != null) pathLine,
       // Where the tap goes.
       opensFightWeek(status.phase) ? l.fightWeekTitle : l.fightPathScreenTitle,
     ].join('. ');
@@ -204,8 +208,10 @@ class FightCountdownCard extends StatelessWidget {
                 current: camp.campWeekOn(today) ?? 0,
               ),
             ],
-            const SizedBox(height: Insets.md),
-            Text(pathLine, style: AppType.callout(color: tone)),
+            if (pathLine != null) ...[
+              const SizedBox(height: Insets.md),
+              Text(pathLine, style: AppType.callout(color: tone)),
+            ],
           ],
         ),
       ),

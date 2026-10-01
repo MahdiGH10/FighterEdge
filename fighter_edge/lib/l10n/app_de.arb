@@ -574,6 +574,7 @@
   "fightPhaseFightWeek": "Kampfwoche · Tag {day} von 7",
   "fightPhaseWeighIn": "Heute ist Wiegen",
   "fightPhaseRefuel": "Gewogen: jetzt auffüllen",
+  "fightPhaseWeighedIn": "Gewogen",
   "fightPhaseFightDay": "Kampftag",
   "fightDone": "Kampf vorbei. Trag deinen nächsten ein.",
   "fightEdit": "Kampf bearbeiten",

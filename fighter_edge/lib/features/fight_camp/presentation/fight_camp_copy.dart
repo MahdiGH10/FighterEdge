@@ -94,8 +94,9 @@ class FightCampCopy {
               ? l.fightPhaseFightDay
               : l.fightPhaseWeighIn)
           : l.fightPhaseFightWeek(camp.fightWeekDayOn(today)!),
-      CampPhase.refuel =>
-        status.daysToFight == 0 ? l.fightPhaseFightDay : l.fightPhaseRefuel,
+      CampPhase.refuel => status.daysToFight == 0
+          ? l.fightPhaseFightDay
+          : (refuelGuidance ? l.fightPhaseRefuel : l.fightPhaseWeighedIn),
       CampPhase.offCamp => l.fightPhaseBeforeCamp(date(camp.fightWeekStart
           .subtract(Duration(days: (camp.campWeeks - 1) * 7)))),
       CampPhase.postFight => l.fightDone,
