@@ -2795,3 +2795,12 @@ A future Claude Code session should report all of the following honestly:
 The goal is a shippable, trustworthy combat-athlete product: useful for a free
 user, compelling enough for Pro, safe around nutrition guidance, honest about
 what is connected, and measurable in production.
+
+
+## UI review and accessibility slice (2026-10-01)
+
+Independent branch ui-review/interaction-accessibility is based on main 578c636. Adds semantics boundaries to existing grouped rows, header/custom/social buttons and Corner Brief heading. Five new activation/name/disabled-state cases pass; 913 non-golden tests, 82.2% coverage, format, generated-l10n diff, analyze and three unchanged goldens pass. All 56 matched semantic-capture pairs are visually identical.
+
+Audit: docs/ui_review_20261001/REPORT.md, COVERAGE.md, PALETTE.md, UX_TEST.md, SOURCES.md and SCREENSHOT_INDEX.md. Local screenshot set has 315 category PNGs + 180 before/after PNGs (90 pairs), retaining all original 126 paths. Scratch fixtures are not committed. Contrast role PR #29 and Login EN/DE validation PR #30 are independent drafts. No merge or deploy. Safety/domain/entitlements are unchanged; native feel, physical screen readers and real billing were not reviewed. Owner safety/legal/photo questions and keyboard/reflow/type gaps remain in the report. Existing dirty owner checkout was preserved.
+
+Review links: accessibility/audit https://github.com/MahdiGH10/FighterEdge/pull/31 ; contrast https://github.com/MahdiGH10/FighterEdge/pull/29 ; sign-in https://github.com/MahdiGH10/FighterEdge/pull/30 . All are unmerged drafts.
