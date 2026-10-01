@@ -5,6 +5,7 @@ import '../../fight_camp/domain/fight_camp.dart';
 import '../../fight_camp/domain/fight_week_plan.dart';
 import '../../fight_camp/domain/weight_path.dart';
 import '../../fight_camp/domain/weight_trend.dart';
+import '../../fight_camp/domain/camp_screening.dart';
 
 /// One piece of logged training, reduced to what the snapshot needs. The
 /// app maps its TrainingLogEntry into this so the domain stays pure Dart.
@@ -176,13 +177,20 @@ class DailySnapshot {
     required List<WeightPoint> weights,
     FightCamp? camp,
     int? ageYears,
+    CampScreening screening = CampScreening.pending,
+    bool refuelGuidance = false,
   }) {
     final day = calendarDay(today);
     final trend = WeightTrend.from(weights, today: day);
     final fightWeek = camp == null
         ? null
         : FightWeekPlan.plan(
-            camp: camp, weights: weights, today: day, ageYears: ageYears);
+            camp: camp,
+            weights: weights,
+            today: day,
+            ageYears: ageYears,
+            screening: screening,
+            refuelGuidance: refuelGuidance);
     return DailySnapshot._(
       date: day,
       training: _training(day, training, plannedSessionsPerWeek,
@@ -202,6 +210,7 @@ class DailySnapshot {
                 camp: camp,
                 today: day,
                 ageYears: ageYears,
+                screening: screening,
               ),
               fightWeekCut: fightWeek?.cut,
               todaySteps: fightWeek?.dayOn(day)?.steps ?? const [],

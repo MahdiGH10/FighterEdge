@@ -1,4 +1,5 @@
 import 'calendar.dart';
+import 'camp_screening.dart';
 import 'fight_camp.dart';
 import 'weight_cut_policy.dart';
 import 'weight_path.dart';
@@ -36,7 +37,8 @@ enum FightWeekStep {
 
   weighIn,
 
-  /// Rehydrate, then refuel ([RefuelTargets]).
+  /// Rehydrate, then refuel ([RefuelTargets]). Only planned when the plan is
+  /// made with `refuelGuidance` on.
   refuel,
 
   fight,
@@ -115,7 +117,10 @@ class FightWeekPlan {
 
   /// From the first day of fight week to fight day, one per calendar day.
   final List<FightWeekDay> days;
-  final RefuelTargets refuel;
+
+  /// Omitted whenever inputs or screening need review, the path is unsafe, or
+  /// the plan was made without `refuelGuidance`.
+  final RefuelTargets? refuel;
 
   /// The first day eating changes, or null when it never does.
   DateTime? get cutStart => days
@@ -136,11 +141,17 @@ class FightWeekPlan {
   /// the steps do not change as weight comes off during the week; without a
   /// weigh-in in the week before, today's trend stands in. Null for
   /// athletes under [WeightCutPolicy.minimumAgeYears].
+  ///
+  /// [refuelGuidance] adds the refuel steps and [RefuelTargets]. It is off by
+  /// default: those numbers have not been reviewed by a qualified sports
+  /// dietitian yet (launch audit SAFE-2), so a caller has to ask for them.
   static FightWeekPlan? plan({
     required FightCamp camp,
     required List<WeightPoint> weights,
     required DateTime today,
     int? ageYears,
+    CampScreening screening = CampScreening.pending,
+    bool refuelGuidance = false,
   }) {
     final start = camp.fightWeekStart;
     var at = daysBetween(today, start) <= 0 ? start : today;
@@ -154,15 +165,18 @@ class FightWeekPlan {
       camp: camp,
       today: at,
       ageYears: ageYears,
+      screening: screening,
     );
-    return build(camp: camp, path: path);
+    return build(camp: camp, path: path, refuelGuidance: refuelGuidance);
   }
 
   /// The plan [path] leads to. Null when [path] is
-  /// [WeightPathStatus.notSupported].
+  /// [WeightPathStatus.notSupported] or screening is unfinished/requires review.
+  /// See [plan] for [refuelGuidance].
   static FightWeekPlan? build({
     required FightCamp camp,
     required WeightPath path,
+    bool refuelGuidance = false,
   }) {
     final cut = _cutFor(path);
     if (cut == null) return null;
@@ -178,10 +192,13 @@ class FightWeekPlan {
             date: addDays(camp.fightWeekStart, i),
             daysToWeighIn: week - i,
             daysToFight: week + lead - i,
-            steps: _stepsFor(cut, week - i, week + lead - i),
+            steps: _stepsFor(cut, week - i, week + lead - i,
+                refuel: refuelGuidance),
           ),
       ],
-      refuel: RefuelTargets.forCamp(camp),
+      refuel: refuelGuidance && cut != FightWeekCut.notPlanned
+          ? RefuelTargets.forCamp(camp)
+          : null,
     );
   }
 
@@ -189,14 +206,17 @@ class FightWeekPlan {
     const epsilon = 1e-9;
     switch (path.status) {
       case WeightPathStatus.notSupported:
+      case WeightPathStatus.needsScreening:
+      case WeightPathStatus.needsProfessionalReview:
         return null;
       case WeightPathStatus.needsMoreData:
       case WeightPathStatus.notSafe:
         return FightWeekCut.notPlanned;
       case WeightPathStatus.atWeight:
         return FightWeekCut.none;
-      case WeightPathStatus.onTrack:
       case WeightPathStatus.needsSupervision:
+        return FightWeekCut.notPlanned;
+      case WeightPathStatus.onTrack:
         final fraction = path.acuteLossFraction;
         if (fraction <= epsilon) return FightWeekCut.none;
         if (fraction <= WeightCutPolicy.lowFibreAcuteFraction + epsilon) {
@@ -209,8 +229,10 @@ class FightWeekPlan {
   static List<FightWeekStep> _stepsFor(
     FightWeekCut cut,
     int toWeighIn,
-    int toFight,
-  ) {
+    int toFight, {
+    required bool refuel,
+  }) {
+    final refuelStep = refuel && cut != FightWeekCut.notPlanned;
     if (toWeighIn > 0) {
       return switch (cut) {
         FightWeekCut.notPlanned => const [],
@@ -228,12 +250,14 @@ class FightWeekPlan {
     if (toWeighIn == 0) {
       return [
         FightWeekStep.weighIn,
-        FightWeekStep.refuel,
+        if (refuelStep) FightWeekStep.refuel,
         if (toFight == 0) FightWeekStep.fight,
       ];
     }
     return toFight == 0
         ? const [FightWeekStep.fight]
-        : const [FightWeekStep.refuel];
+        : refuelStep
+            ? const [FightWeekStep.refuel]
+            : const [];
   }
 }

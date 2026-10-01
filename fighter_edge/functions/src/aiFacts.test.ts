@@ -185,6 +185,29 @@ test("keeps today's training, weight and camp", () => {
   assert.equal("nutrition" in (result.facts.today ?? {}), false);
 });
 
+test("preserves camp screening blocks for the AI", () => {
+  for (const status of ["needsScreening", "needsProfessionalReview"]) {
+    const result = buildAiFacts({
+      target,
+      today: {
+        camp: {
+          phase: "fightWeek",
+          weightPathStatus: status,
+          fightWeekCut: "notPlanned",
+          todaySteps: [],
+        },
+      },
+    });
+    assert.ok(result.ok);
+    assert.deepEqual(result.facts.today?.camp, {
+      phase: "fightWeek",
+      weightPathStatus: status,
+      fightWeekCut: "notPlanned",
+      todaySteps: [],
+    });
+  }
+});
+
 test("today's names must come from fixed lists, never free text", () => {
   const result = buildAiFacts({
     target,

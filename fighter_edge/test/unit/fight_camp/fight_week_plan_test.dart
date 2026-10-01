@@ -1,4 +1,5 @@
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
+import 'package:fighter_edge/features/fight_camp/domain/camp_screening.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_week_plan.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
@@ -28,13 +29,19 @@ FightWeekPlan? planFor(
   int lead = 0,
   double limit = 73.5,
   CompetitionCategory category = CompetitionCategory.professional,
-  int? age,
+  int? age = 30,
+  CampScreening screening = CampScreening.cleared,
+  // The plan's own default is off. Most tests here describe the plan with
+  // refuel on; the group "refuel guidance is off unless asked for" covers off.
+  bool refuel = true,
 }) =>
     FightWeekPlan.plan(
       camp: campIn(daysToWeighIn, lead: lead, limit: limit, category: category),
       weights: [if (kg != null) WeightPoint(today, kg)],
       today: today,
       ageYears: age,
+      screening: screening,
+      refuelGuidance: refuel,
     );
 
 List<List<FightWeekStep>> stepsOf(FightWeekPlan plan) =>
@@ -84,24 +91,34 @@ void main() {
     expect(planFor(73, 40)!.cut, FightWeekCut.none);
   });
 
-  test('a supervised cut still gets the food steps, and keeps its status', () {
+  test('a supervised cut does not get food or refuel prescriptions', () {
     final plan = planFor(80, 28)!;
     expect(plan.status, WeightPathStatus.needsSupervision);
-    expect(plan.cut, FightWeekCut.lowFibreAndCarbs);
-    expect(plan.acuteLossKg, 3.5);
+    expect(plan.cut, FightWeekCut.notPlanned);
+    expect(plan.refuel, isNull);
+    expect(plan.days.expand((d) => d.steps),
+        isNot(contains(FightWeekStep.lowFibre)));
   });
 
-  test('not safe, or no weight: no food plan, but the refuel stands', () {
+  test('not safe, or no weight: no food or refuel plan', () {
     for (final plan in [planFor(90, 28)!, planFor(null, 28)!]) {
       expect(plan.cut, FightWeekCut.notPlanned);
       expect(stepsOf(plan).take(7), everyElement(isEmpty));
-      expect(plan.days.last.steps, contains(FightWeekStep.refuel));
+      expect(plan.refuel, isNull);
+      expect(plan.days.last.steps, isNot(contains(FightWeekStep.refuel)));
     }
   });
 
   test('no plan for a minor', () {
     expect(planFor(80, 77, age: 17), isNull);
     expect(planFor(80, 77, age: 18), isNotNull);
+  });
+
+  test('unknown age or health review holds back the whole plan', () {
+    expect(planFor(80, 77, age: null), isNull);
+    expect(planFor(80, 77, screening: CampScreening.pending), isNull);
+    expect(planFor(80, 77, screening: CampScreening.needsProfessionalReview),
+        isNull);
   });
 
   group('days between weigh-in and fight', () {
@@ -123,7 +140,7 @@ void main() {
 
   group('refuel targets (points 12–14)', () {
     test('4–7 g/kg of carbohydrate at the limit, rounded to 10 g', () {
-      final refuel = planFor(80, 77, lead: 1)!.refuel;
+      final refuel = planFor(80, 77, lead: 1)!.refuel!;
       expect(refuel.totalCarbMinGrams, 290, reason: '73.5 × 4 = 294');
       expect(refuel.totalCarbMaxGrams, 510, reason: '73.5 × 7 = 514.5');
       expect(refuel.minLitresPerHour, 1.0);
@@ -132,9 +149,89 @@ void main() {
     });
 
     test('same-day weigh-in: rates only, no total', () {
-      final refuel = planFor(80, 77)!.refuel;
+      final refuel = planFor(80, 77)!.refuel!;
       expect(refuel.totalCarbMinGrams, isNull);
       expect(refuel.totalCarbMaxGrams, isNull);
+    });
+  });
+
+  // The refuel numbers are not reviewed by a sports dietitian yet (launch
+  // audit SAFE-2/3), so a plan only carries them when a caller asks.
+  group('refuel guidance is off unless asked for', () {
+    List<FightWeekStep> withoutRefuel(List<FightWeekStep> steps) => [
+          for (final s in steps)
+            if (s != FightWeekStep.refuel) s
+        ];
+
+    test('the default plan has no refuel steps and no targets', () {
+      final plan = FightWeekPlan.plan(
+        camp: campIn(77, lead: 1),
+        weights: [WeightPoint(today, 80)],
+        today: today,
+        ageYears: 30,
+        screening: CampScreening.cleared,
+      )!;
+      expect(plan.status, WeightPathStatus.onTrack);
+      expect(plan.refuel, isNull);
+      expect(plan.days.expand((d) => d.steps),
+          isNot(contains(FightWeekStep.refuel)));
+    });
+
+    test('the weigh-in and the days after carry no refuel step', () {
+      final plan = planFor(80, 77, lead: 2, refuel: false)!;
+      expect(plan.days[7].steps, [FightWeekStep.weighIn]);
+      expect(plan.days[8].steps, isEmpty);
+      expect(plan.days[9].steps, [FightWeekStep.fight]);
+      expect(plan.dayOn(addDays(today, 77))!.steps, [FightWeekStep.weighIn]);
+    });
+
+    test('the food steps before the weigh-in do not change', () {
+      final on = planFor(80, 77)!;
+      final off = planFor(80, 77, refuel: false)!;
+      expect(off.cut, on.cut);
+      expect(off.acuteLossKg, on.acuteLossKg);
+      expect(off.cutStart, on.cutStart);
+      expect(stepsOf(off).take(7), stepsOf(on).take(7));
+    });
+
+    test('off is exactly on, minus the refuel, across the whole grid', () {
+      var checked = 0;
+      for (var current = 55.0; current <= 110; current += 5) {
+        for (var limit = 52.0; limit <= 100; limit += 6.2) {
+          for (var days = 0; days <= 90; days += 6) {
+            for (var lead = 0; lead <= 2; lead++) {
+              final on = planFor(current, days, lead: lead, limit: limit)!;
+              final off = planFor(current, days,
+                  lead: lead, limit: limit, refuel: false)!;
+              final reason = '$current kg, $limit limit, $days days, +$lead';
+              checked++;
+              expect(off.refuel, isNull, reason: reason);
+              expect(off.status, on.status, reason: reason);
+              expect(off.cut, on.cut, reason: reason);
+              expect(off.acuteLossKg, on.acuteLossKg, reason: reason);
+              expect(off.days, hasLength(on.days.length), reason: reason);
+              for (var i = 0; i < on.days.length; i++) {
+                expect(off.days[i].steps, withoutRefuel(on.days[i].steps),
+                    reason: '$reason, day $i');
+              }
+              // With it on, the targets exist exactly when food is planned.
+              expect(on.refuel != null, on.cut != FightWeekCut.notPlanned,
+                  reason: reason);
+            }
+          }
+        }
+      }
+      expect(checked, greaterThan(1000));
+    });
+
+    test('a plan that was never made stays never made', () {
+      for (final refuel in [true, false]) {
+        expect(planFor(80, 77, age: 17, refuel: refuel), isNull);
+        expect(planFor(80, 77, age: null, refuel: refuel), isNull);
+        expect(
+            planFor(80, 77, screening: CampScreening.pending, refuel: refuel),
+            isNull);
+      }
     });
   });
 
@@ -148,7 +245,11 @@ void main() {
         for (var d = 1; d <= 4; d++) WeightPoint(addDays(start, d), 74.0),
       ];
       final plan = FightWeekPlan.plan(
-          camp: camp, weights: weights, today: addDays(start, 4))!;
+          camp: camp,
+          weights: weights,
+          today: addDays(start, 4),
+          ageYears: 30,
+          screening: CampScreening.cleared)!;
       expect(plan.cut, FightWeekCut.lowFibreAndCarbs);
       expect(plan.acuteLossKg, 1.5);
     });
@@ -158,6 +259,8 @@ void main() {
         camp: camp,
         weights: [WeightPoint(addDays(start, 2), 74.0)],
         today: addDays(start, 2),
+        ageYears: 30,
+        screening: CampScreening.cleared,
       )!;
       expect(plan.cut, FightWeekCut.lowFibre);
       expect(plan.acuteLossKg, 0.5);
@@ -168,6 +271,8 @@ void main() {
         camp: campIn(7, lead: 1),
         weights: [WeightPoint(start, 75.0)],
         today: addDays(start, 8),
+        ageYears: 30,
+        screening: CampScreening.cleared,
       )!;
       expect(plan.cut, FightWeekCut.lowFibreAndCarbs);
       expect(plan.dayOn(addDays(start, 8))!.steps, [FightWeekStep.fight]);

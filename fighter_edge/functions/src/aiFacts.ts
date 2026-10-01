@@ -80,6 +80,8 @@ const CAMP_NUMBERS = [
 ] as const;
 const CAMP_PHASES = ["offCamp", "camp", "fightWeek", "refuel", "postFight"];
 const WEIGHT_PATH_STATUSES = [
+  "needsScreening",
+  "needsProfessionalReview",
   "needsMoreData",
   "notSupported",
   "atWeight",

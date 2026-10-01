@@ -12,11 +12,15 @@ import 'fight_camp_controller.dart';
 /// Words for fight-camp numbers. Every number comes from the domain; this
 /// only formats it in the athlete's unit and language.
 class FightCampCopy {
-  FightCampCopy(this.l, this.units, this.locale);
+  FightCampCopy(this.l, this.units, this.locale, {this.refuelGuidance = false});
 
   final L l;
   final AppState units;
   final String locale;
+
+  /// Mirrors [FightCampController.refuelGuidance]: step text must not point to
+  /// a refuel the screen does not show.
+  final bool refuelGuidance;
 
   String weight(double kg) =>
       formatFixedDecimal(units.displayWeight(kg), locale);
@@ -57,7 +61,18 @@ class FightCampCopy {
           l.fightPathNotSafe(weight(path.lightestSafeLimitKg!), unit),
         WeightPathStatus.atWeight => l.fightPathAtWeight,
         WeightPathStatus.needsMoreData => l.fightPathNeedsWeight,
+        WeightPathStatus.needsScreening => l.fightPathNeedsScreening,
+        WeightPathStatus.needsProfessionalReview =>
+          l.fightPathProfessionalReview,
         WeightPathStatus.notSupported => l.fightPathAdultsOnly,
+      };
+
+  String pathMessageForStatus(WeightPathStatus status) => switch (status) {
+        WeightPathStatus.needsScreening => l.fightPathNeedsScreening,
+        WeightPathStatus.needsProfessionalReview =>
+          l.fightPathProfessionalReview,
+        WeightPathStatus.notSupported => l.fightPathAdultsOnly,
+        _ => l.fightPathNeedsWeight,
       };
 
   /// One line for the dashboard: the full message when it is short, a
@@ -79,8 +94,9 @@ class FightCampCopy {
               ? l.fightPhaseFightDay
               : l.fightPhaseWeighIn)
           : l.fightPhaseFightWeek(camp.fightWeekDayOn(today)!),
-      CampPhase.refuel =>
-        status.daysToFight == 0 ? l.fightPhaseFightDay : l.fightPhaseRefuel,
+      CampPhase.refuel => status.daysToFight == 0
+          ? l.fightPhaseFightDay
+          : (refuelGuidance ? l.fightPhaseRefuel : l.fightPhaseWeighedIn),
       CampPhase.offCamp => l.fightPhaseBeforeCamp(date(camp.fightWeekStart
           .subtract(Duration(days: (camp.campWeeks - 1) * 7)))),
       CampPhase.postFight => l.fightDone,
@@ -97,6 +113,8 @@ class FightCampCopy {
         l.fightWeekSupervision(weight(path.lightestSafeLimitKg!), unit),
       WeightPathStatus.notSafe => pathMessage(path),
       WeightPathStatus.notSupported => l.fightPathAdultsOnly,
+      WeightPathStatus.needsScreening => l.fightPathNeedsScreening,
+      WeightPathStatus.needsProfessionalReview => l.fightPathProfessionalReview,
       _ => switch (plan.cut) {
           FightWeekCut.lowFibreAndCarbs when start != null =>
             l.fightWeekCarbs(weight(plan.acuteLossKg), unit, date(start)),
@@ -122,7 +140,9 @@ class FightCampCopy {
         FightWeekStep.lowFibre =>
           l.fightStepFibreBody(WeightCutPolicy.lowFibreMaxGramsPerDay),
         FightWeekStep.lowerCarbs => l.fightStepCarbsBody,
-        FightWeekStep.weighIn => l.fightStepWeighInBody,
+        FightWeekStep.weighIn => refuelGuidance
+            ? l.fightStepWeighInBody
+            : l.fightStepWeighInBodyNoRefuel,
         FightWeekStep.refuel => l.fightStepRefuelBody,
         FightWeekStep.fight => l.fightStepFightBody,
       };

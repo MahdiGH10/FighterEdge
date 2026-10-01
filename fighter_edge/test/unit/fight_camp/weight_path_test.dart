@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
+import 'package:fighter_edge/features/fight_camp/domain/camp_screening.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_path.dart';
@@ -25,16 +26,34 @@ WeightPath plan(
   int daysToWeighIn, {
   double limit = 73.5,
   CompetitionCategory category = CompetitionCategory.professional,
-  int? age,
+  int? age = 30,
+  CampScreening screening = CampScreening.cleared,
 }) =>
     WeightPathCalculator.calculate(
       currentWeightKg: current,
       camp: campIn(daysToWeighIn, limit: limit, category: category),
       today: today,
       ageYears: age,
+      screening: screening,
     );
 
 void main() {
+  test('missing age and incomplete screening never produce a path', () {
+    final unknownAge = plan(80, 77, age: null);
+    expect(unknownAge.status, WeightPathStatus.needsScreening);
+    expect(unknownAge.checkpoints, isEmpty);
+    expect(unknownAge.fightWeekEntryKg, isNull);
+    final unfinished = plan(80, 77, screening: CampScreening.pending);
+    expect(unfinished.status, WeightPathStatus.needsScreening);
+    expect(unfinished.checkpoints, isEmpty);
+  });
+
+  test('clinical screening flags refuse automated cut guidance', () {
+    final path = plan(80, 77, screening: CampScreening.needsProfessionalReview);
+    expect(path.status, WeightPathStatus.needsProfessionalReview);
+    expect(path.checkpoints, isEmpty);
+    expect(path.acuteLossKg, 0);
+  });
   test('10 weeks of camp, 5 kg over the food-only start: 0.5 kg a week', () {
     final path = plan(80, 77);
     expect(path.status, WeightPathStatus.onTrack);
@@ -59,7 +78,8 @@ void main() {
     expect(path.acuteLossKg, 3.5);
     expect(path.acuteLossFraction, closeTo(3.5 / 77, 1e-9));
     expect(path.lightestSafeLimitKg, 75.5);
-    expect(path.checkpoints.map((c) => c.weightKg), [79.0, 78.0, 77.0]);
+    expect(path.checkpoints, isEmpty,
+        reason: 'a supervised cut has no automated weekly targets');
   });
 
   test('grappling allows less water loss than pro MMA', () {

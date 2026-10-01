@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fighter_edge/features/fight_camp/data/fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
+import 'package:fighter_edge/features/fight_camp/domain/camp_screening.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_path.dart';
@@ -111,6 +112,21 @@ void main() {
     expect(reporter.reasons, ['fight_save_failed', 'fight_delete_failed']);
   });
 
+  test('refuel guidance is off by default and on only when asked', () {
+    // The default reads --dart-define=FIGHT_WEEK_REFUEL; no build that
+    // reaches testers sets it (launch audit SAFE-2/3).
+    expect(
+        FightCampController(repository: InMemoryFightCampRepository())
+            .refuelGuidance,
+        isFalse,
+        reason: 'unless this test run passes FIGHT_WEEK_REFUEL=true');
+    expect(
+        FightCampController(
+                repository: InMemoryFightCampRepository(), refuelGuidance: true)
+            .refuelGuidance,
+        isTrue);
+  });
+
   test('does nothing without a signed-in account', () {
     final controller =
         FightCampController(repository: InMemoryFightCampRepository());
@@ -128,6 +144,8 @@ void main() {
         WeightEntry(addDays(today, -30), 90), // outside the trend window
       ],
       today: today,
+      ageYears: 30,
+      screening: CampScreening.cleared,
     );
     expect(status.trend.trendKg, closeTo(80.0, 1e-9));
     expect(status.phase, CampPhase.camp);

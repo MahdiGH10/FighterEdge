@@ -1,6 +1,93 @@
 # Fighter Edge — Claude Code Handoff
 
-## START HERE: state as of 2026-09-30
+## START HERE: state as of 2026-10-01
+
+**Merged today: PR #26** (`78ec6df`). The Android manifest removes the three
+ad-services permissions (`ACCESS_ADSERVICES_AD_ID`, `_ATTRIBUTION`, `_TOPICS`)
+next to the old `AD_ID` removal. All 7 checks passed; the emulator job stalled
+once at its 35-minute limit (the known flake) and passed on the re-run. A test
+APK built from that CI run is debug-signed, so Google Play will not accept it.
+
+**This slice (branch `fix/camp-safety-gate`): the camp safety gate, a refuel
+switch, and two Corner Brief fixes.**
+
+- **Safety gate (launch audit SAFE-1 and SAFE-2).** Ported from
+  `fix/camp-safety-eligibility`, which only ever existed in the
+  `FighterEdge-launch-audit` checkout and was never pushed. Camp guidance now
+  needs a confirmed Fuel setup (`campScreeningFromDraft`). A missing age,
+  unfinished setup, a clinical flag or an age under 18 all stop short of a plan
+  (`needsScreening`, `needsProfessionalReview`, `notSupported`) and point to Fuel
+  setup or a professional. Missing weight, unsafe and supervised routes get no
+  food or refuel prescription. Before this, a missing age returned `onTrack`.
+- **Refuel switch (new).** `FightCampController.refuelGuidance`, turned on with
+  `--dart-define=FIGHT_WEEK_REFUEL=true`, and **off in every build by default**
+  (debug too). Off means: no refuel steps, no refuel targets, the weigh-in step no
+  longer says "start your refuel", the Fight week screen shows a one-line note
+  where the targets were, the phase label after the weigh-in reads "Weighed in"
+  instead of "Weighed in: refuel", the Home card drops the "log a weigh-in"
+  prompt on that day (it was wrong after the weigh-in anyway), and the AI coach
+  never receives a `refuel` step. One
+  flag feeds `FightWeekPlan.plan(refuelGuidance:)`, so the Fight week screen, the
+  Home card and the AI snapshot cannot disagree. The plan's own default is off
+  too, so a new caller that forgets it shows nothing. Why: the refuel numbers
+  (fluid and carbohydrate per hour and in total) have not been reviewed by a
+  qualified sports dietitian, and the audit says to keep prescriptive fight-week
+  guidance out of beta builds until they are
+  (`LAUNCH_READINESS_AUDIT_20260928.md`, SAFE-2 and SAFE-3). To see them locally:
+  `flutter run -d web-server -t lib/main_local.dart --dart-define=FIGHT_WEEK_REFUEL=true`.
+  **Left visible, and also in need of that review:** the low-fibre and
+  lower-carb steps before the weigh-in, the weight path and the countdown. This
+  slice did not switch those off.
+- **Prompt v9** (`functions/src/systemPrompt.ts`): the new status rules, plus
+  "never state refuel amounts, rates or timings" (the number check only looks at
+  numbers of 100 or more, so "1 L an hour" or "60 g an hour" would have passed
+  it). New eval scenario `chat-refuel-amounts`. **Not run against a live model:**
+  `npm run eval:ai` needs `OPENROUTER_API_KEY` in the owner's shell.
+- **Bug found while porting.** The Corner Brief (newer than the safety branch)
+  called `buildDailySnapshot` with an age but no screening, so with the new gate
+  every brief would have said "finish Fuel setup". `buildDailySnapshot` now takes
+  the Fuel draft (`fuelDraft:`) and derives age and screening from it, so no
+  caller can pass one and forget the other. The free Corner Brief line also sends
+  a clinical flag (`needsProfessionalReview`) to a professional, as the Pro brief
+  does. Two Corner Brief tests had no age and only passed because of the old bug;
+  they now build a confirmed adult.
+
+**Verified locally:** format and analyze clean; 908 Flutter tests and 3 goldens
+pass; functions 113/113 (`npm test`; the emulator suites run in CI). **Not
+verified:** prompt v9 against a live model, a real device or a browser look at
+the new Fight week note (the widget tests cover it at 320 px and 200% text), the
+four new German strings by a native speaker (`fightStepWeighInBodyNoRefuel`,
+`fightRefuelOff`, `fightWeekSourceSteps`, `fightPhaseWeighedIn`), and the
+deploy: merges do not deploy, so prompt v9 is not live until the backend is
+deployed by hand (see the 2026-09-30 section).
+
+**Owner steps.** (1) A qualified sports dietitian or clinician reviews
+`weight_cut_policy.dart` and the fight-week and refuel wording; only then build
+with `FIGHT_WEEK_REFUEL=true`. (2) The German friend reads the four new strings.
+(3) Carried over, none started: AdMob setup (app, rewarded unit, callback URL
+`https://us-central1-fighter-edge-app.cloudfunctions.net/admobRewardCallback`, GDPR
+message, `ADMOB_APP_ID` and the unit-ID define, Play "contains ads" and Data
+safety answers); a Firestore TTL policy on `adRewardTokens.expiresAt`; the Groq
+and OpenRouter data agreements and the 48 `TODO(owner)` placeholders in the
+hosted legal pages; a live check of a Pro Corner Brief through Groq; real
+photography and a login image without the watermark.
+
+**Still open from the 2026-09-28 launch audit, checked on `main` today:** PLAY-1
+(no in-app way to report an AI answer), LEGAL-1 (48 placeholders), SCALE-3 (each
+model call has its own 25 s timeout and no request-wide deadline), SAFE-3 (see
+the review above). The rest of that list was not re-checked.
+
+**Worth knowing.** Settings > Safety > "Safe cut guidance" is a stored switch
+that nothing reads (`AppState.safeCutGuidance`): turning it off changes no
+guidance. Decide whether to remove it or wire it to something. PR #18 (Dependabot,
+`purchases_flutter` 10.12.0 to 10.13.2) is untouched and needs its own review.
+Local-only work that is not on GitHub: branch `feat/tutorial-written-first`
+(`e5d1d3c`, the tutorial library written-first) and uncommitted request-deadline
+changes in the `FighterEdge-launch-audit` checkout. The owner's own checkout is on
+the already-merged `feat/ai-eval-and-camp-domain` with uncommitted files; leave
+them alone and work in a separate worktree off `main`.
+
+## State as of 2026-09-30 (still accurate unless the section above says otherwise)
 
 **Everything below is merged into `main` (2026-09-30) and the backend was
 deployed by hand the same day** (`firebase deploy --only functions,firestore:rules`

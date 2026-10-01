@@ -181,11 +181,8 @@ class _CoachBodyState extends State<_CoachBody> {
     // from a stale training week, weight trend or fight-camp day.
     final appState = context.watch<AppState>();
     final fightCamp = context.watch<FightCampController>();
-    DailySnapshot today() => buildDailySnapshot(
-          appState,
-          fightCamp,
-          ageYears: edgeFuel.draft?.ageYears,
-        );
+    DailySnapshot today() =>
+        buildDailySnapshot(appState, fightCamp, fuelDraft: edgeFuel.draft);
 
     return Column(
       children: [

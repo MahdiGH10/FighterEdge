@@ -1,5 +1,6 @@
 import 'package:fighter_edge/features/daily_snapshot/domain/daily_snapshot.dart';
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
+import 'package:fighter_edge/features/fight_camp/domain/camp_screening.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_week_plan.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
@@ -59,6 +60,8 @@ DailySnapshot build({
       nutritionDays: nutritionDays,
       weights: weights,
       camp: camp,
+      ageYears: 30,
+      screening: CampScreening.cleared,
     );
 
 void main() {
@@ -136,6 +139,8 @@ void main() {
       nutritionDays: nutritionDays,
       weights: weights,
       camp: camp,
+      ageYears: 30,
+      screening: CampScreening.cleared,
     );
     expect(snapshot.camp!.todaySteps,
         [FightWeekStep.lowFibre, FightWeekStep.lowerCarbs]);
@@ -143,6 +148,40 @@ void main() {
     expect(json['phase'], 'fightWeek');
     expect(json['fightWeekCut'], 'lowFibreAndCarbs');
     expect(json['todaySteps'], ['lowFibre', 'lowerCarbs']);
+  });
+
+  test('the refuel step reaches the AI only when refuel guidance is on', () {
+    final camp = FightCamp.tryCreate(
+      fightDate: addDays(today, 1),
+      weighInDate: today,
+      weightLimitKg: 73.5,
+      category: CompetitionCategory.professional,
+    )!;
+    // Weigh-in day, 74.0 kg trend: under 1% to lose, food only.
+    DailySnapshot onWeighInDay({bool? refuelGuidance}) => DailySnapshot.build(
+          today: today,
+          training: training,
+          plannedSessionsPerWeek: 4,
+          goal: goal,
+          nutritionDays: nutritionDays,
+          weights: [
+            WeightPoint(addDays(today, -1), 74.2),
+            WeightPoint(today, 73.8),
+          ],
+          camp: camp,
+          ageYears: 30,
+          screening: CampScreening.cleared,
+          refuelGuidance: refuelGuidance ?? false,
+        );
+
+    final off = onWeighInDay();
+    expect(off.camp!.fightWeekCut, FightWeekCut.lowFibre);
+    expect(off.camp!.todaySteps, [FightWeekStep.weighIn]);
+    expect((off.toJson()['camp'] as Map)['todaySteps'], ['weighIn']);
+
+    final on = onWeighInDay(refuelGuidance: true);
+    expect(on.camp!.todaySteps, [FightWeekStep.weighIn, FightWeekStep.refuel]);
+    expect((on.toJson()['camp'] as Map)['todaySteps'], ['weighIn', 'refuel']);
   });
 
   test('no fight-week plan for a minor', () {
@@ -164,6 +203,28 @@ void main() {
     expect(snapshot.camp!.fightWeekCut, isNull);
     expect(snapshot.camp!.todaySteps, isEmpty);
     expect((snapshot.toJson()['camp'] as Map)['todaySteps'], isEmpty);
+  });
+
+  test('AI snapshot has no camp prescription without confirmed screening', () {
+    final camp = FightCamp.tryCreate(
+      fightDate: addDays(today, 4),
+      weighInDate: addDays(today, 3),
+      weightLimitKg: 73.5,
+      category: CompetitionCategory.professional,
+    )!;
+    final snapshot = DailySnapshot.build(
+      today: today,
+      training: training,
+      plannedSessionsPerWeek: 4,
+      goal: goal,
+      nutritionDays: nutritionDays,
+      weights: [WeightPoint(today, 75)],
+      camp: camp,
+    );
+    final facts = snapshot.toJson()['camp'] as Map<String, Object?>;
+    expect(facts['weightPathStatus'], 'needsScreening');
+    expect(facts['fightWeekCut'], isNull);
+    expect(facts['todaySteps'], isEmpty);
   });
 
   test('without a recent weigh-in the path asks for data', () {

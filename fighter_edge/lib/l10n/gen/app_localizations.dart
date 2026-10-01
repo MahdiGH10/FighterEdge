@@ -2455,6 +2455,24 @@ abstract class L {
   /// **'Log a weigh-in this week to see your path.'**
   String get fightPathNeedsWeight;
 
+  /// No description provided for @fightPathNeedsScreening.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Fuel setup to confirm adult eligibility and health screening before viewing weight guidance.'**
+  String get fightPathNeedsScreening;
+
+  /// No description provided for @fightPathStartScreening.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Fuel setup'**
+  String get fightPathStartScreening;
+
+  /// No description provided for @fightPathProfessionalReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your health answers need review by a qualified clinician or sports dietitian. Fighter Edge cannot plan a weight cut for you.'**
+  String get fightPathProfessionalReview;
+
   /// No description provided for @fightPathAdultsOnly.
   ///
   /// In en, this message translates to:
@@ -2532,6 +2550,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Weighed in: refuel'**
   String get fightPhaseRefuel;
+
+  /// No description provided for @fightPhaseWeighedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighed in'**
+  String get fightPhaseWeighedIn;
 
   /// No description provided for @fightPhaseFightDay.
   ///
@@ -2743,6 +2767,12 @@ abstract class L {
   /// **'Start your refuel straight after.'**
   String get fightStepWeighInBody;
 
+  /// No description provided for @fightStepWeighInBodyNoRefuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weigh in. Afterwards, follow your coach\'s or dietitian\'s advice.'**
+  String get fightStepWeighInBodyNoRefuel;
+
   /// No description provided for @fightStepRefuel.
   ///
   /// In en, this message translates to:
@@ -2844,6 +2874,18 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Steps and targets from the International Society of Sports Nutrition (2025).'**
   String get fightWeekSource;
+
+  /// No description provided for @fightWeekSourceSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps from the International Society of Sports Nutrition (2025).'**
+  String get fightWeekSourceSteps;
+
+  /// No description provided for @fightRefuelOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuel targets are not in this version. A sports dietitian has to review them first.'**
+  String get fightRefuelOff;
 
   /// No description provided for @cornerBriefTitle.
   ///

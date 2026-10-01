@@ -100,6 +100,7 @@ Widget wrapApp(
   Telemetry telemetry = const NoopTelemetry(),
   ConsentController? consent,
   FightCampRepository? fightCampRepo,
+  bool refuelGuidance = false,
   RewardedAdGateway rewardedAds = const UnavailableRewardedAdGateway(),
   RewardTicketGateway rewardTickets = const UnavailableRewardTicketGateway(),
   Duration rewardPollInterval = Duration.zero,
@@ -154,9 +155,12 @@ Widget wrapApp(
       ),
       Provider<FightCampRepository>.value(value: resolvedFightCampRepo),
       ChangeNotifierProxyProvider<AuthController, FightCampController>(
-        create: (_) => FightCampController(repository: resolvedFightCampRepo),
+        create: (_) => FightCampController(
+            repository: resolvedFightCampRepo, refuelGuidance: refuelGuidance),
         update: (_, auth, controller) => (controller ??
-            FightCampController(repository: resolvedFightCampRepo))
+            FightCampController(
+                repository: resolvedFightCampRepo,
+                refuelGuidance: refuelGuidance))
           ..setUser(auth.user?.id),
       ),
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(

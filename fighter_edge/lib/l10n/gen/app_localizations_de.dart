@@ -1386,6 +1386,17 @@ class LDe extends L {
       'Trag diese Woche ein Gewicht ein, um deinen Weg zu sehen.';
 
   @override
+  String get fightPathNeedsScreening =>
+      'Schließe die Fuel-Einrichtung ab, um Alter und Gesundheit zu prüfen, bevor du Hinweise zum Gewicht erhältst.';
+
+  @override
+  String get fightPathStartScreening => 'Fuel-Einrichtung abschließen';
+
+  @override
+  String get fightPathProfessionalReview =>
+      'Deine Gesundheitsangaben müssen von einer qualifizierten medizinischen Fachperson oder Ernährungsfachkraft geprüft werden. Fighter Edge kann für dich keinen Gewichtsplan erstellen.';
+
+  @override
   String get fightPathAdultsOnly =>
       'Gewichtspläne gibt es nur für Erwachsene. Plane dein Gewicht mit deinem Coach.';
 
@@ -1442,6 +1453,9 @@ class LDe extends L {
 
   @override
   String get fightPhaseRefuel => 'Gewogen: jetzt auffüllen';
+
+  @override
+  String get fightPhaseWeighedIn => 'Gewogen';
 
   @override
   String get fightPhaseFightDay => 'Kampftag';
@@ -1573,6 +1587,10 @@ class LDe extends L {
       'Direkt danach mit dem Auffüllen beginnen.';
 
   @override
+  String get fightStepWeighInBodyNoRefuel =>
+      'Wiegen. Danach folge dem Rat deines Trainers oder deiner Ernährungsfachkraft.';
+
+  @override
   String get fightStepRefuel => 'Auffüllen';
 
   @override
@@ -1629,6 +1647,14 @@ class LDe extends L {
   @override
   String get fightWeekSource =>
       'Schritte und Ziele nach der International Society of Sports Nutrition (2025).';
+
+  @override
+  String get fightWeekSourceSteps =>
+      'Schritte nach der International Society of Sports Nutrition (2025).';
+
+  @override
+  String get fightRefuelOff =>
+      'Ziele fürs Auffüllen sind in dieser Version nicht enthalten. Eine Sporternährungsberatung muss sie erst prüfen.';
 
   @override
   String get cornerBriefTitle => 'Ecken-Briefing';

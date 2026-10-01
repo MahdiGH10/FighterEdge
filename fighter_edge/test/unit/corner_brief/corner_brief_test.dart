@@ -7,6 +7,7 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
+import 'package:fighter_edge/features/fight_camp/domain/camp_screening.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_week_plan.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
@@ -25,11 +26,15 @@ final _target = NutritionTarget(
   fatGrams: 70,
 );
 
+/// An adult with finished Fuel setup, unless a test says otherwise: without
+/// both, the camp gives no weight path at all.
 DailySnapshot _snapshot({
   SessionKind? plannedToday,
   bool plannedTodayDone = false,
   FightCamp? camp,
   List<WeightPoint> weights = const [],
+  int? ageYears = 30,
+  CampScreening screening = CampScreening.cleared,
 }) =>
     DailySnapshot.build(
       today: _today,
@@ -41,6 +46,8 @@ DailySnapshot _snapshot({
       nutritionDays: const [],
       weights: weights,
       camp: camp,
+      ageYears: ageYears,
+      screening: screening,
     );
 
 NutritionDay _day({
@@ -210,6 +217,50 @@ void main() {
         day: _proteinGap(),
       );
       expect(line, const CornerLine(CornerCue.seeProfessional));
+    });
+
+    test('a health review also comes before any food cue', () {
+      final camp = FightCamp.tryCreate(
+        fightDate: addDays(_today, 40),
+        weighInDate: addDays(_today, 39),
+        weightLimitKg: 73.5,
+        category: CompetitionCategory.professional,
+      )!;
+      final snapshot = _snapshot(
+        camp: camp,
+        weights: [WeightPoint(_today, 80)],
+        screening: CampScreening.needsProfessionalReview,
+      );
+      expect(snapshot.camp!.weightPath.status,
+          WeightPathStatus.needsProfessionalReview);
+      final line = CornerBriefCalculator.line(
+        today: snapshot,
+        target: _target,
+        day: _proteinGap(),
+      );
+      expect(line, const CornerLine(CornerCue.seeProfessional));
+    });
+
+    test('unfinished setup is not a reason to send anyone to a professional',
+        () {
+      final camp = FightCamp.tryCreate(
+        fightDate: addDays(_today, 40),
+        weighInDate: addDays(_today, 39),
+        weightLimitKg: 73.5,
+        category: CompetitionCategory.professional,
+      )!;
+      final snapshot = _snapshot(
+        camp: camp,
+        weights: [WeightPoint(_today, 80)],
+        screening: CampScreening.pending,
+      );
+      expect(snapshot.camp!.weightPath.status, WeightPathStatus.needsScreening);
+      final line = CornerBriefCalculator.line(
+        today: snapshot,
+        target: _target,
+        day: _proteinGap(),
+      );
+      expect(line.cue, CornerCue.protein);
     });
   });
 

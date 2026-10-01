@@ -13,12 +13,14 @@ import '../../../../theme/app_typography.dart';
 import '../../../../widgets/grouped_list.dart';
 import '../../../../widgets/stat_card.dart';
 import '../../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../../../edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../../domain/fight_camp.dart';
 import '../../domain/fight_week_plan.dart';
 import '../../domain/weight_path.dart';
 import '../../domain/weight_trend.dart';
 import '../fight_camp_controller.dart';
 import '../fight_camp_copy.dart';
+import '../camp_screening_from_draft.dart';
 import '../screens/fight_path_screen.dart';
 import '../screens/fight_setup_screen.dart';
 import '../screens/fight_week_screen.dart';
@@ -41,6 +43,12 @@ void openFightWeek(BuildContext context) => AppNavigation.push<void>(
       fallbackBuilder: (_) => const FightWeekScreen(),
     );
 
+void openCampScreening(BuildContext context) => AppNavigation.push<void>(
+      context,
+      AppRoutes.fuelSetup,
+      fallbackBuilder: (_) => const EdgeFuelSetupScreen(),
+    );
+
 /// From fight week on, the days matter more than the weekly path.
 bool opensFightWeek(CampPhase phase) =>
     phase == CampPhase.fightWeek || phase == CampPhase.refuel;
@@ -53,20 +61,25 @@ class FightCountdownSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final camp = context.watch<FightCampController>().camp;
+    final fights = context.watch<FightCampController>();
+    final camp = fights.camp;
     final state = context.watch<AppState>();
     if (camp == null || camp.daysToFight(state.now) < 0) {
       return const SizedBox.shrink();
     }
     final l = L.of(context);
-    final copy =
-        FightCampCopy(l, state, Localizations.localeOf(context).toString());
-    final ageYears = context.watch<EdgeFuelController>().draft?.ageYears;
+    final copy = FightCampCopy(
+        l, state, Localizations.localeOf(context).toString(),
+        refuelGuidance: fights.refuelGuidance);
+    final fuelDraft = context.watch<EdgeFuelController>().draft;
+    final ageYears = fuelDraft?.ageYears;
+    final screening = campScreeningFromDraft(fuelDraft);
     final status = FightCampStatus.of(
       camp,
       weights: state.weights,
       today: state.now,
       ageYears: ageYears,
+      screening: screening,
     );
     final todaySteps = opensFightWeek(status.phase)
         ? FightWeekPlan.plan(
@@ -76,6 +89,8 @@ class FightCountdownSection extends StatelessWidget {
               ],
               today: state.now,
               ageYears: ageYears,
+              screening: screening,
+              refuelGuidance: fights.refuelGuidance,
             )?.dayOn(state.now)?.steps ??
             const <FightWeekStep>[]
         : const <FightWeekStep>[];
@@ -121,12 +136,18 @@ class FightCountdownCard extends StatelessWidget {
     final dateLine = l.fightNight(copy.date(camp.fightDate));
     final phaseLine = copy.phaseLine(status, today);
     final warning = status.path.status == WeightPathStatus.needsSupervision ||
+        status.path.status == WeightPathStatus.needsProfessionalReview ||
         status.path.status == WeightPathStatus.notSafe;
-    final pathLine = todaySteps.isEmpty || warning
-        ? copy.pathLine(status.path)
+    // After the weigh-in the path has nothing left to say, and its "log a
+    // weigh-in" prompt would be wrong. With no step to show either, say nothing.
+    final weighedIn = status.phase == CampPhase.refuel &&
+        status.path.status == WeightPathStatus.needsMoreData;
+    final String? pathLine = todaySteps.isEmpty || warning
+        ? (weighedIn ? null : copy.pathLine(status.path))
         : l.fightTodaySteps(todaySteps.map(copy.stepTitle).join(' · '));
     final tone = switch (status.path.status) {
       WeightPathStatus.needsSupervision => AppColors.warning,
+      WeightPathStatus.needsProfessionalReview => AppColors.warning,
       WeightPathStatus.notSafe => AppColors.negative,
       _ => AppAccessibility.textSecondary(context),
     };
@@ -134,7 +155,7 @@ class FightCountdownCard extends StatelessWidget {
       dateLine,
       if (days > 0) '$days ${l.fightDaysToGo(days)}',
       phaseLine,
-      pathLine,
+      if (pathLine != null) pathLine,
       // Where the tap goes.
       opensFightWeek(status.phase) ? l.fightWeekTitle : l.fightPathScreenTitle,
     ].join('. ');
@@ -187,8 +208,10 @@ class FightCountdownCard extends StatelessWidget {
                 current: camp.campWeekOn(today) ?? 0,
               ),
             ],
-            const SizedBox(height: Insets.md),
-            Text(pathLine, style: AppType.callout(color: tone)),
+            if (pathLine != null) ...[
+              const SizedBox(height: Insets.md),
+              Text(pathLine, style: AppType.callout(color: tone)),
+            ],
           ],
         ),
       ),

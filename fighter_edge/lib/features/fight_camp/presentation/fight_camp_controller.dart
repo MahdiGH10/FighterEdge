@@ -6,6 +6,7 @@ import '../../../models/weight_entry.dart';
 import '../../../observability/error_reporter.dart';
 import '../data/fight_camp_repository.dart';
 import '../domain/fight_camp.dart';
+import '../domain/camp_screening.dart';
 import '../domain/weight_path.dart';
 import '../domain/weight_trend.dart';
 
@@ -18,11 +19,22 @@ class FightCampController extends ChangeNotifier {
   FightCampController({
     required FightCampRepository repository,
     ErrorReporter errorReporter = const NoopErrorReporter(),
+    bool? refuelGuidance,
   })  : _repository = repository,
-        _errorReporter = errorReporter;
+        _errorReporter = errorReporter,
+        refuelGuidance =
+            refuelGuidance ?? const bool.fromEnvironment('FIGHT_WEEK_REFUEL');
 
   final FightCampRepository _repository;
   final ErrorReporter _errorReporter;
+
+  /// Whether fight week shows refuel steps and targets (and the AI coach is
+  /// told about them). Off unless a build sets
+  /// `--dart-define=FIGHT_WEEK_REFUEL=true`: the refuel numbers have not been
+  /// reviewed by a qualified sports dietitian yet (launch audit SAFE-2/3), so
+  /// no build that reaches testers shows them. Every surface reads this one
+  /// value, so the screens and the AI never disagree.
+  final bool refuelGuidance;
   StreamSubscription<FightCamp?>? _sub;
   String? _userId;
   FightCamp? _camp;
@@ -116,6 +128,7 @@ class FightCampStatus {
     required List<WeightEntry> weights,
     required DateTime today,
     int? ageYears,
+    CampScreening screening = CampScreening.pending,
   }) {
     final trend = WeightTrend.from(
       [for (final w in weights) WeightPoint(w.date, w.kg)],
@@ -132,6 +145,7 @@ class FightCampStatus {
         camp: camp,
         today: today,
         ageYears: ageYears,
+        screening: screening,
       ),
     );
   }

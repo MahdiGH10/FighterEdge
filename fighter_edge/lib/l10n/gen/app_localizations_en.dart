@@ -1380,6 +1380,17 @@ class LEn extends L {
       'Log a weigh-in this week to see your path.';
 
   @override
+  String get fightPathNeedsScreening =>
+      'Complete Fuel setup to confirm adult eligibility and health screening before viewing weight guidance.';
+
+  @override
+  String get fightPathStartScreening => 'Complete Fuel setup';
+
+  @override
+  String get fightPathProfessionalReview =>
+      'Your health answers need review by a qualified clinician or sports dietitian. Fighter Edge cannot plan a weight cut for you.';
+
+  @override
   String get fightPathAdultsOnly =>
       'Weight cut plans are for adults. Plan your weight with your coach.';
 
@@ -1436,6 +1447,9 @@ class LEn extends L {
 
   @override
   String get fightPhaseRefuel => 'Weighed in: refuel';
+
+  @override
+  String get fightPhaseWeighedIn => 'Weighed in';
 
   @override
   String get fightPhaseFightDay => 'Fight day';
@@ -1563,6 +1577,10 @@ class LEn extends L {
   String get fightStepWeighInBody => 'Start your refuel straight after.';
 
   @override
+  String get fightStepWeighInBodyNoRefuel =>
+      'Weigh in. Afterwards, follow your coach\'s or dietitian\'s advice.';
+
+  @override
   String get fightStepRefuel => 'Refuel';
 
   @override
@@ -1618,6 +1636,14 @@ class LEn extends L {
   @override
   String get fightWeekSource =>
       'Steps and targets from the International Society of Sports Nutrition (2025).';
+
+  @override
+  String get fightWeekSourceSteps =>
+      'Steps from the International Society of Sports Nutrition (2025).';
+
+  @override
+  String get fightRefuelOff =>
+      'Refuel targets are not in this version. A sports dietitian has to review them first.';
 
   @override
   String get cornerBriefTitle => 'Corner Brief';
