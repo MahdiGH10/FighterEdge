@@ -194,6 +194,7 @@ class _CornerBriefCardState extends State<CornerBriefCard> {
             const SizedBox(width: Insets.sm),
             Expanded(
               child: Semantics(
+                container: true,
                 header: true,
                 child: Text(l.cornerBriefTitle,
                     style: AppType.micro(
