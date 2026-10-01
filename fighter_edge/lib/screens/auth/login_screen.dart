@@ -1,4 +1,5 @@
 import '../../theme/app_accessibility.dart';
+import '../../auth/password_policy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -30,17 +31,44 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
   bool _obscure = true;
+  bool _attempted = false;
+
+  String? get _emailError {
+    if (!_attempted || validateEmailAddress(_email.text) == null) return null;
+    final l = L.of(context);
+    return _email.text.trim().isEmpty
+        ? l.authEmailRequired
+        : l.authEmailIncomplete;
+  }
+
+  String? get _passwordError => _attempted && _password.text.isEmpty
+      ? L.of(context).authPasswordRequired
+      : null;
+
+  void _updateValidation(String _) {
+    if (_attempted) setState(() {});
+  }
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
   Future<void> _signIn() async {
     final auth = context.read<AuthController>();
+    if (auth.isBusy) return;
+    setState(() => _attempted = true);
+    if (_emailError != null || _passwordError != null) {
+      (_emailError != null ? _emailFocus : _passwordFocus).requestFocus();
+      return;
+    }
     try {
       await auth.signIn(_email.text, _password.text);
       // Tells the password manager the sign-in worked, so it offers to save
@@ -122,7 +150,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             AppTextField(
                               controller: _email,
+                              focusNode: _emailFocus,
                               label: l.authEmail,
+                              errorText: _emailError,
+                              multilineError: true,
+                              onChanged: _updateValidation,
                               icon: AppIcons.envelopeSimple,
                               keyboardType: TextInputType.emailAddress,
                               autofillHints: const [
@@ -133,7 +165,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: Insets.md),
                             AppTextField(
                               controller: _password,
+                              focusNode: _passwordFocus,
                               label: l.authPassword,
+                              errorText: _passwordError,
+                              multilineError: true,
+                              onChanged: _updateValidation,
                               icon: AppIcons.lockSimple,
                               obscure: _obscure,
                               autofillHints: const [AutofillHints.password],

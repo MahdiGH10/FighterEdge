@@ -1477,6 +1477,24 @@ abstract class L {
   /// **'Sign in to continue your camp'**
   String get authWelcomeBackSubtitle;
 
+  /// No description provided for @authEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email.'**
+  String get authEmailRequired;
+
+  /// No description provided for @authEmailIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'That email looks incomplete.'**
+  String get authEmailIncomplete;
+
+  /// No description provided for @authPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password.'**
+  String get authPasswordRequired;
+
   /// No description provided for @authEmail.
   ///
   /// In en, this message translates to:
