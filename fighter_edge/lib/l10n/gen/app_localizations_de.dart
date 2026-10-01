@@ -812,6 +812,15 @@ class LDe extends L {
   String get authWelcomeBackSubtitle => 'Melde dich an und mach im Camp weiter';
 
   @override
+  String get authEmailRequired => 'Gib deine E-Mail-Adresse ein.';
+
+  @override
+  String get authEmailIncomplete => 'Die E-Mail-Adresse ist unvollständig.';
+
+  @override
+  String get authPasswordRequired => 'Gib dein Passwort ein.';
+
+  @override
   String get authEmail => 'E-Mail';
 
   @override

@@ -345,6 +345,9 @@
 
   "authWelcomeBack": "Welcome back",
   "authWelcomeBackSubtitle": "Sign in to continue your camp",
+  "authEmailRequired": "Enter your email.",
+  "authEmailIncomplete": "That email looks incomplete.",
+  "authPasswordRequired": "Enter your password.",
   "authEmail": "Email",
   "authPassword": "Password",
   "authSignIn": "Sign In",

@@ -808,6 +808,15 @@ class LEn extends L {
   String get authWelcomeBackSubtitle => 'Sign in to continue your camp';
 
   @override
+  String get authEmailRequired => 'Enter your email.';
+
+  @override
+  String get authEmailIncomplete => 'That email looks incomplete.';
+
+  @override
+  String get authPasswordRequired => 'Enter your password.';
+
+  @override
   String get authEmail => 'Email';
 
   @override

@@ -287,6 +287,9 @@
 
   "authWelcomeBack": "Willkommen zurück",
   "authWelcomeBackSubtitle": "Melde dich an und mach im Camp weiter",
+  "authEmailRequired": "Gib deine E-Mail-Adresse ein.",
+  "authEmailIncomplete": "Die E-Mail-Adresse ist unvollständig.",
+  "authPasswordRequired": "Gib dein Passwort ein.",
   "authEmail": "E-Mail",
   "authPassword": "Passwort",
   "authSignIn": "Anmelden",
