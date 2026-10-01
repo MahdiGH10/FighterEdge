@@ -8,8 +8,9 @@ next to the old `AD_ID` removal. All 7 checks passed; the emulator job stalled
 once at its 35-minute limit (the known flake) and passed on the re-run. A test
 APK built from that CI run is debug-signed, so Google Play will not accept it.
 
-**This slice (branch `fix/camp-safety-gate`): the camp safety gate, a refuel
-switch, and two Corner Brief fixes.**
+**Merged today: PR #27** (`caae6be`, branch `fix/camp-safety-gate`): the camp
+safety gate, a refuel switch, and two Corner Brief fixes. All 7 checks passed on
+the first run (the emulator job took about 10 minutes).
 
 - **Safety gate (launch audit SAFE-1 and SAFE-2).** Ported from
   `fix/camp-safety-eligibility`, which only ever existed in the
@@ -19,6 +20,10 @@ switch, and two Corner Brief fixes.**
   (`needsScreening`, `needsProfessionalReview`, `notSupported`) and point to Fuel
   setup or a professional. Missing weight, unsafe and supervised routes get no
   food or refuel prescription. Before this, a missing age returned `onTrack`.
+  **Limit:** the AI request still takes the camp facts from the client, so the
+  gate is not enforced on the server: a modified client could send `onTrack`.
+  The facts only steer an explanation, but do not treat the gate as a server
+  guarantee.
 - **Refuel switch (new).** `FightCampController.refuelGuidance`, turned on with
   `--dart-define=FIGHT_WEEK_REFUEL=true`, and **off in every build by default**
   (debug too). Off means: no refuel steps, no refuel targets, the weigh-in step no
@@ -52,14 +57,25 @@ switch, and two Corner Brief fixes.**
   does. Two Corner Brief tests had no age and only passed because of the old bug;
   they now build a confirmed adult.
 
-**Verified locally:** format and analyze clean; 908 Flutter tests and 3 goldens
-pass; functions 113/113 (`npm test`; the emulator suites run in CI). **Not
-verified:** prompt v9 against a live model, a real device or a browser look at
-the new Fight week note (the widget tests cover it at 320 px and 200% text), the
-four new German strings by a native speaker (`fightStepWeighInBodyNoRefuel`,
-`fightRefuelOff`, `fightWeekSourceSteps`, `fightPhaseWeighedIn`), and the
-deploy: merges do not deploy, so prompt v9 is not live until the backend is
-deployed by hand (see the 2026-09-30 section).
+**Verified:** format and analyze clean; 908 Flutter tests and 3 goldens pass;
+functions 113/113 (`npm test`); the CI coverage floor (82.2% against 80%); all 7
+CI checks green on #27.
+
+**Deployed by hand after the merge (2026-10-01):**
+`firebase deploy --only functions:edgeFuelAiExplain --project fighter-edge-app`
+with `FUNCTIONS_DISCOVERY_TIMEOUT=120`, from a worktree of `main` (a worktree has
+no `.firebaserc`, so `--project` is needed). Only `edgeFuelAiExplain` uses the
+prompt, so only it was updated; it now runs prompt v9. The deploy succeeded and
+`firebase functions:list` shows all seven functions on Node 22. It was **not
+exercised with a live signed-in request.** The deploy prints warnings that
+`ENFORCE_APP_CHECK.value()` is read during deployment. They come from existing
+code (`enforceAppCheck: ENFORCE_APP_CHECK` in `index.ts`, untouched by #27) and
+mean the value is fixed at deploy time, so changing it needs a redeploy.
+
+**Not verified:** prompt v9 against a live model, a real device or a browser look
+at the new Fight week note (the widget tests cover it at 320 px and 200% text),
+and the four new German strings by a native speaker (`fightStepWeighInBodyNoRefuel`,
+`fightRefuelOff`, `fightWeekSourceSteps`, `fightPhaseWeighedIn`).
 
 **Owner steps.** (1) A qualified sports dietitian or clinician reviews
 `weight_cut_policy.dart` and the fight-week and refuel wording; only then build
