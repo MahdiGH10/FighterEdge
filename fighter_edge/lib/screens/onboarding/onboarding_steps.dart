@@ -4,6 +4,7 @@ import '../../theme/app_icons.dart';
 
 import '../../features/edge_fuel/domain/models/nutrition_enums.dart';
 import '../../features/edge_fuel/presentation/nutrition_copy.dart';
+import '../../theme/app_accessibility.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_typography.dart';
@@ -193,33 +194,38 @@ class BodyInputs extends StatelessWidget {
         ? 'Target milestone in kg'
         : 'Gain milestone in kg';
 
+    final ageField = AppTextField(
+      controller: age,
+      label: 'Age',
+      icon: AppIcons.cake,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+    );
+    final heightField = AppTextField(
+      controller: height,
+      label: 'Height cm',
+      icon: AppIcons.ruler,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [_decimalInput],
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: AppTextField(
-                controller: age,
-                label: 'Age',
-                icon: AppIcons.cake,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              ),
-            ),
-            const SizedBox(width: Insets.md),
-            Expanded(
-              child: AppTextField(
-                controller: height,
-                label: 'Height cm',
-                icon: AppIcons.ruler,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [_decimalInput],
-              ),
-            ),
-          ],
-        ),
+        // Half a narrow screen each at large text cut "Height cm" to "He...";
+        // one field per row gives every label the full width.
+        if (AppAccessibility.isLargeText(context)) ...[
+          ageField,
+          const SizedBox(height: Insets.md),
+          heightField,
+        ] else
+          Row(
+            children: [
+              Expanded(child: ageField),
+              const SizedBox(width: Insets.md),
+              Expanded(child: heightField),
+            ],
+          ),
         const SizedBox(height: Insets.md),
         AppTextField(
           controller: currentWeight,
