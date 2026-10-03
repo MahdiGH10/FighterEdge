@@ -2795,3 +2795,8 @@ A future Claude Code session should report all of the following honestly:
 The goal is a shippable, trustworthy combat-athlete product: useful for a free
 user, compelling enough for Pro, safe around nutrition guidance, honest about
 what is connected, and measurable in production.
+
+
+## UI review keyboard slice (2026-10-03)
+
+Branch ui-review/keyboard-activation, based on main 578c636, fixes KBD-01 from the UI review: every PressScale tap surface is now a tab stop, activates with Enter, numpad Enter and Space (once per press, not on key repeat), and draws a 2 px accent ring only while focus came from the keyboard. New token FocusTokens.ringWidth; optional PressScale.focusBorderRadius (FilterChips uses Radii.tile). Eleven new widget tests; format, l10n diff, analyze, the non-golden suite, the 80% coverage gate and the unchanged goldens are recorded in the PR. Not tested: a physical keyboard, switch control, TalkBack or VoiceOver. No copy, safety, domain or entitlement change. See docs/ui_review_20261001/DESIGN_KEYBOARD.md. Touching this file from several review branches conflicts at the end of the file; keep every section.
