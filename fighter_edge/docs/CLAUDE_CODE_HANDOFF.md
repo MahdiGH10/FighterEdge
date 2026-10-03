@@ -2795,3 +2795,12 @@ A future Claude Code session should report all of the following honestly:
 The goal is a shippable, trustworthy combat-athlete product: useful for a free
 user, compelling enough for Pro, safe around nutrition guidance, honest about
 what is connected, and measurable in production.
+
+
+## Release APK crashed on launch: root cause and fix (2026-10-03)
+
+The owner reported the latest sideloaded APK shows "Fighter Edge keeps stopping" (this is the real symptom the earlier "Distribution is still unresolved" note was missing). Reproduced on an Android 15 x86_64 emulator with the CI release APK (FighterEdgeV1.2.apk): the process dies before any Flutter code runs, in androidx.startup.InitializationProvider, with `Failed to create an instance of androidx.work.impl.WorkDatabase`. Cause: R8 keeps the class androidx.work.impl.WorkDatabase_Impl but strips its no-argument constructor, which Room calls by reflection. `apkanalyzer` shows WorkDatabase_Impl has no `<init>()` in both FighterEdgeV1.2.apk and FighterEdgeV2.apk. Debug builds do not shrink and CI never launches the release APK, so nothing caught it.
+
+Fix (branch fix/release-startup-crash): one narrow rule in android/app/proguard-rules.pro, `-keep class * extends androidx.room.RoomDatabase { <init>(); }`. Verified: a local release build with CI's flags (`--obfuscate --split-debug-info`, android-x64 only) has `WorkDatabase_Impl <init>()` in the dex, and the manifest class references are otherwise identical to the old APK. NOT verified: a launch of the fixed APK, because the emulator image could not be re-downloaded (the C: drive filled up). Install the next APK on a phone and report whether it opens. Uninstall the old one first (CI debug-signs each build with a different key).
+
+Follow-up worth doing: a CI step that installs and launches the release APK on the emulator job (today that job runs a debug build), so a shrinker regression fails a PR instead of a tester's phone.
