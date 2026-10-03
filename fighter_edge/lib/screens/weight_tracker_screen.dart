@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
 import '../theme/app_icons.dart';
 
@@ -309,20 +309,15 @@ class _WeightView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: Insets.xl),
-        Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                label: '7-day avg',
-                value: state.weights.isEmpty
-                    ? '—'
-                    : _fmt(state.sevenDayAverage, locale),
-                unit: state.weightUnitLabel,
-              ),
-            ),
-            const SizedBox(width: Insets.md),
-            Expanded(child: _GoalCard(state: state, goalKg: goalKg)),
-          ],
+        _StatPair(
+          first: StatCard(
+            label: '7-day avg',
+            value: state.weights.isEmpty
+                ? '—'
+                : _fmt(state.sevenDayAverage, locale),
+            unit: state.weightUnitLabel,
+          ),
+          second: _GoalCard(state: state, goalKg: goalKg),
         ),
         const SizedBox(height: Insets.xl),
         AppCard(
@@ -361,8 +356,33 @@ class _WeightChart extends StatelessWidget {
   final double? goalKg;
   const _WeightChart({required this.state, required this.goalKg});
 
+  /// How many date labels fit under the plot without touching.
+  ///
+  /// At most four. Labels are spaced evenly, and the end labels are pulled
+  /// inside the plot, so the usable span is the plot less one label width.
+  /// A narrow phone at large text fits three or even two, where four
+  /// printed over one another ("9/27" on "9/28").
+  static int dateLabelCount(BuildContext context, double width, int entries) {
+    final painter = TextPainter(
+      text: TextSpan(text: '00/00', style: AppType.micro()),
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final label = painter.width;
+    painter.dispose();
+    final plot = width - ChartTokens.valueAxis - label;
+    final fit = (plot / (label + Insets.sm)).floor() + 1;
+    return math.min(entries, fit.clamp(2, 4).toInt());
+  }
+
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => _chart(context, constraints.maxWidth),
+    );
+  }
+
+  Widget _chart(BuildContext context, double width) {
     final entries = state.weights;
     final goal = goalKg == null ? null : state.displayWeight(goalKg!);
     if (entries.length < 2) {
@@ -387,7 +407,7 @@ class _WeightChart extends StatelessWidget {
     // A handful of evenly spaced labels regardless of how many weigh-ins
     // there are: "every other" still crowded three weeks of daily entries
     // into unreadable overlap, where a few widely spaced dates read fine.
-    final labelCount = math.min(entries.length, 4);
+    final labelCount = dateLabelCount(context, width, entries.length);
     final labelled = <int>{
       for (var k = 0; k < labelCount; k++)
         (k * (entries.length - 1) / math.max(1, labelCount - 1)).round(),
@@ -421,7 +441,10 @@ class _WeightChart extends StatelessWidget {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: ChartTokens.dateAxis,
+              // Grows with the text size, so a 200% date label is not
+              // clipped by a fixed-height strip.
+              reservedSize:
+                  MediaQuery.textScalerOf(context).scale(ChartTokens.dateAxis),
               interval: 1,
               getTitlesWidget: (v, meta) {
                 final i = v.toInt();
@@ -511,6 +534,34 @@ class _HistoryRow extends StatelessWidget {
               style: AppType.callout(weight: FontWeight.w700)),
         ],
       ),
+    );
+  }
+}
+
+/// Two stat cards side by side, or one above the other at large text, where
+/// half a narrow screen breaks "EdgeFuel" mid-word.
+class _StatPair extends StatelessWidget {
+  final Widget first;
+  final Widget second;
+  const _StatPair({required this.first, required this.second});
+
+  @override
+  Widget build(BuildContext context) {
+    if (AppAccessibility.isLargeText(context)) {
+      return Column(
+        children: [
+          SizedBox(width: double.infinity, child: first),
+          const SizedBox(height: Insets.md),
+          SizedBox(width: double.infinity, child: second),
+        ],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(child: first),
+        const SizedBox(width: Insets.md),
+        Expanded(child: second),
+      ],
     );
   }
 }
