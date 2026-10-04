@@ -1801,6 +1801,10 @@ class LDe extends L {
   String get cornerTopicRecovery => 'Erholung';
 
   @override
+  String get deleteAccountFailed =>
+      'Dein Konto konnte nicht gelöscht werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
   String get syncNotSaved =>
       'Einige Änderungen wurden nicht in deinem Konto gespeichert.';
 

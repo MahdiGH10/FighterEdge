@@ -669,7 +669,8 @@
   "cornerTopicWeight": "Gewicht",
   "cornerTopicCamp": "Camp",
   "cornerTopicRecovery": "Erholung",
-  "syncNotSaved": "Einige Änderungen wurden nicht in deinem Konto gespeichert.",
+"deleteAccountFailed": "Dein Konto konnte nicht gelöscht werden. Prüfe deine Verbindung und versuche es erneut.",
+"syncNotSaved": "Einige Änderungen wurden nicht in deinem Konto gespeichert.",
   "syncRetry": "Erneut versuchen",
   "syncRetrying": "Wird erneut versucht …"
 }

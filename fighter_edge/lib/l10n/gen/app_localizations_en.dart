@@ -1782,6 +1782,10 @@ class LEn extends L {
   String get cornerTopicRecovery => 'Recovery';
 
   @override
+  String get deleteAccountFailed =>
+      'Couldn\'t delete your account. Check your connection and try again.';
+
+  @override
   String get syncNotSaved => 'Some changes weren\'t saved to your account.';
 
   @override

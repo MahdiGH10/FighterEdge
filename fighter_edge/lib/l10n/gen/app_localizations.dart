@@ -3121,6 +3121,12 @@ abstract class L {
   /// **'Recovery'**
   String get cornerTopicRecovery;
 
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete your account. Check your connection and try again.'**
+  String get deleteAccountFailed;
+
   /// No description provided for @syncNotSaved.
   ///
   /// In en, this message translates to:
