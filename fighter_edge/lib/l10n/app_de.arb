@@ -668,5 +668,6 @@
   "cornerTopicFuel": "Ernährung",
   "cornerTopicWeight": "Gewicht",
   "cornerTopicCamp": "Camp",
-  "cornerTopicRecovery": "Erholung"
+  "cornerTopicRecovery": "Erholung",
+  "deleteAccountFailed": "Dein Konto konnte nicht gelöscht werden. Prüfe deine Verbindung und versuche es erneut."
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../auth/auth_repository.dart';
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -20,12 +21,22 @@ Future<void> confirmAndDeleteAccount(BuildContext context) async {
 
   try {
     await context.read<AuthController>().deleteAccount();
-  } catch (e) {
+  } on AuthException catch (e) {
+    // Repository messages are already written for the athlete
+    // ("Sign in again before deleting", etc.).
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$e')),
-    );
+    _showFailure(context, e.message);
+  } catch (_) {
+    // Anything else is a raw exception; its text is not for the athlete.
+    if (!context.mounted) return;
+    _showFailure(context, L.of(context).deleteAccountFailed);
   }
+}
+
+void _showFailure(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message)),
+  );
 }
 
 /// Requires typing DELETE before the button enables — a deliberate speed

@@ -1799,4 +1799,8 @@ class LDe extends L {
 
   @override
   String get cornerTopicRecovery => 'Erholung';
+
+  @override
+  String get deleteAccountFailed =>
+      'Dein Konto konnte nicht gelöscht werden. Prüfe deine Verbindung und versuche es erneut.';
 }
