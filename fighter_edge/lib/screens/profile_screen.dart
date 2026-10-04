@@ -132,7 +132,8 @@ class ProfileScreen extends StatelessWidget {
         GroupedList(
           children: [
             _StatRow('Sessions completed', '${state.completedSessionCount}'),
-            _StatRow('Current streak', '$streakDays days'),
+            _StatRow('Current streak',
+                '$streakDays ${L.of(context).dashboardStatDays(streakDays)}'),
             _StatRow(
                 'Training days / week', '${user?.weeklyTrainingDays ?? 0}'),
           ],

@@ -755,5 +755,6 @@
   "cornerTopicFuel": "Fuel",
   "cornerTopicWeight": "Weight",
   "cornerTopicCamp": "Camp",
-  "cornerTopicRecovery": "Recovery"
+  "cornerTopicRecovery": "Recovery",
+  "deleteAccountFailed": "Couldn't delete your account. Check your connection and try again."
 }
