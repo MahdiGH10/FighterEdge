@@ -36,6 +36,15 @@ class Radii {
   static const double chip = 100;
 }
 
+/// Keyboard focus indication, drawn only when focus arrived by keyboard.
+class FocusTokens {
+  FocusTokens._();
+
+  /// Ring thickness around a focused control. Thick enough to see against a
+  /// card edge at a glance, thin enough not to crowd a 48dp target.
+  static const double ringWidth = 2;
+}
+
 /// Fixed illustrations and layout breakpoints, separate from spacing.
 class LayoutTokens {
   LayoutTokens._();

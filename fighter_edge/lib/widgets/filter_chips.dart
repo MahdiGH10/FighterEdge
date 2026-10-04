@@ -232,6 +232,7 @@ class _Chip extends StatelessWidget {
       label: label,
       child: PressScale(
         onTap: onTap,
+        focusBorderRadius: BorderRadius.circular(Radii.tile),
         // Moving between filters commits nothing — it deserves the lightest
         // tick, not the impact a button gets.
         haptic: AppHaptics.selection,
