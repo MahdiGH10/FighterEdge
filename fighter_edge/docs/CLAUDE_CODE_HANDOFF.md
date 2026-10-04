@@ -2795,8 +2795,3 @@ A future Claude Code session should report all of the following honestly:
 The goal is a shippable, trustworthy combat-athlete product: useful for a free
 user, compelling enough for Pro, safe around nutrition guidance, honest about
 what is connected, and measurable in production.
-
-
-## UI review reflow slice (2026-10-03)
-
-Branch ui-review/reflow-label-size, based on main 578c636, fixes the layout part of REFLOW-01 and REFLOW-02 from the UI review: chips, fuel plan and review macro cards, weight tracker stat cards and chart date labels, tab headers and the onboarding body fields now wrap, stack or scale at 320 px and 200% text instead of ending in "..." or breaking inside a word. Layout only: no copy, safety, domain or entitlement change. Fifteen new widget tests with real fonts (six fail on unchanged main). Left out on purpose: the Fuel setup body step (screening fields, owner reviews), long floating labels at 200% (needs an AppTextField pattern decision), and TYPE-01 (conflicts with PR #29 on adjacent lines). See docs/ui_review_20261001/DESIGN_REFLOW.md. Touching this file from several review branches conflicts at the end of the file; keep every section.
