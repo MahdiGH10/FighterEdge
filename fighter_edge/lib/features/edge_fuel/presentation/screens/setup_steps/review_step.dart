@@ -118,14 +118,10 @@ class _ReviewSuccess extends StatelessWidget {
           ),
         ),
         const SizedBox(height: Insets.md),
-        Row(
-          children: [
-            _MacroChip('Protein', target.proteinGrams, AppColors.protein),
-            const SizedBox(width: Insets.sm),
-            _MacroChip('Carbs', target.carbGrams, AppColors.carbs),
-            const SizedBox(width: Insets.sm),
-            _MacroChip('Fats', target.fatGrams, AppColors.fats),
-          ],
+        _MacroRow(
+          protein: target.proteinGrams,
+          carbs: target.carbGrams,
+          fats: target.fatGrams,
         ),
         const SizedBox(height: Insets.lg),
         AppCard(
@@ -205,6 +201,46 @@ class _ReviewSuccess extends StatelessWidget {
   }
 }
 
+/// Protein, carbs and fats side by side, or one per row at large text, where
+/// three narrow cards split their labels mid-word ("Protei" / "n").
+class _MacroRow extends StatelessWidget {
+  final int? protein;
+  final int? carbs;
+  final int? fats;
+  const _MacroRow({
+    required this.protein,
+    required this.carbs,
+    required this.fats,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = [
+      _MacroChip('Protein', protein, AppColors.protein),
+      _MacroChip('Carbs', carbs, AppColors.carbs),
+      _MacroChip('Fats', fats, AppColors.fats),
+    ];
+    if (AppAccessibility.isLargeText(context)) {
+      return Column(
+        children: [
+          for (var i = 0; i < chips.length; i++) ...[
+            if (i > 0) const SizedBox(height: Insets.sm),
+            SizedBox(width: double.infinity, child: chips[i]),
+          ],
+        ],
+      );
+    }
+    return Row(
+      children: [
+        for (var i = 0; i < chips.length; i++) ...[
+          if (i > 0) const SizedBox(width: Insets.sm),
+          Expanded(child: chips[i]),
+        ],
+      ],
+    );
+  }
+}
+
 class _MacroChip extends StatelessWidget {
   final String label;
   final int? grams;
@@ -213,24 +249,22 @@ class _MacroChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-            horizontal: Insets.sm, vertical: Insets.md),
-        child: Column(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-            const SizedBox(height: Insets.xs),
-            Text('${grams ?? 0} g', style: AppType.title2()),
-            Text(label,
-                style: AppType.micro(
-                    weight: FontWeight.w700, color: AppColors.textMuted)),
-          ],
-        ),
+    return AppCard(
+      padding: const EdgeInsets.symmetric(
+          horizontal: Insets.sm, vertical: Insets.md),
+      child: Column(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(height: Insets.xs),
+          Text('${grams ?? 0} g', style: AppType.title2()),
+          Text(label,
+              style: AppType.micro(
+                  weight: FontWeight.w700, color: AppColors.textMuted)),
+        ],
       ),
     );
   }
