@@ -109,7 +109,9 @@ void main() {
       final streakDays = StreakEngine.streakDays(
           StreakEngine.completedDateKeys(state.sessions),
           now: state.now);
-      expect(find.text('$streakDays days'), findsOneWidget);
+      // Singular for one day (the demo week's streak depends on the weekday).
+      expect(find.text('$streakDays ${streakDays == 1 ? 'day' : 'days'}'),
+          findsOneWidget);
       // Straight from the onboarding answer, not a constant.
       expect(find.text('Training days / week'), findsOneWidget);
       expect(find.text('6'), findsOneWidget);
