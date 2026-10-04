@@ -10,6 +10,7 @@ import '../../domain/models/food_log_entry.dart';
 import '../../domain/models/nutrition_setup_draft.dart';
 import '../../domain/models/nutrition_day.dart';
 import '../../domain/models/nutrition_target.dart';
+import '../../../../state/sync_tracker.dart';
 import 'food_memory.dart';
 
 /// Read-side access to a user's EdgeFuel profile/target, for screens outside
@@ -21,13 +22,20 @@ class EdgeFuelController extends ChangeNotifier {
     required EdgeFuelRepository repository,
     Telemetry telemetry = const NoopTelemetry(),
     ErrorReporter errorReporter = const NoopErrorReporter(),
+    SyncTracker? sync,
   })  : _repository = repository,
         _telemetry = telemetry,
-        _errorReporter = errorReporter;
+        _errorReporter = errorReporter,
+        _sync = sync;
 
   final EdgeFuelRepository _repository;
   final Telemetry _telemetry;
   final ErrorReporter _errorReporter;
+
+  /// Shared "not saved" state behind the notice on Home and Fuel. Optional
+  /// so the controller still works on its own in tests.
+  final SyncTracker? _sync;
+  static const _syncKey = 'nutrition-day';
   bool _lastSaveFailed = false;
 
   /// True when the most recent change could not be stored. Any later
@@ -310,6 +318,7 @@ class EdgeFuelController extends ChangeNotifier {
     notifyListeners();
     try {
       await _repository.saveNutritionDay(userId, day);
+      _sync?.markSaved(_syncKey);
       if (_lastSaveFailed) {
         _lastSaveFailed = false;
         if (!_disposed) notifyListeners();
@@ -318,9 +327,18 @@ class EdgeFuelController extends ChangeNotifier {
     } catch (error, stack) {
       _errorReporter.report(error, stack, reason: 'nutrition_day_save_failed');
       _lastSaveFailed = true;
+      // The retry stores the day as it is *then*, never this attempt's copy,
+      // so it cannot undo an entry added or removed in between.
+      _sync?.markFailed(_syncKey, _retrySaveDay);
       if (!_disposed) notifyListeners();
       return false;
     }
+  }
+
+  Future<bool> _retrySaveDay() async {
+    final day = _day;
+    if (day == null || _disposed) return true;
+    return _saveDay(day);
   }
 
   String _manualId() => 'food-${DateTime.now().microsecondsSinceEpoch}';

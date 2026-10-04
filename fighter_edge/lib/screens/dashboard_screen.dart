@@ -30,6 +30,7 @@ import '../widgets/number_hero.dart';
 import '../widgets/press_scale.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
+import '../widgets/sync_notice.dart';
 import '../widgets/grouped_list.dart';
 import '../widgets/weekly_overview.dart';
 import 'auth/verify_email_screen.dart';
@@ -79,6 +80,8 @@ class DashboardScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(
             Insets.lg, Insets.none, Insets.lg, Insets.xxl),
         children: [
+          // Only while a change was refused by the server.
+          const SyncNotice(),
           Text(
               user?.displayName.isNotEmpty == true
                   ? user!.displayName

@@ -1799,4 +1799,14 @@ class LDe extends L {
 
   @override
   String get cornerTopicRecovery => 'Erholung';
+
+  @override
+  String get syncNotSaved =>
+      'Einige Änderungen wurden nicht in deinem Konto gespeichert.';
+
+  @override
+  String get syncRetry => 'Erneut versuchen';
+
+  @override
+  String get syncRetrying => 'Wird erneut versucht …';
 }

@@ -668,5 +668,8 @@
   "cornerTopicFuel": "Ernährung",
   "cornerTopicWeight": "Gewicht",
   "cornerTopicCamp": "Camp",
-  "cornerTopicRecovery": "Erholung"
+  "cornerTopicRecovery": "Erholung",
+  "syncNotSaved": "Einige Änderungen wurden nicht in deinem Konto gespeichert.",
+  "syncRetry": "Erneut versuchen",
+  "syncRetrying": "Wird erneut versucht …"
 }

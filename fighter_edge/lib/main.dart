@@ -46,6 +46,7 @@ import 'l10n/gen/app_localizations.dart';
 import 'state/first_run_controller.dart';
 import 'state/locale_controller.dart';
 import 'state/streak_controller.dart';
+import 'state/sync_tracker.dart';
 import 'training/reaction/coach_voice.dart';
 import 'training/reaction/tts_coach_voice.dart';
 import 'theme/app_accessibility.dart';
@@ -290,10 +291,22 @@ class FighterEdgeApp extends StatelessWidget {
             errorReporter: errorReporter,
           ),
         ),
+        ChangeNotifierProvider(
+          create: (_) => SyncTracker(
+            errorReporter: errorReporter ?? const NoopErrorReporter(),
+          ),
+        ),
         ChangeNotifierProxyProvider<AuthController, AppState>(
-          create: (_) => AppState(dataRepository: dataRepo),
-          update: (_, auth, state) {
-            final appState = state ?? AppState(dataRepository: dataRepo);
+          create: (context) => AppState(
+            dataRepository: dataRepo,
+            sync: context.read<SyncTracker>(),
+          ),
+          update: (context, auth, state) {
+            final appState = state ??
+                AppState(
+                  dataRepository: dataRepo,
+                  sync: context.read<SyncTracker>(),
+                );
             appState.setUser(auth.user?.id);
             return appState;
           },
@@ -331,17 +344,19 @@ class FighterEdgeApp extends StatelessWidget {
             ..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
-          create: (_) => EdgeFuelController(
+          create: (context) => EdgeFuelController(
             repository: resolvedEdgeFuelRepo,
             telemetry: telemetry ?? const NoopTelemetry(),
             errorReporter: errorReporter ?? const NoopErrorReporter(),
+            sync: context.read<SyncTracker>(),
           ),
-          update: (_, auth, controller) {
+          update: (context, auth, controller) {
             final edgeFuel = controller ??
                 EdgeFuelController(
                   repository: resolvedEdgeFuelRepo,
                   telemetry: telemetry ?? const NoopTelemetry(),
                   errorReporter: errorReporter ?? const NoopErrorReporter(),
+                  sync: context.read<SyncTracker>(),
                 );
             edgeFuel.setUser(auth.user?.id);
             return edgeFuel;

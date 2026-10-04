@@ -32,6 +32,7 @@ import 'package:fighter_edge/observability/telemetry.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/state/first_run_controller.dart';
 import 'package:fighter_edge/state/streak_controller.dart';
+import 'package:fighter_edge/state/sync_tracker.dart';
 import 'package:fighter_edge/training/reaction/coach_voice.dart';
 import 'package:fighter_edge/privacy/consent.dart';
 import 'package:fighter_edge/privacy/data_consent.dart';
@@ -98,6 +99,7 @@ Widget wrapApp(
   ReminderGateway? reminderGateway,
   CoachVoice? coachVoice,
   Telemetry telemetry = const NoopTelemetry(),
+  SyncTracker? sync,
   ConsentController? consent,
   FightCampRepository? fightCampRepo,
   bool refuelGuidance = false,
@@ -124,6 +126,10 @@ Widget wrapApp(
       ChangeNotifierProvider(
         create: (_) => AuthController(repo, billingGateway: billingGateway),
       ),
+      if (sync case final sync?)
+        ChangeNotifierProvider<SyncTracker>.value(value: sync)
+      else
+        ChangeNotifierProvider(create: (_) => SyncTracker()),
       ChangeNotifierProvider(create: (_) => state ?? AppState()),
       Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
       Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
@@ -164,10 +170,14 @@ Widget wrapApp(
           ..setUser(auth.user?.id),
       ),
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
-        create: (_) => EdgeFuelController(repository: resolvedEdgeFuelRepo),
-        update: (_, auth, controller) {
+        create: (context) => EdgeFuelController(
+            repository: resolvedEdgeFuelRepo,
+            sync: context.read<SyncTracker>()),
+        update: (context, auth, controller) {
           final edgeFuel = controller ??
-              EdgeFuelController(repository: resolvedEdgeFuelRepo);
+              EdgeFuelController(
+                  repository: resolvedEdgeFuelRepo,
+                  sync: context.read<SyncTracker>());
           edgeFuel.setUser(auth.user?.id);
           return edgeFuel;
         },

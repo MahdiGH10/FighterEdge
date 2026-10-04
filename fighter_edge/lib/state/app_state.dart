@@ -12,12 +12,17 @@ import '../models/training_log_entry.dart';
 import '../models/training_session.dart';
 import '../models/weight_entry.dart';
 import 'streak_engine.dart';
+import 'sync_tracker.dart';
 
 /// Holds the mutable state for the three interactive features:
 /// weight tracking and nutrition. (The round timer keeps local state.)
 class AppState extends ChangeNotifier {
-  AppState({DataRepository? dataRepository, DateTime Function()? clock})
-      : _dataRepository = dataRepository,
+  AppState({
+    DataRepository? dataRepository,
+    DateTime Function()? clock,
+    SyncTracker? sync,
+  })  : _dataRepository = dataRepository,
+        _sync = sync ?? SyncTracker(),
         _clock = clock ?? DateTime.now,
         _weights = dataRepository == null ? MockData.seedWeights() : [],
         _meals = dataRepository == null ? MockData.seedMeals() : [],
@@ -29,6 +34,11 @@ class AppState extends ChangeNotifier {
   }
 
   final DataRepository? _dataRepository;
+
+  /// Where refused writes are recorded for the "not saved" notice. Every
+  /// write below goes through [SyncTracker.run] instead of being
+  /// fire-and-forget.
+  final SyncTracker _sync;
 
   /// Injected so tests can move through weeks without waiting for them.
   final DateTime Function() _clock;
@@ -74,6 +84,7 @@ class AppState extends ChangeNotifier {
 
   void setUser(String? userId) {
     if (_userId == userId) return;
+    _sync.clear();
     _userId = userId;
     _weightSub?.cancel();
     _mealSub?.cancel();
@@ -183,7 +194,8 @@ class AppState extends ChangeNotifier {
     final repo = _dataRepository;
     final userId = _userId;
     if (repo != null && userId != null) {
-      unawaited(repo.addWeight(userId, entry));
+      unawaited(_sync.run('weight-${entry.stableId}', 'weight_save_failed',
+          () => repo.addWeight(userId, entry)));
     }
     notifyListeners();
   }
@@ -254,7 +266,8 @@ class AppState extends ChangeNotifier {
     final repo = _dataRepository;
     final userId = _userId;
     if (repo != null && userId != null) {
-      unawaited(repo.saveMealsForDate(userId, _nutritionDate, _meals));
+      unawaited(_sync.run('meals', 'meals_save_failed',
+          () => repo.saveMealsForDate(userId, _nutritionDate, _meals)));
     }
     notifyListeners();
   }
@@ -264,7 +277,8 @@ class AppState extends ChangeNotifier {
     final repo = _dataRepository;
     final userId = _userId;
     if (repo != null && userId != null) {
-      unawaited(repo.saveMealsForDate(userId, _nutritionDate, _meals));
+      unawaited(_sync.run('meals', 'meals_save_failed',
+          () => repo.saveMealsForDate(userId, _nutritionDate, _meals)));
     }
     notifyListeners();
   }
@@ -341,7 +355,8 @@ class AppState extends ChangeNotifier {
       final repo = _dataRepository;
       final userId = _userId;
       if (repo != null && userId != null) {
-        unawaited(repo.deleteTrainingLogEntry(userId, existing.id));
+        unawaited(_sync.run('log-${existing.id}', 'training_log_delete_failed',
+            () => repo.deleteTrainingLogEntry(userId, existing.id)));
       }
       notifyListeners();
       return;
@@ -367,7 +382,8 @@ class AppState extends ChangeNotifier {
     final repo = _dataRepository;
     final userId = _userId;
     if (repo != null && userId != null) {
-      unawaited(repo.saveTrainingLogEntry(userId, entry));
+      unawaited(_sync.run('log-${entry.id}', 'training_log_save_failed',
+          () => repo.saveTrainingLogEntry(userId, entry)));
     }
     notifyListeners();
   }
@@ -505,7 +521,8 @@ class AppState extends ChangeNotifier {
       final entry = WeightEntry(DateTime.now(), startingWeightKg);
       _weights.add(entry);
       if (repo != null && userId != null) {
-        unawaited(repo.addWeight(userId, entry));
+        unawaited(_sync.run('weight-${entry.stableId}', 'weight_save_failed',
+            () => repo.addWeight(userId, entry)));
       }
     }
     _resortWeights();
@@ -514,9 +531,11 @@ class AppState extends ChangeNotifier {
     _sessions = sessions;
     if (repo != null && userId != null) {
       for (final session in sessions) {
-        unawaited(repo.saveSession(userId, session));
+        unawaited(_sync.run('session-${session.id}', 'session_save_failed',
+            () => repo.saveSession(userId, session)));
       }
-      unawaited(repo.saveMealsForDate(userId, _nutritionDate, const []));
+      unawaited(_sync.run('meals', 'meals_save_failed',
+          () => repo.saveMealsForDate(userId, _nutritionDate, const [])));
     }
     notifyListeners();
   }

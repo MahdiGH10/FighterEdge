@@ -1780,4 +1780,13 @@ class LEn extends L {
 
   @override
   String get cornerTopicRecovery => 'Recovery';
+
+  @override
+  String get syncNotSaved => 'Some changes weren\'t saved to your account.';
+
+  @override
+  String get syncRetry => 'Retry';
+
+  @override
+  String get syncRetrying => 'Retrying…';
 }

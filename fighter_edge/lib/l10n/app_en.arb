@@ -755,5 +755,8 @@
   "cornerTopicFuel": "Fuel",
   "cornerTopicWeight": "Weight",
   "cornerTopicCamp": "Camp",
-  "cornerTopicRecovery": "Recovery"
+  "cornerTopicRecovery": "Recovery",
+  "syncNotSaved": "Some changes weren't saved to your account.",
+  "syncRetry": "Retry",
+  "syncRetrying": "Retrying…"
 }
