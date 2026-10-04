@@ -36,6 +36,7 @@ import 'firebase_options.dart';
 import 'notifications/local_reminder_gateway.dart';
 import 'notifications/reminder_gateway.dart';
 import 'notifications/unavailable_reminder_gateway.dart';
+import 'observability/boot_failure.dart';
 import 'observability/error_reporter.dart';
 import 'observability/telemetry.dart';
 import 'privacy/consent.dart';
@@ -68,17 +69,38 @@ void main() {
 }
 
 class FighterEdgeBootstrap extends StatefulWidget {
-  const FighterEdgeBootstrap({super.key});
+  /// Builds every production service. Tests pass a fake to exercise the
+  /// failure screen without Firebase.
+  final Future<AppDependencies> Function() initialize;
+
+  const FighterEdgeBootstrap({
+    super.key,
+    this.initialize = _initializeProductionDependencies,
+  });
 
   @override
   State<FighterEdgeBootstrap> createState() => _FighterEdgeBootstrapState();
 }
 
 class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
-  late Future<AppDependencies> _boot = _initializeProductionDependencies();
+  late Future<AppDependencies> _boot = _start();
+
+  /// The FutureBuilder only listens on the next build. A step that fails
+  /// before then would surface as an uncaught zone error on top of the
+  /// failure screen, so the error is marked handled here; the builder still
+  /// receives it.
+  Future<AppDependencies> _start() {
+    final boot = widget.initialize();
+    boot.ignore();
+    return boot;
+  }
 
   void _retry() {
-    setState(() => _boot = _initializeProductionDependencies());
+    // A block body: an arrow would return the Future to setState, which
+    // asserts in debug builds.
+    setState(() {
+      _boot = _start();
+    });
   }
 
   @override
@@ -100,56 +122,74 @@ class _FighterEdgeBootstrapState extends State<FighterEdgeBootstrap> {
   }
 }
 
+/// Each step runs through [bootStep], so a failure leaves one line in the
+/// device log naming the step and the kind of error ("[boot] failed at
+/// firebase: missing_plugin"). The screen the athlete sees is unchanged.
 Future<AppDependencies> _initializeProductionDependencies() async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await bootStep(
+    BootStage.firebase,
+    () =>
+        Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+  );
   // Before the first callable request, so every AI call carries a token.
-  await activateAppCheck();
+  await bootStep(BootStage.appCheck, activateAppCheck);
   final crashlyticsSupported = !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.macOS);
   // Nothing is collected until the athlete decides (audit M-2). Collection
   // is also off natively, so the SDKs stay quiet until the choice applies.
-  final consent = ConsentController(
-    sink: kIsWeb
-        ? const NoopConsentSink()
-        : FirebaseConsentSink(crashlyticsSupported: crashlyticsSupported),
-  );
-  await consent.load();
-  final ErrorReporter errorReporter = crashlyticsSupported
-      ? ConsentGatedErrorReporter(FirebaseErrorReporter(), consent)
-      : const NoopErrorReporter();
-  if (crashlyticsSupported) {
-    installProductionErrorHandlers(errorReporter);
-  }
-  FirebaseFirestore.instance.settings = const Settings(
-    persistenceEnabled: true,
-  );
+  final consent = await bootStep(BootStage.consent, () async {
+    final consent = ConsentController(
+      sink: kIsWeb
+          ? const NoopConsentSink()
+          : FirebaseConsentSink(crashlyticsSupported: crashlyticsSupported),
+    );
+    await consent.load();
+    return consent;
+  });
+  final errorReporter = await bootStep(BootStage.errorHandlers, () {
+    final ErrorReporter reporter = crashlyticsSupported
+        ? ConsentGatedErrorReporter(FirebaseErrorReporter(), consent)
+        : const NoopErrorReporter();
+    if (crashlyticsSupported) {
+      installProductionErrorHandlers(reporter);
+    }
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+    );
+    return reporter;
+  });
 
   // Production auth via Firebase. (LocalAuthRepository remains available as an
   // offline/dev fallback — see docs/firebase_setup.md.)
-  final AuthRepository authRepo = FirebaseAuthRepository();
-  await authRepo.init();
+  final authRepo = await bootStep(BootStage.auth, () async {
+    final AuthRepository repo = FirebaseAuthRepository();
+    await repo.init();
+    return repo;
+  });
 
-  return AppDependencies(
-    authRepo: authRepo,
-    dataRepo: FirestoreDataRepository(),
-    edgeFuelRepo: FirestoreEdgeFuelRepository(),
-    fightCampRepo: FirestoreFightCampRepository(),
-    edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
-    billingGateway: RevenueCatBillingGateway(),
-    rewardedAds: kIsWeb
-        ? const UnavailableRewardedAdGateway()
-        : GoogleRewardedAdGateway(),
-    rewardTickets: FirebaseRewardTicketGateway(),
-    reminderGateway: LocalReminderGateway(),
-    coachVoice: TtsCoachVoice(),
-    telemetry: kIsWeb
-        ? const NoopTelemetry()
-        : ConsentGatedTelemetry(FirebaseTelemetry(), consent),
-    errorReporter: errorReporter,
-    consent: consent,
-  );
+  return bootStep(
+      BootStage.services,
+      () => AppDependencies(
+            authRepo: authRepo,
+            dataRepo: FirestoreDataRepository(),
+            edgeFuelRepo: FirestoreEdgeFuelRepository(),
+            fightCampRepo: FirestoreFightCampRepository(),
+            edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
+            billingGateway: RevenueCatBillingGateway(),
+            rewardedAds: kIsWeb
+                ? const UnavailableRewardedAdGateway()
+                : GoogleRewardedAdGateway(),
+            rewardTickets: FirebaseRewardTicketGateway(),
+            reminderGateway: LocalReminderGateway(),
+            coachVoice: TtsCoachVoice(),
+            telemetry: kIsWeb
+                ? const NoopTelemetry()
+                : ConsentGatedTelemetry(FirebaseTelemetry(), consent),
+            errorReporter: errorReporter,
+            consent: consent,
+          ));
 }
 
 /// Every production service the app is built from.
