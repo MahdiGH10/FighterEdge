@@ -271,6 +271,7 @@ class HeaderIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
       button: onTap != null,
       label: label,
       child: PressScale(

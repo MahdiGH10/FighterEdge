@@ -86,7 +86,9 @@ class GroupedRow extends StatelessWidget {
       child: onTap == null
           ? Semantics(container: true, child: content)
           : Semantics(
-              button: true, child: PressScale(onTap: onTap, child: content)),
+              container: true,
+              button: true,
+              child: PressScale(onTap: onTap, child: content)),
     );
   }
 }

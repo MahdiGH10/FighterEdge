@@ -32,6 +32,7 @@ class PrimaryButton extends StatelessWidget {
     final enabled = onPressed != null;
 
     return Semantics(
+      container: true,
       button: true,
       enabled: enabled,
       child: PressScale(
@@ -74,6 +75,7 @@ class GhostButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
       button: true,
       enabled: onPressed != null,
       child: PressScale(
