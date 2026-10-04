@@ -54,6 +54,9 @@ class _HomeShellState extends State<HomeShell> {
   }
 
   final _navKeys = List.generate(_navCount, (_) => GlobalKey());
+
+  /// Tabs built so far: built on first visit, then kept.
+  final _visited = <int>{};
   final _checklistKey = GlobalKey();
 
   late final EdgeFuelController _fuel;
@@ -150,22 +153,37 @@ class _HomeShellState extends State<HomeShell> {
     await _firstRun.markTourDone();
   }
 
+  Widget _page(int index) => switch (index) {
+        _homeTab => DashboardScreen(
+            onNavigate: _goToTab,
+            checklistKey: _checklistKey,
+            onStartTour: _startTour,
+          ),
+        _trainTab => const TrainingCampScreen(),
+        _fuelTab => const NutritionScreen(),
+        _ => const ProfileScreen(asTab: true),
+      };
+
   @override
   Widget build(BuildContext context) {
-    final activePage = switch (_index) {
-      _homeTab => DashboardScreen(
-          onNavigate: _goToTab,
-          checklistKey: _checklistKey,
-          onStartTour: _startTour,
-        ),
-      _trainTab => const TrainingCampScreen(),
-      _fuelTab => const NutritionScreen(),
-      _ => const ProfileScreen(asTab: true),
-    };
-
+    _visited.add(_index);
     return Scaffold(
-      // Tabs are peers: nothing slides, because nothing moved.
-      body: FadeThrough(switchKey: _index, child: activePage),
+      // Tabs are peers: nothing slides, because nothing moved. Every tab the
+      // athlete has opened stays mounted, so its scroll position, sub-tab and
+      // segment are still there on return; tabs never opened are not built,
+      // and hidden tabs have their tickers paused.
+      body: FadeThrough(
+        switchKey: _index,
+        child: IndexedStack(
+          index: _index,
+          children: [
+            for (var i = 0; i < _navCount; i++)
+              _visited.contains(i)
+                  ? TickerMode(enabled: i == _index, child: _page(i))
+                  : const SizedBox.shrink(),
+          ],
+        ),
+      ),
       bottomNavigationBar: AppBottomNav(
         items: _navItems(context),
         currentIndex: _index,
