@@ -2795,8 +2795,3 @@ A future Claude Code session should report all of the following honestly:
 The goal is a shippable, trustworthy combat-athlete product: useful for a free
 user, compelling enough for Pro, safe around nutrition guidance, honest about
 what is connected, and measurable in production.
-
-
-## UI review sign-in slice (2026-10-01)
-
-Branch ui-review/login-inline-validation adds EN/DE inline missing/incomplete sign-in errors, correction/focus behavior and opt-in multiline AppTextField errors. Legacy six-character sign-in and autofill are preserved. Five new widget cases, 913 non-golden tests, 82.3% coverage, format, l10n diff, analyze and three unchanged goldens pass. See docs/ui_review_20261001/DESIGN_LOGIN.md and LOGIN_VALIDATION.md. Firebase/native auth and physical screen readers were not tested; no readiness claim. Safety strings, domain and entitlements are unchanged.
