@@ -370,7 +370,9 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release-launch-logcat
-          path: fighter_edge/release-launch-logcat.txt
+          path: |
+            fighter_edge/release-launch-logcat.txt
+            fighter_edge/release-launch-crash.txt
           retention-days: 7
 
   ios-build:
