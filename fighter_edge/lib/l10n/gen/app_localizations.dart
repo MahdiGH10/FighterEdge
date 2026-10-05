@@ -3126,6 +3126,24 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Couldn\'t delete your account. Check your connection and try again.'**
   String get deleteAccountFailed;
+
+  /// No description provided for @syncNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Some changes weren\'t saved to your account.'**
+  String get syncNotSaved;
+
+  /// No description provided for @syncRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get syncRetry;
+
+  /// No description provided for @syncRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying…'**
+  String get syncRetrying;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

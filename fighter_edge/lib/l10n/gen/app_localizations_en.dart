@@ -1784,4 +1784,13 @@ class LEn extends L {
   @override
   String get deleteAccountFailed =>
       'Couldn\'t delete your account. Check your connection and try again.';
+
+  @override
+  String get syncNotSaved => 'Some changes weren\'t saved to your account.';
+
+  @override
+  String get syncRetry => 'Retry';
+
+  @override
+  String get syncRetrying => 'Retrying…';
 }

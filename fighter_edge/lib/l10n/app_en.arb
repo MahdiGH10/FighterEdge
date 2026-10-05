@@ -756,5 +756,8 @@
   "cornerTopicWeight": "Weight",
   "cornerTopicCamp": "Camp",
   "cornerTopicRecovery": "Recovery",
-  "deleteAccountFailed": "Couldn't delete your account. Check your connection and try again."
+"deleteAccountFailed": "Couldn't delete your account. Check your connection and try again.",
+"syncNotSaved": "Some changes weren't saved to your account.",
+  "syncRetry": "Retry",
+  "syncRetrying": "Retrying…"
 }
