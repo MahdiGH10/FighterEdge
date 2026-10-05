@@ -31,6 +31,7 @@ import '../widgets/progress_ring.dart';
 import '../widgets/press_scale.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
+import '../widgets/sync_notice.dart';
 import '../widgets/grouped_list.dart';
 
 class NutritionScreen extends StatefulWidget {
@@ -466,6 +467,8 @@ class _TodayView extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(
           Insets.lg, Insets.none, Insets.lg, Insets.xxl),
       children: [
+        // Only while a change was refused by the server.
+        const SyncNotice(),
         AppCard(
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

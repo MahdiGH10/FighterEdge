@@ -145,13 +145,18 @@ class _CollapsingTabHeader extends StatelessWidget {
                       child: ExcludeSemantics(
                         child: Opacity(
                           opacity: compactOpacity,
-                          child: Text(
-                            displayTitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppAccessibility.adjustStyle(
-                              context,
-                              AppType.title2(spacing: 1.5),
+                          // Scales down to fit rather than ending in "...":
+                          // a title cut to "NUTRIT..." names nothing.
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              displayTitle,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: AppAccessibility.adjustStyle(
+                                context,
+                                AppType.title2(spacing: 1.5),
+                              ),
                             ),
                           ),
                         ),
@@ -169,13 +174,20 @@ class _CollapsingTabHeader extends StatelessWidget {
                       opacity: largeOpacity,
                       child: Transform.translate(
                         offset: Offset(0, -8 * progress),
-                        child: Text(
-                          displayTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppAccessibility.adjustStyle(
-                            context,
-                            AppType.largeTitle(spacing: 1.2),
+                        // Same as the compact title: shrink, never "NUTRIT...".
+                        // Still grows with the user's text size until the
+                        // word no longer fits the line.
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            displayTitle,
+                            maxLines: 1,
+                            softWrap: false,
+                            style: AppAccessibility.adjustStyle(
+                              context,
+                              AppType.largeTitle(spacing: 1.2),
+                            ),
                           ),
                         ),
                       ),
@@ -271,6 +283,7 @@ class HeaderIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
       button: onTap != null,
       label: label,
       child: PressScale(

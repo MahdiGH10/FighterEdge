@@ -808,6 +808,15 @@ class LEn extends L {
   String get authWelcomeBackSubtitle => 'Sign in to continue your camp';
 
   @override
+  String get authEmailRequired => 'Enter your email.';
+
+  @override
+  String get authEmailIncomplete => 'That email looks incomplete.';
+
+  @override
+  String get authPasswordRequired => 'Enter your password.';
+
+  @override
   String get authEmail => 'Email';
 
   @override
@@ -1771,4 +1780,17 @@ class LEn extends L {
 
   @override
   String get cornerTopicRecovery => 'Recovery';
+
+  @override
+  String get deleteAccountFailed =>
+      'Couldn\'t delete your account. Check your connection and try again.';
+
+  @override
+  String get syncNotSaved => 'Some changes weren\'t saved to your account.';
+
+  @override
+  String get syncRetry => 'Retry';
+
+  @override
+  String get syncRetrying => 'Retrying…';
 }

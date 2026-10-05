@@ -287,6 +287,9 @@
 
   "authWelcomeBack": "Willkommen zurück",
   "authWelcomeBackSubtitle": "Melde dich an und mach im Camp weiter",
+  "authEmailRequired": "Gib deine E-Mail-Adresse ein.",
+  "authEmailIncomplete": "Die E-Mail-Adresse ist unvollständig.",
+  "authPasswordRequired": "Gib dein Passwort ein.",
   "authEmail": "E-Mail",
   "authPassword": "Passwort",
   "authSignIn": "Anmelden",
@@ -665,5 +668,9 @@
   "cornerTopicFuel": "Ernährung",
   "cornerTopicWeight": "Gewicht",
   "cornerTopicCamp": "Camp",
-  "cornerTopicRecovery": "Erholung"
+  "cornerTopicRecovery": "Erholung",
+"deleteAccountFailed": "Dein Konto konnte nicht gelöscht werden. Prüfe deine Verbindung und versuche es erneut.",
+"syncNotSaved": "Einige Änderungen wurden nicht in deinem Konto gespeichert.",
+  "syncRetry": "Erneut versuchen",
+  "syncRetrying": "Wird erneut versucht …"
 }

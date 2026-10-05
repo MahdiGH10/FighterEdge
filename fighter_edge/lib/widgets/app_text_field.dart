@@ -16,6 +16,7 @@ class AppTextField extends StatelessWidget {
   final TextInputAction textInputAction;
   final Widget? suffix;
   final String? errorText;
+  final bool multilineError;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final bool autofocus;
@@ -34,6 +35,7 @@ class AppTextField extends StatelessWidget {
     this.textInputAction = TextInputAction.next,
     this.suffix,
     this.errorText,
+    this.multilineError = false,
     this.onChanged,
     this.onSubmitted,
     this.autofocus = false,
@@ -73,13 +75,14 @@ class AppTextField extends StatelessWidget {
         floatingLabelStyle: WidgetStateTextStyle.resolveWith((states) {
           final color = states.contains(WidgetState.error)
               ? AppColors.negative
-              : AppColors.primary;
+              : AppAccessibility.accentText(context);
           return AppType.subhead(color: color);
         }),
         prefixIcon:
             Icon(icon, color: AppAccessibility.textMuted(context), size: 20),
         suffixIcon: suffix,
-        errorText: errorText,
+        errorText: multilineError ? null : errorText,
+        error: multilineError && errorText != null ? Text(errorText!) : null,
         filled: true,
         fillColor: AppColors.surface,
         enabledBorder: OutlineInputBorder(

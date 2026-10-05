@@ -812,6 +812,15 @@ class LDe extends L {
   String get authWelcomeBackSubtitle => 'Melde dich an und mach im Camp weiter';
 
   @override
+  String get authEmailRequired => 'Gib deine E-Mail-Adresse ein.';
+
+  @override
+  String get authEmailIncomplete => 'Die E-Mail-Adresse ist unvollständig.';
+
+  @override
+  String get authPasswordRequired => 'Gib dein Passwort ein.';
+
+  @override
   String get authEmail => 'E-Mail';
 
   @override
@@ -1790,4 +1799,18 @@ class LDe extends L {
 
   @override
   String get cornerTopicRecovery => 'Erholung';
+
+  @override
+  String get deleteAccountFailed =>
+      'Dein Konto konnte nicht gelöscht werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get syncNotSaved =>
+      'Einige Änderungen wurden nicht in deinem Konto gespeichert.';
+
+  @override
+  String get syncRetry => 'Erneut versuchen';
+
+  @override
+  String get syncRetrying => 'Wird erneut versucht …';
 }

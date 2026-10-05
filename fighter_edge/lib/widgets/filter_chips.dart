@@ -19,7 +19,8 @@ import 'press_scale.dart';
 ///   share one row.
 ///
 /// At large text sizes the non-scrolling layouts wrap onto more lines rather
-/// than truncating labels or pushing options off-screen.
+/// than truncating labels or pushing options off-screen. The single equal-width
+/// row does the same on screens narrower than [LayoutTokens.narrowScreen].
 class FilterChips extends StatelessWidget {
   final List<String> options;
   final int selectedIndex;
@@ -51,7 +52,11 @@ class FilterChips extends StatelessWidget {
     if (columns == null && scrollable) {
       return _ScrollingChips(selectedIndex: selectedIndex, chips: chips);
     }
-    if (AppAccessibility.isLargeText(context)) {
+    // A single row of equal-width chips also gives way below the narrow-screen
+    // width: at 320 px "Wrestling" shared a third of the row and was cut to
+    // "Wrestl...". Wrapped chips take the width their label needs.
+    final narrow = MediaQuery.sizeOf(context).width < LayoutTokens.narrowScreen;
+    if (AppAccessibility.isLargeText(context) || (columns == null && narrow)) {
       return Wrap(spacing: Insets.sm, runSpacing: Insets.sm, children: chips);
     }
     if (columns == null) {
@@ -232,6 +237,7 @@ class _Chip extends StatelessWidget {
       label: label,
       child: PressScale(
         onTap: onTap,
+        focusBorderRadius: BorderRadius.circular(Radii.tile),
         // Moving between filters commits nothing — it deserves the lightest
         // tick, not the impact a button gets.
         haptic: AppHaptics.selection,
