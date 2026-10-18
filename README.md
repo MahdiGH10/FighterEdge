@@ -10,6 +10,25 @@ deeper analytics, premium recipes, technique content, and the AI Fighter Brief.
 The app is intentionally dark, focused, and athletic rather than a generic
 fitness dashboard.
 
+## Engineering highlights
+
+- **AI that cannot overrule the math.** Calorie and macro targets come from a deterministic, pure-Dart domain layer. The LLM ("Fighter Brief") only explains or prioritises results; its output is schema-validated, quota-limited and safety-checked on the server before it reaches the app.
+- **Measured model selection.** An eval harness (`functions/src/aiEval.ts`, `scripts/ai-eval.mjs`) scores candidate models on 29 fighter situations. On the 2026-09-29 run, Qwen passed 23, gpt-oss-120b 19 and gpt-oss-20b 18, so the provider chain is ordered by evidence. Groq is primary with an OpenRouter chain as automatic fallback when a model is busy, retired or down.
+- **Server-owned entitlements.** Pro access is granted only by the server and the RevenueCat webhook; Firestore rules block clients from writing billing state, and the rules have their own emulator test suite.
+- **Privacy-safe telemetry.** No prompts, meal text, measurements, emails or user IDs in analytics events.
+- **Tested and gated.** 126 Flutter test files (unit, widget, flow, accessibility, golden), Cloud Functions tests, a coverage floor, pinned GitHub Actions, and a written production-readiness audit ([`AUDIT.md`](AUDIT.md)).
+
+```mermaid
+flowchart LR
+  APP["Flutter app"] -->|auth| FB["Firebase Auth"]
+  APP -->|"Fighter Brief request"| FN["Cloud Functions (TypeScript)"]
+  FN -->|"schema + safety validation"| LLM["Groq -> OpenRouter fallback chain"]
+  FN --> FS[("Firestore (rules-protected)")]
+  APP -->|purchase| RC["RevenueCat"]
+  RC -->|webhook| FN
+  FN -->|entitlement| FS
+```
+
 ## Repository map
 
 ```text
@@ -74,13 +93,10 @@ environment/configuration instead.
 - Android Studio/SDK for Android builds
 - Xcode and Apple Developer access for local iOS builds (or a macOS CI runner)
 
-On this project machine the Flutter executable is
-`C:\src\flutter\bin\flutter.bat`.
-
 ## Local development
 
 ```powershell
-cd C:\Users\Mahdi\Downloads\FighterEdge\fighter_edge
+cd fighter_edge
 flutter pub get
 flutter run -d chrome       # fast browser smoke test
 ```
@@ -191,6 +207,4 @@ key, or `unset` until RevenueCat is configured).
 
 ## License and release note
 
-This is a private, unpublished product repository (`publish_to: none`). Add a
-license and public legal/privacy URLs before opening the project or publishing
-the app.
+This is an unpublished product repository (`publish_to: none`) shared for review. All rights reserved until a license is added.
