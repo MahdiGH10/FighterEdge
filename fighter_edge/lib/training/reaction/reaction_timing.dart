@@ -34,7 +34,7 @@
 ///   them react to the rhythm instead of the voice. This is why the reaction
 ///   part is jittered (and skewed, see [ReactionTiming.sampleGapMs]).
 /// * The grappling costs (sprawl, shoot, rolls, cartwheel) are coaching
-///   estimates, needs coach sign-off.
+///   estimates, coach sign-off pending.
 library;
 
 import 'dart:math';
@@ -118,7 +118,7 @@ abstract final class ReactionTiming {
   static const downBlockMs = 700;
   static const jumpMs = 700;
 
-  // Grappling: coaching estimates, needs coach sign-off.
+  // Grappling: coaching estimates, coach sign-off pending.
   static const sprawlMs = 1300;
   static const shootMs = 1800;
   static const frontRollMs = 2500;
@@ -136,7 +136,7 @@ abstract final class ReactionTiming {
   static const finishAfterKickMs = 500;
 
   /// A call that ends on a grappling move: getting back up to stance after
-  /// a sprawl, roll or cartwheel. Coaching estimate, needs coach sign-off.
+  /// a sprawl, roll or cartwheel. Coaching estimate, coach sign-off pending.
   /// It is 500 rather than 300 so the worked examples in the plan hold
   /// (front roll about 5.4 s on Beginner and 3.3 s on Advanced+).
   static const finishAfterGrapplingMs = 500;
