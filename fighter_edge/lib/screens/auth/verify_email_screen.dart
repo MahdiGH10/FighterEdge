@@ -317,7 +317,7 @@ class _VerifiedView extends StatelessWidget {
         Text('Email confirmed', style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
-          'Your account is secured. Pro and the AI coach are unlocked.',
+          'Your account is secured. You can upgrade to Pro now.',
           style:
               AppType.callout(color: AppAccessibility.textSecondary(context)),
         ),

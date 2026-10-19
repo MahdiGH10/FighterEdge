@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../theme/app_icons.dart';
 
-import '../../../../billing/subscription.dart';
 import '../../../../controllers/auth_controller.dart';
-import '../../../../observability/telemetry.dart';
 import '../../../../routing/app_navigation.dart';
 import '../../../../routing/app_router.dart';
-import '../../../../screens/paywall_screen.dart';
 import '../../../../theme/app_accessibility.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme.dart';
@@ -21,14 +18,11 @@ import '../../domain/models/nutrition_target.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../nutrition_copy.dart';
 import '../widgets/fuel_what_is_left.dart';
-import 'edge_fuel_coach_screen.dart';
 import 'edge_fuel_setup_screen.dart';
 
 /// Read-only view of the confirmed deterministic EdgeFuel target.
 ///
-/// The plan stays the source of truth for targets. The daily brief lives on
-/// Home (the Corner Brief); from here Pro opens the EdgeFuel Coach to ask
-/// about the plan.
+/// The plan stays the source of truth for targets.
 class EdgeFuelPlanScreen extends StatelessWidget {
   const EdgeFuelPlanScreen({super.key});
 
@@ -208,8 +202,6 @@ class _PlanBody extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(height: Insets.lg),
-        const _CoachSection(),
         if (FuelWhatIsLeft.appliesTo(edgeFuel)) ...[
           const SizedBox(height: Insets.md),
           FuelWhatIsLeft(edgeFuel: edgeFuel),
@@ -226,97 +218,6 @@ class _PlanBody extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// The way into the EdgeFuel Coach from the plan: open it with Pro, see Pro
-/// without.
-class _CoachSection extends StatelessWidget {
-  const _CoachSection();
-
-  @override
-  Widget build(BuildContext context) {
-    final isPro =
-        context.watch<AuthController>().allows(Feature.edgeFuelAiCoach);
-
-    return AppCard(
-      accent: AppColors.premium,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                AppIcons.clipboardText,
-                color: AppColors.premium,
-                size: IconSizes.inline,
-              ),
-              const SizedBox(width: Insets.sm),
-              Expanded(
-                child: Text(
-                  'EdgeFuel Coach',
-                  style: AppType.micro(
-                    weight: FontWeight.w800,
-                    color: AppColors.textMuted,
-                    spacing: .8,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: Insets.sm),
-          Text(
-            'Ask about your plan, your day or your fight week.',
-            style: AppType.callout(weight: FontWeight.w800),
-          ),
-          const SizedBox(height: Insets.xs),
-          Text(
-            isPro
-                ? 'The coach can explain your plan, but it cannot change the '
-                    'calculated target. Your daily Corner Brief is on Home.'
-                : 'Pro adds the coach and a daily Corner Brief on Home, '
-                    'grounded in your own numbers.',
-            style: AppType.subhead(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: Insets.md),
-          if (isPro)
-            PrimaryButton(
-              'Ask your coach',
-              icon: AppIcons.clipboardText,
-              expand: true,
-              onPressed: () => AppNavigation.push(
-                context,
-                AppRoutes.fuelCoach,
-                fallbackBuilder: (_) => const EdgeFuelCoachScreen(),
-              ),
-            )
-          else
-            PrimaryButton(
-              'See Pro',
-              icon: AppIcons.lockSimpleOpen,
-              expand: true,
-              onPressed: () {
-                Telemetry.fromContext(context).track(
-                  TelemetryEvent.premiumCtaTapped,
-                  parameters: {'surface': 'fuel_plan'},
-                );
-                AppNavigation.push(
-                  context,
-                  AppRoutes.paywall,
-                  extra: const PaywallRouteArgs(
-                    highlight: Feature.edgeFuelAiCoach,
-                    trigger: PaywallTrigger.coach,
-                  ),
-                  fallbackBuilder: (_) => const PaywallScreen(
-                    highlight: Feature.edgeFuelAiCoach,
-                    trigger: PaywallTrigger.coach,
-                  ),
-                );
-              },
-            ),
-        ],
-      ),
     );
   }
 }

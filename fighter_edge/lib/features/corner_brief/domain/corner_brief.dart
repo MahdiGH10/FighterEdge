@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import '../../daily_snapshot/domain/daily_snapshot.dart';
 import '../../edge_fuel/domain/calculators/fighter_brief_calculator.dart';
 import '../../edge_fuel/domain/models/fighter_brief_preview.dart';
@@ -8,16 +6,14 @@ import '../../edge_fuel/domain/models/nutrition_target.dart';
 import '../../fight_camp/domain/fight_week_plan.dart';
 import '../../fight_camp/domain/weight_path.dart';
 
-/// What the free Corner Brief line says: the one thing the app can calculate
-/// that matters most today (product plan, step 3: "one calculated line, no
-/// AI"). Safety first, then food.
+/// What the Corner Brief line on Home says: the one thing the app can
+/// calculate that matters most today. Safety first, then food.
 ///
-/// Fight week's own steps are not a cue: the fight countdown card right above
-/// the brief on Home already shows them.
+/// Fight week's own steps are not a cue: the fight countdown card above the
+/// line on Home already shows them.
 enum CornerCue {
   /// The weight path needs supervision or is not safe, or the athlete's
-  /// health answers need a professional's review. Matches the Pro brief, which
-  /// leads with the same advice for these statuses.
+  /// health answers need a professional's review.
   seeProfessional,
 
   /// No EdgeFuel target yet.
@@ -62,8 +58,8 @@ class CornerLine {
   String toString() => 'CornerLine($cue, $amount)';
 }
 
-/// Picks the free line from facts the app already calculated. Never calls
-/// an AI and never changes a target.
+/// Picks the line from facts the app already calculated. Never changes a
+/// target.
 class CornerBriefCalculator {
   CornerBriefCalculator._();
 
@@ -106,18 +102,4 @@ class CornerBriefCalculator {
         const CornerLine(CornerCue.onTrack),
     };
   }
-}
-
-/// What a brief was written from: the day's snapshot and food log. When it
-/// changes (a meal, a weigh-in, a session, a new day), the brief is out of
-/// date.
-String cornerBriefBasis(DailySnapshot today, NutritionDay? day) {
-  final entries = day?.entries ?? const [];
-  return [
-    jsonEncode(today.toJson()),
-    entries.length,
-    entries.where((entry) => entry.consumed).length,
-    day?.totals.calories ?? 0,
-    day?.totals.proteinGrams ?? 0,
-  ].join('|');
 }

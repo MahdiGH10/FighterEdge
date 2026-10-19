@@ -26,7 +26,6 @@ import 'legal_screen.dart';
 import 'paywall_screen.dart';
 import '../legal/legal_links.dart';
 import '../models/app_user.dart';
-import '../privacy/ai_coach_consent.dart';
 import '../privacy/consent.dart';
 import '../privacy/data_consent.dart';
 
@@ -152,19 +151,6 @@ class SettingsScreen extends StatelessWidget {
               title: l.settingsHealthData,
               subtitle: _healthConsentSummary(context, user),
               onTap: auth.isBusy ? null : () => _withdrawHealthConsent(context),
-            ),
-            _SwitchRow(
-              title: l.settingsAiCoach,
-              subtitle: l.settingsAiCoachSubtitle,
-              value: user.hasAiCoachConsent,
-              onChanged: auth.isBusy
-                  ? null
-                  : (allowed) => allowed
-                      ? showAiCoachConsentSheet(context)
-                      : auth.setDataConsent(
-                          DataConsentPurpose.aiCoach,
-                          granted: false,
-                        ),
             ),
             if (context.read<RewardedAdGateway>().privacyOptionsRequired)
               _SettingsRow(

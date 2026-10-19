@@ -226,7 +226,7 @@ abstract class L {
   /// No description provided for @settingsUpgradeProSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Daily Corner Brief and coach, full drill and recipe libraries, corner cues'**
+  /// **'Full drill and recipe libraries, corner cues'**
   String get settingsUpgradeProSubtitle;
 
   /// No description provided for @settingsSectionTraining.
@@ -1057,48 +1057,6 @@ abstract class L {
   /// **'Delete my account instead'**
   String get healthConsentDeleteAccount;
 
-  /// No description provided for @aiConsentTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Before you talk to the coach'**
-  String get aiConsentTitle;
-
-  /// No description provided for @aiConsentBody.
-  ///
-  /// In en, this message translates to:
-  /// **'To answer, our server sends your calorie and macro targets, today\'s food-log summary, your diet type, allergies, disliked foods, your messages, and, if you use them, today\'s planned session, your training days against your plan, your 7-day weight trend, and your fight camp (dates, weight limit and today\'s food-only plan) to Groq or OpenRouter (USA), which may pass them to an AI model provider. Your name, email address and account ID are never sent.'**
-  String get aiConsentBody;
-
-  /// No description provided for @aiConsentRetention.
-  ///
-  /// In en, this message translates to:
-  /// **'Some providers, especially free models, may keep what they receive under their own terms. Don\'t type anything you don\'t want to share.'**
-  String get aiConsentRetention;
-
-  /// No description provided for @aiConsentStatement.
-  ///
-  /// In en, this message translates to:
-  /// **'I agree that this data is sent to the AI provider as described, including to the USA.'**
-  String get aiConsentStatement;
-
-  /// No description provided for @aiConsentAgree.
-  ///
-  /// In en, this message translates to:
-  /// **'I agree'**
-  String get aiConsentAgree;
-
-  /// No description provided for @aiConsentChangeLater.
-  ///
-  /// In en, this message translates to:
-  /// **'You can turn this off any time in Settings > Privacy.'**
-  String get aiConsentChangeLater;
-
-  /// No description provided for @aiConsentRequiredNotice.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow AI coach data sharing to get an answer.'**
-  String get aiConsentRequiredNotice;
-
   /// No description provided for @settingsHealthData.
   ///
   /// In en, this message translates to:
@@ -1134,18 +1092,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Delete my account'**
   String get settingsHealthDataWithdrawConfirm;
-
-  /// No description provided for @settingsAiCoach.
-  ///
-  /// In en, this message translates to:
-  /// **'AI coach data sharing'**
-  String get settingsAiCoach;
-
-  /// No description provided for @settingsAiCoachSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sends your plan facts and messages to our AI provider (USA) when you use the coach.'**
-  String get settingsAiCoachSubtitle;
 
   /// No description provided for @settingsAdPrivacy.
   ///
@@ -1846,7 +1792,7 @@ abstract class L {
   /// No description provided for @planReadyProBody.
   ///
   /// In en, this message translates to:
-  /// **'Pro includes a daily Corner Brief and coach, all drills and recipes, and cues between rounds.'**
+  /// **'Pro includes all drills and recipes, and cues between rounds.'**
   String get planReadyProBody;
 
   /// No description provided for @planReadyCalories.
@@ -1876,7 +1822,7 @@ abstract class L {
   /// No description provided for @profileProDescription.
   ///
   /// In en, this message translates to:
-  /// **'Daily brief, all drills and recipes'**
+  /// **'All drills and recipes'**
   String get profileProDescription;
 
   /// No description provided for @profileUpgrade.
@@ -1926,18 +1872,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Recipes for your day'**
   String get fuelRecipesTitle;
-
-  /// No description provided for @paywallBenefitBriefTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily Corner Brief'**
-  String get paywallBenefitBriefTitle;
-
-  /// No description provided for @paywallBenefitBriefBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Three lines a day on training, fuel and weight, and a coach to ask.'**
-  String get paywallBenefitBriefBody;
 
   /// No description provided for @paywallBenefitRecipesTitle.
   ///
@@ -2958,168 +2892,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'On track today. Keep the next meal balanced.'**
   String get cornerCueOnTrack;
-
-  /// No description provided for @cornerBriefFreeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro writes your full brief: training, fuel and weight, updated as you log.'**
-  String get cornerBriefFreeHint;
-
-  /// No description provided for @cornerBriefUnlock.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlock the full brief'**
-  String get cornerBriefUnlock;
-
-  /// No description provided for @cornerBriefProHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Your corner writes three lines for today: training, fuel and weight.'**
-  String get cornerBriefProHint;
-
-  /// No description provided for @cornerBriefGet.
-  ///
-  /// In en, this message translates to:
-  /// **'Get today\'s brief'**
-  String get cornerBriefGet;
-
-  /// No description provided for @cornerBriefWriting.
-  ///
-  /// In en, this message translates to:
-  /// **'Your corner is reading your day…'**
-  String get cornerBriefWriting;
-
-  /// No description provided for @cornerBriefUpdating.
-  ///
-  /// In en, this message translates to:
-  /// **'Updating after your last log…'**
-  String get cornerBriefUpdating;
-
-  /// No description provided for @cornerBriefQuota.
-  ///
-  /// In en, this message translates to:
-  /// **'Today\'s briefs are used up. Back tomorrow.'**
-  String get cornerBriefQuota;
-
-  /// No description provided for @cornerBriefQuotaStale.
-  ///
-  /// In en, this message translates to:
-  /// **'Today\'s briefs are used up. This one is from before your last log.'**
-  String get cornerBriefQuotaStale;
-
-  /// No description provided for @cornerBriefUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Your corner couldn\'t answer just now.'**
-  String get cornerBriefUnavailable;
-
-  /// No description provided for @cornerBriefSyncing.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro is still syncing to your account.'**
-  String get cornerBriefSyncing;
-
-  /// No description provided for @cornerBriefTryAgain.
-  ///
-  /// In en, this message translates to:
-  /// **'Try again'**
-  String get cornerBriefTryAgain;
-
-  /// No description provided for @cornerBriefVerify.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm your email to get your full brief.'**
-  String get cornerBriefVerify;
-
-  /// No description provided for @cornerBriefVerifyAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Verify my email'**
-  String get cornerBriefVerifyAction;
-
-  /// No description provided for @cornerBriefSetUpAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Set up EdgeFuel'**
-  String get cornerBriefSetUpAction;
-
-  /// No description provided for @cornerBriefAskCoach.
-  ///
-  /// In en, this message translates to:
-  /// **'Ask your coach'**
-  String get cornerBriefAskCoach;
-
-  /// No description provided for @cornerBriefProfessional.
-  ///
-  /// In en, this message translates to:
-  /// **'Please speak with a qualified professional before acting on this.'**
-  String get cornerBriefProfessional;
-
-  /// No description provided for @cornerBriefWatchVideo.
-  ///
-  /// In en, this message translates to:
-  /// **'Watch a short video for today\'s full brief'**
-  String get cornerBriefWatchVideo;
-
-  /// No description provided for @cornerBriefRewardedNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Today\'s free brief. Pro rewrites it after every log.'**
-  String get cornerBriefRewardedNote;
-
-  /// No description provided for @cornerBriefRewardUsed.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'ve had today\'s free brief. Back tomorrow, or go Pro.'**
-  String get cornerBriefRewardUsed;
-
-  /// No description provided for @cornerBriefVideoClosed.
-  ///
-  /// In en, this message translates to:
-  /// **'Watch to the end to unlock the brief.'**
-  String get cornerBriefVideoClosed;
-
-  /// No description provided for @cornerBriefNoVideo.
-  ///
-  /// In en, this message translates to:
-  /// **'No video right now. Try again later.'**
-  String get cornerBriefNoVideo;
-
-  /// No description provided for @cornerBriefRewardFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Your corner couldn\'t write it just now. Tap again later, no new video needed.'**
-  String get cornerBriefRewardFailed;
-
-  /// No description provided for @cornerTopicTraining.
-  ///
-  /// In en, this message translates to:
-  /// **'Training'**
-  String get cornerTopicTraining;
-
-  /// No description provided for @cornerTopicFuel.
-  ///
-  /// In en, this message translates to:
-  /// **'Fuel'**
-  String get cornerTopicFuel;
-
-  /// No description provided for @cornerTopicWeight.
-  ///
-  /// In en, this message translates to:
-  /// **'Weight'**
-  String get cornerTopicWeight;
-
-  /// No description provided for @cornerTopicCamp.
-  ///
-  /// In en, this message translates to:
-  /// **'Camp'**
-  String get cornerTopicCamp;
-
-  /// No description provided for @cornerTopicRecovery.
-  ///
-  /// In en, this message translates to:
-  /// **'Recovery'**
-  String get cornerTopicRecovery;
 
   /// No description provided for @deleteAccountFailed.
   ///

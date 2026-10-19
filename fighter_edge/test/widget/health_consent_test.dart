@@ -3,13 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:fighter_edge/auth/local_auth_repository.dart';
-import 'package:fighter_edge/billing/subscription.dart';
-import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_models.dart';
-import 'package:fighter_edge/features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
-import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
-import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
-import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
-import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_coach_screen.dart';
 import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/privacy/health_consent_screen.dart';
 import 'package:fighter_edge/routing/app_router.dart';
@@ -19,8 +12,8 @@ import 'package:fighter_edge/screens/settings_screen.dart';
 
 import '../helpers/test_harness.dart';
 
-/// Explicit consent (Art. 9 GDPR) before health data is collected or sent to
-/// the AI provider, and withdrawing it from Settings.
+/// Explicit consent (Art. 9 GDPR) before health data is collected, and
+/// withdrawing it from Settings.
 void main() {
   void tallView(WidgetTester tester) {
     tester.view.physicalSize = const Size(1400, 3400);
@@ -119,72 +112,6 @@ void main() {
     });
   });
 
-  group('AI coach', () {
-    NutritionTarget target() => NutritionTarget(
-          status: NutritionTargetStatus.success,
-          policyVersion: 1,
-          calculatedAt: DateTime(2026, 1, 1),
-          targetCalories: 2500,
-          proteinGrams: 150,
-          carbGrams: 260,
-          fatGrams: 80,
-        );
-
-    testWidgets('says what is sent before the first request', (tester) async {
-      tallView(tester);
-      final repo = await makeRepo(
-        signedIn: true,
-        plan: Plan.pro,
-        aiCoachConsent: false,
-      );
-      final edgeFuelRepo = InMemoryEdgeFuelRepository();
-      await edgeFuelRepo.saveTarget(repo.currentUser!.id, target());
-
-      await tester.pumpWidget(wrapApp(
-        const EdgeFuelCoachScreen(),
-        repo: repo,
-        edgeFuelRepo: edgeFuelRepo,
-      ));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('ai-coach-consent')), findsOneWidget);
-      expect(find.textContaining('Groq or OpenRouter (USA)'), findsOneWidget);
-      expect(find.text('Talk to your coach'), findsNothing);
-
-      await tester.tap(find.text('I agree'));
-      await tester.pumpAndSettle();
-
-      expect(repo.currentUser!.hasAiCoachConsent, isTrue);
-      expect(find.byKey(const ValueKey('ai-coach-consent')), findsNothing);
-      expect(find.text('Talk to your coach'), findsOneWidget);
-    });
-
-    testWidgets('explains a server-side consent refusal', (tester) async {
-      tallView(tester);
-      final repo = await makeRepo(signedIn: true, plan: Plan.pro);
-      final edgeFuelRepo = InMemoryEdgeFuelRepository();
-      await edgeFuelRepo.saveTarget(repo.currentUser!.id, target());
-
-      await tester.pumpWidget(wrapApp(
-        const EdgeFuelCoachScreen(),
-        repo: repo,
-        edgeFuelRepo: edgeFuelRepo,
-        edgeFuelAiGateway: FakeEdgeFuelAiGateway(
-          nextResult: () => const EdgeFuelAiResult.consentRequired(),
-        ),
-      ));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byType(EditableText), 'What should I eat?');
-      await tester.tap(find.bySemanticsLabel('Send'));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Allow AI coach data sharing to get an answer.'),
-        findsOneWidget,
-      );
-    });
-  });
-
   group('Settings > Privacy', () {
     Future<void> openSettings(
         WidgetTester tester, LocalAuthRepository repo) async {
@@ -196,38 +123,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(SettingsScreen), findsOneWidget);
     }
-
-    Finder aiSwitch() => find.descendant(
-          of: find.ancestor(
-            of: find.text('AI coach data sharing'),
-            matching: find.byType(Row),
-          ),
-          matching: find.byType(Switch),
-        );
-
-    testWidgets('AI coach sharing can be withdrawn and given again',
-        (tester) async {
-      final repo = await makeRepo(signedIn: true, onboarded: true);
-      await openSettings(tester, repo);
-      expect(tester.widget<Switch>(aiSwitch()).value, isTrue);
-
-      await tester.tap(aiSwitch());
-      await tester.pumpAndSettle();
-      expect(repo.currentUser!.hasAiCoachConsent, isFalse);
-      expect(repo.currentUser!.hasHealthDataConsent, isTrue);
-
-      // Turning it back on shows the full disclosure first.
-      await tester.tap(aiSwitch());
-      await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('ai-coach-consent')), findsOneWidget);
-      expect(repo.currentUser!.hasAiCoachConsent, isFalse);
-      await tester.tap(find.text('I agree'));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('ai-coach-consent')), findsNothing);
-      expect(repo.currentUser!.hasAiCoachConsent, isTrue);
-      expect(tester.widget<Switch>(aiSwitch()).value, isTrue);
-    });
 
     testWidgets('withdrawing health consent leads to account deletion',
         (tester) async {

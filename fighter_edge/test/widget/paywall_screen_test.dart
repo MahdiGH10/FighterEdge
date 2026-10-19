@@ -20,8 +20,8 @@ void main() {
 
     await tester.pumpWidget(wrapApp(
       const PaywallScreen(
-        highlight: Feature.edgeFuelAiCoach,
-        trigger: PaywallTrigger.cornerBrief,
+        highlight: Feature.cornerCoach,
+        trigger: PaywallTrigger.cornerCoach,
       ),
       repo: repo,
       billingGateway: billing,
@@ -30,8 +30,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(telemetry.records.single.event, TelemetryEvent.paywallViewed);
     expect(telemetry.records.single.parameters, {
-      'feature': 'edgeFuelAiCoach',
-      'trigger': 'corner_brief',
+      'feature': 'cornerCoach',
+      'trigger': 'corner_coach',
     });
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));

@@ -16,10 +16,6 @@ import 'billing/revenuecat_billing_gateway.dart';
 import 'controllers/auth_controller.dart';
 import 'data/data_repository.dart';
 import 'data/firestore_data_repository.dart';
-import 'features/corner_brief/presentation/corner_brief_controller.dart';
-import 'features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
-import 'features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
-import 'features/edge_fuel/ai/firebase_edge_fuel_ai_gateway.dart';
 import 'features/edge_fuel/data/asset_food_catalog_repository.dart';
 import 'features/edge_fuel/data/asset_recipe_catalog_repository.dart';
 import 'features/edge_fuel/data/edge_fuel_repository.dart';
@@ -132,7 +128,7 @@ Future<AppDependencies> _initializeProductionDependencies() async {
     () =>
         Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
   );
-  // Before the first callable request, so every AI call carries a token.
+  // Before the first callable request, so every callable request carries a token.
   await bootStep(BootStage.appCheck, activateAppCheck);
   final crashlyticsSupported = !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
@@ -177,7 +173,6 @@ Future<AppDependencies> _initializeProductionDependencies() async {
             dataRepo: FirestoreDataRepository(),
             edgeFuelRepo: FirestoreEdgeFuelRepository(),
             fightCampRepo: FirestoreFightCampRepository(),
-            edgeFuelAiGateway: FirebaseEdgeFuelAiGateway(),
             billingGateway: RevenueCatBillingGateway(),
             rewardedAds: kIsWeb
                 ? const UnavailableRewardedAdGateway()
@@ -204,7 +199,6 @@ class AppDependencies {
   final DataRepository dataRepo;
   final EdgeFuelRepository edgeFuelRepo;
   final FightCampRepository fightCampRepo;
-  final EdgeFuelAiGateway edgeFuelAiGateway;
   final BillingGateway billingGateway;
   final RewardedAdGateway rewardedAds;
   final RewardTicketGateway rewardTickets;
@@ -219,7 +213,6 @@ class AppDependencies {
     required this.dataRepo,
     required this.edgeFuelRepo,
     required this.fightCampRepo,
-    required this.edgeFuelAiGateway,
     required this.billingGateway,
     required this.rewardedAds,
     required this.rewardTickets,
@@ -236,7 +229,6 @@ class FighterEdgeApp extends StatelessWidget {
   final DataRepository? dataRepo;
   final EdgeFuelRepository? edgeFuelRepo;
   final FightCampRepository? fightCampRepo;
-  final EdgeFuelAiGateway? edgeFuelAiGateway;
   final FoodCatalogRepository? foodCatalogRepo;
   final RecipeCatalogRepository? recipeCatalogRepo;
   final BillingGateway? billingGateway;
@@ -256,7 +248,6 @@ class FighterEdgeApp extends StatelessWidget {
     this.dataRepo,
     this.edgeFuelRepo,
     this.fightCampRepo,
-    this.edgeFuelAiGateway,
     this.foodCatalogRepo,
     this.recipeCatalogRepo,
     this.billingGateway,
@@ -277,7 +268,6 @@ class FighterEdgeApp extends StatelessWidget {
           dataRepo: dependencies.dataRepo,
           edgeFuelRepo: dependencies.edgeFuelRepo,
           fightCampRepo: dependencies.fightCampRepo,
-          edgeFuelAiGateway: dependencies.edgeFuelAiGateway,
           billingGateway: dependencies.billingGateway,
           rewardedAds: dependencies.rewardedAds,
           rewardTickets: dependencies.rewardTickets,
@@ -293,8 +283,6 @@ class FighterEdgeApp extends StatelessWidget {
     final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
     final resolvedFightCampRepo =
         fightCampRepo ?? InMemoryFightCampRepository();
-    final resolvedAiGateway =
-        edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
     final resolvedAds = rewardedAds ?? const UnavailableRewardedAdGateway();
     final resolvedTickets =
         rewardTickets ?? const UnavailableRewardTicketGateway();
@@ -353,7 +341,6 @@ class FighterEdgeApp extends StatelessWidget {
         ),
         Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
         Provider<FightCampRepository>.value(value: resolvedFightCampRepo),
-        Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
         Provider<RewardedAdGateway>.value(value: resolvedAds),
         Provider<RewardTicketGateway>.value(value: resolvedTickets),
         Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
@@ -401,22 +388,6 @@ class FighterEdgeApp extends StatelessWidget {
             edgeFuel.setUser(auth.user?.id);
             return edgeFuel;
           },
-        ),
-        ChangeNotifierProxyProvider<AuthController, CornerBriefController>(
-          create: (_) => CornerBriefController(
-            gateway: resolvedAiGateway,
-            telemetry: telemetry ?? const NoopTelemetry(),
-            tickets: resolvedTickets,
-            ads: resolvedAds,
-          ),
-          update: (_, auth, controller) => (controller ??
-              CornerBriefController(
-                gateway: resolvedAiGateway,
-                telemetry: telemetry ?? const NoopTelemetry(),
-                tickets: resolvedTickets,
-                ads: resolvedAds,
-              ))
-            ..setUser(auth.user?.id),
         ),
       ],
       child: const _FighterEdgeMaterialApp(),

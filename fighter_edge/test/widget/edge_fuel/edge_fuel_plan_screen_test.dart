@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
@@ -88,53 +87,6 @@ void main() {
         find.text('Recipes that fit, highest protein first'),
         findsOneWidget,
       );
-    });
-
-    testWidgets('offers a free athlete Pro instead of the coach',
-        (tester) async {
-      final repo = await makeRepo(signedIn: true, plan: Plan.free);
-      final edgeFuelRepo = InMemoryEdgeFuelRepository();
-      await edgeFuelRepo.saveTarget(repo.currentUser!.id, _successTarget());
-
-      await tester.pumpWidget(wrapApp(
-        const EdgeFuelPlanScreen(),
-        repo: repo,
-        edgeFuelRepo: edgeFuelRepo,
-      ));
-      await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(
-        find.text('See Pro'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      expect(find.text('EdgeFuel Coach'), findsOneWidget);
-      expect(find.text('See Pro'), findsOneWidget);
-      expect(find.text('Ask your coach'), findsNothing);
-    });
-
-    testWidgets('routes a Pro athlete to the Coach experience', (tester) async {
-      final repo = await makeRepo(signedIn: true, plan: Plan.pro);
-      final edgeFuelRepo = InMemoryEdgeFuelRepository();
-      await edgeFuelRepo.saveTarget(repo.currentUser!.id, _successTarget());
-
-      await tester.pumpWidget(wrapApp(
-        const EdgeFuelPlanScreen(),
-        repo: repo,
-        edgeFuelRepo: edgeFuelRepo,
-      ));
-      await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(
-        find.text('Ask your coach'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.ensureVisible(find.text('Ask your coach'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Ask your coach'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Talk to your coach'), findsOneWidget);
     });
   });
 }

@@ -326,7 +326,7 @@ void main() {
           await r.setDataConsent(DataConsentPurpose.aiCoach, granted: false);
       await pumpEventQueue();
 
-      expect(user.hasAiCoachConsent, isFalse);
+      expect(user.consents.allows(DataConsentPurpose.aiCoach), isFalse);
       expect(user.hasHealthDataConsent, isTrue);
       expect((await storedConsents()).keys, ['healthData']);
     });
@@ -345,7 +345,7 @@ void main() {
           .signInWithGoogle();
 
       expect(user.hasHealthDataConsent, isTrue);
-      expect(user.hasAiCoachConsent, isFalse);
+      expect(user.consents.allows(DataConsentPurpose.aiCoach), isFalse);
       expect(
         user.consents.recordFor(DataConsentPurpose.healthData)?.grantedAt,
         DateTime.utc(2026, 9, 1).toLocal(),

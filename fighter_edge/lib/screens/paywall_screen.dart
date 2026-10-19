@@ -31,8 +31,6 @@ enum PaywallTrigger {
   profile,
   cornerCoach,
   techniqueLibrary,
-  cornerBrief,
-  coach,
   premiumRecipe,
 }
 
@@ -44,8 +42,6 @@ extension PaywallTriggerCode on PaywallTrigger {
         PaywallTrigger.profile => 'profile',
         PaywallTrigger.cornerCoach => 'corner_coach',
         PaywallTrigger.techniqueLibrary => 'technique_library',
-        PaywallTrigger.cornerBrief => 'corner_brief',
-        PaywallTrigger.coach => 'coach',
         PaywallTrigger.premiumRecipe => 'premium_recipe',
       };
 }
@@ -509,10 +505,6 @@ class _Benefits extends StatelessWidget {
   const _Benefits({required this.highlight});
 
   static (String, String) _copy(L l, Feature feature) => switch (feature) {
-        Feature.edgeFuelAiCoach => (
-            l.paywallBenefitBriefTitle,
-            l.paywallBenefitBriefBody
-          ),
         Feature.edgeFuelPremiumRecipes => (
             l.paywallBenefitRecipesTitle,
             l.paywallBenefitRecipesBody
