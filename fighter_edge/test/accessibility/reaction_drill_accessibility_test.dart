@@ -86,15 +86,15 @@ void main() {
   });
 
   testWidgets(
-      'a seven-move call fits the screen at 200% text, with reduced motion',
+      'a five-move call fits the screen at 200% text, with reduced motion',
       (tester) async {
     _largeTextBoldHighContrastNoMotion(tester);
     final spec = ReactionDrillSpec.of(
         ReactionDiscipline.mma, ReactionLevel.advancedPlus);
-    // Pick a seed whose drill really does call a 6–7 move sequence early.
+    // Pick a seed whose drill really does open on a five-move sequence.
     final seed = List.generate(200, (i) => i).firstWhere((s) {
       final g = ReactionCueGenerator(spec, random: Random(s));
-      return g.next().commands.length == 7;
+      return g.next().commands.length == 5;
     });
     final handle = tester.ensureSemantics();
     final repo = await makeRepo(signedIn: true);
@@ -110,7 +110,7 @@ void main() {
     // cross-fade to wait through.
     await tester.pump();
     final first = ReactionCueGenerator(spec, random: Random(seed)).next();
-    expect(first.commands, hasLength(7));
+    expect(first.commands, hasLength(5));
     for (final c in first.commands) {
       expect(findDrillMove(c.label), findsOneWidget);
     }
@@ -120,7 +120,7 @@ void main() {
     expect(find.bySemanticsLabel(first.spoken), findsOneWidget);
 
     // Every later call, to the end of the drill, still fits.
-    for (var t = 0; t < 95; t++) {
+    for (var t = 0; t < 3 * 180 + 2 * 60 + 8; t++) {
       await tester.pump(const Duration(seconds: 1));
       expectNoFlutterException(tester);
     }

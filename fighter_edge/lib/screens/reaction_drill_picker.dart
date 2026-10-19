@@ -214,29 +214,25 @@ class _SpecCard extends StatelessWidget {
     String range(int minMs, int maxMs) =>
         '${seconds.format(minMs / 1000)}–${seconds.format(maxMs / 1000)}';
 
-    final fastest = spec.windows.first.window.min;
-    final slowest = spec.windows.last.window.max;
+    final (fastest, slowest) = spec.reactionMs;
     final moves = spec.minLength == spec.maxLength
         ? '${spec.minLength}'
         : '${spec.minLength}–${spec.maxLength}';
     final stats = [
       _Stat(
           label: l.reactionStatDuration,
-          value: formatDrillClock(spec.duration)),
+          value: '${spec.rounds} × ${formatDrillClock(spec.roundDuration)}'),
       _Stat(label: l.reactionStatMoves, value: moves),
       _Stat(label: l.reactionStatReact, value: '${range(fastest, slowest)} s'),
     ];
 
-    final recovery = spec.recovery;
     final blockRest = spec.blockRest;
     final notes = [
-      if (recovery != null)
-        l.reactionRecoveryNote(
-            range(recovery.pause.min, recovery.pause.max), recovery.minLength),
+      l.reactionRoundRestNote(formatDrillClock(spec.restDuration)),
+      l.reactionMoveTimeNote,
       if (blockRest != null)
         l.reactionBlockRestNote(
-            seconds
-                .format((blockRest.rest.min + blockRest.rest.max) / 2 / 1000),
+            seconds.format(blockRest.rest.inMilliseconds / 1000),
             blockRest.minCalls,
             blockRest.maxCalls),
     ];

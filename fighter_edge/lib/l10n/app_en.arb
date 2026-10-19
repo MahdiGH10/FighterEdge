@@ -306,13 +306,6 @@
   "reactionLeaveBody": "This run will end.",
   "reactionLeaveStay": "Keep going",
   "reactionLeaveConfirm": "Leave",
-  "reactionRecoveryNote": "+{time} s to reset after {moves}+ moves",
-  "@reactionRecoveryNote": {
-    "placeholders": {
-      "time": { "type": "String" },
-      "moves": { "type": "int" }
-    }
-  },
   "reactionBlockRestNote": "+{time} s rest every {min}–{max} calls",
   "@reactionBlockRestNote": {
     "placeholders": {
@@ -759,5 +752,20 @@
 "deleteAccountFailed": "Couldn't delete your account. Check your connection and try again.",
 "syncNotSaved": "Some changes weren't saved to your account.",
   "syncRetry": "Retry",
-  "syncRetrying": "Retrying…"
+  "syncRetrying": "Retrying…",
+  "reactionRest": "REST",
+  "reactionRoundOf": "ROUND {n} OF {total}",
+  "@reactionRoundOf": {
+    "placeholders": {
+      "n": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "reactionRoundRestNote": "{time} rest between rounds",
+  "@reactionRoundRestNote": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "reactionMoveTimeNote": "Plus the time the moves themselves take."
 }

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/training/reaction/reaction_cue_generator.dart';
 import 'package:fighter_edge/training/reaction/reaction_drill.dart';
+import 'package:fighter_edge/training/reaction/reaction_timing.dart';
 
 List<ReactionCue> _cues(ReactionDrillSpec spec, {int seed = 7, int n = 2000}) {
   final generator = ReactionCueGenerator(spec, random: Random(seed));
@@ -66,19 +67,41 @@ void main() {
   });
 
   group('Levels', () {
-    test('run for the lengths the coaching plan sets', () {
-      const expected = {
-        ReactionDiscipline.grappling: [30, 60, 120, 150],
-        ReactionDiscipline.striking: [30, 90, 150, 90],
-        ReactionDiscipline.mma: [30, 90, 150, 90],
+    test('run the rounds the coaching plan sets', () {
+      // Work minutes per level; rest is one minute.
+      const work = [1, 2, 3, 3];
+      const rounds = {
+        ReactionDiscipline.grappling: 2,
+        ReactionDiscipline.striking: 3,
+        ReactionDiscipline.mma: 3,
       };
-      for (final entry in expected.entries) {
+      for (final entry in rounds.entries) {
         for (final level in ReactionLevel.values) {
+          final spec = _spec(entry.key, level);
+          final reason = '${entry.key} $level';
+          expect(spec.rounds, entry.value, reason: reason);
+          expect(spec.roundDuration, Duration(minutes: work[level.index]),
+              reason: reason);
+          expect(spec.restDuration, const Duration(minutes: 1), reason: reason);
+          expect(spec.workDuration, spec.roundDuration * entry.value);
           expect(
-            _spec(entry.key, level).duration.inSeconds,
-            entry.value[level.index],
-            reason: '${entry.key} $level',
-          );
+              spec.totalDuration,
+              spec.workDuration +
+                  const Duration(minutes: 1) * (entry.value - 1),
+              reason: reason);
+        }
+      }
+    });
+
+    test('a harder level never runs shorter than an easier one', () {
+      for (final d in ReactionDiscipline.values) {
+        for (var i = 1; i < ReactionLevel.values.length; i++) {
+          final easy = _spec(d, ReactionLevel.values[i - 1]);
+          final hard = _spec(d, ReactionLevel.values[i]);
+          expect(hard.roundDuration, greaterThanOrEqualTo(easy.roundDuration));
+          expect(hard.workDuration, greaterThanOrEqualTo(easy.workDuration));
+          expect(hard.maxLength, greaterThanOrEqualTo(easy.maxLength));
+          expect(hard.minLength, greaterThanOrEqualTo(easy.minLength));
         }
       }
     });
@@ -90,12 +113,12 @@ void main() {
       }
     });
 
-    test('striking and MMA calls stay within each level\'s length', () {
+    test('striking and MMA calls stay within each level length', () {
       const bounds = {
         ReactionLevel.beginner: (1, 2),
-        ReactionLevel.intermediate: (1, 4),
-        ReactionLevel.advanced: (2, 5),
-        ReactionLevel.advancedPlus: (1, 7),
+        ReactionLevel.intermediate: (1, 3),
+        ReactionLevel.advanced: (2, 4),
+        ReactionLevel.advancedPlus: (2, 5),
       };
       for (final d in [ReactionDiscipline.striking, ReactionDiscipline.mma]) {
         for (final MapEntry(key: level, value: (lo, hi)) in bounds.entries) {
@@ -106,68 +129,122 @@ void main() {
         }
       }
     });
+
+    test('only wrestling has block rest, and it eases off with the level', () {
+      expect(
+          _spec(ReactionDiscipline.striking, ReactionLevel.beginner).blockRest,
+          isNull);
+      expect(_spec(ReactionDiscipline.mma, ReactionLevel.beginner).blockRest,
+          isNull);
+      final rests = [
+        for (final l in ReactionLevel.values)
+          _spec(ReactionDiscipline.grappling, l).blockRest,
+      ];
+      expect(rests.last, isNull);
+      for (var i = 1; i < 3; i++) {
+        expect(rests[i]!.rest, lessThan(rests[i - 1]!.rest));
+        expect(rests[i]!.minCalls, greaterThan(rests[i - 1]!.minCalls));
+      }
+    });
   });
 
   group('Timing', () {
     int ms(ReactionCue c) => c.gapAfter.inMilliseconds;
 
-    test('beginner never leaves more than 1.5 s between calls', () {
+    test('every cue carries the floor, and its gap never goes below it', () {
       for (final d in ReactionDiscipline.values) {
-        final gaps = _cues(_spec(d, ReactionLevel.beginner)).map(ms);
-        expect(gaps.every((g) => g >= 1000 && g <= 1500), isTrue, reason: '$d');
+        for (final level in ReactionLevel.values) {
+          for (final c in _cues(_spec(d, level), n: 500)) {
+            expect(
+                c.minGap,
+                Duration(
+                    milliseconds: ReactionTiming.floorMs(c.commands, level)));
+            expect(c.gapAfter, greaterThanOrEqualTo(c.minGap),
+                reason: '$d $level $c');
+          }
+        }
       }
     });
 
-    test('wrestling advanced rests about a second every 3–4 calls', () {
-      final cues =
-          _cues(_spec(ReactionDiscipline.grappling, ReactionLevel.advanced));
-      final restAt = [
-        for (var i = 0; i < cues.length; i++)
-          if (ms(cues[i]) > 1000) i,
-      ];
-      // Base gap is 0.8–1.0 s; with the rest it is 1.7–2.1 s.
-      for (final i in restAt) {
-        expect(ms(cues[i]), inInclusiveRange(1700, 2100));
-      }
-      for (var k = 1; k < restAt.length; k++) {
-        expect(restAt[k] - restAt[k - 1], inInclusiveRange(3, 4));
-      }
-      expect(restAt.first, inInclusiveRange(2, 3));
-    });
-
-    test('advanced striking gives longer calls more time, then a breather', () {
-      final cues =
-          _cues(_spec(ReactionDiscipline.striking, ReactionLevel.advanced));
-      for (final c in cues) {
-        final expected = switch (c.commands.length) {
-          2 => (900, 1100),
-          3 => (1400, 1600),
-          _ => (1900 + 1300, 2100 + 1700),
-        };
-        expect(ms(c), inInclusiveRange(expected.$1, expected.$2),
-            reason: '${c.commands.length} moves');
+    test('gaps follow the model: movement plus a jittered reaction', () {
+      // Wrestling is left out: block rest adds to its gaps (tested below).
+      for (final d in [ReactionDiscipline.striking, ReactionDiscipline.mma]) {
+        for (final level in ReactionLevel.values) {
+          final j = ReactionTiming.of(level).jitter;
+          for (final c in _cues(_spec(d, level))) {
+            final movement = ReactionTiming.movementMs(c.commands, level);
+            final reaction =
+                ReactionTiming.reactionMs(c.commands.length, level);
+            expect(
+                ms(c) - movement,
+                inInclusiveRange((reaction * (1 - j)).floor(),
+                    (reaction * (1 + j)).ceil() + 2000),
+                reason: '$d $level $c');
+          }
+        }
       }
     });
 
-    test('intermediate adds 1–1.5 s after a 3–4 move sequence', () {
-      final cues =
-          _cues(_spec(ReactionDiscipline.mma, ReactionLevel.intermediate));
-      for (final c in cues) {
-        final long = c.commands.length >= 3;
-        expect(
-          ms(c),
-          long ? inInclusiveRange(2300, 3200) : inInclusiveRange(1300, 1700),
+    test('wrestling rests every few calls at the cadence of its level', () {
+      for (final level in [
+        ReactionLevel.beginner,
+        ReactionLevel.intermediate,
+        ReactionLevel.advanced,
+      ]) {
+        final real = _spec(ReactionDiscipline.grappling, level).blockRest!;
+        // The same cadence with a rest too long to mistake for anything else.
+        final spec = ReactionDrillSpec(
+          discipline: ReactionDiscipline.grappling,
+          level: level,
+          rounds: 2,
+          roundDuration: const Duration(minutes: 1),
+          restDuration: const Duration(minutes: 1),
+          minLength: 1,
+          maxLength: 1,
+          blockRest: BlockRest(
+              real.minCalls, real.maxCalls, const Duration(minutes: 5)),
         );
+        final cues = _cues(spec);
+        final restAt = [
+          for (var i = 0; i < cues.length; i++)
+            if (ms(cues[i]) > 200000) i,
+        ];
+        expect(restAt, isNotEmpty, reason: '$level');
+        expect(restAt.first,
+            inInclusiveRange(real.minCalls - 1, real.maxCalls - 1));
+        for (var k = 1; k < restAt.length; k++) {
+          expect(restAt[k] - restAt[k - 1],
+              inInclusiveRange(real.minCalls, real.maxCalls),
+              reason: '$level');
+        }
+        // And the rest is added on top of an ordinary gap.
+        for (final i in restAt) {
+          final movement = ReactionTiming.movementMs(cues[i].commands, level);
+          final reaction = ReactionTiming.reactionMs(1, level);
+          expect(ms(cues[i]) - 300000 - movement,
+              greaterThanOrEqualTo((reaction * 0.5).floor()));
+        }
       }
     });
 
-    test('advanced+ gives about 3 s more after a 6–7 move sequence', () {
-      final cues =
-          _cues(_spec(ReactionDiscipline.striking, ReactionLevel.advancedPlus));
-      final longest = cues.where((c) => c.commands.length >= 6);
-      expect(longest, isNotEmpty);
-      for (final c in longest) {
-        expect(ms(c), inInclusiveRange(2400 + 2700, 2600 + 3300));
+    test('Advanced+ wrestling has no block rest at all', () {
+      const level = ReactionLevel.advancedPlus;
+      final top = (ReactionTiming.reactionMs(1, level) * 1.35).ceil() + 2000;
+      for (final c in _cues(_spec(ReactionDiscipline.grappling, level))) {
+        expect(ms(c) - ReactionTiming.movementMs(c.commands, level),
+            lessThanOrEqualTo(top));
+      }
+    });
+
+    test('a longer or costlier call always gets a longer nominal gap', () {
+      for (final level in ReactionLevel.values) {
+        final jab = [ReactionCommands.jab];
+        final jabCross = [ReactionCommands.jab, ReactionCommands.cross];
+        final kick = [ReactionCommands.highKick];
+        expect(ReactionTiming.nominalGapMs(jabCross, level),
+            greaterThan(ReactionTiming.nominalGapMs(jab, level)));
+        expect(ReactionTiming.nominalGapMs(kick, level),
+            greaterThan(ReactionTiming.nominalGapMs(jab, level)));
       }
     });
   });

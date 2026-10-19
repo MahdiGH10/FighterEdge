@@ -1393,12 +1393,6 @@ abstract class L {
   /// **'Leave'**
   String get reactionLeaveConfirm;
 
-  /// No description provided for @reactionRecoveryNote.
-  ///
-  /// In en, this message translates to:
-  /// **'+{time} s to reset after {moves}+ moves'**
-  String reactionRecoveryNote(String time, int moves);
-
   /// No description provided for @reactionBlockRestNote.
   ///
   /// In en, this message translates to:
@@ -3144,6 +3138,30 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Retrying…'**
   String get syncRetrying;
+
+  /// No description provided for @reactionRest.
+  ///
+  /// In en, this message translates to:
+  /// **'REST'**
+  String get reactionRest;
+
+  /// No description provided for @reactionRoundOf.
+  ///
+  /// In en, this message translates to:
+  /// **'ROUND {n} OF {total}'**
+  String reactionRoundOf(int n, int total);
+
+  /// No description provided for @reactionRoundRestNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} rest between rounds'**
+  String reactionRoundRestNote(String time);
+
+  /// No description provided for @reactionMoveTimeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus the time the moves themselves take.'**
+  String get reactionMoveTimeNote;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

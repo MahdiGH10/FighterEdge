@@ -760,11 +760,6 @@ class LDe extends L {
   String get reactionLeaveConfirm => 'Verlassen';
 
   @override
-  String reactionRecoveryNote(String time, int moves) {
-    return '+$time s zum Zurücksetzen nach $moves+ Bewegungen';
-  }
-
-  @override
   String reactionBlockRestNote(String time, int min, int max) {
     return '+$time s Pause alle $min–$max Rufe';
   }
@@ -1813,4 +1808,21 @@ class LDe extends L {
 
   @override
   String get syncRetrying => 'Wird erneut versucht …';
+
+  @override
+  String get reactionRest => 'PAUSE';
+
+  @override
+  String reactionRoundOf(int n, int total) {
+    return 'RUNDE $n VON $total';
+  }
+
+  @override
+  String reactionRoundRestNote(String time) {
+    return '$time Pause zwischen den Runden';
+  }
+
+  @override
+  String get reactionMoveTimeNote =>
+      'Dazu kommt die Zeit für die Bewegungen selbst.';
 }

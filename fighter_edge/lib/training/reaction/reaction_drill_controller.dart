@@ -6,21 +6,29 @@ import 'package:flutter/foundation.dart';
 import 'coach_voice.dart';
 import 'reaction_cue_generator.dart';
 import 'reaction_drill.dart';
+import 'reaction_timing.dart';
 
-enum ReactionDrillPhase { ready, countdown, live, paused, finished }
+enum ReactionDrillPhase { ready, countdown, live, rest, paused, finished }
 
 /// Runs one reaction drill in real time: a short "get in stance" countdown,
-/// then calls until the clock runs out.
+/// then calls until the round's clock runs out, a timed rest, and the next
+/// round, until the last one ends.
 ///
 /// Each call is spoken to completion and *then* its gap starts, so the
 /// athlete's reaction time never depends on how long a line takes to say.
-/// The drill clock, however, is the wall clock: a drill lasts its full
-/// duration, and when time is up the call in progress is cut off.
+/// The round clock, however, is the wall clock: a round lasts its full
+/// duration, and when time is up the call in progress is cut off. A call
+/// that could not finish before the round ends (its speech plus the least
+/// time the athlete needs) is not started.
 class ReactionDrillController extends ChangeNotifier {
   final ReactionDrillSpec spec;
   final CoachVoice _voice;
   final Random Function() _randomFactory;
   final int countdownSeconds;
+
+  /// After a pause the athlete is only a step out of stance, so the countdown
+  /// back in is shorter than the one that starts a drill or a round.
+  static const resumeCountdownSeconds = 2;
 
   static const _tick = Duration(milliseconds: 100);
 
@@ -45,11 +53,36 @@ class ReactionDrillController extends ChangeNotifier {
   /// Seconds left in the "get in stance" countdown.
   int get countdown => _countdown;
 
+  /// Work time elapsed in the current round.
   Duration _elapsed = Duration.zero;
   Duration get elapsed => _elapsed;
-  Duration get remaining => spec.duration - _elapsed;
-  double get progress =>
-      (_elapsed.inMilliseconds / spec.duration.inMilliseconds).clamp(0, 1);
+
+  Duration _completedWork = Duration.zero;
+
+  /// Work time over the whole drill so far, rests excluded.
+  Duration get workElapsed => _completedWork + _elapsed;
+
+  int _round = 1;
+
+  /// The round being played (1-based). During a rest it is the next one.
+  int get round => _round;
+  int get rounds => spec.rounds;
+
+  Duration _restLeft = Duration.zero;
+
+  /// Whether the drill is in (or paused in) the rest between rounds.
+  bool get isResting => _restLeft > Duration.zero;
+
+  /// Time left on the clock the athlete sees: the rest while resting,
+  /// otherwise the round.
+  Duration get remaining =>
+      isResting ? _restLeft : spec.roundDuration - _elapsed;
+
+  double get progress => isResting
+      ? (1 - _restLeft.inMilliseconds / spec.restDuration.inMilliseconds)
+          .clamp(0, 1)
+      : (_elapsed.inMilliseconds / spec.roundDuration.inMilliseconds)
+          .clamp(0, 1);
 
   ReactionCue? _cue;
 
@@ -64,7 +97,8 @@ class ReactionDrillController extends ChangeNotifier {
   bool get hasVoice => _voice.isAvailable;
   bool get isRunning =>
       _phase == ReactionDrillPhase.countdown ||
-      _phase == ReactionDrillPhase.live;
+      _phase == ReactionDrillPhase.live ||
+      _phase == ReactionDrillPhase.rest;
 
   ReactionCueGenerator? _generator;
 
@@ -82,10 +116,13 @@ class ReactionDrillController extends ChangeNotifier {
     _halt();
     _generator = ReactionCueGenerator(spec, random: _randomFactory());
     _elapsed = Duration.zero;
+    _completedWork = Duration.zero;
+    _round = 1;
+    _restLeft = Duration.zero;
     _cue = null;
     _calls = 0;
     _commands = 0;
-    return _go();
+    return _go(countdownSeconds);
   }
 
   /// Holds the drill where it is: the clock stops and the voice is cut off.
@@ -98,20 +135,28 @@ class ReactionDrillController extends ChangeNotifier {
   }
 
   /// Picks a paused drill back up. The athlete has stepped out of stance, so
-  /// it goes through the countdown again before the next call.
+  /// it goes through a short countdown again before the next call. A drill
+  /// paused in a rest carries on resting first.
   Future<void> resume() {
     if (_phase != ReactionDrillPhase.paused) return Future.value();
-    return _go();
+    return _go(min(countdownSeconds, resumeCountdownSeconds));
   }
 
-  /// The countdown, then calls until the clock runs out, continuing from
-  /// [_elapsed] with the run's own generator.
-  Future<void> _go() async {
+  /// Any rest still owed, the countdown, then calls until the round's clock
+  /// runs out, continuing from [_elapsed] with the run's own generator.
+  Future<void> _go(int countdownFrom) async {
     final run = ++_run;
     final generator = _generator!;
+
+    if (isResting) {
+      if (!await _rest(run)) return;
+      // A rest ends with a full countdown into the next round.
+      countdownFrom = countdownSeconds;
+    }
+
     _cue = null;
     _phase = ReactionDrillPhase.countdown;
-    _countdown = countdownSeconds;
+    _countdown = countdownFrom;
     notifyListeners();
 
     unawaited(_voice.say('Get ready!'));
@@ -127,8 +172,8 @@ class ReactionDrillController extends ChangeNotifier {
     final from = _elapsed;
     _clock = Timer.periodic(_tick, (timer) {
       _elapsed = from + _tick * timer.tick;
-      if (_elapsed >= spec.duration) {
-        _finish();
+      if (_elapsed >= spec.roundDuration) {
+        _endRound();
       } else {
         notifyListeners();
       }
@@ -136,6 +181,13 @@ class ReactionDrillController extends ChangeNotifier {
 
     while (run == _run) {
       final cue = generator.next();
+      final left = spec.roundDuration - _elapsed;
+      if (SpeechEstimate.expected(cue.spoken) + cue.minGap > left) {
+        // Too late in the round to say this and give the athlete time to do
+        // it. Stay quiet until the round ends.
+        await _wait(left > _tick ? left : _tick);
+        continue;
+      }
       _cue = cue;
       _calls++;
       _commands += cue.commands.length;
@@ -144,6 +196,41 @@ class ReactionDrillController extends ChangeNotifier {
       if (run != _run) return;
       await _wait(cue.gapAfter);
     }
+  }
+
+  /// Counts the rest down to the countdown that opens the next round.
+  /// Returns false if the run was superseded.
+  Future<bool> _rest(int run) async {
+    _cue = null;
+    _phase = ReactionDrillPhase.rest;
+    notifyListeners();
+    final lead = Duration(seconds: countdownSeconds);
+    while (_restLeft > lead) {
+      final step = _restLeft - lead < const Duration(seconds: 1)
+          ? _restLeft - lead
+          : const Duration(seconds: 1);
+      await _wait(step);
+      if (run != _run) return false;
+      _restLeft -= step;
+      notifyListeners();
+    }
+    _restLeft = Duration.zero;
+    return true;
+  }
+
+  /// A round is over: the last one ends the drill, any other starts the rest.
+  void _endRound() {
+    if (_round >= spec.rounds) {
+      _finish();
+      return;
+    }
+    _halt();
+    _completedWork += spec.roundDuration;
+    _round++;
+    _elapsed = Duration.zero;
+    _restLeft = spec.restDuration;
+    unawaited(_voice.stop().then((_) => _voice.say('Rest')));
+    unawaited(_go(countdownSeconds));
   }
 
   /// Ends the drill early and returns to the start screen state. [elapsed]
@@ -159,7 +246,7 @@ class ReactionDrillController extends ChangeNotifier {
 
   void _finish() {
     _halt();
-    _elapsed = spec.duration;
+    _elapsed = spec.roundDuration;
     _phase = ReactionDrillPhase.finished;
     notifyListeners();
     unawaited(_voice.stop().then((_) => _voice.say('Time!')));

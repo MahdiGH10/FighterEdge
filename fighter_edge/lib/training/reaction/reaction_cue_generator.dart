@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'reaction_drill.dart';
+import 'reaction_timing.dart';
 
 /// Endless, unpredictable calls for one [ReactionDrillSpec].
 ///
@@ -32,20 +33,18 @@ class ReactionCueGenerator {
     final length = _between(spec.minLength, spec.maxLength);
     final commands = [for (var i = 0; i < length; i++) _deal()];
 
-    var gapMs = _draw(spec.windowFor(length));
-    final recovery = spec.recovery;
-    if (recovery != null && length >= recovery.minLength) {
-      gapMs += _draw(recovery.pause);
-    }
+    var gapMs = ReactionTiming.sampleGapMs(commands, spec.level, _random);
     final block = spec.blockRest;
     if (block != null && ++_callsInBlock >= _blockSize) {
-      gapMs += _draw(block.rest);
+      gapMs += block.rest.inMilliseconds;
       _callsInBlock = 0;
       _blockSize = _nextBlockSize();
     }
     return ReactionCue(
       List.unmodifiable(commands),
       Duration(milliseconds: gapMs),
+      minGap:
+          Duration(milliseconds: ReactionTiming.floorMs(commands, spec.level)),
     );
   }
 
@@ -71,8 +70,6 @@ class ReactionCueGenerator {
     final block = spec.blockRest;
     return block == null ? 0 : _between(block.minCalls, block.maxCalls);
   }
-
-  int _draw(MsRange range) => _between(range.min, range.max);
 
   int _between(int min, int max) => min + _random.nextInt(max - min + 1);
 }

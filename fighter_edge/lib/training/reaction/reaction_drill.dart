@@ -7,6 +7,8 @@
 /// controller.
 library;
 
+import 'reaction_timing.dart';
+
 /// One call the coach can make.
 class ReactionCommand {
   final String id;
@@ -148,177 +150,70 @@ enum ReactionDiscipline {
 
 enum ReactionLevel { beginner, intermediate, advanced, advancedPlus }
 
-/// A closed range of milliseconds a timing is drawn from. "About 1 second"
-/// becomes 900–1100 ms, so no two gaps are exactly alike.
-class MsRange {
-  final int min;
-  final int max;
-  const MsRange(this.min, this.max) : assert(min <= max);
-
-  /// Centered on [ms], give or take [spread].
-  const MsRange.about(int ms, {int spread = 100})
-      : min = ms - spread,
-        max = ms + spread;
-
-  @override
-  String toString() => '$min–$max ms';
-}
-
-/// Reaction window for calls up to [maxLength] commands long.
-class ReactionWindow {
-  final int maxLength;
-  final MsRange window;
-  const ReactionWindow(this.maxLength, this.window);
-}
-
-/// Extra recovery after a call at least [minLength] commands long.
-class RecoveryPause {
-  final int minLength;
-  final MsRange pause;
-  const RecoveryPause(this.minLength, this.pause);
-}
-
-/// Extra rest after every few calls, whatever their length (the wrestling
-/// Advanced "3–4 calls, then breathe" rhythm).
-class BlockRest {
-  final int minCalls;
-  final int maxCalls;
-  final MsRange rest;
-  const BlockRest(this.minCalls, this.maxCalls, this.rest);
-}
-
-/// Everything that makes one level of one discipline hard: how long it runs,
-/// how long each call is, and how much time the athlete gets after it.
+/// Everything that makes one level of one discipline hard: how many rounds it
+/// has and how long they are, how long each call is, and any extra breathing
+/// time. The time the athlete gets after each call comes from
+/// [ReactionTiming], because it depends on what the call asks for.
 ///
 /// Every gap is measured from the moment the voice *finishes* the call, so
-/// a seven-command sequence never eats into its own reaction time.
+/// a five-move sequence never eats into its own reaction time.
 class ReactionDrillSpec {
   final ReactionDiscipline discipline;
   final ReactionLevel level;
-  final Duration duration;
+
+  /// Work rounds, each [roundDuration] long, with [restDuration] between.
+  final int rounds;
+  final Duration roundDuration;
+  final Duration restDuration;
 
   /// Commands per call, inclusive.
   final int minLength;
   final int maxLength;
 
-  /// Ordered by [ReactionWindow.maxLength]; the first that fits a call's
-  /// length applies.
-  final List<ReactionWindow> windows;
-  final RecoveryPause? recovery;
+  /// Extra rest after every few calls; null for none.
   final BlockRest? blockRest;
 
   const ReactionDrillSpec({
     required this.discipline,
     required this.level,
-    required this.duration,
+    required this.rounds,
+    required this.roundDuration,
+    required this.restDuration,
     required this.minLength,
     required this.maxLength,
-    required this.windows,
-    this.recovery,
     this.blockRest,
   });
 
-  MsRange windowFor(int length) =>
-      windows.firstWhere((w) => length <= w.maxLength).window;
+  /// All the time spent calling moves, over every round.
+  Duration get workDuration => roundDuration * rounds;
+
+  /// The whole drill, rests included.
+  Duration get totalDuration => workDuration + restDuration * (rounds - 1);
+
+  /// The reaction time after the voice stops, in ms, as (shortest, longest)
+  /// before jitter, movement time not included. What the picker shows.
+  (int, int) get reactionMs =>
+      ReactionTiming.reactionRangeMs(discipline, level);
 
   static ReactionDrillSpec of(
     ReactionDiscipline discipline,
     ReactionLevel level,
-  ) =>
-      discipline == ReactionDiscipline.grappling
-          ? _grappling(level)
-          : _combinations(discipline, level);
-
-  // Wrestling calls are always a single command: rolls and sprawls are
-  // whole-body movements, not something to chain mid-sentence.
-  static ReactionDrillSpec _grappling(ReactionLevel level) {
-    const d = ReactionDiscipline.grappling;
-    return switch (level) {
-      ReactionLevel.beginner => ReactionDrillSpec(
-          discipline: d,
-          level: level,
-          duration: const Duration(seconds: 30),
-          minLength: 1,
-          maxLength: 1,
-          windows: const [ReactionWindow(1, MsRange(1000, 1500))],
-        ),
-      ReactionLevel.intermediate => ReactionDrillSpec(
-          discipline: d,
-          level: level,
-          duration: const Duration(minutes: 1),
-          minLength: 1,
-          maxLength: 1,
-          windows: const [ReactionWindow(1, MsRange.about(1000))],
-        ),
-      ReactionLevel.advanced => ReactionDrillSpec(
-          discipline: d,
-          level: level,
-          duration: const Duration(minutes: 2),
-          minLength: 1,
-          maxLength: 1,
-          windows: const [ReactionWindow(1, MsRange.about(900))],
-          blockRest: const BlockRest(3, 4, MsRange.about(1000)),
-        ),
-      ReactionLevel.advancedPlus => ReactionDrillSpec(
-          discipline: d,
-          level: level,
-          duration: const Duration(minutes: 2, seconds: 30),
-          minLength: 1,
-          maxLength: 1,
-          windows: const [ReactionWindow(1, MsRange.about(1000))],
-        ),
-    };
-  }
-
-  // Striking and MMA share one progression; only the vocabulary differs.
-  static ReactionDrillSpec _combinations(
-    ReactionDiscipline d,
-    ReactionLevel level,
   ) {
-    // Longer calls earn more time to finish the last movement.
-    const scaled = [
-      ReactionWindow(2, MsRange.about(1000)),
-      ReactionWindow(3, MsRange.about(1500)),
-      ReactionWindow(5, MsRange.about(2000)),
-      ReactionWindow(7, MsRange.about(2500)),
-    ];
-    return switch (level) {
-      ReactionLevel.beginner => ReactionDrillSpec(
-          discipline: d,
-          level: level,
-          duration: const Duration(seconds: 30),
-          minLength: 1,
-          maxLength: 2,
-          windows: const [ReactionWindow(2, MsRange(1000, 1500))],
-        ),
-      ReactionLevel.intermediate => ReactionDrillSpec(
-          discipline: d,
-          level: level,
-          duration: const Duration(minutes: 1, seconds: 30),
-          minLength: 1,
-          maxLength: 4,
-          windows: const [ReactionWindow(4, MsRange.about(1500, spread: 200))],
-          recovery: const RecoveryPause(3, MsRange(1000, 1500)),
-        ),
-      ReactionLevel.advanced => ReactionDrillSpec(
-          discipline: d,
-          level: level,
-          duration: const Duration(minutes: 2, seconds: 30),
-          minLength: 2,
-          maxLength: 5,
-          windows: scaled,
-          recovery: const RecoveryPause(4, MsRange.about(1500, spread: 200)),
-        ),
-      ReactionLevel.advancedPlus => ReactionDrillSpec(
-          discipline: d,
-          level: level,
-          duration: const Duration(minutes: 1, seconds: 30),
-          minLength: 1,
-          maxLength: 7,
-          windows: scaled,
-          recovery: const RecoveryPause(6, MsRange.about(3000, spread: 300)),
-        ),
-    };
+    final t = ReactionTiming.of(level);
+    // Wrestling calls are always a single command: rolls and sprawls are
+    // whole-body movements, not something to chain mid-sentence. Breathing
+    // room between blocks of calls is a wrestling thing too.
+    final grappling = discipline == ReactionDiscipline.grappling;
+    return ReactionDrillSpec(
+      discipline: discipline,
+      level: level,
+      rounds: ReactionTiming.roundsFor(discipline),
+      roundDuration: t.roundWork,
+      restDuration: t.roundRest,
+      minLength: grappling ? 1 : t.minMoves,
+      maxLength: grappling ? 1 : t.maxMoves,
+      blockRest: grappling ? t.grapplingBlockRest : null,
+    );
   }
 }
 
@@ -330,7 +225,13 @@ class ReactionCue {
   /// Silence after the voice finishes, before the next call.
   final Duration gapAfter;
 
-  const ReactionCue(this.commands, this.gapAfter);
+  /// The shortest that silence could ever have been: the movement itself
+  /// plus a moment to reset. Used to decide whether the call still fits
+  /// before the round ends.
+  final Duration minGap;
+
+  const ReactionCue(this.commands, this.gapAfter,
+      {this.minGap = Duration.zero});
 
   /// The line the voice speaks: short, clipped, no filler words.
   String get spoken => '${commands.map((c) => c.spoken).join(', ')}!';
