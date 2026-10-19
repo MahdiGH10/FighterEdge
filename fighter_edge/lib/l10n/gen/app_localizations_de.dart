@@ -574,13 +574,6 @@ class LDe extends L {
   String get settingsHealthDataWithdrawConfirm => 'Mein Konto löschen';
 
   @override
-  String get settingsAdPrivacy => 'Datenschutz bei Werbung';
-
-  @override
-  String get settingsAdPrivacySubtitle =>
-      'Ändere deine Einwilligung für die freiwilligen Videos';
-
-  @override
   String get deleteAccountSubscriptionWarning =>
       'Das Löschen deines Kontos kündigt dein Abo nicht. Kündige es zuerst in deinen App-Store- oder Google-Play-Einstellungen, sonst verlängert es sich weiter.';
 

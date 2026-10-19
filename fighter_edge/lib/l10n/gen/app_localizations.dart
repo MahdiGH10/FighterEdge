@@ -1093,18 +1093,6 @@ abstract class L {
   /// **'Delete my account'**
   String get settingsHealthDataWithdrawConfirm;
 
-  /// No description provided for @settingsAdPrivacy.
-  ///
-  /// In en, this message translates to:
-  /// **'Ad privacy choices'**
-  String get settingsAdPrivacy;
-
-  /// No description provided for @settingsAdPrivacySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Change what you agreed to for the optional videos'**
-  String get settingsAdPrivacySubtitle;
-
   /// No description provided for @deleteAccountSubscriptionWarning.
   ///
   /// In en, this message translates to:

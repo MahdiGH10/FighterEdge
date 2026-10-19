@@ -570,13 +570,6 @@ class LEn extends L {
   String get settingsHealthDataWithdrawConfirm => 'Delete my account';
 
   @override
-  String get settingsAdPrivacy => 'Ad privacy choices';
-
-  @override
-  String get settingsAdPrivacySubtitle =>
-      'Change what you agreed to for the optional videos';
-
-  @override
   String get deleteAccountSubscriptionWarning =>
       'Deleting your account doesn\'t cancel your subscription. Cancel it first in your App Store or Google Play account settings, or it keeps renewing.';
 
