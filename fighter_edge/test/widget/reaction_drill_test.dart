@@ -16,6 +16,30 @@ import '../helpers/test_harness.dart';
 /// Longer than the call cross-fade, so the previous call has fully left.
 const _callSettle = Duration(milliseconds: 400);
 
+/// The picker is a list, so the command chips can sit below the fold.
+Future<void> _scrollToMix(WidgetTester tester) async {
+  final scrollable = find
+      .descendant(
+          of: find.byType(ReactionDrillPicker),
+          matching: find.byType(Scrollable))
+      .first;
+  await tester.scrollUntilVisible(find.textContaining('IN THE MIX'), 200,
+      scrollable: scrollable);
+  await tester.pumpAndSettle();
+}
+
+/// Back to the top, where the stats are.
+Future<void> _scrollToTop(WidgetTester tester) async {
+  await tester.drag(
+      find
+          .descendant(
+              of: find.byType(ReactionDrillPicker),
+              matching: find.byType(Scrollable))
+          .first,
+      const Offset(0, 3000));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('Train > Reaction picks a drill and shows what it asks',
       (tester) async {
@@ -31,12 +55,15 @@ void main() {
     // commands.
     expect(find.text('3 × 1:00'), findsOneWidget);
     expect(find.text('1–2'), findsOneWidget);
+    await _scrollToMix(tester);
     expect(find.text('IN THE MIX · 24'), findsOneWidget);
+    await _scrollToTop(tester);
 
     await tester.tap(find.text('Wrestling'));
     await tester.tap(find.text('Advanced'));
     await tester.pumpAndSettle();
     expect(find.text('2 × 3:00'), findsOneWidget);
+    await _scrollToMix(tester);
     expect(find.text('IN THE MIX · 7'), findsOneWidget);
     expect(find.textContaining('Cartwheel'), findsOneWidget);
 
@@ -162,8 +189,9 @@ void main() {
     expect(find.text('GET IN STANCE'), findsOneWidget);
     // After a pause the way back into stance is two seconds, not three.
     await tester.pump(const Duration(seconds: 1));
+    await tester.pump(_callSettle);
     expect(find.text('GET IN STANCE'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 700));
     await tester.pump(_callSettle);
     expect(find.text('GET IN STANCE'), findsNothing);
     expect(find.text('CALL 1'), findsNothing,
@@ -291,7 +319,8 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
     await open();
-    expect(find.text('1:30'), findsOneWidget, reason: 'striking advanced+');
+    expect(find.text('3 × 3:00'), findsOneWidget, reason: 'striking advanced+');
+    await _scrollToMix(tester);
     expect(find.text('IN THE MIX · 19'), findsOneWidget);
   });
 }
