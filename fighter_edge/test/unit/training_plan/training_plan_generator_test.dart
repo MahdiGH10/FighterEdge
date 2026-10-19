@@ -374,7 +374,8 @@ void main() {
         goal: TrainingGoal.competitionPrep,
         weekdays: [1, 2, 4, 5],
       ));
-      expect(four.reasons, contains(ReasonCode.extraConditioningForCompetition));
+      expect(
+          four.reasons, contains(ReasonCode.extraConditioningForCompetition));
       final three = _week(_inputs(
         goal: TrainingGoal.competitionPrep,
         weekdays: [1, 3, 5],
@@ -420,7 +421,8 @@ void main() {
           _inputs(level: entry.key, weekdays: [1, 3, 5]),
           templates: GenericTemplateSet.instance,
         );
-        final skill = week.sessions.firstWhere((s) => s.kind == SessionKind.skill);
+        final skill =
+            week.sessions.firstWhere((s) => s.kind == SessionKind.skill);
         expect(skill.estimatedMinutes, entry.value, reason: '${entry.key}');
       }
     });
@@ -502,7 +504,7 @@ void main() {
           disciplines: [Discipline.boxing, Discipline.wrestling],
           goal: TrainingGoal.competitionPrep,
           level: level,
-          weekdays: [1, 2, 3, 4, 5],
+          weekdays: [1, 2, 3, 4, 5, 6],
           fight: fight,
         );
 
@@ -751,10 +753,14 @@ void main() {
     });
 
     test('far from the fight the plan is general and says so', () {
-      final week = weekOf(DateTime.utc(2026, 10, 5));
+      final week = weekOf(DateTime.utc(2026, 9, 28));
+      var general = 0;
       for (final s in week.sessions) {
+        if (fight.phaseOn(s.date) != TrainingPhase.general) continue;
+        general++;
         expect(s.reasons, contains(ReasonCode.generalPhase));
       }
+      expect(general, greaterThan(3));
     });
 
     test('the build phase says so', () {
@@ -799,7 +805,8 @@ void main() {
 
     test('the weigh-in day is a light recovery session', () {
       final week = weekOf(DateTime.utc(2026, 11, 23));
-      final day = week.days.firstWhere((d) => d.date == DateTime.utc(2026, 11, 27));
+      final day =
+          week.days.firstWhere((d) => d.date == DateTime.utc(2026, 11, 27));
       expect(day.type, DayType.weighIn);
       final s = day.sessions.single;
       expect(s.kind, SessionKind.recovery);
@@ -838,8 +845,10 @@ void main() {
 
     test('the week after the fight is light recovery only', () {
       final week = weekOf(DateTime.utc(2026, 11, 30));
-      expect(week.sessions, isNotEmpty);
-      for (final s in week.sessions) {
+      final after = week.sessions
+          .where((s) => fight.phaseOn(s.date) == TrainingPhase.postFight);
+      expect(after, isNotEmpty);
+      for (final s in after) {
         expect(s.kind, SessionKind.recovery);
         expect(s.intensity, Intensity.light);
         expect(s.reasons, contains(ReasonCode.postFightRecovery));
@@ -905,7 +914,8 @@ void main() {
         expect(s.titleKey, s.kind.fallbackTitleKey);
         expect(s.blocks, isEmpty);
         expect(s.reasons, contains(ReasonCode.noTemplateAvailable));
-        expect(s.estimatedMinutes, ExperienceLevel.intermediate.defaultSessionMinutes);
+        expect(s.estimatedMinutes,
+            ExperienceLevel.intermediate.defaultSessionMinutes);
       }
     });
 
