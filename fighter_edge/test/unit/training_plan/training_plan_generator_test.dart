@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
@@ -9,7 +9,6 @@ import 'package:fighter_edge/features/training_plan/domain/models/experience_lev
 import 'package:fighter_edge/features/training_plan/domain/models/fight_context.dart';
 import 'package:fighter_edge/features/training_plan/domain/models/intensity.dart';
 import 'package:fighter_edge/features/training_plan/domain/models/plan_inputs.dart';
-import 'package:fighter_edge/features/training_plan/domain/models/planned_session.dart';
 import 'package:fighter_edge/features/training_plan/domain/models/planned_week.dart';
 import 'package:fighter_edge/features/training_plan/domain/models/reason_code.dart';
 import 'package:fighter_edge/features/training_plan/domain/models/session_kind.dart';
@@ -67,8 +66,6 @@ FightContext _fight(DateTime fightDate, {DateTime? weighIn}) => FightContext(
         category: CompetitionCategory.amateurStriking,
       )!,
     );
-
-List<PlannedSession> _sessions(PlannedWeek week) => week.sessions.toList();
 
 Set<int> _trainingWeekdays(PlannedWeek week) => {
       for (final s in week.sessions) s.date.weekday,
