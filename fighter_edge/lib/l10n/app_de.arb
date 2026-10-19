@@ -297,7 +297,8 @@
   "dashboardRecovery": "Deine geplanten Einheiten sind erledigt. Nimm dir Zeit zur Erholung.",
   "dashboardPlanHint": "Öffne Training, um deine Woche zu planen.",
   "dashboardNextUp": "Als Nächstes: {day} · {session}",
-  "dashboardStartSession": "Einheit starten",
+  "dashboardLogSession": "Einheit erfassen",
+  "dashboardTimerAction": "Runden-Timer",
   "dashboardOpenCamp": "Trainingsplan öffnen",
   "dashboardSetFuel": "Ernährungsziel festlegen",
   "dashboardFuelInfo": "Warum dieses Ziel wichtig ist",
@@ -357,7 +358,9 @@
   "nutritionMacroGrams": "{value} / {target} g",
   "nutritionGrams": "{value} g",
   "trainingSessionDone": "Erledigt",
-  "trainingStartSession": "{session} starten",
+  "trainingLogNamedSession": "{session} erfassen",
+  "trainTools": "Werkzeuge",
+  "trainTimerToolSubtitle": "Freie Intervalle für Sparring, MMA, Boxen oder BJJ",
   "@nutritionOverTarget": {
     "placeholders": {
       "kcal": {
@@ -382,7 +385,7 @@
       }
     }
   },
-  "@trainingStartSession": {
+  "@trainingLogNamedSession": {
     "placeholders": {
       "session": {
         "type": "String"

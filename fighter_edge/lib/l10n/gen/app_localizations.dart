@@ -1537,11 +1537,17 @@ abstract class L {
   /// **'Next: {day} · {session}'**
   String dashboardNextUp(String day, String session);
 
-  /// No description provided for @dashboardStartSession.
+  /// No description provided for @dashboardLogSession.
   ///
   /// In en, this message translates to:
-  /// **'Start session'**
-  String get dashboardStartSession;
+  /// **'Log session'**
+  String get dashboardLogSession;
+
+  /// No description provided for @dashboardTimerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Round timer'**
+  String get dashboardTimerAction;
 
   /// No description provided for @dashboardOpenCamp.
   ///
@@ -1693,11 +1699,23 @@ abstract class L {
   /// **'Done'**
   String get trainingSessionDone;
 
-  /// No description provided for @trainingStartSession.
+  /// No description provided for @trainingLogNamedSession.
   ///
   /// In en, this message translates to:
-  /// **'Start {session}'**
-  String trainingStartSession(String session);
+  /// **'Log {session}'**
+  String trainingLogNamedSession(String session);
+
+  /// No description provided for @trainTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get trainTools;
+
+  /// No description provided for @trainTimerToolSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open intervals for sparring, MMA, boxing or BJJ'**
+  String get trainTimerToolSubtitle;
 
   /// No description provided for @onboardingBack.
   ///

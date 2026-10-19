@@ -838,7 +838,10 @@ class LDe extends L {
   }
 
   @override
-  String get dashboardStartSession => 'Einheit starten';
+  String get dashboardLogSession => 'Einheit erfassen';
+
+  @override
+  String get dashboardTimerAction => 'Runden-Timer';
 
   @override
   String get dashboardOpenCamp => 'Trainingsplan öffnen';
@@ -931,9 +934,16 @@ class LDe extends L {
   String get trainingSessionDone => 'Erledigt';
 
   @override
-  String trainingStartSession(String session) {
-    return '$session starten';
+  String trainingLogNamedSession(String session) {
+    return '$session erfassen';
   }
+
+  @override
+  String get trainTools => 'Werkzeuge';
+
+  @override
+  String get trainTimerToolSubtitle =>
+      'Freie Intervalle für Sparring, MMA, Boxen oder BJJ';
 
   @override
   String get onboardingBack => 'Zurück';
