@@ -112,10 +112,27 @@ void main() {
     engine((call) => call.method == 'speak' ? never.future : Future.value(1));
     final voice = TtsCoachVoice();
     var done = false;
+    // One syllable: 2 x (190 + 250) ms + 1 s = 1.88 s.
     unawaited(voice.say('Shoot!').then((_) => done = true));
-    await tester.pump(const Duration(seconds: 5));
+    await tester.pump(const Duration(milliseconds: 1500));
     expect(done, isFalse);
-    await tester.pump(const Duration(seconds: 2));
-    expect(done, isTrue, reason: 'gives up on the line after 6 s');
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(done, isTrue, reason: 'gives up on the line after 1.88 s');
+    expect(calls.where((c) => c.method == 'stop'), isNotEmpty,
+        reason: 'a line that ran over is cut off so it cannot overlap');
+  });
+
+  testWidgets('a longer call is given longer before it is cut off',
+      (tester) async {
+    final never = Completer<Object?>();
+    engine((call) => call.method == 'speak' ? never.future : Future.value(1));
+    final voice = TtsCoachVoice();
+    var done = false;
+    // Three syllables: 2 x (3 x 190 + 250) ms + 1 s = 2.64 s.
+    unawaited(voice.say('Jab, cross, hook!').then((_) => done = true));
+    await tester.pump(const Duration(milliseconds: 2300));
+    expect(done, isFalse);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(done, isTrue);
   });
 }
