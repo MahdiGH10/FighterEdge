@@ -207,6 +207,7 @@ class _LogIconButton extends StatelessWidget {
       {required this.label, required this.primary, required this.onTap});
   @override
   Widget build(BuildContext context) => Semantics(
+      container: true,
       button: true,
       label: L.of(context).trainingLogNamedSession(label),
       child: PressScale(
