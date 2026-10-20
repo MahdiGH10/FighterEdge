@@ -69,6 +69,8 @@ class PlanController extends ChangeNotifier {
         _sync = sync ?? SyncTracker(),
         _generator = generator,
         _resolver = resolver {
+    // With no repository (demo, tests) there is nothing to wait for.
+    _loaded = repository == null;
     _log.addListener(_onLogChanged);
   }
 

@@ -5,9 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/data/data_repository.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
+import 'package:fighter_edge/features/training_plan/data/legacy_session_slot.dart';
+import 'package:fighter_edge/features/training_plan/data/stored_training_plan.dart';
 import 'package:fighter_edge/models/meal.dart';
 import 'package:fighter_edge/models/training_log_entry.dart';
-import 'package:fighter_edge/models/training_session.dart';
 import 'package:fighter_edge/models/weight_entry.dart';
 import 'package:fighter_edge/state/app_state.dart';
 
@@ -36,12 +37,20 @@ class _FlakyRepository implements DataRepository {
       _inner.saveMealsForDate(userId, date, meals);
 
   @override
-  Stream<List<TrainingSession>> watchSessions(String userId) =>
-      _inner.watchSessions(userId);
+  Stream<List<LegacySessionSlot>> watchLegacySessions(String userId) =>
+      _inner.watchLegacySessions(userId);
 
   @override
-  Future<void> saveSession(String userId, TrainingSession session) =>
-      _inner.saveSession(userId, session);
+  Future<void> saveLegacySession(String userId, LegacySessionSlot session) =>
+      _inner.saveLegacySession(userId, session);
+
+  @override
+  Stream<StoredTrainingPlan?> watchTrainingPlan(String userId) =>
+      _inner.watchTrainingPlan(userId);
+
+  @override
+  Future<void> saveTrainingPlan(String userId, StoredTrainingPlan plan) =>
+      _inner.saveTrainingPlan(userId, plan);
 
   @override
   Stream<List<TrainingLogEntry>> watchTrainingLog(String userId) =>
@@ -64,7 +73,6 @@ void main() {
 
     expect(state.weights, isEmpty);
     expect(state.meals, isEmpty);
-    expect(state.sessions, isEmpty);
 
     state.dispose();
     repository.dispose();
@@ -81,7 +89,6 @@ void main() {
 
     expect(state.weights, isEmpty);
     expect(state.meals, isEmpty);
-    expect(state.sessions, isEmpty);
     expect(state.trainingLog, isEmpty);
 
     state.dispose();
@@ -103,7 +110,6 @@ void main() {
     state.setUser(null);
 
     expect(state.weights, isEmpty);
-    expect(state.sessions, isEmpty);
     expect(state.trainingLog, isEmpty);
 
     state.dispose();
@@ -250,21 +256,44 @@ void main() {
     });
   });
 
-  group('AppState — sessions', () {
-    test('logging a session stores completion metadata and history', () {
+  group('AppState — training log', () {
+    TrainingLogEntry entry(String id, DateTime at) => TrainingLogEntry(
+          id: id,
+          completedAt: at,
+          source: TrainingSource.planned,
+          title: 'Skill session',
+          planSlotId: '2026-10-19.skill',
+          rpe: 9,
+          note: 'Hard rounds',
+        );
+
+    test('adding an entry keeps the log newest first', () {
       final s = AppState();
-      final session = s.sessions.firstWhere((item) => !item.completed);
+      s.addTrainingLogEntry(entry('a', DateTime(2026, 10, 19, 18)));
+      s.addTrainingLogEntry(entry('b', DateTime(2026, 10, 20, 18)));
 
-      s.completeSession(session, rpe: 9, note: 'Hard rounds');
+      expect(s.trainingLog.map((e) => e.id), ['b', 'a']);
+      expect(s.trainingLog.first.planSlotId, '2026-10-19.skill');
+      expect(s.completedSessionCount, 2);
+    });
 
-      final logged = s.sessions.firstWhere((item) => item.id == session.id);
-      expect(logged.completed, isTrue);
-      expect(logged.completedAt, isNotNull);
-      expect(logged.rpe, 9);
-      expect(logged.note, 'Hard rounds');
-      // History now lists log entries, each linked back to its plan slot.
-      expect(s.completedSessionsDesc.first.title, session.title);
-      expect(s.trainingLog.first.planSlotId, session.id);
+    test('removing an entry takes it out and a missing id changes nothing',
+        () {
+      final s = AppState();
+      s.addTrainingLogEntry(entry('a', DateTime(2026, 10, 19, 18)));
+      var notified = 0;
+      s.addListener(() => notified++);
+
+      s.removeTrainingLogEntry('nope');
+      expect(notified, 0);
+      s.removeTrainingLogEntry('a');
+
+      expect(s.trainingLog, isEmpty);
+      expect(notified, 1);
+    });
+
+    test('the offline demo starts with an empty log', () {
+      expect(AppState().trainingLog, isEmpty);
     });
   });
 }

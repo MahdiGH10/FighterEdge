@@ -78,6 +78,7 @@ class DashboardScreen extends StatelessWidget {
             ? upcoming
             : null;
     final recent = state.trainingLog.take(3).toList();
+    final weekDays = plan.weekDays();
     // The header says what day it is, which is more use than the word
     // "Dashboard" on the screen the bottom bar already calls Home.
     final locale = Localizations.localeOf(context).toString();
@@ -140,8 +141,10 @@ class DashboardScreen extends StatelessWidget {
                 WeeklyOverview(
                   dayLetters: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
                   progress: [
-                    for (final day in plan.weekDays())
-                      day.rows.any((r) => r.status == SessionStatus.completed)
+                    for (var i = 0; i < 7; i++)
+                      i < weekDays.length &&
+                              weekDays[i].rows.any(
+                                  (r) => r.status == SessionStatus.completed)
                           ? 1.0
                           : 0.0
                   ],

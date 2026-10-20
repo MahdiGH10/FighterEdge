@@ -2,6 +2,7 @@ import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/training/reaction/coach_voice.dart';
@@ -40,15 +41,19 @@ void main() {
   Future<AppState> pumpTimer(WidgetTester tester,
       {bool withSession = false}) async {
     final repo = await makeRepo(signedIn: true);
-    final state = AppState();
+    // A Thursday; six days a week includes it.
+    final state = AppState(clock: () => DateTime(2026, 9, 24, 18));
+    final plan = PlanController(log: state)
+      ..startFresh(
+          weeklyTrainingDays: 6, goal: 'Gain muscle', level: 'Intermediate');
     await tester.pumpWidget(wrapApp(
       RoundTimerScreen(
         clock: manualClock(),
-        session:
-            withSession ? state.sessions.firstWhere((s) => !s.completed) : null,
+        session: withSession ? plan.todaySession!.session : null,
       ),
       repo: repo,
       state: state,
+      planController: plan,
       coachVoice: voice,
     ));
     await tester.pumpAndSettle();

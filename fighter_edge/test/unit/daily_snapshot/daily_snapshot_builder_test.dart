@@ -9,6 +9,7 @@ import 'package:fighter_edge/features/fight_camp/domain/fight_week_plan.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_cut_policy.dart';
 import 'package:fighter_edge/features/fight_camp/domain/weight_path.dart';
 import 'package:fighter_edge/features/fight_camp/presentation/fight_camp_controller.dart';
+import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,6 +25,7 @@ const confirmed = NutritionSetupDraft(ageYears: 30, confirmed: true);
 /// did: it passed the age and forgot the screening).
 void main() {
   late AppState state;
+  late PlanController plan;
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -31,6 +33,7 @@ void main() {
     state = AppState(dataRepository: InMemoryDataRepository(), clock: () => now)
       ..addWeight(addDays(now, -1), 74.2)
       ..addWeight(now, 73.6);
+    plan = PlanController(log: state);
   });
 
   Future<FightCampController> campOnWeighInDay({bool? refuelGuidance}) async {
@@ -53,7 +56,7 @@ void main() {
   }
 
   test('without a Fuel draft the camp asks for setup', () async {
-    final snapshot = buildDailySnapshot(state, await campOnWeighInDay());
+    final snapshot = buildDailySnapshot(state, plan, await campOnWeighInDay());
     final camp = snapshot.camp!;
     expect(camp.weightPath.status, WeightPathStatus.needsScreening);
     expect(camp.fightWeekCut, isNull);
@@ -63,14 +66,14 @@ void main() {
   });
 
   test('a draft that is not confirmed is not screening', () async {
-    final snapshot = buildDailySnapshot(state, await campOnWeighInDay(),
+    final snapshot = buildDailySnapshot(state, plan, await campOnWeighInDay(),
         fuelDraft: const NutritionSetupDraft(ageYears: 30));
     expect(snapshot.camp!.weightPath.status, WeightPathStatus.needsScreening);
   });
 
   test('a confirmed draft gives the age and clears the gate together',
       () async {
-    final snapshot = buildDailySnapshot(state, await campOnWeighInDay(),
+    final snapshot = buildDailySnapshot(state, plan, await campOnWeighInDay(),
         fuelDraft: confirmed);
     final camp = snapshot.camp!;
     expect(camp.weightPath.status, WeightPathStatus.onTrack);
@@ -79,7 +82,7 @@ void main() {
   });
 
   test('a clinical flag holds the camp for professional review', () async {
-    final snapshot = buildDailySnapshot(state, await campOnWeighInDay(),
+    final snapshot = buildDailySnapshot(state, plan, await campOnWeighInDay(),
         fuelDraft: const NutritionSetupDraft(
           ageYears: 30,
           confirmed: true,
@@ -92,7 +95,7 @@ void main() {
   });
 
   test('a minor gets no camp guidance', () async {
-    final snapshot = buildDailySnapshot(state, await campOnWeighInDay(),
+    final snapshot = buildDailySnapshot(state, plan, await campOnWeighInDay(),
         fuelDraft: const NutritionSetupDraft(ageYears: 17, confirmed: true));
     final camp = snapshot.camp!;
     expect(camp.weightPath.status, WeightPathStatus.notSupported);
@@ -102,12 +105,12 @@ void main() {
 
   test('the refuel step follows the controller switch', () async {
     final off = buildDailySnapshot(
-        state, await campOnWeighInDay(refuelGuidance: false),
+        state, plan, await campOnWeighInDay(refuelGuidance: false),
         fuelDraft: confirmed);
     expect(off.camp!.todaySteps, [FightWeekStep.weighIn]);
 
     final on = buildDailySnapshot(
-        state, await campOnWeighInDay(refuelGuidance: true),
+        state, plan, await campOnWeighInDay(refuelGuidance: true),
         fuelDraft: confirmed);
     expect(on.camp!.todaySteps, [FightWeekStep.weighIn, FightWeekStep.refuel]);
   });
