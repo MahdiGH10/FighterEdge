@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -37,6 +39,7 @@ import 'observability/error_reporter.dart';
 import 'observability/telemetry.dart';
 import 'privacy/consent.dart';
 import 'routing/app_router.dart';
+import 'screens/paywall_screen.dart';
 import 'security/app_check.dart';
 import 'state/app_state.dart';
 import 'l10n/gen/app_localizations.dart';
@@ -336,6 +339,7 @@ class FighterEdgeApp extends StatelessWidget {
                   sync: context.read<SyncTracker>(),
                 );
             appState.setUser(auth.user?.id);
+            appState.accessSource = () => auth.accessState;
             return appState;
           },
         ),
@@ -406,6 +410,8 @@ class _FighterEdgeMaterialApp extends StatefulWidget {
 class _FighterEdgeMaterialAppState extends State<_FighterEdgeMaterialApp> {
   late final GoRouter _router;
   late final VoidCallback _stopSessionReset;
+  late final AppState _appState;
+  bool _paywallOpen = false;
 
   @override
   void initState() {
@@ -413,10 +419,27 @@ class _FighterEdgeMaterialAppState extends State<_FighterEdgeMaterialApp> {
     final auth = context.read<AuthController>();
     _router = createAppRouter(auth: auth);
     _stopSessionReset = resetStackOnSessionChange(_router, auth);
+    // A refused write in a read-only account opens the paywall from here.
+    _appState = context.read<AppState>();
+    _appState.onWriteBlocked = () => unawaited(_openReadOnlyPaywall());
+  }
+
+  Future<void> _openReadOnlyPaywall() async {
+    if (_paywallOpen) return;
+    _paywallOpen = true;
+    try {
+      await _router.push<void>(
+        AppRoutes.paywall,
+        extra: const PaywallRouteArgs(trigger: PaywallTrigger.readOnly),
+      );
+    } finally {
+      _paywallOpen = false;
+    }
   }
 
   @override
   void dispose() {
+    _appState.onWriteBlocked = null;
     _stopSessionReset();
     _router.dispose();
     super.dispose();
