@@ -13,6 +13,7 @@ import '../theme/app_haptics.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
+import '../state/glass_policy_controller.dart';
 import '../state/locale_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -38,6 +39,7 @@ class SettingsScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final reminders = context.watch<ReminderGateway>();
     final consent = context.watch<ConsentController>();
+    final glass = context.watch<GlassPolicyController>();
     final user = auth.user;
 
     // Signing out or deleting the account makes the router take this page
@@ -81,6 +83,12 @@ class SettingsScreen extends StatelessWidget {
               title: l.settingsLanguage,
               subtitle: _languageLabel(context, l),
               onTap: () => _pickLanguage(context),
+            ),
+            _SwitchRow(
+              title: l.settingsReduceTransparency,
+              subtitle: l.settingsReduceTransparencySubtitle,
+              value: glass.reduceTransparency,
+              onChanged: glass.setReduceTransparency,
             ),
           ]),
           const SizedBox(height: Insets.xl),

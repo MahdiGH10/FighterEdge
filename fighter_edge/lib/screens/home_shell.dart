@@ -7,6 +7,7 @@ import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart
 import '../l10n/gen/app_localizations.dart';
 import '../state/app_state.dart';
 import '../state/first_run_controller.dart';
+import '../state/glass_policy_controller.dart';
 import '../state/streak_controller.dart';
 import '../theme/app_haptics.dart';
 import '../widgets/bottom_nav.dart';
@@ -74,6 +75,9 @@ class _HomeShellState extends State<HomeShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _syncStreakEarn();
       _askForConsentOnce();
+      // The shell is the first screen that draws glass, so this is where the
+      // device finds out whether it can afford the blur. Runs once per install.
+      if (mounted) context.read<GlassPolicyController>().startProbe();
     });
   }
 
@@ -167,28 +171,32 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     _visited.add(_index);
-    return Scaffold(
-      // Tabs are peers: nothing slides, because nothing moved. Every tab the
-      // athlete has opened stays mounted, so its scroll position, sub-tab and
-      // segment are still there on return; tabs never opened are not built,
-      // and hidden tabs have their tickers paused.
-      body: FadeThrough(
-        switchKey: _index,
-        child: IndexedStack(
-          index: _index,
-          children: [
-            for (var i = 0; i < _navCount; i++)
-              _visited.contains(i)
-                  ? TickerMode(enabled: i == _index, child: _page(i))
-                  : const SizedBox.shrink(),
-          ],
+    // One backdrop group for the whole shell: the nav, a collapsed header and a
+    // sheet over a tab share one copy of what is behind them.
+    return BackdropGroup(
+      child: Scaffold(
+        // Tabs are peers: nothing slides, because nothing moved. Every tab the
+        // athlete has opened stays mounted, so its scroll position, sub-tab and
+        // segment are still there on return; tabs never opened are not built,
+        // and hidden tabs have their tickers paused.
+        body: FadeThrough(
+          switchKey: _index,
+          child: IndexedStack(
+            index: _index,
+            children: [
+              for (var i = 0; i < _navCount; i++)
+                _visited.contains(i)
+                    ? TickerMode(enabled: i == _index, child: _page(i))
+                    : const SizedBox.shrink(),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: AppBottomNav(
-        items: _navItems(context),
-        currentIndex: _index,
-        onTap: _goToTab,
-        itemKeys: _navKeys,
+        bottomNavigationBar: AppBottomNav(
+          items: _navItems(context),
+          currentIndex: _index,
+          onTap: _goToTab,
+          itemKeys: _navKeys,
+        ),
       ),
     );
   }

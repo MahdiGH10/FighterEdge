@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fighter_edge/ads/reward_ticket_gateway.dart';
 import 'package:fighter_edge/ads/rewarded_ad_gateway.dart';
 import 'package:fighter_edge/l10n/gen/app_localizations.dart';
+import 'package:fighter_edge/state/glass_policy_controller.dart';
 import 'package:fighter_edge/state/locale_controller.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/billing/billing_gateway.dart';
@@ -135,6 +136,7 @@ Widget wrapApp(
       ),
       Provider<Telemetry>.value(value: telemetry),
       ChangeNotifierProvider(create: (_) => LocaleController()..load()),
+      ChangeNotifierProvider(create: (_) => GlassPolicyController()..load()),
       ChangeNotifierProxyProvider<AuthController, FirstRunController>(
         create: (_) => FirstRunController(),
         update: (_, auth, firstRun) =>
@@ -178,6 +180,8 @@ Widget wrapApp(
         locale: context.watch<LocaleController>().locale,
         localizationsDelegates: L.localizationsDelegates,
         supportedLocales: L.supportedLocales,
+        builder: (context, child) =>
+            GlassPolicyHost(child: child ?? const SizedBox.shrink()),
         home: home,
       ),
     ),
