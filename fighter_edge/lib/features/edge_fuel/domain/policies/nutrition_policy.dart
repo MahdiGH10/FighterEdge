@@ -12,7 +12,15 @@ import '../models/nutrition_enums.dart';
 class NutritionPolicy {
   const NutritionPolicy._();
 
-  static const int version = 1;
+  /// The current policy version. Version 2 adds training-aware energy, a
+  /// % of body weight per week rate and a training/rest-day split; see
+  /// `NutritionPolicyV2` and `NutritionTargetCalculatorV2`.
+  static const int version = 2;
+
+  /// The original policy. [NutritionTargetCalculator] keeps producing it, and
+  /// stamps it on every result, so a stored v1 target never changes until the
+  /// user accepts a v2 proposal.
+  static const int v1 = 1;
 
   // ---- §7.3 activity coefficients ----
   static const Map<ActivityLevel, double> activityCoefficients = {
