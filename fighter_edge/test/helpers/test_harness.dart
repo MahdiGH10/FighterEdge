@@ -5,8 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:fighter_edge/ads/reward_ticket_gateway.dart';
-import 'package:fighter_edge/ads/rewarded_ad_gateway.dart';
 import 'package:fighter_edge/l10n/gen/app_localizations.dart';
 import 'package:fighter_edge/state/locale_controller.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
@@ -95,8 +93,6 @@ Widget wrapApp(
   ConsentController? consent,
   FightCampRepository? fightCampRepo,
   bool refuelGuidance = false,
-  RewardedAdGateway rewardedAds = const UnavailableRewardedAdGateway(),
-  RewardTicketGateway rewardTickets = const UnavailableRewardTicketGateway(),
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
   final resolvedFightCampRepo = fightCampRepo ?? InMemoryFightCampRepository();
@@ -122,8 +118,6 @@ Widget wrapApp(
         ChangeNotifierProvider(create: (_) => SyncTracker()),
       ChangeNotifierProvider(create: (_) => state ?? AppState()),
       Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
-      Provider<RewardedAdGateway>.value(value: rewardedAds),
-      Provider<RewardTicketGateway>.value(value: rewardTickets),
       Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
       Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
       Provider<ReminderGateway>.value(

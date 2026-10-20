@@ -20,7 +20,6 @@ import '../l10n/gen/app_localizations.dart';
 import '../widgets/section_header.dart';
 import 'dashboard_screen.dart';
 import 'paywall_screen.dart';
-import 'round_timer_screen.dart';
 import 'settings_screen.dart';
 import 'weight_tracker_screen.dart';
 
@@ -101,12 +100,6 @@ class ProfileScreen extends StatelessWidget {
         const SectionHeader('Tools'),
         const GroupedList(
           children: [
-            _ToolRow(
-              title: 'Round timer',
-              subtitle: 'Open intervals for sparring, MMA, boxing or BJJ',
-              route: AppRoutes.roundTimer,
-              screen: RoundTimerScreen(),
-            ),
             _ToolRow(
               title: 'Weight tracker',
               subtitle: 'Log weigh-ins and monitor the cut or gain',

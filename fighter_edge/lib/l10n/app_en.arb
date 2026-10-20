@@ -217,8 +217,6 @@
   "settingsHealthDataWithdrawTitle": "Withdraw consent?",
   "settingsHealthDataWithdrawBody": "Fighter Edge can't calculate your plan or track your progress without your health data. Withdrawing your consent therefore means deleting your account and all its data.",
   "settingsHealthDataWithdrawConfirm": "Delete my account",
-  "settingsAdPrivacy": "Ad privacy choices",
-  "settingsAdPrivacySubtitle": "Change what you agreed to for the optional videos",
   "deleteAccountSubscriptionWarning": "Deleting your account doesn't cancel your subscription. Cancel it first in your App Store or Google Play account settings, or it keeps renewing.",
 
   "trainTabReaction": "Reaction",
@@ -341,7 +339,8 @@
   "dashboardRecovery": "Your planned sessions are done. Take time to recover.",
   "dashboardPlanHint": "Open Train to set up your week.",
   "dashboardNextUp": "Next: {day} · {session}",
-  "dashboardStartSession": "Start session",
+  "dashboardLogSession": "Log session",
+  "dashboardTimerAction": "Round timer",
   "dashboardOpenCamp": "Open camp",
   "dashboardStatWeeks": "{count, plural, =1{week} other{weeks}}",
   "@dashboardStatWeeks": {
@@ -501,7 +500,9 @@
   "planActionMoveToToday": "Move to today",
   "planActionPutBack": "Put back",
   "planActionMore": "More options",
-  "trainingStartSession": "Start {session}",
+  "trainingLogNamedSession": "Log {session}",
+  "trainTools": "Tools",
+  "trainTimerToolSubtitle": "Open intervals for sparring, MMA, boxing or BJJ",
   "@nutritionOverTarget": {
     "placeholders": {
       "kcal": {
@@ -526,7 +527,7 @@
       }
     }
   },
-  "@trainingStartSession": {
+  "@trainingLogNamedSession": {
     "placeholders": {
       "session": {
         "type": "String"
