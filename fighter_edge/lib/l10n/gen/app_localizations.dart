@@ -391,12 +391,6 @@ abstract class L {
   /// **'Dashboard'**
   String get dashboardTitle;
 
-  /// No description provided for @dashboardWeeklyOverview.
-  ///
-  /// In en, this message translates to:
-  /// **'Weekly overview'**
-  String get dashboardWeeklyOverview;
-
   /// No description provided for @dashboardNextSession.
   ///
   /// In en, this message translates to:
@@ -439,35 +433,11 @@ abstract class L {
   /// **'completed'**
   String get dashboardStatCompleted;
 
-  /// No description provided for @dashboardStatDays.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{day} other{days}}'**
-  String dashboardStatDays(int count);
-
   /// No description provided for @dashboardAddWeighIn.
   ///
   /// In en, this message translates to:
   /// **'Add weigh-in'**
   String get dashboardAddWeighIn;
-
-  /// No description provided for @dashboardStreakAtRisk.
-  ///
-  /// In en, this message translates to:
-  /// **'At risk'**
-  String get dashboardStreakAtRisk;
-
-  /// No description provided for @dashboardStreakOnFire.
-  ///
-  /// In en, this message translates to:
-  /// **'On fire'**
-  String get dashboardStreakOnFire;
-
-  /// No description provided for @dashboardStreakLogToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Log today'**
-  String get dashboardStreakLogToday;
 
   /// No description provided for @fuelWeekTitle.
   ///
@@ -1093,18 +1063,6 @@ abstract class L {
   /// **'Delete my account'**
   String get settingsHealthDataWithdrawConfirm;
 
-  /// No description provided for @settingsAdPrivacy.
-  ///
-  /// In en, this message translates to:
-  /// **'Ad privacy choices'**
-  String get settingsAdPrivacy;
-
-  /// No description provided for @settingsAdPrivacySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Change what you agreed to for the optional videos'**
-  String get settingsAdPrivacySubtitle;
-
   /// No description provided for @deleteAccountSubscriptionWarning.
   ///
   /// In en, this message translates to:
@@ -1489,12 +1447,6 @@ abstract class L {
   /// **'Hide password'**
   String get authHidePassword;
 
-  /// No description provided for @dashboardThisWeek.
-  ///
-  /// In en, this message translates to:
-  /// **'This week'**
-  String get dashboardThisWeek;
-
   /// No description provided for @dashboardFighter.
   ///
   /// In en, this message translates to:
@@ -1543,17 +1495,251 @@ abstract class L {
   /// **'Next: {day} · {session}'**
   String dashboardNextUp(String day, String session);
 
-  /// No description provided for @dashboardStartSession.
+  /// No description provided for @dashboardLogSession.
   ///
   /// In en, this message translates to:
-  /// **'Start session'**
-  String get dashboardStartSession;
+  /// **'Log session'**
+  String get dashboardLogSession;
+
+  /// No description provided for @dashboardTimerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Round timer'**
+  String get dashboardTimerAction;
 
   /// No description provided for @dashboardOpenCamp.
   ///
   /// In en, this message translates to:
   /// **'Open camp'**
   String get dashboardOpenCamp;
+
+  /// No description provided for @dashboardStatWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{week} other{weeks}}'**
+  String dashboardStatWeeks(int count);
+
+  /// No description provided for @weeklyCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get weeklyCardTitle;
+
+  /// No description provided for @weeklyCardRestWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest week'**
+  String get weeklyCardRestWeek;
+
+  /// No description provided for @weeklyCardRestWeekHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions planned. Rest is part of the plan.'**
+  String get weeklyCardRestWeekHint;
+
+  /// No description provided for @weeklyCardProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {planned} done'**
+  String weeklyCardProgress(int done, int planned);
+
+  /// No description provided for @weeklyCardNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {day} {session}'**
+  String weeklyCardNext(String day, String session);
+
+  /// No description provided for @weeklyCardAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All planned sessions done'**
+  String get weeklyCardAllDone;
+
+  /// No description provided for @weeklyCardNothingLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'No more sessions planned this week'**
+  String get weeklyCardNothingLeft;
+
+  /// No description provided for @weeklyCardTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{target} needed to count this week'**
+  String weeklyCardTarget(int target);
+
+  /// No description provided for @weeklyCardStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week in a row} other{{count} weeks in a row}}'**
+  String weeklyCardStreak(int count);
+
+  /// No description provided for @weeklyCardReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review'**
+  String get weeklyCardReview;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewWeekOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {date}'**
+  String reviewWeekOf(String date);
+
+  /// No description provided for @reviewTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get reviewTraining;
+
+  /// No description provided for @reviewSessionsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {planned} sessions done'**
+  String reviewSessionsDone(int done, int planned);
+
+  /// No description provided for @reviewFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get reviewFood;
+
+  /// No description provided for @reviewFoodNoTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up Fuel to compare your week with a target.'**
+  String get reviewFoodNoTarget;
+
+  /// No description provided for @reviewFoodNoLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'No meals logged this week.'**
+  String get reviewFoodNoLogs;
+
+  /// No description provided for @reviewFoodAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average {average} kcal a day against a target of {target}.'**
+  String reviewFoodAverage(int average, int target);
+
+  /// No description provided for @reviewWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get reviewWeight;
+
+  /// No description provided for @reviewWeightNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough weigh-ins for a trend yet.'**
+  String get reviewWeightNoData;
+
+  /// No description provided for @reviewWeightNoPath.
+  ///
+  /// In en, this message translates to:
+  /// **'No weight path to compare with.'**
+  String get reviewWeightNoPath;
+
+  /// No description provided for @reviewWeightPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Path: {change} this week'**
+  String reviewWeightPath(String change);
+
+  /// No description provided for @reviewRecommendation.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendation'**
+  String get reviewRecommendation;
+
+  /// No description provided for @reviewRecMoveSession.
+  ///
+  /// In en, this message translates to:
+  /// **'You have a planned session left over. Move it to today?'**
+  String get reviewRecMoveSession;
+
+  /// No description provided for @reviewRecLower.
+  ///
+  /// In en, this message translates to:
+  /// **'Your weight is above your path and you ate to your target. Lower your daily target by {kcal} kcal?'**
+  String reviewRecLower(int kcal);
+
+  /// No description provided for @reviewRecRaise.
+  ///
+  /// In en, this message translates to:
+  /// **'Your weight is below your path and you ate to your target. Raise your daily target by {kcal} kcal?'**
+  String reviewRecRaise(int kcal);
+
+  /// No description provided for @reviewHoldOnPath.
+  ///
+  /// In en, this message translates to:
+  /// **'You are on path. Keep your plan as it is.'**
+  String get reviewHoldOnPath;
+
+  /// No description provided for @reviewHoldNoTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up Fuel to get a calorie target before changes can be suggested.'**
+  String get reviewHoldNoTarget;
+
+  /// No description provided for @reviewHoldNeedLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Log at least four days of food before your target is changed.'**
+  String get reviewHoldNeedLogs;
+
+  /// No description provided for @reviewHoldIntake.
+  ///
+  /// In en, this message translates to:
+  /// **'You were not close to your target this week, so it stays. Aim for it first.'**
+  String get reviewHoldIntake;
+
+  /// No description provided for @reviewHoldNoPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough weigh-ins, or no path to judge the scale by. Your target stays.'**
+  String get reviewHoldNoPath;
+
+  /// No description provided for @reviewHoldFloor.
+  ///
+  /// In en, this message translates to:
+  /// **'Eating less would go under your resting energy estimate. Your target stays.'**
+  String get reviewHoldFloor;
+
+  /// No description provided for @reviewAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get reviewAccept;
+
+  /// No description provided for @reviewKeepCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current'**
+  String get reviewKeepCurrent;
+
+  /// No description provided for @reviewGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get reviewGotIt;
+
+  /// No description provided for @reviewAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'You accepted this review.'**
+  String get reviewAccepted;
+
+  /// No description provided for @reviewKept.
+  ///
+  /// In en, this message translates to:
+  /// **'You kept your current plan.'**
+  String get reviewKept;
 
   /// No description provided for @dashboardSetFuel.
   ///
@@ -1596,48 +1782,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Confirm your email'**
   String get dashboardConfirmEmail;
-
-  /// No description provided for @dashboardRiskTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Streak at risk'**
-  String get dashboardRiskTitle;
-
-  /// No description provided for @dashboardFreezeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Yesterday is unlogged. Protect it with a freeze ({count} left).'**
-  String dashboardFreezeHint(int count);
-
-  /// No description provided for @dashboardLogHint.
-  ///
-  /// In en, this message translates to:
-  /// **'No freeze is available. Log a session today to start again.'**
-  String get dashboardLogHint;
-
-  /// No description provided for @dashboardFreeze.
-  ///
-  /// In en, this message translates to:
-  /// **'Freeze'**
-  String get dashboardFreeze;
-
-  /// No description provided for @dashboardLogNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Log now'**
-  String get dashboardLogNow;
-
-  /// No description provided for @dashboardFreezeUsed.
-  ///
-  /// In en, this message translates to:
-  /// **'Freeze used — yesterday is protected.'**
-  String get dashboardFreezeUsed;
-
-  /// No description provided for @dashboardLogged.
-  ///
-  /// In en, this message translates to:
-  /// **'Logged'**
-  String get dashboardLogged;
 
   /// No description provided for @dashboardYesterday.
   ///
@@ -1699,11 +1843,155 @@ abstract class L {
   /// **'Done'**
   String get trainingSessionDone;
 
-  /// No description provided for @trainingStartSession.
+  /// No description provided for @tplGenericSkill.
   ///
   /// In en, this message translates to:
-  /// **'Start {session}'**
-  String trainingStartSession(String session);
+  /// **'Skill session'**
+  String get tplGenericSkill;
+
+  /// No description provided for @tplGenericSparring.
+  ///
+  /// In en, this message translates to:
+  /// **'Sparring session'**
+  String get tplGenericSparring;
+
+  /// No description provided for @tplGenericConditioning.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditioning session'**
+  String get tplGenericConditioning;
+
+  /// No description provided for @tplGenericStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength session'**
+  String get tplGenericStrength;
+
+  /// No description provided for @tplGenericRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery session'**
+  String get tplGenericRecovery;
+
+  /// No description provided for @tplGenericGymClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym class'**
+  String get tplGenericGymClass;
+
+  /// No description provided for @planDisciplineBoxing.
+  ///
+  /// In en, this message translates to:
+  /// **'Boxing'**
+  String get planDisciplineBoxing;
+
+  /// No description provided for @planDisciplineKickboxing.
+  ///
+  /// In en, this message translates to:
+  /// **'Kickboxing'**
+  String get planDisciplineKickboxing;
+
+  /// No description provided for @planDisciplineMuayThai.
+  ///
+  /// In en, this message translates to:
+  /// **'Muay Thai'**
+  String get planDisciplineMuayThai;
+
+  /// No description provided for @planDisciplineWrestling.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrestling'**
+  String get planDisciplineWrestling;
+
+  /// No description provided for @planDisciplineBjj.
+  ///
+  /// In en, this message translates to:
+  /// **'BJJ'**
+  String get planDisciplineBjj;
+
+  /// No description provided for @planDisciplineMma.
+  ///
+  /// In en, this message translates to:
+  /// **'MMA'**
+  String get planDisciplineMma;
+
+  /// No description provided for @planSessionMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String planSessionMinutes(int minutes);
+
+  /// No description provided for @planSessionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{discipline} · {minutes} min'**
+  String planSessionSubtitle(String discipline, int minutes);
+
+  /// No description provided for @planStatusSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get planStatusSkipped;
+
+  /// No description provided for @planStatusNotDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not done'**
+  String get planStatusNotDone;
+
+  /// No description provided for @planStatusMovedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {day}'**
+  String planStatusMovedTo(String day);
+
+  /// No description provided for @planStatusMovedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved from {day}'**
+  String planStatusMovedFrom(String day);
+
+  /// No description provided for @planActionSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get planActionSkip;
+
+  /// No description provided for @planActionMoveToToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to today'**
+  String get planActionMoveToToday;
+
+  /// No description provided for @planActionPutBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Put back'**
+  String get planActionPutBack;
+
+  /// No description provided for @planActionMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get planActionMore;
+
+  /// No description provided for @trainingLogNamedSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Log {session}'**
+  String trainingLogNamedSession(String session);
+
+  /// No description provided for @trainTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get trainTools;
+
+  /// No description provided for @trainTimerToolSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open intervals for sparring, MMA, boxing or BJJ'**
+  String get trainTimerToolSubtitle;
 
   /// No description provided for @onboardingBack.
   ///

@@ -1,6 +1,7 @@
+import '../features/training_plan/data/legacy_session_slot.dart';
+import '../features/training_plan/data/stored_training_plan.dart';
 import '../models/meal.dart';
 import '../models/training_log_entry.dart';
-import '../models/training_session.dart';
 import '../models/weight_entry.dart';
 
 abstract class DataRepository {
@@ -16,9 +17,18 @@ abstract class DataRepository {
     List<Meal> meals,
   );
 
-  Stream<List<TrainingSession>> watchSessions(String userId);
+  /// The old weekday-string schedule. Read only to migrate it once to the
+  /// dated plan and to move its completions into the log; nothing plans from
+  /// it.
+  Stream<List<LegacySessionSlot>> watchLegacySessions(String userId);
 
-  Future<void> saveSession(String userId, TrainingSession session);
+  Future<void> saveLegacySession(String userId, LegacySessionSlot session);
+
+  /// The saved training plan (inputs and skip/move choices), or null before
+  /// one exists. Its existence marks the one-time migration as done.
+  Stream<StoredTrainingPlan?> watchTrainingPlan(String userId);
+
+  Future<void> saveTrainingPlan(String userId, StoredTrainingPlan plan);
 
   /// Every logged training entry, newest first.
   Stream<List<TrainingLogEntry>> watchTrainingLog(String userId);

@@ -33,6 +33,12 @@ service cloud.firestore {
         allow read, write: if isOwner(uid);
       }
 
+      // The training plan: the inputs the dated week is generated from and
+      // the athlete's skip/move choices. Owner-only.
+      match /trainingPlan/{docId} {
+        allow read, write: if isOwner(uid);
+      }
+
       // The athlete's next fight (date, weigh-in, weight limit). Owner-only.
       match /fightCamp/{docId} {
         allow read, write: if isOwner(uid);

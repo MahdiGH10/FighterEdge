@@ -1,5 +1,23 @@
 # Fighter Edge — Claude Code Handoff
 
+## V2 visual foundation (lane F, three stacked PRs)
+
+**6.1 Tokens (this slice).** `AppColors` now carries the approved V2 values: the
+`#08070C` ground and its surface ramp, saturated crimson (`#E0222B`, ramp
+`crimson50-900`) and a new ember ramp (`ember50-900`, `emberSoft`), pink-red
+`negative`, gold `premium` for Pro only, green `positive` for done only. Protein
+is violet now (green means done). `GlassColors` (same file) holds the glass
+tint, rim, inner-light and glow tokens and the text-on-glass rule:
+`GlassColors.allowsText(kind, color)` judges a colour at the brightest glow
+corner (`worstCaseBackdrop`); on hero and sheet glass only Text, Text 2, Ember
+soft, Gold and Done green pass small text. `test/unit/color_contrast_test.dart`
+pins that table and the solid fallbacks. Fonts unchanged: Oswald (variable) and
+Barlow (static 400-700) were already bundled; no Inter, nothing added.
+**Not changed yet:** `Radii.card/button/tile` and the type sizes (only
+`Radii.hero` and `Radii.sheet` were added); screens still use their old layout
+with the new colours. Goldens regenerated (Windows renderer):
+`flutter test --tags golden --update-goldens`.
+
 ## START HERE: state as of 2026-10-01
 
 **Merged today: PR #26** (`78ec6df`). The Android manifest removes the three

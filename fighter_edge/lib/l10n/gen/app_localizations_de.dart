@@ -169,9 +169,6 @@ class LDe extends L {
   String get dashboardTitle => 'Übersicht';
 
   @override
-  String get dashboardWeeklyOverview => 'Wochenübersicht';
-
-  @override
   String get dashboardNextSession => 'Nächste Einheit';
 
   @override
@@ -193,27 +190,7 @@ class LDe extends L {
   String get dashboardStatCompleted => 'abgeschlossen';
 
   @override
-  String dashboardStatDays(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Tage',
-      one: 'Tag',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get dashboardAddWeighIn => 'Gewicht eintragen';
-
-  @override
-  String get dashboardStreakAtRisk => 'In Gefahr';
-
-  @override
-  String get dashboardStreakOnFire => 'Läuft';
-
-  @override
-  String get dashboardStreakLogToday => 'Heute eintragen';
 
   @override
   String get fuelWeekTitle => 'Ernährung diese Woche';
@@ -574,13 +551,6 @@ class LDe extends L {
   String get settingsHealthDataWithdrawConfirm => 'Mein Konto löschen';
 
   @override
-  String get settingsAdPrivacy => 'Datenschutz bei Werbung';
-
-  @override
-  String get settingsAdPrivacySubtitle =>
-      'Ändere deine Einwilligung für die freiwilligen Videos';
-
-  @override
   String get deleteAccountSubscriptionWarning =>
       'Das Löschen deines Kontos kündigt dein Abo nicht. Kündige es zuerst in deinen App-Store- oder Google-Play-Einstellungen, sonst verlängert es sich weiter.';
 
@@ -810,9 +780,6 @@ class LDe extends L {
   String get authHidePassword => 'Passwort verbergen';
 
   @override
-  String get dashboardThisWeek => 'Diese Woche';
-
-  @override
   String get dashboardFighter => 'Athlet';
 
   @override
@@ -840,10 +807,172 @@ class LDe extends L {
   }
 
   @override
-  String get dashboardStartSession => 'Einheit starten';
+  String get dashboardLogSession => 'Einheit erfassen';
+
+  @override
+  String get dashboardTimerAction => 'Runden-Timer';
 
   @override
   String get dashboardOpenCamp => 'Trainingsplan öffnen';
+
+  @override
+  String dashboardStatWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Wochen',
+      one: 'Woche',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyCardTitle => 'Diese Woche';
+
+  @override
+  String get weeklyCardRestWeek => 'Ruhewoche';
+
+  @override
+  String get weeklyCardRestWeekHint =>
+      'Keine Einheiten geplant. Ruhe gehört zum Plan.';
+
+  @override
+  String weeklyCardProgress(int done, int planned) {
+    return '$done von $planned erledigt';
+  }
+
+  @override
+  String weeklyCardNext(String day, String session) {
+    return 'Als Nächstes: $day $session';
+  }
+
+  @override
+  String get weeklyCardAllDone => 'Alle geplanten Einheiten erledigt';
+
+  @override
+  String get weeklyCardNothingLeft =>
+      'Diese Woche sind keine Einheiten mehr geplant';
+
+  @override
+  String weeklyCardTarget(int target) {
+    return '$target nötig, damit die Woche zählt';
+  }
+
+  @override
+  String weeklyCardStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Wochen in Folge',
+      one: '1 Woche in Folge',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyCardReview => 'Wochenrückblick';
+
+  @override
+  String get reviewTitle => 'Wochenrückblick';
+
+  @override
+  String reviewWeekOf(String date) {
+    return 'Woche ab $date';
+  }
+
+  @override
+  String get reviewTraining => 'Training';
+
+  @override
+  String reviewSessionsDone(int done, int planned) {
+    return '$done von $planned Einheiten erledigt';
+  }
+
+  @override
+  String get reviewFood => 'Ernährung';
+
+  @override
+  String get reviewFoodNoTarget =>
+      'Richte Fuel ein, um deine Woche mit einem Ziel zu vergleichen.';
+
+  @override
+  String get reviewFoodNoLogs =>
+      'Diese Woche wurden keine Mahlzeiten eingetragen.';
+
+  @override
+  String reviewFoodAverage(int average, int target) {
+    return 'Durchschnitt $average kcal am Tag bei einem Ziel von $target.';
+  }
+
+  @override
+  String get reviewWeight => 'Gewicht';
+
+  @override
+  String get reviewWeightNoData => 'Noch zu wenige Wiegungen für einen Trend.';
+
+  @override
+  String get reviewWeightNoPath => 'Kein Gewichtspfad zum Vergleichen.';
+
+  @override
+  String reviewWeightPath(String change) {
+    return 'Pfad: $change diese Woche';
+  }
+
+  @override
+  String get reviewRecommendation => 'Empfehlung';
+
+  @override
+  String get reviewRecMoveSession =>
+      'Eine geplante Einheit ist übrig. Auf heute verschieben?';
+
+  @override
+  String reviewRecLower(int kcal) {
+    return 'Dein Gewicht liegt über deinem Pfad und du hast dein Ziel gegessen. Tagesziel um $kcal kcal senken?';
+  }
+
+  @override
+  String reviewRecRaise(int kcal) {
+    return 'Dein Gewicht liegt unter deinem Pfad und du hast dein Ziel gegessen. Tagesziel um $kcal kcal erhöhen?';
+  }
+
+  @override
+  String get reviewHoldOnPath =>
+      'Du liegst auf Kurs. Lass deinen Plan, wie er ist.';
+
+  @override
+  String get reviewHoldNoTarget =>
+      'Richte Fuel ein, um ein Kalorienziel zu bekommen, bevor Änderungen vorgeschlagen werden.';
+
+  @override
+  String get reviewHoldNeedLogs =>
+      'Trage mindestens vier Tage Essen ein, bevor dein Ziel geändert wird.';
+
+  @override
+  String get reviewHoldIntake =>
+      'Du warst diese Woche nicht nah an deinem Ziel, deshalb bleibt es. Erreiche es zuerst.';
+
+  @override
+  String get reviewHoldNoPath =>
+      'Zu wenige Wiegungen oder kein Pfad, an dem sich die Waage messen lässt. Dein Ziel bleibt.';
+
+  @override
+  String get reviewHoldFloor =>
+      'Weniger zu essen würde unter deinen geschätzten Grundumsatz fallen. Dein Ziel bleibt.';
+
+  @override
+  String get reviewAccept => 'Annehmen';
+
+  @override
+  String get reviewKeepCurrent => 'Aktuellen Plan behalten';
+
+  @override
+  String get reviewGotIt => 'Verstanden';
+
+  @override
+  String get reviewAccepted => 'Du hast diesen Rückblick angenommen.';
+
+  @override
+  String get reviewKept => 'Du hast deinen aktuellen Plan behalten.';
 
   @override
   String get dashboardSetFuel => 'Ernährungsziel festlegen';
@@ -867,30 +996,6 @@ class LDe extends L {
 
   @override
   String get dashboardConfirmEmail => 'E-Mail bestätigen';
-
-  @override
-  String get dashboardRiskTitle => 'Serie gefährdet';
-
-  @override
-  String dashboardFreezeHint(int count) {
-    return 'Gestern fehlt ein Eintrag. Schütze den Tag mit einem Schutz ($count übrig).';
-  }
-
-  @override
-  String get dashboardLogHint =>
-      'Kein Schutz verfügbar. Trage heute eine Einheit ein, um neu zu starten.';
-
-  @override
-  String get dashboardFreeze => 'Schützen';
-
-  @override
-  String get dashboardLogNow => 'Jetzt eintragen';
-
-  @override
-  String get dashboardFreezeUsed => 'Schutz verwendet — gestern ist geschützt.';
-
-  @override
-  String get dashboardLogged => 'Eingetragen';
 
   @override
   String get dashboardYesterday => 'Gestern';
@@ -933,9 +1038,90 @@ class LDe extends L {
   String get trainingSessionDone => 'Erledigt';
 
   @override
-  String trainingStartSession(String session) {
-    return '$session starten';
+  String get tplGenericSkill => 'Technik-Einheit';
+
+  @override
+  String get tplGenericSparring => 'Sparring-Einheit';
+
+  @override
+  String get tplGenericConditioning => 'Konditionseinheit';
+
+  @override
+  String get tplGenericStrength => 'Krafteinheit';
+
+  @override
+  String get tplGenericRecovery => 'Regenerationseinheit';
+
+  @override
+  String get tplGenericGymClass => 'Kurs im Gym';
+
+  @override
+  String get planDisciplineBoxing => 'Boxen';
+
+  @override
+  String get planDisciplineKickboxing => 'Kickboxen';
+
+  @override
+  String get planDisciplineMuayThai => 'Muay Thai';
+
+  @override
+  String get planDisciplineWrestling => 'Ringen';
+
+  @override
+  String get planDisciplineBjj => 'BJJ';
+
+  @override
+  String get planDisciplineMma => 'MMA';
+
+  @override
+  String planSessionMinutes(int minutes) {
+    return '$minutes Min.';
   }
+
+  @override
+  String planSessionSubtitle(String discipline, int minutes) {
+    return '$discipline · $minutes Min.';
+  }
+
+  @override
+  String get planStatusSkipped => 'Übersprungen';
+
+  @override
+  String get planStatusNotDone => 'Nicht gemacht';
+
+  @override
+  String planStatusMovedTo(String day) {
+    return 'Verschoben auf $day';
+  }
+
+  @override
+  String planStatusMovedFrom(String day) {
+    return 'Verschoben von $day';
+  }
+
+  @override
+  String get planActionSkip => 'Überspringen';
+
+  @override
+  String get planActionMoveToToday => 'Auf heute verschieben';
+
+  @override
+  String get planActionPutBack => 'Zurücksetzen';
+
+  @override
+  String get planActionMore => 'Weitere Optionen';
+
+  @override
+  String trainingLogNamedSession(String session) {
+    return '$session erfassen';
+  }
+
+  @override
+  String get trainTools => 'Werkzeuge';
+
+  @override
+  String get trainTimerToolSubtitle =>
+      'Freie Intervalle für Sparring, MMA, Boxen oder BJJ';
 
   @override
   String get onboardingBack => 'Zurück';

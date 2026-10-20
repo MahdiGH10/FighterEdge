@@ -5,8 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:fighter_edge/ads/reward_ticket_gateway.dart';
-import 'package:fighter_edge/ads/rewarded_ad_gateway.dart';
 import 'package:fighter_edge/l10n/gen/app_localizations.dart';
 import 'package:fighter_edge/state/locale_controller.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
@@ -23,12 +21,12 @@ import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fu
 import 'package:fighter_edge/features/fight_camp/data/fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/presentation/fight_camp_controller.dart';
+import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
 import 'package:fighter_edge/notifications/reminder_gateway.dart';
 import 'package:fighter_edge/notifications/unavailable_reminder_gateway.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/state/first_run_controller.dart';
-import 'package:fighter_edge/state/streak_controller.dart';
 import 'package:fighter_edge/state/sync_tracker.dart';
 import 'package:fighter_edge/training/reaction/coach_voice.dart';
 import 'package:fighter_edge/privacy/consent.dart';
@@ -83,6 +81,7 @@ Widget wrapApp(
   Widget home, {
   required LocalAuthRepository repo,
   AppState? state,
+  PlanController? planController,
   EdgeFuelRepository? edgeFuelRepo,
   FoodCatalogRepository? foodCatalogRepo,
   RecipeCatalogRepository? recipeCatalogRepo,
@@ -94,8 +93,6 @@ Widget wrapApp(
   ConsentController? consent,
   FightCampRepository? fightCampRepo,
   bool refuelGuidance = false,
-  RewardedAdGateway rewardedAds = const UnavailableRewardedAdGateway(),
-  RewardTicketGateway rewardTickets = const UnavailableRewardTicketGateway(),
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
   final resolvedFightCampRepo = fightCampRepo ?? InMemoryFightCampRepository();
@@ -121,8 +118,6 @@ Widget wrapApp(
         ChangeNotifierProvider(create: (_) => SyncTracker()),
       ChangeNotifierProvider(create: (_) => state ?? AppState()),
       Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
-      Provider<RewardedAdGateway>.value(value: rewardedAds),
-      Provider<RewardTicketGateway>.value(value: rewardTickets),
       Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
       Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
       Provider<ReminderGateway>.value(
@@ -140,13 +135,6 @@ Widget wrapApp(
         update: (_, auth, firstRun) =>
             (firstRun ?? FirstRunController())..setUser(auth.user?.id),
       ),
-      ChangeNotifierProxyProvider<AuthController, StreakController>(
-        create: (context) =>
-            StreakController(clock: () => context.read<AppState>().now),
-        update: (context, auth, streak) => (streak ??
-            StreakController(clock: () => context.read<AppState>().now))
-          ..setUser(auth.user?.id),
-      ),
       Provider<FightCampRepository>.value(value: resolvedFightCampRepo),
       ChangeNotifierProxyProvider<AuthController, FightCampController>(
         create: (_) => FightCampController(
@@ -156,6 +144,24 @@ Widget wrapApp(
                 repository: resolvedFightCampRepo,
                 refuelGuidance: refuelGuidance))
           ..setUser(auth.user?.id),
+      ),
+      ChangeNotifierProxyProvider2<AuthController, FightCampController,
+          PlanController>(
+        create: (context) =>
+            planController ??
+            PlanController(
+                log: context.read<AppState>(),
+                sync: context.read<SyncTracker>()),
+        update: (context, auth, fightCamp, plan) => (plan ??
+            PlanController(
+                log: context.read<AppState>(),
+                sync: context.read<SyncTracker>()))
+          ..configure(
+            userId: auth.user?.id,
+            fight: fightCamp.camp,
+            goal: auth.user?.goal ?? '',
+            level: auth.user?.experienceLevel ?? '',
+          ),
       ),
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
         create: (context) => EdgeFuelController(

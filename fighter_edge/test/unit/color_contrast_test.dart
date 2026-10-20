@@ -45,6 +45,13 @@ void main() {
       'crimson200': AppColors.crimson200,
       'crimson300': AppColors.crimson300,
       'crimson400': AppColors.crimson400,
+      'ember50': AppColors.ember50,
+      'ember100': AppColors.ember100,
+      'ember200': AppColors.ember200,
+      'ember300': AppColors.ember300,
+      'ember400': AppColors.ember400,
+      'emberSoft': AppColors.emberSoft,
+      'textMuted': AppColors.textMuted,
       'positiveStrong': AppColors.positiveStrong,
       'warningStrong': AppColors.warningStrong,
       'negativeStrong': AppColors.negativeStrong,
@@ -119,6 +126,35 @@ void main() {
       expect(AppColors.crimson500, AppColors.primary);
     });
 
+    test('ember ramp gets monotonically darker', () {
+      const ramp = [
+        AppColors.ember50,
+        AppColors.ember100,
+        AppColors.ember200,
+        AppColors.ember300,
+        AppColors.ember400,
+        AppColors.ember500,
+        AppColors.ember600,
+        AppColors.ember700,
+        AppColors.ember800,
+        AppColors.ember900,
+      ];
+      for (var i = 1; i < ramp.length; i++) {
+        expect(
+          _luminance(ramp[i]),
+          lessThan(_luminance(ramp[i - 1])),
+          reason: 'ember ramp step $i is not darker than step ${i - 1}.',
+        );
+      }
+    });
+
+    test('accent aliases point at the ramps', () {
+      expect(AppColors.accentText, AppColors.crimson400);
+      expect(AppColors.primaryFill, AppColors.crimson600);
+      expect(AppColors.emberSoft, AppColors.ember300);
+      expect(AppColors.ember, AppColors.ember500);
+    });
+
     test('neutral ramp gets monotonically darker', () {
       const ramp = [
         AppColors.neutral0,
@@ -164,6 +200,127 @@ void main() {
           reason: 'crimson ramp step $i is not darker than step ${i - 1}.',
         );
       }
+    });
+  });
+
+  group('text over glass is judged at the brightest case', () {
+    // The text roles of the design system board, by name.
+    const roles = <String, Color>{
+      'Text': AppColors.textPrimary,
+      'Text 2': AppColors.textSecondary,
+      'Text 3': AppColors.textMuted,
+      'Accent text': AppColors.accentText,
+      'Ember soft': AppColors.emberSoft,
+      'Gold': AppColors.premium,
+      'Done green': AppColors.positive,
+      'Danger': AppColors.negative,
+    };
+
+    // What the rule must come out as. A token change that flips a cell has to
+    // flip this table on purpose.
+    const smallTextOnGlass = <GlassKind, Set<String>>{
+      GlassKind.hero: {'Text', 'Text 2', 'Ember soft', 'Gold', 'Done green'},
+      GlassKind.heroGold: {'Text', 'Text 2', 'Gold'},
+      GlassKind.nav: {
+        'Text',
+        'Text 2',
+        'Text 3',
+        'Accent text',
+        'Ember soft',
+        'Gold',
+        'Done green',
+        'Danger',
+      },
+      GlassKind.sheet: {'Text', 'Text 2', 'Ember soft', 'Gold', 'Done green'},
+    };
+
+    for (final kind in GlassKind.values) {
+      final backdrop = GlassColors.worstCaseBackdrop(kind);
+      roles.forEach((name, color) {
+        final expectAllowed = smallTextOnGlass[kind]!.contains(name);
+        test('$name on ${kind.name} glass at its brightest', () {
+          final ratio = _contrast(color, backdrop);
+          expect(GlassColors.allowsText(kind, color), expectAllowed,
+              reason: '$name measures ${ratio.toStringAsFixed(2)}:1.');
+          if (expectAllowed) {
+            expect(ratio, greaterThanOrEqualTo(4.5));
+          } else {
+            expect(ratio, lessThan(4.5));
+          }
+        });
+      });
+    }
+
+    test('18px bold text may use the roles small text may not (hero, sheet)',
+        () {
+      for (final kind in [GlassKind.hero, GlassKind.sheet]) {
+        for (final name in ['Text 3', 'Accent text', 'Danger']) {
+          expect(
+            GlassColors.allowsText(kind, roles[name]!, largeBold: true),
+            isTrue,
+            reason: '$name at 18px bold on ${kind.name}: '
+                '${_contrast(roles[name]!, GlassColors.worstCaseBackdrop(kind)).toStringAsFixed(2)}:1',
+          );
+        }
+      }
+    });
+
+    test('the gold hero is stricter: Danger fails even at 18px bold', () {
+      expect(
+        GlassColors.allowsText(GlassKind.heroGold, AppColors.negative,
+            largeBold: true),
+        isFalse,
+      );
+      expect(
+        GlassColors.allowsText(GlassKind.heroGold, AppColors.negative),
+        isFalse,
+      );
+    });
+
+    test('text() hands back an allowed colour untouched', () {
+      expect(GlassColors.text(GlassKind.hero, AppColors.emberSoft),
+          AppColors.emberSoft);
+      expect(
+          GlassColors.text(GlassKind.hero, AppColors.negative, largeBold: true),
+          AppColors.negative);
+    });
+
+    test('text() refuses a disallowed colour in debug builds', () {
+      expect(
+        () => GlassColors.text(GlassKind.hero, AppColors.accentText),
+        throwsAssertionError,
+      );
+    });
+
+    test('the near-opaque fills used without blur are no worse than blurred',
+        () {
+      final navTinted =
+          Color.alphaBlend(GlassColors.navFillTinted, AppColors.ember);
+      final sheetTinted =
+          Color.alphaBlend(GlassColors.sheetFillTinted, AppColors.ember);
+      for (final entry in roles.entries) {
+        expect(_contrast(entry.value, navTinted), greaterThanOrEqualTo(4.5),
+            reason: '${entry.key} on nav, tinted level');
+        expect(_contrast(entry.value, sheetTinted), greaterThanOrEqualTo(4.5),
+            reason: '${entry.key} on sheet, tinted level');
+      }
+    });
+
+    test('every text role clears AA on the solid fallbacks', () {
+      for (final kind in GlassKind.values) {
+        final solid = GlassColors.solidFill(kind);
+        for (final entry in roles.entries) {
+          expect(_contrast(entry.value, solid), greaterThanOrEqualTo(4.5),
+              reason: '${entry.key} on the ${kind.name} solid fallback');
+        }
+      }
+    });
+
+    test('white on the primary button fill and on primary clears AA', () {
+      expect(_contrast(AppColors.onPrimary, AppColors.primaryFill),
+          greaterThanOrEqualTo(4.5));
+      expect(_contrast(AppColors.onPrimary, AppColors.primary),
+          greaterThanOrEqualTo(4.5));
     });
   });
 }

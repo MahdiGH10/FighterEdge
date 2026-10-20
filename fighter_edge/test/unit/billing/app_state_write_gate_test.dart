@@ -1,7 +1,6 @@
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/models/meal.dart';
 import 'package:fighter_edge/models/training_log_entry.dart';
-import 'package:fighter_edge/models/training_session.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -68,8 +67,6 @@ void main() {
       final log = state.trainingLog.length;
       final firstMeal = state.meals.first;
       final eaten = firstMeal.eaten;
-      final firstSession = state.sessions.first;
-      final wasDone = firstSession.completed;
 
       state.addWeight(DateTime(2026, 10, 20), 70);
       state.toggleMeal(firstMeal);
@@ -83,8 +80,6 @@ void main() {
         fats: 1,
         eaten: true,
       ));
-      state.toggleSession(firstSession);
-      state.completeSession(firstSession);
       state.addTrainingLogEntry(TrainingLogEntry(
         id: 'manual-1',
         completedAt: DateTime(2026, 10, 20, 18),
@@ -92,12 +87,11 @@ void main() {
         title: 'Run',
       ));
 
-      expect(blocked, 6);
+      expect(blocked, 4);
       expect(state.weights.length, weights);
       expect(state.meals.length, meals);
       expect(state.meals.first.eaten, eaten);
       expect(state.trainingLog.length, log);
-      expect(state.sessions.first.completed, wasDone);
     });
 
     test('the same calls work in a trial', () {
@@ -122,15 +116,13 @@ void main() {
       // Reading history, plan and weights.
       expect(state.weights, isNotEmpty);
       expect(state.weightHistoryDesc, isNotEmpty);
-      expect(state.sessions, isNotEmpty);
-      expect(state.completedSessionsDesc, isA<List<TrainingSession>>());
       expect(state.trainingLog, isA<List<TrainingLogEntry>>());
       expect(state.meals, isNotNull);
       // Settings are local preferences, not athlete data.
       await state.setUseMetricUnits(false);
       expect(state.useMetricUnits, isFalse);
       // Onboarding happens before the paywall.
-      await state.startFreshCamp(startingWeightKg: 70, weeklyTrainingDays: 4);
+      await state.startFreshCamp(startingWeightKg: 70);
       expect(state.latestWeight, 70);
     });
   });

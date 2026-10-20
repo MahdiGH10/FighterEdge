@@ -113,6 +113,45 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
     );
   });
 
+  const plan = {
+    schemaVersion: 1,
+    origin: "onboarding",
+    inputs: {
+      disciplines: [],
+      goal: "buildFitness",
+      level: "beginner",
+      weekdays: [1, 3, 5],
+      gymClassWeekdays: [],
+      sessionMinutes: null,
+      startDate: "2026-10-19",
+    },
+    adjustments: [],
+  };
+  const planDoc = (uid: string, db: ReturnType<typeof ownerDb>) =>
+    db.collection("users").doc(uid).collection("trainingPlan").doc("current");
+
+  it("lets an athlete save and read their own training plan", async () => {
+    const db = ownerDb("alice");
+    await assertSucceeds(planDoc("alice", db).set(plan));
+    await assertSucceeds(planDoc("alice", db).get());
+  });
+
+  it("keeps everyone else out of an athlete's training plan", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore()
+        .collection("users").doc("alice")
+        .collection("trainingPlan").doc("current").set(plan);
+    });
+    const mallory = ownerDb("mallory");
+    await assertFails(planDoc("alice", mallory).get());
+    await assertFails(planDoc("alice", mallory).set({ ...plan, origin: "x" }));
+    const anon = env.unauthenticatedContext().firestore();
+    await assertFails(
+      anon.collection("users").doc("alice")
+        .collection("trainingPlan").doc("current").get(),
+    );
+  });
+
   // --- Billing is server-owned (audit T-3): the client must never be able
   // to grant, extend, or fake a paid entitlement, only the Admin SDK.
 
