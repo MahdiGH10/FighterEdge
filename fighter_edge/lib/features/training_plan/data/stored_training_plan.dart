@@ -176,9 +176,8 @@ class StoredTrainingPlan {
     final rawReviews = json['reviews'];
     if (rawReviews is Map) {
       for (final e in rawReviews.entries) {
-        final decision = ReviewDecision.values
-            .where((d) => d.name == e.value)
-            .firstOrNull;
+        final decision =
+            ReviewDecision.values.where((d) => d.name == e.value).firstOrNull;
         if (e.key is String && decision != null) {
           reviews[e.key as String] = decision;
         }

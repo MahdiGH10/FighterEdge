@@ -87,7 +87,8 @@ class WeeklyTargetCard extends StatelessWidget {
           ],
           if (onOpenReview != null) ...[
             const SizedBox(height: Insets.md),
-            GhostButton(l.weeklyCardReview, expand: true, onPressed: onOpenReview),
+            GhostButton(l.weeklyCardReview,
+                expand: true, onPressed: onOpenReview),
           ],
         ],
       ),

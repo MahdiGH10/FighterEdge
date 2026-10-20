@@ -11,7 +11,6 @@ import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart
 import '../features/fight_camp/domain/calendar.dart';
 import '../features/fight_camp/presentation/widgets/fight_countdown_card.dart';
 import '../features/training_plan/domain/models/planned_session.dart';
-import '../features/training_plan/domain/models/session_status.dart';
 import '../features/training_plan/domain/session_status_resolver.dart';
 import '../features/training_plan/presentation/plan_controller.dart';
 import '../features/training_plan/presentation/plan_labels.dart';
@@ -26,7 +25,6 @@ import '../state/app_state.dart';
 import '../state/first_run_controller.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
@@ -62,7 +60,6 @@ class DashboardScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final firstRun = context.watch<FirstRunController>();
     final plan = context.watch<PlanController>();
-    final fuel = context.watch<EdgeFuelController>();
     final user = auth.user;
     final week = plan.thisWeek;
     final streakWeeks = plan.weeklyStreak.count;

@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_icons.dart';
 
-import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../l10n/gen/app_localizations.dart';
-import '../state/app_state.dart';
 import '../state/first_run_controller.dart';
 import '../theme/app_haptics.dart';
 import '../widgets/bottom_nav.dart';

@@ -196,7 +196,7 @@ void main() {
       await pumpHome(tester, monday);
       await tester.scrollUntilVisible(find.text('THIS WEEK'), 300);
       expect(find.text('0 of 3 done'), findsOneWidget);
-      expect(find.text('Next: Wed Skill session'), findsOneWidget);
+      expect(find.text('Next: Wed Conditioning session'), findsOneWidget);
     });
 
     testWidgets('moves when a session is done', (tester) async {
@@ -235,8 +235,8 @@ void main() {
 
     testWidgets('offers the weekly review on Sunday until it is answered',
         (tester) async {
-      final (plan, _) = await pumpHome(tester, DateTime(2026, 10, 25, 20),
-          days: 6);
+      final (plan, _) =
+          await pumpHome(tester, DateTime(2026, 10, 25, 20), days: 6);
       await tester.scrollUntilVisible(find.text('Weekly review'), 300);
       expect(find.text('Weekly review'), findsOneWidget);
 

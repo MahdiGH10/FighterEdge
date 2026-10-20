@@ -55,15 +55,15 @@ void main() {
             now: now),
         isNull,
       );
-      expect(TargetAdjustment.apply(_target(kcal: null), 100, now: now),
-          isNull);
-      expect(TargetAdjustment.apply(_target(carbs: null), 100, now: now),
-          isNull);
+      expect(
+          TargetAdjustment.apply(_target(kcal: null), 100, now: now), isNull);
+      expect(
+          TargetAdjustment.apply(_target(carbs: null), 100, now: now), isNull);
     });
 
     test('refuses a step that would empty the carbohydrate', () {
-      expect(TargetAdjustment.apply(_target(carbs: 10), -150, now: now),
-          isNull);
+      expect(
+          TargetAdjustment.apply(_target(carbs: 10), -150, now: now), isNull);
     });
   });
 

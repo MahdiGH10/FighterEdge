@@ -69,7 +69,8 @@ class _WeeklyReviewScreenState extends State<WeeklyReviewScreen> {
                 Insets.lg, Insets.none, Insets.lg, Insets.xxl),
             children: [
               Text(
-                l.reviewWeekOf(DateFormat.MMMd(locale).format(review.weekStart)),
+                l.reviewWeekOf(
+                    DateFormat.MMMd(locale).format(review.weekStart)),
                 style: AppType.subhead(
                     color: AppAccessibility.textSecondary(context)),
               ),
@@ -139,8 +140,7 @@ class _FoodSection extends StatelessWidget {
           Text(l.reviewFood, style: AppType.headline()),
           const SizedBox(height: Insets.sm),
           if (n.targetCalories == null)
-            Text(l.reviewFoodNoTarget,
-                style: AppType.callout(color: secondary))
+            Text(l.reviewFoodNoTarget, style: AppType.callout(color: secondary))
           else ...[
             FuelWeekCard(
               key: ValueKey('review-fuel-$weekStart'),
@@ -186,8 +186,7 @@ class _WeightSection extends StatelessWidget {
           Text(l.reviewWeight, style: AppType.headline()),
           const SizedBox(height: Insets.xs),
           if (w.changeKg == null)
-            Text(l.reviewWeightNoData,
-                style: AppType.callout(color: secondary))
+            Text(l.reviewWeightNoData, style: AppType.callout(color: secondary))
           else ...[
             Text(change(w.changeKg!), style: AppType.title1()),
             const SizedBox(height: Insets.xs),
@@ -235,8 +234,8 @@ class _RecommendationSection extends StatelessWidget {
     final l = L.of(context);
     final plan = context.watch<PlanController>();
     final decision = plan.reviewDecision(review.weekStart);
-    final actionable =
-        review.recommendation.kind != RecommendationKind.hold && decision == null;
+    final actionable = review.recommendation.kind != RecommendationKind.hold &&
+        decision == null;
     return AppCard(
       accent: AppAccessibility.accentText(context),
       child: Column(
@@ -269,8 +268,9 @@ class _RecommendationSection extends StatelessWidget {
   }
 
   void _keep(BuildContext context) {
-    context.read<PlanController>().recordReview(
-        review.weekStart, ReviewDecision.kept);
+    context
+        .read<PlanController>()
+        .recordReview(review.weekStart, ReviewDecision.kept);
     Navigator.of(context).maybePop();
   }
 
@@ -279,9 +279,8 @@ class _RecommendationSection extends StatelessWidget {
     final r = review.recommendation;
     switch (r.kind) {
       case RecommendationKind.moveSession:
-        final row = plan.rows
-            .where((row) => row.session.id == r.sessionId)
-            .firstOrNull;
+        final row =
+            plan.rows.where((row) => row.session.id == r.sessionId).firstOrNull;
         if (row != null && plan.canMoveToToday(row)) {
           plan.move(row.session, plan.today);
         }

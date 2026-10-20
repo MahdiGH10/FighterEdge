@@ -167,9 +167,6 @@ class LEn extends L {
   String get dashboardTitle => 'Dashboard';
 
   @override
-  String get dashboardWeeklyOverview => 'Weekly overview';
-
-  @override
   String get dashboardNextSession => 'Next session';
 
   @override
@@ -191,27 +188,7 @@ class LEn extends L {
   String get dashboardStatCompleted => 'completed';
 
   @override
-  String dashboardStatDays(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'days',
-      one: 'day',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get dashboardAddWeighIn => 'Add weigh-in';
-
-  @override
-  String get dashboardStreakAtRisk => 'At risk';
-
-  @override
-  String get dashboardStreakOnFire => 'On fire';
-
-  @override
-  String get dashboardStreakLogToday => 'Log today';
 
   @override
   String get fuelWeekTitle => 'Fuel this week';
@@ -806,9 +783,6 @@ class LEn extends L {
   String get authHidePassword => 'Hide password';
 
   @override
-  String get dashboardThisWeek => 'This week';
-
-  @override
   String get dashboardFighter => 'Fighter';
 
   @override
@@ -842,6 +816,162 @@ class LEn extends L {
   String get dashboardOpenCamp => 'Open camp';
 
   @override
+  String dashboardStatWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'weeks',
+      one: 'week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyCardTitle => 'This week';
+
+  @override
+  String get weeklyCardRestWeek => 'Rest week';
+
+  @override
+  String get weeklyCardRestWeekHint =>
+      'No sessions planned. Rest is part of the plan.';
+
+  @override
+  String weeklyCardProgress(int done, int planned) {
+    return '$done of $planned done';
+  }
+
+  @override
+  String weeklyCardNext(String day, String session) {
+    return 'Next: $day $session';
+  }
+
+  @override
+  String get weeklyCardAllDone => 'All planned sessions done';
+
+  @override
+  String get weeklyCardNothingLeft => 'No more sessions planned this week';
+
+  @override
+  String weeklyCardTarget(int target) {
+    return '$target needed to count this week';
+  }
+
+  @override
+  String weeklyCardStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks in a row',
+      one: '1 week in a row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyCardReview => 'Weekly review';
+
+  @override
+  String get reviewTitle => 'Weekly review';
+
+  @override
+  String reviewWeekOf(String date) {
+    return 'Week of $date';
+  }
+
+  @override
+  String get reviewTraining => 'Training';
+
+  @override
+  String reviewSessionsDone(int done, int planned) {
+    return '$done of $planned sessions done';
+  }
+
+  @override
+  String get reviewFood => 'Food';
+
+  @override
+  String get reviewFoodNoTarget =>
+      'Set up Fuel to compare your week with a target.';
+
+  @override
+  String get reviewFoodNoLogs => 'No meals logged this week.';
+
+  @override
+  String reviewFoodAverage(int average, int target) {
+    return 'Average $average kcal a day against a target of $target.';
+  }
+
+  @override
+  String get reviewWeight => 'Weight';
+
+  @override
+  String get reviewWeightNoData => 'Not enough weigh-ins for a trend yet.';
+
+  @override
+  String get reviewWeightNoPath => 'No weight path to compare with.';
+
+  @override
+  String reviewWeightPath(String change) {
+    return 'Path: $change this week';
+  }
+
+  @override
+  String get reviewRecommendation => 'Recommendation';
+
+  @override
+  String get reviewRecMoveSession =>
+      'You have a planned session left over. Move it to today?';
+
+  @override
+  String reviewRecLower(int kcal) {
+    return 'Your weight is above your path and you ate to your target. Lower your daily target by $kcal kcal?';
+  }
+
+  @override
+  String reviewRecRaise(int kcal) {
+    return 'Your weight is below your path and you ate to your target. Raise your daily target by $kcal kcal?';
+  }
+
+  @override
+  String get reviewHoldOnPath => 'You are on path. Keep your plan as it is.';
+
+  @override
+  String get reviewHoldNoTarget =>
+      'Set up Fuel to get a calorie target before changes can be suggested.';
+
+  @override
+  String get reviewHoldNeedLogs =>
+      'Log at least four days of food before your target is changed.';
+
+  @override
+  String get reviewHoldIntake =>
+      'You were not close to your target this week, so it stays. Aim for it first.';
+
+  @override
+  String get reviewHoldNoPath =>
+      'Not enough weigh-ins, or no path to judge the scale by. Your target stays.';
+
+  @override
+  String get reviewHoldFloor =>
+      'Eating less would go under your resting energy estimate. Your target stays.';
+
+  @override
+  String get reviewAccept => 'Accept';
+
+  @override
+  String get reviewKeepCurrent => 'Keep current';
+
+  @override
+  String get reviewGotIt => 'Got it';
+
+  @override
+  String get reviewAccepted => 'You accepted this review.';
+
+  @override
+  String get reviewKept => 'You kept your current plan.';
+
+  @override
   String get dashboardSetFuel => 'Set a fuel target';
 
   @override
@@ -863,30 +993,6 @@ class LEn extends L {
 
   @override
   String get dashboardConfirmEmail => 'Confirm your email';
-
-  @override
-  String get dashboardRiskTitle => 'Streak at risk';
-
-  @override
-  String dashboardFreezeHint(int count) {
-    return 'Yesterday is unlogged. Protect it with a freeze ($count left).';
-  }
-
-  @override
-  String get dashboardLogHint =>
-      'No freeze is available. Log a session today to start again.';
-
-  @override
-  String get dashboardFreeze => 'Freeze';
-
-  @override
-  String get dashboardLogNow => 'Log now';
-
-  @override
-  String get dashboardFreezeUsed => 'Freeze used — yesterday is protected.';
-
-  @override
-  String get dashboardLogged => 'Logged';
 
   @override
   String get dashboardYesterday => 'Yesterday';
