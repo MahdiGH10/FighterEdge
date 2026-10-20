@@ -57,6 +57,13 @@ class LEn extends L {
   String get settingsLanguageGerman => 'Deutsch';
 
   @override
+  String get settingsReduceTransparency => 'Reduce transparency';
+
+  @override
+  String get settingsReduceTransparencySubtitle =>
+      'Solid backgrounds instead of frosted glass. High contrast does this too';
+
+  @override
   String get settingsLanguageBeta =>
       'German is partly translated — the rest stays in English for now.';
 

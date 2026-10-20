@@ -57,6 +57,13 @@ class LDe extends L {
   String get settingsLanguageGerman => 'Deutsch';
 
   @override
+  String get settingsReduceTransparency => 'Transparenz reduzieren';
+
+  @override
+  String get settingsReduceTransparencySubtitle =>
+      'Feste Hintergründe statt Milchglas. Hoher Kontrast macht das ebenfalls';
+
+  @override
   String get settingsLanguageBeta =>
       'Deutsch ist teilweise übersetzt — der Rest bleibt vorerst auf Englisch.';
 

@@ -193,6 +193,18 @@ abstract class L {
   /// **'Deutsch'**
   String get settingsLanguageGerman;
 
+  /// No description provided for @settingsReduceTransparency.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce transparency'**
+  String get settingsReduceTransparency;
+
+  /// No description provided for @settingsReduceTransparencySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid backgrounds instead of frosted glass. High contrast does this too'**
+  String get settingsReduceTransparencySubtitle;
+
   /// No description provided for @settingsLanguageBeta.
   ///
   /// In en, this message translates to:

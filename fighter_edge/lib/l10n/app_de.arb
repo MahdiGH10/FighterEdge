@@ -19,6 +19,8 @@
   "settingsLanguageSystem": "Systemsprache",
   "settingsLanguageEnglish": "English",
   "settingsLanguageGerman": "Deutsch",
+  "settingsReduceTransparency": "Transparenz reduzieren",
+  "settingsReduceTransparencySubtitle": "Feste Hintergründe statt Milchglas. Hoher Kontrast macht das ebenfalls",
   "settingsLanguageBeta": "Deutsch ist teilweise übersetzt — der Rest bleibt vorerst auf Englisch.",
   "settingsSectionSubscription": "Abo",
   "settingsManagePro": "Pro verwalten",
