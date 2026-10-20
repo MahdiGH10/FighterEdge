@@ -49,9 +49,8 @@ class _GlowPainter extends CustomPainter {
   /// ([rx], [ry]), all as fractions of the box, like CSS `radial-gradient`.
   static Paint _glow(Size size, double cx, double cy, double rx, double ry,
       List<Color> colors, List<double> stops) {
-    final matrix =
-        Matrix4.translationValues(cx * size.width, cy * size.height, 0)
-          ..scale(rx * size.width, ry * size.height, 1);
+    final matrix = Matrix4.diagonal3Values(rx * size.width, ry * size.height, 1)
+      ..setTranslationRaw(cx * size.width, cy * size.height, 0);
     return Paint()
       ..shader = ui.Gradient.radial(
         Offset.zero,

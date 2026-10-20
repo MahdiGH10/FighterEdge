@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/glass_sheet.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_icons.dart';
@@ -319,12 +320,8 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _showInfo(BuildContext context, String title, String message) {
-    showModalBottomSheet<void>(
+    showGlassSheet<void>(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Radii.card)),
-      ),
       builder: (context) => Padding(
         padding: const EdgeInsets.all(Insets.xl),
         child: Column(
@@ -429,9 +426,8 @@ Future<void> _pickLanguage(BuildContext context) async {
   final controller = context.read<LocaleController>();
   final l = L.of(context);
   final current = controller.locale?.languageCode;
-  await showModalBottomSheet<void>(
+  await showGlassSheet<void>(
     context: context,
-    backgroundColor: AppColors.surface,
     showDragHandle: true,
     builder: (sheetContext) => SafeArea(
       top: false,

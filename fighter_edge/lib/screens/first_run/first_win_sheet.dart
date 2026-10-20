@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../widgets/glass_sheet.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,13 +23,9 @@ import '../../widgets/primary_button.dart';
 /// anything, "can we remind you?" is a request for trust not yet earned. Right
 /// after a win it reads as an offer to help repeat it.
 Future<void> showFirstWinSheet(BuildContext context) {
-  return showModalBottomSheet<void>(
+  return showGlassSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(Radii.card)),
-    ),
     builder: (_) => const FirstWinSheet(),
   );
 }
