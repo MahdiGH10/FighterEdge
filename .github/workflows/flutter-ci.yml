@@ -278,10 +278,10 @@ jobs:
       # Two emulator boots, one per test file, instead of one `flutter test
       # integration_test/` covering both: pointed at a directory, it reuses
       # a single long-lived emulator for every file it finds. This runner
-      # has no real GPU — the emulator always renders through SwiftShader
-      # software rendering (visible in its own launch args, `-gpu
-      # swiftshader_indirect`) — and twice in a row, that one shared
-      # instance died right as the *second* file (app_flow_test.dart, by
+      # has no real GPU. Pin `-gpu software` below: the old default
+      # `swiftshader_indirect` was deprecated in emulator 36.4.9. Twice in a
+      # row, the shared instance died right as the *second* file
+      # (app_flow_test.dart, by
       # far the longer/heavier of the two) finished: both files' tests
       # passed (their own pass/fail output said so), but the emulator was
       # already unreachable by the time the action's own cleanup tried to
@@ -289,7 +289,7 @@ jobs:
       # avoids the accumulated memory/GPU-context pressure that's the most
       # likely trigger.
       # ram-size: app_flow_test.dart twice failed on a `ColorBuffer`
-      # allocation error from the software (SwiftShader) GPU renderer at
+      # allocation error from the software GPU renderer at
       # the same step, ~170 buffers into the session both times —
       # consistent with a resource ceiling in the renderer, not a random
       # glitch. More RAM gives it headroom.
@@ -311,6 +311,7 @@ jobs:
           target: google_apis
           arch: x86_64
           ram-size: 4096M
+          emulator-options: -no-window -gpu software -no-snapshot -noaudio -no-boot-anim
           working-directory: fighter_edge
           script: flutter test integration_test/performance_smoke_test.dart
 
@@ -321,6 +322,7 @@ jobs:
           target: google_apis
           arch: x86_64
           ram-size: 4096M
+          emulator-options: -no-window -gpu software -no-snapshot -noaudio -no-boot-anim
           working-directory: fighter_edge
           script: flutter test integration_test/app_flow_test.dart
 
@@ -362,6 +364,7 @@ jobs:
           target: google_apis
           arch: x86_64
           ram-size: 4096M
+          emulator-options: -no-window -gpu software -no-snapshot -noaudio -no-boot-anim
           working-directory: fighter_edge
           script: bash tool/ci/launch_release_apk.sh build/release-artifact/app/outputs/flutter-apk/app-release.apk
 
