@@ -227,7 +227,10 @@ void main() {
       expect(find.text('Streak at risk'), findsOneWidget);
       expect(find.textContaining('(1 left)'), findsOneWidget);
 
-      await tester.ensureVisible(find.text('Freeze'));
+      // Centred, not at the top edge: the glass header sits over the top
+      // of the list.
+      await Scrollable.ensureVisible(tester.element(find.text('Freeze')),
+          alignment: .5);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Freeze'));
       await tester.pumpAndSettle();
@@ -256,7 +259,10 @@ void main() {
       expect(find.text('Streak at risk'), findsOneWidget);
       expect(find.text('Freeze'), findsNothing);
 
-      await tester.ensureVisible(find.text('Log now'));
+      // Centred, not at the top edge: the glass header sits over the top
+      // of the list.
+      await Scrollable.ensureVisible(tester.element(find.text('Log now')),
+          alignment: .5);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Log now'));
       await tester.pump();
