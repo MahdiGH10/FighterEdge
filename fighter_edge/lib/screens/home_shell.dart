@@ -175,6 +175,9 @@ class _HomeShellState extends State<HomeShell> {
     // sheet over a tab share one copy of what is behind them.
     return BackdropGroup(
       child: Scaffold(
+        // The glass nav is drawn over the body, so lists scroll under it. Their
+        // bottom padding clears it: ScreenScaffold.tabBottomPadding.
+        extendBody: true,
         // Tabs are peers: nothing slides, because nothing moved. Every tab the
         // athlete has opened stays mounted, so its scroll position, sub-tab and
         // segment are still there on return; tabs never opened are not built,

@@ -14,6 +14,7 @@ import '../theme/app_typography.dart';
 import '../training/reaction/coach_voice.dart';
 import '../training/reaction/reaction_cue_generator.dart';
 import '../training/reaction/reaction_drill.dart';
+import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/premium_effects.dart';
 import '../widgets/primary_button.dart';
@@ -127,8 +128,8 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
     final l = L.of(context);
     final spec = _spec;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
+      padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
+          ScreenScaffold.tabBottomPadding(context)),
       children: [
         PremiumReveal(
           index: 0,

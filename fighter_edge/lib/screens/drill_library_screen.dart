@@ -17,6 +17,7 @@ import '../training/drills/drill_catalog.dart';
 import '../training/drills/drill_progress_store.dart';
 import '../training/drills/learning_path.dart';
 import '../training/taxonomy/technique_taxonomy.dart';
+import '../widgets/app_scaffold.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/primary_button.dart';
@@ -164,7 +165,8 @@ class _DrillLibraryScreenState extends State<DrillLibraryScreen> {
                 ..._visible.where((d) => !d.starter),
               ];
         return ListView(
-          padding: const EdgeInsets.only(bottom: Insets.xxl),
+          padding:
+              EdgeInsets.only(bottom: ScreenScaffold.tabBottomPadding(context)),
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(

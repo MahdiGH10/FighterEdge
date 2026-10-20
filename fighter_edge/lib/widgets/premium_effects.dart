@@ -1,19 +1,24 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import '../theme/app_icons.dart';
+import '../theme/glass_policy.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 
-/// The app's ground: one flat colour behind every screen.
+/// The app's ground: near-black with a soft, static glow.
 ///
-/// It used to paint a red radial glow top-right and a cool one bottom-left.
-/// That was decoration that explained nothing, repeated on every screen, and
-/// it is the single most template-looking thing the app had. Depth now comes
-/// from the surface ramp (`background` < `surface` < `surfaceAlt`), the way
-/// the colour contract describes.
+/// The glow is the thing the glass sits on: a crimson core fading to ember at
+/// the top edge, a cool violet-blue pool bottom-left and a violet touch
+/// bottom-right ([GlassColors]). It is painted once, inside its own
+/// [RepaintBoundary], and never animates, so scrolling content above it does
+/// not re-raster it.
+///
+/// At [GlassLevel.solid] (Reduce transparency, high contrast) the glow is
+/// gone and the ground is the flat `background` colour.
 class AppBackground extends StatelessWidget {
   final Widget child;
 
@@ -21,8 +26,92 @@ class AppBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(color: AppColors.background, child: child);
+    if (!GlassPolicy.of(context).tints) {
+      return ColoredBox(color: AppColors.background, child: child);
+    }
+    return Stack(
+      children: [
+        const Positioned.fill(
+          child: RepaintBoundary(
+            child: CustomPaint(painter: _GlowPainter()),
+          ),
+        ),
+        child,
+      ],
+    );
   }
+}
+
+class _GlowPainter extends CustomPainter {
+  const _GlowPainter();
+
+  /// An elliptical radial gradient: centre at ([cx], [cy]) and radii
+  /// ([rx], [ry]), all as fractions of the box, like CSS `radial-gradient`.
+  static Paint _glow(Size size, double cx, double cy, double rx, double ry,
+      List<Color> colors, List<double> stops) {
+    final matrix =
+        Matrix4.translationValues(cx * size.width, cy * size.height, 0)
+          ..scale(rx * size.width, ry * size.height, 1);
+    return Paint()
+      ..shader = ui.Gradient.radial(
+        Offset.zero,
+        1,
+        colors,
+        stops,
+        TileMode.clamp,
+        matrix.storage,
+      );
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    canvas.drawRect(rect, Paint()..color = AppColors.background);
+    // Top: crimson core, ember halo, gone by 66%.
+    canvas.drawRect(
+      rect,
+      _glow(
+        size,
+        .5,
+        -.14,
+        1.2,
+        .52,
+        [
+          GlassColors.glowTop,
+          GlassColors.glowEmber,
+          GlassColors.glowTop.withValues(alpha: 0),
+        ],
+        const [0, .3, .66],
+      ),
+    );
+    // Bottom left: the cool pool that makes the crimson above read richer.
+    canvas.drawRect(
+      rect,
+      _glow(
+          size,
+          0,
+          1.02,
+          .85,
+          .38,
+          [GlassColors.glowLow, GlassColors.glowLow.withValues(alpha: 0)],
+          const [0, .72]),
+    );
+    // Bottom right: a violet touch.
+    canvas.drawRect(
+      rect,
+      _glow(
+          size,
+          1.04,
+          .84,
+          .55,
+          .26,
+          [GlassColors.glowViolet, GlassColors.glowViolet.withValues(alpha: 0)],
+          const [0, .72]),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_GlowPainter oldDelegate) => false;
 }
 
 /// Small entrance motion with an accessibility-safe static path.

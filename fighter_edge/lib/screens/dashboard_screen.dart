@@ -76,104 +76,112 @@ class DashboardScreen extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     return ScreenScaffold.tab(
       title: DateFormat.MMMEd(locale).format(state.now),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-            Insets.lg, Insets.none, Insets.lg, Insets.xxl),
-        children: [
-          // Only while a change was refused by the server.
-          const SyncNotice(),
-          Text(
-              user?.displayName.isNotEmpty == true
-                  ? user!.displayName
-                  : l.dashboardFighter,
-              style: AppType.title1()),
-          if (user?.goal.isNotEmpty == true)
-            Text(user!.goal,
-                style: AppType.subhead(
-                    color: AppAccessibility.textSecondary(context))),
-          const SizedBox(height: Insets.lg),
-          if (firstRun.isActive) ...[
-            FirstWeekChecklist(
-                key: checklistKey,
-                compact: true,
-                onStartTour: onStartTour ?? () {},
-                onLogMeal: () => onNavigate(2),
-                onTrain: () => onNavigate(1)),
+      scrollsUnderHeader: true,
+      // A Builder so the padding reads the body's own MediaQuery: the header
+      // above and the glass nav below are folded into it.
+      body: Builder(
+        builder: (context) => ListView(
+          padding: EdgeInsets.fromLTRB(
+              Insets.lg,
+              MediaQuery.paddingOf(context).top,
+              Insets.lg,
+              ScreenScaffold.tabBottomPadding(context)),
+          children: [
+            // Only while a change was refused by the server.
+            const SyncNotice(),
+            Text(
+                user?.displayName.isNotEmpty == true
+                    ? user!.displayName
+                    : l.dashboardFighter,
+                style: AppType.title1()),
+            if (user?.goal.isNotEmpty == true)
+              Text(user!.goal,
+                  style: AppType.subhead(
+                      color: AppAccessibility.textSecondary(context))),
+            const SizedBox(height: Insets.lg),
+            if (firstRun.isActive) ...[
+              FirstWeekChecklist(
+                  key: checklistKey,
+                  compact: true,
+                  onStartTour: onStartTour ?? () {},
+                  onLogMeal: () => onNavigate(2),
+                  onTrain: () => onNavigate(1)),
+              const SizedBox(height: Insets.md),
+            ],
+            const FightCountdownSection(),
+            _SessionHero(
+                session: next,
+                today: todaysSession != null,
+                hasPlan: state.sessions.isNotEmpty,
+                onNavigate: onNavigate),
             const SizedBox(height: Insets.md),
-          ],
-          const FightCountdownSection(),
-          _SessionHero(
-              session: next,
-              today: todaysSession != null,
-              hasPlan: state.sessions.isNotEmpty,
-              onNavigate: onNavigate),
-          const SizedBox(height: Insets.md),
-          const CornerLineRow(),
-          const SizedBox(height: Insets.md),
-          if (auth.supportsEmailVerification &&
-              user != null &&
-              !user.emailVerified) ...[
-            _VerificationBanner(auth: auth),
+            const CornerLineRow(),
             const SizedBox(height: Insets.md),
-          ],
-          if (atRisk) ...[
-            _StreakFreezeBanner(streak: streak, onNavigate: onNavigate),
+            if (auth.supportsEmailVerification &&
+                user != null &&
+                !user.emailVerified) ...[
+              _VerificationBanner(auth: auth),
+              const SizedBox(height: Insets.md),
+            ],
+            if (atRisk) ...[
+              _StreakFreezeBanner(streak: streak, onNavigate: onNavigate),
+              const SizedBox(height: Insets.md),
+            ],
+            const DevMessageCard(),
+            _DashboardStats(streakDays: streakDays),
+            const AddFightRow(),
+            const SizedBox(height: Insets.xl),
+            Text(l.dashboardThisWeek, style: AppType.headline()),
             const SizedBox(height: Insets.md),
-          ],
-          const DevMessageCard(),
-          _DashboardStats(streakDays: streakDays),
-          const AddFightRow(),
-          const SizedBox(height: Insets.xl),
-          Text(l.dashboardThisWeek, style: AppType.headline()),
-          const SizedBox(height: Insets.md),
-          AppCard(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                WeeklyOverview(
-                  dayLetters: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-                  progress: [
-                    for (final day in days)
-                      state.sessions.any((s) =>
-                              s.completed &&
-                              s.day.toLowerCase().startsWith(day))
-                          ? 1.0
-                          : 0.0
+            AppCard(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                  WeeklyOverview(
+                    dayLetters: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+                    progress: [
+                      for (final day in days)
+                        state.sessions.any((s) =>
+                                s.completed &&
+                                s.day.toLowerCase().startsWith(day))
+                            ? 1.0
+                            : 0.0
+                    ],
+                    todayIndex: state.now.weekday - 1,
+                  ),
+                  if (fuel.hasUsableTarget) ...[
+                    const SizedBox(height: Insets.xl),
+                    FuelWeekCard(
+                        key: ValueKey(
+                            '${fuel.targetCalories}-${fuel.consumedCalories}-${fuel.entries.length}'),
+                        edgeFuel: fuel,
+                        embedded: true),
                   ],
-                  todayIndex: state.now.weekday - 1,
-                ),
-                if (fuel.hasUsableTarget) ...[
-                  const SizedBox(height: Insets.xl),
-                  FuelWeekCard(
-                      key: ValueKey(
-                          '${fuel.targetCalories}-${fuel.consumedCalories}-${fuel.entries.length}'),
-                      edgeFuel: fuel,
-                      embedded: true),
-                ],
-              ])),
-          const SizedBox(height: Insets.xl),
-          Row(children: [
-            Expanded(
-                child:
-                    Text(l.dashboardRecentActivity, style: AppType.headline())),
-            TextButton(
-                style: TextButton.styleFrom(
-                    foregroundColor: AppColors.textSecondary),
-                onPressed: () => onNavigate(1),
-                child: Text(l.dashboardSeeAll)),
-          ]),
-          if (recent.isEmpty)
-            Padding(
-                padding: const EdgeInsets.symmetric(vertical: Insets.md),
-                child: Text(l.dashboardNoActivity,
-                    style: AppType.callout(
-                        color: AppAccessibility.textSecondary(context))))
-          else
-            GroupedList(children: [
-              for (final session in recent)
-                _ActivityRow(session: session, now: state.now),
+                ])),
+            const SizedBox(height: Insets.xl),
+            Row(children: [
+              Expanded(
+                  child: Text(l.dashboardRecentActivity,
+                      style: AppType.headline())),
+              TextButton(
+                  style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary),
+                  onPressed: () => onNavigate(1),
+                  child: Text(l.dashboardSeeAll)),
             ]),
-        ],
+            if (recent.isEmpty)
+              Padding(
+                  padding: const EdgeInsets.symmetric(vertical: Insets.md),
+                  child: Text(l.dashboardNoActivity,
+                      style: AppType.callout(
+                          color: AppAccessibility.textSecondary(context))))
+            else
+              GroupedList(children: [
+                for (final session in recent)
+                  _ActivityRow(session: session, now: state.now),
+              ]),
+          ],
+        ),
       ),
     );
   }
