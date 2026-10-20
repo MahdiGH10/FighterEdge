@@ -11,10 +11,6 @@ enum VerifiedAction {
   /// Buying Pro. A subscription tied to an address that may not exist is a
   /// refund and account-recovery problem the moment anything goes wrong.
   purchasePro,
-
-  /// The AI coach. Every call costs money on our side, which makes unverified
-  /// accounts a cheap way to farm inference.
-  aiCoach,
 }
 
 /// How loudly the app should currently be asking for verification.
@@ -91,7 +87,6 @@ class VerificationGate {
       VerifiedAction.purchasePro =>
         'Verify your email before upgrading. Your subscription and receipts '
             'are tied to it.',
-      VerifiedAction.aiCoach => 'Verify your email to unlock the AI coach.',
     };
   }
 }

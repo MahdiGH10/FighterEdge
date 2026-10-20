@@ -75,7 +75,7 @@ class LEn extends L {
 
   @override
   String get settingsUpgradeProSubtitle =>
-      'Daily Corner Brief and coach, full drill and recipe libraries, corner cues';
+      'Full drill and recipe libraries, corner cues';
 
   @override
   String get settingsSectionTraining => 'Training preferences';
@@ -549,32 +549,6 @@ class LEn extends L {
   String get healthConsentDeleteAccount => 'Delete my account instead';
 
   @override
-  String get aiConsentTitle => 'Before you talk to the coach';
-
-  @override
-  String get aiConsentBody =>
-      'To answer, our server sends your calorie and macro targets, today\'s food-log summary, your diet type, allergies, disliked foods, your messages, and, if you use them, today\'s planned session, your training days against your plan, your 7-day weight trend, and your fight camp (dates, weight limit and today\'s food-only plan) to Groq or OpenRouter (USA), which may pass them to an AI model provider. Your name, email address and account ID are never sent.';
-
-  @override
-  String get aiConsentRetention =>
-      'Some providers, especially free models, may keep what they receive under their own terms. Don\'t type anything you don\'t want to share.';
-
-  @override
-  String get aiConsentStatement =>
-      'I agree that this data is sent to the AI provider as described, including to the USA.';
-
-  @override
-  String get aiConsentAgree => 'I agree';
-
-  @override
-  String get aiConsentChangeLater =>
-      'You can turn this off any time in Settings > Privacy.';
-
-  @override
-  String get aiConsentRequiredNotice =>
-      'Allow AI coach data sharing to get an answer.';
-
-  @override
   String get settingsHealthData => 'Health data';
 
   @override
@@ -594,13 +568,6 @@ class LEn extends L {
 
   @override
   String get settingsHealthDataWithdrawConfirm => 'Delete my account';
-
-  @override
-  String get settingsAiCoach => 'AI coach data sharing';
-
-  @override
-  String get settingsAiCoachSubtitle =>
-      'Sends your plan facts and messages to our AI provider (USA) when you use the coach.';
 
   @override
   String get settingsAdPrivacy => 'Ad privacy choices';
@@ -1017,7 +984,7 @@ class LEn extends L {
 
   @override
   String get planReadyProBody =>
-      'Pro includes a daily Corner Brief and coach, all drills and recipes, and cues between rounds.';
+      'Pro includes all drills and recipes, and cues between rounds.';
 
   @override
   String get planReadyCalories => 'Daily calories';
@@ -1033,7 +1000,7 @@ class LEn extends L {
   String get profileProActive => 'Pro subscription active';
 
   @override
-  String get profileProDescription => 'Daily brief, all drills and recipes';
+  String get profileProDescription => 'All drills and recipes';
 
   @override
   String get profileUpgrade => 'Upgrade';
@@ -1060,13 +1027,6 @@ class LEn extends L {
 
   @override
   String get fuelRecipesTitle => 'Recipes for your day';
-
-  @override
-  String get paywallBenefitBriefTitle => 'Daily Corner Brief';
-
-  @override
-  String get paywallBenefitBriefBody =>
-      'Three lines a day on training, fuel and weight, and a coach to ask.';
 
   @override
   String get paywallBenefitRecipesTitle => 'Full Recipe Library';
@@ -1691,95 +1651,6 @@ class LEn extends L {
 
   @override
   String get cornerCueOnTrack => 'On track today. Keep the next meal balanced.';
-
-  @override
-  String get cornerBriefFreeHint =>
-      'Pro writes your full brief: training, fuel and weight, updated as you log.';
-
-  @override
-  String get cornerBriefUnlock => 'Unlock the full brief';
-
-  @override
-  String get cornerBriefProHint =>
-      'Your corner writes three lines for today: training, fuel and weight.';
-
-  @override
-  String get cornerBriefGet => 'Get today\'s brief';
-
-  @override
-  String get cornerBriefWriting => 'Your corner is reading your day…';
-
-  @override
-  String get cornerBriefUpdating => 'Updating after your last log…';
-
-  @override
-  String get cornerBriefQuota => 'Today\'s briefs are used up. Back tomorrow.';
-
-  @override
-  String get cornerBriefQuotaStale =>
-      'Today\'s briefs are used up. This one is from before your last log.';
-
-  @override
-  String get cornerBriefUnavailable => 'Your corner couldn\'t answer just now.';
-
-  @override
-  String get cornerBriefSyncing => 'Pro is still syncing to your account.';
-
-  @override
-  String get cornerBriefTryAgain => 'Try again';
-
-  @override
-  String get cornerBriefVerify => 'Confirm your email to get your full brief.';
-
-  @override
-  String get cornerBriefVerifyAction => 'Verify my email';
-
-  @override
-  String get cornerBriefSetUpAction => 'Set up EdgeFuel';
-
-  @override
-  String get cornerBriefAskCoach => 'Ask your coach';
-
-  @override
-  String get cornerBriefProfessional =>
-      'Please speak with a qualified professional before acting on this.';
-
-  @override
-  String get cornerBriefWatchVideo =>
-      'Watch a short video for today\'s full brief';
-
-  @override
-  String get cornerBriefRewardedNote =>
-      'Today\'s free brief. Pro rewrites it after every log.';
-
-  @override
-  String get cornerBriefRewardUsed =>
-      'You\'ve had today\'s free brief. Back tomorrow, or go Pro.';
-
-  @override
-  String get cornerBriefVideoClosed => 'Watch to the end to unlock the brief.';
-
-  @override
-  String get cornerBriefNoVideo => 'No video right now. Try again later.';
-
-  @override
-  String get cornerBriefRewardFailed =>
-      'Your corner couldn\'t write it just now. Tap again later, no new video needed.';
-
-  @override
-  String get cornerTopicTraining => 'Training';
-
-  @override
-  String get cornerTopicFuel => 'Fuel';
-
-  @override
-  String get cornerTopicWeight => 'Weight';
-
-  @override
-  String get cornerTopicCamp => 'Camp';
-
-  @override
-  String get cornerTopicRecovery => 'Recovery';
 
   @override
   String get deleteAccountFailed =>

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_coach_screen.dart';
-import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import 'package:fighter_edge/screens/settings_screen.dart';
 import 'package:fighter_edge/screens/weight_tracker_screen.dart';
 import 'package:fighter_edge/widgets/filter_chips.dart';
@@ -70,17 +68,4 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
-
-  testWidgets('the EdgeFuel Coach with no plan leads straight to setup',
-      (tester) async {
-    phone(tester);
-    final repo = await makeRepo(signedIn: true, onboarded: true);
-    await tester.pumpWidget(wrapApp(const EdgeFuelCoachScreen(), repo: repo));
-    await tester.pumpAndSettle();
-
-    expect(find.text('No plan yet'), findsOneWidget);
-    await tester.tap(find.text('Start setup'));
-    await tester.pumpAndSettle();
-    expect(find.byType(EdgeFuelSetupScreen), findsOneWidget);
-  });
 }

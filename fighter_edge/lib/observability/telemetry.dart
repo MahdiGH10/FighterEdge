@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 /// Product events that are safe to send to Firebase Analytics.
 ///
 /// Event names and parameters are intentionally an allow-list. Do not add
-/// body measurements, nutrition values, free-form AI text, email addresses,
+/// body measurements, nutrition values, free-form text, email addresses,
 /// Firebase UIDs, or other health data here.
 enum TelemetryEvent {
   paywallViewed,
@@ -16,9 +16,6 @@ enum TelemetryEvent {
   subscriptionCheckoutStarted,
   subscriptionPurchaseResult,
   purchaseRestoreResult,
-  cornerBriefPreviewViewed,
-  aiRequestResult,
-  rewardedAdResult,
 
   // Activation and habit funnel. Parameters are enums, small counts and 0/1
   // flags only — never a body measurement, a food, or anything typed.
@@ -42,10 +39,6 @@ extension TelemetryEventName on TelemetryEvent {
         TelemetryEvent.subscriptionPurchaseResult =>
           'subscription_purchase_result',
         TelemetryEvent.purchaseRestoreResult => 'purchase_restore_result',
-        TelemetryEvent.cornerBriefPreviewViewed =>
-          'corner_brief_preview_viewed',
-        TelemetryEvent.aiRequestResult => 'ai_request_result',
-        TelemetryEvent.rewardedAdResult => 'rewarded_ad_result',
         TelemetryEvent.onboardingStepViewed => 'onboarding_step_viewed',
         TelemetryEvent.onboardingCompleted => 'onboarding_completed',
         TelemetryEvent.planRevealed => 'plan_revealed',
@@ -162,7 +155,6 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
       if (key == 'feature') {
         return _oneOf(value, const {
           'direct',
-          'edgeFuelAiCoach',
           'edgeFuelPremiumRecipes',
           'fullTechniqueLibrary',
           'cornerCoach',
@@ -176,8 +168,6 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
           'profile',
           'corner_coach',
           'technique_library',
-          'corner_brief',
-          'coach',
           'premium_recipe',
         });
       }
@@ -187,8 +177,6 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
         return _oneOf(value, const {
           'plan_ready',
           'paywall_waitlist',
-          'corner_brief',
-          'fuel_plan',
         });
       }
       if (key == 'access') return _oneOf(value, const {'free', 'pro'});
@@ -206,30 +194,6 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
       return false;
     case TelemetryEvent.purchaseRestoreResult:
       if (key == 'status') return _oneOf(value, const {'active', 'none'});
-      return false;
-    case TelemetryEvent.cornerBriefPreviewViewed:
-      if (key == 'access') return _oneOf(value, const {'free', 'pro'});
-      return false;
-    case TelemetryEvent.aiRequestResult:
-      if (key == 'task') return _oneOf(value, const {'chat', 'corner_brief'});
-      if (key == 'status') {
-        return _oneOf(value, const {
-          'success',
-          'quota_reached',
-          'entitlement_required',
-          'consent_required',
-          'unavailable',
-        });
-      }
-      // A Corner Brief rewritten after a log, not asked for.
-      if (key == 'automatic') return _flag(value);
-      // A free account's brief unlocked by a rewarded video.
-      if (key == 'rewarded') return _flag(value);
-      return false;
-    case TelemetryEvent.rewardedAdResult:
-      if (key == 'status') {
-        return _oneOf(value, const {'earned', 'closed_early', 'unavailable'});
-      }
       return false;
     case TelemetryEvent.onboardingStepViewed:
       if (key == 'step') return value is int && value >= 1 && value <= 7;

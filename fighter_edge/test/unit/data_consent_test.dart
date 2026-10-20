@@ -102,7 +102,7 @@ void main() {
 
     test('a new account holds no consent', () {
       expect(base.hasHealthDataConsent, isFalse);
-      expect(base.hasAiCoachConsent, isFalse);
+      expect(base.consents.allows(DataConsentPurpose.aiCoach), isFalse);
     });
 
     test('copyWith and JSON keep consents', () {
@@ -110,11 +110,11 @@ void main() {
         consents: DataConsents.none.granted(DataConsentPurpose.healthData),
       );
       expect(user.hasHealthDataConsent, isTrue);
-      expect(user.hasAiCoachConsent, isFalse);
+      expect(user.consents.allows(DataConsentPurpose.aiCoach), isFalse);
 
       final restored = AppUser.fromJson(user.toJson());
       expect(restored.hasHealthDataConsent, isTrue);
-      expect(restored.hasAiCoachConsent, isFalse);
+      expect(restored.consents.allows(DataConsentPurpose.aiCoach), isFalse);
     });
   });
 }

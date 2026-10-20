@@ -31,9 +31,8 @@ class AppUser {
   /// developer and never written by the client.
   final DevMessage? devMessage;
 
-  /// Explicit consents the account holds (health data, AI coach). Written by
-  /// the athlete, checked by the app before collecting health data and by the
-  /// server before any AI call.
+  /// Explicit consents the account holds (health data). Written by the
+  /// athlete and checked by the app before collecting health data.
   final DataConsents consents;
 
   const AppUser({
@@ -58,8 +57,6 @@ class AppUser {
 
   bool get hasHealthDataConsent =>
       consents.allows(DataConsentPurpose.healthData);
-
-  bool get hasAiCoachConsent => consents.allows(DataConsentPurpose.aiCoach);
 
   /// Expiry-aware, like the server (audit M-4): a Pro plan whose recorded
   /// expiry has passed (beyond [Entitlements.expiryLeeway]) no longer counts,

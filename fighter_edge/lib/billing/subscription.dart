@@ -27,12 +27,6 @@ extension PlanInfo on Plan {
 /// earlier paywall sold timer presets and weight history that were free
 /// anyway, and analytics that did not exist.)
 enum Feature {
-  /// The daily Corner Brief and the EdgeFuel Coach chat (master prompt
-  /// §13.1).
-  /// Gated like every Pro feature, which also keeps per-user AI spend
-  /// bounded.
-  edgeFuelAiCoach,
-
   /// EdgeFuel premium recipes (master prompt §10) — its own entitlement case
   /// so it can be reasoned about, priced, and server-verified on its own.
   edgeFuelPremiumRecipes,
@@ -47,7 +41,6 @@ enum Feature {
 extension FeatureInfo on Feature {
   /// Human-readable name shown on the paywall and lock states.
   String get title => switch (this) {
-        Feature.edgeFuelAiCoach => 'Daily Corner Brief',
         Feature.edgeFuelPremiumRecipes => 'Full Recipe Library',
         Feature.fullTechniqueLibrary => 'Full Drill Library',
         Feature.cornerCoach => 'Corner Cues',
@@ -55,9 +48,6 @@ extension FeatureInfo on Feature {
 
   /// One line on what the feature actually does, for the paywall.
   String get pitch => switch (this) {
-        Feature.edgeFuelAiCoach => 'Three lines from your corner each day on '
-            'training, fuel and weight, and a coach to ask, grounded in your '
-            'own numbers',
         Feature.edgeFuelPremiumRecipes => 'Every recipe, scaled to your '
             'servings and checked against your allergens',
         Feature.fullTechniqueLibrary => 'Every drill across striking, '
@@ -67,7 +57,6 @@ extension FeatureInfo on Feature {
       };
 
   IconData get icon => switch (this) {
-        Feature.edgeFuelAiCoach => AppIcons.clipboardText,
         Feature.edgeFuelPremiumRecipes => AppIcons.forkKnife,
         Feature.fullTechniqueLibrary => AppIcons.handFist,
         Feature.cornerCoach => AppIcons.megaphoneSimple,
@@ -81,7 +70,6 @@ class Entitlements {
 
   /// Features that require Pro. Anything not listed is available to everyone.
   static const Set<Feature> _proOnly = {
-    Feature.edgeFuelAiCoach,
     Feature.edgeFuelPremiumRecipes,
     Feature.fullTechniqueLibrary,
     Feature.cornerCoach,

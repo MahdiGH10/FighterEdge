@@ -75,7 +75,7 @@ class LDe extends L {
 
   @override
   String get settingsUpgradeProSubtitle =>
-      'Tägliches Ecken-Briefing und Coach, komplette Drill- und Rezept-Bibliothek, Ecken-Tipps';
+      'Komplette Drill- und Rezept-Bibliothek, Ecken-Tipps';
 
   @override
   String get settingsSectionTraining => 'Trainingseinstellungen';
@@ -553,32 +553,6 @@ class LDe extends L {
   String get healthConsentDeleteAccount => 'Stattdessen mein Konto löschen';
 
   @override
-  String get aiConsentTitle => 'Bevor du mit dem Coach sprichst';
-
-  @override
-  String get aiConsentBody =>
-      'Für eine Antwort sendet unser Server deine Kalorien- und Makroziele, die Zusammenfassung deines heutigen Ernährungsprotokolls, deine Ernährungsweise, Allergien, Abneigungen, deine Nachrichten und, wenn du sie nutzt, deine heute geplante Einheit, deine Trainingstage im Vergleich zu deinem Plan, deinen 7-Tage-Gewichtstrend und dein Fight Camp (Termine, Gewichtslimit und den heutigen rein ernährungsbasierten Plan) an Groq oder OpenRouter (USA), das sie an einen KI-Modellanbieter weitergeben kann. Dein Name, deine E-Mail-Adresse und deine Konto-ID werden nie gesendet.';
-
-  @override
-  String get aiConsentRetention =>
-      'Manche Anbieter, besonders kostenlose Modelle, können Eingaben nach ihren eigenen Bedingungen speichern. Schreib nichts, was du nicht teilen möchtest.';
-
-  @override
-  String get aiConsentStatement =>
-      'Ich willige ein, dass diese Daten wie beschrieben an den KI-Anbieter übermittelt werden, auch in die USA.';
-
-  @override
-  String get aiConsentAgree => 'Ich willige ein';
-
-  @override
-  String get aiConsentChangeLater =>
-      'Du kannst das jederzeit unter Einstellungen > Datenschutz ausschalten.';
-
-  @override
-  String get aiConsentRequiredNotice =>
-      'Erlaube die Datenweitergabe an den KI-Coach, um eine Antwort zu bekommen.';
-
-  @override
   String get settingsHealthData => 'Gesundheitsdaten';
 
   @override
@@ -598,13 +572,6 @@ class LDe extends L {
 
   @override
   String get settingsHealthDataWithdrawConfirm => 'Mein Konto löschen';
-
-  @override
-  String get settingsAiCoach => 'Datenweitergabe an den KI-Coach';
-
-  @override
-  String get settingsAiCoachSubtitle =>
-      'Sendet deine Planwerte und Nachrichten an unseren KI-Anbieter (USA), wenn du den Coach nutzt.';
 
   @override
   String get settingsAdPrivacy => 'Datenschutz bei Werbung';
@@ -1021,7 +988,7 @@ class LDe extends L {
 
   @override
   String get planReadyProBody =>
-      'Pro enthält ein tägliches Ecken-Briefing mit Coach, alle Übungen und Rezepte sowie Hinweise zwischen den Runden.';
+      'Pro enthält alle Übungen und Rezepte sowie Hinweise zwischen den Runden.';
 
   @override
   String get planReadyCalories => 'Tägliche Kalorien';
@@ -1037,8 +1004,7 @@ class LDe extends L {
   String get profileProActive => 'Pro-Abonnement aktiv';
 
   @override
-  String get profileProDescription =>
-      'Täglicher Brief, alle Übungen und Rezepte';
+  String get profileProDescription => 'Alle Übungen und Rezepte';
 
   @override
   String get profileUpgrade => 'Upgrade';
@@ -1065,13 +1031,6 @@ class LDe extends L {
 
   @override
   String get fuelRecipesTitle => 'Rezepte für deinen Tag';
-
-  @override
-  String get paywallBenefitBriefTitle => 'Tägliches Ecken-Briefing';
-
-  @override
-  String get paywallBenefitBriefBody =>
-      'Drei Zeilen täglich zu Training, Ernährung und Gewicht, plus ein Coach für deine Fragen.';
 
   @override
   String get paywallBenefitRecipesTitle => 'Alle Rezepte';
@@ -1703,102 +1662,6 @@ class LDe extends L {
   @override
   String get cornerCueOnTrack =>
       'Heute im Plan. Halte die nächste Mahlzeit ausgewogen.';
-
-  @override
-  String get cornerBriefFreeHint =>
-      'Mit Pro schreibt deine Ecke das ganze Briefing: Training, Ernährung und Gewicht, aktualisiert bei jedem Eintrag.';
-
-  @override
-  String get cornerBriefUnlock => 'Ganzes Briefing freischalten';
-
-  @override
-  String get cornerBriefProHint =>
-      'Deine Ecke schreibt drei Zeilen für heute: Training, Ernährung und Gewicht.';
-
-  @override
-  String get cornerBriefGet => 'Heutiges Briefing holen';
-
-  @override
-  String get cornerBriefWriting => 'Deine Ecke liest deinen Tag…';
-
-  @override
-  String get cornerBriefUpdating =>
-      'Wird nach deinem letzten Eintrag aktualisiert…';
-
-  @override
-  String get cornerBriefQuota =>
-      'Die Briefings für heute sind aufgebraucht. Morgen wieder.';
-
-  @override
-  String get cornerBriefQuotaStale =>
-      'Die Briefings für heute sind aufgebraucht. Dieses ist von vor deinem letzten Eintrag.';
-
-  @override
-  String get cornerBriefUnavailable =>
-      'Deine Ecke konnte gerade nicht antworten.';
-
-  @override
-  String get cornerBriefSyncing =>
-      'Pro wird noch mit deinem Konto synchronisiert.';
-
-  @override
-  String get cornerBriefTryAgain => 'Nochmal versuchen';
-
-  @override
-  String get cornerBriefVerify =>
-      'Bestätige deine E-Mail-Adresse, um das ganze Briefing zu bekommen.';
-
-  @override
-  String get cornerBriefVerifyAction => 'E-Mail bestätigen';
-
-  @override
-  String get cornerBriefSetUpAction => 'EdgeFuel einrichten';
-
-  @override
-  String get cornerBriefAskCoach => 'Frag deinen Coach';
-
-  @override
-  String get cornerBriefProfessional =>
-      'Bitte sprich mit einer qualifizierten Fachperson, bevor du danach handelst.';
-
-  @override
-  String get cornerBriefWatchVideo =>
-      'Kurzes Video ansehen für das ganze Briefing heute';
-
-  @override
-  String get cornerBriefRewardedNote =>
-      'Dein kostenloses Briefing für heute. Mit Pro wird es nach jedem Eintrag neu geschrieben.';
-
-  @override
-  String get cornerBriefRewardUsed =>
-      'Dein kostenloses Briefing für heute ist genutzt. Morgen wieder, oder hol dir Pro.';
-
-  @override
-  String get cornerBriefVideoClosed =>
-      'Schau das Video bis zum Ende, um das Briefing freizuschalten.';
-
-  @override
-  String get cornerBriefNoVideo =>
-      'Gerade kein Video verfügbar. Versuch es später noch mal.';
-
-  @override
-  String get cornerBriefRewardFailed =>
-      'Deine Ecke konnte es gerade nicht schreiben. Tipp später noch mal, ohne neues Video.';
-
-  @override
-  String get cornerTopicTraining => 'Training';
-
-  @override
-  String get cornerTopicFuel => 'Ernährung';
-
-  @override
-  String get cornerTopicWeight => 'Gewicht';
-
-  @override
-  String get cornerTopicCamp => 'Camp';
-
-  @override
-  String get cornerTopicRecovery => 'Erholung';
 
   @override
   String get deleteAccountFailed =>

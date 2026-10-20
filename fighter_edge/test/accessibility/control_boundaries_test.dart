@@ -97,8 +97,10 @@ void main() {
     expect(
         tester.getSemantics(find.text('Corner Brief')).getSemanticsData().label,
         'Corner Brief');
-    final action = tester.getSemantics(find.text('Unlock the full brief'));
-    expect(action.getSemanticsData().label, 'Unlock the full brief');
+    final action = tester.getSemantics(
+        find.text('Set up EdgeFuel and your corner can read your food too.'));
+    expect(action.getSemanticsData().label,
+        'Set up EdgeFuel and your corner can read your food too.');
     expect(action.getSemanticsData().flagsCollection.isButton, isTrue);
     semantics.dispose();
   });

@@ -263,31 +263,4 @@ void main() {
       expect(line.cue, CornerCue.protein);
     });
   });
-
-  group('cornerBriefBasis', () {
-    test('is stable for the same day and log', () {
-      final a = cornerBriefBasis(_snapshot(), _proteinGap());
-      final b = cornerBriefBasis(_snapshot(), _proteinGap());
-      expect(a, b);
-    });
-
-    test('changes when something is logged, or a session is planned', () {
-      final base = cornerBriefBasis(_snapshot(), _proteinGap());
-      expect(cornerBriefBasis(_snapshot(), _carbGap()), isNot(base));
-      expect(cornerBriefBasis(_snapshot(), null), isNot(base));
-      expect(
-        cornerBriefBasis(
-            _snapshot(plannedToday: SessionKind.bjj), _proteinGap()),
-        isNot(base),
-      );
-      expect(
-        cornerBriefBasis(
-          _snapshot(plannedToday: SessionKind.bjj, plannedTodayDone: true),
-          _proteinGap(),
-        ),
-        isNot(cornerBriefBasis(
-            _snapshot(plannedToday: SessionKind.bjj), _proteinGap())),
-      );
-    });
-  });
 }

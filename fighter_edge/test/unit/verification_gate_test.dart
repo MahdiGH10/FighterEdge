@@ -30,15 +30,10 @@ void main() {
       }
     });
 
-    test('an unverified user may not buy Pro or use the AI coach', () {
+    test('an unverified user may not buy Pro', () {
       final user = _user(verified: false);
       expect(
         VerificationGate.allows(user, VerifiedAction.purchasePro,
-            supportsVerification: true),
-        isFalse,
-      );
-      expect(
-        VerificationGate.allows(user, VerifiedAction.aiCoach,
             supportsVerification: true),
         isFalse,
       );

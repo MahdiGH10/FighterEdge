@@ -11,12 +11,10 @@ enum DataConsentPurpose {
   /// Storing and using health, body, nutrition and training data.
   healthData('healthData', currentVersion: 1),
 
-  /// Sending plan facts, food preferences, the training week, the weight
-  /// trend, the fight camp and chat messages to the AI provider (Groq or
-  /// OpenRouter, USA) when the athlete uses the AI coach. Version 2 (2026-09-28) added
-  /// training, weight and the fight camp; version 3 (the same day) added the
-  /// kind of session planned for today, for the Corner Brief. Each time,
-  /// everyone is asked again.
+  /// Legacy. The AI coach was removed from the app, but existing accounts
+  /// still carry this consent on their profile (the Firestore rules accept it
+  /// and withdrawal must keep working), so the purpose stays defined. Nothing
+  /// asks for it any more.
   aiCoach('aiCoach', currentVersion: 3);
 
   const DataConsentPurpose(this.key, {required this.currentVersion});

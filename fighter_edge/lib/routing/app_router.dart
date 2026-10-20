@@ -6,7 +6,6 @@ import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
 import '../debug/component_gallery_screen.dart';
 import '../features/edge_fuel/presentation/controllers/recipe_library_controller.dart';
-import '../features/edge_fuel/presentation/screens/edge_fuel_coach_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../features/edge_fuel/presentation/screens/recipe_library_screen.dart';
@@ -44,7 +43,6 @@ class AppRoutes {
   static const fuelPlan = '/fuel/plan';
   static const fuelSetup = '/fuel/setup';
   static const fuelRecipes = '/fuel/recipes';
-  static const fuelCoach = '/fuel/coach';
   static const fightSetup = '/fight/setup';
   static const fightPath = '/fight/path';
   static const fightWeek = '/fight/week';
@@ -215,13 +213,6 @@ GoRouter createAppRouter({AuthController? auth}) {
         pageBuilder: (context, state) => _appPage(
           state: state,
           child: const EdgeFuelPlanScreen(),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.fuelCoach,
-        pageBuilder: (context, state) => _appPage(
-          state: state,
-          child: const EdgeFuelCoachScreen(),
         ),
       ),
       GoRoute(

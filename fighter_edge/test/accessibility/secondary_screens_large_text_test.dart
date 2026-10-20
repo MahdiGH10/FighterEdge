@@ -19,7 +19,6 @@ const _routes = <String, String>{
   'round timer': AppRoutes.roundTimer,
   'fuel plan': AppRoutes.fuelPlan,
   'fuel setup': AppRoutes.fuelSetup,
-  'fuel coach': AppRoutes.fuelCoach,
   'fuel recipes': AppRoutes.fuelRecipes,
   'fight setup': AppRoutes.fightSetup,
   'fight path': AppRoutes.fightPath,

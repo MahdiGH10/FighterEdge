@@ -13,9 +13,6 @@ import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/billing/billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/controllers/auth_controller.dart';
-import 'package:fighter_edge/features/corner_brief/presentation/corner_brief_controller.dart';
-import 'package:fighter_edge/features/edge_fuel/ai/edge_fuel_ai_gateway.dart';
-import 'package:fighter_edge/features/edge_fuel/ai/fake_edge_fuel_ai_gateway.dart';
 import 'package:fighter_edge/features/edge_fuel/data/asset_food_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/asset_recipe_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/edge_fuel_repository.dart';
@@ -46,15 +43,13 @@ const testName = 'Ayoub';
 /// Builds a fresh [LocalAuthRepository] backed by mocked SharedPreferences,
 /// optionally already signed in (and optionally on the Pro plan).
 ///
-/// A signed-in account has agreed to health-data use and AI coach data
-/// sharing unless a test says otherwise, like most real accounts past the
-/// first screen.
+/// A signed-in account has agreed to health-data use unless a test says
+/// otherwise, like most real accounts past the first screen.
 Future<LocalAuthRepository> makeRepo({
   bool signedIn = false,
   Plan plan = Plan.free,
   bool onboarded = false,
   bool healthConsent = true,
-  bool aiCoachConsent = true,
 }) async {
   SharedPreferences.setMockInitialValues({});
   final repo = LocalAuthRepository();
@@ -67,9 +62,6 @@ Future<LocalAuthRepository> makeRepo({
     );
     if (healthConsent) {
       await repo.setDataConsent(DataConsentPurpose.healthData, granted: true);
-    }
-    if (aiCoachConsent) {
-      await repo.setDataConsent(DataConsentPurpose.aiCoach, granted: true);
     }
     if (onboarded) {
       await repo.completeOnboarding(
@@ -92,7 +84,6 @@ Widget wrapApp(
   required LocalAuthRepository repo,
   AppState? state,
   EdgeFuelRepository? edgeFuelRepo,
-  EdgeFuelAiGateway? edgeFuelAiGateway,
   FoodCatalogRepository? foodCatalogRepo,
   RecipeCatalogRepository? recipeCatalogRepo,
   BillingGateway? billingGateway,
@@ -105,11 +96,9 @@ Widget wrapApp(
   bool refuelGuidance = false,
   RewardedAdGateway rewardedAds = const UnavailableRewardedAdGateway(),
   RewardTicketGateway rewardTickets = const UnavailableRewardTicketGateway(),
-  Duration rewardPollInterval = Duration.zero,
 }) {
   final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
   final resolvedFightCampRepo = fightCampRepo ?? InMemoryFightCampRepository();
-  final resolvedAiGateway = edgeFuelAiGateway ?? const FakeEdgeFuelAiGateway();
   // Widget tests have no asset bundle, so the catalogs default to reading the
   // real JSON off disk. Tests get the shipped content unless they pass a fake.
   final resolvedFoodCatalog = foodCatalogRepo ??
@@ -132,7 +121,6 @@ Widget wrapApp(
         ChangeNotifierProvider(create: (_) => SyncTracker()),
       ChangeNotifierProvider(create: (_) => state ?? AppState()),
       Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
-      Provider<EdgeFuelAiGateway>.value(value: resolvedAiGateway),
       Provider<RewardedAdGateway>.value(value: rewardedAds),
       Provider<RewardTicketGateway>.value(value: rewardTickets),
       Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
@@ -181,24 +169,6 @@ Widget wrapApp(
           edgeFuel.setUser(auth.user?.id);
           return edgeFuel;
         },
-      ),
-      ChangeNotifierProxyProvider<AuthController, CornerBriefController>(
-        create: (_) => CornerBriefController(
-          gateway: resolvedAiGateway,
-          telemetry: telemetry,
-          tickets: rewardTickets,
-          ads: rewardedAds,
-          rewardPollInterval: rewardPollInterval,
-        ),
-        update: (_, auth, controller) => (controller ??
-            CornerBriefController(
-              gateway: resolvedAiGateway,
-              telemetry: telemetry,
-              tickets: rewardTickets,
-              ads: rewardedAds,
-              rewardPollInterval: rewardPollInterval,
-            ))
-          ..setUser(auth.user?.id),
       ),
     ],
     // Mirrors the app: the language switch in Settings has to actually

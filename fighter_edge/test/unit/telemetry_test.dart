@@ -28,11 +28,11 @@ void main() {
 
     expect(
       safeTelemetryParameters(TelemetryEvent.paywallViewed, {
-        'feature': 'edgeFuelAiCoach',
-        'trigger': 'corner_brief',
+        'feature': 'cornerCoach',
+        'trigger': 'corner_coach',
         'message': 'Please help me lose 10 kg',
       }),
-      {'feature': 'edgeFuelAiCoach', 'trigger': 'corner_brief'},
+      {'feature': 'cornerCoach', 'trigger': 'corner_coach'},
     );
     expect(
       safeTelemetryParameters(TelemetryEvent.reactionDrillFinished, {
