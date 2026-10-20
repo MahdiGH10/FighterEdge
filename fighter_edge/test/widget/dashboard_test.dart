@@ -12,7 +12,6 @@ import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/theme/app_theme.dart';
-import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../helpers/test_harness.dart';
 

@@ -405,7 +405,9 @@ class PlanController extends ChangeNotifier {
     _sub?.cancel();
     _sub = null;
     _generation++;
-    _stored = null;
+    // With no repository the plan only lives here, so there is no account to
+    // swap it for.
+    if (_repository != null) _stored = null;
     _loaded = false;
     _migrationTriedFor = null;
     _invalidate(inputs: true);

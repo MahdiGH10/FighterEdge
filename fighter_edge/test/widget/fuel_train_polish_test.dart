@@ -48,9 +48,8 @@ void main() {
       expect(
           find.descendant(
               of: row,
-              matching: find.text(weekday == DateTime.wednesday
-                  ? 'Wed 23'
-                  : 'Fri 25')),
+              matching: find
+                  .text(weekday == DateTime.wednesday ? 'Wed 23' : 'Fri 25')),
           findsOneWidget);
     });
   }

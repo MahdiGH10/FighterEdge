@@ -277,8 +277,7 @@ void main() {
       expect(s.completedSessionCount, 2);
     });
 
-    test('removing an entry takes it out and a missing id changes nothing',
-        () {
+    test('removing an entry takes it out and a missing id changes nothing', () {
       final s = AppState();
       s.addTrainingLogEntry(entry('a', DateTime(2026, 10, 19, 18)));
       var notified = 0;

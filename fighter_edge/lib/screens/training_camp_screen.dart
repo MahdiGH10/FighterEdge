@@ -470,7 +470,8 @@ class _HistoryRow extends StatelessWidget {
         padding: const EdgeInsets.all(Insets.md),
         child: Row(
           children: [
-            Icon(PlanLabels.logIcon(session), color: AppColors.primary, size: 24),
+            Icon(PlanLabels.logIcon(session),
+                color: AppColors.primary, size: 24),
             const SizedBox(width: Insets.md),
             Expanded(
               child: Column(

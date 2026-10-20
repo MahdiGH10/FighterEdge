@@ -182,17 +182,15 @@ void main() {
       await first.settle();
       final before = [
         for (var w = 0; w < 4; w++)
-          jsonEncode(first.plan
-              .weekContaining(addDays(_monday, 7 * w))!
-              .toJson()),
+          jsonEncode(
+              first.plan.weekContaining(addDays(_monday, 7 * w))!.toJson()),
       ];
 
       final second = await _rig(repo: repo);
       final after = [
         for (var w = 0; w < 4; w++)
-          jsonEncode(second.plan
-              .weekContaining(addDays(_monday, 7 * w))!
-              .toJson()),
+          jsonEncode(
+              second.plan.weekContaining(addDays(_monday, 7 * w))!.toJson()),
       ];
 
       expect(second.plan.hasPlan, isTrue);
@@ -334,12 +332,11 @@ void main() {
       expect(rig.plan.todaySession?.session.id, session.id);
     });
 
-    test('a missed session can be moved to today when today is free',
-        () async {
+    test('a missed session can be moved to today when today is free', () async {
       // Tuesday: Monday's session was not done, and Tuesday is a rest day.
       rig.now = DateTime(2026, 10, 20, 9);
-      final missed = rig.plan.rows
-          .firstWhere((r) => r.date == DateTime.utc(2026, 10, 19));
+      final missed =
+          rig.plan.rows.firstWhere((r) => r.date == DateTime.utc(2026, 10, 19));
       expect(missed.status, SessionStatus.missed);
       expect(rig.plan.canMoveToToday(missed), isTrue);
 
@@ -356,8 +353,8 @@ void main() {
         () async {
       // Wednesday: Monday missed, but Wednesday has its own session.
       rig.now = DateTime(2026, 10, 21, 9);
-      final missed = rig.plan.rows
-          .firstWhere((r) => r.date == DateTime.utc(2026, 10, 19));
+      final missed =
+          rig.plan.rows.firstWhere((r) => r.date == DateTime.utc(2026, 10, 19));
       expect(rig.plan.canMoveToToday(missed), isFalse);
     });
 
@@ -440,17 +437,19 @@ void main() {
 
     test('a timer session of twenty minutes or more fills the slot that day',
         () {
-      rig.state.addTrainingLogEntry(
-          entry(TrainingSource.timer, seconds: PlanController.minStandInSeconds));
+      rig.state.addTrainingLogEntry(entry(TrainingSource.timer,
+          seconds: PlanController.minStandInSeconds));
       expect(rig.plan.todaySession, isNull);
       expect(rig.plan.todayRow!.status, SessionStatus.completed);
     });
 
     test('one entry completes at most one session', () {
       rig.state.addTrainingLogEntry(entry(TrainingSource.manual));
-      expect(rig.plan.rows
-          .where((r) => r.status == SessionStatus.completed)
-          .length, 1);
+      expect(
+          rig.plan.rows
+              .where((r) => r.status == SessionStatus.completed)
+              .length,
+          1);
     });
   });
 
@@ -519,7 +518,8 @@ void main() {
 
       // Only a year of weeks is generated, plus next week.
       final first = rig.plan.rows.first.date;
-      expect(daysBetween(first, rig.now) <= 7 * (PlanController.historyWeeks + 1),
+      expect(
+          daysBetween(first, rig.now) <= 7 * (PlanController.historyWeeks + 1),
           isTrue);
       expect(rig.plan.todaySession, isNotNull);
     });

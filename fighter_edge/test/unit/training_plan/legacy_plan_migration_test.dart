@@ -145,8 +145,8 @@ void main() {
       expect(OnboardingPlan.weekdaysFor(0), hasLength(2));
       expect(OnboardingPlan.weekdaysFor(9), hasLength(6));
       for (var days = 0; days <= 9; days++) {
-        expect(OnboardingPlan.weekdaysFor(days),
-            isNot(contains(DateTime.sunday)));
+        expect(
+            OnboardingPlan.weekdaysFor(days), isNot(contains(DateTime.sunday)));
       }
     });
 

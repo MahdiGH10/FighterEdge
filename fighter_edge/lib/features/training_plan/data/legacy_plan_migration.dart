@@ -108,8 +108,7 @@ class LegacyPlanMigration {
 
   /// The experience level chosen at onboarding. Unknown means beginner, who
   /// gets no sparring.
-  static ExperienceLevel levelOfProfile(String level) =>
-      switch (level.trim()) {
+  static ExperienceLevel levelOfProfile(String level) => switch (level.trim()) {
         'Intermediate' => ExperienceLevel.intermediate,
         'Advanced' => ExperienceLevel.advanced,
         'Fighter' => ExperienceLevel.competitor,

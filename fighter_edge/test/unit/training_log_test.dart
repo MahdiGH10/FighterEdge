@@ -189,8 +189,7 @@ void main() {
 
     test('an old completion on the plan moves into the log exactly once',
         () async {
-      await repo.saveLegacySession(
-          'fighter', doneSlot(rpe: 7, note: 'Legacy'));
+      await repo.saveLegacySession('fighter', doneSlot(rpe: 7, note: 'Legacy'));
       now = _week2Mon;
       await start();
       await _settle();

@@ -117,7 +117,8 @@ void main() {
   test('adjustments replace by session id and can be removed', () {
     var plan = StoredTrainingPlan(inputs: _plan().inputs);
     plan = plan.withAdjustment(const SessionAdjustment.skipped('x'));
-    plan = plan.withAdjustment(SessionAdjustment.moved('x', DateTime(2026, 10, 22)));
+    plan = plan
+        .withAdjustment(SessionAdjustment.moved('x', DateTime(2026, 10, 22)));
     expect(plan.adjustments, hasLength(1));
     expect(plan.adjustments['x']!.kind, AdjustmentKind.moved);
     expect(plan.withoutAdjustment('x').adjustments, isEmpty);

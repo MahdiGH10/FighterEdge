@@ -31,7 +31,8 @@ class CornerLineRow extends StatelessWidget {
     final fightCamp = context.watch<FightCampController>();
     final fuel = context.watch<EdgeFuelController>();
 
-    final today = buildDailySnapshot(state, plan, fightCamp, fuelDraft: fuel.draft);
+    final today =
+        buildDailySnapshot(state, plan, fightCamp, fuelDraft: fuel.draft);
     // Fuel can be showing another day; the line is only ever about today.
     final day = fuel.isToday ? fuel.day : null;
     final line =
