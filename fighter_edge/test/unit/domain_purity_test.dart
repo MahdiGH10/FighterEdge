@@ -9,6 +9,7 @@ const _pureDirectories = [
   'lib/features/edge_fuel/domain',
   'lib/features/fight_camp/domain',
   'lib/features/daily_snapshot/domain',
+  'lib/features/training_plan/domain',
 ];
 
 final _forbidden = <RegExp>[
