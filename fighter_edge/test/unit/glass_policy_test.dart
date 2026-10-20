@@ -147,11 +147,11 @@ void main() {
   group('GlassPolicyController', () {
     setUp(() => SharedPreferences.setMockInitialValues({}));
 
-    test('starts at full glass', () async {
+    test('starts tinted until the device proves it can draw full glass', () async {
       final c = GlassPolicyController(probe: FrameProbe(source: _FakeSource()));
       await c.load();
       expect(c.isLoaded, isTrue);
-      expect(c.policy, const GlassPolicy());
+      expect(c.policy.resolve(highContrast: false), GlassLevel.tinted);
       c.dispose();
     });
 
@@ -201,6 +201,7 @@ void main() {
       source.emit(_frames(120, 4));
       await Future<void>.delayed(Duration.zero);
       expect(c.verdict, FrameVerdict.smooth);
+      expect(c.policy.resolve(highContrast: false), GlassLevel.full);
       c.startProbe();
       expect(source.listenCalls, 1, reason: 'a stored verdict is final');
       c.dispose();
