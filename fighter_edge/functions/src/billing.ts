@@ -42,6 +42,28 @@ export interface RevenueCatEvent {
   transferred_to?: unknown;
   cancel_reason?: unknown;
   expiration_reason?: unknown;
+  /** RevenueCat period type: TRIAL, INTRO or NORMAL (others are ignored). */
+  period_type?: unknown;
+}
+
+/**
+ * The kind of store period an entitlement is in. A store free trial is
+ * TRIAL; a discounted first period is INTRO. Anything RevenueCat sends that we
+ * do not model (PROMOTIONAL, PREPAID, a new value) is stored as null: it must
+ * never be mistaken for a trial or a paid period.
+ */
+export type ProPeriod = "TRIAL" | "INTRO" | "NORMAL";
+
+/** Parses a RevenueCat webhook `period_type`; null when unknown. */
+export function parseProPeriod(value: unknown): ProPeriod | null {
+  switch (value) {
+    case "TRIAL":
+    case "INTRO":
+    case "NORMAL":
+      return value;
+    default:
+      return null;
+  }
 }
 
 export interface EntitlementMutation {
@@ -58,6 +80,7 @@ export interface EntitlementMutation {
   environment: string | null;
   cancelReason: string | null;
   expirationReason: string | null;
+  proPeriod: ProPeriod | null;
 }
 
 const PRO_GRANT_EVENTS = new Set<RevenueCatEventType>([
@@ -163,6 +186,7 @@ export function mapRevenueCatEvent(
     environment: stringValue(event.environment),
     cancelReason: stringValue(event.cancel_reason),
     expirationReason: stringValue(event.expiration_reason),
+    proPeriod: parseProPeriod(event.period_type),
   };
 }
 
@@ -199,6 +223,8 @@ export interface RevenueCatEntitlement {
   willRenew: boolean;
   productId: string | null;
   store: string | null;
+  /** TRIAL / INTRO / NORMAL when RevenueCat reports it, else null. */
+  proPeriod: ProPeriod | null;
 }
 
 function isoMs(value: unknown): number | null {
@@ -222,6 +248,7 @@ export function entitlementFromSubscriber(
     willRenew: false,
     productId: null,
     store: null,
+    proPeriod: null,
   };
   const subscriber = (body as { subscriber?: unknown } | null)?.subscriber;
   if (typeof subscriber !== "object" || subscriber === null) return none;
@@ -255,6 +282,7 @@ export function entitlementFromSubscriber(
         unsubscribe_detected_at?: unknown;
         billing_issues_detected_at?: unknown;
         store?: unknown;
+        period_type?: unknown;
       }
     | undefined;
   const willRenew =
@@ -270,6 +298,12 @@ export function entitlementFromSubscriber(
     willRenew,
     productId,
     store: stringValue(subscription?.store),
+    // The v1 REST API spells the period in lower case ("trial").
+    proPeriod: parseProPeriod(
+      typeof subscription?.period_type === "string"
+        ? subscription.period_type.toUpperCase()
+        : null,
+    ),
   };
 }
 

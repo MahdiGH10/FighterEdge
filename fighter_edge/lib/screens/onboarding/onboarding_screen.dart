@@ -10,6 +10,7 @@ import '../../features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import '../../features/edge_fuel/domain/models/nutrition_target.dart';
 import '../../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../../features/edge_fuel/presentation/nutrition_copy.dart';
+import '../../features/training_plan/presentation/plan_controller.dart';
 import '../../observability/telemetry.dart';
 import '../../privacy/health_consent_screen.dart';
 import '../../routing/app_navigation.dart';
@@ -288,6 +289,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     setState(() => _error = null);
     final auth = context.read<AuthController>();
     final state = context.read<AppState>();
+    final plan = context.read<PlanController>();
     final firstRun = context.read<FirstRunController>();
     final telemetry = _telemetry;
     final userId = auth.user?.id;
@@ -302,9 +304,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         if (nutritionTarget == null) return;
       }
 
-      await state.startFreshCamp(
-        startingWeightKg: currentWeight,
+      await state.startFreshCamp(startingWeightKg: currentWeight);
+      plan.startFresh(
         weeklyTrainingDays: _days,
+        goal: _campGoal,
+        level: _level,
       );
 
       if (createNutritionTarget) {

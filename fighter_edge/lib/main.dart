@@ -6,9 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'ads/google_rewarded_ad_gateway.dart';
-import 'ads/reward_ticket_gateway.dart';
-import 'ads/rewarded_ad_gateway.dart';
 import 'auth/auth_repository.dart';
 import 'auth/firebase_auth_repository.dart';
 import 'billing/billing_gateway.dart';
@@ -28,6 +25,7 @@ import 'features/fight_camp/data/fight_camp_repository.dart';
 import 'features/fight_camp/data/firestore_fight_camp_repository.dart';
 import 'features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'features/fight_camp/presentation/fight_camp_controller.dart';
+import 'features/training_plan/presentation/plan_controller.dart';
 import 'firebase_options.dart';
 import 'notifications/local_reminder_gateway.dart';
 import 'notifications/reminder_gateway.dart';
@@ -43,7 +41,6 @@ import 'l10n/gen/app_localizations.dart';
 import 'state/first_run_controller.dart';
 import 'state/glass_policy_controller.dart';
 import 'state/locale_controller.dart';
-import 'state/streak_controller.dart';
 import 'state/sync_tracker.dart';
 import 'training/reaction/coach_voice.dart';
 import 'training/reaction/tts_coach_voice.dart';
@@ -175,10 +172,6 @@ Future<AppDependencies> _initializeProductionDependencies() async {
             edgeFuelRepo: FirestoreEdgeFuelRepository(),
             fightCampRepo: FirestoreFightCampRepository(),
             billingGateway: RevenueCatBillingGateway(),
-            rewardedAds: kIsWeb
-                ? const UnavailableRewardedAdGateway()
-                : GoogleRewardedAdGateway(),
-            rewardTickets: FirebaseRewardTicketGateway(),
             reminderGateway: LocalReminderGateway(),
             coachVoice: TtsCoachVoice(),
             telemetry: kIsWeb
@@ -201,8 +194,6 @@ class AppDependencies {
   final EdgeFuelRepository edgeFuelRepo;
   final FightCampRepository fightCampRepo;
   final BillingGateway billingGateway;
-  final RewardedAdGateway rewardedAds;
-  final RewardTicketGateway rewardTickets;
   final ReminderGateway reminderGateway;
   final CoachVoice coachVoice;
   final Telemetry telemetry;
@@ -215,8 +206,6 @@ class AppDependencies {
     required this.edgeFuelRepo,
     required this.fightCampRepo,
     required this.billingGateway,
-    required this.rewardedAds,
-    required this.rewardTickets,
     required this.reminderGateway,
     required this.coachVoice,
     required this.telemetry,
@@ -233,8 +222,6 @@ class FighterEdgeApp extends StatelessWidget {
   final FoodCatalogRepository? foodCatalogRepo;
   final RecipeCatalogRepository? recipeCatalogRepo;
   final BillingGateway? billingGateway;
-  final RewardedAdGateway? rewardedAds;
-  final RewardTicketGateway? rewardTickets;
   final ReminderGateway? reminderGateway;
   final CoachVoice? coachVoice;
   final Telemetry? telemetry;
@@ -252,8 +239,6 @@ class FighterEdgeApp extends StatelessWidget {
     this.foodCatalogRepo,
     this.recipeCatalogRepo,
     this.billingGateway,
-    this.rewardedAds,
-    this.rewardTickets,
     this.reminderGateway,
     this.coachVoice,
     this.telemetry,
@@ -270,8 +255,6 @@ class FighterEdgeApp extends StatelessWidget {
           edgeFuelRepo: dependencies.edgeFuelRepo,
           fightCampRepo: dependencies.fightCampRepo,
           billingGateway: dependencies.billingGateway,
-          rewardedAds: dependencies.rewardedAds,
-          rewardTickets: dependencies.rewardTickets,
           reminderGateway: dependencies.reminderGateway,
           coachVoice: dependencies.coachVoice,
           telemetry: dependencies.telemetry,
@@ -284,9 +267,6 @@ class FighterEdgeApp extends StatelessWidget {
     final resolvedEdgeFuelRepo = edgeFuelRepo ?? InMemoryEdgeFuelRepository();
     final resolvedFightCampRepo =
         fightCampRepo ?? InMemoryFightCampRepository();
-    final resolvedAds = rewardedAds ?? const UnavailableRewardedAdGateway();
-    final resolvedTickets =
-        rewardTickets ?? const UnavailableRewardTicketGateway();
     // The catalogs are bundled assets, so the asset-backed implementations are
     // the right default everywhere -- there is no Firebase variant to swap in.
     // They stay injectable so tests can supply fixtures without an asset
@@ -342,8 +322,6 @@ class FighterEdgeApp extends StatelessWidget {
         ),
         Provider<EdgeFuelRepository>.value(value: resolvedEdgeFuelRepo),
         Provider<FightCampRepository>.value(value: resolvedFightCampRepo),
-        Provider<RewardedAdGateway>.value(value: resolvedAds),
-        Provider<RewardTicketGateway>.value(value: resolvedTickets),
         Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
         Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
         ChangeNotifierProvider(create: (_) => LocaleController()..load()),
@@ -352,13 +330,6 @@ class FighterEdgeApp extends StatelessWidget {
           create: (_) => FirstRunController(),
           update: (_, auth, firstRun) =>
               (firstRun ?? FirstRunController())..setUser(auth.user?.id),
-        ),
-        ChangeNotifierProxyProvider<AuthController, StreakController>(
-          create: (context) =>
-              StreakController(clock: () => context.read<AppState>().now),
-          update: (context, auth, streak) => (streak ??
-              StreakController(clock: () => context.read<AppState>().now))
-            ..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, FightCampController>(
           create: (_) => FightCampController(
@@ -371,6 +342,26 @@ class FighterEdgeApp extends StatelessWidget {
                 errorReporter: errorReporter ?? const NoopErrorReporter(),
               ))
             ..setUser(auth.user?.id),
+        ),
+        ChangeNotifierProxyProvider2<AuthController, FightCampController,
+            PlanController>(
+          create: (context) => PlanController(
+            log: context.read<AppState>(),
+            repository: dataRepo,
+            sync: context.read<SyncTracker>(),
+          ),
+          update: (context, auth, fightCamp, plan) => (plan ??
+              PlanController(
+                log: context.read<AppState>(),
+                repository: dataRepo,
+                sync: context.read<SyncTracker>(),
+              ))
+            ..configure(
+              userId: auth.user?.id,
+              fight: fightCamp.camp,
+              goal: auth.user?.goal ?? '',
+              level: auth.user?.experienceLevel ?? '',
+            ),
         ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
           create: (context) => EdgeFuelController(

@@ -102,6 +102,10 @@ class ReactionDrillController extends ChangeNotifier {
 
   ReactionCueGenerator? _generator;
 
+  /// A call dealt too late in a round to say. It opens the next round, so the
+  /// move the athlete last heard can never be repeated right after the break.
+  ReactionCue? _unsaid;
+
   // Bumped on every start/stop/finish; a loop that sees a different run id
   // after an await has been superseded and bails out.
   int _run = 0;
@@ -115,6 +119,7 @@ class ReactionDrillController extends ChangeNotifier {
     if (isRunning) return Future.value();
     _halt();
     _generator = ReactionCueGenerator(spec, random: _randomFactory());
+    _unsaid = null;
     _elapsed = Duration.zero;
     _completedWork = Duration.zero;
     _round = 1;
@@ -180,11 +185,13 @@ class ReactionDrillController extends ChangeNotifier {
     });
 
     while (run == _run) {
-      final cue = generator.next();
+      final cue = _unsaid ?? generator.next();
+      _unsaid = null;
       final left = spec.roundDuration - _elapsed;
       if (SpeechEstimate.expected(cue.spoken) + cue.minGap > left) {
         // Too late in the round to say this and give the athlete time to do
-        // it. Stay quiet until the round ends.
+        // it. Keep it for the next round and stay quiet until this one ends.
+        _unsaid = cue;
         await _wait(left > _tick ? left : _tick);
         continue;
       }

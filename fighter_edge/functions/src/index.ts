@@ -48,6 +48,10 @@ initializeApp();
 
 export { deleteAccount } from "./accountDeletion";
 
+// V2 removed the AI coach and the rewarded ads from the app. The three
+// handlers below stay in the source but are no longer exported, so they are
+// not deployed. Export them again to restore the AI (see tag archive/ai-v1).
+
 const OPENROUTER_API_KEY = defineSecret("OPENROUTER_API_KEY");
 const GROQ_API_KEY = defineSecret("GROQ_API_KEY");
 const REVENUECAT_WEBHOOK_AUTH = defineSecret("REVENUECAT_WEBHOOK_AUTH");
@@ -100,7 +104,7 @@ function isValidHistory(value: unknown): value is ChatTurn[] {
  * Entitlement and consent are checked against the stored profile before
  * quota is consumed.
  */
-export const edgeFuelAiExplain = onCall(
+const edgeFuelAiExplain = onCall(
   {
     secrets: [OPENROUTER_API_KEY, GROQ_API_KEY],
     cors: true,
@@ -377,7 +381,7 @@ export const edgeFuelAiExplain = onCall(
  * passes to AdMob. Checks the same gates as the brief itself, so nobody
  * watches a video that could not pay off.
  */
-export const startRewardedBrief = onCall(
+const startRewardedBrief = onCall(
   { cors: true, enforceAppCheck: ENFORCE_APP_CHECK },
   async (request) => {
     if (!request.auth) {
@@ -416,7 +420,7 @@ export const startRewardedBrief = onCall(
  * Corner Brief. Always answers 200 to a correctly signed call, so AdMob does
  * not retry a reward we chose not to grant; nothing identifying is logged.
  */
-export const admobRewardCallback = onRequest(
+const admobRewardCallback = onRequest(
   { cors: false },
   async (request, response) => {
     if (request.method !== "GET") {

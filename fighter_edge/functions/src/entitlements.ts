@@ -15,6 +15,7 @@ import {
   ENTITLEMENT_LEEWAY_MS,
   entitlementFromSubscriber,
   mapRevenueCatEvent,
+  parseProPeriod,
   RevenueCatEntitlement,
   RevenueCatEvent,
   transferParties,
@@ -175,6 +176,7 @@ export async function writeEntitlement(
           store: entitlement.store,
           expiresAtMs: entitlement.expiresAtMs,
           willRenew: entitlement.willRenew,
+          proPeriod: entitlement.proPeriod,
           lastEventId: source.eventId,
           lastEventType: source.type,
           lastEventTimestampMs: source.timestampMs,
@@ -251,6 +253,7 @@ export async function processRevenueCatEvent(
             environment: mutation.environment,
             expiresAtMs: mutation.expiresAtMs,
             willRenew: mutation.willRenew,
+            proPeriod: mutation.proPeriod,
             cancelReason: mutation.cancelReason,
             expirationReason: mutation.expirationReason,
             lastEventId: mutation.providerEventId,
@@ -301,7 +304,14 @@ async function processTransfer(
       outcome = await writeEntitlement(
         db,
         uid,
-        { plan: "free", expiresAtMs: null, willRenew: false, productId: null, store: null },
+        {
+          plan: "free",
+          expiresAtMs: null,
+          willRenew: false,
+          productId: null,
+          store: null,
+          proPeriod: null,
+        },
         source,
       );
     } else {
@@ -399,6 +409,7 @@ export async function reconcileExpiredEntitlements(
       willRenew: false,
       productId: null,
       store: null,
+      proPeriod: null,
     };
     if (deps.apiKey) {
       try {
@@ -416,6 +427,7 @@ export async function reconcileExpiredEntitlements(
         expiresAtMs: (billing?.expiresAtMs as number | undefined) ?? null,
         productId: (billing?.productId as string | undefined) ?? null,
         store: (billing?.store as string | undefined) ?? null,
+        proPeriod: parseProPeriod(billing?.proPeriod),
       };
     }
     await writeEntitlement(db, doc.id, entitlement, {
