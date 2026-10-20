@@ -27,7 +27,6 @@ import 'package:fighter_edge/notifications/unavailable_reminder_gateway.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/state/first_run_controller.dart';
-import 'package:fighter_edge/state/streak_controller.dart';
 import 'package:fighter_edge/state/sync_tracker.dart';
 import 'package:fighter_edge/training/reaction/coach_voice.dart';
 import 'package:fighter_edge/privacy/consent.dart';
@@ -135,13 +134,6 @@ Widget wrapApp(
         create: (_) => FirstRunController(),
         update: (_, auth, firstRun) =>
             (firstRun ?? FirstRunController())..setUser(auth.user?.id),
-      ),
-      ChangeNotifierProxyProvider<AuthController, StreakController>(
-        create: (context) =>
-            StreakController(clock: () => context.read<AppState>().now),
-        update: (context, auth, streak) => (streak ??
-            StreakController(clock: () => context.read<AppState>().now))
-          ..setUser(auth.user?.id),
       ),
       Provider<FightCampRepository>.value(value: resolvedFightCampRepo),
       ChangeNotifierProxyProvider<AuthController, FightCampController>(

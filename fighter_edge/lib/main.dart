@@ -40,7 +40,6 @@ import 'state/app_state.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'state/first_run_controller.dart';
 import 'state/locale_controller.dart';
-import 'state/streak_controller.dart';
 import 'state/sync_tracker.dart';
 import 'training/reaction/coach_voice.dart';
 import 'training/reaction/tts_coach_voice.dart';
@@ -329,13 +328,6 @@ class FighterEdgeApp extends StatelessWidget {
           create: (_) => FirstRunController(),
           update: (_, auth, firstRun) =>
               (firstRun ?? FirstRunController())..setUser(auth.user?.id),
-        ),
-        ChangeNotifierProxyProvider<AuthController, StreakController>(
-          create: (context) =>
-              StreakController(clock: () => context.read<AppState>().now),
-          update: (context, auth, streak) => (streak ??
-              StreakController(clock: () => context.read<AppState>().now))
-            ..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, FightCampController>(
           create: (_) => FightCampController(

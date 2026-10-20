@@ -4,12 +4,11 @@ import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/training_plan/presentation/plan_controller.dart';
 import '../l10n/decimal_format.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
-import '../state/streak_controller.dart';
-import '../state/streak_engine.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -31,12 +30,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final streak = context.watch<StreakController>();
-    final streakDays = StreakEngine.streakDays(
-      state.trainingDayKeys,
-      protectedDateKeys: streak.protectedDateKeys,
-      now: state.now,
-    );
+    final streakWeeks = context.watch<PlanController>().weeklyStreak.count;
     final weight = state.latestWeight;
     final auth = context.watch<AuthController>();
     final user = auth.user;
@@ -125,8 +119,8 @@ class ProfileScreen extends StatelessWidget {
         GroupedList(
           children: [
             _StatRow('Sessions completed', '${state.completedSessionCount}'),
-            _StatRow('Current streak',
-                '$streakDays ${L.of(context).dashboardStatDays(streakDays)}'),
+            _StatRow('Week streak',
+                '$streakWeeks ${L.of(context).dashboardStatWeeks(streakWeeks)}'),
             _StatRow(
                 'Training days / week', '${user?.weeklyTrainingDays ?? 0}'),
           ],

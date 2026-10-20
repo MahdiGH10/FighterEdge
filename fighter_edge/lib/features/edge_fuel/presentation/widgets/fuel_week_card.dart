@@ -17,8 +17,12 @@ class FuelWeekCard extends StatefulWidget {
   final EdgeFuelController edgeFuel;
   final bool embedded;
 
+  /// The day the week runs up to; null for today. The weekly review passes
+  /// the Sunday of the week it is about.
+  final DateTime? now;
+
   const FuelWeekCard(
-      {super.key, required this.edgeFuel, this.embedded = false});
+      {super.key, required this.edgeFuel, this.embedded = false, this.now});
 
   @override
   State<FuelWeekCard> createState() => _FuelWeekCardState();
@@ -30,7 +34,7 @@ class _FuelWeekCardState extends State<FuelWeekCard> {
   @override
   void initState() {
     super.initState();
-    _week = widget.edgeFuel.loadThisWeek();
+    _week = widget.edgeFuel.loadThisWeek(now: widget.now);
   }
 
   @override

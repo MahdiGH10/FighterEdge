@@ -391,12 +391,6 @@ abstract class L {
   /// **'Dashboard'**
   String get dashboardTitle;
 
-  /// No description provided for @dashboardWeeklyOverview.
-  ///
-  /// In en, this message translates to:
-  /// **'Weekly overview'**
-  String get dashboardWeeklyOverview;
-
   /// No description provided for @dashboardNextSession.
   ///
   /// In en, this message translates to:
@@ -439,35 +433,11 @@ abstract class L {
   /// **'completed'**
   String get dashboardStatCompleted;
 
-  /// No description provided for @dashboardStatDays.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{day} other{days}}'**
-  String dashboardStatDays(int count);
-
   /// No description provided for @dashboardAddWeighIn.
   ///
   /// In en, this message translates to:
   /// **'Add weigh-in'**
   String get dashboardAddWeighIn;
-
-  /// No description provided for @dashboardStreakAtRisk.
-  ///
-  /// In en, this message translates to:
-  /// **'At risk'**
-  String get dashboardStreakAtRisk;
-
-  /// No description provided for @dashboardStreakOnFire.
-  ///
-  /// In en, this message translates to:
-  /// **'On fire'**
-  String get dashboardStreakOnFire;
-
-  /// No description provided for @dashboardStreakLogToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Log today'**
-  String get dashboardStreakLogToday;
 
   /// No description provided for @fuelWeekTitle.
   ///
@@ -1477,12 +1447,6 @@ abstract class L {
   /// **'Hide password'**
   String get authHidePassword;
 
-  /// No description provided for @dashboardThisWeek.
-  ///
-  /// In en, this message translates to:
-  /// **'This week'**
-  String get dashboardThisWeek;
-
   /// No description provided for @dashboardFighter.
   ///
   /// In en, this message translates to:
@@ -1549,6 +1513,234 @@ abstract class L {
   /// **'Open camp'**
   String get dashboardOpenCamp;
 
+  /// No description provided for @dashboardStatWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{week} other{weeks}}'**
+  String dashboardStatWeeks(int count);
+
+  /// No description provided for @weeklyCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get weeklyCardTitle;
+
+  /// No description provided for @weeklyCardRestWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest week'**
+  String get weeklyCardRestWeek;
+
+  /// No description provided for @weeklyCardRestWeekHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions planned. Rest is part of the plan.'**
+  String get weeklyCardRestWeekHint;
+
+  /// No description provided for @weeklyCardProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {planned} done'**
+  String weeklyCardProgress(int done, int planned);
+
+  /// No description provided for @weeklyCardNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {day} {session}'**
+  String weeklyCardNext(String day, String session);
+
+  /// No description provided for @weeklyCardAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All planned sessions done'**
+  String get weeklyCardAllDone;
+
+  /// No description provided for @weeklyCardNothingLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'No more sessions planned this week'**
+  String get weeklyCardNothingLeft;
+
+  /// No description provided for @weeklyCardTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{target} needed to count this week'**
+  String weeklyCardTarget(int target);
+
+  /// No description provided for @weeklyCardStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week in a row} other{{count} weeks in a row}}'**
+  String weeklyCardStreak(int count);
+
+  /// No description provided for @weeklyCardReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review'**
+  String get weeklyCardReview;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewWeekOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {date}'**
+  String reviewWeekOf(String date);
+
+  /// No description provided for @reviewTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get reviewTraining;
+
+  /// No description provided for @reviewSessionsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {planned} sessions done'**
+  String reviewSessionsDone(int done, int planned);
+
+  /// No description provided for @reviewFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get reviewFood;
+
+  /// No description provided for @reviewFoodNoTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up Fuel to compare your week with a target.'**
+  String get reviewFoodNoTarget;
+
+  /// No description provided for @reviewFoodNoLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'No meals logged this week.'**
+  String get reviewFoodNoLogs;
+
+  /// No description provided for @reviewFoodAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average {average} kcal a day against a target of {target}.'**
+  String reviewFoodAverage(int average, int target);
+
+  /// No description provided for @reviewWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get reviewWeight;
+
+  /// No description provided for @reviewWeightNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough weigh-ins for a trend yet.'**
+  String get reviewWeightNoData;
+
+  /// No description provided for @reviewWeightNoPath.
+  ///
+  /// In en, this message translates to:
+  /// **'No weight path to compare with.'**
+  String get reviewWeightNoPath;
+
+  /// No description provided for @reviewWeightPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Path: {change} this week'**
+  String reviewWeightPath(String change);
+
+  /// No description provided for @reviewRecommendation.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendation'**
+  String get reviewRecommendation;
+
+  /// No description provided for @reviewRecMoveSession.
+  ///
+  /// In en, this message translates to:
+  /// **'You have a planned session left over. Move it to today?'**
+  String get reviewRecMoveSession;
+
+  /// No description provided for @reviewRecLower.
+  ///
+  /// In en, this message translates to:
+  /// **'Your weight is above your path and you ate to your target. Lower your daily target by {kcal} kcal?'**
+  String reviewRecLower(int kcal);
+
+  /// No description provided for @reviewRecRaise.
+  ///
+  /// In en, this message translates to:
+  /// **'Your weight is below your path and you ate to your target. Raise your daily target by {kcal} kcal?'**
+  String reviewRecRaise(int kcal);
+
+  /// No description provided for @reviewHoldOnPath.
+  ///
+  /// In en, this message translates to:
+  /// **'You are on path. Keep your plan as it is.'**
+  String get reviewHoldOnPath;
+
+  /// No description provided for @reviewHoldNoTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up Fuel to get a calorie target before changes can be suggested.'**
+  String get reviewHoldNoTarget;
+
+  /// No description provided for @reviewHoldNeedLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Log at least four days of food before your target is changed.'**
+  String get reviewHoldNeedLogs;
+
+  /// No description provided for @reviewHoldIntake.
+  ///
+  /// In en, this message translates to:
+  /// **'You were not close to your target this week, so it stays. Aim for it first.'**
+  String get reviewHoldIntake;
+
+  /// No description provided for @reviewHoldNoPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough weigh-ins, or no path to judge the scale by. Your target stays.'**
+  String get reviewHoldNoPath;
+
+  /// No description provided for @reviewHoldFloor.
+  ///
+  /// In en, this message translates to:
+  /// **'Eating less would go under your resting energy estimate. Your target stays.'**
+  String get reviewHoldFloor;
+
+  /// No description provided for @reviewAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get reviewAccept;
+
+  /// No description provided for @reviewKeepCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current'**
+  String get reviewKeepCurrent;
+
+  /// No description provided for @reviewGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get reviewGotIt;
+
+  /// No description provided for @reviewAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'You accepted this review.'**
+  String get reviewAccepted;
+
+  /// No description provided for @reviewKept.
+  ///
+  /// In en, this message translates to:
+  /// **'You kept your current plan.'**
+  String get reviewKept;
+
   /// No description provided for @dashboardSetFuel.
   ///
   /// In en, this message translates to:
@@ -1590,48 +1782,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Confirm your email'**
   String get dashboardConfirmEmail;
-
-  /// No description provided for @dashboardRiskTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Streak at risk'**
-  String get dashboardRiskTitle;
-
-  /// No description provided for @dashboardFreezeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Yesterday is unlogged. Protect it with a freeze ({count} left).'**
-  String dashboardFreezeHint(int count);
-
-  /// No description provided for @dashboardLogHint.
-  ///
-  /// In en, this message translates to:
-  /// **'No freeze is available. Log a session today to start again.'**
-  String get dashboardLogHint;
-
-  /// No description provided for @dashboardFreeze.
-  ///
-  /// In en, this message translates to:
-  /// **'Freeze'**
-  String get dashboardFreeze;
-
-  /// No description provided for @dashboardLogNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Log now'**
-  String get dashboardLogNow;
-
-  /// No description provided for @dashboardFreezeUsed.
-  ///
-  /// In en, this message translates to:
-  /// **'Freeze used — yesterday is protected.'**
-  String get dashboardFreezeUsed;
-
-  /// No description provided for @dashboardLogged.
-  ///
-  /// In en, this message translates to:
-  /// **'Logged'**
-  String get dashboardLogged;
 
   /// No description provided for @dashboardYesterday.
   ///

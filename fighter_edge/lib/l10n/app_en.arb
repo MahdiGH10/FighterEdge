@@ -56,7 +56,6 @@
   "settingsDeleteAccountSubtitle": "Permanently erase your account and all of your data",
 
   "dashboardTitle": "Dashboard",
-  "dashboardWeeklyOverview": "Weekly overview",
   "dashboardNextSession": "Next session",
   "dashboardRecentActivity": "Recent activity",
   "dashboardSeeAll": "See all",
@@ -64,14 +63,7 @@
   "dashboardStatSessions": "Sessions",
   "dashboardStatStreak": "Streak",
   "dashboardStatCompleted": "completed",
-  "dashboardStatDays": "{count, plural, =1{day} other{days}}",
-  "@dashboardStatDays": {
-    "placeholders": { "count": { "type": "int" } }
-  },
   "dashboardAddWeighIn": "Add weigh-in",
-  "dashboardStreakAtRisk": "At risk",
-  "dashboardStreakOnFire": "On fire",
-  "dashboardStreakLogToday": "Log today",
 
   "fuelWeekTitle": "Fuel this week",
   "fuelWeekLogged": "{count}/7 logged",
@@ -339,7 +331,6 @@
   "authCreateAccount": "Create account",
   "authShowPassword": "Show password",
   "authHidePassword": "Hide password",
-  "dashboardThisWeek": "This week",
   "dashboardFighter": "Fighter",
   "dashboardToday": "Today",
   "dashboardNoPlan": "No sessions planned",
@@ -351,6 +342,77 @@
   "dashboardLogSession": "Log session",
   "dashboardTimerAction": "Round timer",
   "dashboardOpenCamp": "Open camp",
+  "dashboardStatWeeks": "{count, plural, =1{week} other{weeks}}",
+  "@dashboardStatWeeks": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "weeklyCardTitle": "This week",
+  "weeklyCardRestWeek": "Rest week",
+  "weeklyCardRestWeekHint": "No sessions planned. Rest is part of the plan.",
+  "weeklyCardProgress": "{done} of {planned} done",
+  "@weeklyCardProgress": {
+    "placeholders": { "done": { "type": "int" }, "planned": { "type": "int" } }
+  },
+  "weeklyCardNext": "Next: {day} {session}",
+  "@weeklyCardNext": {
+    "placeholders": { "day": { "type": "String" }, "session": { "type": "String" } }
+  },
+  "weeklyCardAllDone": "All planned sessions done",
+  "weeklyCardNothingLeft": "No more sessions planned this week",
+  "weeklyCardTarget": "{target} needed to count this week",
+  "@weeklyCardTarget": {
+    "placeholders": { "target": { "type": "int" } }
+  },
+  "weeklyCardStreak": "{count, plural, =1{1 week in a row} other{{count} weeks in a row}}",
+  "@weeklyCardStreak": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "weeklyCardReview": "Weekly review",
+  "reviewTitle": "Weekly review",
+  "reviewWeekOf": "Week of {date}",
+  "@reviewWeekOf": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "reviewTraining": "Training",
+  "reviewSessionsDone": "{done} of {planned} sessions done",
+  "@reviewSessionsDone": {
+    "placeholders": { "done": { "type": "int" }, "planned": { "type": "int" } }
+  },
+  "reviewFood": "Food",
+  "reviewFoodNoTarget": "Set up Fuel to compare your week with a target.",
+  "reviewFoodNoLogs": "No meals logged this week.",
+  "reviewFoodAverage": "Average {average} kcal a day against a target of {target}.",
+  "@reviewFoodAverage": {
+    "placeholders": { "average": { "type": "int" }, "target": { "type": "int" } }
+  },
+  "reviewWeight": "Weight",
+  "reviewWeightNoData": "Not enough weigh-ins for a trend yet.",
+  "reviewWeightNoPath": "No weight path to compare with.",
+  "reviewWeightPath": "Path: {change} this week",
+  "@reviewWeightPath": {
+    "placeholders": { "change": { "type": "String" } }
+  },
+  "reviewRecommendation": "Recommendation",
+  "reviewRecMoveSession": "You have a planned session left over. Move it to today?",
+  "reviewRecLower": "Your weight is above your path and you ate to your target. Lower your daily target by {kcal} kcal?",
+  "@reviewRecLower": {
+    "placeholders": { "kcal": { "type": "int" } }
+  },
+  "reviewRecRaise": "Your weight is below your path and you ate to your target. Raise your daily target by {kcal} kcal?",
+  "@reviewRecRaise": {
+    "placeholders": { "kcal": { "type": "int" } }
+  },
+  "reviewHoldOnPath": "You are on path. Keep your plan as it is.",
+  "reviewHoldNoTarget": "Set up Fuel to get a calorie target before changes can be suggested.",
+  "reviewHoldNeedLogs": "Log at least four days of food before your target is changed.",
+  "reviewHoldIntake": "You were not close to your target this week, so it stays. Aim for it first.",
+  "reviewHoldNoPath": "Not enough weigh-ins, or no path to judge the scale by. Your target stays.",
+  "reviewHoldFloor": "Eating less would go under your resting energy estimate. Your target stays.",
+  "reviewAccept": "Accept",
+  "reviewKeepCurrent": "Keep current",
+  "reviewGotIt": "Got it",
+  "reviewAccepted": "You accepted this review.",
+  "reviewKept": "You kept your current plan.",
   "dashboardSetFuel": "Set a fuel target",
   "dashboardFuelInfo": "Why this target matters",
   "dashboardFuelExplanation": "Calories support your goal. Protein supports recovery and muscle. Carbohydrates provide energy for training.",
@@ -358,13 +420,6 @@
   "dashboardNoActivity": "Complete your first session to start your history.",
   "dashboardVerifyEmail": "Verify your email",
   "dashboardConfirmEmail": "Confirm your email",
-  "dashboardRiskTitle": "Streak at risk",
-  "dashboardFreezeHint": "Yesterday is unlogged. Protect it with a freeze ({count} left).",
-  "dashboardLogHint": "No freeze is available. Log a session today to start again.",
-  "dashboardFreeze": "Freeze",
-  "dashboardLogNow": "Log now",
-  "dashboardFreezeUsed": "Freeze used — yesterday is protected.",
-  "dashboardLogged": "Logged",
   "dashboardYesterday": "Yesterday",
   "dashboardDaysAgo": "{count} days ago",
   "@dashboardNextUp": {
@@ -374,13 +429,6 @@
       },
       "session": {
         "type": "String"
-      }
-    }
-  },
-  "@dashboardFreezeHint": {
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },
