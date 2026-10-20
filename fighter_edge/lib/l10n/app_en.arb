@@ -225,8 +225,6 @@
   "settingsHealthDataWithdrawTitle": "Withdraw consent?",
   "settingsHealthDataWithdrawBody": "Fighter Edge can't calculate your plan or track your progress without your health data. Withdrawing your consent therefore means deleting your account and all its data.",
   "settingsHealthDataWithdrawConfirm": "Delete my account",
-  "settingsAdPrivacy": "Ad privacy choices",
-  "settingsAdPrivacySubtitle": "Change what you agreed to for the optional videos",
   "deleteAccountSubscriptionWarning": "Deleting your account doesn't cancel your subscription. Cancel it first in your App Store or Google Play account settings, or it keeps renewing.",
 
   "trainTabReaction": "Reaction",

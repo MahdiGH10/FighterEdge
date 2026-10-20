@@ -210,8 +210,6 @@
   "settingsHealthDataWithdrawTitle": "Einwilligung widerrufen?",
   "settingsHealthDataWithdrawBody": "Ohne deine Gesundheitsdaten kann Fighter Edge weder deinen Plan berechnen noch deinen Fortschritt verfolgen. Ein Widerruf bedeutet deshalb, dass dein Konto mit allen Daten gelöscht wird.",
   "settingsHealthDataWithdrawConfirm": "Mein Konto löschen",
-  "settingsAdPrivacy": "Datenschutz bei Werbung",
-  "settingsAdPrivacySubtitle": "Ändere deine Einwilligung für die freiwilligen Videos",
   "deleteAccountSubscriptionWarning": "Das Löschen deines Kontos kündigt dein Abo nicht. Kündige es zuerst in deinen App-Store- oder Google-Play-Einstellungen, sonst verlängert es sich weiter.",
 
   "trainTabReaction": "Reaktion",

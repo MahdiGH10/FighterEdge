@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-import 'package:fighter_edge/ads/fake_rewarded_ad_gateway.dart';
-import 'package:fighter_edge/ads/reward_ticket_gateway.dart';
-import 'package:fighter_edge/ads/rewarded_ad_gateway.dart';
 import 'package:fighter_edge/billing/fake_billing_gateway.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/edge_fuel_repository.dart';
@@ -58,8 +55,6 @@ void main() {
     final edgeFuelRepo = InMemoryEdgeFuelRepository();
     final fightCampRepo = InMemoryFightCampRepository();
     final consent = ConsentController.decided(ConsentChoices.all);
-    final ads = FakeRewardedAdGateway();
-    const tickets = UnavailableRewardTicketGateway();
 
     final dependencies = AppDependencies(
       authRepo: await makeRepo(),
@@ -67,8 +62,6 @@ void main() {
       edgeFuelRepo: edgeFuelRepo,
       fightCampRepo: fightCampRepo,
       billingGateway: FakeBillingGateway(),
-      rewardedAds: ads,
-      rewardTickets: tickets,
       reminderGateway: reminders,
       coachVoice: voice,
       telemetry: telemetry,
@@ -89,7 +82,5 @@ void main() {
     expect(identical(read<EdgeFuelRepository>(), edgeFuelRepo), isTrue);
     expect(identical(read<FightCampRepository>(), fightCampRepo), isTrue);
     expect(identical(read<ConsentController>(), consent), isTrue);
-    expect(identical(read<RewardedAdGateway>(), ads), isTrue);
-    expect(identical(read<RewardTicketGateway>(), tickets), isTrue);
   });
 }
