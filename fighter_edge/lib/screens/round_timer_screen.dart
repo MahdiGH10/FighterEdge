@@ -10,9 +10,11 @@ import '../theme/app_icons.dart';
 import '../billing/subscription.dart';
 import '../controllers/auth_controller.dart';
 import '../data/mock_data.dart';
+import '../features/training_plan/domain/models/planned_session.dart';
+import '../features/training_plan/presentation/plan_controller.dart';
+import '../features/training_plan/presentation/plan_labels.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../models/timer_style.dart';
-import '../models/training_session.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
@@ -41,7 +43,7 @@ import 'paywall_screen.dart';
 /// each phase change is called out loud (when a speech engine exists), felt
 /// as a haptic, and announced to screen readers.
 class RoundTimerScreen extends StatefulWidget {
-  final TrainingSession? session;
+  final PlannedSession? session;
 
   /// Tests may pin time. Null reads the zone's clock, which widget tests
   /// already fake.
@@ -207,8 +209,9 @@ class _RoundTimerScreenState extends State<RoundTimerScreen>
         _announce(l.timerAnnounceDone);
         final session = widget.session;
         if (session != null) {
-          context.read<AppState>().completeSession(
+          context.read<PlanController>().complete(
                 session,
+                title: PlanLabels.title(l, session),
                 rpe: 7,
                 note: 'Completed from round timer',
               );

@@ -4,12 +4,11 @@ import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/training_plan/presentation/plan_controller.dart';
 import '../l10n/decimal_format.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
-import '../state/streak_controller.dart';
-import '../state/streak_engine.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -21,7 +20,6 @@ import '../l10n/gen/app_localizations.dart';
 import '../widgets/section_header.dart';
 import 'dashboard_screen.dart';
 import 'paywall_screen.dart';
-import 'round_timer_screen.dart';
 import 'settings_screen.dart';
 import 'weight_tracker_screen.dart';
 
@@ -32,12 +30,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final streak = context.watch<StreakController>();
-    final streakDays = StreakEngine.streakDays(
-      state.trainingDayKeys,
-      protectedDateKeys: streak.protectedDateKeys,
-      now: state.now,
-    );
+    final streakWeeks = context.watch<PlanController>().weeklyStreak.count;
     final weight = state.latestWeight;
     final auth = context.watch<AuthController>();
     final user = auth.user;
@@ -112,12 +105,6 @@ class ProfileScreen extends StatelessWidget {
           const GroupedList(
             children: [
               _ToolRow(
-                title: 'Round timer',
-                subtitle: 'Open intervals for sparring, MMA, boxing or BJJ',
-                route: AppRoutes.roundTimer,
-                screen: RoundTimerScreen(),
-              ),
-              _ToolRow(
                 title: 'Weight tracker',
                 subtitle: 'Log weigh-ins and monitor the cut or gain',
                 route: AppRoutes.weightTracker,
@@ -136,8 +123,8 @@ class ProfileScreen extends StatelessWidget {
           GroupedList(
             children: [
               _StatRow('Sessions completed', '${state.completedSessionCount}'),
-              _StatRow('Current streak',
-                  '$streakDays ${L.of(context).dashboardStatDays(streakDays)}'),
+              _StatRow('Week streak',
+                  '$streakWeeks ${L.of(context).dashboardStatWeeks(streakWeeks)}'),
               _StatRow(
                   'Training days / week', '${user?.weeklyTrainingDays ?? 0}'),
             ],

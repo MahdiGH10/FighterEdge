@@ -2,7 +2,7 @@ import '../data/data_repository.dart';
 
 /// Where a piece of logged training came from.
 enum TrainingSource {
-  /// One of the weekly plan's sessions, marked done.
+  /// A planned session of the dated week, marked done.
   planned,
 
   /// A round-timer workout finished without a planned session behind it.
@@ -23,17 +23,19 @@ enum TrainingSource {
 
 /// One occurrence of training, kept forever.
 ///
-/// The weekly plan (`TrainingSession`) is a template that repeats every week;
-/// this is the record of what actually happened on a given day. Before the
-/// log existed, completing a plan slot overwrote the slot itself, so the app
-/// could never hold more than one week of history.
+/// The plan (`PlannedSession`) says what should happen on a date; this is the
+/// record of what actually happened. The two are joined by
+/// `SessionStatusResolver`, and nothing about the plan is stored on an entry
+/// except which session it fulfils.
 class TrainingLogEntry {
   final String id;
   final DateTime completedAt;
   final TrainingSource source;
   final String title;
 
-  /// The weekly plan slot this entry fulfils (`TrainingSession.id`), if any.
+  /// The planned session this entry fulfils (`PlannedSession.id`, such as
+  /// `2026-10-19.skill`), if any. Older entries hold the id of a weekday slot
+  /// (`Tue-Wrestling`); those stay valid as history.
   final String? planSlotId;
   final int? durationSeconds;
 

@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../features/training_plan/data/legacy_session_slot.dart';
+import '../features/training_plan/data/stored_training_plan.dart';
 import '../models/meal.dart';
 import '../models/training_log_entry.dart';
-import '../models/training_session.dart';
 import '../models/weight_entry.dart';
 import 'data_repository.dart';
 
@@ -63,20 +64,36 @@ class FirestoreDataRepository implements DataRepository {
   }
 
   @override
-  Stream<List<TrainingSession>> watchSessions(String userId) {
+  Stream<List<LegacySessionSlot>> watchLegacySessions(String userId) {
     return _userCollection(userId, 'sessions').snapshots().map((snapshot) {
       final sessions = [
-        for (final doc in snapshot.docs) TrainingSession.fromJson(doc.data()),
+        for (final doc in snapshot.docs) LegacySessionSlot.fromJson(doc.data()),
       ]..sort((a, b) => _dayOrder(a.day).compareTo(_dayOrder(b.day)));
       return sessions;
     });
   }
 
   @override
-  Future<void> saveSession(String userId, TrainingSession session) {
+  Future<void> saveLegacySession(String userId, LegacySessionSlot session) {
     return _userCollection(userId, 'sessions')
         .doc(session.id)
         .set(session.toJson());
+  }
+
+  @override
+  Stream<StoredTrainingPlan?> watchTrainingPlan(String userId) {
+    return _userCollection(userId, 'trainingPlan')
+        .doc('current')
+        .snapshots()
+        .map((snap) =>
+            snap.exists ? StoredTrainingPlan.fromJson(snap.data()!) : null);
+  }
+
+  @override
+  Future<void> saveTrainingPlan(String userId, StoredTrainingPlan plan) {
+    return _userCollection(userId, 'trainingPlan')
+        .doc('current')
+        .set(plan.toJson());
   }
 
   @override

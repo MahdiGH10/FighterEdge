@@ -473,8 +473,8 @@ void main() {
         ),
         now: _now,
       );
-      expect(success.policyVersion, NutritionPolicy.version);
-      expect(unsupported.policyVersion, NutritionPolicy.version);
+      expect(success.policyVersion, NutritionPolicy.v1);
+      expect(unsupported.policyVersion, NutritionPolicy.v1);
     });
   });
 
