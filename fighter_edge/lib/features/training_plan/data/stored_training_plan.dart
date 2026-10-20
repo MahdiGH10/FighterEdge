@@ -5,6 +5,7 @@ import '../domain/models/experience_level.dart';
 import '../domain/models/plan_inputs.dart';
 import '../domain/models/training_goal.dart';
 import '../domain/session_status_resolver.dart';
+import '../../weekly_review/domain/weekly_review.dart';
 
 /// Where a saved plan came from.
 enum PlanOrigin {
@@ -26,10 +27,12 @@ class StoredTrainingPlan {
   StoredTrainingPlan({
     required this.inputs,
     Iterable<SessionAdjustment> adjustments = const [],
+    Map<String, ReviewDecision> reviews = const {},
     this.origin = PlanOrigin.onboarding,
     this.generatorVersion,
     this.templateSetVersion,
-  }) : adjustments = _byId(adjustments);
+  })  : adjustments = _byId(adjustments),
+        reviews = Map.unmodifiable(reviews);
 
   static const int schemaVersion = 1;
 
@@ -38,6 +41,10 @@ class StoredTrainingPlan {
 
   /// At most one per session id; the last one given wins.
   final Map<String, SessionAdjustment> adjustments;
+
+  /// What the athlete decided at each weekly review, by the week's Monday
+  /// (`yyyy-mm-dd`). A reviewed week is not offered again.
+  final Map<String, ReviewDecision> reviews;
   final PlanOrigin origin;
 
   /// The rules and template set that last made this plan's weeks, for the
@@ -53,12 +60,14 @@ class StoredTrainingPlan {
   StoredTrainingPlan copyWith({
     PlanInputs? inputs,
     Iterable<SessionAdjustment>? adjustments,
+    Map<String, ReviewDecision>? reviews,
     int? generatorVersion,
     int? templateSetVersion,
   }) =>
       StoredTrainingPlan(
         inputs: inputs ?? this.inputs,
         adjustments: adjustments ?? this.adjustments.values,
+        reviews: reviews ?? this.reviews,
         origin: origin,
         generatorVersion: generatorVersion ?? this.generatorVersion,
         templateSetVersion: templateSetVersion ?? this.templateSetVersion,
@@ -72,6 +81,10 @@ class StoredTrainingPlan {
           adjustment,
         ],
       );
+
+  /// This plan with the review of the week starting [weekStart] recorded.
+  StoredTrainingPlan withReview(DateTime weekStart, ReviewDecision decision) =>
+      copyWith(reviews: {...reviews, dateKey(weekStart): decision});
 
   /// This plan with any adjustment for [sessionId] removed.
   StoredTrainingPlan withoutAdjustment(String sessionId) => copyWith(
@@ -99,6 +112,9 @@ class StoredTrainingPlan {
         'gymClassWeekdays': gym,
         'sessionMinutes': inputs.sessionMinutes,
         'startDate': dateKey(inputs.startDate),
+      },
+      'reviews': {
+        for (final e in reviews.entries) e.key: e.value.name,
       },
       'adjustments': [
         for (final a in sorted)
@@ -156,6 +172,18 @@ class StoredTrainingPlan {
         if (to != null) adjustments.add(SessionAdjustment.moved(id, to));
       }
     }
+    final reviews = <String, ReviewDecision>{};
+    final rawReviews = json['reviews'];
+    if (rawReviews is Map) {
+      for (final e in rawReviews.entries) {
+        final decision = ReviewDecision.values
+            .where((d) => d.name == e.value)
+            .firstOrNull;
+        if (e.key is String && decision != null) {
+          reviews[e.key as String] = decision;
+        }
+      }
+    }
     final origin = PlanOrigin.values.firstWhere(
       (o) => o.name == json['origin'],
       orElse: () => PlanOrigin.onboarding,
@@ -163,6 +191,7 @@ class StoredTrainingPlan {
     return StoredTrainingPlan(
       inputs: plan,
       adjustments: adjustments,
+      reviews: reviews,
       origin: origin,
       generatorVersion: (json['generatorVersion'] as num?)?.toInt(),
       templateSetVersion: (json['templateSetVersion'] as num?)?.toInt(),

@@ -1,4 +1,3 @@
-import '../../../models/training_log_entry.dart';
 import '../../../state/app_state.dart';
 import '../../edge_fuel/domain/calculators/weekly_fuel_calculator.dart';
 import '../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
@@ -93,6 +92,3 @@ Future<WeeklyReview> buildWeeklyReview({
     ),
   );
 }
-
-// Keeps the log type in scope for readers: entries are what the plan joins.
-typedef _LogEntry = TrainingLogEntry;

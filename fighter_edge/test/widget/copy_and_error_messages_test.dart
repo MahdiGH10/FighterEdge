@@ -98,7 +98,7 @@ void main() {
         .pumpWidget(wrapApp(const ProfileScreen(), repo: repo, state: state));
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.text('Current streak'), 200);
+    await tester.scrollUntilVisible(find.text('Week streak'), 200);
     expect(find.text('1 day'), findsOneWidget);
     expect(find.text('1 days'), findsNothing);
   });

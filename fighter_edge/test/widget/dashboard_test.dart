@@ -4,9 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
-import 'package:fighter_edge/features/training_plan/data/legacy_session_slot.dart';
 import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
-import 'package:fighter_edge/models/training_log_entry.dart';
+import 'package:fighter_edge/features/weekly_review/domain/weekly_review.dart';
 import 'package:fighter_edge/screens/dashboard_screen.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
@@ -29,8 +28,8 @@ void main() {
 
     expect(find.text('Ayoub'), findsOneWidget);
     expect(find.text('Ayoub'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('This week'), 300);
-    expect(find.text('This week'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('THIS WEEK'), 300);
+    expect(find.text('THIS WEEK'), findsOneWidget);
     expect(find.text('77.2'), findsWidgets); // weight stat from AppState
   });
 
@@ -159,121 +158,96 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  group('streak freeze', () {
-    // AppState.completeSession always stamps `now`, so there is no public
-    // way to put a *past* completion on the board through it. Seeding the
-    // repository directly (as the real Firestore-backed app accumulates
-    // history over actual days) is the honest way to get an "at risk" board
-    // — alive through two days ago, nothing logged yesterday or today.
-    Future<AppState> atRiskState(String userId) async {
-      final repo = InMemoryDataRepository();
-      final now = wednesday;
-      Future<void> seed(String day, int daysAgo) => repo.saveLegacySession(
-            userId,
-            LegacySessionSlot(
-              id: day,
-              day: day,
-              title: day,
-              completed: true,
-              completedAt: now.subtract(Duration(days: daysAgo)),
-            ),
-          );
-      await seed('a', 2);
-      await seed('b', 3);
-      return AppState(dataRepository: repo, clock: () => wednesday)
-        ..setUser(userId);
-    }
-
-    testWidgets('is not shown when nothing is at risk', (tester) async {
-      final repo = await makeRepo(signedIn: true);
-      await tester.pumpWidget(wrapApp(
-        DashboardScreen(onNavigate: (_) {}),
-        repo: repo,
-        state: AppState(clock: () => wednesday),
-      ));
-      await tester.pump();
-
-      expect(find.text('Streak at risk'), findsNothing);
-    });
-
-    testWidgets('demo streak is at risk on Saturday', (tester) async {
-      tester.view.physicalSize = const Size(430, 1600);
+  group('weekly target card', () {
+    Future<(PlanController, AppState)> pumpHome(
+      WidgetTester tester,
+      DateTime now, {
+      int days = 3,
+      ValueChanged<int>? onNavigate,
+    }) async {
+      tester.view.physicalSize = const Size(430, 1800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       final repo = await makeRepo(signedIn: true);
-      // Monday to Thursday trained, nothing on Friday, and it is Saturday.
-      final saturday = DateTime(2026, 9, 26, 20);
-      final state = AppState(clock: () => saturday);
-      for (var day = 21; day <= 24; day++) {
-        state.addTrainingLogEntry(TrainingLogEntry(
-          id: 'log-$day',
-          completedAt: DateTime(2026, 9, day, 18),
-          source: TrainingSource.planned,
-          title: 'Session',
-        ));
-      }
-      await tester.pumpWidget(wrapApp(
-        DashboardScreen(onNavigate: (_) {}),
-        repo: repo,
-        state: state,
-      ));
-      await tester.pumpAndSettle();
-      expect(find.text('Streak at risk'), findsOneWidget);
-    });
-
-    testWidgets('offers to spend a banked freeze, and using it clears it',
-        (tester) async {
-      SharedPreferences.setMockInitialValues({});
-      final repo = await makeRepo(signedIn: true);
+      final data = InMemoryDataRepository();
       final userId = repo.currentUser!.id;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('fe_streak.$userId.freezes', 1);
-
+      final state = AppState(dataRepository: data, clock: () => now)
+        ..setUser(userId);
+      // Three days a week is Mon, Wed, Fri.
+      final plan = PlanController(log: state, repository: data)
+        ..configure(userId: userId)
+        ..startFresh(
+            weeklyTrainingDays: days,
+            goal: 'Build fight-camp structure',
+            level: 'Beginner');
       await tester.pumpWidget(wrapApp(
-        DashboardScreen(onNavigate: (_) {}),
-        repo: repo,
-        state: await atRiskState(userId),
-      ));
+          DashboardScreen(onNavigate: onNavigate ?? (_) {}),
+          repo: repo,
+          state: state,
+          planController: plan));
       await tester.pumpAndSettle();
+      return (plan, state);
+    }
 
-      await tester.scrollUntilVisible(find.text('Streak at risk'), 300);
-      expect(find.text('Streak at risk'), findsOneWidget);
-      expect(find.textContaining('(1 left)'), findsOneWidget);
+    final monday = DateTime(2026, 10, 19, 9);
 
-      await tester.ensureVisible(find.text('Freeze'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Freeze'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Streak at risk'), findsNothing);
-      expect(
-        find.text('Freeze used — yesterday is protected.'),
-        findsOneWidget,
-      );
+    testWidgets('says how many sessions are done and what is next',
+        (tester) async {
+      await pumpHome(tester, monday);
+      await tester.scrollUntilVisible(find.text('THIS WEEK'), 300);
+      expect(find.text('0 of 3 done'), findsOneWidget);
+      expect(find.text('Next: Wed Skill session'), findsOneWidget);
     });
 
-    testWidgets('offers to log instead when no freeze is banked',
-        (tester) async {
-      SharedPreferences.setMockInitialValues({});
-      final repo = await makeRepo(signedIn: true);
+    testWidgets('moves when a session is done', (tester) async {
+      final (plan, _) = await pumpHome(tester, monday);
+      plan.complete(plan.todaySession!.session, title: 'Skill session');
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('THIS WEEK'), 300);
+      expect(find.text('1 of 3 done'), findsOneWidget);
+    });
+
+    testWidgets('tapping it opens the week to act on', (tester) async {
       var navigatedTo = -1;
-
-      await tester.pumpWidget(wrapApp(
-        DashboardScreen(onNavigate: (i) => navigatedTo = i),
-        repo: repo,
-        state: await atRiskState(repo.currentUser!.id),
-      ));
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(find.text('Streak at risk'), 300);
-      expect(find.text('Streak at risk'), findsOneWidget);
-      expect(find.text('Freeze'), findsNothing);
-
-      await tester.ensureVisible(find.text('Log now'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Log now'));
+      await pumpHome(tester, monday, onNavigate: (i) => navigatedTo = i);
+      await tester.scrollUntilVisible(find.text('THIS WEEK'), 300);
+      await tester.tap(find.text('0 of 3 done'));
       await tester.pump();
-      expect(navigatedTo, 1); // Train tab, where sessions are completed
+      expect(navigatedTo, 1);
+    });
+
+    testWidgets('a week with no sessions is a rest week, never a miss',
+        (tester) async {
+      // The plan starts on a Sunday, so the week it is in has nothing planned.
+      await pumpHome(tester, DateTime(2026, 10, 25, 9));
+      await tester.scrollUntilVisible(find.text('THIS WEEK'), 300);
+      expect(find.text('Rest week'), findsOneWidget);
+      expect(find.textContaining('missed'), findsNothing);
+      expect(find.textContaining('Not done'), findsNothing);
+    });
+
+    testWidgets('no freeze banner and no daily streak any more',
+        (tester) async {
+      await pumpHome(tester, DateTime(2026, 10, 23, 20));
+      expect(find.text('Streak at risk'), findsNothing);
+      expect(find.text('Freeze'), findsNothing);
+    });
+
+    testWidgets('offers the weekly review on Sunday until it is answered',
+        (tester) async {
+      final (plan, _) = await pumpHome(tester, DateTime(2026, 10, 25, 20),
+          days: 6);
+      await tester.scrollUntilVisible(find.text('Weekly review'), 300);
+      expect(find.text('Weekly review'), findsOneWidget);
+
+      plan.recordReview(DateTime(2026, 10, 19), ReviewDecision.kept);
+      await tester.pumpAndSettle();
+      expect(find.text('Weekly review'), findsNothing);
+    });
+
+    testWidgets('offers no review in the middle of the week', (tester) async {
+      await pumpHome(tester, DateTime(2026, 10, 22, 20));
+      expect(find.text('Weekly review'), findsNothing);
     });
   });
 }

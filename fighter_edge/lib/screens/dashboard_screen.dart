@@ -8,7 +8,6 @@ import '../auth/verification_gate.dart';
 import '../controllers/auth_controller.dart';
 import '../features/corner_brief/presentation/corner_line_row.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
-import '../features/edge_fuel/presentation/widgets/fuel_week_card.dart';
 import '../features/fight_camp/domain/calendar.dart';
 import '../features/fight_camp/presentation/widgets/fight_countdown_card.dart';
 import '../features/training_plan/domain/models/planned_session.dart';
@@ -16,6 +15,8 @@ import '../features/training_plan/domain/models/session_status.dart';
 import '../features/training_plan/domain/session_status_resolver.dart';
 import '../features/training_plan/presentation/plan_controller.dart';
 import '../features/training_plan/presentation/plan_labels.dart';
+import '../features/weekly_review/domain/review_window.dart';
+import '../features/weekly_review/presentation/weekly_review_screen.dart';
 import '../l10n/decimal_format.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../models/training_log_entry.dart';
@@ -23,8 +24,6 @@ import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
 import '../state/first_run_controller.dart';
-import '../state/streak_controller.dart';
-import '../state/streak_engine.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
@@ -38,7 +37,7 @@ import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/sync_notice.dart';
 import '../widgets/grouped_list.dart';
-import '../widgets/weekly_overview.dart';
+import '../widgets/weekly_target_card.dart';
 import 'auth/verify_email_screen.dart';
 import 'first_run/first_week_checklist.dart';
 import 'round_timer_screen.dart';
@@ -62,14 +61,14 @@ class DashboardScreen extends StatelessWidget {
     final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
     final firstRun = context.watch<FirstRunController>();
-    final streak = context.watch<StreakController>();
     final plan = context.watch<PlanController>();
     final fuel = context.watch<EdgeFuelController>();
     final user = auth.user;
-    final streakDays = StreakEngine.streakDays(state.trainingDayKeys,
-        protectedDateKeys: streak.protectedDateKeys, now: state.now);
-    final atRisk = StreakEngine.isAtRisk(state.trainingDayKeys,
-        protectedDateKeys: streak.protectedDateKeys, now: state.now);
+    final week = plan.thisWeek;
+    final streakWeeks = plan.weeklyStreak.count;
+    final reviewWeek = plan.hasPlan ? ReviewWindow.weekFor(plan.today) : null;
+    final reviewReady =
+        reviewWeek != null && plan.reviewDecision(reviewWeek) == null;
     // Today's session if it is still to do, else the next one this week.
     final todaysSession = plan.todaySession?.session;
     final upcoming = plan.nextSession;
@@ -78,7 +77,6 @@ class DashboardScreen extends StatelessWidget {
             ? upcoming
             : null;
     final recent = state.trainingLog.take(3).toList();
-    final weekDays = plan.weekDays();
     // The header says what day it is, which is more use than the word
     // "Dashboard" on the screen the bottom bar already calls Home.
     final locale = Localizations.localeOf(context).toString();
@@ -124,41 +122,27 @@ class DashboardScreen extends StatelessWidget {
             _VerificationBanner(auth: auth),
             const SizedBox(height: Insets.md),
           ],
-          if (atRisk) ...[
-            _StreakFreezeBanner(streak: streak, onNavigate: onNavigate),
-            const SizedBox(height: Insets.md),
-          ],
           const DevMessageCard(),
-          _DashboardStats(streakDays: streakDays),
+          _DashboardStats(streakWeeks: streakWeeks),
           const AddFightRow(),
           const SizedBox(height: Insets.xl),
-          Text(l.dashboardThisWeek, style: AppType.headline()),
-          const SizedBox(height: Insets.md),
-          AppCard(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                WeeklyOverview(
-                  dayLetters: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-                  progress: [
-                    for (var i = 0; i < 7; i++)
-                      i < weekDays.length &&
-                              weekDays[i].rows.any(
-                                  (r) => r.status == SessionStatus.completed)
-                          ? 1.0
-                          : 0.0
-                  ],
-                  todayIndex: state.now.weekday - 1,
-                ),
-                if (fuel.hasUsableTarget) ...[
-                  const SizedBox(height: Insets.xl),
-                  FuelWeekCard(
-                      key: ValueKey(
-                          '${fuel.targetCalories}-${fuel.consumedCalories}-${fuel.entries.length}'),
-                      edgeFuel: fuel,
-                      embedded: true),
-                ],
-              ])),
+          WeeklyTargetCard(
+            completed: week.completed,
+            planned: week.planned,
+            target: week.target,
+            streakWeeks: streakWeeks,
+            nextDay: nextThisWeek == null
+                ? null
+                : PlanLabels.weekday(context, nextThisWeek.date),
+            nextTitle: nextThisWeek == null
+                ? null
+                : PlanLabels.title(l, nextThisWeek.session),
+            onOpenWeek: () => onNavigate(1),
+            onOpenReview: reviewReady
+                ? () => Navigator.of(context).push(CupertinoPageRoute<void>(
+                    builder: (_) => WeeklyReviewScreen(weekStart: reviewWeek)))
+                : null,
+          ),
           const SizedBox(height: Insets.xl),
           Row(children: [
             Expanded(
@@ -275,8 +259,8 @@ class _SessionHero extends StatelessWidget {
 }
 
 class _DashboardStats extends StatelessWidget {
-  final int streakDays;
-  const _DashboardStats({required this.streakDays});
+  final int streakWeeks;
+  const _DashboardStats({required this.streakWeeks});
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
@@ -300,8 +284,8 @@ class _DashboardStats extends StatelessWidget {
           unit: l.dashboardStatCompleted),
       _Stat(
           label: l.dashboardStatStreak,
-          value: '$streakDays',
-          unit: l.dashboardStatDays(streakDays)),
+          value: '$streakWeeks',
+          unit: l.dashboardStatWeeks(streakWeeks)),
     ];
     return AppCard(
         child: AppAccessibility.isLargeText(context)
@@ -389,43 +373,6 @@ class _VerificationBanner extends StatelessWidget {
                   style: AppType.callout())),
           const Icon(AppIcons.caretRight,
               size: IconSizes.row, color: AppColors.textSecondary),
-        ]));
-  }
-}
-
-class _StreakFreezeBanner extends StatelessWidget {
-  final StreakController streak;
-  final ValueChanged<int> onNavigate;
-  const _StreakFreezeBanner({required this.streak, required this.onNavigate});
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final hasFreeze = streak.freezesAvailable > 0;
-    return AppCard(
-        accent: AppColors.negative,
-        padding: const EdgeInsets.all(Insets.md),
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(l.dashboardRiskTitle, style: AppType.headline()),
-          const SizedBox(height: Insets.xs),
-          Text(
-              hasFreeze
-                  ? l.dashboardFreezeHint(streak.freezesAvailable)
-                  : l.dashboardLogHint,
-              style: AppType.subhead(
-                  color: AppAccessibility.textSecondary(context))),
-          const SizedBox(height: Insets.sm),
-          GhostButton(hasFreeze ? l.dashboardFreeze : l.dashboardLogNow,
-              onPressed: hasFreeze
-                  ? () async {
-                      final messenger = ScaffoldMessenger.of(context);
-                      final used = await streak.useFreezeForYesterday();
-                      if (!messenger.mounted || !used) return;
-                      AppHaptics.success();
-                      messenger.showSnackBar(
-                          SnackBar(content: Text(l.dashboardFreezeUsed)));
-                    }
-                  : () => onNavigate(1)),
         ]));
   }
 }

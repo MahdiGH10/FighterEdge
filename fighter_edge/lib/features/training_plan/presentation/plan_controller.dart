@@ -11,7 +11,9 @@ import '../../fight_camp/domain/fight_camp.dart';
 import '../data/legacy_plan_migration.dart';
 import '../data/onboarding_plan.dart';
 import '../data/stored_training_plan.dart';
+import '../../weekly_review/domain/weekly_review.dart';
 import '../domain/consistency/weekly_adherence.dart';
+import '../domain/consistency/weekly_streak.dart';
 import '../domain/models/date_key.dart';
 import '../domain/models/fight_context.dart';
 import '../domain/models/plan_inputs.dart';
@@ -292,6 +294,31 @@ class PlanController extends ChangeNotifier {
         today: today,
       );
 
+  /// Consecutive weeks that met their target, counting this one once it
+  /// has. Rest days and rest-only weeks never break it, and nothing before
+  /// the plan began is counted.
+  WeeklyStreak get weeklyStreak {
+    if (_stored == null) {
+      return const WeeklyStreak(
+          count: 0, currentWeekMet: false, currentWeekAlive: true);
+    }
+    final start = _stored!.inputs.startDate;
+    final earliest = addDays(today, -7 * historyWeeks);
+    final first = weekStart(start.isAfter(earliest) ? start : earliest);
+    final all = rows;
+    final weeks = <WeeklyAdherence>[];
+    for (var ws = first; !ws.isAfter(thisWeekStart); ws = addDays(ws, 7)) {
+      weeks.add(WeeklyAdherence.fromResolved(
+          weekStart: ws, resolved: all, today: today));
+    }
+    return WeeklyStreak.of(weeks);
+  }
+
+  /// What the athlete decided at the review of the week starting
+  /// [weekStart], or null when it has not been reviewed.
+  ReviewDecision? reviewDecision(DateTime weekStart) =>
+      _stored?.reviews[dateKey(calendarDay(weekStart))];
+
   /// The newest log entry that fulfils [sessionId].
   TrainingLogEntry? logEntryFor(String sessionId) {
     for (final entry in _log.trainingLog) {
@@ -373,6 +400,14 @@ class PlanController extends ChangeNotifier {
     final stored = _stored;
     if (stored == null || !stored.adjustments.containsKey(session.id)) return;
     _adopt(stored.withoutAdjustment(session.id));
+  }
+
+  /// Records the athlete's answer to the review of the week starting
+  /// [weekStart]. The plan itself only changes through what they accepted.
+  void recordReview(DateTime weekStart, ReviewDecision decision) {
+    final stored = _stored;
+    if (stored == null) return;
+    _adopt(stored.withReview(calendarDay(weekStart), decision));
   }
 
   void _adjust(SessionAdjustment adjustment) {

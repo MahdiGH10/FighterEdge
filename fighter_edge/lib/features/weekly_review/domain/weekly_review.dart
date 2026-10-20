@@ -33,6 +33,9 @@ enum ReviewReason {
   atFloor,
 }
 
+/// What the athlete did with a review.
+enum ReviewDecision { accepted, kept }
+
 enum RecommendationKind { hold, adjustCalories, moveSession }
 
 /// The single suggestion a review ends in. It only recommends: the athlete

@@ -56,7 +56,6 @@
   "settingsDeleteAccountSubtitle": "Löscht dein Konto und alle deine Daten endgültig",
 
   "dashboardTitle": "Übersicht",
-  "dashboardWeeklyOverview": "Wochenübersicht",
   "dashboardNextSession": "Nächste Einheit",
   "dashboardRecentActivity": "Letzte Aktivitäten",
   "dashboardSeeAll": "Alle ansehen",
@@ -64,14 +63,7 @@
   "dashboardStatSessions": "Einheiten",
   "dashboardStatStreak": "Serie",
   "dashboardStatCompleted": "abgeschlossen",
-  "dashboardStatDays": "{count, plural, =1{Tag} other{Tage}}",
-  "@dashboardStatDays": {
-    "placeholders": { "count": { "type": "int" } }
-  },
   "dashboardAddWeighIn": "Gewicht eintragen",
-  "dashboardStreakAtRisk": "In Gefahr",
-  "dashboardStreakOnFire": "Läuft",
-  "dashboardStreakLogToday": "Heute eintragen",
 
   "fuelWeekTitle": "Ernährung diese Woche",
   "fuelWeekLogged": "{count}/7 erfasst",
@@ -289,7 +281,6 @@
   "authCreateAccount": "Konto erstellen",
   "authShowPassword": "Passwort anzeigen",
   "authHidePassword": "Passwort verbergen",
-  "dashboardThisWeek": "Diese Woche",
   "dashboardFighter": "Athlet",
   "dashboardToday": "Heute",
   "dashboardNoPlan": "Noch keine Einheiten geplant",
@@ -300,6 +291,44 @@
   "dashboardNextUp": "Als Nächstes: {day} · {session}",
   "dashboardStartSession": "Einheit starten",
   "dashboardOpenCamp": "Trainingsplan öffnen",
+  "dashboardStatWeeks": "{count, plural, =1{Woche} other{Wochen}}",
+  "weeklyCardTitle": "Diese Woche",
+  "weeklyCardRestWeek": "Ruhewoche",
+  "weeklyCardRestWeekHint": "Keine Einheiten geplant. Ruhe gehört zum Plan.",
+  "weeklyCardProgress": "{done} von {planned} erledigt",
+  "weeklyCardNext": "Als Nächstes: {day} {session}",
+  "weeklyCardAllDone": "Alle geplanten Einheiten erledigt",
+  "weeklyCardNothingLeft": "Diese Woche sind keine Einheiten mehr geplant",
+  "weeklyCardTarget": "{target} nötig, damit die Woche zählt",
+  "weeklyCardStreak": "{count, plural, =1{1 Woche in Folge} other{{count} Wochen in Folge}}",
+  "weeklyCardReview": "Wochenrückblick",
+  "reviewTitle": "Wochenrückblick",
+  "reviewWeekOf": "Woche ab {date}",
+  "reviewTraining": "Training",
+  "reviewSessionsDone": "{done} von {planned} Einheiten erledigt",
+  "reviewFood": "Ernährung",
+  "reviewFoodNoTarget": "Richte Fuel ein, um deine Woche mit einem Ziel zu vergleichen.",
+  "reviewFoodNoLogs": "Diese Woche wurden keine Mahlzeiten eingetragen.",
+  "reviewFoodAverage": "Durchschnitt {average} kcal am Tag bei einem Ziel von {target}.",
+  "reviewWeight": "Gewicht",
+  "reviewWeightNoData": "Noch zu wenige Wiegungen für einen Trend.",
+  "reviewWeightNoPath": "Kein Gewichtspfad zum Vergleichen.",
+  "reviewWeightPath": "Pfad: {change} diese Woche",
+  "reviewRecommendation": "Empfehlung",
+  "reviewRecMoveSession": "Eine geplante Einheit ist übrig. Auf heute verschieben?",
+  "reviewRecLower": "Dein Gewicht liegt über deinem Pfad und du hast dein Ziel gegessen. Tagesziel um {kcal} kcal senken?",
+  "reviewRecRaise": "Dein Gewicht liegt unter deinem Pfad und du hast dein Ziel gegessen. Tagesziel um {kcal} kcal erhöhen?",
+  "reviewHoldOnPath": "Du liegst auf Kurs. Lass deinen Plan, wie er ist.",
+  "reviewHoldNoTarget": "Richte Fuel ein, um ein Kalorienziel zu bekommen, bevor Änderungen vorgeschlagen werden.",
+  "reviewHoldNeedLogs": "Trage mindestens vier Tage Essen ein, bevor dein Ziel geändert wird.",
+  "reviewHoldIntake": "Du warst diese Woche nicht nah an deinem Ziel, deshalb bleibt es. Erreiche es zuerst.",
+  "reviewHoldNoPath": "Zu wenige Wiegungen oder kein Pfad, an dem sich die Waage messen lässt. Dein Ziel bleibt.",
+  "reviewHoldFloor": "Weniger zu essen würde unter deinen geschätzten Grundumsatz fallen. Dein Ziel bleibt.",
+  "reviewAccept": "Annehmen",
+  "reviewKeepCurrent": "Aktuellen Plan behalten",
+  "reviewGotIt": "Verstanden",
+  "reviewAccepted": "Du hast diesen Rückblick angenommen.",
+  "reviewKept": "Du hast deinen aktuellen Plan behalten.",
   "dashboardSetFuel": "Ernährungsziel festlegen",
   "dashboardFuelInfo": "Warum dieses Ziel wichtig ist",
   "dashboardFuelExplanation": "Kalorien unterstützen dein Ziel. Eiweiß unterstützt Erholung und Muskeln. Kohlenhydrate liefern Energie fürs Training.",
@@ -307,13 +336,6 @@
   "dashboardNoActivity": "Schließe deine erste Einheit ab, um deinen Verlauf zu starten.",
   "dashboardVerifyEmail": "E-Mail bestätigen",
   "dashboardConfirmEmail": "E-Mail bestätigen",
-  "dashboardRiskTitle": "Serie gefährdet",
-  "dashboardFreezeHint": "Gestern fehlt ein Eintrag. Schütze den Tag mit einem Schutz ({count} übrig).",
-  "dashboardLogHint": "Kein Schutz verfügbar. Trage heute eine Einheit ein, um neu zu starten.",
-  "dashboardFreeze": "Schützen",
-  "dashboardLogNow": "Jetzt eintragen",
-  "dashboardFreezeUsed": "Schutz verwendet — gestern ist geschützt.",
-  "dashboardLogged": "Eingetragen",
   "dashboardYesterday": "Gestern",
   "dashboardDaysAgo": "Vor {count} Tagen",
   "@dashboardNextUp": {
@@ -323,13 +345,6 @@
       },
       "session": {
         "type": "String"
-      }
-    }
-  },
-  "@dashboardFreezeHint": {
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },
