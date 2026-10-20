@@ -96,6 +96,63 @@ describe("entitlements (emulator)", { skip: !emulator && "no Firestore emulator"
       assert.equal((await db.collection("billingEvents").doc(event.id).get()).exists, true);
     });
 
+    it("runs a store trial: start, cancel, convert, expire", async () => {
+      const id = uid("trial");
+      await seed(id);
+      const deps = { apiKey: null, nowMs: NOW };
+      await processRevenueCatEvent(
+        db,
+        purchase(id, { period_type: "TRIAL", expiration_at_ms: NOW + 7 * DAY }),
+        deps,
+      );
+      let data = await profile(id);
+      assert.equal(data?.plan, "pro");
+      assert.equal(data?.billing.proPeriod, "TRIAL");
+
+      await processRevenueCatEvent(
+        db,
+        purchase(id, {
+          type: "CANCELLATION",
+          period_type: "TRIAL",
+          event_timestamp_ms: NOW + 1,
+          expiration_at_ms: NOW + 7 * DAY,
+        }),
+        deps,
+      );
+      data = await profile(id);
+      assert.equal(data?.plan, "pro");
+      assert.equal(data?.billing.willRenew, false);
+
+      const later = { apiKey: null, nowMs: NOW + 7 * DAY };
+      await processRevenueCatEvent(
+        db,
+        purchase(id, {
+          type: "RENEWAL",
+          period_type: "NORMAL",
+          event_timestamp_ms: NOW + 7 * DAY,
+          expiration_at_ms: NOW + 37 * DAY,
+        }),
+        later,
+      );
+      data = await profile(id);
+      assert.equal(data?.plan, "pro");
+      assert.equal(data?.billing.proPeriod, "NORMAL");
+
+      await processRevenueCatEvent(
+        db,
+        purchase(id, {
+          type: "EXPIRATION",
+          period_type: "NORMAL",
+          event_timestamp_ms: NOW + 40 * DAY,
+          expiration_at_ms: NOW + 37 * DAY,
+        }),
+        { apiKey: null, nowMs: NOW + 40 * DAY },
+      );
+      data = await profile(id);
+      assert.equal(data?.plan, "free");
+      assert.equal(data?.entitlement, null);
+    });
+
     it("is idempotent: a replayed event is a no-op", async () => {
       const id = uid("replay");
       await seed(id);
