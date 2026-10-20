@@ -1699,6 +1699,138 @@ abstract class L {
   /// **'Done'**
   String get trainingSessionDone;
 
+  /// No description provided for @tplGenericSkill.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill session'**
+  String get tplGenericSkill;
+
+  /// No description provided for @tplGenericSparring.
+  ///
+  /// In en, this message translates to:
+  /// **'Sparring session'**
+  String get tplGenericSparring;
+
+  /// No description provided for @tplGenericConditioning.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditioning session'**
+  String get tplGenericConditioning;
+
+  /// No description provided for @tplGenericStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength session'**
+  String get tplGenericStrength;
+
+  /// No description provided for @tplGenericRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery session'**
+  String get tplGenericRecovery;
+
+  /// No description provided for @tplGenericGymClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym class'**
+  String get tplGenericGymClass;
+
+  /// No description provided for @planDisciplineBoxing.
+  ///
+  /// In en, this message translates to:
+  /// **'Boxing'**
+  String get planDisciplineBoxing;
+
+  /// No description provided for @planDisciplineKickboxing.
+  ///
+  /// In en, this message translates to:
+  /// **'Kickboxing'**
+  String get planDisciplineKickboxing;
+
+  /// No description provided for @planDisciplineMuayThai.
+  ///
+  /// In en, this message translates to:
+  /// **'Muay Thai'**
+  String get planDisciplineMuayThai;
+
+  /// No description provided for @planDisciplineWrestling.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrestling'**
+  String get planDisciplineWrestling;
+
+  /// No description provided for @planDisciplineBjj.
+  ///
+  /// In en, this message translates to:
+  /// **'BJJ'**
+  String get planDisciplineBjj;
+
+  /// No description provided for @planDisciplineMma.
+  ///
+  /// In en, this message translates to:
+  /// **'MMA'**
+  String get planDisciplineMma;
+
+  /// No description provided for @planSessionMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String planSessionMinutes(int minutes);
+
+  /// No description provided for @planSessionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{discipline} · {minutes} min'**
+  String planSessionSubtitle(String discipline, int minutes);
+
+  /// No description provided for @planStatusSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get planStatusSkipped;
+
+  /// No description provided for @planStatusNotDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not done'**
+  String get planStatusNotDone;
+
+  /// No description provided for @planStatusMovedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {day}'**
+  String planStatusMovedTo(String day);
+
+  /// No description provided for @planStatusMovedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved from {day}'**
+  String planStatusMovedFrom(String day);
+
+  /// No description provided for @planActionSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get planActionSkip;
+
+  /// No description provided for @planActionMoveToToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to today'**
+  String get planActionMoveToToday;
+
+  /// No description provided for @planActionPutBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Put back'**
+  String get planActionPutBack;
+
+  /// No description provided for @planActionMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get planActionMore;
+
   /// No description provided for @trainingStartSession.
   ///
   /// In en, this message translates to:

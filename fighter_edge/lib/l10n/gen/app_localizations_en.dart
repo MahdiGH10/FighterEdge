@@ -929,6 +929,80 @@ class LEn extends L {
   String get trainingSessionDone => 'Done';
 
   @override
+  String get tplGenericSkill => 'Skill session';
+
+  @override
+  String get tplGenericSparring => 'Sparring session';
+
+  @override
+  String get tplGenericConditioning => 'Conditioning session';
+
+  @override
+  String get tplGenericStrength => 'Strength session';
+
+  @override
+  String get tplGenericRecovery => 'Recovery session';
+
+  @override
+  String get tplGenericGymClass => 'Gym class';
+
+  @override
+  String get planDisciplineBoxing => 'Boxing';
+
+  @override
+  String get planDisciplineKickboxing => 'Kickboxing';
+
+  @override
+  String get planDisciplineMuayThai => 'Muay Thai';
+
+  @override
+  String get planDisciplineWrestling => 'Wrestling';
+
+  @override
+  String get planDisciplineBjj => 'BJJ';
+
+  @override
+  String get planDisciplineMma => 'MMA';
+
+  @override
+  String planSessionMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String planSessionSubtitle(String discipline, int minutes) {
+    return '$discipline · $minutes min';
+  }
+
+  @override
+  String get planStatusSkipped => 'Skipped';
+
+  @override
+  String get planStatusNotDone => 'Not done';
+
+  @override
+  String planStatusMovedTo(String day) {
+    return 'Moved to $day';
+  }
+
+  @override
+  String planStatusMovedFrom(String day) {
+    return 'Moved from $day';
+  }
+
+  @override
+  String get planActionSkip => 'Skip';
+
+  @override
+  String get planActionMoveToToday => 'Move to today';
+
+  @override
+  String get planActionPutBack => 'Put back';
+
+  @override
+  String get planActionMore => 'More options';
+
+  @override
   String trainingStartSession(String session) {
     return 'Start $session';
   }

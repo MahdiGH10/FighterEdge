@@ -6,7 +6,12 @@ import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../l10n/gen/app_localizations.dart';
-import '../models/training_session.dart';
+import '../features/training_plan/domain/models/planned_session.dart';
+import '../features/training_plan/domain/models/session_status.dart';
+import '../features/training_plan/domain/session_status_resolver.dart';
+import '../features/training_plan/presentation/plan_controller.dart';
+import '../features/training_plan/presentation/plan_labels.dart';
+import '../models/training_log_entry.dart';
 import '../state/app_state.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
@@ -71,24 +76,18 @@ class _WeekView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
+    final plan = context.watch<PlanController>();
     final campStart = context.watch<AuthController>().user?.createdAt;
-    final now = state.now;
-    const dayNames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-    final unfinished = state.sessions.where((s) => !s.completed);
-    final next = unfinished
-            .where((s) =>
-                s.day.toLowerCase().startsWith(dayNames[now.weekday - 1]))
-            .firstOrNull ??
-        unfinished.firstOrNull;
+    final now = context.watch<AppState>().now;
+    final days = plan.weekDays();
+    final next = plan.todaySession ?? plan.nextSession;
     // The camp begins when the account does — onboarding seeds a fresh camp,
     // and there is no separate camp-start model yet. Week 1 is the first
     // calendar week of the account, not a fixed number.
     final weekNumber =
         campStart == null ? 1 : (now.difference(campStart).inDays ~/ 7) + 1;
     // Monday-to-Sunday range for the current week.
-    final weekStart = DateTime(now.year, now.month, now.day)
-        .subtract(Duration(days: now.weekday - DateTime.monday));
+    final weekStart = plan.thisWeekStart;
     final weekEnd = weekStart.add(const Duration(days: 6));
     final rangeFormat = DateFormat('MMM d');
 
@@ -105,7 +104,7 @@ class _WeekView extends StatelessWidget {
               color: AppAccessibility.textSecondary(context)),
         ),
         const SizedBox(height: Insets.lg),
-        if (state.sessions.isEmpty)
+        if (!plan.hasPlan)
           const Padding(
             padding: EdgeInsets.only(top: Insets.xxl),
             child: _PlaceholderView(
@@ -113,39 +112,77 @@ class _WeekView extends StatelessWidget {
               'once your camp is set up.',
             ),
           ),
-        for (final s in state.sessions)
-          _SessionRow(
-            s,
-            isNext: s.id == next?.id,
-            onStart: () => Navigator.of(context).push(CupertinoPageRoute(
-              builder: (_) => RoundTimerScreen(session: s),
-            )),
-            onLog: () => _logSession(context, state, s),
-          ),
+        for (final day in days) ...[
+          // Days before the plan began are left out; a rest day is calm
+          // text, never a gap to fill.
+          if (day.isRest && day.emptyStatus != SessionStatus.beforeStart)
+            _RestRow(date: day.date),
+          for (final row in day.rows)
+            _SessionRow(
+              row,
+              isNext: row.session.id == next?.session.id &&
+                  row.status != SessionStatus.moved,
+              onStart: () => Navigator.of(context).push(CupertinoPageRoute(
+                builder: (_) => RoundTimerScreen(session: row.session),
+              )),
+              onLog: () => _logSession(context, plan, row.session),
+            ),
+        ],
       ],
     );
   }
 
   Future<void> _logSession(
     BuildContext context,
-    AppState state,
-    TrainingSession session,
+    PlanController plan,
+    PlannedSession session,
   ) async {
+    final title = PlanLabels.title(L.of(context), session);
+    final existing = plan.logEntryFor(session.id);
     final result = await showDialog<({int rpe, String note})>(
       context: context,
-      builder: (_) => _SessionLogDialog(session: session),
+      builder: (_) => _SessionLogDialog(
+        title: title,
+        initialRpe: existing?.rpe ?? 0,
+        initialNote: existing?.note ?? '',
+      ),
     );
     if (result == null) return;
-    state.completeSession(session, rpe: result.rpe, note: result.note);
+    plan.complete(session, title: title, rpe: result.rpe, note: result.note);
     AppHaptics.success();
+  }
+}
+
+/// A day with nothing planned. Never a miss.
+class _RestRow extends StatelessWidget {
+  final DateTime date;
+  const _RestRow({required this.date});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Insets.md),
+      child: Text(
+        '${PlanLabels.weekday(context, date)} ${date.day} · '
+        '${l.dashboardRestDay}',
+        style: AppType.subhead(color: AppAccessibility.textMuted(context)),
+      ),
+    );
   }
 }
 
 /// Owns the note controller so it is disposed with the dialog, after its exit
 /// animation, never while a focused field is still on screen.
 class _SessionLogDialog extends StatefulWidget {
-  final TrainingSession session;
-  const _SessionLogDialog({required this.session});
+  final String title;
+  final int initialRpe;
+  final String initialNote;
+  const _SessionLogDialog({
+    required this.title,
+    required this.initialRpe,
+    required this.initialNote,
+  });
 
   @override
   State<_SessionLogDialog> createState() => _SessionLogDialogState();
@@ -158,8 +195,8 @@ class _SessionLogDialogState extends State<_SessionLogDialog> {
   @override
   void initState() {
     super.initState();
-    _rpe = widget.session.rpe == 0 ? 7 : widget.session.rpe;
-    _note = TextEditingController(text: widget.session.note);
+    _rpe = widget.initialRpe == 0 ? 7 : widget.initialRpe;
+    _note = TextEditingController(text: widget.initialNote);
   }
 
   @override
@@ -171,7 +208,7 @@ class _SessionLogDialogState extends State<_SessionLogDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Log ${widget.session.title}', style: AppType.title2()),
+      title: Text('Log ${widget.title}', style: AppType.title2()),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -221,44 +258,67 @@ class _SessionLogDialogState extends State<_SessionLogDialog> {
 }
 
 class _SessionRow extends StatelessWidget {
-  final TrainingSession s;
+  final ResolvedSession row;
   final bool isNext;
   final VoidCallback onStart, onLog;
-  const _SessionRow(this.s,
+  const _SessionRow(this.row,
       {required this.isNext, required this.onStart, required this.onLog});
+
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
+    final plan = context.read<PlanController>();
+    final session = row.session;
+    final status = row.status;
+    final title = PlanLabels.title(l, session);
     final large = AppAccessibility.isLargeText(context);
+    final done = status == SessionStatus.completed;
+    // A session that was moved away or skipped is not asked for again.
+    final open = status == SessionStatus.today ||
+        status == SessionStatus.planned ||
+        status == SessionStatus.missed;
+    final note = switch (status) {
+      SessionStatus.completed => l.trainingSessionDone,
+      SessionStatus.skipped => l.planStatusSkipped,
+      SessionStatus.missed => l.planStatusNotDone,
+      SessionStatus.moved =>
+        l.planStatusMovedTo(PlanLabels.weekday(context, row.movedTo!)),
+      _ => row.movedFrom == null
+          ? null
+          : l.planStatusMovedFrom(PlanLabels.weekday(context, row.movedFrom!)),
+    };
     final content =
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(s.day,
+      Text('${PlanLabels.weekday(context, row.date)} ${row.date.day}',
           style: AppType.subhead(color: AppAccessibility.textMuted(context))),
       const SizedBox(height: Insets.xs),
-      Text(s.title, style: AppType.headline()),
+      Text(title, style: AppType.headline()),
       const SizedBox(height: Insets.xs),
-      Text(s.subtitle,
+      Text(PlanLabels.subtitle(l, session),
           style:
               AppType.subhead(color: AppAccessibility.textSecondary(context))),
-      if (s.completed) ...[
+      if (note != null) ...[
         const SizedBox(height: Insets.sm),
         Row(children: [
-          const Icon(AppIcons.check,
-              size: IconSizes.inline, color: AppColors.textSecondary),
-          const SizedBox(width: Insets.xs),
+          if (done) ...[
+            const Icon(AppIcons.check,
+                size: IconSizes.inline, color: AppColors.textSecondary),
+            const SizedBox(width: Insets.xs),
+          ],
           Flexible(
-              child: Text(L.of(context).trainingSessionDone,
+              child: Text(note,
                   style: AppType.subhead(color: AppColors.textSecondary))),
         ]),
       ],
     ]);
+    final menu = _menu(context, plan, l);
     final actions = Row(mainAxisSize: MainAxisSize.min, children: [
-      if (!s.completed)
-        _StartIconButton(label: s.title, primary: isNext, onTap: onStart),
-      HeaderIcon(s.completed ? AppIcons.notePencil : AppIcons.checkCircle,
-          label: s.completed
-              ? L.of(context).trainingEditSessionLog
-              : L.of(context).trainingLogSession,
-          onTap: onLog),
+      if (open) _StartIconButton(label: title, primary: isNext, onTap: onStart),
+      if (done || open)
+        HeaderIcon(done ? AppIcons.notePencil : AppIcons.checkCircle,
+            label: done ? l.trainingEditSessionLog : l.trainingLogSession,
+            onTap: onLog),
+      if (menu != null) menu,
     ]);
     return Padding(
         padding: const EdgeInsets.only(bottom: Insets.md),
@@ -273,7 +333,7 @@ class _SessionRow extends StatelessWidget {
                         Align(alignment: Alignment.centerRight, child: actions)
                       ])
                 : Row(children: [
-                    Icon(s.icon,
+                    Icon(PlanLabels.icon(session.kind, session.discipline),
                         size: IconSizes.row, color: AppColors.textSecondary),
                     const SizedBox(width: Insets.md),
                     Expanded(child: content),
@@ -281,7 +341,51 @@ class _SessionRow extends StatelessWidget {
                     actions,
                   ])));
   }
+
+  /// Skip, move to today, or put a skipped or moved session back. Nothing
+  /// here is a penalty: the athlete is choosing, and rest never counts as a
+  /// miss.
+  Widget? _menu(BuildContext context, PlanController plan, L l) {
+    final session = row.session;
+    final status = row.status;
+    final canSkip = status == SessionStatus.today ||
+        status == SessionStatus.planned ||
+        status == SessionStatus.missed;
+    final canMove = plan.canMoveToToday(row);
+    final canPutBack = status == SessionStatus.skipped ||
+        status == SessionStatus.moved ||
+        row.movedFrom != null;
+    if (!canSkip && !canPutBack) return null;
+    return PopupMenuButton<_RowAction>(
+      tooltip: l.planActionMore,
+      icon: const Icon(AppIcons.dotsThreeVertical,
+          size: IconSizes.row, color: AppColors.textSecondary),
+      onSelected: (action) {
+        switch (action) {
+          case _RowAction.skip:
+            plan.skip(session);
+          case _RowAction.moveToToday:
+            plan.move(session, plan.today);
+          case _RowAction.putBack:
+            plan.clearAdjustment(session);
+        }
+      },
+      itemBuilder: (_) => [
+        if (canSkip)
+          PopupMenuItem(value: _RowAction.skip, child: Text(l.planActionSkip)),
+        if (canMove)
+          PopupMenuItem(
+              value: _RowAction.moveToToday,
+              child: Text(l.planActionMoveToToday)),
+        if (canPutBack)
+          PopupMenuItem(
+              value: _RowAction.putBack, child: Text(l.planActionPutBack)),
+      ],
+    );
+  }
 }
+
+enum _RowAction { skip, moveToToday, putBack }
 
 class _StartIconButton extends StatelessWidget {
   final String label;
@@ -318,7 +422,7 @@ class _HistoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sessions = context.watch<AppState>().completedSessionsDesc;
+    final sessions = context.watch<AppState>().trainingLog;
     if (sessions.isEmpty) {
       return const _PlaceholderView(
           'Complete or log a session to build history');
@@ -354,7 +458,7 @@ class _HistoryView extends StatelessWidget {
 }
 
 class _HistoryRow extends StatelessWidget {
-  final TrainingSession session;
+  final TrainingLogEntry session;
   const _HistoryRow(this.session);
 
   @override
@@ -366,7 +470,7 @@ class _HistoryRow extends StatelessWidget {
         padding: const EdgeInsets.all(Insets.md),
         child: Row(
           children: [
-            Icon(session.icon, color: AppColors.primary, size: 24),
+            Icon(PlanLabels.logIcon(session), color: AppColors.primary, size: 24),
             const SizedBox(width: Insets.md),
             Expanded(
               child: Column(
@@ -376,9 +480,7 @@ class _HistoryRow extends StatelessWidget {
                       style: AppType.callout(weight: FontWeight.w700)),
                   const SizedBox(height: Insets.xxs),
                   Text(
-                    completedAt == null
-                        ? 'Logged'
-                        : DateFormat('MMM d, h:mm a').format(completedAt),
+                    DateFormat('MMM d, h:mm a').format(completedAt),
                     style: AppType.subhead(color: AppColors.textSecondary),
                   ),
                   if (session.note.isNotEmpty) ...[

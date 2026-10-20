@@ -28,6 +28,7 @@ import 'features/fight_camp/data/fight_camp_repository.dart';
 import 'features/fight_camp/data/firestore_fight_camp_repository.dart';
 import 'features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'features/fight_camp/presentation/fight_camp_controller.dart';
+import 'features/training_plan/presentation/plan_controller.dart';
 import 'firebase_options.dart';
 import 'notifications/local_reminder_gateway.dart';
 import 'notifications/reminder_gateway.dart';
@@ -369,6 +370,26 @@ class FighterEdgeApp extends StatelessWidget {
                 errorReporter: errorReporter ?? const NoopErrorReporter(),
               ))
             ..setUser(auth.user?.id),
+        ),
+        ChangeNotifierProxyProvider2<AuthController, FightCampController,
+            PlanController>(
+          create: (context) => PlanController(
+            log: context.read<AppState>(),
+            repository: dataRepo,
+            sync: context.read<SyncTracker>(),
+          ),
+          update: (context, auth, fightCamp, plan) => (plan ??
+              PlanController(
+                log: context.read<AppState>(),
+                repository: dataRepo,
+                sync: context.read<SyncTracker>(),
+              ))
+            ..configure(
+              userId: auth.user?.id,
+              fight: fightCamp.camp,
+              goal: auth.user?.goal ?? '',
+              level: auth.user?.experienceLevel ?? '',
+            ),
         ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
           create: (context) => EdgeFuelController(

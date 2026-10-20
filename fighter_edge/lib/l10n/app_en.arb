@@ -410,6 +410,49 @@
   "nutritionMacroGrams": "{value} / {target} g",
   "nutritionGrams": "{value} g",
   "trainingSessionDone": "Done",
+  "tplGenericSkill": "Skill session",
+  "tplGenericSparring": "Sparring session",
+  "tplGenericConditioning": "Conditioning session",
+  "tplGenericStrength": "Strength session",
+  "tplGenericRecovery": "Recovery session",
+  "tplGenericGymClass": "Gym class",
+  "planDisciplineBoxing": "Boxing",
+  "planDisciplineKickboxing": "Kickboxing",
+  "planDisciplineMuayThai": "Muay Thai",
+  "planDisciplineWrestling": "Wrestling",
+  "planDisciplineBjj": "BJJ",
+  "planDisciplineMma": "MMA",
+  "planSessionMinutes": "{minutes} min",
+  "@planSessionMinutes": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "planSessionSubtitle": "{discipline} · {minutes} min",
+  "@planSessionSubtitle": {
+    "placeholders": {
+      "discipline": { "type": "String" },
+      "minutes": { "type": "int" }
+    }
+  },
+  "planStatusSkipped": "Skipped",
+  "planStatusNotDone": "Not done",
+  "planStatusMovedTo": "Moved to {day}",
+  "@planStatusMovedTo": {
+    "placeholders": {
+      "day": { "type": "String" }
+    }
+  },
+  "planStatusMovedFrom": "Moved from {day}",
+  "@planStatusMovedFrom": {
+    "placeholders": {
+      "day": { "type": "String" }
+    }
+  },
+  "planActionSkip": "Skip",
+  "planActionMoveToToday": "Move to today",
+  "planActionPutBack": "Put back",
+  "planActionMore": "More options",
   "trainingStartSession": "Start {session}",
   "@nutritionOverTarget": {
     "placeholders": {

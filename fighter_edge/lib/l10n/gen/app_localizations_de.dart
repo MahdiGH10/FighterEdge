@@ -933,6 +933,80 @@ class LDe extends L {
   String get trainingSessionDone => 'Erledigt';
 
   @override
+  String get tplGenericSkill => 'Technik-Einheit';
+
+  @override
+  String get tplGenericSparring => 'Sparring-Einheit';
+
+  @override
+  String get tplGenericConditioning => 'Konditionseinheit';
+
+  @override
+  String get tplGenericStrength => 'Krafteinheit';
+
+  @override
+  String get tplGenericRecovery => 'Regenerationseinheit';
+
+  @override
+  String get tplGenericGymClass => 'Kurs im Gym';
+
+  @override
+  String get planDisciplineBoxing => 'Boxen';
+
+  @override
+  String get planDisciplineKickboxing => 'Kickboxen';
+
+  @override
+  String get planDisciplineMuayThai => 'Muay Thai';
+
+  @override
+  String get planDisciplineWrestling => 'Ringen';
+
+  @override
+  String get planDisciplineBjj => 'BJJ';
+
+  @override
+  String get planDisciplineMma => 'MMA';
+
+  @override
+  String planSessionMinutes(int minutes) {
+    return '$minutes Min.';
+  }
+
+  @override
+  String planSessionSubtitle(String discipline, int minutes) {
+    return '$discipline · $minutes Min.';
+  }
+
+  @override
+  String get planStatusSkipped => 'Übersprungen';
+
+  @override
+  String get planStatusNotDone => 'Nicht gemacht';
+
+  @override
+  String planStatusMovedTo(String day) {
+    return 'Verschoben auf $day';
+  }
+
+  @override
+  String planStatusMovedFrom(String day) {
+    return 'Verschoben von $day';
+  }
+
+  @override
+  String get planActionSkip => 'Überspringen';
+
+  @override
+  String get planActionMoveToToday => 'Auf heute verschieben';
+
+  @override
+  String get planActionPutBack => 'Zurücksetzen';
+
+  @override
+  String get planActionMore => 'Weitere Optionen';
+
+  @override
   String trainingStartSession(String session) {
     return '$session starten';
   }

@@ -5,6 +5,7 @@ import '../theme/app_icons.dart';
 
 import '../ads/rewarded_ad_gateway.dart';
 import '../controllers/auth_controller.dart';
+import '../features/training_plan/presentation/plan_controller.dart';
 import '../notifications/reminder_gateway.dart';
 import '../notifications/training_reminder_schedule.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -226,6 +227,7 @@ class SettingsScreen extends StatelessWidget {
     ReminderGateway reminders,
     bool enabled,
   ) async {
+    final plan = context.read<PlanController>();
     if (!enabled) {
       await state.setCampReminders(false);
       await reminders.cancelAll();
@@ -244,7 +246,7 @@ class SettingsScreen extends StatelessWidget {
     }
     await state.setCampReminders(true);
     await reminders.scheduleTrainingReminders(
-      weekdays: TrainingReminderSchedule.weekdaysFor(state.sessions),
+      weekdays: plan.trainingWeekdays,
       time: TrainingReminderSchedule.defaultTime,
     );
   }

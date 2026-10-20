@@ -1,22 +1,26 @@
 import 'dart:async';
 
+import '../features/training_plan/data/legacy_session_slot.dart';
+import '../features/training_plan/data/stored_training_plan.dart';
 import '../models/meal.dart';
 import '../models/training_log_entry.dart';
-import '../models/training_session.dart';
 import '../models/weight_entry.dart';
 import 'data_repository.dart';
 
 class InMemoryDataRepository implements DataRepository {
   final Map<String, List<WeightEntry>> _weights = {};
   final Map<String, Map<String, List<Meal>>> _meals = {};
-  final Map<String, List<TrainingSession>> _sessions = {};
+  final Map<String, List<LegacySessionSlot>> _sessions = {};
+  final Map<String, StoredTrainingPlan> _plans = {};
   final Map<String, Map<String, TrainingLogEntry>> _log = {};
 
   final Map<String, StreamController<List<WeightEntry>>> _weightControllers =
       {};
   final Map<String, StreamController<List<Meal>>> _mealControllers = {};
-  final Map<String, StreamController<List<TrainingSession>>>
+  final Map<String, StreamController<List<LegacySessionSlot>>>
       _sessionControllers = {};
+  final Map<String, StreamController<StoredTrainingPlan?>> _planControllers =
+      {};
   final Map<String, StreamController<List<TrainingLogEntry>>> _logControllers =
       {};
 
@@ -64,11 +68,11 @@ class InMemoryDataRepository implements DataRepository {
   }
 
   @override
-  Stream<List<TrainingSession>> watchSessions(String userId) {
+  Stream<List<LegacySessionSlot>> watchLegacySessions(String userId) {
     _ensureUser(userId);
     final controller = _sessionControllers.putIfAbsent(
       userId,
-      () => StreamController<List<TrainingSession>>.broadcast(),
+      () => StreamController<List<LegacySessionSlot>>.broadcast(),
     );
     Future.microtask(
         () => controller.add(List.unmodifiable(_sessions[userId]!)));
@@ -76,7 +80,8 @@ class InMemoryDataRepository implements DataRepository {
   }
 
   @override
-  Future<void> saveSession(String userId, TrainingSession session) async {
+  Future<void> saveLegacySession(
+      String userId, LegacySessionSlot session) async {
     _ensureUser(userId);
     final sessions = _sessions[userId]!;
     final existingIndex = sessions.indexWhere((s) => s.id == session.id);
@@ -86,6 +91,22 @@ class InMemoryDataRepository implements DataRepository {
       sessions[existingIndex] = session;
     }
     _sessionControllers[userId]?.add(List.unmodifiable(sessions));
+  }
+
+  @override
+  Stream<StoredTrainingPlan?> watchTrainingPlan(String userId) {
+    final controller = _planControllers.putIfAbsent(
+      userId,
+      () => StreamController<StoredTrainingPlan?>.broadcast(),
+    );
+    Future.microtask(() => controller.add(_plans[userId]));
+    return controller.stream;
+  }
+
+  @override
+  Future<void> saveTrainingPlan(String userId, StoredTrainingPlan plan) async {
+    _plans[userId] = plan;
+    _planControllers[userId]?.add(plan);
   }
 
   @override
@@ -130,6 +151,9 @@ class InMemoryDataRepository implements DataRepository {
       controller.close();
     }
     for (final controller in _sessionControllers.values) {
+      controller.close();
+    }
+    for (final controller in _planControllers.values) {
       controller.close();
     }
   }

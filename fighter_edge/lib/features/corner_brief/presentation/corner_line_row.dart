@@ -13,6 +13,7 @@ import '../../daily_snapshot/presentation/daily_snapshot_builder.dart';
 import '../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../../edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../../fight_camp/presentation/fight_camp_controller.dart';
+import '../../training_plan/presentation/plan_controller.dart';
 import '../../../state/app_state.dart';
 import '../domain/corner_brief.dart';
 
@@ -26,10 +27,11 @@ class CornerLineRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final state = context.watch<AppState>();
+    final plan = context.watch<PlanController>();
     final fightCamp = context.watch<FightCampController>();
     final fuel = context.watch<EdgeFuelController>();
 
-    final today = buildDailySnapshot(state, fightCamp, fuelDraft: fuel.draft);
+    final today = buildDailySnapshot(state, plan, fightCamp, fuelDraft: fuel.draft);
     // Fuel can be showing another day; the line is only ever about today.
     final day = fuel.isToday ? fuel.day : null;
     final line =
