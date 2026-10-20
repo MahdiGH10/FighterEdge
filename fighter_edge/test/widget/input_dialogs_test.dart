@@ -154,7 +154,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.bySemanticsLabel('Log session').first);
+      await tester.tap(find.bySemanticsLabel(RegExp(r'^Log ')).first);
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'felt sharp on entries');
       await tester.tap(find.text('Save'));

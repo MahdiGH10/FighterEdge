@@ -79,14 +79,30 @@ void main() {
     expect(find.textContaining('Calories support'), findsOneWidget);
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Start session'));
+    // Logging is the main action. It opens the RPE sheet, never the timer,
+    // and nothing is logged until the athlete saves.
+    await tester.tap(find.text('Log session'));
     await tester.pumpAndSettle();
-    expect(
-        tester
-            .widget<RoundTimerScreen>(find.byType(RoundTimerScreen))
-            .session
-            ?.id,
-        session.id);
+    expect(find.byType(RoundTimerScreen), findsNothing);
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(state.sessions.single.completed, isFalse);
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(state.sessions.single.completed, isTrue);
+    expect(state.sessions.single.rpe, 7);
+  });
+
+  testWidgets('Home has a quick action that opens the round timer',
+      (tester) async {
+    final repo = await makeRepo(signedIn: true);
+    await tester.pumpWidget(wrapApp(DashboardScreen(onNavigate: (_) {}),
+        repo: repo,
+        state: AppState(
+            dataRepository: InMemoryDataRepository(), clock: () => wednesday)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Round timer'));
+    await tester.pumpAndSettle();
+    expect(find.byType(RoundTimerScreen), findsOneWidget);
   });
 
   for (final scale in [1.0, 2.0]) {

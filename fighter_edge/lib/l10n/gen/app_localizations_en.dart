@@ -570,13 +570,6 @@ class LEn extends L {
   String get settingsHealthDataWithdrawConfirm => 'Delete my account';
 
   @override
-  String get settingsAdPrivacy => 'Ad privacy choices';
-
-  @override
-  String get settingsAdPrivacySubtitle =>
-      'Change what you agreed to for the optional videos';
-
-  @override
   String get deleteAccountSubscriptionWarning =>
       'Deleting your account doesn\'t cancel your subscription. Cancel it first in your App Store or Google Play account settings, or it keeps renewing.';
 
@@ -836,7 +829,10 @@ class LEn extends L {
   }
 
   @override
-  String get dashboardStartSession => 'Start session';
+  String get dashboardLogSession => 'Log session';
+
+  @override
+  String get dashboardTimerAction => 'Round timer';
 
   @override
   String get dashboardOpenCamp => 'Open camp';
@@ -929,9 +925,16 @@ class LEn extends L {
   String get trainingSessionDone => 'Done';
 
   @override
-  String trainingStartSession(String session) {
-    return 'Start $session';
+  String trainingLogNamedSession(String session) {
+    return 'Log $session';
   }
+
+  @override
+  String get trainTools => 'Tools';
+
+  @override
+  String get trainTimerToolSubtitle =>
+      'Open intervals for sparring, MMA, boxing or BJJ';
 
   @override
   String get onboardingBack => 'Back';

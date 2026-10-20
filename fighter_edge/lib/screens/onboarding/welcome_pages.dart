@@ -46,7 +46,7 @@ const _pages = [
     title: 'Your camp, organised.',
     body: 'Training week, weight and fuel in one place — built around the '
         'days you can actually train.',
-    proof: ['Weekly plan', 'Session log', 'Round timer'],
+    proof: ['Weekly plan', 'Session log', 'Weigh-ins'],
   ),
   _WelcomePage(
     icon: AppIcons.lightning,

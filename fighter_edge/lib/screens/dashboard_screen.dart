@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +35,7 @@ import '../widgets/weekly_overview.dart';
 import 'auth/verify_email_screen.dart';
 import 'first_run/first_week_checklist.dart';
 import 'round_timer_screen.dart';
+import 'session_log_dialog.dart';
 import 'weight_tracker_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -219,11 +219,11 @@ class _SessionHero extends StatelessWidget {
               style: AppType.callout(
                   color: AppAccessibility.textSecondary(context))),
           const SizedBox(height: Insets.lg),
-          PrimaryButton(today ? l.dashboardStartSession : l.dashboardOpenCamp,
+          PrimaryButton(today ? l.dashboardLogSession : l.dashboardOpenCamp,
               expand: true,
               onPressed: today
-                  ? () => Navigator.of(context).push(CupertinoPageRoute<void>(
-                      builder: (_) => RoundTimerScreen(session: session)))
+                  ? () => logSessionWithRpe(
+                      context, context.read<AppState>(), session!)
                   : () => onNavigate(1)),
           const SizedBox(height: Insets.sm),
           Row(children: [
@@ -256,6 +256,21 @@ class _SessionHero extends StatelessWidget {
                           ],
                         ))),
           ]),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.zero,
+                  foregroundColor: AppAccessibility.textSecondary(context)),
+              icon: const Icon(AppIcons.timer, size: IconSizes.row),
+              label: Text(l.dashboardTimerAction,
+                  style: AppType.subhead(
+                      color: AppAccessibility.textSecondary(context))),
+              onPressed: () => AppNavigation.push(context, AppRoutes.roundTimer,
+                  fallbackBuilder: (_) => const RoundTimerScreen()),
+            ),
+          ),
         ]));
   }
 }
@@ -268,7 +283,7 @@ class _DashboardStats extends StatelessWidget {
     final l = L.of(context);
     final state = context.watch<AppState>();
     final weight = state.latestWeight == 0
-        ? '—'
+        ? 'â€”'
         : formatFixedDecimal(state.displayWeight(state.latestWeight),
             Localizations.localeOf(context).toString());
     final stats = [
@@ -454,7 +469,7 @@ class _ActivityRow extends StatelessWidget {
                 Text(
                     session.rpe == 0
                         ? when
-                        : '$when · ${l.dashboardEffort(session.rpe)}',
+                        : '$when Â· ${l.dashboardEffort(session.rpe)}',
                     style: AppType.subhead(
                         color: AppAccessibility.textMuted(context))),
               ])),
