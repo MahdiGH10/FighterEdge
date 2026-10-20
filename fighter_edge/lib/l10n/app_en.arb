@@ -348,7 +348,8 @@
   "dashboardRecovery": "Your planned sessions are done. Take time to recover.",
   "dashboardPlanHint": "Open Train to set up your week.",
   "dashboardNextUp": "Next: {day} · {session}",
-  "dashboardStartSession": "Start session",
+  "dashboardLogSession": "Log session",
+  "dashboardTimerAction": "Round timer",
   "dashboardOpenCamp": "Open camp",
   "dashboardSetFuel": "Set a fuel target",
   "dashboardFuelInfo": "Why this target matters",
@@ -408,7 +409,9 @@
   "nutritionMacroGrams": "{value} / {target} g",
   "nutritionGrams": "{value} g",
   "trainingSessionDone": "Done",
-  "trainingStartSession": "Start {session}",
+  "trainingLogNamedSession": "Log {session}",
+  "trainTools": "Tools",
+  "trainTimerToolSubtitle": "Open intervals for sparring, MMA, boxing or BJJ",
   "@nutritionOverTarget": {
     "placeholders": {
       "kcal": {
@@ -433,7 +436,7 @@
       }
     }
   },
-  "@trainingStartSession": {
+  "@trainingLogNamedSession": {
     "placeholders": {
       "session": {
         "type": "String"

@@ -829,7 +829,10 @@ class LEn extends L {
   }
 
   @override
-  String get dashboardStartSession => 'Start session';
+  String get dashboardLogSession => 'Log session';
+
+  @override
+  String get dashboardTimerAction => 'Round timer';
 
   @override
   String get dashboardOpenCamp => 'Open camp';
@@ -922,9 +925,16 @@ class LEn extends L {
   String get trainingSessionDone => 'Done';
 
   @override
-  String trainingStartSession(String session) {
-    return 'Start $session';
+  String trainingLogNamedSession(String session) {
+    return 'Log $session';
   }
+
+  @override
+  String get trainTools => 'Tools';
+
+  @override
+  String get trainTimerToolSubtitle =>
+      'Open intervals for sparring, MMA, boxing or BJJ';
 
   @override
   String get onboardingBack => 'Back';
