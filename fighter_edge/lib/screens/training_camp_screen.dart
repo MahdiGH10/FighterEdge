@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -6,7 +5,6 @@ import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../l10n/gen/app_localizations.dart';
-import '../features/training_plan/domain/models/planned_session.dart';
 import '../features/training_plan/domain/models/session_status.dart';
 import '../features/training_plan/domain/session_status_resolver.dart';
 import '../features/training_plan/presentation/plan_controller.dart';
@@ -20,7 +18,11 @@ import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/stat_card.dart';
+import '../routing/app_navigation.dart';
+import '../routing/app_router.dart';
+import '../widgets/grouped_list.dart';
 import 'round_timer_screen.dart';
+import 'session_log_dialog.dart';
 import 'drill_library_screen.dart';
 import 'reaction_drill_picker.dart';
 import '../theme/app_haptics.dart';
@@ -122,34 +124,22 @@ class _WeekView extends StatelessWidget {
               row,
               isNext: row.session.id == next?.session.id &&
                   row.status != SessionStatus.moved,
-              onStart: () => Navigator.of(context).push(CupertinoPageRoute(
-                builder: (_) => RoundTimerScreen(session: row.session),
-              )),
-              onLog: () => _logSession(context, plan, row.session),
+              onLog: () => logSessionWithRpe(context, plan, row.session),
             ),
         ],
+        const SizedBox(height: Insets.md),
+        Text(L.of(context).trainTools, style: AppType.title2()),
+        const SizedBox(height: Insets.sm),
+        GroupedList(children: [
+          GroupedRow(
+            title: L.of(context).timerTitle,
+            subtitle: L.of(context).trainTimerToolSubtitle,
+            onTap: () => AppNavigation.push(context, AppRoutes.roundTimer,
+                fallbackBuilder: (_) => const RoundTimerScreen()),
+          ),
+        ]),
       ],
     );
-  }
-
-  Future<void> _logSession(
-    BuildContext context,
-    PlanController plan,
-    PlannedSession session,
-  ) async {
-    final title = PlanLabels.title(L.of(context), session);
-    final existing = plan.logEntryFor(session.id);
-    final result = await showDialog<({int rpe, String note})>(
-      context: context,
-      builder: (_) => _SessionLogDialog(
-        title: title,
-        initialRpe: existing?.rpe ?? 0,
-        initialNote: existing?.note ?? '',
-      ),
-    );
-    if (result == null) return;
-    plan.complete(session, title: title, rpe: result.rpe, note: result.note);
-    AppHaptics.success();
   }
 }
 
@@ -172,97 +162,11 @@ class _RestRow extends StatelessWidget {
   }
 }
 
-/// Owns the note controller so it is disposed with the dialog, after its exit
-/// animation, never while a focused field is still on screen.
-class _SessionLogDialog extends StatefulWidget {
-  final String title;
-  final int initialRpe;
-  final String initialNote;
-  const _SessionLogDialog({
-    required this.title,
-    required this.initialRpe,
-    required this.initialNote,
-  });
-
-  @override
-  State<_SessionLogDialog> createState() => _SessionLogDialogState();
-}
-
-class _SessionLogDialogState extends State<_SessionLogDialog> {
-  late int _rpe;
-  late final TextEditingController _note;
-
-  @override
-  void initState() {
-    super.initState();
-    _rpe = widget.initialRpe == 0 ? 7 : widget.initialRpe;
-    _note = TextEditingController(text: widget.initialNote);
-  }
-
-  @override
-  void dispose() {
-    _note.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Log ${widget.title}', style: AppType.title2()),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('RPE $_rpe / 10',
-              style: AppType.subhead(
-                  weight: FontWeight.w700, color: AppColors.textSecondary)),
-          Slider(
-            value: _rpe.toDouble(),
-            min: 1,
-            max: 10,
-            divisions: 9,
-            activeColor: AppColors.primary,
-            onChanged: (value) => setState(() => _rpe = value.round()),
-          ),
-          TextField(
-            controller: _note,
-            minLines: 2,
-            maxLines: 3,
-            style: AppType.callout(),
-            cursorColor: AppColors.primary,
-            decoration: const InputDecoration(
-              hintText: 'Quick reflection',
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: AppColors.primary),
-              ),
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Cancel',
-              style: AppType.callout(color: AppColors.textSecondary)),
-        ),
-        TextButton(
-          onPressed: () =>
-              Navigator.pop(context, (rpe: _rpe, note: _note.text)),
-          child: Text('Save',
-              style: AppType.callout(
-                  weight: FontWeight.w700, color: AppColors.accentText)),
-        ),
-      ],
-    );
-  }
-}
-
 class _SessionRow extends StatelessWidget {
   final ResolvedSession row;
   final bool isNext;
-  final VoidCallback onStart, onLog;
-  const _SessionRow(this.row,
-      {required this.isNext, required this.onStart, required this.onLog});
+  final VoidCallback onLog;
+  const _SessionRow(this.row, {required this.isNext, required this.onLog});
 
   @override
   Widget build(BuildContext context) {
@@ -313,11 +217,11 @@ class _SessionRow extends StatelessWidget {
     ]);
     final menu = _menu(context, plan, l);
     final actions = Row(mainAxisSize: MainAxisSize.min, children: [
-      if (open) _StartIconButton(label: title, primary: isNext, onTap: onStart),
-      if (done || open)
-        HeaderIcon(done ? AppIcons.notePencil : AppIcons.checkCircle,
-            label: done ? l.trainingEditSessionLog : l.trainingLogSession,
-            onTap: onLog),
+      if (done)
+        HeaderIcon(AppIcons.notePencil,
+            label: l.trainingEditSessionLog, onTap: onLog)
+      else if (open)
+        _LogIconButton(label: title, primary: isNext, onTap: onLog),
       if (menu != null) menu,
     ]);
     return Padding(
@@ -387,18 +291,19 @@ class _SessionRow extends StatelessWidget {
 
 enum _RowAction { skip, moveToToday, putBack }
 
-class _StartIconButton extends StatelessWidget {
+class _LogIconButton extends StatelessWidget {
   final String label;
   final bool primary;
   final VoidCallback onTap;
-  const _StartIconButton(
+  const _LogIconButton(
       {required this.label, required this.primary, required this.onTap});
   @override
   Widget build(BuildContext context) => Semantics(
+      container: true,
       button: true,
-      label: L.of(context).trainingStartSession(label),
+      label: L.of(context).trainingLogNamedSession(label),
       child: PressScale(
-          key: primary ? const ValueKey('primary-session-start') : null,
+          key: primary ? const ValueKey('primary-session-log') : null,
           onTap: onTap,
           haptic: AppHaptics.commit,
           child: DecoratedBox(
@@ -410,7 +315,7 @@ class _StartIconButton extends StatelessWidget {
                   shape: BoxShape.circle),
               child: SizedBox.square(
                   dimension: AppAccessibility.minTouchTarget,
-                  child: Icon(AppIconsFill.play,
+                  child: Icon(AppIcons.checkCircle,
                       color: primary
                           ? AppColors.textPrimary
                           : AppColors.textSecondary,

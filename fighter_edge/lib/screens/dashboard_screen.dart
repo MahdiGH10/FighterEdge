@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +41,7 @@ import '../widgets/weekly_overview.dart';
 import 'auth/verify_email_screen.dart';
 import 'first_run/first_week_checklist.dart';
 import 'round_timer_screen.dart';
+import 'session_log_dialog.dart';
 import 'weight_tracker_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -233,11 +233,11 @@ class _SessionHero extends StatelessWidget {
               style: AppType.callout(
                   color: AppAccessibility.textSecondary(context))),
           const SizedBox(height: Insets.lg),
-          PrimaryButton(today ? l.dashboardStartSession : l.dashboardOpenCamp,
+          PrimaryButton(today ? l.dashboardLogSession : l.dashboardOpenCamp,
               expand: true,
               onPressed: today
-                  ? () => Navigator.of(context).push(CupertinoPageRoute<void>(
-                      builder: (_) => RoundTimerScreen(session: session)))
+                  ? () => logSessionWithRpe(
+                      context, context.read<PlanController>(), session!)
                   : () => onNavigate(1)),
           const SizedBox(height: Insets.sm),
           Row(children: [
@@ -270,6 +270,21 @@ class _SessionHero extends StatelessWidget {
                           ],
                         ))),
           ]),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.zero,
+                  foregroundColor: AppAccessibility.textSecondary(context)),
+              icon: const Icon(AppIcons.timer, size: IconSizes.row),
+              label: Text(l.dashboardTimerAction,
+                  style: AppType.subhead(
+                      color: AppAccessibility.textSecondary(context))),
+              onPressed: () => AppNavigation.push(context, AppRoutes.roundTimer,
+                  fallbackBuilder: (_) => const RoundTimerScreen()),
+            ),
+          ),
         ]));
   }
 }

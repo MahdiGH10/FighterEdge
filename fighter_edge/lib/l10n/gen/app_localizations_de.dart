@@ -574,13 +574,6 @@ class LDe extends L {
   String get settingsHealthDataWithdrawConfirm => 'Mein Konto löschen';
 
   @override
-  String get settingsAdPrivacy => 'Datenschutz bei Werbung';
-
-  @override
-  String get settingsAdPrivacySubtitle =>
-      'Ändere deine Einwilligung für die freiwilligen Videos';
-
-  @override
   String get deleteAccountSubscriptionWarning =>
       'Das Löschen deines Kontos kündigt dein Abo nicht. Kündige es zuerst in deinen App-Store- oder Google-Play-Einstellungen, sonst verlängert es sich weiter.';
 
@@ -840,7 +833,10 @@ class LDe extends L {
   }
 
   @override
-  String get dashboardStartSession => 'Einheit starten';
+  String get dashboardLogSession => 'Einheit erfassen';
+
+  @override
+  String get dashboardTimerAction => 'Runden-Timer';
 
   @override
   String get dashboardOpenCamp => 'Trainingsplan öffnen';
@@ -1007,9 +1003,16 @@ class LDe extends L {
   String get planActionMore => 'Weitere Optionen';
 
   @override
-  String trainingStartSession(String session) {
-    return '$session starten';
+  String trainingLogNamedSession(String session) {
+    return '$session erfassen';
   }
+
+  @override
+  String get trainTools => 'Werkzeuge';
+
+  @override
+  String get trainTimerToolSubtitle =>
+      'Freie Intervalle für Sparring, MMA, Boxen oder BJJ';
 
   @override
   String get onboardingBack => 'Zurück';

@@ -5,9 +5,9 @@
          transitively, and its presence forces answers about ad tracking on
          the Play Data safety form that would otherwise not apply. -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
-    <!-- The ads SDK adds these three (Android 13+ ad services) on its own. The
-         one ad is an opt-in, non-personalised rewarded video, so the app needs
-         none of them, and their presence changes the Play Data safety answers. -->
+    <!-- Android 13+ ad services permissions. The app has no ads, so none of
+         them are needed, and their presence changes the Play Data safety
+         answers. Kept removed in case a library adds them. -->
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" tools:node="remove"/>
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" tools:node="remove"/>
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS" tools:node="remove"/>
@@ -56,12 +56,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!-- AdMob (rewarded videos, free accounts, opt-in). The ID comes from
-             build.gradle.kts. The advertising ID permission above stays
-             removed: the app asks only for non-personalised ads. -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="${admobAppId}"/>
         <!-- Privacy by default (audit M-2): Analytics and Crashlytics collect
              nothing until the athlete consents in the app, which then enables
              them at runtime (lib/privacy/consent.dart). Consent Mode v2

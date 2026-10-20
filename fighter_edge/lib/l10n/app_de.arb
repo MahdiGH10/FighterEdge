@@ -210,8 +210,6 @@
   "settingsHealthDataWithdrawTitle": "Einwilligung widerrufen?",
   "settingsHealthDataWithdrawBody": "Ohne deine Gesundheitsdaten kann Fighter Edge weder deinen Plan berechnen noch deinen Fortschritt verfolgen. Ein Widerruf bedeutet deshalb, dass dein Konto mit allen Daten gelöscht wird.",
   "settingsHealthDataWithdrawConfirm": "Mein Konto löschen",
-  "settingsAdPrivacy": "Datenschutz bei Werbung",
-  "settingsAdPrivacySubtitle": "Ändere deine Einwilligung für die freiwilligen Videos",
   "deleteAccountSubscriptionWarning": "Das Löschen deines Kontos kündigt dein Abo nicht. Kündige es zuerst in deinen App-Store- oder Google-Play-Einstellungen, sonst verlängert es sich weiter.",
 
   "trainTabReaction": "Reaktion",
@@ -298,7 +296,8 @@
   "dashboardRecovery": "Deine geplanten Einheiten sind erledigt. Nimm dir Zeit zur Erholung.",
   "dashboardPlanHint": "Öffne Training, um deine Woche zu planen.",
   "dashboardNextUp": "Als Nächstes: {day} · {session}",
-  "dashboardStartSession": "Einheit starten",
+  "dashboardLogSession": "Einheit erfassen",
+  "dashboardTimerAction": "Runden-Timer",
   "dashboardOpenCamp": "Trainingsplan öffnen",
   "dashboardSetFuel": "Ernährungsziel festlegen",
   "dashboardFuelInfo": "Warum dieses Ziel wichtig ist",
@@ -380,7 +379,9 @@
   "planActionMoveToToday": "Auf heute verschieben",
   "planActionPutBack": "Zurücksetzen",
   "planActionMore": "Weitere Optionen",
-  "trainingStartSession": "{session} starten",
+  "trainingLogNamedSession": "{session} erfassen",
+  "trainTools": "Werkzeuge",
+  "trainTimerToolSubtitle": "Freie Intervalle für Sparring, MMA, Boxen oder BJJ",
   "@nutritionOverTarget": {
     "placeholders": {
       "kcal": {
@@ -405,7 +406,7 @@
       }
     }
   },
-  "@trainingStartSession": {
+  "@trainingLogNamedSession": {
     "placeholders": {
       "session": {
         "type": "String"

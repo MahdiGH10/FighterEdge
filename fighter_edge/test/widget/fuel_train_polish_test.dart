@@ -8,6 +8,8 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.d
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
 import 'package:fighter_edge/screens/nutrition_screen.dart';
+import 'package:fighter_edge/screens/profile_screen.dart';
+import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/screens/training_camp_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/widgets/progress_ring.dart';
@@ -15,6 +17,37 @@ import 'package:fighter_edge/widgets/stat_card.dart';
 import '../helpers/test_harness.dart';
 
 void main() {
+  testWidgets('Train has a Tools row for the timer and the play button is gone',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 1100);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final repo = await makeRepo(signedIn: true);
+    await tester.pumpWidget(wrapApp(const TrainingCampScreen(),
+        repo: repo,
+        state: AppState(
+            dataRepository: InMemoryDataRepository(),
+            clock: () => DateTime(2026, 9, 23))));
+    await tester.pumpAndSettle();
+    expect(find.text('Tools'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'^Start ')), findsNothing);
+    await tester.tap(find.text('Round Timer'));
+    await tester.pumpAndSettle();
+    expect(find.byType(RoundTimerScreen), findsOneWidget);
+  });
+
+  testWidgets('Profile no longer lists the round timer', (tester) async {
+    tester.view.physicalSize = const Size(390, 1100);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final repo = await makeRepo(signedIn: true);
+    await tester.pumpWidget(
+        wrapApp(const ProfileScreen(), repo: repo, state: AppState()));
+    await tester.pumpAndSettle();
+    expect(find.text('Round timer'), findsNothing);
+    expect(find.text('Weight tracker'), findsOneWidget);
+  });
+
   for (final weekday in [DateTime.wednesday, DateTime.thursday]) {
     testWidgets(
         'only today or the next unfinished session is highlighted on $weekday',
@@ -38,11 +71,11 @@ void main() {
       await tester.pumpWidget(wrapApp(const TrainingCampScreen(),
           repo: repo, state: state, planController: plan));
       await tester.pumpAndSettle();
-      final primary = find.byKey(const ValueKey('primary-session-start'));
+      final primary = find.byKey(const ValueKey('primary-session-log'));
       expect(primary, findsOneWidget);
       final semantics = tester.widget<Semantics>(
           find.ancestor(of: primary, matching: find.byType(Semantics)).first);
-      expect(semantics.properties.label, 'Start Skill session');
+      expect(semantics.properties.label, 'Log Skill session');
       // Today's row on Wednesday, the next one (Friday) on Thursday.
       final row = find.ancestor(of: primary, matching: find.byType(AppCard));
       expect(
