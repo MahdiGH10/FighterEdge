@@ -1093,18 +1093,6 @@ abstract class L {
   /// **'Delete my account'**
   String get settingsHealthDataWithdrawConfirm;
 
-  /// No description provided for @settingsAdPrivacy.
-  ///
-  /// In en, this message translates to:
-  /// **'Ad privacy choices'**
-  String get settingsAdPrivacy;
-
-  /// No description provided for @settingsAdPrivacySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Change what you agreed to for the optional videos'**
-  String get settingsAdPrivacySubtitle;
-
   /// No description provided for @deleteAccountSubscriptionWarning.
   ///
   /// In en, this message translates to:
@@ -1543,11 +1531,17 @@ abstract class L {
   /// **'Next: {day} · {session}'**
   String dashboardNextUp(String day, String session);
 
-  /// No description provided for @dashboardStartSession.
+  /// No description provided for @dashboardLogSession.
   ///
   /// In en, this message translates to:
-  /// **'Start session'**
-  String get dashboardStartSession;
+  /// **'Log session'**
+  String get dashboardLogSession;
+
+  /// No description provided for @dashboardTimerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Round timer'**
+  String get dashboardTimerAction;
 
   /// No description provided for @dashboardOpenCamp.
   ///
@@ -1699,11 +1693,23 @@ abstract class L {
   /// **'Done'**
   String get trainingSessionDone;
 
-  /// No description provided for @trainingStartSession.
+  /// No description provided for @trainingLogNamedSession.
   ///
   /// In en, this message translates to:
-  /// **'Start {session}'**
-  String trainingStartSession(String session);
+  /// **'Log {session}'**
+  String trainingLogNamedSession(String session);
+
+  /// No description provided for @trainTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get trainTools;
+
+  /// No description provided for @trainTimerToolSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open intervals for sparring, MMA, boxing or BJJ'**
+  String get trainTimerToolSubtitle;
 
   /// No description provided for @onboardingBack.
   ///
