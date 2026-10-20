@@ -16,6 +16,30 @@ import '../helpers/test_harness.dart';
 /// Longer than the call cross-fade, so the previous call has fully left.
 const _callSettle = Duration(milliseconds: 400);
 
+/// The picker is a list, so the command chips can sit below the fold.
+Future<void> _scrollToMix(WidgetTester tester) async {
+  final scrollable = find
+      .descendant(
+          of: find.byType(ReactionDrillPicker),
+          matching: find.byType(Scrollable))
+      .first;
+  await tester.scrollUntilVisible(find.textContaining('IN THE MIX'), 200,
+      scrollable: scrollable);
+  await tester.pumpAndSettle();
+}
+
+/// Back to the top, where the stats are.
+Future<void> _scrollToTop(WidgetTester tester) async {
+  await tester.drag(
+      find
+          .descendant(
+              of: find.byType(ReactionDrillPicker),
+              matching: find.byType(Scrollable))
+          .first,
+      const Offset(0, 3000));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('Train > Reaction picks a drill and shows what it asks',
       (tester) async {
@@ -27,15 +51,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ReactionDrillPicker), findsOneWidget);
     expect(find.text('THE COACH CALLS IT. YOU REACT.'), findsOneWidget);
-    // MMA beginner by default: 30 s, up to two moves, 24 commands.
-    expect(find.text('0:30'), findsOneWidget);
+    // MMA beginner by default: 3 rounds of a minute, up to two moves, 24
+    // commands.
+    expect(find.text('3 × 1:00'), findsOneWidget);
     expect(find.text('1–2'), findsOneWidget);
+    await _scrollToMix(tester);
     expect(find.text('IN THE MIX · 24'), findsOneWidget);
+    await _scrollToTop(tester);
 
     await tester.tap(find.text('Wrestling'));
     await tester.tap(find.text('Advanced'));
     await tester.pumpAndSettle();
-    expect(find.text('2:00'), findsOneWidget);
+    expect(find.text('2 × 3:00'), findsOneWidget);
+    await _scrollToMix(tester);
     expect(find.text('IN THE MIX · 7'), findsOneWidget);
     expect(find.textContaining('Cartwheel'), findsOneWidget);
 
@@ -77,7 +105,8 @@ void main() {
     ));
     await tester.pump();
     expect(find.text('3'), findsOneWidget);
-    expect(find.text('0:30'), findsOneWidget);
+    expect(find.text('1:00'), findsOneWidget);
+    expect(find.text('ROUND 1 OF 3'), findsOneWidget);
     expect(find.text('Stop'), findsOneWidget);
     expect(find.text('No voice on this device. Follow the calls on screen.'),
         findsOneWidget,
@@ -90,7 +119,14 @@ void main() {
       expect(findDrillMove(c.label), findsOneWidget);
     }
 
-    await tester.pump(const Duration(seconds: 31));
+    // Round 1 ends on the minute; the rest comes next.
+    await tester.pump(const Duration(seconds: 60));
+    await tester.pump(_callSettle);
+    expect(find.text('REST'), findsOneWidget);
+    expect(find.text('ROUND 2 OF 3'), findsOneWidget);
+
+    // Two more rounds and one more rest, to the last bell at 5:03.
+    await tester.pump(const Duration(seconds: 241));
     await tester.pump(_callSettle);
     expect(find.text('TIME'), findsOneWidget);
     expect(find.text('Go again'), findsOneWidget);
@@ -111,7 +147,7 @@ void main() {
   });
 
   final grapplingBeginner = ReactionDrillSpec.of(
-      ReactionDiscipline.grappling, ReactionLevel.beginner); // 30 s
+      ReactionDiscipline.grappling, ReactionLevel.beginner); // 2 x 1 min
 
   Future<void> openDrill(WidgetTester tester) async {
     final repo = await makeRepo(signedIn: true);
@@ -142,7 +178,7 @@ void main() {
     await tester.tap(find.text('Pause'));
     await tester.pump(_callSettle);
     expect(find.text('PAUSED'), findsOneWidget);
-    expect(find.text('0:20 left'), findsOneWidget);
+    expect(find.text('0:50 left'), findsOneWidget);
     expect(find.text('Resume'), findsOneWidget);
 
     await tester.pump(const Duration(minutes: 1));
@@ -151,11 +187,21 @@ void main() {
     await tester.tap(find.text('Resume'));
     await tester.pump(_callSettle);
     expect(find.text('GET IN STANCE'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 3));
+    // After a pause the way back into stance is two seconds, not three.
+    await tester.pump(const Duration(seconds: 1));
     await tester.pump(_callSettle);
+    expect(find.text('GET IN STANCE'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pump(_callSettle);
+    expect(find.text('GET IN STANCE'), findsNothing);
     expect(find.text('CALL 1'), findsNothing,
         reason: 'the call count carries on from before the pause');
-    await tester.pump(const Duration(seconds: 21));
+    // The 50 s left of round 1, then the rest.
+    await tester.pump(const Duration(seconds: 50));
+    await tester.pump(_callSettle);
+    expect(find.text('REST'), findsOneWidget);
+    // The rest (60 s), round 2 (60 s), to the last bell.
+    await tester.pump(const Duration(seconds: 60 + 60));
     await tester.pump(_callSettle);
     expect(find.text('TIME'), findsOneWidget);
   });
@@ -206,12 +252,12 @@ void main() {
     await tester.tap(find.text('Stop'));
     await tester.pump(_callSettle);
     expect(find.textContaining('Stopped at 0:12'), findsOneWidget);
-    expect(find.text('0:30'), findsOneWidget, reason: 'ready for a full run');
+    expect(find.text('1:00'), findsOneWidget, reason: 'ready for a full run');
 
     await tester.tap(find.text('Start drill'));
-    await tester.pump(const Duration(seconds: 3 + 31));
+    await tester.pump(const Duration(seconds: 3 + 60 + 60 + 60 + 1));
     await tester.pump(_callSettle);
-    expect(find.textContaining(' in 0:30'), findsOneWidget);
+    expect(find.textContaining(' in 2:00'), findsOneWidget);
     expect(find.text('Ready for Intermediate?'), findsOneWidget);
 
     // Nothing asks before leaving a finished drill.
@@ -273,7 +319,8 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
     await open();
-    expect(find.text('1:30'), findsOneWidget, reason: 'striking advanced+');
+    expect(find.text('3 × 3:00'), findsOneWidget, reason: 'striking advanced+');
+    await _scrollToMix(tester);
     expect(find.text('IN THE MIX · 19'), findsOneWidget);
   });
 }

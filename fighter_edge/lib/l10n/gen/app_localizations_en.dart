@@ -723,11 +723,6 @@ class LEn extends L {
   String get reactionLeaveConfirm => 'Leave';
 
   @override
-  String reactionRecoveryNote(String time, int moves) {
-    return '+$time s to reset after $moves+ moves';
-  }
-
-  @override
   String reactionBlockRestNote(String time, int min, int max) {
     return '+$time s rest every $min–$max calls';
   }
@@ -1664,4 +1659,20 @@ class LEn extends L {
 
   @override
   String get syncRetrying => 'Retrying…';
+
+  @override
+  String get reactionRest => 'REST';
+
+  @override
+  String reactionRoundOf(int n, int total) {
+    return 'ROUND $n OF $total';
+  }
+
+  @override
+  String reactionRoundRestNote(String time) {
+    return '$time rest between rounds';
+  }
+
+  @override
+  String get reactionMoveTimeNote => 'Plus the time the moves themselves take.';
 }

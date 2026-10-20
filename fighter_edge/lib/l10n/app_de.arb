@@ -252,7 +252,6 @@
   "reactionLeaveBody": "Dieser Durchgang wird beendet.",
   "reactionLeaveStay": "Weitermachen",
   "reactionLeaveConfirm": "Verlassen",
-  "reactionRecoveryNote": "+{time} s zum Zurücksetzen nach {moves}+ Bewegungen",
   "reactionBlockRestNote": "+{time} s Pause alle {min}–{max} Rufe",
 
   "devMessageFrom": "VON {from}",
@@ -634,5 +633,9 @@
 "deleteAccountFailed": "Dein Konto konnte nicht gelöscht werden. Prüfe deine Verbindung und versuche es erneut.",
 "syncNotSaved": "Einige Änderungen wurden nicht in deinem Konto gespeichert.",
   "syncRetry": "Erneut versuchen",
-  "syncRetrying": "Wird erneut versucht …"
+  "syncRetrying": "Wird erneut versucht …",
+  "reactionRest": "PAUSE",
+  "reactionRoundOf": "RUNDE {n} VON {total}",
+  "reactionRoundRestNote": "{time} Pause zwischen den Runden",
+  "reactionMoveTimeNote": "Dazu kommt die Zeit für die Bewegungen selbst."
 }

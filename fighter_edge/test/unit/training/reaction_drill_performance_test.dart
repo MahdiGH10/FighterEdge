@@ -26,7 +26,7 @@ void main() {
       print('PERF generator ${d.name}: 100000 calls in '
           '${watch.elapsedMilliseconds} ms '
           '(${(watch.elapsedMicroseconds / 100000).toStringAsFixed(2)} µs/call)');
-      // A whole 2.5-minute drill makes ~100 calls; 100k must stay far under
+      // A whole drill makes well under 200 calls; 100k must stay far under
       // a second of work.
       expect(watch.elapsedMilliseconds, lessThan(2000));
     }
@@ -35,7 +35,7 @@ void main() {
   testWidgets('a full drill rebuilds the screen a bounded number of times',
       (tester) async {
     final spec = ReactionDrillSpec.of(
-        ReactionDiscipline.grappling, ReactionLevel.advancedPlus); // 150 s
+        ReactionDiscipline.grappling, ReactionLevel.beginner); // 3 min
     final repo = await makeRepo(signedIn: true);
     var frames = 0;
     tester.binding.addPersistentFrameCallback((_) => frames++);
@@ -47,7 +47,7 @@ void main() {
     final watch = Stopwatch()..start();
     // Pump every 16 ms like a real display, for the whole drill.
     const frame = Duration(milliseconds: 16);
-    final total = const Duration(seconds: 3) + spec.duration;
+    final total = const Duration(seconds: 3) + spec.totalDuration;
     var pumped = Duration.zero;
     while (pumped < total + const Duration(seconds: 1)) {
       await tester.pump(frame);
@@ -57,7 +57,7 @@ void main() {
     expect(find.text('TIME'), findsOneWidget);
 
     // The drill clock ticks 10×/s, and each new call's red-to-white flash
-    // runs for ~23 frames — about 30/s on the fastest drill. Anything near
+    // runs for ~23 frames. Anything near
     // 60/s for the whole drill would mean something rebuilds every frame for
     // no reason.
     final seconds = total.inSeconds + 1;

@@ -190,13 +190,25 @@ class _Clock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     // Ready means the next tap starts a fresh run, whatever the last one
     // reached — so the clock shows the full drill.
     final fresh = drill.phase == ReactionDrillPhase.ready;
-    final remaining = fresh ? drill.spec.duration : _remainingOnClock(drill);
+    final remaining =
+        fresh ? drill.spec.roundDuration : _remainingOnClock(drill);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (!fresh && drill.rounds > 1) ...[
+          Text(
+            l.reactionRoundOf(drill.round, drill.rounds),
+            textAlign: TextAlign.center,
+            style: AppType.micro(
+                weight: FontWeight.w800,
+                color: AppAccessibility.textMuted(context)),
+          ),
+          const SizedBox(height: Insets.xxs),
+        ],
         Text(
           formatDrillClock(remaining),
           textAlign: TextAlign.center,
@@ -247,7 +259,8 @@ class _Stage extends StatelessWidget {
             if (drill.calls > 0) ...[
               const SizedBox(height: Insets.sm),
               Text(
-                l.reactionStopped(formatDrillClock(drill.elapsed), drill.calls),
+                l.reactionStopped(
+                    formatDrillClock(drill.workElapsed), drill.calls),
                 textAlign: TextAlign.center,
                 style: AppType.headline(color: secondary),
               ),
@@ -281,6 +294,13 @@ class _Stage extends StatelessWidget {
           key: ValueKey('call-${drill.calls}'),
           cue: drill.currentCue,
           number: drill.calls,
+        ),
+      ReactionDrillPhase.rest => Column(
+          key: const ValueKey('rest'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l.reactionRest, style: AppType.display()),
+          ],
         ),
       ReactionDrillPhase.paused => Column(
           key: const ValueKey('paused'),
@@ -452,7 +472,7 @@ class _Finished extends StatelessWidget {
                 const SizedBox(height: Insets.xs),
                 Text(
                   l.reactionFinishedSummary(
-                      drill.calls, formatDrillClock(spec.duration)),
+                      drill.calls, formatDrillClock(spec.workDuration)),
                   textAlign: TextAlign.center,
                   style: AppType.headline(
                       color: AppAccessibility.textSecondary(context)),
@@ -485,7 +505,10 @@ class _Actions extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return switch (drill.phase) {
-      ReactionDrillPhase.countdown || ReactionDrillPhase.live => _Pair(
+      ReactionDrillPhase.countdown ||
+      ReactionDrillPhase.live ||
+      ReactionDrillPhase.rest =>
+        _Pair(
           first: GhostButton(
             l.reactionPause,
             icon: AppIconsFill.pause,
