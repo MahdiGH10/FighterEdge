@@ -6,14 +6,14 @@ import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_reposit
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
-import 'package:fighter_edge/models/training_session.dart';
+import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
 import 'package:fighter_edge/screens/nutrition_screen.dart';
 import 'package:fighter_edge/screens/profile_screen.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/screens/training_camp_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/widgets/progress_ring.dart';
-import 'package:fighter_edge/theme/app_icons.dart';
+import 'package:fighter_edge/widgets/stat_card.dart';
 import '../helpers/test_harness.dart';
 
 void main() {
@@ -57,29 +57,33 @@ void main() {
       addTearDown(tester.view.reset);
       final repo = await makeRepo(signedIn: true);
       final data = InMemoryDataRepository();
-      for (final day in ['Mon', 'Wed', 'Fri']) {
-        await data.saveSession(
-            repo.currentUser!.id,
-            TrainingSession(
-                day: day,
-                title: day,
-                subtitle: 'Practice',
-                icon: AppIcons.boxingGlove,
-                completed: false));
-      }
       final state = AppState(
           dataRepository: data,
           clock: () => DateTime(2026, 9, 21 + weekday - 1))
         ..setUser(repo.currentUser!.id);
-      await tester.pumpWidget(
-          wrapApp(const TrainingCampScreen(), repo: repo, state: state));
+      // Three days a week is Mon, Wed, Fri.
+      final plan = PlanController(log: state, repository: data)
+        ..configure(userId: repo.currentUser!.id)
+        ..startFresh(
+            weeklyTrainingDays: 3,
+            goal: 'Build fight-camp structure',
+            level: 'Beginner');
+      await tester.pumpWidget(wrapApp(const TrainingCampScreen(),
+          repo: repo, state: state, planController: plan));
       await tester.pumpAndSettle();
       final primary = find.byKey(const ValueKey('primary-session-log'));
       expect(primary, findsOneWidget);
       final semantics = tester.widget<Semantics>(
           find.ancestor(of: primary, matching: find.byType(Semantics)).first);
-      expect(semantics.properties.label,
-          weekday == DateTime.wednesday ? 'Log Wed' : 'Log Mon');
+      expect(semantics.properties.label, 'Log Skill session');
+      // Today's row on Wednesday, the next one (Friday) on Thursday.
+      final row = find.ancestor(of: primary, matching: find.byType(AppCard));
+      expect(
+          find.descendant(
+              of: row,
+              matching: find
+                  .text(weekday == DateTime.wednesday ? 'Wed 23' : 'Fri 25')),
+          findsOneWidget);
     });
   }
 

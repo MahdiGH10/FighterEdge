@@ -8,10 +8,16 @@ import '../controllers/auth_controller.dart';
 import '../features/corner_brief/presentation/corner_line_row.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../features/edge_fuel/presentation/widgets/fuel_week_card.dart';
+import '../features/fight_camp/domain/calendar.dart';
 import '../features/fight_camp/presentation/widgets/fight_countdown_card.dart';
+import '../features/training_plan/domain/models/planned_session.dart';
+import '../features/training_plan/domain/models/session_status.dart';
+import '../features/training_plan/domain/session_status_resolver.dart';
+import '../features/training_plan/presentation/plan_controller.dart';
+import '../features/training_plan/presentation/plan_labels.dart';
 import '../l10n/decimal_format.dart';
 import '../l10n/gen/app_localizations.dart';
-import '../models/training_session.dart';
+import '../models/training_log_entry.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
@@ -57,20 +63,22 @@ class DashboardScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final firstRun = context.watch<FirstRunController>();
     final streak = context.watch<StreakController>();
+    final plan = context.watch<PlanController>();
     final fuel = context.watch<EdgeFuelController>();
     final user = auth.user;
     final streakDays = StreakEngine.streakDays(state.trainingDayKeys,
         protectedDateKeys: streak.protectedDateKeys, now: state.now);
     final atRisk = StreakEngine.isAtRisk(state.trainingDayKeys,
         protectedDateKeys: streak.protectedDateKeys, now: state.now);
-    const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-    final today = days[state.now.weekday - 1];
-    final unfinished = state.sessions.where((s) => !s.completed);
-    final todaysSession = unfinished
-        .where((s) => s.day.toLowerCase().startsWith(today))
-        .firstOrNull;
-    final next = todaysSession ?? unfinished.firstOrNull;
-    final recent = state.completedSessionsDesc.take(3).toList();
+    // Today's session if it is still to do, else the next one this week.
+    final todaysSession = plan.todaySession?.session;
+    final upcoming = plan.nextSession;
+    final nextThisWeek =
+        upcoming != null && daysBetween(plan.thisWeekStart, upcoming.date) < 7
+            ? upcoming
+            : null;
+    final recent = state.trainingLog.take(3).toList();
+    final weekDays = plan.weekDays();
     // The header says what day it is, which is more use than the word
     // "Dashboard" on the screen the bottom bar already calls Home.
     final locale = Localizations.localeOf(context).toString();
@@ -103,9 +111,9 @@ class DashboardScreen extends StatelessWidget {
           ],
           const FightCountdownSection(),
           _SessionHero(
-              session: next,
-              today: todaysSession != null,
-              hasPlan: state.sessions.isNotEmpty,
+              session: todaysSession,
+              next: nextThisWeek,
+              hasPlan: plan.hasPlan,
               onNavigate: onNavigate),
           const SizedBox(height: Insets.md),
           const CornerLineRow(),
@@ -133,10 +141,10 @@ class DashboardScreen extends StatelessWidget {
                 WeeklyOverview(
                   dayLetters: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
                   progress: [
-                    for (final day in days)
-                      state.sessions.any((s) =>
-                              s.completed &&
-                              s.day.toLowerCase().startsWith(day))
+                    for (var i = 0; i < 7; i++)
+                      i < weekDays.length &&
+                              weekDays[i].rows.any(
+                                  (r) => r.status == SessionStatus.completed)
                           ? 1.0
                           : 0.0
                   ],
@@ -170,8 +178,8 @@ class DashboardScreen extends StatelessWidget {
                         color: AppAccessibility.textSecondary(context))))
           else
             GroupedList(children: [
-              for (final session in recent)
-                _ActivityRow(session: session, now: state.now),
+              for (final entry in recent)
+                _ActivityRow(entry: entry, now: state.now),
             ]),
         ],
       ),
@@ -180,13 +188,16 @@ class DashboardScreen extends StatelessWidget {
 }
 
 class _SessionHero extends StatelessWidget {
-  final TrainingSession? session;
-  final bool today;
+  /// Today's session, when it is still to do.
+  final PlannedSession? session;
+
+  /// The next session later this week, when there is none to do today.
+  final ResolvedSession? next;
   final bool hasPlan;
   final ValueChanged<int> onNavigate;
   const _SessionHero(
       {required this.session,
-      required this.today,
+      required this.next,
       required this.hasPlan,
       required this.onNavigate});
 
@@ -194,11 +205,12 @@ class _SessionHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final fuel = context.watch<EdgeFuelController>();
-    final title = session == null
-        ? (hasPlan ? l.dashboardWeekDone : l.dashboardNoPlan)
-        : today
-            ? session!.title
-            : l.dashboardRestDay;
+    final today = session != null;
+    final title = today
+        ? PlanLabels.title(l, session!)
+        : next != null
+            ? l.dashboardRestDay
+            : (hasPlan ? l.dashboardWeekDone : l.dashboardNoPlan);
     return AppCard(
         accent: AppColors.primary,
         edge: true,
@@ -211,11 +223,13 @@ class _SessionHero extends StatelessWidget {
           Text(title, style: AppType.display()),
           const SizedBox(height: Insets.sm),
           Text(
-              session == null
-                  ? (hasPlan ? l.dashboardRecovery : l.dashboardPlanHint)
-                  : today
-                      ? session!.subtitle
-                      : l.dashboardNextUp(session!.day, session!.title),
+              today
+                  ? PlanLabels.subtitle(l, session!)
+                  : next != null
+                      ? l.dashboardNextUp(
+                          PlanLabels.weekday(context, next!.date),
+                          PlanLabels.title(l, next!.session))
+                      : (hasPlan ? l.dashboardRecovery : l.dashboardPlanHint),
               style: AppType.callout(
                   color: AppAccessibility.textSecondary(context))),
           const SizedBox(height: Insets.lg),
@@ -223,7 +237,7 @@ class _SessionHero extends StatelessWidget {
               expand: true,
               onPressed: today
                   ? () => logSessionWithRpe(
-                      context, context.read<AppState>(), session!)
+                      context, context.read<PlanController>(), session!)
                   : () => onNavigate(1)),
           const SizedBox(height: Insets.sm),
           Row(children: [
@@ -283,7 +297,7 @@ class _DashboardStats extends StatelessWidget {
     final l = L.of(context);
     final state = context.watch<AppState>();
     final weight = state.latestWeight == 0
-        ? 'â€”'
+        ? '—'
         : formatFixedDecimal(state.displayWeight(state.latestWeight),
             Localizations.localeOf(context).toString());
     final stats = [
@@ -432,44 +446,37 @@ class _StreakFreezeBanner extends StatelessWidget {
 }
 
 class _ActivityRow extends StatelessWidget {
-  final TrainingSession session;
+  final TrainingLogEntry entry;
   final DateTime now;
-  const _ActivityRow({required this.session, required this.now});
+  const _ActivityRow({required this.entry, required this.now});
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final date = session.completedAt;
-    final days = date == null
-        ? null
-        : DateUtils.dateOnly(now).difference(DateUtils.dateOnly(date)).inDays;
-    final when = days == null
-        ? l.dashboardLogged
-        : days <= 0
-            ? l.commonToday
-            : days == 1
-                ? l.dashboardYesterday
-                : l.dashboardDaysAgo(days);
+    final days = DateUtils.dateOnly(now)
+        .difference(DateUtils.dateOnly(entry.completedAt))
+        .inDays;
+    final when = days <= 0
+        ? l.commonToday
+        : days == 1
+            ? l.dashboardYesterday
+            : l.dashboardDaysAgo(days);
     return Padding(
         padding: const EdgeInsets.all(Insets.lg),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(session.icon,
+          Icon(PlanLabels.logIcon(entry),
               size: IconSizes.row, color: AppColors.textSecondary),
           const SizedBox(width: Insets.md),
           Expanded(
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(session.title,
+                Text(entry.title,
                     style: AppType.callout(weight: FontWeight.w600)),
                 const SizedBox(height: Insets.xs),
-                Text(session.subtitle,
-                    style: AppType.subhead(
-                        color: AppAccessibility.textSecondary(context))),
-                const SizedBox(height: Insets.xs),
                 Text(
-                    session.rpe == 0
+                    entry.rpe == 0
                         ? when
-                        : '$when Â· ${l.dashboardEffort(session.rpe)}',
+                        : '$when · ${l.dashboardEffort(entry.rpe)}',
                     style: AppType.subhead(
                         color: AppAccessibility.textMuted(context))),
               ])),

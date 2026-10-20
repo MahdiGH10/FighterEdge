@@ -21,6 +21,7 @@ import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fu
 import 'package:fighter_edge/features/fight_camp/data/fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/presentation/fight_camp_controller.dart';
+import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
 import 'package:fighter_edge/notifications/reminder_gateway.dart';
 import 'package:fighter_edge/notifications/unavailable_reminder_gateway.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
@@ -81,6 +82,7 @@ Widget wrapApp(
   Widget home, {
   required LocalAuthRepository repo,
   AppState? state,
+  PlanController? planController,
   EdgeFuelRepository? edgeFuelRepo,
   FoodCatalogRepository? foodCatalogRepo,
   RecipeCatalogRepository? recipeCatalogRepo,
@@ -150,6 +152,24 @@ Widget wrapApp(
                 repository: resolvedFightCampRepo,
                 refuelGuidance: refuelGuidance))
           ..setUser(auth.user?.id),
+      ),
+      ChangeNotifierProxyProvider2<AuthController, FightCampController,
+          PlanController>(
+        create: (context) =>
+            planController ??
+            PlanController(
+                log: context.read<AppState>(),
+                sync: context.read<SyncTracker>()),
+        update: (context, auth, fightCamp, plan) => (plan ??
+            PlanController(
+                log: context.read<AppState>(),
+                sync: context.read<SyncTracker>()))
+          ..configure(
+            userId: auth.user?.id,
+            fight: fightCamp.camp,
+            goal: auth.user?.goal ?? '',
+            level: auth.user?.experienceLevel ?? '',
+          ),
       ),
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
         create: (context) => EdgeFuelController(

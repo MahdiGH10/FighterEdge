@@ -58,6 +58,19 @@ class PlanInputs {
   /// Optional. Without it the plan is a general one.
   final FightContext? fight;
 
+  /// The same inputs with another [fight] (or none). The fight lives in its
+  /// own store, so the saved plan keeps the rest and the app joins them.
+  PlanInputs withFight(FightContext? fight) => PlanInputs(
+        disciplines: disciplines,
+        goal: goal,
+        level: level,
+        weekdays: trainingWeekdays,
+        gymClassWeekdays: gymClassWeekdays,
+        sessionMinutes: sessionMinutes,
+        startDate: startDate,
+        fight: fight,
+      );
+
   static Iterable<int> _validWeekdays(Iterable<int> days) =>
       days.where((d) => d >= DateTime.monday && d <= DateTime.sunday);
 

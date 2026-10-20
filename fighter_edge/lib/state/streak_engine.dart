@@ -1,5 +1,4 @@
 import '../data/data_repository.dart';
-import '../models/training_session.dart';
 
 /// Pure streak and streak-freeze math, kept apart from [AppState] and
 /// [StreakController] for the same reason [VerificationGate] is kept apart
@@ -22,13 +21,6 @@ class StreakEngine {
 
   static int freezeCap({required bool isPro}) =>
       isPro ? proFreezeCap : freeFreezeCap;
-
-  /// The date keys (see [mealDateKey]) on which a session was completed.
-  static Set<String> completedDateKeys(List<TrainingSession> sessions) => {
-        for (final session in sessions)
-          if (session.completed && session.completedAt != null)
-            mealDateKey(session.completedAt!),
-      };
 
   /// Consecutive days with a completed session, walking back from today.
   /// A day with nothing logged yet (today, before the user trains) does not

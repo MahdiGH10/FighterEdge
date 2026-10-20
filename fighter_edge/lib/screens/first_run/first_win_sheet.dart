@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_icons.dart';
 
 import '../../notifications/reminder_gateway.dart';
+import '../../features/training_plan/presentation/plan_controller.dart';
 import '../../notifications/training_reminder_schedule.dart';
 import '../../state/app_state.dart';
 import '../../state/first_run_controller.dart';
@@ -41,6 +42,7 @@ class FirstWinSheet extends StatelessWidget {
     final state = context.watch<AppState>();
     final firstRun = context.read<FirstRunController>();
     final reminders = context.read<ReminderGateway>();
+    final plan = context.read<PlanController>();
     // Someone who already switched reminders on in Settings has answered,
     // and there is nothing useful to offer where reminders cannot fire.
     final askReminders = !state.campReminders &&
@@ -58,7 +60,7 @@ class FirstWinSheet extends StatelessWidget {
           // prompt appearing over the sheet is fine, and a denial here has
           // nothing left in this sheet to update — Settings offers the same
           // switch with a clear explanation if the user wants to retry.
-          unawaited(_enableReminders(state, reminders));
+          unawaited(_enableReminders(reminders, plan));
         }
       }
       Navigator.of(context).pop();
@@ -122,11 +124,12 @@ class FirstWinSheet extends StatelessWidget {
   }
 }
 
-Future<void> _enableReminders(AppState state, ReminderGateway reminders) async {
+Future<void> _enableReminders(
+    ReminderGateway reminders, PlanController plan) async {
   final granted = await reminders.requestPermission();
   if (!granted) return;
   await reminders.scheduleTrainingReminders(
-    weekdays: TrainingReminderSchedule.weekdaysFor(state.sessions),
+    weekdays: plan.trainingWeekdays,
     time: TrainingReminderSchedule.defaultTime,
   );
 }

@@ -4,13 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
-import 'package:fighter_edge/models/training_session.dart';
+import 'package:fighter_edge/features/training_plan/data/legacy_session_slot.dart';
+import 'package:fighter_edge/features/training_plan/domain/models/session_status.dart';
+import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
+import 'package:fighter_edge/models/training_log_entry.dart';
 import 'package:fighter_edge/screens/dashboard_screen.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/theme/app_theme.dart';
-import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -58,20 +60,22 @@ void main() {
     addTearDown(tester.view.reset);
     final repo = await makeRepo(signedIn: true);
     final data = InMemoryDataRepository();
-    const session = TrainingSession(
-        day: 'Wed',
-        title: 'Boxing',
-        subtitle: 'Jab practice',
-        completed: false,
-        icon: AppIcons.boxingGlove);
-    await data.saveSession(repo.currentUser!.id, session);
+    final userId = repo.currentUser!.id;
     final state = AppState(dataRepository: data, clock: () => wednesday)
-      ..setUser(repo.currentUser!.id);
-    await tester.pumpWidget(
-        wrapApp(DashboardScreen(onNavigate: (_) {}), repo: repo, state: state));
+      ..setUser(userId);
+    // Three days a week is Mon, Wed, Fri: Wednesday has a session.
+    final plan = PlanController(log: state, repository: data)
+      ..configure(userId: userId)
+      ..startFresh(
+          weeklyTrainingDays: 3,
+          goal: 'Build fight-camp structure',
+          level: 'Beginner');
+    await tester.pumpWidget(wrapApp(DashboardScreen(onNavigate: (_) {}),
+        repo: repo, state: state, planController: plan));
     await tester.pumpAndSettle();
     expect(find.byType(PrimaryButton), findsOneWidget);
-    expect(find.text('Boxing'), findsOneWidget);
+    expect(find.text('Skill session'), findsOneWidget);
+    expect(find.text('45 min'), findsOneWidget);
     expect(find.text('Streak'), findsOneWidget);
     expect(find.text('Why this target matters'), findsNothing);
     await tester.tap(find.byTooltip('Why this target matters'));
@@ -85,11 +89,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(RoundTimerScreen), findsNothing);
     expect(find.byType(AlertDialog), findsOneWidget);
-    expect(state.sessions.single.completed, isFalse);
+    expect(plan.todaySession, isNotNull);
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
-    expect(state.sessions.single.completed, isTrue);
-    expect(state.sessions.single.rpe, 7);
+    expect(plan.todaySession, isNull);
+    expect(plan.todayRow!.status, SessionStatus.completed);
+    expect(state.trainingLog.single.rpe, 7);
+    expect(state.trainingLog.single.planSlotId, plan.todayRow!.session.id);
   });
 
   testWidgets('Home has a quick action that opens the round timer',
@@ -181,13 +187,12 @@ void main() {
     Future<AppState> atRiskState(String userId) async {
       final repo = InMemoryDataRepository();
       final now = wednesday;
-      Future<void> seed(String day, int daysAgo) => repo.saveSession(
+      Future<void> seed(String day, int daysAgo) => repo.saveLegacySession(
             userId,
-            TrainingSession(
+            LegacySessionSlot(
+              id: day,
               day: day,
               title: day,
-              subtitle: '',
-              icon: AppIcons.boxingGlove,
               completed: true,
               completedAt: now.subtract(Duration(days: daysAgo)),
             ),
@@ -215,10 +220,21 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       final repo = await makeRepo(signedIn: true);
+      // Monday to Thursday trained, nothing on Friday, and it is Saturday.
+      final saturday = DateTime(2026, 9, 26, 20);
+      final state = AppState(clock: () => saturday);
+      for (var day = 21; day <= 24; day++) {
+        state.addTrainingLogEntry(TrainingLogEntry(
+          id: 'log-$day',
+          completedAt: DateTime(2026, 9, day, 18),
+          source: TrainingSource.planned,
+          title: 'Session',
+        ));
+      }
       await tester.pumpWidget(wrapApp(
         DashboardScreen(onNavigate: (_) {}),
         repo: repo,
-        state: AppState(clock: () => DateTime(2026, 9, 26, 20)),
+        state: state,
       ));
       await tester.pumpAndSettle();
       expect(find.text('Streak at risk'), findsOneWidget);

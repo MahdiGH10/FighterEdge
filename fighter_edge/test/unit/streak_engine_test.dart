@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:fighter_edge/models/training_session.dart';
+import 'package:fighter_edge/data/data_repository.dart';
 import 'package:fighter_edge/state/streak_engine.dart';
-import 'package:fighter_edge/theme/app_icons.dart';
 
 void main() {
   // A fixed Wednesday so "week" math in these tests never depends on the
@@ -11,40 +10,8 @@ void main() {
 
   Set<String> keysFor(List<int> daysAgo, {DateTime? from}) => {
         for (final n in daysAgo)
-          StreakEngine.completedDateKeys([
-            TrainingSession(
-              day: 'x',
-              title: 't',
-              subtitle: '',
-              icon: AppIconsFill.circle,
-              completed: true,
-              completedAt: (from ?? wednesday).subtract(Duration(days: n)),
-            ),
-          ]).first,
+          mealDateKey((from ?? wednesday).subtract(Duration(days: n))),
       };
-
-  group('completedDateKeys', () {
-    test('only counts completed sessions with a completion date', () {
-      final sessions = [
-        TrainingSession(
-          day: 'Mon',
-          title: 'a',
-          subtitle: '',
-          icon: AppIconsFill.circle,
-          completed: true,
-          completedAt: wednesday,
-        ),
-        const TrainingSession(
-          day: 'Tue',
-          title: 'b',
-          subtitle: '',
-          icon: AppIconsFill.circle,
-          completed: false,
-        ),
-      ];
-      expect(StreakEngine.completedDateKeys(sessions).length, 1);
-    });
-  });
 
   group('streakDays', () {
     test('is zero with nothing completed', () {
@@ -80,16 +47,7 @@ void main() {
       final keys = keysFor([2]); // yesterday and today both empty
       final withoutFreeze = StreakEngine.streakDays(keys, now: wednesday);
       final protected = {
-        StreakEngine.completedDateKeys([
-          TrainingSession(
-            day: 'x',
-            title: 't',
-            subtitle: '',
-            icon: AppIconsFill.circle,
-            completed: true,
-            completedAt: wednesday.subtract(const Duration(days: 1)),
-          ),
-        ]).first,
+        mealDateKey(wednesday.subtract(const Duration(days: 1))),
       };
       final withFreeze = StreakEngine.streakDays(
         keys,
@@ -116,16 +74,7 @@ void main() {
     test('false once yesterday is protected', () {
       final keys = keysFor([2, 3]);
       final protected = {
-        StreakEngine.completedDateKeys([
-          TrainingSession(
-            day: 'x',
-            title: 't',
-            subtitle: '',
-            icon: AppIconsFill.circle,
-            completed: true,
-            completedAt: wednesday.subtract(const Duration(days: 1)),
-          ),
-        ]).first,
+        mealDateKey(wednesday.subtract(const Duration(days: 1))),
       };
       expect(
         StreakEngine.isAtRisk(keys,
@@ -173,16 +122,7 @@ void main() {
       final monday = StreakEngine.weekStart(wednesday);
       final keys = {
         for (final n in [0, 1, 6, 7]) // last day counts, next Monday does not
-          StreakEngine.completedDateKeys([
-            TrainingSession(
-              day: 'x',
-              title: 't',
-              subtitle: '',
-              icon: AppIconsFill.circle,
-              completed: true,
-              completedAt: monday.add(Duration(days: n)),
-            ),
-          ]).first,
+          mealDateKey(monday.add(Duration(days: n))),
       };
       expect(StreakEngine.daysCompletedInWeek(keys, monday), 3);
     });
