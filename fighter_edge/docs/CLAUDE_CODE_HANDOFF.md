@@ -18,6 +18,27 @@ Barlow (static 400-700) were already bundled; no Inter, nothing added.
 with the new colours. Goldens regenerated (Windows renderer):
 `flutter test --tags golden --update-goldens`.
 
+**6.2 Glass primitives.** `lib/widgets/glass_surface.dart`: `GlassSurface`
+(navigation layer: `ClipRRect` + `BackdropFilter.grouped` +
+`ImageFilterConfig.blur(sigma 16, bounded: true)`, tint, hairline, inner light;
+for the bottom nav, a collapsed header, sheets) and `GlassCard` (hero tint, rim
+and inner light painted by one `CustomPainter`, **no blur**).
+`lib/theme/glass_policy.dart`: `GlassLevel` full / tinted / solid and
+`GlassPolicy.resolve`: the "Reduce transparency" setting or
+`MediaQuery.highContrast` gives solid, a slow frame probe gives tinted, the
+lowest wins. `lib/state/frame_probe.dart` watches the first 120 raster times
+(p90 above 16 ms is slow, nearest-rank) through an injectable
+`RasterTimingSource`; `GlassPolicyController` persists the setting
+(`settings.reduceTransparency`) and the verdict (`glass.frameProbe.v1`, once per
+install) and `GlassPolicyHost` (in `MaterialApp.router`'s builder) publishes the
+policy. `HomeShell` owns the one `BackdropGroup` and starts the probe. Budget:
+at most 3 blurs live (`GlassBlurBudget` reports a fourth in debug); hidden tabs
+(tickers off) and the tinted/solid levels count none; never in list items, never
+animated. Setting added to Settings > App, EN + DE. **Not yet used by any screen:**
+the nav, headers and sheets move onto these in 6.3. **Limit:** the probe verdict
+is permanent for the install (no re-probe), and a single noisy start-up could
+demote a good phone to tinted; the owner can clear it only by reinstalling.
+
 ## START HERE: state as of 2026-10-01
 
 **Merged today: PR #26** (`78ec6df`). The Android manifest removes the three

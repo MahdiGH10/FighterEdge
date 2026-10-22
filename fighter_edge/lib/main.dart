@@ -42,6 +42,7 @@ import 'security/app_check.dart';
 import 'state/app_state.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'state/first_run_controller.dart';
+import 'state/glass_policy_controller.dart';
 import 'state/locale_controller.dart';
 import 'state/sync_tracker.dart';
 import 'training/reaction/coach_voice.dart';
@@ -328,6 +329,7 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
         Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
         ChangeNotifierProvider(create: (_) => LocaleController()..load()),
+        ChangeNotifierProvider(create: (_) => GlassPolicyController()..load()),
         ChangeNotifierProxyProvider<AuthController, FirstRunController>(
           create: (_) => FirstRunController(),
           update: (_, auth, firstRun) =>
@@ -449,7 +451,9 @@ class _FighterEdgeMaterialAppState extends State<_FighterEdgeMaterialApp> {
       localizationsDelegates: L.localizationsDelegates,
       supportedLocales: L.supportedLocales,
       routerConfig: _router,
-      builder: AppAccessibility.builder,
+      builder: (context, child) => GlassPolicyHost(
+        child: AppAccessibility.builder(context, child),
+      ),
     );
   }
 }

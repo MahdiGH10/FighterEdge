@@ -19,6 +19,8 @@
   "settingsLanguageSystem": "System default",
   "settingsLanguageEnglish": "English",
   "settingsLanguageGerman": "Deutsch",
+  "settingsReduceTransparency": "Reduce transparency",
+  "settingsReduceTransparencySubtitle": "Solid backgrounds instead of frosted glass. High contrast does this too",
   "settingsLanguageBeta": "German is partly translated — the rest stays in English for now.",
   "settingsSectionSubscription": "Subscription",
   "settingsManagePro": "Manage Pro",
