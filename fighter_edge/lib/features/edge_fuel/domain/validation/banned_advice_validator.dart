@@ -1,0 +1,237 @@
+import 'text_normalizer.dart';
+
+/// Rule 3 of the Fuel V2 spec: the app never gives advice on fluid or sodium
+/// restriction, water loading, sauna, sweat suits, diuretics, laxatives or
+/// fasting. No flag, tier or subscription unlocks it.
+///
+/// This is the denylist. It runs on any text: UI strings, notifications,
+/// recipe notes, and anything an AI model returns. It is deliberately strict:
+/// it does not try to read negation, so "never use a sauna" is flagged too.
+/// Copy that explains the policy has to say it without naming the method
+/// ("Fighter Edge plans food only"). A false positive costs a rewrite; a
+/// false negative puts a banned instruction on a fighter's screen.
+///
+/// Dietitian sign-off pending: the list of terms and patterns is a safety
+/// screen written from the ISSN 2025 position stand and the ACSM 2021
+/// consensus, and has not been reviewed by a sports dietitian. Pure Dart: no
+/// clock, no platform, no network.
+enum BannedAdviceCategory {
+  /// Cutting or limiting drinking water or other fluids, or dehydrating on
+  /// purpose.
+  fluidRestriction,
+
+  /// Cutting, loading or counting sodium or salt for weight.
+  sodiumManipulation,
+
+  /// Water loading.
+  waterLoading,
+
+  /// Sauna, steam room, hot bath, sweat suit, plastic or rubber suit.
+  heatSweating,
+
+  /// Diuretics, water pills and masking agents.
+  diuretic,
+
+  /// Laxatives, enemas and induced vomiting.
+  laxativeOrPurging,
+
+  /// Fasting, skipped meals and not eating.
+  fasting,
+}
+
+/// One banned phrase found in a text. [matched] is the folded text that
+/// matched, for a developer reading a failed test; never log it, because the
+/// scanned text can be user content.
+class BannedAdviceMatch {
+  const BannedAdviceMatch(this.category, this.matched);
+
+  final BannedAdviceCategory category;
+  final String matched;
+
+  @override
+  String toString() => 'BannedAdviceMatch(${category.name}: "$matched")';
+}
+
+final RegExp _numberUnit = RegExp(
+  r'\d+(?:\s+\d+)*\s*(?:mg|g|grams?|mmol|meq)\b',
+);
+
+RegExp _re(String pattern) => RegExp(pattern);
+
+/// Words that put a limit on something: "cut", "limit", "no", "less".
+const String _limitVerbs = r'(?:restrict(?:ing|ed)?|limit(?:ing|ed)?|'
+    r'cut(?:ting)?|reduc(?:e|ing|ed)|minimi[sz](?:e|ing)|lower(?:ing)?|'
+    r'ration(?:ing)?|withhold(?:ing)?|deny(?:ing)?|eliminat(?:e|ing)|'
+    r'stop(?:ping)?|avoid(?:ing)?|drop(?:ping)?|less|no|zero|without|'
+    r'skip(?:ping)?|low|lowest)';
+
+const String _fillers = r'(?:(?:your|the|all|any|of|on|down|back|in|out|'
+    r'dietary|added|table|extra)\s+){0,3}';
+
+final Map<BannedAdviceCategory, List<RegExp>> _patterns = {
+  BannedAdviceCategory.fluidRestriction: [
+    _re(r'\b' +
+        _limitVerbs +
+        r'\s+' +
+        _fillers +
+        r'(?:water|fluids?|liquids?|drinking|hydration)\b'),
+    _re(r'\b(?:dont|do not|never|stop|cant|cannot|no)\s+'
+        r'(?:drink|drinking|sip|sipping|have|having)\s+'
+        r'(?:(?:any|much|more|too much|your|the|a lot of)\s+)*'
+        r'(?:water|fluids?|liquids?)\b'),
+    _re(r'\b(?:nothing to drink|no drinks|no drinking|no fluids?)\b'),
+    _re(r'\b(?:water|fluids?|liquids?|hydration)\s+'
+        r'(?:restriction|restricted|restricting|cut|cuts|cutting|deprivation|'
+        r'manipulation|depletion|fast|fasting|diet)\b'),
+    _re(r'\bdry\s+(?:fast|day|out|cut)\b'),
+    _re(r'\bdehydrat(?:e|ed|ing|ion)\s+(?:yourself|your body|before|to make|'
+        r'to cut|for weight|for the weigh)'),
+    _re(r'\b(?:to|and|will|should|try to|by|deliberately|purposely|'
+        r'intentionally|then|you can)\s+dehydrate\b'),
+    _re(r'\bthirst\s+(?:cut|training|method)\b'),
+    _re(r'\b(?:cut|drop|lose|losing|shed|dump|drain|flush|sweat|sweating)\s+'
+        r'(?:off\s+|out\s+)?(?:the\s+|your\s+|that\s+|some\s+|extra\s+)?'
+        r'water\s+weight\b'),
+    _re(r'\bwater\s+weight\s+(?:cut|loss|manipulation)\b'),
+    // German.
+    _re(r'\b(?:weniger|nicht|kein(?:e|en)?|ohne)\s+(?:mehr\s+)?'
+        r'(?:wasser|flussigkeit|trinken)\b'),
+    _re(r'\b(?:wasser|flussigkeit)s?\s*(?:entzug|restriktion|reduktion|'
+        r'reduzieren|begrenzen)'),
+    _re(r'\b(?:trinken|flussigkeit|wasser)\s+(?:reduzieren|begrenzen|'
+        r'einschranken|weglassen)'),
+  ],
+  BannedAdviceCategory.sodiumManipulation: [
+    _re(r'\b' +
+        _limitVerbs +
+        r'\s+' +
+        _fillers +
+        r'(?:sodium|salt|salty|natrium|salz)\b'),
+    _re(r'\b(?:sodium|salt|natrium|salz)\s+'
+        r'(?:restriction|restricted|restricting|cut|cuts|cutting|depletion|'
+        r'manipulation|loading|load|loaded|protocol|free|deprivation|'
+        r'reduzieren|reduktion|weglassen)\b'),
+    _re(r'\b(?:load|loading|loaded|boost|boosting|extra|megadose|'
+        r'pile on|binge on)\s+(?:up\s+)?(?:on\s+|with\s+)?(?:sodium|salt)\b'),
+    _re(r'\b(?:sodium|salt|natrium)\s+(?:\w+\s+){0,2}' +
+        _numberUnit.pattern),
+    _re(_numberUnit.pattern + r'\s+(?:of\s+)?(?:sodium|salt|natrium)\b'),
+  ],
+  BannedAdviceCategory.waterLoading: [
+    _re(r'\bwater\s*load(?:ing|ed|s)?\b'),
+    _re(r'\b(?:load|loading|loaded)\s+(?:up\s+)?(?:on\s+|with\s+)?'
+        r'(?:water|fluids?)\b'),
+    _re(r'\bhyper\s*hydrat'),
+    _re(r'\bgallons?\b'),
+    _re(r'\b(?:\d+(?:\s+\d+)?|several|many)\s+(?:l|liters?|litres?)\s+of\s+'
+        r'water\s+(?:a|per|each|every)\s+day\b'),
+    _re(r'\b(?:wasser)\s*(?:laden|beladung|aufladen)'),
+  ],
+  BannedAdviceCategory.heatSweating: [
+    _re(r'\bsaunas?\b'),
+    _re(r'\bsteam\s*(?:room|bath|rooms|baths)\b'),
+    _re(r'\bhot\s+(?:bath|baths|tub|room|box|yoga|bikram)\b'),
+    _re(r'\bhot\s*box\b'),
+    _re(r'\bsweat\s*(?:suit|suits|box|gear)\b'),
+    _re(r'\b(?:rubber|plastic|neoprene|heated|trash\s*bag|bin\s*bag|'
+        r'garbage\s*bag)\s*(?:suit|suits|wrap|wraps|bag|bags|jacket)\b'),
+    _re(r'\b(?:sweat|sweating)\s+(?:it\s+|them\s+)?(?:off|out)\b'),
+    _re(r'\bsweat\s+(?:to\s+)?(?:cut|lose|drop|make weight)\b'),
+    _re(r'\b(?:passive|forced)\s+(?:heat|sweat|sweating)\b'),
+    _re(r'\bepsom\b'),
+    _re(r'\b(?:schwitzanzug|dampfbad|heisses?\s+bad|heisse\s+wanne)\b'),
+  ],
+  BannedAdviceCategory.diuretic: [
+    _re(r'\bdiuretics?\b'),
+    _re(r'\b(?:water|fluid|dehydration)\s+(?:pills?|tablets?)\b'),
+    _re(r'\b(?:lasix|furosemide|frusemide|hydrochlorothiazide|hctz|'
+        r'spironolactone|torsemide|bumetanide|acetazolamide|diamox|'
+        r'triamterene|amiloride|masking agents?)\b'),
+    _re(r'\bflush(?:ing)?\s+(?:out\s+)?(?:water|fluids?)\b'),
+    _re(r'\b(?:entwasser\w*|diuretik\w*|wassertablette\w*|harntreib\w*)\b'),
+  ],
+  BannedAdviceCategory.laxativeOrPurging: [
+    _re(r'\blaxatives?\b'),
+    _re(r'\benemas?\b'),
+    _re(r'\bcolon\s+(?:cleans\w*|flush\w*|prep)\b'),
+    _re(r'\bbowel\s+prep\b'),
+    _re(r'\bpurg(?:e|ed|es|ing)\b'),
+    _re(r'\b(?:make\s+yourself\s+(?:sick|throw\s+up)|induce\s+vomiting|'
+        r'induced\s+vomiting|self\s+induced|throw\s+up\s+on\s+purpose|puke)\b'),
+    _re(r'\b(?:senna|bisacodyl|dulcolax|ex\s+lax)\b'),
+    _re(r'\b(?:abfuhr\w*|einlauf|einlaufe|erbrechen\s+ausl\w*|kotzen)\b'),
+  ],
+  BannedAdviceCategory.fasting: [
+    _re(r'\bfasting\b'),
+    _re(r'\bfasted\b'),
+    _re(r'\bfasts?\s+(?:for|until|till|from|on|all|the\s+(?:day|week)|\d)'),
+    _re(r'\b(?:water|dry|juice|intermittent|extended|prolonged)\s+fast\b'),
+    _re(r'\bskip(?:ping|ped)?\s+(?:a\s+|your\s+|the\s+|all\s+|most\s+|some\s+)?'
+        r'(?:meals?|breakfast|lunch|dinner|eating)\b'),
+    _re(r'\bstarv(?:e|ed|ing|ation)\b'),
+    _re(r'\b(?:eat|eating)\s+(?:nothing|very little|almost nothing)\b'),
+    _re(r'\b(?:stop|stopped|quit)\s+eating\b'),
+    _re(r'\b(?:dont|do not|never|cant|cannot)\s+eat\b'),
+    _re(r'\bno\s+food\s+(?:for|until|till|after|today|all)\b'),
+    _re(r'\bnothing\s+to\s+eat\b'),
+    _re(r'\bcrash\s+diet\b'),
+    _re(r'\bvery\s+low\s+calorie\b'),
+    _re(r'\bvlcd\b'),
+    _re(r'\b(?:fasten|hungern|nichts\s+essen|mahlzeit(?:en)?\s+auslassen|'
+        r'essen\s+auslassen)\b'),
+  ],
+};
+
+/// Tokens that stay unambiguous with the spaces taken out, so
+/// "s.a.u.n.a" and "sweat_suit" cannot slip past the word patterns.
+const Map<BannedAdviceCategory, List<String>> _squashed = {
+  BannedAdviceCategory.heatSweating: ['sauna', 'sweatsuit'],
+  BannedAdviceCategory.diuretic: ['diuretic'],
+  BannedAdviceCategory.laxativeOrPurging: ['laxative'],
+  BannedAdviceCategory.waterLoading: ['waterloading', 'hyperhydrat'],
+};
+
+class BannedAdviceValidator {
+  const BannedAdviceValidator._();
+
+  /// Dietitian sign-off pending: see the class comment of
+  /// [BannedAdviceCategory].
+  static const bool dietitianSignOffPending = true;
+
+  /// Every banned phrase in [text], at most one per category and pattern.
+  /// Empty when the text is clean.
+  static List<BannedAdviceMatch> scan(String text) {
+    final matches = <BannedAdviceMatch>[];
+    final folded = normalizeForScan(text);
+    for (final entry in _patterns.entries) {
+      for (final pattern in entry.value) {
+        final match = pattern.firstMatch(folded);
+        if (match != null) {
+          matches.add(BannedAdviceMatch(entry.key, match.group(0)!.trim()));
+        }
+      }
+    }
+    final seen = {for (final m in matches) m.category};
+    for (final deleet in const [false, true]) {
+      final squashed = squashForScan(text, deleet: deleet);
+      for (final entry in _squashed.entries) {
+        if (seen.contains(entry.key)) continue;
+        for (final token in entry.value) {
+          if (squashed.contains(token)) {
+            matches.add(BannedAdviceMatch(entry.key, token));
+            seen.add(entry.key);
+            break;
+          }
+        }
+      }
+    }
+    return matches;
+  }
+
+  /// The categories [text] falls into.
+  static Set<BannedAdviceCategory> categories(String text) =>
+      {for (final m in scan(text)) m.category};
+
+  /// True when [text] contains no banned advice.
+  static bool isClean(String text) => scan(text).isEmpty;
+}
