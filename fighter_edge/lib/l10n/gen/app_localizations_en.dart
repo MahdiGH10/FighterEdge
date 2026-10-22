@@ -1207,13 +1207,6 @@ class LEn extends L {
       'Every striking, wrestling, BJJ and clinch drill, with how to train it.';
 
   @override
-  String get paywallBenefitCuesTitle => 'Corner Cues';
-
-  @override
-  String get paywallBenefitCuesBody =>
-      'A tactical and a recovery cue on every rest in the round timer.';
-
-  @override
   String get paywallAnnualPlan => 'Annual plan';
 
   @override
@@ -1951,4 +1944,22 @@ class LEn extends L {
   @override
   String get planReadyNotNowNote =>
       'Your plan stays saved. Logging needs a subscription.';
+
+  @override
+  String get paywallTrialCancelNote =>
+      'Cancel in your store settings before the trial ends and you pay nothing.';
+
+  @override
+  String get paywallAfterTrialNote =>
+      'If you don\'t subscribe after the trial, your plan and logs stay readable. Logging and sessions need a subscription.';
+
+  @override
+  String get paywallBenefitSessionTitle => 'Session mode';
+
+  @override
+  String get paywallBenefitSessionBody =>
+      'Rounds and rest timed for you, with a tactical and a recovery cue on every break.';
+
+  @override
+  String get paywallContinue => 'Continue';
 }

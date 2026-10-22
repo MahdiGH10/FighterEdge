@@ -1,7 +1,6 @@
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/billing/trial_reminder.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/test_harness.dart';
 
@@ -15,7 +14,6 @@ void main() {
   var now = _now;
 
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
     now = _now;
     gateway = FakeReminderGateway();
     coordinator = TrialReminderCoordinator(gateway: gateway, now: () => now);
@@ -65,27 +63,31 @@ void main() {
   });
 
   group('sync', () {
-    test('schedules once for a running trial and asks permission once',
-        () async {
+    test('schedules once for a running trial and never prompts', () async {
       final ends = _now.add(const Duration(days: 7));
       await sync(AccessState.trial(ends));
       await sync(AccessState.trial(ends));
 
       expect(gateway.trialReminderAt, ends.subtract(const Duration(days: 2)));
       expect(gateway.trialReminderTitle, 'Trial ends');
-      expect(gateway.permissionRequests, 1);
-
-      // A new coordinator (next launch) does not prompt again.
-      final again = TrialReminderCoordinator(gateway: gateway, now: () => now);
-      await again.sync(AccessState.trial(ends.add(const Duration(days: 1))),
-          title: 'Trial ends', body: 'Soon');
-      expect(gateway.permissionRequests, 1);
+      expect(gateway.trialReminderSchedules, 1);
+      // No permission prompt, on first launch or at trial start.
+      expect(gateway.permissionRequests, 0);
     });
 
-    test('does nothing when permission was refused', () async {
-      gateway.permissionGranted = false;
-      await sync(AccessState.trial(_now.add(const Duration(days: 7))));
+    test('moves the reminder when the trial end moves', () async {
+      final ends = _now.add(const Duration(days: 7));
+      await sync(AccessState.trial(ends));
+      final later = ends.add(const Duration(days: 1));
+      await sync(AccessState.trial(later));
+      expect(gateway.trialReminderAt, later.subtract(const Duration(days: 2)));
+      expect(gateway.trialReminderSchedules, 2);
+    });
+
+    test('schedules nothing when fewer than two days are left', () async {
+      await sync(AccessState.trial(_now.add(const Duration(days: 1))));
       expect(gateway.trialReminderAt, isNull);
+      expect(gateway.trialReminderSchedules, 0);
     });
 
     test('cancels when the trial converts, lapses or ends early', () async {
@@ -100,6 +102,7 @@ void main() {
       await sync(AccessState.trial(ends));
       await sync(const AccessState.readOnly());
       expect(gateway.trialReminderAt, isNull);
+      expect(gateway.trialReminderCancels, 2);
     });
 
     test('a passing unknown state keeps the reminder', () async {
@@ -110,8 +113,20 @@ void main() {
       expect(gateway.trialReminderCancels, 0);
     });
 
-    test('does not cancel needlessly when nothing was scheduled', () async {
+    test('clears a reminder left from an earlier launch once, then rests',
+        () async {
+      // A fresh coordinator (new launch) cannot know what the OS still holds.
+      await sync(const AccessState.active());
+      await sync(const AccessState.active());
       await sync(const AccessState.readOnly());
+      expect(gateway.trialReminderCancels, 1);
+    });
+
+    test('does nothing where notifications are unavailable', () async {
+      gateway.available = false;
+      await sync(AccessState.trial(_now.add(const Duration(days: 7))));
+      await sync(const AccessState.readOnly());
+      expect(gateway.trialReminderSchedules, 0);
       expect(gateway.trialReminderCancels, 0);
     });
 

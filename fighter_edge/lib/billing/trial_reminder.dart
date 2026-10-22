@@ -1,5 +1,3 @@
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../notifications/reminder_gateway.dart';
 import 'subscription.dart';
 
@@ -8,6 +6,11 @@ import 'subscription.dart';
 /// It only reads the server-fed [AccessState]; it never decides access. The
 /// reminder is scheduled while a dated trial is running and removed as soon
 /// as the account is anything else (converted, lapsed, signed out).
+///
+/// It never asks for notification permission itself: there is no prompt at
+/// first launch or at trial start. The reminder is scheduled either way and
+/// the OS shows it when the athlete has allowed notifications (for example
+/// through the training reminders in Settings).
 class TrialReminderCoordinator {
   TrialReminderCoordinator({
     required ReminderGateway gateway,
@@ -18,13 +21,16 @@ class TrialReminderCoordinator {
   /// How long before the trial ends the reminder fires.
   static const Duration lead = Duration(days: 2);
 
-  static const _askedKey = 'trial.reminderPermissionAsked';
-
   final ReminderGateway _gateway;
   final DateTime Function() _now;
 
   /// What is currently scheduled, so a rebuild does not reschedule it.
   DateTime? _scheduledFor;
+
+  /// Whether a stale reminder from an earlier launch has been cleared this
+  /// session. The OS keeps a scheduled notification across restarts, so the
+  /// first sync that finds no trial clears it once.
+  bool _clearedThisSession = false;
 
   /// When the reminder should fire for [access], or null when there is none
   /// to send: not a dated trial, or fewer than [lead] left already.
@@ -49,14 +55,14 @@ class TrialReminderCoordinator {
       // An unknown state may be a passing blip: leave a scheduled reminder
       // in place rather than drop it.
       if (access.isUnknown) return;
-      if (_scheduledFor != null) {
+      if (_scheduledFor != null || !_clearedThisSession) {
         _scheduledFor = null;
+        _clearedThisSession = true;
         await _gateway.cancelTrialEndReminder();
       }
       return;
     }
     if (_scheduledFor == at) return;
-    if (!await _permissionGranted()) return;
     _scheduledFor = at;
     await _gateway.scheduleTrialEndReminder(at: at, title: title, body: body);
   }
@@ -64,23 +70,7 @@ class TrialReminderCoordinator {
   /// Drops the scheduled reminder (sign-out).
   Future<void> cancel() async {
     _scheduledFor = null;
+    _clearedThisSession = true;
     await _gateway.cancelTrialEndReminder();
-  }
-
-  /// Asks for notification permission once, ever. Later calls reuse the
-  /// answer the OS already holds without prompting again.
-  Future<bool> _permissionGranted() async {
-    var asked = false;
-    SharedPreferences? prefs;
-    try {
-      prefs = await SharedPreferences.getInstance();
-      asked = prefs.getBool(_askedKey) ?? false;
-    } catch (_) {}
-    if (asked) return true;
-    final granted = await _gateway.requestPermission();
-    try {
-      await prefs?.setBool(_askedKey, true);
-    } catch (_) {}
-    return granted;
   }
 }

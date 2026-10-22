@@ -1214,13 +1214,6 @@ class LDe extends L {
       'Jeder Drill für Striking, Ringen, BJJ und Clinch, mit Trainingsanleitung.';
 
   @override
-  String get paywallBenefitCuesTitle => 'Ecken-Tipps';
-
-  @override
-  String get paywallBenefitCuesBody =>
-      'Ein taktischer und ein Erholungs-Tipp in jeder Pause des Runden-Timers.';
-
-  @override
   String get paywallAnnualPlan => 'Jahresabo';
 
   @override
@@ -1966,4 +1959,22 @@ class LDe extends L {
   @override
   String get planReadyNotNowNote =>
       'Dein Plan bleibt gespeichert. Zum Eintragen brauchst du ein Abo.';
+
+  @override
+  String get paywallTrialCancelNote =>
+      'Kündige vor Testende in deinen Store-Einstellungen und du zahlst nichts.';
+
+  @override
+  String get paywallAfterTrialNote =>
+      'Wenn du nach dem Test kein Abo abschließt, bleiben dein Plan und deine Einträge lesbar. Eintragen und Einheiten brauchen ein Abo.';
+
+  @override
+  String get paywallBenefitSessionTitle => 'Einheiten-Modus';
+
+  @override
+  String get paywallBenefitSessionBody =>
+      'Runden und Pausen werden für dich getimt, mit einem taktischen und einem Erholungs-Tipp in jeder Pause.';
+
+  @override
+  String get paywallContinue => 'Weiter';
 }

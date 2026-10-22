@@ -591,8 +591,6 @@
   "paywallBenefitRecipesBody": "Every recipe, scaled to your servings and checked for your allergens.",
   "paywallBenefitDrillsTitle": "Full Drill Library",
   "paywallBenefitDrillsBody": "Every striking, wrestling, BJJ and clinch drill, with how to train it.",
-  "paywallBenefitCuesTitle": "Corner Cues",
-  "paywallBenefitCuesBody": "A tactical and a recovery cue on every rest in the round timer.",
   "paywallAnnualPlan": "Annual plan",
   "paywallMonthlyPlan": "Monthly plan",
   "paywallBestValue": "Best value",
@@ -845,5 +843,10 @@
   "planReadyStartTrialDays": "Start your {days}-day free trial",
   "@planReadyStartTrialDays": {"placeholders": {"days": {"type": "int"}}},
   "planReadyViewPlans": "See plans",
-  "planReadyNotNowNote": "Your plan stays saved. Logging needs a subscription."
+  "planReadyNotNowNote": "Your plan stays saved. Logging needs a subscription.",
+  "paywallTrialCancelNote": "Cancel in your store settings before the trial ends and you pay nothing.",
+  "paywallAfterTrialNote": "If you don't subscribe after the trial, your plan and logs stay readable. Logging and sessions need a subscription.",
+  "paywallBenefitSessionTitle": "Session mode",
+  "paywallBenefitSessionBody": "Rounds and rest timed for you, with a tactical and a recovery cue on every break.",
+  "paywallContinue": "Continue"
 }

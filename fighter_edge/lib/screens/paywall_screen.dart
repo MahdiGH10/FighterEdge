@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,8 @@ import '../l10n/gen/app_localizations.dart';
 import '../legal/legal_links.dart';
 import 'legal_screen.dart';
 import '../observability/telemetry.dart';
+import '../routing/app_navigation.dart';
+import '../routing/app_router.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
@@ -57,6 +60,45 @@ class PaywallRouteArgs {
   final PaywallTrigger trigger;
 
   const PaywallRouteArgs({this.highlight, required this.trigger});
+}
+
+/// The entry gate after the onboarding plan reveal ("Start your free week").
+///
+/// The onboarding screen calls [open] and carries on into the app when it
+/// returns true. The label only promises a free trial when the store offers
+/// one for this customer ([BillingProduct.freeTrial]).
+abstract final class TrialGate {
+  /// Days of the store free trial on the plan the paywall shows first
+  /// (annual), or null when the store offers none or has not answered.
+  static int? offeredDays(List<BillingProduct> products) {
+    final first = products
+            .where((p) => p.period == BillingProductPeriod.annual)
+            .firstOrNull ??
+        products.firstOrNull;
+    return first?.freeTrial?.days;
+  }
+
+  /// "Start your free week", "Start your 14-day free trial", or "See plans"
+  /// when there is no store trial to name.
+  static String ctaLabel(L l, int? trialDays) => switch (trialDays) {
+        null => l.planReadyViewPlans,
+        7 => l.planReadyStartFreeWeek,
+        final days => l.planReadyStartTrialDays(days),
+      };
+
+  /// Opens the paywall as the onboarding gate. True once the store accepted
+  /// a purchase or the account already has access; false when the athlete
+  /// backed out. Access itself still only comes from the server.
+  static Future<bool> open(BuildContext context) async {
+    final started = await AppNavigation.push<bool>(
+      context,
+      AppRoutes.paywall,
+      extra: const PaywallRouteArgs(trigger: PaywallTrigger.planReady),
+      fallbackBuilder: (_) =>
+          const PaywallScreen(trigger: PaywallTrigger.planReady),
+    );
+    return started == true;
+  }
 }
 
 /// The subscription screen. Store purchases start here, but access is granted
@@ -114,7 +156,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       // The store accepted the purchase. The onboarding gate carries on; the
       // account itself unlocks only when the server confirms.
       if (widget.trigger == PaywallTrigger.planReady &&
-          auth.billingState.isPro) {
+          (auth.billingState.isPro || auth.accessState.hasPaidAccess)) {
         navigator.maybePop(true);
       }
     } on AuthException catch (e) {
@@ -165,61 +207,79 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final selected =
         products.where((p) => p.period == _selectedPeriod).firstOrNull ??
             products.firstOrNull;
+    final buyable = paid || !auth.billingAvailable ? null : selected;
+    // The trial is only ever named when the store offers it for this plan.
+    final trial = buyable?.freeTrial;
     final secondary = AppAccessibility.textSecondary(context);
     final quietLink =
         AppType.subhead(weight: FontWeight.w800, color: secondary);
     final showReadOnlyNote =
         access.isReadOnly && widget.trigger != PaywallTrigger.planReady;
+    // The buy button and its renewal terms sit in a fixed dock, as on the
+    // mockup. At very large text the dock would cover the screen, so they
+    // move into the page instead.
+    final docked = buyable != null && !AppAccessibility.isLargeText(context);
+    final purchase = buyable == null
+        ? null
+        : _PurchaseControls(
+            product: buyable,
+            busy: auth.isBusy,
+            onPurchase: () => _purchase(buyable),
+          );
     return ScreenScaffold(
-      title: 'FighterEdge',
+      title: 'Fighter Edge Pro',
       showBack: true,
+      bottomNav:
+          docked && purchase != null ? _PurchaseDock(child: purchase) : null,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
             Insets.lg, Insets.none, Insets.lg, Insets.xxl),
         children: [
           const SizedBox(height: Insets.xs),
-          Text(l.paywallPlainTitle,
-              textAlign: TextAlign.center, style: AppType.title1()),
-          const SizedBox(height: Insets.xs),
-          Text(l.paywallPlainSubtitle,
-              textAlign: TextAlign.center,
-              style: AppType.subhead(color: secondary)),
+          Text(
+            trial != null
+                ? TrialGate.ctaLabel(l, trial.days)
+                : l.paywallPlainTitle,
+            style: AppType.largeTitle(),
+          ),
+          const SizedBox(height: Insets.sm),
+          if (buyable != null && trial != null)
+            _TrialSummary(product: buyable)
+          else
+            Text(l.paywallPlainSubtitle,
+                style: AppType.callout(color: secondary)),
           if (showReadOnlyNote) ...[
             const SizedBox(height: Insets.md),
             Text(l.readOnlyBanner,
                 key: const ValueKey('paywall-read-only-note'),
-                textAlign: TextAlign.center,
                 style: AppType.callout(
                     weight: FontWeight.w700, color: AppColors.textPrimary)),
           ],
-          const SizedBox(height: Insets.lg),
+          const SizedBox(height: Insets.xl),
           _Benefits(highlight: widget.highlight),
-          const SizedBox(height: Insets.lg),
+          const SizedBox(height: Insets.xl),
           if (paid)
             _PaidStatus(
               access: access,
               isBusy: auth.isBusy,
               onRefresh: auth.refreshCurrentUser,
+              onContinue: widget.trigger == PaywallTrigger.planReady
+                  ? () => Navigator.of(context).maybePop(true)
+                  : null,
             )
           else ...[
             if (auth.billingState.isPro) ...[
               const _BillingSyncNotice(),
               const SizedBox(height: Insets.md),
             ],
-            // The plans and the one button sit right under the benefits, so a
-            // phone shows what you get and what it costs without scrolling.
-            if (auth.billingAvailable && selected != null) ...[
-              if (selected.freeTrial != null) ...[
-                _TrialSummary(product: selected),
-                const SizedBox(height: Insets.md),
-              ],
+            if (buyable != null) ...[
               for (final product in products) ...[
                 _PlanTile(
                   product: product,
                   monthlyProduct: products
                       .where((p) => p.period == BillingProductPeriod.monthly)
                       .firstOrNull,
-                  selected: product.id == selected.id,
+                  selected: product.id == buyable.id,
                   onTap: auth.isBusy
                       ? null
                       : () => setState(() => _selectedPeriod = product.period),
@@ -227,49 +287,126 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 const SizedBox(height: Insets.sm),
               ],
               const SizedBox(height: Insets.xs),
-              PrimaryButton(
-                selected.freeTrial != null
-                    ? l.paywallStartTrial
-                    : selected.period == BillingProductPeriod.annual
-                        ? l.paywallContinueAnnual
-                        : l.paywallContinueMonthly,
-                icon: AppIcons.lockSimpleOpen,
-                expand: true,
-                onPressed: auth.isBusy ? null : () => _purchase(selected),
-              ),
-              const SizedBox(height: Insets.sm),
               Text(l.paywallTrust,
                   textAlign: TextAlign.center,
                   style: AppType.subhead(color: secondary)),
               const SizedBox(height: Insets.sm),
-              _RenewalDisclosure(product: selected),
+              Text(l.paywallAfterTrialNote,
+                  textAlign: TextAlign.center,
+                  style: AppType.subhead(color: secondary)),
+              if (!docked && purchase != null) ...[
+                const SizedBox(height: Insets.lg),
+                purchase,
+              ],
             ] else if (auth.billingAvailable && auth.isBusy) ...[
               const _BillingLoadingNotice(),
             ] else ...[
               const _UnavailableCard(),
             ],
-            const SizedBox(height: Insets.sm),
-            TextButton(
-              onPressed: auth.isBusy
-                  ? null
-                  : auth.billingAvailable
-                      ? _restore
-                      : auth.refreshCurrentUser,
-              child: Text(
-                auth.billingAvailable
-                    ? l.paywallRestore
-                    : l.paywallRefreshStatus,
-                style: quietLink,
+          ],
+          const SizedBox(height: Insets.md),
+          // Restore stays reachable in every state, read-only included.
+          Wrap(
+            alignment: WrapAlignment.center,
+            children: [
+              TextButton(
+                onPressed: auth.isBusy
+                    ? null
+                    : auth.billingAvailable
+                        ? _restore
+                        : auth.refreshCurrentUser,
+                child: Text(
+                  auth.billingAvailable
+                      ? l.paywallRestore
+                      : l.paywallRefreshStatus,
+                  style: quietLink,
+                ),
+              ),
+              ..._legalLinks(context, quietLink),
+            ],
+          ),
+          if (auth.billingManagementUrl case final managementUrl?)
+            Center(
+              child: TextButton(
+                onPressed: () => launchUrl(Uri.parse(managementUrl)),
+                child: Text(l.paywallManage, style: quietLink),
               ),
             ),
-          ],
-          if (auth.billingManagementUrl case final managementUrl?)
-            TextButton(
-              onPressed: () => launchUrl(Uri.parse(managementUrl)),
-              child: Text(l.paywallManage, style: quietLink),
-            ),
-          const _LegalLinksRow(),
         ],
+      ),
+    );
+  }
+}
+
+/// Terms of Use (EULA) and Privacy Policy, reachable from the paywall itself.
+List<Widget> _legalLinks(BuildContext context, TextStyle style) {
+  final l = L.of(context);
+  return [
+    TextButton(
+      onPressed: () => LegalLinks.open(context, LegalDocument.terms),
+      child: Text(l.legalTermsLink, style: style),
+    ),
+    TextButton(
+      onPressed: () => LegalLinks.open(context, LegalDocument.privacy),
+      child: Text(l.legalPrivacyLink, style: style),
+    ),
+  ];
+}
+
+/// The one buy button and the renewal terms that must sit beside it.
+class _PurchaseControls extends StatelessWidget {
+  const _PurchaseControls({
+    required this.product,
+    required this.busy,
+    required this.onPurchase,
+  });
+
+  final BillingProduct product;
+  final bool busy;
+  final VoidCallback onPurchase;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PrimaryButton(
+          product.freeTrial != null
+              ? l.paywallStartTrial
+              : product.period == BillingProductPeriod.annual
+                  ? l.paywallContinueAnnual
+                  : l.paywallContinueMonthly,
+          icon: AppIcons.lockSimpleOpen,
+          expand: true,
+          onPressed: busy ? null : onPurchase,
+        ),
+        _RenewalDisclosure(product: product),
+      ],
+    );
+  }
+}
+
+/// The fixed bottom dock that holds [_PurchaseControls]. Content scrolls
+/// under it, so it is a navigation-layer glass surface; [GlassSurface] falls
+/// back to a solid surface on its own.
+class _PurchaseDock extends StatelessWidget {
+  const _PurchaseDock({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassSurface(
+      kind: GlassKind.nav,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+              Insets.lg, Insets.md, Insets.lg, Insets.sm),
+          child: child,
+        ),
       ),
     );
   }
@@ -319,27 +456,23 @@ class _TrialSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final trial = product.freeTrial!;
-    return GlassCard(
-      tone: GlassTone.gold,
-      padding: const EdgeInsets.all(Insets.lg),
-      child: MergeSemantics(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l.paywallTrialBadge(trial.days).toUpperCase(),
-              style: AppType.micro(
-                  color: AppColors.premium, weight: FontWeight.w900),
-            ),
-            const SizedBox(height: Insets.xs),
-            Text(
-              l.paywallTrialThen(trial.days, _priceWithPeriod(l, product)),
-              key: const ValueKey('paywall-trial-line'),
-              style: AppType.title2(),
-            ),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // One Text in one style: the price after the trial is exactly as
+        // large and as bright as "free" (Apple 3.1.2, Play disclosure).
+        Text(
+          l.paywallTrialThen(trial.days, _priceWithPeriod(l, product)),
+          key: const ValueKey('paywall-trial-line'),
+          style: AppType.title1(),
         ),
-      ),
+        const SizedBox(height: Insets.xs),
+        Text(
+          l.paywallTrialCancelNote,
+          style:
+              AppType.callout(color: AppAccessibility.textSecondary(context)),
+        ),
+      ],
     );
   }
 }
@@ -350,17 +483,22 @@ class _PaidStatus extends StatelessWidget {
     required this.access,
     required this.isBusy,
     required this.onRefresh,
+    this.onContinue,
   });
 
   final AccessState access;
   final bool isBusy;
   final Future<void> Function() onRefresh;
 
+  /// Set on the onboarding gate: the account already has access, so the
+  /// gate just lets the athlete through.
+  final VoidCallback? onContinue;
+
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final effective = access.effective;
-    final days = access.trialDaysLeft(DateTime.now());
+    final days = access.trialDaysLeft(clock.now());
     return Column(
       children: [
         if (effective != null && effective.isTrial && days != null)
@@ -393,37 +531,14 @@ class _PaidStatus extends StatelessWidget {
               style: AppType.title2(color: AppColors.positive)),
         ],
         const SizedBox(height: Insets.lg),
+        if (onContinue case final proceed?) ...[
+          PrimaryButton(l.paywallContinue, expand: true, onPressed: proceed),
+          const SizedBox(height: Insets.sm),
+        ],
         GhostButton(
           l.paywallOnProRefresh,
           icon: AppIcons.arrowClockwise,
           onPressed: isBusy ? null : onRefresh,
-        ),
-      ],
-    );
-  }
-}
-
-/// Terms of Use (EULA) and Privacy Policy, reachable from the paywall itself.
-class _LegalLinksRow extends StatelessWidget {
-  const _LegalLinksRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final style = AppType.subhead(
-      weight: FontWeight.w700,
-      color: AppAccessibility.textSecondary(context),
-    );
-    return Wrap(
-      alignment: WrapAlignment.center,
-      children: [
-        TextButton(
-          onPressed: () => LegalLinks.open(context, LegalDocument.terms),
-          child: Text(l.legalTermsLink, style: style),
-        ),
-        TextButton(
-          onPressed: () => LegalLinks.open(context, LegalDocument.privacy),
-          child: Text(l.legalPrivacyLink, style: style),
         ),
       ],
     );
@@ -554,6 +669,11 @@ class _PlanTile extends StatelessWidget {
                       style: AppType.subhead(
                           weight: FontWeight.w700, color: secondary),
                     ),
+                    if (product.freeTrial case final trial?) ...[
+                      const SizedBox(height: Insets.xxs),
+                      Text(l.paywallTrialBadge(trial.days),
+                          style: AppType.subhead(color: secondary)),
+                    ],
                     if (equivalent != null || savings != null) ...[
                       const SizedBox(height: Insets.xxs),
                       Wrap(
@@ -581,74 +701,89 @@ class _PlanTile extends StatelessWidget {
   }
 }
 
-/// What the subscription is for, in outcomes the athlete can check against
-/// the app: the camp week, fuel, the weekly review, the weight path, and the
-/// gated features. The one that brought the athlete here leads the features.
+/// What the subscription is for, as outcomes the athlete can check against
+/// the app: the camp week, session mode, fuel for training days, the weekly
+/// review, the safe weight path, drills and recipes. When a locked feature
+/// brought the athlete here, its outcome leads the list.
 class _Benefits extends StatelessWidget {
   final Feature? highlight;
   const _Benefits({required this.highlight});
 
-  static (String, String) _copy(L l, Feature feature) => switch (feature) {
-        Feature.edgeFuelPremiumRecipes => (
-            l.paywallBenefitRecipesTitle,
-            l.paywallBenefitRecipesBody
-          ),
-        Feature.fullTechniqueLibrary => (
-            l.paywallBenefitDrillsTitle,
-            l.paywallBenefitDrillsBody
-          ),
-        Feature.cornerCoach => (
-            l.paywallBenefitCuesTitle,
-            l.paywallBenefitCuesBody
-          ),
-      };
-
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final features = [
-      for (final feature in Feature.values)
-        if (Entitlements.isProOnly(feature)) feature,
-    ];
-    final first = highlight;
-    if (first != null && features.remove(first)) features.insert(0, first);
-    final rows = <_BenefitRow>[
-      _BenefitRow(
-        icon: AppIcons.calendarBlank,
-        title: l.paywallBenefitCampTitle,
-        body: l.paywallBenefitCampBody,
-      ),
-      _BenefitRow(
-        icon: AppIcons.forkKnife,
-        title: l.paywallBenefitFuelTitle,
-        body: l.paywallBenefitFuelBody,
-      ),
-      _BenefitRow(
-        icon: AppIcons.chartLineUp,
-        title: l.paywallBenefitReviewTitle,
-        body: l.paywallBenefitReviewBody,
-      ),
-      _BenefitRow(
-        icon: AppIcons.scales,
-        title: l.paywallBenefitWeightTitle,
-        body: l.paywallBenefitWeightBody,
-      ),
-      for (final feature in features)
+    // (feature behind it, row). Outcomes without a single gated feature
+    // carry null.
+    final rows = <(Feature?, _BenefitRow)>[
+      (
+        null,
         _BenefitRow(
-          icon: feature.icon,
-          title: _copy(l, feature).$1,
-          body: _copy(l, feature).$2,
+          icon: AppIcons.calendarBlank,
+          title: l.paywallBenefitCampTitle,
+          body: l.paywallBenefitCampBody,
         ),
-    ];
-    return AppCard(
-      child: Column(
-        children: [
-          for (final (index, row) in rows.indexed) ...[
-            if (index > 0) const SizedBox(height: Insets.md),
-            row,
-          ],
-        ],
       ),
+      (
+        Feature.cornerCoach,
+        _BenefitRow(
+          icon: AppIcons.timer,
+          title: l.paywallBenefitSessionTitle,
+          body: l.paywallBenefitSessionBody,
+        ),
+      ),
+      (
+        null,
+        _BenefitRow(
+          icon: AppIcons.forkKnife,
+          title: l.paywallBenefitFuelTitle,
+          body: l.paywallBenefitFuelBody,
+        ),
+      ),
+      (
+        null,
+        _BenefitRow(
+          icon: AppIcons.chartLineUp,
+          title: l.paywallBenefitReviewTitle,
+          body: l.paywallBenefitReviewBody,
+        ),
+      ),
+      (
+        null,
+        _BenefitRow(
+          icon: AppIcons.scales,
+          title: l.paywallBenefitWeightTitle,
+          body: l.paywallBenefitWeightBody,
+        ),
+      ),
+      (
+        Feature.fullTechniqueLibrary,
+        _BenefitRow(
+          icon: Feature.fullTechniqueLibrary.icon,
+          title: l.paywallBenefitDrillsTitle,
+          body: l.paywallBenefitDrillsBody,
+        ),
+      ),
+      (
+        Feature.edgeFuelPremiumRecipes,
+        _BenefitRow(
+          icon: Feature.edgeFuelPremiumRecipes.icon,
+          title: l.paywallBenefitRecipesTitle,
+          body: l.paywallBenefitRecipesBody,
+        ),
+      ),
+    ];
+    final lead = rows.where((r) => r.$1 != null && r.$1 == highlight).toList();
+    final ordered = [
+      ...lead,
+      ...rows.where((r) => !lead.contains(r)),
+    ];
+    return Column(
+      children: [
+        for (final (index, (_, row)) in ordered.indexed) ...[
+          if (index > 0) const SizedBox(height: Insets.md),
+          row,
+        ],
+      ],
     );
   }
 }

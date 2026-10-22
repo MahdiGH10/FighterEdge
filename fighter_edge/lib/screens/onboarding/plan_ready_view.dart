@@ -11,6 +11,7 @@ import '../../theme/app_typography.dart';
 import '../../widgets/premium_effects.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/stat_card.dart';
+import '../paywall_screen.dart';
 import 'onboarding_widgets.dart';
 
 class CompletedOnboardingPlan {
@@ -106,12 +107,7 @@ class PlanReadyView extends StatelessWidget {
             Text(l.planReadyMissingTarget,
                 style: AppType.callout(color: AppColors.textSecondary)),
           const SizedBox(height: Insets.xl),
-          PrimaryButton(
-              switch (trialDays) {
-                null => l.planReadyViewPlans,
-                7 => l.planReadyStartFreeWeek,
-                final days => l.planReadyStartTrialDays(days),
-              },
+          PrimaryButton(TrialGate.ctaLabel(l, trialDays),
               expand: true,
               onPressed: isBusy
                   ? null

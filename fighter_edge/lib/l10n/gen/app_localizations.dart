@@ -2155,18 +2155,6 @@ abstract class L {
   /// **'Every striking, wrestling, BJJ and clinch drill, with how to train it.'**
   String get paywallBenefitDrillsBody;
 
-  /// No description provided for @paywallBenefitCuesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Corner Cues'**
-  String get paywallBenefitCuesTitle;
-
-  /// No description provided for @paywallBenefitCuesBody.
-  ///
-  /// In en, this message translates to:
-  /// **'A tactical and a recovery cue on every rest in the round timer.'**
-  String get paywallBenefitCuesBody;
-
   /// No description provided for @paywallAnnualPlan.
   ///
   /// In en, this message translates to:
@@ -3336,6 +3324,36 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Your plan stays saved. Logging needs a subscription.'**
   String get planReadyNotNowNote;
+
+  /// No description provided for @paywallTrialCancelNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel in your store settings before the trial ends and you pay nothing.'**
+  String get paywallTrialCancelNote;
+
+  /// No description provided for @paywallAfterTrialNote.
+  ///
+  /// In en, this message translates to:
+  /// **'If you don\'t subscribe after the trial, your plan and logs stay readable. Logging and sessions need a subscription.'**
+  String get paywallAfterTrialNote;
+
+  /// No description provided for @paywallBenefitSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session mode'**
+  String get paywallBenefitSessionTitle;
+
+  /// No description provided for @paywallBenefitSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds and rest timed for you, with a tactical and a recovery cue on every break.'**
+  String get paywallBenefitSessionBody;
+
+  /// No description provided for @paywallContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get paywallContinue;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {
