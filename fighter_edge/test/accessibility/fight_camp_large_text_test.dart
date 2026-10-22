@@ -32,7 +32,7 @@ void main() {
     });
 
     final repo =
-        await makeRepo(signedIn: true, plan: Plan.free, onboarded: true);
+        await makeRepo(signedIn: true, plan: Plan.pro, onboarded: true);
     final fights = InMemoryFightCampRepository();
     await fights.saveFight(
       repo.currentUser!.id,

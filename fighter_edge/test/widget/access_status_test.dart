@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fighter_edge/billing/billing_gateway.dart';
 import 'package:fighter_edge/billing/fake_billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
@@ -85,7 +87,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('See plans'), findsOneWidget);
 
-    await auth.startProCheckout(billing.products.first);
+    // The checkout waits on the server refresh, so it runs under the test
+    // clock instead of being awaited.
+    unawaited(auth.startProCheckout(billing.products.first));
+    await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
 
     // The server has not confirmed yet: neither a trial chip (that would be

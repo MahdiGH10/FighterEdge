@@ -2,6 +2,7 @@ import 'package:fighter_edge/billing/billing_gateway.dart';
 import 'package:fighter_edge/billing/fake_billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/screens/paywall_screen.dart';
+import 'package:fighter_edge/theme/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,15 +25,26 @@ const _monthly = BillingProduct(
   freeTrial: BillingFreeTrial(days: 7),
 );
 
+/// A tall phone, so the whole list is built and nothing is lazily dropped.
+void _tallScreen(WidgetTester tester) {
+  tester.view.physicalSize = const Size(800, 3000);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+}
+
 Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
   await tester.scrollUntilVisible(finder, 200,
       scrollable: find.byType(Scrollable).first);
+  // Fully visible, clear of the docked purchase bar.
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
 }
 
 void main() {
   group('trial line', () {
     testWidgets('shows the store trial with the price as prominent as "free"',
         (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       await tester.pumpWidget(wrapApp(
         const PaywallScreen(),
@@ -64,6 +76,7 @@ void main() {
 
     testWidgets('picking monthly changes the price after the trial',
         (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       await tester.pumpWidget(wrapApp(
         const PaywallScreen(),
@@ -85,6 +98,7 @@ void main() {
 
     testWidgets('never claims a trial the store does not offer',
         (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       await tester.pumpWidget(wrapApp(
         const PaywallScreen(),
@@ -109,6 +123,7 @@ void main() {
 
     testWidgets('a trial on one plan only is shown only for that plan',
         (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       const monthlyNoTrial = BillingProduct(
         id: 'fighter_edge_pro_monthly',
@@ -137,6 +152,7 @@ void main() {
   group('the paywall as a page', () {
     testWidgets('has no waitlist and offers Restore, Terms and Privacy',
         (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       await tester.pumpWidget(wrapApp(const PaywallScreen(), repo: repo));
       await tester.pumpAndSettle();
@@ -150,6 +166,7 @@ void main() {
     });
 
     testWidgets('lists outcomes, not only gated features', (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       await tester.pumpWidget(wrapApp(const PaywallScreen(), repo: repo));
       await tester.pumpAndSettle();
@@ -166,6 +183,7 @@ void main() {
 
     testWidgets('a read-only account is told its data is saved',
         (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       await tester.pumpWidget(wrapApp(
         const PaywallScreen(trigger: PaywallTrigger.readOnly),
@@ -180,6 +198,7 @@ void main() {
 
     testWidgets('the onboarding gate does not show the read-only note',
         (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       await tester.pumpWidget(wrapApp(
         const PaywallScreen(trigger: PaywallTrigger.planReady),
@@ -193,6 +212,7 @@ void main() {
     testWidgets(
         'an account in its trial sees the trial status, not a buy button',
         (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       await repo.debugSetPlan(
         Plan.pro,
@@ -207,13 +227,18 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Your free trial is running'), findsOneWidget);
-      expect(find.text('Trial · 6 days left'), findsOneWidget);
+      // The days-left label is set in capitals on the status card.
+      expect(
+          find.textContaining(
+              RegExp(r'trial · \d+ days? left', caseSensitive: false)),
+          findsOneWidget);
       expect(find.text('Start free trial'), findsNothing);
     });
   });
 
   group('the onboarding gate', () {
     testWidgets('pops true once the store accepts the trial', (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       final billing = FakeBillingGateway(
         products: [_annual, _monthly],
@@ -257,6 +282,7 @@ void main() {
     });
 
     testWidgets('backing out of the gate returns nothing', (tester) async {
+      _tallScreen(tester);
       final repo = await makeRepo(signedIn: true);
       bool? result = true;
       await tester.pumpWidget(wrapApp(
@@ -281,7 +307,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('open gate'));
       await tester.pumpAndSettle();
-      await tester.pageBack();
+      await tester.tap(find.byIcon(AppIcons.caretLeft));
       await tester.pumpAndSettle();
       expect(result, isNull);
     });

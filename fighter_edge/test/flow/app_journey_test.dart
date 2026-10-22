@@ -9,7 +9,7 @@ import 'package:fighter_edge/theme/app_icons.dart';
 import '../helpers/test_harness.dart';
 
 /// Headless end-to-end journey (runs under `flutter test`), through
-/// onboarding to the dashboard, then proving the honest-waitlist path when
+/// onboarding to the dashboard, then proving the honest no-checkout path when
 /// billing is unconfigured (audit M-6). `integration_test/app_flow_test.dart`
 /// runs the same onboarding on-device, then diverges to exercise a
 /// configured store purchase and the server-owned entitlement boundary
