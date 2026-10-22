@@ -4,6 +4,7 @@ import '../models/nutrition_target_v2.dart';
 import '../models/planned_fuel_session.dart';
 import '../policies/nutrition_policy.dart';
 import '../policies/nutrition_policy_v2.dart';
+import '../policies/energy_availability_proxy.dart';
 import '../policies/nutrition_safety_policy.dart';
 import '../policies/session_energy_table.dart';
 import '../policies/weight_rate_policy.dart';
@@ -37,12 +38,15 @@ class NutritionTargetCalculatorV2 {
   /// [plannedWeek] is the week Fuel is sizing for, as simple pure inputs.
   /// [weeklyRatePercent] overrides the rate implied by `profile.goalPace`
   /// (a fight-camp path supplies it); it is clamped to the safe range either
-  /// way. [trainingDayShift] turns the carbohydrate shift off.
+  /// way. [inFightCamp] lets the rate go up to the camp's 1% a week; outside
+  /// a camp loss is capped at 0.75%. [trainingDayShift] turns the carbohydrate
+  /// shift off.
   static NutritionTargetV2 calculate(
     NutritionProfile profile, {
     required List<PlannedFuelSession> plannedWeek,
     required DateTime now,
     double? weeklyRatePercent,
+    bool inFightCamp = false,
     bool trainingDayShift = true,
   }) {
     // 1. Missing data.
@@ -131,6 +135,7 @@ class NutritionTargetCalculatorV2 {
       goal: profile.goal,
       weightKg: weightKg,
       requestedPercent: requested,
+      inFightCamp: inFightCamp,
     );
     if (rate.wasClamped) warnings.add('weightRateAdjusted');
     final dailyGap =
@@ -167,6 +172,16 @@ class NutritionTargetCalculatorV2 {
     if (isLosing && rawAverage < rmr) {
       rawAverage = rmr;
       warnings.add('goalRateReducedToProtectRmr');
+    }
+    // Training athletes: resting energy alone leaves too little for the
+    // sessions (placeholder proxy, dietitian sign-off pending).
+    final eaFloor = EnergyAvailabilityProxy.floorKcal(
+      restingEnergyKcal: rmr,
+      averageSessionKcalPerDay: weekSessionKcal / 7,
+    );
+    if (isLosing && rawAverage < eaFloor) {
+      rawAverage = eaFloor.toDouble();
+      warnings.add('goalRateReducedForEnergyAvailability');
     }
     var average = NutritionPolicyV2.roundToTen(rawAverage);
     if (average < rmrFloor) average = rmrFloor;
@@ -279,6 +294,7 @@ class NutritionTargetCalculatorV2 {
       fiberGramsHigh:
           (average / 1000 * NutritionPolicy.fiberGPer1000KcalHigh).round(),
       minimumDailyKcal: minimumDay,
+      energyAvailabilityFloorKcal: eaFloor > rmrFloor ? eaFloor : rmrFloor,
       appliedWeeklyChangePercent: signedChange,
       proteinReferenceWeightKg: referenceWeightKg,
       equationProfileUsed: profile.equationProfile,
