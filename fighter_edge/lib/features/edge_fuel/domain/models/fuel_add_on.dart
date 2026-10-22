@@ -32,8 +32,18 @@ class FuelAddOn {
     required this.grams,
     required this.unit,
     required this.unitCount,
+    required this.source,
     this.prepMinutes = 0,
   });
+
+  /// [source] for a portion Fighter Edge chose as a common serving.
+  // dietitian sign-off pending
+  static const String sourceCurated = 'Fighter Edge curated portion';
+
+  /// [source] for a portion that is a household weight in USDA FoodData
+  /// Central (SR Legacy), such as one medium banana. Re-check at sign-off.
+  static const String sourceUsdaHousehold =
+      'USDA FoodData Central household weight';
 
   /// Stable id, unique across the list.
   final String id;
@@ -48,6 +58,10 @@ class FuelAddOn {
   /// Display only: "2 piece", "1 scoop", or grams for [AddOnUnit.gram].
   final AddOnUnit unit;
   final double unitCount;
+
+  /// Where the portion size comes from. The nutrition always comes from the
+  /// food record, which carries its own source.
+  final String source;
 
   /// Time to make it ready to eat. Zero for something eaten as it is.
   final int prepMinutes;

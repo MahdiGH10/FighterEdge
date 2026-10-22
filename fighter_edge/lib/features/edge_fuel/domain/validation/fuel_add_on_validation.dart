@@ -45,7 +45,9 @@ class FuelAddOnValidator {
         issues.add(CatalogIssue(id, 'portion has no weight'));
       } else if (addOn.grams > maxPortionGrams) {
         issues.add(
-          CatalogIssue(id, 'portion of ${addOn.grams} g is above '
+          CatalogIssue(
+              id,
+              'portion of ${addOn.grams} g is above '
               '$maxPortionGrams g'),
         );
       }
@@ -54,9 +56,14 @@ class FuelAddOnValidator {
       }
       if (addOn.unit == AddOnUnit.gram && addOn.unitCount != addOn.grams) {
         issues.add(
-          CatalogIssue(id, 'a gram portion must state its own weight '
+          CatalogIssue(
+              id,
+              'a gram portion must state its own weight '
               '(${addOn.unitCount} vs ${addOn.grams} g)'),
         );
+      }
+      if (addOn.source.trim().isEmpty) {
+        issues.add(CatalogIssue(id, 'missing source'));
       }
       if (addOn.prepMinutes < 0) {
         issues.add(CatalogIssue(id, 'prep time cannot be negative'));
@@ -103,7 +110,8 @@ class FuelAddOnValidator {
     for (final group in AddOnGroup.values) {
       if (group == AddOnGroup.meal) continue;
       if (!addOns.any((a) => a.group == group)) {
-        issues.add(CatalogIssue('<catalog>', 'no add-on in group ${group.name}'));
+        issues
+            .add(CatalogIssue('<catalog>', 'no add-on in group ${group.name}'));
       }
     }
     var proteinRich = 0;
@@ -118,7 +126,7 @@ class FuelAddOnValidator {
       issues.add(CatalogIssue(
         '<catalog>',
         '$proteinRich protein-rich add-ons, expected at least '
-        '$minimumProteinRich',
+            '$minimumProteinRich',
       ));
     }
     return issues;

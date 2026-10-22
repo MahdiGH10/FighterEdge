@@ -15,6 +15,7 @@ class FuelAddOnCatalog {
   static const int version = 1;
   static const bool dietitianSignOffPending = true;
 
+  // dietitian sign-off pending
   static const List<FuelAddOn> all = [
     // ---- dairy ----
     FuelAddOn(
@@ -24,6 +25,7 @@ class FuelAddOnCatalog {
       grams: 200,
       unit: AddOnUnit.gram,
       unitCount: 200,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'greek-yogurt-full-fat-150g',
@@ -32,6 +34,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.gram,
       unitCount: 150,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'cottage-cheese-150g',
@@ -40,6 +43,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.gram,
       unitCount: 150,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'milk-skimmed-glass',
@@ -48,6 +52,7 @@ class FuelAddOnCatalog {
       grams: 250,
       unit: AddOnUnit.cup,
       unitCount: 1,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'milk-whole-glass',
@@ -56,6 +61,7 @@ class FuelAddOnCatalog {
       grams: 250,
       unit: AddOnUnit.cup,
       unitCount: 1,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'mozzarella-30g',
@@ -64,6 +70,7 @@ class FuelAddOnCatalog {
       grams: 30,
       unit: AddOnUnit.gram,
       unitCount: 30,
+      source: FuelAddOn.sourceCurated,
     ),
     // ---- eggs ----
     FuelAddOn(
@@ -73,6 +80,7 @@ class FuelAddOnCatalog {
       grams: 100,
       unit: AddOnUnit.piece,
       unitCount: 2,
+      source: FuelAddOn.sourceUsdaHousehold,
       prepMinutes: 8,
     ),
     FuelAddOn(
@@ -82,6 +90,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.piece,
       unitCount: 3,
+      source: FuelAddOn.sourceUsdaHousehold,
       prepMinutes: 8,
     ),
     FuelAddOn(
@@ -91,6 +100,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.gram,
       unitCount: 150,
+      source: FuelAddOn.sourceCurated,
       prepMinutes: 8,
     ),
     // ---- meat (raw weight, needs cooking) ----
@@ -101,6 +111,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.gram,
       unitCount: 150,
+      source: FuelAddOn.sourceCurated,
       prepMinutes: 15,
     ),
     FuelAddOn(
@@ -110,6 +121,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.gram,
       unitCount: 150,
+      source: FuelAddOn.sourceCurated,
       prepMinutes: 15,
     ),
     FuelAddOn(
@@ -119,6 +131,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.gram,
       unitCount: 150,
+      source: FuelAddOn.sourceCurated,
       prepMinutes: 15,
     ),
     // ---- fish ----
@@ -129,6 +142,7 @@ class FuelAddOnCatalog {
       grams: 120,
       unit: AddOnUnit.can,
       unitCount: 1,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'sardines-canned-1-can',
@@ -137,6 +151,7 @@ class FuelAddOnCatalog {
       grams: 90,
       unit: AddOnUnit.can,
       unitCount: 1,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'salmon-120g',
@@ -145,6 +160,7 @@ class FuelAddOnCatalog {
       grams: 120,
       unit: AddOnUnit.gram,
       unitCount: 120,
+      source: FuelAddOn.sourceCurated,
       prepMinutes: 12,
     ),
     FuelAddOn(
@@ -154,6 +170,7 @@ class FuelAddOnCatalog {
       grams: 120,
       unit: AddOnUnit.gram,
       unitCount: 120,
+      source: FuelAddOn.sourceCurated,
       prepMinutes: 6,
     ),
     // ---- plant protein ----
@@ -164,6 +181,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.gram,
       unitCount: 150,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'tempeh-100g',
@@ -172,6 +190,7 @@ class FuelAddOnCatalog {
       grams: 100,
       unit: AddOnUnit.gram,
       unitCount: 100,
+      source: FuelAddOn.sourceCurated,
       prepMinutes: 8,
     ),
     FuelAddOn(
@@ -181,6 +200,7 @@ class FuelAddOnCatalog {
       grams: 100,
       unit: AddOnUnit.gram,
       unitCount: 100,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'edamame-100g',
@@ -189,6 +209,7 @@ class FuelAddOnCatalog {
       grams: 100,
       unit: AddOnUnit.gram,
       unitCount: 100,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'hummus-60g',
@@ -197,6 +218,7 @@ class FuelAddOnCatalog {
       grams: 60,
       unit: AddOnUnit.gram,
       unitCount: 60,
+      source: FuelAddOn.sourceCurated,
     ),
     // ---- supplements ----
     FuelAddOn(
@@ -206,6 +228,7 @@ class FuelAddOnCatalog {
       grams: 30,
       unit: AddOnUnit.scoop,
       unitCount: 1,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'soy-isolate-1-scoop',
@@ -214,6 +237,7 @@ class FuelAddOnCatalog {
       grams: 30,
       unit: AddOnUnit.scoop,
       unitCount: 1,
+      source: FuelAddOn.sourceCurated,
     ),
     // ---- legumes (cooked) ----
     FuelAddOn(
@@ -223,6 +247,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.gram,
       unitCount: 150,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'red-lentils-cooked-200g',
@@ -231,6 +256,7 @@ class FuelAddOnCatalog {
       grams: 200,
       unit: AddOnUnit.gram,
       unitCount: 200,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'black-beans-cooked-150g',
@@ -239,6 +265,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.gram,
       unitCount: 150,
+      source: FuelAddOn.sourceCurated,
     ),
     // ---- grains and starches ----
     FuelAddOn(
@@ -248,6 +275,7 @@ class FuelAddOnCatalog {
       grams: 40,
       unit: AddOnUnit.gram,
       unitCount: 40,
+      source: FuelAddOn.sourceCurated,
       prepMinutes: 3,
     ),
     FuelAddOn(
@@ -257,6 +285,7 @@ class FuelAddOnCatalog {
       grams: 180,
       unit: AddOnUnit.gram,
       unitCount: 180,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'quinoa-cooked-150g',
@@ -265,6 +294,7 @@ class FuelAddOnCatalog {
       grams: 150,
       unit: AddOnUnit.gram,
       unitCount: 150,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'pasta-wholewheat-cooked-180g',
@@ -273,6 +303,7 @@ class FuelAddOnCatalog {
       grams: 180,
       unit: AddOnUnit.gram,
       unitCount: 180,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'sweet-potato-cooked-200g',
@@ -281,6 +312,7 @@ class FuelAddOnCatalog {
       grams: 200,
       unit: AddOnUnit.gram,
       unitCount: 200,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'rice-cakes-2',
@@ -289,6 +321,7 @@ class FuelAddOnCatalog {
       grams: 18,
       unit: AddOnUnit.piece,
       unitCount: 2,
+      source: FuelAddOn.sourceUsdaHousehold,
     ),
     FuelAddOn(
       id: 'wholemeal-bread-2-slices',
@@ -297,6 +330,7 @@ class FuelAddOnCatalog {
       grams: 70,
       unit: AddOnUnit.slice,
       unitCount: 2,
+      source: FuelAddOn.sourceCurated,
     ),
     // ---- fruit ----
     FuelAddOn(
@@ -306,6 +340,7 @@ class FuelAddOnCatalog {
       grams: 118,
       unit: AddOnUnit.piece,
       unitCount: 1,
+      source: FuelAddOn.sourceUsdaHousehold,
     ),
     FuelAddOn(
       id: 'apple-1',
@@ -314,6 +349,7 @@ class FuelAddOnCatalog {
       grams: 182,
       unit: AddOnUnit.piece,
       unitCount: 1,
+      source: FuelAddOn.sourceUsdaHousehold,
     ),
     FuelAddOn(
       id: 'orange-1',
@@ -322,6 +358,7 @@ class FuelAddOnCatalog {
       grams: 131,
       unit: AddOnUnit.piece,
       unitCount: 1,
+      source: FuelAddOn.sourceUsdaHousehold,
     ),
     FuelAddOn(
       id: 'dates-5',
@@ -330,6 +367,7 @@ class FuelAddOnCatalog {
       grams: 40,
       unit: AddOnUnit.piece,
       unitCount: 5,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'raisins-30g',
@@ -338,6 +376,7 @@ class FuelAddOnCatalog {
       grams: 30,
       unit: AddOnUnit.gram,
       unitCount: 30,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'blueberries-100g',
@@ -346,6 +385,7 @@ class FuelAddOnCatalog {
       grams: 100,
       unit: AddOnUnit.gram,
       unitCount: 100,
+      source: FuelAddOn.sourceCurated,
     ),
     // ---- nuts and seeds ----
     FuelAddOn(
@@ -355,6 +395,7 @@ class FuelAddOnCatalog {
       grams: 30,
       unit: AddOnUnit.gram,
       unitCount: 30,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'peanut-butter-2-tbsp',
@@ -363,6 +404,7 @@ class FuelAddOnCatalog {
       grams: 32,
       unit: AddOnUnit.tablespoon,
       unitCount: 2,
+      source: FuelAddOn.sourceUsdaHousehold,
     ),
     FuelAddOn(
       id: 'pumpkin-seeds-30g',
@@ -371,6 +413,7 @@ class FuelAddOnCatalog {
       grams: 30,
       unit: AddOnUnit.gram,
       unitCount: 30,
+      source: FuelAddOn.sourceCurated,
     ),
     FuelAddOn(
       id: 'avocado-100g',
@@ -379,6 +422,7 @@ class FuelAddOnCatalog {
       grams: 100,
       unit: AddOnUnit.gram,
       unitCount: 100,
+      source: FuelAddOn.sourceCurated,
     ),
   ];
 }

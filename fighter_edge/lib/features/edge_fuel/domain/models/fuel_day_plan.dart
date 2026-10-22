@@ -28,8 +28,9 @@ enum CarbTier { light, moderate, heavy }
 
 /// One dated session of the plan, in the pure input type Fuel works with.
 ///
-/// Fuel does not import the training-plan feature. The caller maps its dated
-/// plan onto this type, as it already does for [PlannedFuelSession].
+/// `TrainingPlanFuelBridge` maps the training plan's dated week onto this
+/// type. Any other dated session (a gym class the athlete logs ahead) can be
+/// passed the same way.
 class FuelDatedSession {
   const FuelDatedSession({
     required this.date,
@@ -37,10 +38,15 @@ class FuelDatedSession {
     required this.intensity,
     required this.durationMinutes,
     this.startMinuteOfDay,
+    this.sessionId,
   });
 
   /// Only the calendar day (year, month, day) is read.
   final DateTime date;
+
+  /// The plan's id for the session, so a hint can point back at it. Null for
+  /// a session that is not in the plan.
+  final String? sessionId;
   final FuelDiscipline discipline;
   final FuelIntensity intensity;
   final int durationMinutes;
@@ -115,7 +121,8 @@ class FuelDayPlan {
 
   final CarbTier carbTier;
 
-  /// The day's sessions in time order, shortest-duration noise removed.
+  /// The day's sessions in time order. Sessions with no duration are left
+  /// out.
   final List<FuelDatedSession> sessions;
 
   /// Planned session energy per kg of body weight, from the energy table.

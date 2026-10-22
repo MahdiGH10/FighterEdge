@@ -2,9 +2,9 @@ import 'dart:math' as math;
 
 import '../models/fuel_day_plan.dart';
 import '../models/fuel_guidance.dart';
-import '../models/planned_fuel_session.dart';
 import '../policies/fuel_day_policy.dart';
 import '../policies/session_energy_table.dart';
+import '../models/planned_fuel_session.dart';
 
 /// Day-type fuel guidance as a pure function of the dated training plan.
 ///
@@ -21,33 +21,31 @@ import '../policies/session_energy_table.dart';
 /// moves a session to another day.
 ///
 /// DIETITIAN SIGN-OFF PENDING: see [FuelDayPolicy]. Nothing here sets or
-/// changes a target. Under-18 or unknown age gets no guidance
-/// ([guidance] requires `adultConfirmed`).
+/// changes a target. Under-18 or unknown age gets no amounts: [guidance]
+/// returns null and [hints] gives reason codes only.
 class FuelDayPlanner {
   const FuelDayPlanner._();
 
-  /// Classifies [date]. Sessions on other days are ignored. A session with no
-  /// duration is ignored.
+  /// Classifies [date]. Sessions on other days, and sessions with no
+  /// duration, are ignored.
   static FuelDayPlan planDay({
     required DateTime date,
     required Iterable<FuelDatedSession> plan,
     FuelFightWindow? fight,
   }) {
     final sessions = _sessionsOn(date, plan);
-    final load = _loadOf(sessions);
-    final tier = _carbTierOf(load, sessions);
     final kcalPerKg = sessions.fold<double>(
       0,
       (sum, s) =>
-          sum +
-          SessionEnergyTable.sessionKcal(s.toPlannedFuelSession(0), 1.0),
+          sum + SessionEnergyTable.sessionKcal(s.toPlannedFuelSession(0), 1),
     );
+    final load = _loadOf(sessions, kcalPerKg);
     final inFight = fight?.contains(date) ?? false;
     return FuelDayPlan(
       date: DateTime(date.year, date.month, date.day),
       type: inFight ? FuelDayType.fightWeek : load,
       load: load,
-      carbTier: tier,
+      carbTier: _carbTierOf(load, sessions),
       sessions: List.unmodifiable(sessions),
       sessionKcalPerKg: kcalPerKg,
     );
@@ -61,43 +59,38 @@ class FuelDayPlanner {
     int days = 7,
   }) {
     final dated = plan.toList(growable: false);
-    final first = DateTime(start.year, start.month, start.day);
     return List.unmodifiable([
       for (var i = 0; i < days; i++)
         planDay(
           // DateTime's day overflow handles month ends. 12:00 keeps a DST
           // change from moving the calendar day.
-          date: DateTime(first.year, first.month, first.day + i, 12),
+          date: DateTime(start.year, start.month, start.day + i, 12),
           plan: dated,
           fight: fight,
         ),
     ]);
   }
 
-  /// Macro ranges in grams for [day]. Null when the athlete is not a
-  /// confirmed adult (rule 4: under-18 or unknown age gets no targets) or the
-  /// weight is not usable.
+  /// Macro guidance in grams for [day].
+  ///
+  /// Null when the athlete is not a confirmed adult (rule 4: under-18 or
+  /// unknown age gets no targets) or the weight is not usable. The floors are
+  /// always given. The ranges are given only when [amountsEnabled] is true and
+  /// the day is not in fight week.
   static FuelMacroGuidance? guidance(
     FuelDayPlan day, {
     required double weightKg,
     required bool adultConfirmed,
+    bool amountsEnabled = FuelDayPolicy.amountsEnabledByDefault,
   }) {
     if (!adultConfirmed) return null;
     if (!weightKg.isFinite || weightKg <= 0) return null;
-    final (carbLow, carbHigh) = switch (day.carbTier) {
-      CarbTier.light => (
-          FuelDayPolicy.carbLightLow,
-          FuelDayPolicy.carbLightHigh
-        ),
-      CarbTier.moderate => (
-          FuelDayPolicy.carbModerateLow,
-          FuelDayPolicy.carbModerateHigh
-        ),
-      CarbTier.heavy => (
-          FuelDayPolicy.carbHeavyLow,
-          FuelDayPolicy.carbHeavyHigh
-        ),
-    };
+    final status = day.isFightWeek
+        ? FuelRangeStatus.fightWeek
+        : (amountsEnabled
+            ? FuelRangeStatus.shown
+            : FuelRangeStatus.awaitingSignOff);
+    final show = status == FuelRangeStatus.shown;
     final carbFloorPerKg = day.load == FuelDayType.doubleDay
         ? FuelDayPolicy.carbFloorDoubleDayGPerKg
         : FuelDayPolicy.carbFloorGPerKg;
@@ -105,31 +98,66 @@ class FuelDayPlanner {
       dayType: day.type,
       carbTier: day.carbTier,
       weightKg: weightKg,
-      carbGramsLow: (carbLow * weightKg).round(),
-      carbGramsHigh: (carbHigh * weightKg).round(),
+      rangeStatus: status,
+      carbs: show ? carbRangeFor(day.carbTier).forWeight(weightKg) : null,
+      protein: show
+          ? const PerKgRange(
+              FuelDayPolicy.proteinLowGPerKg,
+              FuelDayPolicy.proteinHighGPerKg,
+            ).forWeight(weightKg)
+          : null,
+      fat: show
+          ? const PerKgRange(
+              FuelDayPolicy.fatLowGPerKg,
+              FuelDayPolicy.fatHighGPerKg,
+            ).forWeight(weightKg)
+          : null,
       carbFloorGrams: (carbFloorPerKg * weightKg).ceil(),
-      proteinGramsLow: (FuelDayPolicy.proteinLowGPerKg * weightKg).round(),
-      proteinGramsHigh: (FuelDayPolicy.proteinHighGPerKg * weightKg).round(),
       proteinFloorGrams: (FuelDayPolicy.proteinFloorGPerKg * weightKg).ceil(),
-      fatGramsLow: (FuelDayPolicy.fatLowGPerKg * weightKg).round(),
-      fatGramsHigh: (FuelDayPolicy.fatHighGPerKg * weightKg).round(),
       fatFloorGrams: (FuelDayPolicy.fatFloorGPerKg * weightKg).ceil(),
     );
   }
 
+  /// The g/kg carbohydrate range of a tier.
+  // dietitian sign-off pending
+  static PerKgRange carbRangeFor(CarbTier tier) => switch (tier) {
+        CarbTier.light => const PerKgRange(
+            FuelDayPolicy.carbLightLow,
+            FuelDayPolicy.carbLightHigh,
+          ),
+        CarbTier.moderate => const PerKgRange(
+            FuelDayPolicy.carbModerateLow,
+            FuelDayPolicy.carbModerateHigh,
+          ),
+        CarbTier.heavy => const PerKgRange(
+            FuelDayPolicy.carbHeavyLow,
+            FuelDayPolicy.carbHeavyHigh,
+          ),
+      };
+
   /// Pre- and post-session hints for each of the day's sessions, in time
-  /// order. Empty on a rest day. Reason codes and g/kg ranges only.
-  static List<SessionFuelHint> hints(FuelDayPlan day) {
+  /// order. Empty on a rest day.
+  ///
+  /// The reason codes always come through. The g/kg amounts come through only
+  /// for a confirmed adult with [amountsEnabled] on. No hint is about fluid,
+  /// sodium or skipping food.
+  static List<SessionFuelHint> hints(
+    FuelDayPlan day, {
+    required bool adultConfirmed,
+    bool amountsEnabled = FuelDayPolicy.amountsEnabledByDefault,
+  }) {
+    final amounts = adultConfirmed && amountsEnabled;
     final sessions = day.sessions;
     return List.unmodifiable([
       for (var i = 0; i < sessions.length; i++)
         SessionFuelHint(
           sessionIndex: i,
           session: sessions[i],
-          pre: _pre(sessions[i]),
+          pre: _pre(sessions[i], amounts: amounts),
           post: _post(
             sessions[i],
             next: i + 1 < sessions.length ? sessions[i + 1] : null,
+            amounts: amounts,
           ),
         ),
     ]);
@@ -160,44 +188,35 @@ class FuelDayPlanner {
     return [for (final e in indexed) e.$2];
   }
 
-  static FuelDayType _loadOf(List<FuelDatedSession> sessions) {
+  static FuelDayType _loadOf(
+    List<FuelDatedSession> sessions,
+    double sessionKcalPerKg,
+  ) {
     if (sessions.isEmpty) return FuelDayType.rest;
     final counted = sessions
-        .where(
-            (s) => s.durationMinutes >= FuelDayPolicy.minimumCountedSessionMinutes)
-        .toList();
-    final anyBeyondLight = sessions.any((s) => s.intensity != FuelIntensity.light);
-    if (counted.length >= 2 && anyBeyondLight) return FuelDayType.doubleDay;
-    final kcalPerKg = sessions.fold<double>(
-      0,
-      (sum, s) =>
-          sum +
-          SessionEnergyTable.sessionKcal(s.toPlannedFuelSession(0), 1.0),
-    );
+        .where((s) =>
+            s.durationMinutes >= FuelDayPolicy.minimumCountedSessionMinutes)
+        .toList(growable: false);
+    final countedBeyondLight =
+        counted.any((s) => s.intensity != FuelIntensity.light);
+    if (counted.length >= 2 && countedBeyondLight) return FuelDayType.doubleDay;
     final hard = sessions.any((s) => s.intensity == FuelIntensity.hard) ||
-        kcalPerKg >= FuelDayPolicy.hardDaySessionKcalPerKg;
+        sessionKcalPerKg >= FuelDayPolicy.hardDaySessionKcalPerKg;
     return hard ? FuelDayType.hard : FuelDayType.easy;
   }
 
   static CarbTier _carbTierOf(
     FuelDayType load,
     List<FuelDatedSession> sessions,
-  ) {
-    switch (load) {
-      case FuelDayType.rest:
-        return CarbTier.light;
-      case FuelDayType.easy:
-        final allLight =
-            sessions.every((s) => s.intensity == FuelIntensity.light);
-        return allLight ? CarbTier.light : CarbTier.moderate;
-      case FuelDayType.hard:
-      case FuelDayType.doubleDay:
-        return CarbTier.heavy;
-      case FuelDayType.fightWeek:
-        // Never passed: [_loadOf] does not return it.
-        return CarbTier.light;
-    }
-  }
+  ) =>
+      switch (load) {
+        FuelDayType.easy
+            when sessions.any((s) => s.intensity != FuelIntensity.light) =>
+          CarbTier.moderate,
+        FuelDayType.hard || FuelDayType.doubleDay => CarbTier.heavy,
+        // Rest, light-only training, and fight week (never a load).
+        _ => CarbTier.light,
+      };
 
   // ---- hints ----
 
@@ -205,17 +224,19 @@ class FuelDayPlanner {
       s.intensity == FuelIntensity.hard ||
       s.durationMinutes > FuelDayPolicy.longSessionMinutes;
 
-  static PreSessionFuel _pre(FuelDatedSession s) {
+  static PreSessionFuel _pre(FuelDatedSession s, {required bool amounts}) {
     if (_highIntensityOrLong(s)) {
-      return const PreSessionFuel(
+      return PreSessionFuel(
         need: FuelHintNeed.recommended,
-        carbs: PerKgRange(
-          FuelDayPolicy.preCarbLowGPerKg,
-          FuelDayPolicy.preCarbHighGPerKg,
-        ),
+        carbs: amounts
+            ? const PerKgRange(
+                FuelDayPolicy.preCarbLowGPerKg,
+                FuelDayPolicy.preCarbHighGPerKg,
+              )
+            : null,
         mealLeadHoursMin: FuelDayPolicy.preMealLeadHoursMin,
         mealLeadHoursMax: FuelDayPolicy.preMealLeadHoursMax,
-        reasons: [
+        reasons: const [
           FuelHintReason.highIntensityOrLong,
           FuelHintReason.lowFatBeforeSession,
           FuelHintReason.lowFibreBeforeSession,
@@ -234,35 +255,41 @@ class FuelDayPlanner {
     );
   }
 
-  static PostSessionFuel _post(FuelDatedSession s, {FuelDatedSession? next}) {
-    if (s.intensity == FuelIntensity.light && !_highIntensityOrLong(s)) {
+  static PostSessionFuel _post(
+    FuelDatedSession s, {
+    required FuelDatedSession? next,
+    required bool amounts,
+  }) {
+    final wantsCarbs = _highIntensityOrLong(s);
+    if (s.intensity == FuelIntensity.light && !wantsCarbs) {
       return const PostSessionFuel(
         need: FuelHintNeed.none,
         reasons: [FuelHintReason.lightSession],
       );
     }
-    const protein = PerKgRange(
-      FuelDayPolicy.postProteinLowGPerKg,
-      FuelDayPolicy.postProteinHighGPerKg,
-    );
+    final protein = amounts
+        ? const PerKgRange(
+            FuelDayPolicy.postProteinLowGPerKg,
+            FuelDayPolicy.postProteinHighGPerKg,
+          )
+        : null;
     final reasons = <FuelHintReason>[FuelHintReason.proteinDoseAfter];
-    final wantsCarbs = _highIntensityOrLong(s);
     final gapHours = next == null ? null : _gapHours(s, next);
-    final soon = gapHours != null &&
-        gapHours < FuelDayPolicy.quickTurnaroundHours;
+    final soon =
+        gapHours != null && gapHours < FuelDayPolicy.quickTurnaroundHours;
     if (next != null) {
       reasons.add(soon
           ? FuelHintReason.nextSessionSoon
           : FuelHintReason.nextSessionSameDay);
     }
     if (!wantsCarbs) {
-      // Moderate session: protein dose only. The day's carbohydrate tier
+      // Moderate session: a protein dose only. The day's carbohydrate tier
       // covers the rest.
       return PostSessionFuel(
         need: FuelHintNeed.recommended,
         protein: protein,
         proteinWithinHours: FuelDayPolicy.postProteinWithinHours,
-        reasons: reasons,
+        reasons: List.unmodifiable(reasons),
       );
     }
     reasons.add(FuelHintReason.carbRefillAfter);
@@ -271,27 +298,31 @@ class FuelDayPlanner {
         need: FuelHintNeed.recommended,
         protein: protein,
         proteinWithinHours: FuelDayPolicy.postProteinWithinHours,
-        carbsPerHour: const PerKgRange(
-          FuelDayPolicy.quickCarbLowGPerKgPerHour,
-          FuelDayPolicy.quickCarbHighGPerKgPerHour,
-        ),
+        carbsPerHour: amounts
+            ? const PerKgRange(
+                FuelDayPolicy.quickCarbLowGPerKgPerHour,
+                FuelDayPolicy.quickCarbHighGPerKgPerHour,
+              )
+            : null,
         carbsPerHourForHours: math.min(
           FuelDayPolicy.quickTurnaroundHours,
           math.max(1, gapHours.ceil()),
         ),
-        reasons: reasons,
+        reasons: List.unmodifiable(reasons),
       );
     }
     return PostSessionFuel(
       need: FuelHintNeed.recommended,
       protein: protein,
       proteinWithinHours: FuelDayPolicy.postProteinWithinHours,
-      carbs: const PerKgRange(
-        FuelDayPolicy.postCarbLowGPerKg,
-        FuelDayPolicy.postCarbHighGPerKg,
-      ),
+      carbs: amounts
+          ? const PerKgRange(
+              FuelDayPolicy.postCarbLowGPerKg,
+              FuelDayPolicy.postCarbHighGPerKg,
+            )
+          : null,
       carbWithinMinutes: FuelDayPolicy.postCarbWithinMinutes,
-      reasons: reasons,
+      reasons: List.unmodifiable(reasons),
     );
   }
 
