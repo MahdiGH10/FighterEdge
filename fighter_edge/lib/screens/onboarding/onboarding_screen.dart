@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_icons.dart';
 
+import '../../billing/billing_gateway.dart';
 import '../../controllers/auth_controller.dart';
 import '../../features/edge_fuel/data/edge_fuel_repository.dart';
 import '../../features/edge_fuel/domain/calculators/nutrition_target_calculator.dart';
@@ -99,14 +100,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         isBusy: auth.isBusy,
         onOpenDashboard: _finishOnboarding,
         onViewFuelPlan: () => _finishOnboarding(openFuelPlan: true),
-        onViewPro: () => AppNavigation.push(
-          context,
-          AppRoutes.paywall,
-          extra: const PaywallRouteArgs(trigger: PaywallTrigger.planReady),
-          fallbackBuilder: (_) => const PaywallScreen(
-            trigger: PaywallTrigger.planReady,
-          ),
-        ),
+        trialDays: _offeredTrialDays(auth),
+        onStartTrial: _startTrial,
       );
     }
     final step = OnboardingStepContent.fromIndex(
@@ -364,6 +359,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await repo.saveProfileDraft(userId, profileDraft);
     await repo.saveTarget(userId, target);
     return target;
+  }
+
+  /// The free-trial length the store offers for the plan the gate shows
+  /// first (annual), or null when it offers none.
+  int? _offeredTrialDays(AuthController auth) {
+    final products = auth.billingProducts;
+    final first = products
+            .where((p) => p.period == BillingProductPeriod.annual)
+            .firstOrNull ??
+        products.firstOrNull;
+    return first?.freeTrial?.days;
+  }
+
+  /// The entry gate. A purchase the store accepted carries straight on into
+  /// the app; backing out leaves the plan reveal as it was.
+  Future<void> _startTrial() async {
+    final started = await AppNavigation.push<bool>(
+      context,
+      AppRoutes.paywall,
+      extra: const PaywallRouteArgs(trigger: PaywallTrigger.planReady),
+      fallbackBuilder: (_) => const PaywallScreen(
+        trigger: PaywallTrigger.planReady,
+      ),
+    );
+    if (started == true && mounted) await _finishOnboarding();
   }
 
   Future<void> _finishOnboarding({bool openFuelPlan = false}) async {

@@ -228,6 +228,27 @@ class FakeReminderGateway implements ReminderGateway {
     cancelled = true;
     scheduledWeekdays = null;
   }
+
+  /// When the trial-end reminder is set for, and what it says.
+  DateTime? trialReminderAt;
+  String? trialReminderTitle;
+  int trialReminderCancels = 0;
+
+  @override
+  Future<void> scheduleTrialEndReminder({
+    required DateTime at,
+    required String title,
+    required String body,
+  }) async {
+    trialReminderAt = at;
+    trialReminderTitle = title;
+  }
+
+  @override
+  Future<void> cancelTrialEndReminder() async {
+    trialReminderCancels++;
+    trialReminderAt = null;
+  }
 }
 
 /// One move of a live reaction-drill call, as the athlete reads it: the move

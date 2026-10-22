@@ -26,6 +26,7 @@ import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import '../widgets/access_status.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/dev_message_card.dart';
 import '../widgets/number_hero.dart';
@@ -95,6 +96,8 @@ class DashboardScreen extends StatelessWidget {
                 style: AppType.subhead(
                     color: AppAccessibility.textSecondary(context))),
           const SizedBox(height: Insets.lg),
+          // "Trial · N days left", or the read-only banner once it ended.
+          const AccessStatus(),
           if (firstRun.isActive) ...[
             FirstWeekChecklist(
                 key: checklistKey,

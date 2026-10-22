@@ -105,17 +105,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Upgrade'));
     await tester.pumpAndSettle();
-    expect(find.text('Your corner, every day'), findsOneWidget);
-    expect(find.text('Pro opens soon'), findsOneWidget);
+    expect(find.text('Your camp, planned and fueled'), findsOneWidget);
 
-    // Billing is not wired yet: the CTA records interest honestly and must
-    // not grant Pro from the client or pretend to be a checkout.
-    await tester.tap(find.byType(PrimaryButton)); // Notify me when Pro opens.
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Pro will appear here when it opens'),
-        findsOneWidget);
-    expect(find.textContaining(RegExp("on the list", caseSensitive: false)),
-        findsOneWidget);
+    // Billing is not wired in this build: the paywall says so plainly, offers
+    // no checkout and no waitlist, and must not grant Pro from the client.
+    await tester.scrollUntilVisible(
+        find.text("Subscriptions aren't available here yet"), 300,
+        scrollable: find.byType(Scrollable).first);
+    expect(find.textContaining('waitlist'), findsNothing);
+    expect(find.text('Start free trial'), findsNothing);
 
     // Pro remains locked until a trusted billing backend grants it.
     expect(repo.currentUser!.isPro, isFalse);

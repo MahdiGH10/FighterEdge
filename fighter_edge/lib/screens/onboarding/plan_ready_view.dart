@@ -34,7 +34,14 @@ class PlanReadyView extends StatelessWidget {
   final bool isBusy;
   final VoidCallback onOpenDashboard;
   final VoidCallback onViewFuelPlan;
-  final VoidCallback onViewPro;
+
+  /// Opens the paywall: the entry gate, not an upsell.
+  final VoidCallback onStartTrial;
+
+  /// The store's free-trial length for the plan the gate will offer, or null
+  /// when the store offers none (or has not answered). The button only says
+  /// "free" when this is set.
+  final int? trialDays;
 
   const PlanReadyView(
       {super.key,
@@ -42,7 +49,8 @@ class PlanReadyView extends StatelessWidget {
       required this.isBusy,
       required this.onOpenDashboard,
       required this.onViewFuelPlan,
-      required this.onViewPro});
+      required this.onStartTrial,
+      this.trialDays});
 
   @override
   Widget build(BuildContext context) {
@@ -98,37 +106,33 @@ class PlanReadyView extends StatelessWidget {
             Text(l.planReadyMissingTarget,
                 style: AppType.callout(color: AppColors.textSecondary)),
           const SizedBox(height: Insets.xl),
-          PrimaryButton(isBusy ? 'Opening your dashboard...' : 'Open dashboard',
+          PrimaryButton(
+              switch (trialDays) {
+                null => l.planReadyViewPlans,
+                7 => l.planReadyStartFreeWeek,
+                final days => l.planReadyStartTrialDays(days),
+              },
+              expand: true,
+              onPressed: isBusy
+                  ? null
+                  : () {
+                      Telemetry.fromContext(context)
+                          .track(TelemetryEvent.premiumCtaTapped, parameters: {
+                        'surface': 'plan_ready',
+                        'access': 'free'
+                      });
+                      onStartTrial();
+                    }),
+          const SizedBox(height: Insets.sm),
+          GhostButton(isBusy ? 'Opening your dashboard...' : 'Open dashboard',
               expand: true, onPressed: isBusy ? null : onOpenDashboard),
+          const SizedBox(height: Insets.xs),
+          Text(l.planReadyNotNowNote,
+              textAlign: TextAlign.center,
+              style: AppType.micro(color: AppColors.textMuted)),
           const SizedBox(height: Insets.sm),
           GhostButton('View fuel plan',
               expand: true, onPressed: isBusy ? null : onViewFuelPlan),
-          const SizedBox(height: Insets.xl),
-          Text(l.planReadyProTitle,
-              style: AppType.headline(color: AppColors.premium)),
-          const SizedBox(height: Insets.sm),
-          Text(l.planReadyProBody,
-              style: AppType.callout(color: AppColors.textSecondary)),
-          Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                    foregroundColor: AppColors.premium,
-                    minimumSize: const Size(AppAccessibility.minTouchTarget,
-                        AppAccessibility.minTouchTarget)),
-                onPressed: isBusy
-                    ? null
-                    : () {
-                        Telemetry.fromContext(context).track(
-                            TelemetryEvent.premiumCtaTapped,
-                            parameters: {
-                              'surface': 'plan_ready',
-                              'access': 'free'
-                            });
-                        onViewPro();
-                      },
-                child: const Text('See Pro options'),
-              )),
           const SizedBox(height: Insets.md),
           Text(
               'Targets are estimates, not medical advice. Review your inputs anytime in EdgeFuel.',

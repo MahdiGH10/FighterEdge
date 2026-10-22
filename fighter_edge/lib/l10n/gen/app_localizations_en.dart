@@ -428,20 +428,6 @@ class LEn extends L {
   String get timerAnnounceDone => 'Session complete.';
 
   @override
-  String get paywallWaitlistCta => 'Notify me when Pro opens';
-
-  @override
-  String get paywallWaitlistJoined => 'You\'re on the list';
-
-  @override
-  String get paywallWaitlistThanks =>
-      'Noted. Pro will appear here when it opens, with the price shown before any charge.';
-
-  @override
-  String get paywallWaitlistBody =>
-      'Pro can\'t be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.';
-
-  @override
   String get paywallRenewalDisclosure =>
       'Subscriptions renew automatically at the price and period shown above unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple ID or Google Play account when you confirm the purchase. You can manage or cancel your subscription at any time in your store account settings.';
 
@@ -1165,13 +1151,6 @@ class LEn extends L {
       'Your plan is based on your goals and training days. You can adjust it as your training changes.';
 
   @override
-  String get planReadyProTitle => 'More training tools with Pro';
-
-  @override
-  String get planReadyProBody =>
-      'Pro includes all drills and recipes, and cues between rounds.';
-
-  @override
   String get planReadyCalories => 'Daily calories';
 
   @override
@@ -1205,7 +1184,7 @@ class LEn extends L {
   }
 
   @override
-  String get paywallPlainTitle => 'Your corner, every day';
+  String get paywallPlainTitle => 'Your camp, planned and fueled';
 
   @override
   String get paywallPlainSubtitle => 'One plan. Everything in Fighter Edge.';
@@ -1274,13 +1253,6 @@ class LEn extends L {
   @override
   String get paywallSync =>
       'Your store purchase is recognized. Pro unlocks after the secure account sync completes.';
-
-  @override
-  String get paywallSoonTitle => 'Pro opens soon';
-
-  @override
-  String get paywallNoPaymentToday =>
-      'No payment today. We will ask again before any charge.';
 
   @override
   String get paywallPurchaseActive => 'Pro is active on your account.';
@@ -1865,4 +1837,118 @@ class LEn extends L {
 
   @override
   String get reactionMoveTimeNote => 'Plus the time the moves themselves take.';
+
+  @override
+  String get paywallBenefitCampTitle => 'Your camp week';
+
+  @override
+  String get paywallBenefitCampBody =>
+      'Dated sessions for your week, built around your level and your fight date.';
+
+  @override
+  String get paywallBenefitFuelTitle => 'Fuel for training days';
+
+  @override
+  String get paywallBenefitFuelBody =>
+      'Calorie and protein targets that move with the week you train.';
+
+  @override
+  String get paywallBenefitReviewTitle => 'Weekly review';
+
+  @override
+  String get paywallBenefitReviewBody =>
+      'Each Sunday: what you did and what to change. You decide.';
+
+  @override
+  String get paywallBenefitWeightTitle => 'Safe weight path';
+
+  @override
+  String get paywallBenefitWeightBody =>
+      'A weight path to your fight date, with safety limits.';
+
+  @override
+  String paywallTrialBadge(int days) {
+    return '$days-day free trial';
+  }
+
+  @override
+  String paywallTrialThen(int days, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days free, then $price',
+      one: '1 day free, then $price',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get paywallStartTrial => 'Start free trial';
+
+  @override
+  String paywallTrialRenewalDisclosure(int days, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return 'Free for $_temp0, then $price, renewing automatically until you cancel. Cancel at least 24 hours before the trial ends in your store account settings to avoid being charged. Payment is charged to your Apple ID or Google Play account at the end of the trial.';
+  }
+
+  @override
+  String get paywallTrialActiveTitle => 'Your free trial is running';
+
+  @override
+  String get paywallTrialActiveBody =>
+      'It becomes a paid plan when the trial ends unless you cancel in your store account.';
+
+  @override
+  String get paywallUnavailableTitle =>
+      'Subscriptions aren\'t available here yet';
+
+  @override
+  String get paywallUnavailableBody =>
+      'This version can\'t start a subscription yet. Your data stays saved.';
+
+  @override
+  String get readOnlyBanner =>
+      'Your data is saved. Subscribe to keep training.';
+
+  @override
+  String get readOnlyBannerCta => 'See plans';
+
+  @override
+  String trialChipDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Trial · $days days left',
+      one: 'Trial · 1 day left',
+      zero: 'Trial · ends today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get trialReminderTitle => 'Your free trial ends in 2 days';
+
+  @override
+  String get trialReminderBody =>
+      'It renews unless you cancel in your store account. Your data stays saved either way.';
+
+  @override
+  String get planReadyStartFreeWeek => 'Start your free week';
+
+  @override
+  String planReadyStartTrialDays(int days) {
+    return 'Start your $days-day free trial';
+  }
+
+  @override
+  String get planReadyViewPlans => 'See plans';
+
+  @override
+  String get planReadyNotNowNote =>
+      'Your plan stays saved. Logging needs a subscription.';
 }

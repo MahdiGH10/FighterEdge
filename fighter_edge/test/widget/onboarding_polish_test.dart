@@ -50,7 +50,7 @@ void main() {
       expect(chip.selected, isTrue);
       expect(tester.takeException(), isNull);
     });
-    testWidgets('plan ready puts dashboard before Pro and fits scale $scale',
+    testWidgets('plan ready leads with the free week and fits scale $scale',
         (tester) async {
       tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1;
@@ -80,19 +80,14 @@ void main() {
                   isBusy: false,
                   onOpenDashboard: () => opened = true,
                   onViewFuelPlan: () {},
-                  onViewPro: () {})),
+                  trialDays: 7,
+                  onStartTrial: () {})),
           repo: repo));
       await tester.pumpAndSettle();
       expect(find.byType(BrandLogo), findsNothing);
+      await tester.scrollUntilVisible(find.text('Start your free week'), 250);
+      expect(find.text('See Pro options'), findsNothing);
       await tester.scrollUntilVisible(find.text('Open dashboard'), 250);
-      final actionY = tester.getTopLeft(find.text('Open dashboard')).dy;
-      if (find.text('More training tools with Pro').evaluate().isNotEmpty) {
-        expect(
-            actionY,
-            lessThan(tester
-                .getTopLeft(find.text('More training tools with Pro'))
-                .dy));
-      }
       await Scrollable.ensureVisible(
           tester.element(find.text('Open dashboard')),
           alignment: .5);
@@ -100,7 +95,6 @@ void main() {
       await tester.tap(find.text('Open dashboard'));
       await tester.pump();
       expect(opened, isTrue);
-      await tester.scrollUntilVisible(find.text('See Pro options'), 250);
       expect(tester.takeException(), isNull);
     });
   }
