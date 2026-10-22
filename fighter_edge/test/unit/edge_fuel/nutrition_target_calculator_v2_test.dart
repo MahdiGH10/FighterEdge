@@ -63,12 +63,14 @@ NutritionTargetV2 _calc(
   List<PlannedFuelSession>? week,
   double? rate,
   bool shift = true,
+  bool camp = false,
 }) =>
     NutritionTargetCalculatorV2.calculate(
       p,
       plannedWeek: week ?? _fiveSessionWeek(),
       now: _now,
       weeklyRatePercent: rate,
+      inFightCamp: camp,
       trainingDayShift: shift,
     );
 
@@ -266,14 +268,48 @@ void main() {
           avgFor(GoalPace.standard), greaterThan(avgFor(GoalPace.upperLimit)));
     });
 
-    test('an explicit rate overrides the pace and is clamped to 1%', () {
+    test('an explicit camp rate overrides the pace and is clamped to 1%', () {
       final p = _profile(
           goal: NutritionGoal.loseFat, target: 70, pace: GoalPace.gentle);
-      final camp = _calc(p, rate: 1.0);
+      final camp = _calc(p, rate: 1.0, camp: true);
       expect(camp.appliedWeeklyChangePercent, closeTo(-1.0, 0.1));
-      final tooFast = _calc(p, rate: 4.0);
+      final tooFast = _calc(p, rate: 4.0, camp: true);
       expect(tooFast.warnings, contains('weightRateAdjusted'));
       expect(tooFast.weeklyAverageCalories, camp.weeklyAverageCalories);
+    });
+
+    test('outside a camp the same rate is clamped to 0.75%', () {
+      final p = _profile(
+          goal: NutritionGoal.loseFat, target: 70, pace: GoalPace.gentle);
+      final t = _calc(p, rate: 1.0);
+      expect(t.warnings, contains('weightRateAdjusted'));
+      expect(t.appliedWeeklyChangePercent, closeTo(-0.75, 0.05));
+    });
+
+    test('a hard-training loser is held at the energy-availability floor', () {
+      // Light, short athlete training five times a week: resting energy plus
+      // half the session energy is above maintenance minus the camp rate.
+      final p = _profile(
+        goal: NutritionGoal.loseFat,
+        weight: 60,
+        height: 165,
+        age: 25,
+        target: 55,
+        equation: EquationProfile.lowerOffset,
+        activity: ActivityLevel.veryLow,
+      );
+      final t = _calc(p, rate: 1.0, camp: true);
+      expect(t.isSuccess, isTrue);
+      final ea = t.energyAvailabilityFloorKcal!;
+      expect(ea, greaterThan(t.estimatedRmrKcal!));
+      expect(
+        ea,
+        NutritionPolicyV2.ceilToTen(
+          t.estimatedRmrKcal! + 0.5 * t.sessionEnergyKcalPerWeek! / 7,
+        ),
+      );
+      expect(t.weeklyAverageCalories, greaterThanOrEqualTo(ea - 10));
+      expect(t.warnings, contains('goalRateReducedForEnergyAvailability'));
     });
 
     test('a heavy athlete is held to 1 kg a week, below 1%', () {
