@@ -147,7 +147,8 @@ void main() {
   group('GlassPolicyController', () {
     setUp(() => SharedPreferences.setMockInitialValues({}));
 
-    test('starts tinted until the device proves it can draw full glass', () async {
+    test('starts tinted until the device proves it can draw full glass',
+        () async {
       final c = GlassPolicyController(probe: FrameProbe(source: _FakeSource()));
       await c.load();
       expect(c.isLoaded, isTrue);
