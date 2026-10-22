@@ -4,26 +4,28 @@ import 'text_normalizer.dart';
 /// restriction, water loading, sauna, sweat suits, diuretics, laxatives or
 /// fasting. No flag, tier or subscription unlocks it.
 ///
-/// This is the denylist. It runs on any text: UI strings, notifications,
-/// recipe notes, and anything an AI model returns. It is deliberately strict:
-/// it does not try to read negation, so "never use a sauna" is flagged too.
-/// Copy that explains the policy has to say it without naming the method
-/// ("Fighter Edge plans food only"). A false positive costs a rewrite; a
-/// false negative puts a banned instruction on a fighter's screen.
+/// This is the denylist. It runs on any text: UI strings (the copy lint runs
+/// it over both ARB files), notifications, recipe notes, and anything an AI
+/// model returns. It is deliberately strict: it does not try to read
+/// negation, so "never use a sauna" is flagged too. Copy that explains the
+/// policy should say it without naming the method ("Fighter Edge plans food
+/// only"); where naming it is the point, the ARB test keeps a short,
+/// reasoned allowlist. A false positive costs a rewrite; a false negative
+/// puts a banned instruction on a fighter's screen.
 ///
-/// Dietitian sign-off pending: the list of terms and patterns is a safety
-/// screen written from the ISSN 2025 position stand and the ACSM 2021
-/// consensus, and has not been reviewed by a sports dietitian. Pure Dart: no
-/// clock, no platform, no network.
+/// Pure Dart: no clock, no platform, no network.
+// dietitian sign-off pending: the terms and patterns are a safety screen
+// written from the ISSN 2025 position stand (points 9-12) and the ACSM 2021
+// consensus (Table 6), not yet reviewed by a sports dietitian.
 enum BannedAdviceCategory {
-  /// Cutting or limiting drinking water or other fluids, or dehydrating on
+  /// Cutting or limiting water or other fluids, spitting, or dehydrating on
   /// purpose.
   fluidRestriction,
 
   /// Cutting, loading or counting sodium or salt for weight.
   sodiumManipulation,
 
-  /// Water loading.
+  /// Water loading and distilled-water tricks.
   waterLoading,
 
   /// Sauna, steam room, hot bath, sweat suit, plastic or rubber suit.
@@ -41,7 +43,7 @@ enum BannedAdviceCategory {
 
 /// One banned phrase found in a text. [matched] is the folded text that
 /// matched, for a developer reading a failed test; never log it, because the
-/// scanned text can be user content.
+/// scanned text can be user or model content.
 class BannedAdviceMatch {
   const BannedAdviceMatch(this.category, this.matched);
 
@@ -49,14 +51,22 @@ class BannedAdviceMatch {
   final String matched;
 
   @override
+  bool operator ==(Object other) =>
+      other is BannedAdviceMatch &&
+      other.category == category &&
+      other.matched == matched;
+
+  @override
+  int get hashCode => Object.hash(category, matched);
+
+  @override
   String toString() => 'BannedAdviceMatch(${category.name}: "$matched")';
 }
 
-final RegExp _numberUnit = RegExp(
-  r'\d+(?:\s+\d+)*\s*(?:mg|g|grams?|mmol|meq)\b',
-);
-
 RegExp _re(String pattern) => RegExp(pattern);
+
+/// A number with a sodium unit: "2300 mg", "50 mmol".
+const String _numberUnit = r'\d+(?:\s+\d+)*\s*(?:mg|g|grams?|mmol|meq)\b';
 
 /// Words that put a limit on something: "cut", "limit", "no", "less".
 const String _limitVerbs = r'(?:restrict(?:ing|ed)?|limit(?:ing|ed)?|'
@@ -65,6 +75,8 @@ const String _limitVerbs = r'(?:restrict(?:ing|ed)?|limit(?:ing|ed)?|'
     r'stop(?:ping)?|avoid(?:ing)?|drop(?:ping)?|less|no|zero|without|'
     r'skip(?:ping)?|low|lowest)';
 
+/// Up to three small words between the verb and the noun: "cut back on
+/// your water".
 const String _fillers = r'(?:(?:your|the|all|any|of|on|down|back|in|out|'
     r'dietary|added|table|extra)\s+){0,3}';
 
@@ -93,6 +105,8 @@ final Map<BannedAdviceCategory, List<RegExp>> _patterns = {
         r'(?:off\s+|out\s+)?(?:the\s+|your\s+|that\s+|some\s+|extra\s+)?'
         r'water\s+weight\b'),
     _re(r'\bwater\s+weight\s+(?:cut|loss|manipulation)\b'),
+    // Spitting to shed the last grams of fluid.
+    _re(r'\bspit(?:ting)?\s+(?:to|into|in|out|off|for|your|it|weight)\b'),
     // German.
     _re(r'\b(?:weniger|nicht|kein(?:e|en)?|ohne)\s+(?:mehr\s+)?'
         r'(?:wasser|flussigkeit|trinken)\b'),
@@ -100,6 +114,8 @@ final Map<BannedAdviceCategory, List<RegExp>> _patterns = {
         r'reduzieren|begrenzen)'),
     _re(r'\b(?:trinken|flussigkeit|wasser)\s+(?:reduzieren|begrenzen|'
         r'einschranken|weglassen)'),
+    _re(r'\bwasser\s*cut\b'),
+    _re(r'\bausspucken\b'),
   ],
   BannedAdviceCategory.sodiumManipulation: [
     _re(r'\b' +
@@ -113,9 +129,8 @@ final Map<BannedAdviceCategory, List<RegExp>> _patterns = {
         r'reduzieren|reduktion|weglassen)\b'),
     _re(r'\b(?:load|loading|loaded|boost|boosting|extra|megadose|'
         r'pile on|binge on)\s+(?:up\s+)?(?:on\s+|with\s+)?(?:sodium|salt)\b'),
-    _re(r'\b(?:sodium|salt|natrium)\s+(?:\w+\s+){0,2}' +
-        _numberUnit.pattern),
-    _re(_numberUnit.pattern + r'\s+(?:of\s+)?(?:sodium|salt|natrium)\b'),
+    _re(r'\b(?:sodium|salt|natrium)\s+(?:\w+\s+){0,2}' + _numberUnit),
+    _re(r'\b' + _numberUnit + r'\s+(?:of\s+)?(?:sodium|salt|natrium)\b'),
   ],
   BannedAdviceCategory.waterLoading: [
     _re(r'\bwater\s*load(?:ing|ed|s)?\b'),
@@ -125,14 +140,16 @@ final Map<BannedAdviceCategory, List<RegExp>> _patterns = {
     _re(r'\bgallons?\b'),
     _re(r'\b(?:\d+(?:\s+\d+)?|several|many)\s+(?:l|liters?|litres?)\s+of\s+'
         r'water\s+(?:a|per|each|every)\s+day\b'),
-    _re(r'\b(?:wasser)\s*(?:laden|beladung|aufladen)'),
+    _re(r'\bdistill?ed\s+water\b'),
+    _re(r'\bwasser\s*(?:laden|beladung|aufladen)'),
+    _re(r'\bdestilliert\w*\s+wasser\b'),
   ],
   BannedAdviceCategory.heatSweating: [
     _re(r'\bsaunas?\b'),
     _re(r'\bsteam\s*(?:room|bath|rooms|baths)\b'),
     _re(r'\bhot\s+(?:bath|baths|tub|room|box|yoga|bikram)\b'),
     _re(r'\bhot\s*box\b'),
-    _re(r'\bsweat\s*(?:suit|suits|box|gear)\b'),
+    _re(r'\bsweat\s*(?:suit|suits|box|gear|jacket)\b'),
     _re(r'\b(?:rubber|plastic|neoprene|heated|trash\s*bag|bin\s*bag|'
         r'garbage\s*bag)\s*(?:suit|suits|wrap|wraps|bag|bags|jacket)\b'),
     _re(r'\b(?:sweat|sweating)\s+(?:it\s+|them\s+)?(?:off|out)\b'),
@@ -147,6 +164,7 @@ final Map<BannedAdviceCategory, List<RegExp>> _patterns = {
     _re(r'\b(?:lasix|furosemide|frusemide|hydrochlorothiazide|hctz|'
         r'spironolactone|torsemide|bumetanide|acetazolamide|diamox|'
         r'triamterene|amiloride|masking agents?)\b'),
+    _re(r'\bdandelion\s+(?:root|tea|extract|pills?)\b'),
     _re(r'\bflush(?:ing)?\s+(?:out\s+)?(?:water|fluids?)\b'),
     _re(r'\b(?:entwasser\w*|diuretik\w*|wassertablette\w*|harntreib\w*)\b'),
   ],
@@ -171,19 +189,21 @@ final Map<BannedAdviceCategory, List<RegExp>> _patterns = {
     _re(r'\bstarv(?:e|ed|ing|ation)\b'),
     _re(r'\b(?:eat|eating)\s+(?:nothing|very little|almost nothing)\b'),
     _re(r'\b(?:stop|stopped|quit)\s+eating\b'),
-    _re(r'\b(?:dont|do not|never|cant|cannot)\s+eat\b'),
+    // "Don't eat anything until the weigh-in", not "don't eat new foods".
+    _re(r'\b(?:dont|do not|never|cant|cannot)\s+eat\s+(?:anything|at all|'
+        r'for\s+\d|until|till|after|before|all day|today|tomorrow)\b'),
     _re(r'\bno\s+food\s+(?:for|until|till|after|today|all)\b'),
     _re(r'\bnothing\s+to\s+eat\b'),
     _re(r'\bcrash\s+diet\b'),
     _re(r'\bvery\s+low\s+calorie\b'),
     _re(r'\bvlcd\b'),
-    _re(r'\b(?:fasten|hungern|nichts\s+essen|mahlzeit(?:en)?\s+auslassen|'
-        r'essen\s+auslassen)\b'),
+    _re(r'\b(?:fasten|hungern|nichts\s+(?:mehr\s+)?essen|'
+        r'mahlzeit(?:en)?\s+auslassen|essen\s+auslassen)\b'),
   ],
 };
 
-/// Tokens that stay unambiguous with the spaces taken out, so
-/// "s.a.u.n.a" and "sweat_suit" cannot slip past the word patterns.
+/// Tokens that stay unambiguous with the spaces taken out, so "sau na" and
+/// "s4un4" cannot slip past the word patterns.
 const Map<BannedAdviceCategory, List<String>> _squashed = {
   BannedAdviceCategory.heatSweating: ['sauna', 'sweatsuit'],
   BannedAdviceCategory.diuretic: ['diuretic'],
@@ -194,36 +214,39 @@ const Map<BannedAdviceCategory, List<String>> _squashed = {
 class BannedAdviceValidator {
   const BannedAdviceValidator._();
 
-  /// Dietitian sign-off pending: see the class comment of
-  /// [BannedAdviceCategory].
+  // dietitian sign-off pending: see [BannedAdviceCategory].
   static const bool dietitianSignOffPending = true;
 
-  /// Every banned phrase in [text], at most one per category and pattern.
-  /// Empty when the text is clean.
+  /// Every banned phrase in [text], at most one per pattern. Empty when the
+  /// text is clean.
   static List<BannedAdviceMatch> scan(String text) {
     final matches = <BannedAdviceMatch>[];
-    final folded = normalizeForScan(text);
+    final forms = {
+      normalizeForScan(text),
+      normalizeForScan(text, deleet: true),
+    };
     for (final entry in _patterns.entries) {
       for (final pattern in entry.value) {
-        final match = pattern.firstMatch(folded);
-        if (match != null) {
-          matches.add(BannedAdviceMatch(entry.key, match.group(0)!.trim()));
-        }
-      }
-    }
-    final seen = {for (final m in matches) m.category};
-    for (final deleet in const [false, true]) {
-      final squashed = squashForScan(text, deleet: deleet);
-      for (final entry in _squashed.entries) {
-        if (seen.contains(entry.key)) continue;
-        for (final token in entry.value) {
-          if (squashed.contains(token)) {
-            matches.add(BannedAdviceMatch(entry.key, token));
-            seen.add(entry.key);
+        for (final form in forms) {
+          final match = pattern.firstMatch(form);
+          if (match != null) {
+            matches.add(BannedAdviceMatch(entry.key, match[0]!.trim()));
             break;
           }
         }
       }
+    }
+    final seen = {for (final m in matches) m.category};
+    final squashed = {
+      squashForScan(text),
+      squashForScan(text, deleet: true),
+    };
+    for (final entry in _squashed.entries) {
+      if (seen.contains(entry.key)) continue;
+      final token = entry.value
+          .where((t) => squashed.any((form) => form.contains(t)))
+          .firstOrNull;
+      if (token != null) matches.add(BannedAdviceMatch(entry.key, token));
     }
     return matches;
   }
@@ -232,6 +255,8 @@ class BannedAdviceValidator {
   static Set<BannedAdviceCategory> categories(String text) =>
       {for (final m in scan(text)) m.category};
 
-  /// True when [text] contains no banned advice.
+  /// True when [text] contains no banned advice. Use it as the gate for any
+  /// generated text: a false result means the text is dropped and replaced
+  /// with the "talk to a professional" card, never edited and shown.
   static bool isClean(String text) => scan(text).isEmpty;
 }
