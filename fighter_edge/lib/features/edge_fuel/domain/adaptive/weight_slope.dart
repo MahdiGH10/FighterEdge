@@ -89,8 +89,11 @@ class WeightSlope {
 /// 2. Outlier: a day more than `max(1.5 kg, 2% of the median)` from the median
 ///    of the other readings within 3 days either side is dropped. A day with
 ///    fewer than two neighbours cannot be judged and stays.
-/// 3. The line needs 12 days and a 14-day span over 21 days, or 8 days and a
-///    10-day span over the 14-day fallback.
+/// 3. The line needs 9 days and a 14-day span over 21 days, or 6 days and a
+///    10-day span over the 14-day fallback. Both are "3 weigh-ins a week",
+///    the Tier 1 gate, so a user who reaches Tier 1 always has a slope; a
+///    thin line is answered by a wide noise band (more "on pace" holds), not
+///    by a stricter count.
 ///
 /// Water events (salt, creatine, cycle, carb load) are not modelled; the long
 /// window and the noise band are the defence. The thresholds are
@@ -100,9 +103,9 @@ class WeightSlopeCalculator {
 
   static const int windowDays = 21;
   static const int fallbackWindowDays = 14;
-  static const int minPoints = 12;
+  static const int minPoints = 9;
   static const int minSpanDays = 14;
-  static const int fallbackMinPoints = 8;
+  static const int fallbackMinPoints = 6;
   static const int fallbackMinSpanDays = 10;
 
   static const double outlierMinKg = 1.5;

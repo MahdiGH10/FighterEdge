@@ -29,7 +29,8 @@ class SafetyReask {
     CalendarDay? lossGoalStartedOn,
   }) {
     if (lastAnsweredOn == null) return true;
-    if (lossGoalStartedOn != null && lossGoalStartedOn.isAfter(lastAnsweredOn)) {
+    if (lossGoalStartedOn != null &&
+        lossGoalStartedOn.isAfter(lastAnsweredOn)) {
       return true;
     }
     return !today.isBefore(nextDue(lastAnsweredOn));

@@ -66,8 +66,8 @@ enum CheckInReason {
   /// are answered.
   safetyReaskDue,
 
-  /// Weight went down faster than 1% of body weight in a week. No cut is
-  /// proposed. Two weeks in a row ends in a referral.
+  /// The weight trend fell faster than 1% of body weight a week. No cut is
+  /// ever proposed with it; two check-ins in a row end in a referral.
   lossAboveCap,
 
   /// Logged intake averaged below resting energy two weeks running. The
@@ -82,6 +82,18 @@ enum CheckInReason {
   /// step is a slower pace or an optional maintenance week, not a lower
   /// number.
   plateauAtFloor,
+
+  /// Under 18 or no known age: no targets and no proposals (Fuel V2 rule 4).
+  ageNotEligible,
+
+  /// A self-declared clinical flag (pregnancy, eating-disorder history,
+  /// medicated diabetes, kidney or liver disease, a clinician-managed diet).
+  /// The outcome is a referral, never a number.
+  clinicalReviewFlagged,
+
+  /// The current target sits below today's floor (for example after the
+  /// training plan grew). The proposal lifts it back to the floor.
+  targetBelowFloor,
 }
 
 enum CheckInAction { hold, increase, decrease }

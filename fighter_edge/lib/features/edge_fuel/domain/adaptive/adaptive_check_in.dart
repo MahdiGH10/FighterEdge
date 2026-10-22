@@ -1,16 +1,21 @@
 import '../calculators/weekly_check_in.dart';
 import '../models/nutrition_enums.dart';
 import '../policies/energy_availability_proxy.dart';
+import '../policies/nutrition_policy.dart';
 import '../policies/nutrition_policy_v2.dart';
 import '../policies/weight_rate_policy.dart';
 import 'calendar_day.dart';
 import 'data_tier.dart';
+import 'fuel_log_day.dart';
 import 'safety_reask.dart';
 import 'weight_slope.dart';
 
 /// What the check-in recommends. It only ever recommends: nothing changes
 /// until the user taps Apply (Fuel V2 spec, rule 2).
 enum CheckInOutcome {
+  /// Under 18 or no known age. No target, no proposal, nothing to show.
+  notEligible,
+
   /// No change. The reason says why.
   hold,
 
@@ -33,6 +38,7 @@ enum LoggingSelfReport { all, most, some, none }
 class AdaptiveCheckInInput {
   const AdaptiveCheckInInput({
     required this.today,
+    required this.ageYears,
     required this.goal,
     required this.currentTargetKcal,
     required this.minimumKcal,
@@ -45,6 +51,7 @@ class AdaptiveCheckInInput {
     this.maximumKcal,
     this.maintenanceKcal,
     this.averageSessionKcalPerDay = 0,
+    this.clinicalReviewNeeded = false,
     this.inFightWeek = false,
     this.inFightCamp = false,
     this.lastTargetChangeDay,
@@ -55,8 +62,12 @@ class AdaptiveCheckInInput {
     this.lossGoalStartedOn,
   });
 
-  /// The last closed day: the check-in is computed as of the end of it.
+  /// The check-in day. Data windows end the day before (the last closed day).
   final CalendarDay today;
+
+  /// Whole years; null when unknown. Under 18 or null gives
+  /// [CheckInOutcome.notEligible].
+  final int? ageYears;
   final NutritionGoal goal;
 
   /// The weekly-average target the user is held to.
@@ -75,8 +86,8 @@ class AdaptiveCheckInInput {
   final double currentWeightKg;
 
   /// The pace the user chose, a positive percent of body weight per week
-  /// (zero for maintenance). The goal gives the direction. A loss above the
-  /// policy cap is clamped to the cap before the check-in uses it.
+  /// (zero for maintenance). The goal gives the direction. It is clamped by
+  /// `WeightRatePolicy` (0.75% outside a camp) before the check-in uses it.
   final double plannedWeeklyChangePercent;
 
   /// Estimated resting energy (`NutritionTargetV2.estimatedRmrKcal`).
@@ -85,6 +96,10 @@ class AdaptiveCheckInInput {
   /// Average planned session energy per day, for the energy-availability
   /// floor. Zero for no planned training.
   final double averageSessionKcalPerDay;
+
+  /// A self-declared clinical flag is set (`NutritionSafetyPolicy` said
+  /// `needsProfessionalReview`).
+  final bool clinicalReviewNeeded;
 
   final DataTierAssessment tier;
 
@@ -95,7 +110,7 @@ class AdaptiveCheckInInput {
   /// Inside a fight-camp path: the loss cap is the camp's 1%, not 0.75%.
   final bool inFightCamp;
 
-  /// The day the last target change was applied; null when none.
+  /// The day the last target change took effect; null when none.
   final CalendarDay? lastTargetChangeDay;
 
   /// The observed weekly change, in percent of body weight, at the previous
@@ -107,14 +122,14 @@ class AdaptiveCheckInInput {
   /// (`TargetHistory.continuousDeficitWeeks`).
   final int continuousDeficitWeeks;
 
-  /// An optional maintenance week was offered and declined recently
-  /// (`TargetHistory.maintenanceOfferDeclinedWithin`): no nagging.
+  /// An optional maintenance week was offered and the user chose Keep
+  /// recently (`TargetHistory.maintenanceOfferDeclinedWithin`): no nagging.
   final bool maintenanceOfferRecentlyDeclined;
 
   /// When the safety questions were last answered; null when never.
   final CalendarDay? lastSafetyScreenDay;
 
-  /// When the current loss goal started, if it did after the last answer.
+  /// When the current loss goal started.
   final CalendarDay? lossGoalStartedOn;
 }
 
@@ -140,24 +155,24 @@ class AdaptiveCheckInDecision {
 
   final CheckInOutcome outcome;
 
-  /// Signed kcal per day; 0 for a hold or a referral.
+  /// Signed kcal per day; 0 unless [isProposal].
   final int deltaKcal;
 
-  /// The target after the change; the current target for a hold or referral.
+  /// The target after the change; the current target unless [isProposal].
   final int proposedTargetKcal;
 
-  /// At least one code, always.
+  /// At least one code, always. The first is the headline.
   final List<CheckInReason> reasons;
   final DataTier tier;
 
   /// The lowest weekly-average target allowed:
-  /// `max(minimum, resting + 0.5 x session energy)`.
+  /// `max(minimum day, resting + 0.5 x session energy)`.
   final int floorKcal;
 
   /// The 8-week safety questions are due. The UI asks them.
   final bool safetyReaskDue;
 
-  /// kg per week, signed (negative is losing). Null when no slope was used.
+  /// kg per week, signed (negative is losing). Null when no slope was usable.
   final double? observedKgPerWeek;
   final double? plannedKgPerWeek;
 
@@ -183,9 +198,8 @@ class AdaptiveCheckInDecision {
 
   bool get isReferral => outcome == CheckInOutcome.referral;
 
-  /// A neutral copy key for the outcome, such as
-  /// `fuel.checkIn.hold.onPace`. The UI maps keys to words; the domain never
-  /// holds a user-facing string.
+  /// A neutral copy key for the outcome, such as `fuel.checkIn.hold.onPace`.
+  /// The UI maps keys to words; the domain never holds a user-facing string.
   String get copyKey => '$copyKeyPrefix.${outcome.name}.${reasons.first.name}';
 
   /// One key per reason, same format.
@@ -197,8 +211,8 @@ class AdaptiveCheckInDecision {
 }
 
 /// The deterministic weekly decision (Fuel V2 slice N1). Pure: no clock, no
-/// storage, no UI. All thresholds are implementation defaults pending
-/// dietitian sign-off (see [signOffPending]).
+/// storage, no UI. All thresholds are implementation defaults.
+/// DIETITIAN SIGN-OFF PENDING (see [signOffPending]).
 ///
 /// ```text
 /// planned    = signed rate x weight / 100              (kg/week)
@@ -210,24 +224,33 @@ class AdaptiveCheckInDecision {
 ///
 /// Order of rules (first match wins), each ending in a reason code:
 ///
-/// 1. invalid input; fight week (the camp plan owns the numbers);
-/// 2. SAFETY: logged intake under resting energy two weeks running, or a loss
-///    above 1% of body weight a week two check-ins running, gives a
-///    [CheckInOutcome.referral]: no number changes, never a bigger cut;
-/// 3. one change a week;
-/// 4. 10 or more weeks of continuous deficit: optional maintenance week;
-/// 5. data gates: Tier 0, partial logging, no usable slope, implausible
-///    change, a loss above 1% (hold), intake off target;
-/// 6. inside the error band: on pace;
-/// 7. otherwise one damped, clamped step; a cut never goes below the floor
-///    and never happens while the safety questions are overdue; at the floor
-///    the next step is a maintenance week, not a lower number.
+/// 1. under 18 or unknown age: not eligible, nothing at all;
+/// 2. invalid input;
+/// 3. SAFETY, a [CheckInOutcome.referral] with every reason that applies: a
+///    clinical flag; logged intake under resting energy two weeks running; a
+///    trend loss above 1% of body weight a week two check-ins running. No
+///    number changes, never a bigger cut. Safety beats fight week;
+/// 4. fight week (the camp plan owns the numbers);
+/// 5. a target below today's floor is lifted back to it;
+/// 6. one change a week;
+/// 7. 10 or more weeks of continuous deficit: optional maintenance week;
+/// 8. data gates: Tier 0, partial logging, no usable slope, implausible
+///    change, intake off target;
+/// 9. inside the error band: on pace;
+/// 10. otherwise one damped, clamped step. A cut never goes below the floor
+///    and never happens while the safety questions are due; at the floor the
+///    next step is a maintenance week, not a lower number.
+///
+/// A single check-in with a loss above 1% adds [CheckInReason.lossAboveCap]
+/// to whatever it gets. It can never end in a step down: losing that fast
+/// puts the error below zero, which always asks for more food.
 class AdaptiveWeeklyCheckIn {
   const AdaptiveWeeklyCheckIn._();
 
   /// Every number below is a placeholder until a sports dietitian reviews it.
   static const bool signOffPending = true;
 
+  /// kcal per day for 1 kg per week: 7,700 / 7 = 1,100.
   static const double kcalPerKgPerWeekPerDay = WeightRatePolicy.kcalPerKg / 7;
   static const double correctionDamping = 0.5;
   static const int minStepKcal = 100;
@@ -238,17 +261,15 @@ class AdaptiveWeeklyCheckIn {
   static const double deadBandPlannedFraction = 0.25;
   static const double deadBandMinKgPerWeek = 0.1;
 
-  /// Average logged intake and the target must be this close for the week to
-  /// say anything about the plan.
-  static const double adherenceTolerance = 0.10;
-
-  /// A weekly change beyond this share of body weight is not tissue.
-  static const double implausibleChangePercent = 2.0;
+  /// Shared with the 7-day check-in.
+  static const double adherenceTolerance = WeeklyCheckIn.adherenceTolerance;
+  static const double implausibleChangePercent =
+      WeeklyCheckIn.implausibleChangePercent;
 
   /// Loss faster than this share of body weight a week is a safety signal.
   static const double veryFastLossPercent = 1.0;
 
-  /// Days a logged week needs to count as "enough" in the safety rule.
+  /// Counted days a week needs for the low-intake rule to read it.
   static const int lowIntakeMinDaysPerWeek = 5;
 
   /// Weeks of continuous deficit after which a maintenance week is offered.
@@ -259,20 +280,68 @@ class AdaptiveWeeklyCheckIn {
 
   static const int maintenanceWeekDays = 7;
 
+  /// True when [ageYears] may have targets at all.
+  static bool isEligibleAge(int? ageYears) =>
+      ageYears != null && ageYears >= NutritionPolicy.minimumAgeYears;
+
+  /// `clamp(round10(0.5 x |correction|), 100, 200)`.
+  static int stepFor(double correctionKcal) {
+    final half = correctionDamping * correctionKcal.abs();
+    final rounded = NutritionPolicyV2.roundToTen(half);
+    if (rounded < minStepKcal) return minStepKcal;
+    if (rounded > maxStepKcal) return maxStepKcal;
+    return rounded;
+  }
+
+  /// Signed planned weekly change as a percent of body weight (negative is
+  /// losing), after `WeightRatePolicy`'s caps: 0.75% (and 1 kg) a week for a
+  /// loss outside a camp, 1% inside one, 0.5% for a gain.
+  static double signedPlannedPercent({
+    required NutritionGoal goal,
+    required double weightKg,
+    required double requestedPercent,
+    bool inFightCamp = false,
+  }) {
+    final rate = WeightRatePolicy.apply(
+      goal: goal,
+      weightKg: weightKg,
+      requestedPercent: requestedPercent,
+      inFightCamp: inFightCamp,
+    ).percentPerWeek;
+    return switch (goal) {
+      NutritionGoal.maintain => 0.0,
+      NutritionGoal.gainMuscle => rate,
+      NutritionGoal.loseFat => -rate,
+    };
+  }
+
   static AdaptiveCheckInDecision decide(AdaptiveCheckInInput i) {
+    // 1. Age: no targets at all.
+    if (!isEligibleAge(i.ageYears)) {
+      return const AdaptiveCheckInDecision(
+        outcome: CheckInOutcome.notEligible,
+        deltaKcal: 0,
+        proposedTargetKcal: 0,
+        reasons: [CheckInReason.ageNotEligible],
+        tier: DataTier.tier0,
+        floorKcal: 0,
+        safetyReaskDue: false,
+      );
+    }
+
     final valid = _valid(i);
     final current = valid ? i.currentTargetKcal.round() : 0;
+    final minimum = valid ? NutritionPolicyV2.ceilToTen(i.minimumKcal) : 0;
     final eaFloor = valid
         ? EnergyAvailabilityProxy.floorKcal(
             restingEnergyKcal: i.restingEnergyKcal,
             averageSessionKcalPerDay: i.averageSessionKcalPerDay,
           )
         : 0;
-    final floor = valid
-        ? (NutritionPolicyV2.ceilToTen(i.minimumKcal) > eaFloor
-            ? NutritionPolicyV2.ceilToTen(i.minimumKcal)
-            : eaFloor)
-        : 0;
+    final floor = minimum > eaFloor ? minimum : eaFloor;
+    final floorReason = eaFloor > minimum
+        ? CheckInReason.atEnergyAvailabilityFloor
+        : CheckInReason.atCalorieFloor;
     final reaskDue = valid &&
         SafetyReask.isDue(
           lastAnsweredOn: i.lastSafetyScreenDay,
@@ -280,9 +349,12 @@ class AdaptiveWeeklyCheckIn {
           lossGoalStartedOn: i.lossGoalStartedOn,
         );
 
-    final observedKg = valid ? i.slope.slopeKgPerWeek : null;
+    final observedKg =
+        valid && i.slope.isUsable ? i.slope.slopeKgPerWeek : null;
     final observedPercent =
         observedKg == null ? null : observedKg / i.currentWeightKg * 100;
+    final fastLoss =
+        observedPercent != null && observedPercent < -veryFastLossPercent;
 
     AdaptiveCheckInDecision make(
       CheckInOutcome outcome,
@@ -299,7 +371,7 @@ class AdaptiveWeeklyCheckIn {
           outcome: outcome,
           deltaKcal: (target ?? current) - current,
           proposedTargetKcal: target ?? current,
-          reasons: reasons,
+          reasons: List.unmodifiable(reasons),
           tier: i.tier.tier,
           floorKcal: floor,
           safetyReaskDue: reaskDue,
@@ -311,93 +383,110 @@ class AdaptiveWeeklyCheckIn {
           deadBandKgPerWeek: band,
           maintenanceWeekDays: weekDays,
         );
-    AdaptiveCheckInDecision hold(CheckInReason reason) =>
-        make(CheckInOutcome.hold, [reason]);
+    // A hold that carries the one-week fast-loss signal when there is one.
+    AdaptiveCheckInDecision hold(List<CheckInReason> reasons) => make(
+          CheckInOutcome.hold,
+          [...reasons, if (fastLoss) CheckInReason.lossAboveCap],
+        );
 
-    // 1. Invalid input and fight week.
-    if (!valid) return hold(CheckInReason.invalidInput);
-    if (i.inFightWeek) return hold(CheckInReason.fightWeek);
+    // 2. Invalid input.
+    if (!valid) return make(CheckInOutcome.hold, [CheckInReason.invalidInput]);
 
-    // 2. Safety escalation: a referral, never a number.
-    if (_lowIntakeTwoWeeks(i)) {
-      return make(CheckInOutcome.referral, [CheckInReason.lowIntakeSafety]);
-    }
-    final fastLoss =
-        observedPercent != null && observedPercent < -veryFastLossPercent;
+    // 3. Safety escalation: a referral, never a number.
     final previous = i.previousObservedWeeklyPercent;
-    if (fastLoss && previous != null && previous < -veryFastLossPercent) {
-      return make(CheckInOutcome.referral, [CheckInReason.lossAboveCap]);
+    final referral = <CheckInReason>[
+      if (i.clinicalReviewNeeded) CheckInReason.clinicalReviewFlagged,
+      if (_lowIntakeTwoWeeks(i)) CheckInReason.lowIntakeSafety,
+      if (fastLoss && previous != null && previous < -veryFastLossPercent)
+        CheckInReason.lossAboveCap,
+    ];
+    if (referral.isNotEmpty) return make(CheckInOutcome.referral, referral);
+
+    // 4. Fight week.
+    if (i.inFightWeek) return hold(const [CheckInReason.fightWeek]);
+
+    // 5. Never below the floor: lift a target that sits under it.
+    if (current < floor) {
+      return make(
+        CheckInOutcome.propose,
+        [CheckInReason.targetBelowFloor, floorReason],
+        target: floor,
+      );
     }
 
-    // 3. One change a week.
+    // 6. One change a week.
     final last = i.lastTargetChangeDay;
     if (last != null && last.daysUntil(i.today) < minDaysBetweenChanges) {
-      return hold(CheckInReason.recentChange);
+      return hold(const [CheckInReason.recentChange]);
     }
 
-    // 4. Long deficit: an optional maintenance week.
-    if (i.goal == NutritionGoal.loseFat &&
+    // 7. Long deficit: an optional maintenance week.
+    final mayOfferMaintenanceWeek = i.goal == NutritionGoal.loseFat &&
         !i.inFightCamp &&
-        i.continuousDeficitWeeks >= deficitWeeksBeforeMaintenanceOffer &&
-        !i.maintenanceOfferRecentlyDeclined) {
-      final week = _maintenanceWeekTarget(i, current);
-      if (week != null) {
-        return make(
-          CheckInOutcome.offerMaintenanceWeek,
-          [CheckInReason.deficitDurationReached],
-          target: week,
-          weekDays: maintenanceWeekDays,
-        );
-      }
+        !i.maintenanceOfferRecentlyDeclined;
+    final maintenanceWeek =
+        mayOfferMaintenanceWeek ? _maintenanceWeekTarget(i, current) : null;
+    if (maintenanceWeek != null &&
+        i.continuousDeficitWeeks >= deficitWeeksBeforeMaintenanceOffer) {
+      return make(
+        CheckInOutcome.offerMaintenanceWeek,
+        [CheckInReason.deficitDurationReached],
+        target: maintenanceWeek,
+        weekDays: maintenanceWeekDays,
+      );
     }
 
-    // 5. Data gates.
+    // 8. Data gates.
     if (!i.tier.mayPropose) {
-      final reasons = i.tier.reasons.isEmpty
-          ? const [CheckInReason.programTooNew]
-          : i.tier.reasons;
-      return make(CheckInOutcome.hold, reasons);
+      return hold(
+        i.tier.reasons.isEmpty
+            ? const [CheckInReason.programTooNew]
+            : i.tier.reasons,
+      );
     }
     final report = i.loggingSelfReport;
     if (i.tier.thisWeek.partialDays > 0 ||
         report == LoggingSelfReport.some ||
         report == LoggingSelfReport.none) {
-      return hold(CheckInReason.partialLoggingFlagged);
+      return hold(const [CheckInReason.partialLoggingFlagged]);
     }
-    if (!i.slope.isUsable || observedKg == null || observedPercent == null) {
-      return hold(CheckInReason.insufficientWeighIns);
+    if (observedKg == null || observedPercent == null) {
+      return hold(const [CheckInReason.insufficientWeighIns]);
     }
     if (observedPercent.abs() > implausibleChangePercent) {
-      return hold(CheckInReason.implausibleWeightChange);
+      return hold(const [CheckInReason.implausibleWeightChange]);
     }
-    if (fastLoss) return hold(CheckInReason.lossAboveCap);
     final intake = i.tier.thisWeek.averageIntakeKcal;
-    if (intake == null) return hold(CheckInReason.insufficientLogging);
+    if (intake == null) return hold(const [CheckInReason.insufficientLogging]);
     if ((intake - i.currentTargetKcal).abs() / i.currentTargetKcal >
         adherenceTolerance) {
-      return hold(CheckInReason.intakeOffTarget);
+      return hold(const [CheckInReason.intakeOffTarget]);
     }
 
-    // 6. Plan against slope.
-    final plannedPercent = _plannedPercent(i);
+    // 9. Plan against slope.
+    final plannedPercent = signedPlannedPercent(
+      goal: i.goal,
+      weightKg: i.currentWeightKg,
+      requestedPercent: i.plannedWeeklyChangePercent,
+      inFightCamp: i.inFightCamp,
+    );
     final planned = plannedPercent * i.currentWeightKg / 100;
     final error = observedKg - planned;
-    final band = _max(
-      _max(deadBandPlannedFraction * planned.abs(),
-          i.slope.noiseBandKgPerWeek ?? 0),
-      deadBandMinKgPerWeek,
-    );
+    final noise = i.slope.noiseBandKgPerWeek ?? 0;
+    var band = deadBandPlannedFraction * planned.abs();
+    if (noise > band) band = noise;
+    if (deadBandMinKgPerWeek > band) band = deadBandMinKgPerWeek;
+    final correction = -kcalPerKgPerWeekPerDay * error;
+    final step = stepFor(correction);
     AdaptiveCheckInDecision withNumbers(
       CheckInOutcome outcome,
-      List<CheckInReason> reasons, {
+      CheckInReason reason, {
       int? target,
-      double? correction,
-      int? step,
       int? weekDays,
     }) =>
         make(
           outcome,
-          reasons,
+          [reason, if (fastLoss) CheckInReason.lossAboveCap],
           target: target,
           planned: planned,
           error: error,
@@ -407,108 +496,45 @@ class AdaptiveWeeklyCheckIn {
           weekDays: weekDays,
         );
     if (error.abs() <= band) {
-      return withNumbers(CheckInOutcome.hold, [CheckInReason.onPace]);
+      return withNumbers(CheckInOutcome.hold, CheckInReason.onPace);
     }
 
-    // 7. One damped, clamped step.
-    final correction = -kcalPerKgPerWeekPerDay * error;
-    final step = _stepFor(correction);
+    // 10. One damped, clamped step.
     final wantsLess = correction < 0;
     final reason = _reasonFor(i.goal, wantsLess);
 
     if (wantsLess) {
       if (reaskDue) {
-        return withNumbers(
-          CheckInOutcome.hold,
-          [CheckInReason.safetyReaskDue],
-          correction: correction,
-          step: step,
-        );
+        return withNumbers(CheckInOutcome.hold, CheckInReason.safetyReaskDue);
       }
-      final bounded = _max((current - step).toDouble(), floor.toDouble());
-      var target = NutritionPolicyV2.ceilToTen(bounded);
-      if (target > current) target = current;
+      // Round away from the current target so a full step stays a full
+      // step; the floor is already on a ten.
+      var target = _floorToTen((current - step).toDouble());
+      if (target < floor) target = floor;
       if (current - target < minStepKcal) {
-        final week = i.goal == NutritionGoal.loseFat && !i.inFightCamp
-            ? _maintenanceWeekTarget(i, current)
-            : null;
-        if (week != null && !i.maintenanceOfferRecentlyDeclined) {
+        if (maintenanceWeek != null) {
           return withNumbers(
             CheckInOutcome.offerMaintenanceWeek,
-            [CheckInReason.plateauAtFloor],
-            target: week,
-            correction: correction,
-            step: step,
+            CheckInReason.plateauAtFloor,
+            target: maintenanceWeek,
             weekDays: maintenanceWeekDays,
           );
         }
-        return withNumbers(
-          CheckInOutcome.hold,
-          [
-            eaFloor > NutritionPolicyV2.ceilToTen(i.minimumKcal)
-                ? CheckInReason.atEnergyAvailabilityFloor
-                : CheckInReason.atCalorieFloor,
-          ],
-          correction: correction,
-          step: step,
-        );
+        return withNumbers(CheckInOutcome.hold, floorReason);
       }
-      return withNumbers(
-        CheckInOutcome.propose,
-        [reason],
-        target: target,
-        correction: correction,
-        step: step,
-      );
+      return withNumbers(CheckInOutcome.propose, reason, target: target);
     }
 
     final ceiling = i.maximumKcal;
-    final wanted = (current + step).toDouble();
-    final bounded = ceiling != null && wanted > ceiling ? ceiling : wanted;
-    var target = (bounded / 10).floor() * 10;
-    if (target < current) target = current;
+    var target = NutritionPolicyV2.ceilToTen((current + step).toDouble());
+    if (ceiling != null && target > ceiling) target = _floorToTen(ceiling);
     if (target - current < minStepKcal) {
-      return withNumbers(
-        CheckInOutcome.hold,
-        [CheckInReason.atCalorieCeiling],
-        correction: correction,
-        step: step,
-      );
+      return withNumbers(CheckInOutcome.hold, CheckInReason.atCalorieCeiling);
     }
-    return withNumbers(
-      CheckInOutcome.propose,
-      [reason],
-      target: target,
-      correction: correction,
-      step: step,
-    );
+    return withNumbers(CheckInOutcome.propose, reason, target: target);
   }
 
-  /// `clamp(round10(0.5 x |correction|), 100, 200)`.
-  static int _stepFor(double correctionKcal) {
-    final half = correctionDamping * correctionKcal.abs();
-    final rounded = NutritionPolicyV2.roundToTen(half);
-    return rounded < minStepKcal
-        ? minStepKcal
-        : (rounded > maxStepKcal ? maxStepKcal : rounded);
-  }
-
-  /// Signed planned weekly change as a percent of body weight (negative is
-  /// losing). Loss is clamped to the policy cap.
-  static double _plannedPercent(AdaptiveCheckInInput i) {
-    switch (i.goal) {
-      case NutritionGoal.maintain:
-        return 0;
-      case NutritionGoal.gainMuscle:
-        return i.plannedWeeklyChangePercent;
-      case NutritionGoal.loseFat:
-        final cap = i.inFightCamp
-            ? WeightRatePolicy.maxCampLossPercentPerWeek
-            : WeightRatePolicy.maxLossPercentPerWeek;
-        final pct = i.plannedWeeklyChangePercent;
-        return -(pct > cap ? cap : pct);
-    }
-  }
+  static int _floorToTen(double kcal) => (kcal / 10).floor() * 10;
 
   static CheckInReason _reasonFor(NutritionGoal goal, bool wantsLess) {
     switch (goal) {
@@ -529,26 +555,24 @@ class AdaptiveWeeklyCheckIn {
   }
 
   /// Logged intake averaged below resting energy in each of the last two
-  /// weeks, with enough counted days in each to mean it.
+  /// weeks, with enough counted days in each to mean it. Partial days never
+  /// count, so a half-logged week cannot raise this alarm.
   static bool _lowIntakeTwoWeeks(AdaptiveCheckInInput i) {
-    bool low(double? avg, int days) =>
-        days >= lowIntakeMinDaysPerWeek &&
-        avg != null &&
-        avg < i.restingEnergyKcal;
-    return low(i.tier.thisWeek.averageIntakeKcal, i.tier.thisWeek.daysCounted) &&
-        low(i.tier.lastWeek.averageIntakeKcal, i.tier.lastWeek.daysCounted);
+    bool low(LogWindow w) =>
+        w.daysCounted >= lowIntakeMinDaysPerWeek &&
+        w.averageIntakeKcal != null &&
+        w.averageIntakeKcal! < i.restingEnergyKcal;
+    return low(i.tier.thisWeek) && low(i.tier.lastWeek);
   }
 
   /// The maintenance-week target, or null when it would not be a real step up
   /// (unknown maintenance, or less than one step above the current target).
   static int? _maintenanceWeekTarget(AdaptiveCheckInInput i, int current) {
     final m = i.maintenanceKcal;
-    if (m == null || !m.isFinite) return null;
-    final target = (m / 10).floor() * 10;
+    if (m == null) return null;
+    final target = _floorToTen(m);
     return target - current >= minStepKcal ? target : null;
   }
-
-  static double _max(double a, double b) => a > b ? a : b;
 
   static bool _valid(AdaptiveCheckInInput i) {
     bool pos(double v) => v.isFinite && v > 0;
@@ -566,10 +590,8 @@ class AdaptiveWeeklyCheckIn {
         i.averageSessionKcalPerDay < 0) {
       return false;
     }
-    if (i.maximumKcal != null && !i.maximumKcal!.isFinite) return false;
-    if (i.maintenanceKcal != null && !i.maintenanceKcal!.isFinite) {
-      return false;
-    }
+    if (i.maximumKcal != null && !pos(i.maximumKcal!)) return false;
+    if (i.maintenanceKcal != null && !pos(i.maintenanceKcal!)) return false;
     final p = i.previousObservedWeeklyPercent;
     if (p != null && !p.isFinite) return false;
     if (i.continuousDeficitWeeks < 0) return false;
@@ -577,8 +599,10 @@ class AdaptiveWeeklyCheckIn {
     if (slope != null && !slope.isFinite) return false;
     final band = i.slope.noiseBandKgPerWeek;
     if (band != null && !band.isFinite) return false;
-    final avg = i.tier.thisWeek.averageIntakeKcal;
-    if (avg != null && !avg.isFinite) return false;
+    for (final w in [i.tier.thisWeek, i.tier.lastWeek]) {
+      final avg = w.averageIntakeKcal;
+      if (avg != null && (!avg.isFinite || avg < 0)) return false;
+    }
     return true;
   }
 }

@@ -145,9 +145,9 @@ void main() {
 
     test('in a fight camp loss is capped at 1% and 1 kg, whichever is tighter',
         () {
-      double camp(double kg) => WeightRatePolicy.maxPercentFor(
-          NutritionGoal.loseFat, kg,
-          inFightCamp: true);
+      double camp(double kg) =>
+          WeightRatePolicy.maxPercentFor(NutritionGoal.loseFat, kg,
+              inFightCamp: true);
       expect(camp(80), 1.0);
       expect(camp(100), 1.0);
       expect(camp(125), closeTo(0.8, 1e-12));
