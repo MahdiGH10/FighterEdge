@@ -94,8 +94,8 @@ class _WeekView extends StatelessWidget {
     final rangeFormat = DateFormat('MMM d');
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
+      padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
+          ScreenScaffold.tabBottomPadding(context)),
       children: [
         Text('WEEK $weekNumber', style: AppType.title1()),
         const SizedBox(height: Insets.xxs),
@@ -350,8 +350,8 @@ class _HistoryView extends StatelessWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(
-              Insets.lg, Insets.none, Insets.lg, Insets.xxl),
+          padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
+              ScreenScaffold.tabBottomPadding(context)),
           sliver: SliverList.builder(
             itemCount: sessions.length,
             itemBuilder: (context, index) => _HistoryRow(sessions[index]),

@@ -79,90 +79,97 @@ class DashboardScreen extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     return ScreenScaffold.tab(
       title: DateFormat.MMMEd(locale).format(state.now),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-            Insets.lg, Insets.none, Insets.lg, Insets.xxl),
-        children: [
-          // Only while a change was refused by the server.
-          const SyncNotice(),
-          Text(
-              user?.displayName.isNotEmpty == true
-                  ? user!.displayName
-                  : l.dashboardFighter,
-              style: AppType.title1()),
-          if (user?.goal.isNotEmpty == true)
-            Text(user!.goal,
-                style: AppType.subhead(
-                    color: AppAccessibility.textSecondary(context))),
-          const SizedBox(height: Insets.lg),
-          if (firstRun.isActive) ...[
-            FirstWeekChecklist(
-                key: checklistKey,
-                compact: true,
-                onStartTour: onStartTour ?? () {},
-                onLogMeal: () => onNavigate(2),
-                onTrain: () => onNavigate(1)),
+      scrollsUnderHeader: true,
+      body: Builder(
+        builder: (context) => ListView(
+          padding: EdgeInsets.fromLTRB(
+              Insets.lg,
+              MediaQuery.paddingOf(context).top,
+              Insets.lg,
+              ScreenScaffold.tabBottomPadding(context)),
+          children: [
+            // Only while a change was refused by the server.
+            const SyncNotice(),
+            Text(
+                user?.displayName.isNotEmpty == true
+                    ? user!.displayName
+                    : l.dashboardFighter,
+                style: AppType.title1()),
+            if (user?.goal.isNotEmpty == true)
+              Text(user!.goal,
+                  style: AppType.subhead(
+                      color: AppAccessibility.textSecondary(context))),
+            const SizedBox(height: Insets.lg),
+            if (firstRun.isActive) ...[
+              FirstWeekChecklist(
+                  key: checklistKey,
+                  compact: true,
+                  onStartTour: onStartTour ?? () {},
+                  onLogMeal: () => onNavigate(2),
+                  onTrain: () => onNavigate(1)),
+              const SizedBox(height: Insets.md),
+            ],
+            const FightCountdownSection(),
+            _SessionHero(
+                session: todaysSession,
+                next: nextThisWeek,
+                hasPlan: plan.hasPlan,
+                onNavigate: onNavigate),
             const SizedBox(height: Insets.md),
-          ],
-          const FightCountdownSection(),
-          _SessionHero(
-              session: todaysSession,
-              next: nextThisWeek,
-              hasPlan: plan.hasPlan,
-              onNavigate: onNavigate),
-          const SizedBox(height: Insets.md),
-          const CornerLineRow(),
-          const SizedBox(height: Insets.md),
-          if (auth.supportsEmailVerification &&
-              user != null &&
-              !user.emailVerified) ...[
-            _VerificationBanner(auth: auth),
+            const CornerLineRow(),
             const SizedBox(height: Insets.md),
-          ],
-          const DevMessageCard(),
-          _DashboardStats(streakWeeks: streakWeeks),
-          const AddFightRow(),
-          const SizedBox(height: Insets.xl),
-          WeeklyTargetCard(
-            completed: week.completed,
-            planned: week.planned,
-            target: week.target,
-            streakWeeks: streakWeeks,
-            nextDay: nextThisWeek == null
-                ? null
-                : PlanLabels.weekday(context, nextThisWeek.date),
-            nextTitle: nextThisWeek == null
-                ? null
-                : PlanLabels.title(l, nextThisWeek.session),
-            onOpenWeek: () => onNavigate(1),
-            onOpenReview: reviewReady
-                ? () => Navigator.of(context).push(MaterialPageRoute<void>(
-                    builder: (_) => WeeklyReviewScreen(weekStart: reviewWeek)))
-                : null,
-          ),
-          const SizedBox(height: Insets.xl),
-          Row(children: [
-            Expanded(
-                child:
-                    Text(l.dashboardRecentActivity, style: AppType.headline())),
-            TextButton(
-                style: TextButton.styleFrom(
-                    foregroundColor: AppColors.textSecondary),
-                onPressed: () => onNavigate(1),
-                child: Text(l.dashboardSeeAll)),
-          ]),
-          if (recent.isEmpty)
-            Padding(
-                padding: const EdgeInsets.symmetric(vertical: Insets.md),
-                child: Text(l.dashboardNoActivity,
-                    style: AppType.callout(
-                        color: AppAccessibility.textSecondary(context))))
-          else
-            GroupedList(children: [
-              for (final entry in recent)
-                _ActivityRow(entry: entry, now: state.now),
+            if (auth.supportsEmailVerification &&
+                user != null &&
+                !user.emailVerified) ...[
+              _VerificationBanner(auth: auth),
+              const SizedBox(height: Insets.md),
+            ],
+            const DevMessageCard(),
+            _DashboardStats(streakWeeks: streakWeeks),
+            const AddFightRow(),
+            const SizedBox(height: Insets.xl),
+            WeeklyTargetCard(
+              completed: week.completed,
+              planned: week.planned,
+              target: week.target,
+              streakWeeks: streakWeeks,
+              nextDay: nextThisWeek == null
+                  ? null
+                  : PlanLabels.weekday(context, nextThisWeek.date),
+              nextTitle: nextThisWeek == null
+                  ? null
+                  : PlanLabels.title(l, nextThisWeek.session),
+              onOpenWeek: () => onNavigate(1),
+              onOpenReview: reviewReady
+                  ? () => Navigator.of(context).push(MaterialPageRoute<void>(
+                      builder: (_) =>
+                          WeeklyReviewScreen(weekStart: reviewWeek)))
+                  : null,
+            ),
+            const SizedBox(height: Insets.xl),
+            Row(children: [
+              Expanded(
+                  child: Text(l.dashboardRecentActivity,
+                      style: AppType.headline())),
+              TextButton(
+                  style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary),
+                  onPressed: () => onNavigate(1),
+                  child: Text(l.dashboardSeeAll)),
             ]),
-        ],
+            if (recent.isEmpty)
+              Padding(
+                  padding: const EdgeInsets.symmetric(vertical: Insets.md),
+                  child: Text(l.dashboardNoActivity,
+                      style: AppType.callout(
+                          color: AppAccessibility.textSecondary(context))))
+            else
+              GroupedList(children: [
+                for (final entry in recent)
+                  _ActivityRow(entry: entry, now: state.now),
+              ]),
+          ],
+        ),
       ),
     );
   }
