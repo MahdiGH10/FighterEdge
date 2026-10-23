@@ -1,8 +1,8 @@
 /// Pure input types for training-aware nutrition (policy v2).
 ///
-/// Fuel does not import the training-plan feature. The caller maps its
-/// planned week onto these simple types, so Fuel and Train share one source of
-/// truth without sharing code.
+/// The caller maps its planned week onto these simple types, so Fuel and
+/// Train share one source of truth. `TrainingPlanFuelBridge` is the one place
+/// in the Fuel domain that reads the training-plan domain.
 library;
 
 /// What a planned session trains, for the purpose of energy cost only.

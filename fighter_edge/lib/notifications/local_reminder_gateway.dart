@@ -30,6 +30,14 @@ class LocalReminderGateway implements ReminderGateway {
   /// stable id range that nothing else in the app uses.
   static int _idFor(int weekday) => 6100 + weekday;
 
+  /// The one-off trial-end notification. Outside the training range so
+  /// re-scheduling training days never clears it.
+  static const _trialReminderId = 6200;
+  static const _trialChannelId = 'trial_reminders';
+  static const _trialChannelName = 'Subscription reminders';
+  static const _trialChannelDescription =
+      'A heads-up before your free trial ends.';
+
   @override
   bool get isAvailable =>
       !kIsWeb &&
@@ -95,10 +103,10 @@ class LocalReminderGateway implements ReminderGateway {
     if (!isAvailable) return;
     try {
       await _ensureInitialized();
-      // Every id this gateway ever schedules lives in the same small range,
-      // so clearing all of them first and re-adding the requested days keeps
-      // this idempotent without tracking what was scheduled last time.
-      await _plugin.cancelAll();
+      // Training ids live in one small range, so clearing all of them first
+      // and re-adding the requested days keeps this idempotent without
+      // tracking what was scheduled last time. The trial reminder is kept.
+      await _cancelTraining();
       for (final weekday in weekdays) {
         await _plugin.zonedSchedule(
           id: _idFor(weekday),
@@ -133,7 +141,54 @@ class LocalReminderGateway implements ReminderGateway {
     if (!isAvailable) return;
     try {
       await _ensureInitialized();
-      await _plugin.cancelAll();
+      await _cancelTraining();
+    } catch (_) {}
+  }
+
+  Future<void> _cancelTraining() async {
+    for (var weekday = DateTime.monday; weekday <= DateTime.sunday; weekday++) {
+      await _plugin.cancel(id: _idFor(weekday));
+    }
+  }
+
+  @override
+  Future<void> scheduleTrialEndReminder({
+    required DateTime at,
+    required String title,
+    required String body,
+  }) async {
+    if (!isAvailable) return;
+    try {
+      await _ensureInitialized();
+      await _plugin.zonedSchedule(
+        id: _trialReminderId,
+        title: title,
+        body: body,
+        scheduledDate: tz.TZDateTime.from(at, tz.local),
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            _trialChannelId,
+            _trialChannelName,
+            channelDescription: _trialChannelDescription,
+            importance: Importance.defaultImportance,
+            icon: 'ic_notification',
+            color: AppColors.primary,
+          ),
+          iOS: DarwinNotificationDetails(presentSound: true),
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    } catch (_) {
+      // A reminder that cannot be scheduled must never surface as an error.
+    }
+  }
+
+  @override
+  Future<void> cancelTrialEndReminder() async {
+    if (!isAvailable) return;
+    try {
+      await _ensureInitialized();
+      await _plugin.cancel(id: _trialReminderId);
     } catch (_) {}
   }
 

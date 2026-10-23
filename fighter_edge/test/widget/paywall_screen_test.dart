@@ -120,6 +120,8 @@ void _paywallComplianceTests() {
     await tester.scrollUntilVisible(terms, 200,
         scrollable: find.byType(Scrollable).first);
     expect(find.text('Privacy Policy'), findsOneWidget);
+    await tester.ensureVisible(terms);
+    await tester.pumpAndSettle();
 
     // No TERMS_URL in tests: the in-app document opens instead.
     await tester.tap(terms);

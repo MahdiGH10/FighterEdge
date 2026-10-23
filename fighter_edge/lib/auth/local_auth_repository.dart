@@ -280,12 +280,23 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   /// Test/dev-only entitlement seeding. Production UI must never call this.
-  Future<AppUser> debugSetPlan(Plan plan) async {
+  ///
+  /// [expiresAt] and [period] stand in for the webhook's `billing.expiresAtMs`
+  /// and `billing.proPeriod`.
+  Future<AppUser> debugSetPlan(
+    Plan plan, {
+    DateTime? expiresAt,
+    ProPeriod? period,
+  }) async {
     final current = _current;
     if (current == null) {
       throw const AuthException('signed-out', 'Sign in before changing plan.');
     }
-    final user = current.copyWith(plan: plan);
+    final user = current.copyWith(
+      plan: plan,
+      planExpiresAt: expiresAt,
+      planPeriod: period,
+    );
     await _persistAccount(user, null);
     _current = user;
     _controller.add(_current);

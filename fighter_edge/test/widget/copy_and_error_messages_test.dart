@@ -2,7 +2,7 @@ import 'package:fighter_edge/auth/auth_repository.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
 import 'package:fighter_edge/screens/delete_account_flow.dart';
-import 'package:fighter_edge/screens/profile_screen.dart';
+import 'package:fighter_edge/screens/dashboard_screen.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -83,7 +83,7 @@ void main() {
     });
   });
 
-  testWidgets('Profile says "1 week", not "1 weeks"', (tester) async {
+  testWidgets('Home says "1 week", not "1 weeks"', (tester) async {
     final repo = await makeRepo(signedIn: true, onboarded: true);
     final state = AppState(clock: () => DateTime(2026, 10, 19, 9));
     final plan = PlanController(log: state)
@@ -93,12 +93,12 @@ void main() {
       plan.complete(session, title: 'Session');
     }
 
-    await tester.pumpWidget(wrapApp(const ProfileScreen(),
+    await tester.pumpWidget(wrapApp(DashboardScreen(onNavigate: (_) {}),
         repo: repo, state: state, planController: plan));
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.text('Week streak'), 200);
-    expect(find.text('1 week'), findsOneWidget);
-    expect(find.text('1 weeks'), findsNothing);
+    await tester.scrollUntilVisible(find.text('Streak'), 200);
+    expect(find.text('week'), findsOneWidget);
+    expect(find.text('weeks'), findsNothing);
   });
 }

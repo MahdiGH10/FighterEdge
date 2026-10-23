@@ -431,20 +431,6 @@ class LDe extends L {
   String get timerAnnounceDone => 'Einheit beendet.';
 
   @override
-  String get paywallWaitlistCta => 'Benachrichtige mich, wenn Pro startet';
-
-  @override
-  String get paywallWaitlistJoined => 'Du stehst auf der Liste';
-
-  @override
-  String get paywallWaitlistThanks =>
-      'Notiert. Pro erscheint hier, sobald es startet, mit Preis vor jeder Zahlung.';
-
-  @override
-  String get paywallWaitlistBody =>
-      'Pro kann in dieser Version noch nicht gekauft werden. Tippe unten, und dieses Gerät merkt sich deine Anfrage. Der Store-Preis wird immer vor jeder Zahlung angezeigt.';
-
-  @override
   String get paywallRenewalDisclosure =>
       'Abonnements verlängern sich automatisch zum oben angezeigten Preis und Zeitraum, sofern sie nicht mindestens 24 Stunden vor Ende des laufenden Zeitraums gekündigt werden. Die Zahlung wird bei Bestätigung des Kaufs über deine Apple-ID bzw. dein Google-Play-Konto abgerechnet. Du kannst dein Abo jederzeit in den Einstellungen deines Store-Kontos verwalten oder kündigen.';
 
@@ -1022,7 +1008,7 @@ class LDe extends L {
 
   @override
   String nutritionOverTarget(int kcal) {
-    return '$kcal kcal über dem Ziel';
+    return 'Tagesziel erreicht, plus $kcal kcal';
   }
 
   @override
@@ -1172,13 +1158,6 @@ class LDe extends L {
       'Dein Plan richtet sich nach deinen Zielen und Trainingstagen. Du kannst ihn anpassen, wenn sich dein Training ändert.';
 
   @override
-  String get planReadyProTitle => 'Weitere Trainingshilfen mit Pro';
-
-  @override
-  String get planReadyProBody =>
-      'Pro enthält alle Übungen und Rezepte sowie Hinweise zwischen den Runden.';
-
-  @override
   String get planReadyCalories => 'Tägliche Kalorien';
 
   @override
@@ -1212,7 +1191,7 @@ class LDe extends L {
   }
 
   @override
-  String get paywallPlainTitle => 'Deine Ecke, jeden Tag';
+  String get paywallPlainTitle => 'Dein Camp, geplant und ernährt';
 
   @override
   String get paywallPlainSubtitle => 'Ein Abo. Alles in Fighter Edge.';
@@ -1233,13 +1212,6 @@ class LDe extends L {
   @override
   String get paywallBenefitDrillsBody =>
       'Jeder Drill für Striking, Ringen, BJJ und Clinch, mit Trainingsanleitung.';
-
-  @override
-  String get paywallBenefitCuesTitle => 'Ecken-Tipps';
-
-  @override
-  String get paywallBenefitCuesBody =>
-      'Ein taktischer und ein Erholungs-Tipp in jeder Pause des Runden-Timers.';
 
   @override
   String get paywallAnnualPlan => 'Jahresabo';
@@ -1281,13 +1253,6 @@ class LDe extends L {
   @override
   String get paywallSync =>
       'Dein Store-Kauf ist erkannt. Pro wird freigeschaltet, sobald der sichere Kontoabgleich fertig ist.';
-
-  @override
-  String get paywallSoonTitle => 'Pro startet bald';
-
-  @override
-  String get paywallNoPaymentToday =>
-      'Heute keine Zahlung. Vor jeder Abbuchung fragen wir noch einmal.';
 
   @override
   String get paywallPurchaseActive => 'Pro ist in deinem Konto aktiv.';
@@ -1881,4 +1846,135 @@ class LDe extends L {
   @override
   String get reactionMoveTimeNote =>
       'Dazu kommt die Zeit für die Bewegungen selbst.';
+
+  @override
+  String get paywallBenefitCampTitle => 'Deine Camp-Woche';
+
+  @override
+  String get paywallBenefitCampBody =>
+      'Datierte Einheiten für deine Woche, passend zu Level und Kampftermin.';
+
+  @override
+  String get paywallBenefitFuelTitle => 'Ernährung für Trainingstage';
+
+  @override
+  String get paywallBenefitFuelBody =>
+      'Kalorien- und Proteinziele, die sich mit deiner Trainingswoche bewegen.';
+
+  @override
+  String get paywallBenefitReviewTitle => 'Wochenrückblick';
+
+  @override
+  String get paywallBenefitReviewBody =>
+      'Jeden Sonntag: was du geschafft hast und was sich ändern sollte. Du entscheidest.';
+
+  @override
+  String get paywallBenefitWeightTitle => 'Sicherer Gewichtsweg';
+
+  @override
+  String get paywallBenefitWeightBody =>
+      'Ein Gewichtsweg bis zum Kampftermin, mit Sicherheitsgrenzen.';
+
+  @override
+  String paywallTrialBadge(int days) {
+    return '$days Tage gratis testen';
+  }
+
+  @override
+  String paywallTrialThen(int days, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days Tage gratis, danach $price',
+      one: '1 Tag gratis, danach $price',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get paywallStartTrial => 'Gratis-Test starten';
+
+  @override
+  String paywallTrialRenewalDisclosure(int days, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days Tage',
+      one: '1 Tag',
+    );
+    return 'Gratis für $_temp0, danach $price, mit automatischer Verlängerung bis zur Kündigung. Kündige mindestens 24 Stunden vor Ende des Tests in den Einstellungen deines Store-Kontos, um eine Abbuchung zu vermeiden. Die Zahlung wird nach Ende des Tests über deine Apple-ID bzw. dein Google-Play-Konto abgerechnet.';
+  }
+
+  @override
+  String get paywallTrialActiveTitle => 'Dein Gratis-Test läuft';
+
+  @override
+  String get paywallTrialActiveBody =>
+      'Er wird zu einem bezahlten Abo, wenn der Test endet, sofern du nicht in deinem Store-Konto kündigst.';
+
+  @override
+  String get paywallUnavailableTitle => 'Abos sind hier noch nicht verfügbar';
+
+  @override
+  String get paywallUnavailableBody =>
+      'Diese Version kann noch kein Abo starten. Deine Daten bleiben gespeichert.';
+
+  @override
+  String get readOnlyBanner =>
+      'Deine Daten sind gespeichert. Abonniere, um weiter zu trainieren.';
+
+  @override
+  String get readOnlyBannerCta => 'Tarife ansehen';
+
+  @override
+  String trialChipDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Test · noch $days Tage',
+      one: 'Test · noch 1 Tag',
+      zero: 'Test · endet heute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get trialReminderTitle => 'Dein Gratis-Test endet in 2 Tagen';
+
+  @override
+  String get trialReminderBody =>
+      'Er verlängert sich, sofern du nicht in deinem Store-Konto kündigst. Deine Daten bleiben in jedem Fall gespeichert.';
+
+  @override
+  String get planReadyStartFreeWeek => 'Starte deine Gratis-Woche';
+
+  @override
+  String planReadyStartTrialDays(int days) {
+    return 'Starte deinen $days-Tage-Gratis-Test';
+  }
+
+  @override
+  String get planReadyViewPlans => 'Tarife ansehen';
+
+  @override
+  String get planReadyNotNowNote =>
+      'Dein Plan bleibt gespeichert. Zum Eintragen brauchst du ein Abo.';
+
+  @override
+  String get paywallTrialCancelNote =>
+      'Kündige vor Testende in deinen Store-Einstellungen und du zahlst nichts.';
+
+  @override
+  String get paywallAfterTrialNote =>
+      'Wenn du nach dem Test kein Abo abschließt, bleiben dein Plan und deine Einträge lesbar. Eintragen und Einheiten brauchen ein Abo.';
+
+  @override
+  String get paywallBenefitSessionTitle => 'Einheiten-Modus';
+
+  @override
+  String get paywallBenefitSessionBody =>
+      'Runden und Pausen werden für dich getimt, mit einem taktischen und einem Erholungs-Tipp in jeder Pause.';
+
+  @override
+  String get paywallContinue => 'Weiter';
 }
