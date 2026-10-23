@@ -284,7 +284,11 @@ jobs:
           ram-size: 4096M
           emulator-options: -no-window -gpu software -no-snapshot -noaudio -no-boot-anim
           working-directory: fighter_edge
-          script: flutter test integration_test/app_flow_test.dart
+          # One line on purpose (the runner executes each line separately).
+          # On shared runners the flow can pass and then lose its result as the
+          # emulator disconnects ("No tests were found", exit 79). Run it once
+          # more before failing; a real failure fails both attempts.
+          script: flutter test integration_test/app_flow_test.dart || flutter test integration_test/app_flow_test.dart
 
   performance-smoke:
     name: Performance smoke test (Android emulator)
