@@ -89,14 +89,12 @@ void main() {
       expect(find.text('Get to 74 kg'), findsNothing);
     });
 
-    testWidgets('stats reflect real state and the onboarding answer',
+    testWidgets('quiet training summary reflects the onboarding answer',
         (tester) async {
       tester.view.physicalSize = const Size(430, 1600);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       final repo = await _repoWithRealUser(weeklyTrainingDays: 6);
-      // A default AppState with no repository seeds sample sessions, so build
-      // the expectation from the same state the screen reads.
       final state = AppState();
 
       await tester.pumpWidget(
@@ -104,14 +102,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Sessions completed'), findsOneWidget);
-      expect(find.text('${state.completedSessionCount}'), findsWidgets);
-      // The weekly streak, not a daily one; a new account has none yet.
-      expect(find.text('Week streak'), findsOneWidget);
-      expect(find.text('0 weeks'), findsOneWidget);
-      // Straight from the onboarding answer, not a constant.
-      expect(find.text('Training days / week'), findsOneWidget);
-      expect(find.text('6'), findsOneWidget);
+      expect(find.text('Sessions completed'), findsNothing);
+      expect(find.text('Week streak'), findsNothing);
+      expect(find.text('Training days'), findsOneWidget);
+      expect(find.text('6 days each week'), findsOneWidget);
+      expect(find.text('Preferences, privacy and account'), findsOneWidget);
     });
   });
 
