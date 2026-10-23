@@ -130,6 +130,11 @@ void main() {
       await _tapVisible(tester, find.text('Continue with monthly plan'));
       expect(billing.purchaseCount, 1);
       expect(repo.currentUser!.isPro, isFalse);
+      // The paywall pops, then onboarding saves and swaps in the app: several
+      // async hops after the tap. pumpAndSettle only waits for scheduled
+      // frames, so on the slow emulator it can return before the dashboard
+      // is built. Wait for it.
+      await _pumpUntilFound(tester, find.text('Ayoub'));
       expect(find.text('Ayoub'), findsOneWidget);
 
       // 7. Profile -> the paid upgrade entry point. Computed from the nav
@@ -140,12 +145,15 @@ void main() {
       );
       await tester.pumpAndSettle();
       await _tapVisible(tester, find.text('Upgrade'));
-      expect(find.text('Your corner, every day'), findsOneWidget);
+      expect(find.text('Your camp, planned and fueled'), findsOneWidget);
 
       // 8. The trusted webhook updates the server profile.
       await repo.debugSetPlan(Plan.pro);
       await tester.pumpAndSettle();
       expect(repo.currentUser!.isPro, isTrue);
+      // The paid status sits below the benefits list, which is lazily built:
+      // on a 320x640 screen it is not mounted until scrolled to.
+      await _ensureVisible(tester, find.text("You're on Pro"));
       expect(find.text("You're on Pro"), findsOneWidget);
 
       // 9. Sign out from Profile -> back to login.
@@ -177,6 +185,20 @@ Future<void> _ensureVisible(WidgetTester tester, Finder finder) => tester
 /// where a tap cannot land. Centring keeps it clear of header and nav bar.
 Future<void> _centerInView(WidgetTester tester, Finder finder) async {
   await Scrollable.ensureVisible(tester.element(finder), alignment: .5);
+  await tester.pumpAndSettle();
+}
+
+/// Pumps real frames until [finder] matches (or [timeout] passes), for results
+/// that arrive after a chain of async work rather than on the next frame.
+Future<void> _pumpUntilFound(
+  WidgetTester tester,
+  Finder finder, {
+  Duration timeout = const Duration(seconds: 20),
+}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (finder.evaluate().isEmpty && DateTime.now().isBefore(deadline)) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
   await tester.pumpAndSettle();
 }
 
