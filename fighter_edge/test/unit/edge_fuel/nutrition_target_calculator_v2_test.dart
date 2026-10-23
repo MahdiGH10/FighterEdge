@@ -64,6 +64,7 @@ NutritionTargetV2 _calc(
   double? rate,
   bool shift = true,
   bool camp = false,
+  bool enablePendingEnergyAvailabilityFloor = false,
 }) =>
     NutritionTargetCalculatorV2.calculate(
       p,
@@ -72,6 +73,8 @@ NutritionTargetV2 _calc(
       weeklyRatePercent: rate,
       inFightCamp: camp,
       trainingDayShift: shift,
+      enablePendingEnergyAvailabilityFloor:
+          enablePendingEnergyAvailabilityFloor,
     );
 
 /// Every invariant the safety rules promise, for any successful result.
@@ -298,7 +301,13 @@ void main() {
         equation: EquationProfile.lowerOffset,
         activity: ActivityLevel.veryLow,
       );
-      final t = _calc(p, rate: 1.0, camp: true);
+      final withoutSignOff = _calc(p, rate: 1.0, camp: true);
+      expect(withoutSignOff.energyAvailabilityFloorKcal, isNull);
+      expect(withoutSignOff.warnings,
+          isNot(contains('goalRateReducedForEnergyAvailability')));
+
+      final t = _calc(p,
+          rate: 1.0, camp: true, enablePendingEnergyAvailabilityFloor: true);
       expect(t.isSuccess, isTrue);
       final ea = t.energyAvailabilityFloorKcal!;
       expect(ea, greaterThan(t.estimatedRmrKcal!));

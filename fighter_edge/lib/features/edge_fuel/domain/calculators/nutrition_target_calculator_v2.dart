@@ -40,7 +40,8 @@ class NutritionTargetCalculatorV2 {
   /// (a fight-camp path supplies it); it is clamped to the safe range either
   /// way. [inFightCamp] lets the rate go up to the camp's 1% a week; outside
   /// a camp loss is capped at 0.75%. [trainingDayShift] turns the carbohydrate
-  /// shift off.
+  /// shift off. [enablePendingEnergyAvailabilityFloor] is off until the
+  /// placeholder floor receives sports-dietitian sign-off.
   static NutritionTargetV2 calculate(
     NutritionProfile profile, {
     required List<PlannedFuelSession> plannedWeek,
@@ -48,6 +49,7 @@ class NutritionTargetCalculatorV2 {
     double? weeklyRatePercent,
     bool inFightCamp = false,
     bool trainingDayShift = true,
+    bool enablePendingEnergyAvailabilityFloor = false,
   }) {
     // 1. Missing data.
     if (profile.goal != NutritionGoal.maintain) {
@@ -179,7 +181,9 @@ class NutritionTargetCalculatorV2 {
       restingEnergyKcal: rmr,
       averageSessionKcalPerDay: weekSessionKcal / 7,
     );
-    if (isLosing && rawAverage < eaFloor) {
+    if (enablePendingEnergyAvailabilityFloor &&
+        isLosing &&
+        rawAverage < eaFloor) {
       rawAverage = eaFloor.toDouble();
       warnings.add('goalRateReducedForEnergyAvailability');
     }
@@ -294,7 +298,9 @@ class NutritionTargetCalculatorV2 {
       fiberGramsHigh:
           (average / 1000 * NutritionPolicy.fiberGPer1000KcalHigh).round(),
       minimumDailyKcal: minimumDay,
-      energyAvailabilityFloorKcal: eaFloor > rmrFloor ? eaFloor : rmrFloor,
+      energyAvailabilityFloorKcal: enablePendingEnergyAvailabilityFloor
+          ? (eaFloor > rmrFloor ? eaFloor : rmrFloor)
+          : null,
       appliedWeeklyChangePercent: signedChange,
       proteinReferenceWeightKg: referenceWeightKg,
       equationProfileUsed: profile.equationProfile,

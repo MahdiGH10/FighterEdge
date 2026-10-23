@@ -188,6 +188,7 @@ void main() {
         ),
       ],
       now: DateTime(2026, 10, 22),
+      enablePendingEnergyAvailabilityFloor: true,
     );
     expect(formula.isSuccess, isTrue);
     final target = formula.weeklyAverageCalories!;
