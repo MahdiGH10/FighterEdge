@@ -205,8 +205,11 @@ class FakeReminderGateway implements ReminderGateway {
 
   FakeReminderGateway({this.permissionGranted = true});
 
+  /// Flip to false to model a platform without local notifications.
+  bool available = true;
+
   @override
-  bool get isAvailable => true;
+  bool get isAvailable => available;
 
   @override
   Future<bool> requestPermission() async {
@@ -227,6 +230,29 @@ class FakeReminderGateway implements ReminderGateway {
   Future<void> cancelAll() async {
     cancelled = true;
     scheduledWeekdays = null;
+  }
+
+  /// When the trial-end reminder is set for, and what it says.
+  DateTime? trialReminderAt;
+  String? trialReminderTitle;
+  int trialReminderCancels = 0;
+  int trialReminderSchedules = 0;
+
+  @override
+  Future<void> scheduleTrialEndReminder({
+    required DateTime at,
+    required String title,
+    required String body,
+  }) async {
+    trialReminderSchedules++;
+    trialReminderAt = at;
+    trialReminderTitle = title;
+  }
+
+  @override
+  Future<void> cancelTrialEndReminder() async {
+    trialReminderCancels++;
+    trialReminderAt = null;
   }
 }
 
