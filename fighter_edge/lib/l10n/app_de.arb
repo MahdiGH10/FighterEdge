@@ -368,7 +368,7 @@
     }
   },
   "nutritionKcalLeft": "kcal übrig",
-  "nutritionOverTarget": "{kcal} kcal über dem Ziel",
+  "nutritionOverTarget": "Tagesziel erreicht, plus {kcal} kcal",
   "nutritionViewPlan": "Ernährungsplan ansehen",
   "nutritionRecipesFit": "Passende Rezepte",
   "nutritionMacroGrams": "{value} / {target} g",
