@@ -27,6 +27,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/access_status.dart';
 import '../widgets/dev_message_card.dart';
 import '../widgets/number_hero.dart';
 import '../widgets/press_scale.dart';
@@ -100,6 +101,7 @@ class DashboardScreen extends StatelessWidget {
                   style: AppType.subhead(
                       color: AppAccessibility.textSecondary(context))),
             const SizedBox(height: Insets.lg),
+            const AccessStatus(),
             if (firstRun.isActive) ...[
               FirstWeekChecklist(
                   key: checklistKey,

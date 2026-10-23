@@ -186,7 +186,6 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
       if (key == 'surface') {
         return _oneOf(value, const {
           'plan_ready',
-          'paywall_waitlist',
         });
       }
       if (key == 'access') return _oneOf(value, const {'free', 'pro'});
