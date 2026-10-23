@@ -72,75 +72,81 @@ class ProfileScreen extends StatelessWidget {
         ],
       ],
     );
-    final body = ListView(
-      padding: const EdgeInsets.fromLTRB(
-          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
-      children: [
-        if (largeText)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final body = Builder(
+      builder: (context) => ListView(
+        padding: EdgeInsets.fromLTRB(
+            Insets.lg,
+            MediaQuery.paddingOf(context).top,
+            Insets.lg,
+            ScreenScaffold.tabBottomPadding(context)),
+        children: [
+          if (largeText)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const FighterAvatar(size: 64),
+                const SizedBox(height: Insets.md),
+                details,
+              ],
+            )
+          else
+            Row(
+              children: [
+                const FighterAvatar(size: 64),
+                const SizedBox(width: Insets.lg),
+                Expanded(child: details),
+              ],
+            ),
+          const SizedBox(height: Insets.xl),
+          const SectionHeader('Subscription'),
+          _SubscriptionCard(auth: auth),
+          const SizedBox(height: Insets.xl),
+          const SectionHeader('Tools'),
+          const GroupedList(
             children: [
-              const FighterAvatar(size: 64),
-              const SizedBox(height: Insets.md),
-              details,
-            ],
-          )
-        else
-          Row(
-            children: [
-              const FighterAvatar(size: 64),
-              const SizedBox(width: Insets.lg),
-              Expanded(child: details),
+              _ToolRow(
+                title: 'Weight tracker',
+                subtitle: 'Log weigh-ins and monitor the cut or gain',
+                route: AppRoutes.weightTracker,
+                screen: WeightTrackerScreen(),
+              ),
+              _ToolRow(
+                title: 'Settings',
+                subtitle: 'Units, safety, reminders and account controls',
+                route: AppRoutes.settings,
+                screen: SettingsScreen(),
+              ),
             ],
           ),
-        const SizedBox(height: Insets.xl),
-        const SectionHeader('Subscription'),
-        _SubscriptionCard(auth: auth),
-        const SizedBox(height: Insets.xl),
-        const SectionHeader('Tools'),
-        const GroupedList(
-          children: [
-            _ToolRow(
-              title: 'Weight tracker',
-              subtitle: 'Log weigh-ins and monitor the cut or gain',
-              route: AppRoutes.weightTracker,
-              screen: WeightTrackerScreen(),
-            ),
-            _ToolRow(
-              title: 'Settings',
-              subtitle: 'Units, safety, reminders and account controls',
-              route: AppRoutes.settings,
-              screen: SettingsScreen(),
-            ),
-          ],
-        ),
-        const SizedBox(height: Insets.xl),
-        const SectionHeader('Stats'),
-        GroupedList(
-          children: [
-            _StatRow('Sessions completed', '${state.completedSessionCount}'),
-            _StatRow('Week streak',
-                '$streakWeeks ${L.of(context).dashboardStatWeeks(streakWeeks)}'),
-            _StatRow(
-                'Training days / week', '${user?.weeklyTrainingDays ?? 0}'),
-          ],
-        ),
-        const SizedBox(height: Insets.xl),
-        GhostButton(
-          'Sign out',
-          icon: AppIcons.signOut,
-          expand: true,
-          onPressed: () async {
-            await auth.signOut();
-            if (context.mounted) {
-              Navigator.of(context).popUntil((r) => r.isFirst);
-            }
-          },
-        ),
-      ],
+          const SizedBox(height: Insets.xl),
+          const SectionHeader('Stats'),
+          GroupedList(
+            children: [
+              _StatRow('Sessions completed', '${state.completedSessionCount}'),
+              _StatRow('Week streak',
+                  '$streakWeeks ${L.of(context).dashboardStatWeeks(streakWeeks)}'),
+              _StatRow(
+                  'Training days / week', '${user?.weeklyTrainingDays ?? 0}'),
+            ],
+          ),
+          const SizedBox(height: Insets.xl),
+          GhostButton(
+            'Sign out',
+            icon: AppIcons.signOut,
+            expand: true,
+            onPressed: () async {
+              await auth.signOut();
+              if (context.mounted) {
+                Navigator.of(context).popUntil((r) => r.isFirst);
+              }
+            },
+          ),
+        ],
+      ),
     );
     if (asTab) {
-      return ScreenScaffold.tab(title: 'Profile', body: body);
+      return ScreenScaffold.tab(
+          title: 'Profile', scrollsUnderHeader: true, body: body);
     }
     return ScreenScaffold(title: 'Profile', showBack: true, body: body);
   }

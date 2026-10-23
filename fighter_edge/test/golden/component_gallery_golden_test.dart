@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fighter_edge/debug/component_gallery_screen.dart';
 import 'package:fighter_edge/theme/app_theme.dart';
+import 'package:fighter_edge/theme/glass_policy.dart';
 import 'package:fighter_edge/widgets/press_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -47,9 +48,10 @@ void main() {
   Future<void> pumpGallery(
     WidgetTester tester, {
     required double textScale,
+    GlassPolicy glass = const GlassPolicy(),
   }) async {
     final binding = TestWidgetsFlutterBinding.instance;
-    final size = Size(390, textScale > 1 ? 2200 : 1700);
+    final size = Size(390, textScale > 1 ? 3000 : 2300);
     binding.platformDispatcher.views.first.physicalSize = size;
     await tester.pumpWidget(
       MaterialApp(
@@ -61,7 +63,10 @@ void main() {
             textScaler: TextScaler.linear(textScale),
             disableAnimations: true,
           ),
-          child: const ComponentGalleryScreen(),
+          child: GlassPolicyScope(
+            policy: glass,
+            child: BackdropGroup(child: const ComponentGalleryScreen()),
+          ),
         ),
       ),
     );
@@ -76,6 +81,42 @@ void main() {
       await expectLater(
         find.byType(ComponentGalleryScreen),
         matchesGoldenFile('goldens/component_gallery_default.png'),
+      );
+    },
+    tags: 'golden',
+  );
+
+  // The solid level is what Reduce transparency, high contrast and the slow
+  // device fallback look like: same layout, no glow, opaque surfaces.
+  testWidgets(
+    'component gallery matches baseline at the solid glass level',
+    (tester) async {
+      await pumpGallery(
+        tester,
+        textScale: 1,
+        glass: const GlassPolicy(reduceTransparency: true),
+      );
+
+      await expectLater(
+        find.byType(ComponentGalleryScreen),
+        matchesGoldenFile('goldens/component_gallery_solid.png'),
+      );
+    },
+    tags: 'golden',
+  );
+
+  testWidgets(
+    'component gallery matches baseline at the tinted glass level',
+    (tester) async {
+      await pumpGallery(
+        tester,
+        textScale: 1,
+        glass: const GlassPolicy(slowFrames: true),
+      );
+
+      await expectLater(
+        find.byType(ComponentGalleryScreen),
+        matchesGoldenFile('goldens/component_gallery_tinted.png'),
       );
     },
     tags: 'golden',

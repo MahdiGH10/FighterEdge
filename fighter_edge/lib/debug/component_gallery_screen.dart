@@ -7,6 +7,7 @@ import '../theme/app_typography.dart';
 import '../widgets/animated_count.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/filter_chips.dart';
+import '../widgets/glass_surface.dart';
 import '../widgets/password_strength_meter.dart';
 import '../widgets/premium_effects.dart';
 import '../widgets/press_scale.dart';
@@ -80,6 +81,11 @@ class ComponentGalleryCanvas extends StatelessWidget {
               _GallerySection(
                 title: 'Navigation',
                 child: _NavigationStates(),
+              ),
+              SizedBox(height: Insets.lg),
+              _GallerySection(
+                title: 'Glass',
+                child: _GlassStates(),
               ),
             ],
           ),
@@ -349,6 +355,99 @@ class _NavigationStates extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _GlassStates extends StatelessWidget {
+  const _GlassStates();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GlassCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('TODAY',
+                  style: AppType.micro(
+                      color: GlassColors.text(
+                          GlassKind.hero, AppColors.emberSoft))),
+              const SizedBox(height: Insets.xs),
+              Text('Wrestling', style: AppType.largeTitle()),
+              const SizedBox(height: Insets.xs),
+              Text(
+                '6 rounds · about 50 min',
+                style: AppType.callout(
+                    color: GlassColors.text(
+                        GlassKind.hero, AppColors.textSecondary)),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: Insets.md),
+        GlassCard(
+          tone: GlassTone.cool,
+          child: Text(
+            '3 of 5 done · next: Thu Wrestling',
+            style: AppType.callout(
+                color:
+                    GlassColors.text(GlassKind.hero, AppColors.textSecondary)),
+          ),
+        ),
+        const SizedBox(height: Insets.md),
+        GlassCard(
+          tone: GlassTone.gold,
+          child: Text(
+            'FREE WEEK · 5 DAYS LEFT',
+            style: AppType.micro(
+                color: GlassColors.text(GlassKind.heroGold, AppColors.premium)),
+          ),
+        ),
+        const SizedBox(height: Insets.md),
+        // The navigation layer, over something bright so the blur reads.
+        ClipRRect(
+          borderRadius: BorderRadius.circular(Radii.card),
+          child: SizedBox(
+            height: 120,
+            child: Stack(
+              children: [
+                const Positioned.fill(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(child: ColoredBox(color: AppColors.ember500)),
+                      Expanded(child: ColoredBox(color: AppColors.crimson500)),
+                      Expanded(child: ColoredBox(color: AppColors.protein)),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: GlassSurface(
+                    kind: GlassKind.nav,
+                    child: SizedBox(
+                      height: 56,
+                      child: Center(
+                        child: Text(
+                          'Glass nav layer',
+                          style: AppType.subhead(
+                              color: GlassColors.text(
+                                  GlassKind.nav, AppColors.textPrimary)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

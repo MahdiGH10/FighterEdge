@@ -7,6 +7,7 @@ import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/billing/fake_billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/main.dart';
+import 'package:fighter_edge/state/glass_policy_controller.dart';
 import 'package:fighter_edge/theme/app_icons.dart';
 import 'package:fighter_edge/widgets/bottom_nav.dart';
 import 'package:fighter_edge/widgets/primary_button.dart';
@@ -42,7 +43,13 @@ void main() {
     // scrolls and taps again.
     WidgetController.hitTestWarningShouldBeFatal = true;
     addTearDown(() => WidgetController.hitTestWarningShouldBeFatal = false);
-    SharedPreferences.setMockInitialValues({});
+    // Solid glass: the emulator renders on the CPU, and the real blur from
+    // the V2 chrome sometimes kills it as the flow ends (the test prints a
+    // pass, then "No tests were found"). This also runs the solid fallback
+    // in CI; the blur path has its own widget and golden tests.
+    SharedPreferences.setMockInitialValues({
+      GlassPolicyController.reduceTransparencyKey: true,
+    });
     final repo = LocalAuthRepository();
     await repo.init();
     final billing = FakeBillingGateway();
@@ -126,7 +133,7 @@ void main() {
     await _tapVisible(tester, find.text('Monthly plan'));
     final buy = find.text('Continue with monthly plan');
     await _ensureVisible(tester, buy);
-    await tester.ensureVisible(buy);
+    await _centerInView(tester, buy);
     await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(buy);
     await tester.pump();
@@ -159,6 +166,15 @@ void main() {
 Future<void> _ensureVisible(WidgetTester tester, Finder finder) => tester
     .scrollUntilVisible(finder, 300, scrollable: find.byType(Scrollable).first);
 
+/// Brings [finder] fully into view, centred. `tester.ensureVisible` aligns
+/// the widget's leading edge with the viewport top, which on the tab screens
+/// (their lists scroll under the glass header) parks it beneath the header
+/// where a tap cannot land. Centring keeps it clear of header and nav bar.
+Future<void> _centerInView(WidgetTester tester, Finder finder) async {
+  await Scrollable.ensureVisible(tester.element(finder), alignment: .5);
+  await tester.pumpAndSettle();
+}
+
 /// Retries: on the real, GPU-less, software-rendered emulator this suite
 /// runs on in CI, a target that `_ensureVisible` just confirmed exists has
 /// gone missing again by the time the interaction actually runs, at four
@@ -182,7 +198,7 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) =>
       await _ensureVisible(tester, finder);
       // scrollUntilVisible stops as soon as the widget exists, which on a
       // 320x640 screen can leave it half off the edge; bring all of it in.
-      await tester.ensureVisible(finder);
+      await _centerInView(tester, finder);
       await tester.pumpAndSettle();
       // A brief real-time pause before tapping — twice, a tap right after
       // scrolling missed its target the instant the emulator's software

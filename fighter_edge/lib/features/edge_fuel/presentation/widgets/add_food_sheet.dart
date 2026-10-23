@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../../widgets/glass_sheet.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,11 +47,10 @@ Future<AddFoodOutcome?> showAddFoodSheet(
   BuildContext context, {
   required String dayLabel,
 }) {
-  return showModalBottomSheet<AddFoodOutcome>(
+  return showGlassSheet<AddFoodOutcome>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: AppColors.surface,
     showDragHandle: true,
     builder: (_) => FractionallySizedBox(
       heightFactor: .92,
