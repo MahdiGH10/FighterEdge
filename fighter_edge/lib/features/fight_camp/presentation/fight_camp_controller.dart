@@ -70,9 +70,15 @@ class FightCampController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Asked before any fight write; the app points it at
+  /// `AppState.requireWrite` so a read-only account cannot change its fight.
+  bool Function() writeGate = _openGate;
+
+  static bool _openGate() => true;
+
   void save(FightCamp camp) {
     final userId = _userId;
-    if (userId == null) return;
+    if (userId == null || !writeGate()) return;
     _camp = camp;
     notifyListeners();
     _write(() => _repository.saveFight(userId, camp), 'fight_save_failed');
@@ -80,7 +86,7 @@ class FightCampController extends ChangeNotifier {
 
   void clear() {
     final userId = _userId;
-    if (userId == null) return;
+    if (userId == null || !writeGate()) return;
     _camp = null;
     notifyListeners();
     _write(() => _repository.deleteFight(userId), 'fight_delete_failed');

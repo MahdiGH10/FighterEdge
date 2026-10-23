@@ -383,20 +383,26 @@ class PlanController extends ChangeNotifier {
 
   /// Takes back a completion. The session goes back to what its date says.
   void undoComplete(PlannedSession session) {
+    if (!_log.requireWrite()) return;
     final entry = logEntryFor(session.id);
     if (entry != null) _log.removeTrainingLogEntry(entry.id);
   }
 
   /// The athlete chose not to do [session]. Neutral, not a failure.
-  void skip(PlannedSession session) =>
-      _adjust(SessionAdjustment.skipped(session.id));
+  void skip(PlannedSession session) {
+    if (!_log.requireWrite()) return;
+    _adjust(SessionAdjustment.skipped(session.id));
+  }
 
   /// Moves [session] to [to]. Nothing moves on its own.
-  void move(PlannedSession session, DateTime to) =>
-      _adjust(SessionAdjustment.moved(session.id, calendarDay(to)));
+  void move(PlannedSession session, DateTime to) {
+    if (!_log.requireWrite()) return;
+    _adjust(SessionAdjustment.moved(session.id, calendarDay(to)));
+  }
 
   /// Puts a skipped or moved session back on its planned date.
   void clearAdjustment(PlannedSession session) {
+    if (!_log.requireWrite()) return;
     final stored = _stored;
     if (stored == null || !stored.adjustments.containsKey(session.id)) return;
     _adopt(stored.withoutAdjustment(session.id));
@@ -405,6 +411,7 @@ class PlanController extends ChangeNotifier {
   /// Records the athlete's answer to the review of the week starting
   /// [weekStart]. The plan itself only changes through what they accepted.
   void recordReview(DateTime weekStart, ReviewDecision decision) {
+    if (!_log.requireWrite()) return;
     final stored = _stored;
     if (stored == null) return;
     _adopt(stored.withReview(calendarDay(weekStart), decision));

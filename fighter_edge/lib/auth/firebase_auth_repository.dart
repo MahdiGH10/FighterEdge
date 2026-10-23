@@ -146,13 +146,22 @@ class FirebaseAuthRepository implements AuthRepository {
           unawaited(_seedProfile(user).catchError((Object _) {}));
         }
         emitted = true;
-        emit(_remember(_appUserFrom(user, snap.data() ?? const {})));
+        // A cache-only snapshot with no document means the profile was never
+        // fetched: the default free plan is a placeholder, not the answer.
+        final unconfirmed = !snap.exists && snap.metadata.isFromCache;
+        emit(_remember(_appUserFrom(
+          user,
+          snap.data() ?? const {},
+          confirmed: !unconfirmed,
+        )));
       },
       onError: (Object error) {
         if (kDebugMode) debugPrint('[auth] profile listener error: $error');
       },
       onDone: () {
-        if (!emitted) emit(_remember(_appUserFrom(user, const {})));
+        if (!emitted) {
+          emit(_remember(_appUserFrom(user, const {}, confirmed: false)));
+        }
       },
     );
   }
@@ -180,6 +189,7 @@ class FirebaseAuthRepository implements AuthRepository {
   /// onboarding back into the onboarding wizard.
   Future<AppUser> _hydrate(User user, {Duration? timeout}) async {
     Map<String, dynamic> profileData = const {};
+    var confirmed = true;
     try {
       var future = _doc(user.uid).get();
       if (timeout != null) future = future.timeout(timeout);
@@ -190,17 +200,23 @@ class FirebaseAuthRepository implements AuthRepository {
         await _seedProfile(user);
       }
     } catch (e) {
+      confirmed = false;
       // Debug only: Firestore errors can name the `users/{uid}` path, and
       // debugPrint is not stripped from release builds.
       if (kDebugMode) {
         debugPrint('[auth] Firestore unavailable, defaulting to free plan: $e');
       }
     }
-    return _remember(_appUserFrom(user, profileData));
+    return _remember(_appUserFrom(user, profileData, confirmed: confirmed));
   }
 
   /// Builds the app's user from the auth account and its profile document.
-  AppUser _appUserFrom(User user, Map<String, dynamic> profileData) {
+  /// [confirmed] is false when the profile could not be read at all.
+  AppUser _appUserFrom(
+    User user,
+    Map<String, dynamic> profileData, {
+    bool confirmed = true,
+  }) {
     final billingData = Map<String, dynamic>.from(
       (profileData['billing'] as Map?) ?? const <String, dynamic>{},
     );
@@ -217,6 +233,8 @@ class FirebaseAuthRepository implements AuthRepository {
       plan: plan,
       planExpiresAt: _parseBillingDate(billingData['expiresAtMs']),
       planWillRenew: (billingData['willRenew'] as bool?) ?? false,
+      planPeriod: ProPeriodParsing.fromServer(billingData['proPeriod']),
+      entitlementConfirmed: confirmed,
       billingProvider: billingData['provider'] as String?,
       createdAt: user.metadata.creationTime ?? DateTime.now(),
       onboardingComplete: (profileData['onboardingComplete'] as bool?) ?? false,

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
+import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/screens/home_shell.dart';
@@ -38,7 +39,11 @@ void main() {
   testWidgets('a new account gets the checklist, tour and first-win moment',
       (tester) async {
     useTallScreen(tester);
-    final repo = await makeRepo(signedIn: true, onboarded: true);
+    final repo = await makeRepo(
+      signedIn: true,
+      onboarded: true,
+      plan: Plan.pro,
+    );
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('fe_first_run.${repo.currentUser!.id}.active', true);
     final reminders = FakeReminderGateway();
