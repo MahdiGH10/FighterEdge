@@ -6,11 +6,8 @@ import '../theme/app_icons.dart';
 import '../auth/verification_gate.dart';
 import '../controllers/auth_controller.dart';
 import '../features/corner_brief/presentation/corner_line_row.dart';
-import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../features/fight_camp/domain/calendar.dart';
 import '../features/fight_camp/presentation/widgets/fight_countdown_card.dart';
-import '../features/training_plan/domain/models/planned_session.dart';
-import '../features/training_plan/domain/session_status_resolver.dart';
 import '../features/training_plan/presentation/plan_controller.dart';
 import '../features/training_plan/presentation/plan_labels.dart';
 import '../features/weekly_review/domain/review_window.dart';
@@ -30,16 +27,15 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/dev_message_card.dart';
 import '../widgets/number_hero.dart';
 import '../widgets/press_scale.dart';
-import '../widgets/primary_button.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/sync_notice.dart';
 import '../widgets/grouped_list.dart';
 import '../widgets/weekly_target_card.dart';
 import 'auth/verify_email_screen.dart';
 import 'first_run/first_week_checklist.dart';
-import 'round_timer_screen.dart';
-import 'session_log_dialog.dart';
 import 'weight_tracker_screen.dart';
+import 'home/today_hero.dart';
+import 'round_timer_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final ValueChanged<int> onNavigate;
@@ -66,8 +62,6 @@ class DashboardScreen extends StatelessWidget {
     final reviewWeek = plan.hasPlan ? ReviewWindow.weekFor(plan.today) : null;
     final reviewReady =
         reviewWeek != null && plan.reviewDecision(reviewWeek) == null;
-    // Today's session if it is still to do, else the next one this week.
-    final todaysSession = plan.todaySession?.session;
     final upcoming = plan.nextSession;
     final nextThisWeek =
         upcoming != null && daysBetween(plan.thisWeekStart, upcoming.date) < 7
@@ -78,7 +72,7 @@ class DashboardScreen extends StatelessWidget {
     // "Dashboard" on the screen the bottom bar already calls Home.
     final locale = Localizations.localeOf(context).toString();
     return ScreenScaffold.tab(
-      title: DateFormat.MMMEd(locale).format(state.now),
+      title: l.dashboardToday,
       scrollsUnderHeader: true,
       body: Builder(
         builder: (context) => ListView(
@@ -90,6 +84,9 @@ class DashboardScreen extends StatelessWidget {
           children: [
             // Only while a change was refused by the server.
             const SyncNotice(),
+            Text(DateFormat.MMMEd(locale).format(state.now),
+                style: AppType.subhead(
+                    color: AppAccessibility.textSecondary(context))),
             Text(
                 user?.displayName.isNotEmpty == true
                     ? user!.displayName
@@ -109,13 +106,38 @@ class DashboardScreen extends StatelessWidget {
                   onTrain: () => onNavigate(1)),
               const SizedBox(height: Insets.md),
             ],
-            const FightCountdownSection(),
-            _SessionHero(
-                session: todaysSession,
-                next: nextThisWeek,
-                hasPlan: plan.hasPlan,
-                onNavigate: onNavigate),
+            TodayHero(onNavigate: onNavigate),
+            const SizedBox(height: Insets.sm),
+            Wrap(
+              spacing: Insets.sm,
+              children: [
+                TextButton.icon(
+                  onPressed: () => AppNavigation.push(
+                    context,
+                    AppRoutes.weightTracker,
+                    fallbackBuilder: (_) => const WeightTrackerScreen(),
+                  ),
+                  icon: const Icon(AppIcons.scales),
+                  label: Text(l.dashboardAddWeighIn),
+                ),
+                TextButton.icon(
+                  onPressed: () => onNavigate(2),
+                  icon: const Icon(AppIcons.forkKnife),
+                  label: Text(l.navFuel),
+                ),
+                TextButton.icon(
+                  onPressed: () => AppNavigation.push(
+                    context,
+                    AppRoutes.roundTimer,
+                    fallbackBuilder: (_) => const RoundTimerScreen(),
+                  ),
+                  icon: const Icon(AppIcons.timer),
+                  label: Text(l.dashboardTimerAction),
+                ),
+              ],
+            ),
             const SizedBox(height: Insets.md),
+            const FightCountdownSection(),
             const CornerLineRow(),
             const SizedBox(height: Insets.md),
             if (auth.supportsEmailVerification &&
@@ -172,108 +194,6 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _SessionHero extends StatelessWidget {
-  /// Today's session, when it is still to do.
-  final PlannedSession? session;
-
-  /// The next session later this week, when there is none to do today.
-  final ResolvedSession? next;
-  final bool hasPlan;
-  final ValueChanged<int> onNavigate;
-  const _SessionHero(
-      {required this.session,
-      required this.next,
-      required this.hasPlan,
-      required this.onNavigate});
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final fuel = context.watch<EdgeFuelController>();
-    final today = session != null;
-    final title = today
-        ? PlanLabels.title(l, session!)
-        : next != null
-            ? l.dashboardRestDay
-            : (hasPlan ? l.dashboardWeekDone : l.dashboardNoPlan);
-    return AppCard(
-        accent: AppColors.primary,
-        edge: true,
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(l.dashboardToday.toUpperCase(),
-              style:
-                  AppType.micro(color: AppAccessibility.accentText(context))),
-          const SizedBox(height: Insets.xs),
-          Text(title, style: AppType.display()),
-          const SizedBox(height: Insets.sm),
-          Text(
-              today
-                  ? PlanLabels.subtitle(l, session!)
-                  : next != null
-                      ? l.dashboardNextUp(
-                          PlanLabels.weekday(context, next!.date),
-                          PlanLabels.title(l, next!.session))
-                      : (hasPlan ? l.dashboardRecovery : l.dashboardPlanHint),
-              style: AppType.callout(
-                  color: AppAccessibility.textSecondary(context))),
-          const SizedBox(height: Insets.lg),
-          PrimaryButton(today ? l.dashboardLogSession : l.dashboardOpenCamp,
-              expand: true,
-              onPressed: today
-                  ? () => logSessionWithRpe(
-                      context, context.read<PlanController>(), session!)
-                  : () => onNavigate(1)),
-          const SizedBox(height: Insets.sm),
-          Row(children: [
-            Expanded(
-                child: TextButton(
-              style: TextButton.styleFrom(
-                  alignment: Alignment.centerLeft, padding: EdgeInsets.zero),
-              onPressed: () => onNavigate(2),
-              child: Text(
-                  fuel.hasUsableTarget
-                      ? l.fuelLeftToday(
-                          (fuel.targetCalories - fuel.consumedCalories)
-                              .clamp(0, fuel.targetCalories))
-                      : l.dashboardSetFuel,
-                  style: AppType.subhead(
-                      color: AppAccessibility.textSecondary(context))),
-            )),
-            IconButton(
-                tooltip: l.dashboardFuelInfo,
-                icon: const Icon(AppIcons.info, size: IconSizes.row),
-                onPressed: () => showDialog<void>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                          title: Text(l.dashboardFuelInfo),
-                          content: Text(l.dashboardFuelExplanation),
-                          actions: [
-                            TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text(l.commonClose))
-                          ],
-                        ))),
-          ]),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              style: TextButton.styleFrom(
-                  alignment: Alignment.centerLeft,
-                  padding: EdgeInsets.zero,
-                  foregroundColor: AppAccessibility.textSecondary(context)),
-              icon: const Icon(AppIcons.timer, size: IconSizes.row),
-              label: Text(l.dashboardTimerAction,
-                  style: AppType.subhead(
-                      color: AppAccessibility.textSecondary(context))),
-              onPressed: () => AppNavigation.push(context, AppRoutes.roundTimer,
-                  fallbackBuilder: (_) => const RoundTimerScreen()),
-            ),
-          ),
-        ]));
   }
 }
 

@@ -95,6 +95,8 @@ void main() {
     expect(plan.todayRow!.status, SessionStatus.completed);
     expect(state.trainingLog.single.rpe, 7);
     expect(state.trainingLog.single.planSlotId, plan.todayRow!.session.id);
+    expect(find.text('Skill session done'), findsOneWidget);
+    expect(find.text('Log session'), findsNothing);
   });
 
   testWidgets('Home has a quick action that opens the round timer',
