@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../theme/app_icons.dart';
 
 import '../../controllers/auth_controller.dart';
@@ -8,13 +9,10 @@ import '../../features/edge_fuel/domain/calculators/nutrition_target_calculator.
 import '../../features/edge_fuel/domain/models/nutrition_enums.dart';
 import '../../features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import '../../features/edge_fuel/domain/models/nutrition_target.dart';
-import '../../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../../features/edge_fuel/presentation/nutrition_copy.dart';
 import '../../features/training_plan/presentation/plan_controller.dart';
 import '../../observability/telemetry.dart';
 import '../../privacy/health_consent_screen.dart';
-import '../../routing/app_navigation.dart';
-import '../../routing/app_router.dart';
 import '../../state/app_state.dart';
 import '../../state/first_run_controller.dart';
 import '../../theme/app_colors.dart';
@@ -97,16 +95,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return PlanReadyView(
         plan: completedPlan,
         isBusy: auth.isBusy,
-        onOpenDashboard: _finishOnboarding,
-        onViewFuelPlan: () => _finishOnboarding(openFuelPlan: true),
-        onViewPro: () => AppNavigation.push(
-          context,
-          AppRoutes.paywall,
-          extra: const PaywallRouteArgs(trigger: PaywallTrigger.planReady),
-          fallbackBuilder: (_) => const PaywallScreen(
-            trigger: PaywallTrigger.planReady,
-          ),
-        ),
+        onContinueReadOnly: auth.billingAvailable ? null : _finishOnboarding,
+        trialDays: TrialGate.offeredDays(auth.billingProducts),
+        onStartTrial: _startTrial,
       );
     }
     final step = OnboardingStepContent.fromIndex(
@@ -145,7 +136,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: SafeArea(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(
-                Insets.lg, Insets.lg, Insets.lg, Insets.xxxl),
+              Insets.lg,
+              Insets.lg,
+              Insets.lg,
+              Insets.xxxl,
+            ),
             children: [
               Row(
                 children: [
@@ -158,8 +153,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     const SizedBox(width: Insets.sm),
                   ],
                   Expanded(
-                      child: OnboardingProgressHeader(
-                          step: _step, stepCount: _stepCount)),
+                    child: OnboardingProgressHeader(
+                      step: _step,
+                      stepCount: _stepCount,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: Insets.xxl),
@@ -248,8 +246,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   /// Takes the [Telemetry] captured before `completeOnboarding`: completing
   /// replaces this screen with the app, so its context is gone by then.
-  static void _trackCompleted(Telemetry telemetry,
-          {required String goal, required int days, required bool detailed}) =>
+  static void _trackCompleted(
+    Telemetry telemetry, {
+    required String goal,
+    required int days,
+    required bool detailed,
+  }) =>
       telemetry.track(
         TelemetryEvent.onboardingCompleted,
         parameters: {
@@ -290,7 +292,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final auth = context.read<AuthController>();
     final state = context.read<AppState>();
     final plan = context.read<PlanController>();
-    final firstRun = context.read<FirstRunController>();
     final telemetry = _telemetry;
     final userId = auth.user?.id;
     final currentWeight = createNutritionTarget
@@ -326,14 +327,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         return;
       }
 
-      await firstRun.begin();
-      await auth.completeOnboarding(
-        goal: _campGoal,
-        experienceLevel: _level,
-        weeklyTrainingDays: _days,
-        startingWeightKg: currentWeight,
-      );
-      _trackCompleted(telemetry, goal: _campGoal, days: _days, detailed: false);
+      if (!mounted) return;
+      setState(() {
+        _completedPlan = CompletedOnboardingPlan(
+          target: null,
+          nutritionGoal: _nutritionGoal,
+          campGoal: _campGoal,
+          level: _level,
+          days: _days,
+        );
+      });
+      telemetry.track(TelemetryEvent.planRevealed);
     } catch (_) {
       if (!mounted) return;
       setState(() => _error = 'Could not save setup. Try again.');
@@ -366,7 +370,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return target;
   }
 
-  Future<void> _finishOnboarding({bool openFuelPlan = false}) async {
+  /// The entry gate. A purchase the store accepted carries straight on into
+  /// the app; backing out leaves the plan reveal as it was.
+  Future<void> _startTrial() async {
+    final started = await TrialGate.open(context);
+    if (started && mounted) await _finishOnboarding();
+  }
+
+  Future<void> _finishOnboarding() async {
     final plan = _completedPlan;
     if (plan == null) return;
 
@@ -385,13 +396,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         weeklyTrainingDays: plan.days,
         startingWeightKg: currentWeight,
       );
-      _trackCompleted(telemetry,
-          goal: plan.campGoal, days: plan.days, detailed: true);
-      if (!openFuelPlan || !mounted) return;
-      AppNavigation.replace(
-        context,
-        AppRoutes.fuelPlan,
-        fallbackBuilder: (_) => const EdgeFuelPlanScreen(),
+      _trackCompleted(
+        telemetry,
+        goal: plan.campGoal,
+        days: plan.days,
+        detailed: true,
       );
     } catch (_) {
       if (!mounted) return;
