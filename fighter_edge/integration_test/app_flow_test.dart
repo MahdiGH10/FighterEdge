@@ -151,6 +151,9 @@ void main() {
       await repo.debugSetPlan(Plan.pro);
       await tester.pumpAndSettle();
       expect(repo.currentUser!.isPro, isTrue);
+      // The paid status sits below the benefits list, which is lazily built:
+      // on a 320x640 screen it is not mounted until scrolled to.
+      await _ensureVisible(tester, find.text("You're on Pro"));
       expect(find.text("You're on Pro"), findsOneWidget);
 
       // 9. Sign out from Profile -> back to login.
