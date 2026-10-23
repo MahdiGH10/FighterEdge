@@ -56,4 +56,35 @@ void main() {
       reason: 'valid values for other events must not cross the boundary',
     );
   });
+
+  test('trial events carry only a billing period and the read-only trigger',
+      () {
+    expect(TelemetryEvent.trialStarted.eventName, 'trial_started');
+    expect(TelemetryEvent.trialConverted.eventName, 'trial_converted');
+    for (final event in [
+      TelemetryEvent.trialStarted,
+      TelemetryEvent.trialConverted
+    ]) {
+      expect(
+        safeTelemetryParameters(event, {
+          'billing_period': 'annual',
+          'uid': 'firebase-uid-1',
+          'email': 'a@b.test',
+          'receipt': 'token',
+        }),
+        {'billing_period': 'annual'},
+      );
+      expect(
+        safeTelemetryParameters(event, {'billing_period': 'weekly'}),
+        isEmpty,
+      );
+    }
+    expect(
+      safeTelemetryParameters(TelemetryEvent.paywallViewed, {
+        'feature': 'direct',
+        'trigger': 'read_only',
+      }),
+      {'feature': 'direct', 'trigger': 'read_only'},
+    );
+  });
 }

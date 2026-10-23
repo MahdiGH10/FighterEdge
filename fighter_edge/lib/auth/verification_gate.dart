@@ -8,8 +8,11 @@ import '../models/app_user.dart';
 /// timer, and the EdgeFuel plan all stay open, because a user who cannot try
 /// the product has no reason to verify anything.
 enum VerifiedAction {
-  /// Buying Pro. A subscription tied to an address that may not exist is a
-  /// refund and account-recovery problem the moment anything goes wrong.
+  /// Starting the store trial or buying. The trial must be reachable right
+  /// after the plan reveal, so the email only has to have been sent (accounts
+  /// from Google or Apple already count as verified). Receipts belong to the
+  /// store account and the Firebase uid, not to the address; the trial then
+  /// nudges the athlete to finish verifying.
   purchasePro,
 }
 
@@ -51,14 +54,21 @@ class VerificationGate {
   /// no concept of verification (the local/dev repository), the gate is open —
   /// otherwise dev and test builds would be unable to reach gated surfaces at
   /// all.
+  ///
+  /// [verificationEmailSent] says a verification email was sent this session
+  /// (sign-up sends one automatically). It is enough to start the trial.
   static bool allows(
     AppUser? user,
     VerifiedAction action, {
     required bool supportsVerification,
+    bool verificationEmailSent = false,
   }) {
     if (!supportsVerification) return true;
     if (user == null) return false;
-    return user.emailVerified;
+    if (user.emailVerified) return true;
+    return switch (action) {
+      VerifiedAction.purchasePro => verificationEmailSent,
+    };
   }
 
   /// How hard the app should currently be pushing [user] to verify.
@@ -85,8 +95,8 @@ class VerificationGate {
   static String refusalMessage(VerifiedAction action) {
     return switch (action) {
       VerifiedAction.purchasePro =>
-        'Verify your email before upgrading. Your subscription and receipts '
-            'are tied to it.',
+        'Verify your email to start your free week. Send the verification '
+            'email first; your subscription is tied to your account.',
     };
   }
 }

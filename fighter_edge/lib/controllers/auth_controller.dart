@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 
 import '../auth/auth_repository.dart';
@@ -36,6 +37,11 @@ class AuthController extends ChangeNotifier {
   /// Firebase rate-limits these server-side; the cooldown exists so the user
   /// sees why the button is inert instead of tapping into a silent failure.
   DateTime? _verificationSentAt;
+
+  /// A verification email went out for this account this session (sign-up
+  /// sends one itself). Enough to start the store trial; see
+  /// [VerifiedAction.purchasePro].
+  bool _verificationEmailSent = false;
   static const Duration _resendCooldown = Duration(seconds: 60);
 
   AuthController(
@@ -61,6 +67,25 @@ class AuthController extends ChangeNotifier {
 
   /// Expiry-aware (see [AppUser.isPro]).
   bool get isPro => _user?.isPro ?? false;
+
+  /// The last confirmed [AccessState] this session. In memory only: it is
+  /// never persisted, so it can only bridge a moment when the server-fed
+  /// profile is unreadable, not outlive the app.
+  AccessState? _lastAccess;
+
+  /// What the athlete may do right now. Derived only from the server-fed
+  /// profile (`plan`, expiry, `proPeriod`); a store purchase result alone
+  /// never changes it.
+  AccessState get accessState {
+    final user = _user;
+    if (user == null) return const AccessState.unknown();
+    final state = user.accessAt(clock.now(), lastKnown: _lastAccess);
+    if (!state.isUnknown) _lastAccess = state;
+    return state;
+  }
+
+  /// Whether new data may be saved (see [AccessState.canWrite]).
+  bool get canWrite => accessState.canWrite;
 
   /// The plan in effect right now. It gates features, so a Pro plan past its
   /// expiry counts as free here, even before the server has caught up.
@@ -88,6 +113,7 @@ class AuthController extends ChangeNotifier {
         _user,
         action,
         supportsVerification: supportsEmailVerification,
+        verificationEmailSent: _verificationEmailSent,
       );
 
   /// Seconds left before another verification email may be requested. 0 means
@@ -112,7 +138,7 @@ class AuthController extends ChangeNotifier {
       final refreshed = await _repo.refreshCurrentUser();
       if (refreshed == null) return false;
       final changed = refreshed.emailVerified != _user?.emailVerified;
-      _user = refreshed;
+      _replaceUser(refreshed);
       _status = AuthStatus.authenticated;
       // Only rebuild when something actually changed — a poll that finds
       // nothing new should cost the UI nothing.
@@ -125,16 +151,29 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  /// Swaps in a fresher profile of the same account and reports the one
+  /// access transition worth measuring: trial to paid. Observation only.
+  void _replaceUser(AppUser? next) {
+    final before = accessState;
+    _user = next;
+    if (next == null) return;
+    if (before.effective?.isTrial == true && accessState.isActive) {
+      _telemetry.track(TelemetryEvent.trialConverted);
+    }
+  }
+
   void _onUserChanged(AppUser? user) {
     // The same account again: its server profile changed (Pro granted,
     // renewed or revoked by the webhook; onboarding saved). Update it
     // without tearing down the billing session.
     if (user != null && _user?.id == user.id) {
-      _user = user;
+      _replaceUser(user);
       _status = AuthStatus.authenticated;
       notifyListeners();
       return;
     }
+    _lastAccess = null;
+    _verificationEmailSent = false;
     _user = user;
     _status =
         user == null ? AuthStatus.unauthenticated : AuthStatus.authenticated;
@@ -186,9 +225,13 @@ class AuthController extends ChangeNotifier {
   Future<void> _apply(Future<AppUser> Function() action) =>
       _run(() async => _onUserChanged(await action()));
 
-  Future<void> signUp(String email, String password, String name) =>
-      _apply(() => _repo.signUpWithEmail(
-          email: email, password: password, displayName: name));
+  Future<void> signUp(String email, String password, String name) async {
+    await _apply(() => _repo.signUpWithEmail(
+        email: email, password: password, displayName: name));
+    // Sign-up sends the verification email itself, which is all the trial
+    // needs (see [VerifiedAction.purchasePro]).
+    if (_user != null) _verificationEmailSent = true;
+  }
 
   Future<void> signIn(String email, String password) =>
       _apply(() => _repo.signInWithEmail(email: email, password: password));
@@ -212,6 +255,7 @@ class AuthController extends ChangeNotifier {
   Future<void> sendEmailVerification() => _run(() async {
         await _repo.sendEmailVerification();
         _verificationSentAt = DateTime.now();
+        _verificationEmailSent = true;
       });
 
   Future<void> sendMagicLink(String email) =>
@@ -267,6 +311,12 @@ class AuthController extends ChangeNotifier {
               'billing_period': selected.period.name,
             },
           );
+          if (_billingState.inTrial) {
+            _telemetry.track(
+              TelemetryEvent.trialStarted,
+              parameters: {'billing_period': selected.period.name},
+            );
+          }
           notifyListeners();
           await _refreshServerEntitlement();
         } on BillingException catch (e) {
@@ -350,7 +400,7 @@ class AuthController extends ChangeNotifier {
     await _repo.syncEntitlement();
     for (var attempt = 0; attempt < 3; attempt++) {
       final refreshed = await _repo.refreshCurrentUser();
-      _user = refreshed;
+      _replaceUser(refreshed);
       _status = refreshed == null
           ? AuthStatus.unauthenticated
           : AuthStatus.authenticated;
@@ -379,7 +429,8 @@ class AuthController extends ChangeNotifier {
             startingWeightKg: startingWeightKg,
           ));
 
-  bool allows(Feature feature) => Entitlements.allows(plan, feature);
+  bool allows(Feature feature) =>
+      Entitlements.allowsAccess(accessState, feature);
 
   /// Whether the signed-in account has explicitly agreed to [purpose] at its
   /// current wording.
