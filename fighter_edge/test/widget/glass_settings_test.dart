@@ -61,7 +61,7 @@ void main() {
       ),
     );
     // No MediaQuery above: high contrast reads as off.
-    expect(seen, GlassLevel.full);
+    expect(seen, GlassLevel.tinted);
 
     await controller.setReduceTransparency(true);
     await tester.pump();

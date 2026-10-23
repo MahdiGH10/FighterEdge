@@ -33,7 +33,9 @@ class GlassPolicyController extends ChangeNotifier {
 
   GlassPolicy get policy => GlassPolicy(
         reduceTransparency: _reduceTransparency,
-        slowFrames: _verdict == FrameVerdict.slow,
+        // Start without blur. Enable it only after this device has actually
+        // demonstrated smooth raster frames; a missing verdict is not proof.
+        slowFrames: _verdict != FrameVerdict.smooth,
       );
 
   Future<void> load() async {
@@ -46,7 +48,7 @@ class GlassPolicyController extends ChangeNotifier {
         _ => null,
       };
     } catch (_) {
-      // No stored value is the default: full glass, probe not run yet.
+      // No stored value keeps the tinted look until the probe completes.
     }
     _loaded = true;
     if (_disposed) return;
