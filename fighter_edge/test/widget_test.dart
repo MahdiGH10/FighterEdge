@@ -58,6 +58,6 @@ void main() {
     await tester.tap(navLabel('Fuel'));
     await tester.pumpAndSettle();
 
-    expect(find.text('NUTRITION'), findsOneWidget);
+    expect(find.text('FUEL'), findsOneWidget);
   });
 }

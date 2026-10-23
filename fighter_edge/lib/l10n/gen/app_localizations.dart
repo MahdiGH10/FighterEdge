@@ -3354,6 +3354,54 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Continue'**
   String get paywallContinue;
+
+  /// No description provided for @fuelLogFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Log food'**
+  String get fuelLogFood;
+
+  /// No description provided for @fuelRecentFoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent foods'**
+  String get fuelRecentFoods;
+
+  /// No description provided for @fuelQuickAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get fuelQuickAdd;
+
+  /// No description provided for @fuelEmptyLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged yet. Use Log food to add your first meal.'**
+  String get fuelEmptyLog;
+
+  /// No description provided for @fuelGramsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g left'**
+  String fuelGramsLeft(int grams);
+
+  /// No description provided for @fuelConsumedKcal.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal logged'**
+  String fuelConsumedKcal(int kcal);
+
+  /// No description provided for @fuelRemovedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed'**
+  String fuelRemovedSnack(String name);
+
+  /// No description provided for @fuelRepeatFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Log {name} again'**
+  String fuelRepeatFood(String name);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

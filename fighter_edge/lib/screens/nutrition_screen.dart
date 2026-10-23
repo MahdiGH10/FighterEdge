@@ -19,6 +19,7 @@ import '../features/edge_fuel/presentation/widgets/fuel_what_is_left.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
+import '../state/app_state.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
@@ -44,6 +45,11 @@ class NutritionScreen extends StatefulWidget {
 class _NutritionScreenState extends State<NutritionScreen> {
   int _tab = 0;
 
+  // Feedback stays above the pinned logging action, including above the nav
+  // when this screen is hosted in HomeShell.
+  EdgeInsets get _feedbackMargin => const EdgeInsets.fromLTRB(Insets.lg,
+      Insets.sm, Insets.lg, AppAccessibility.minTouchTarget + Insets.xxl);
+
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
@@ -58,6 +64,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
           onEdit: _editFood,
           onToggle: _confirmToggled,
           onDelete: _deleteFood,
+          onLogged: _confirmLogged,
         ),
       1 => _MealsView(
           edgeFuel: edgeFuel,
@@ -70,7 +77,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
     };
 
     return ScreenScaffold.tab(
-      title: l.nutritionTitle,
+      title: l.navFuel,
       body: Column(
         children: [
           Padding(
@@ -85,18 +92,22 @@ class _NutritionScreenState extends State<NutritionScreen> {
           ),
           const SizedBox(height: Insets.lg),
           Expanded(child: activeTab),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              Insets.lg,
-              Insets.sm,
-              Insets.lg,
-              Insets.md,
-            ),
-            child: PrimaryButton(
-              l.nutritionAddFood,
-              icon: AppIcons.plus,
-              expand: true,
-              onPressed: () => _addFood(edgeFuel),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Insets.lg,
+                Insets.sm,
+                Insets.lg,
+                Insets.md,
+              ),
+              child: PrimaryButton(
+                l.fuelLogFood,
+                key: const ValueKey('fuel-log-food'),
+                icon: AppIcons.plus,
+                expand: true,
+                onPressed: () => _addFood(edgeFuel),
+              ),
             ),
           ),
         ],
@@ -105,6 +116,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
   }
 
   Future<void> _addFood(EdgeFuelController edgeFuel) async {
+    if (!context.read<AppState>().requireWrite()) return;
     final l = L.of(context);
     final dayLabel = edgeFuel.isToday
         ? l.commonToday
@@ -129,6 +141,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
+          margin: _feedbackMargin,
           content: Text(
               L.of(context).nutritionAddedSnack(entry.name, entry.calories)),
           action: SnackBarAction(
@@ -147,6 +161,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
   /// again, since toggling the same stale [entry] object twice would flip
   /// to the same state both times.
   void _confirmToggled(EdgeFuelController edgeFuel, FoodLogEntry entry) {
+    if (!context.read<AppState>().requireWrite()) return;
     AppHaptics.commit();
     final l = L.of(context);
     final nowEaten = !entry.consumed;
@@ -155,6 +170,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
+          margin: _feedbackMargin,
           content: Text(nowEaten
               ? l.foodMarkedEaten(entry.name)
               : l.foodMarkedNotEaten(entry.name)),
@@ -168,11 +185,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
   }
 
   void _deleteFood(EdgeFuelController edgeFuel, FoodLogEntry entry) {
+    if (!context.read<AppState>().requireWrite()) return;
     unawaited(edgeFuel.deleteEntry(entry));
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
-        content: Text('${entry.name} removed'),
+        behavior: SnackBarBehavior.floating,
+        margin: _feedbackMargin,
+        content: Text(L.of(context).fuelRemovedSnack(entry.name)),
         action: SnackBarAction(
           label: L.of(context).commonUndo,
           onPressed: () => unawaited(edgeFuel.addEntry(entry)),
@@ -184,11 +204,13 @@ class _NutritionScreenState extends State<NutritionScreen> {
     EdgeFuelController edgeFuel, {
     FoodLogEntry? existing,
   }) async {
+    if (!context.read<AppState>().requireWrite()) return;
     final entry = await showDialog<FoodLogEntry>(
       context: context,
       builder: (_) => _FoodEntryDialog(existing: existing),
     );
-    if (entry == null) return;
+    if (entry == null || !mounted) return;
+    if (!context.read<AppState>().requireWrite()) return;
     // Shown at once; storage confirms in the background (audit A-4).
     if (existing == null) {
       unawaited(edgeFuel.addEntry(entry));
@@ -216,7 +238,10 @@ class _DateSwitcher extends StatelessWidget {
           HeaderIcon(
             AppIcons.caretLeft,
             label: l.nutritionPreviousDay,
-            onTap: () => edgeFuel.shiftDate(-1),
+            onTap: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              edgeFuel.shiftDate(-1);
+            },
           ),
           Expanded(
             child: Text(
@@ -231,7 +256,10 @@ class _DateSwitcher extends StatelessWidget {
           HeaderIcon(
             AppIcons.caretRight,
             label: l.nutritionNextDay,
-            onTap: () => edgeFuel.shiftDate(1),
+            onTap: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              edgeFuel.shiftDate(1);
+            },
           ),
         ],
       ),
@@ -465,12 +493,14 @@ class _TodayView extends StatelessWidget {
       onEdit;
   final void Function(EdgeFuelController, FoodLogEntry) onToggle;
   final void Function(EdgeFuelController, FoodLogEntry) onDelete;
+  final void Function(EdgeFuelController, FoodLogEntry) onLogged;
   const _TodayView(
       {required this.edgeFuel,
       required this.ratio,
       required this.onEdit,
       required this.onToggle,
-      required this.onDelete});
+      required this.onDelete,
+      required this.onLogged});
 
   @override
   Widget build(BuildContext context) {
@@ -490,11 +520,16 @@ class _TodayView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AnimatedCount(
-                  value:
-                      (hasTarget ? left : edgeFuel.consumedCalories).toDouble(),
-                  formatter: (value) => '${value.round()}',
-                  style: AppType.heroNumeral(),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: AppAccessibility.heroNumeralScaler(context),
+                  ),
+                  child: AnimatedCount(
+                    value: (hasTarget ? left : edgeFuel.consumedCalories)
+                        .toDouble(),
+                    formatter: (value) => '${value.round()}',
+                    style: AppType.heroNumeral(),
+                  ),
                 ),
                 Text(
                   hasTarget ? l.nutritionKcalLeft : l.nutritionLoggedToday,
@@ -503,20 +538,26 @@ class _TodayView extends StatelessWidget {
               ],
             ),
           ),
-          ProgressRing(
-            progress: ratio.clamp(0.0, 1.0),
-            size: LayoutTokens.fuelRing,
-            strokeWidth: Insets.sm,
-            color: AppColors.primary,
-            child: Text(
-              '${edgeFuel.consumedCalories}',
-              style: AppType.title2(),
+          if (hasTarget)
+            ProgressRing(
+              progress: ratio.clamp(0.0, 1.0),
+              size: LayoutTokens.fuelSummaryRing,
+              strokeWidth: Insets.sm,
+              color: AppColors.primary,
+              child: Semantics(
+                label: l.fuelConsumedKcal(edgeFuel.consumedCalories),
+                excludeSemantics: true,
+                child: Text(
+                  '${(ratio.clamp(0.0, 1.0) * 100).round()}%',
+                  style: AppType.title2(),
+                ),
+              ),
             ),
-          ),
         ]),
         const SizedBox(height: Insets.xl),
         _Macro(l.nutritionProtein, edgeFuel.consumedProtein,
-            edgeFuel.targetProtein, AppColors.protein),
+            edgeFuel.targetProtein, AppColors.protein,
+            prominent: true),
         const SizedBox(height: Insets.md),
         _Macro(l.nutritionCarbs, edgeFuel.consumedCarbs, edgeFuel.targetCarbs,
             AppColors.carbs),
@@ -544,17 +585,19 @@ class _TodayView extends StatelessWidget {
           FuelWhatIsLeft(edgeFuel: edgeFuel, compact: true),
         const SizedBox(height: Insets.xl),
         if (recent.isNotEmpty) ...[
-          Text('Quick add',
+          Text(l.fuelRecentFoods,
               style: AppType.micro(color: AppColors.textSecondary)),
           const SizedBox(height: Insets.sm),
           Wrap(spacing: Insets.sm, runSpacing: Insets.sm, children: [
             for (final entry in recent)
               ActionChip(
+                tooltip: l.fuelRepeatFood(entry.name),
                 label: Text(entry.name),
                 onPressed: () {
+                  if (!context.read<AppState>().requireWrite()) return;
                   final logged = edgeFuel.entryForLogAgain(entry);
                   unawaited(edgeFuel.addEntry(logged));
-                  AppHaptics.commit();
+                  onLogged(edgeFuel, logged);
                 },
               ),
           ]),
@@ -562,7 +605,7 @@ class _TodayView extends StatelessWidget {
         ],
         SectionHeader(l.nutritionMeals),
         if (edgeFuel.entries.isEmpty)
-          Text('Nothing logged yet. Add a meal to see what is left.',
+          Text(l.fuelEmptyLog,
               style: AppType.body(color: AppColors.textSecondary))
         else
           _MealGroup(
@@ -650,11 +693,19 @@ class _MealGroup extends StatelessWidget {
           Dismissible(
             key: ValueKey(entry.id),
             direction: DismissDirection.endToStart,
+            movementDuration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : MotionTokens.standard,
+            resizeDuration: MediaQuery.disableAnimationsOf(context)
+                ? null
+                : MotionTokens.fast,
+            confirmDismiss: (_) async =>
+                context.read<AppState>().requireWrite(),
             background: const Align(
               alignment: Alignment.centerRight,
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: Insets.lg),
-                child: Icon(AppIcons.x, color: AppColors.negative),
+                child: Icon(AppIcons.x, color: AppColors.textSecondary),
               ),
             ),
             onDismissed: (_) => onDelete(edgeFuel, entry),
@@ -663,7 +714,10 @@ class _MealGroup extends StatelessWidget {
                 onToggle: () => onToggle(edgeFuel, entry),
                 onEdit: () => onEdit(edgeFuel, existing: entry),
                 onDelete: () => onDelete(edgeFuel, entry),
-                onSaveToggle: () => edgeFuel.toggleSavedFood(entry)),
+                onSaveToggle: () {
+                  if (!context.read<AppState>().requireWrite()) return;
+                  edgeFuel.toggleSavedFood(entry);
+                }),
           ),
       ]);
 }
@@ -734,6 +788,7 @@ class _QuickStartMeals extends StatelessWidget {
   }
 
   Future<void> _addMeal(BuildContext context, _QuickMeal meal) async {
+    if (!context.read<AppState>().requireWrite()) return;
     AppHaptics.commit();
     unawaited(edgeFuel.addEntry(
       FoodLogEntry(
@@ -977,7 +1032,7 @@ class _MealsView extends StatelessWidget {
           ScreenScaffold.tabBottomPadding(context)),
       children: [
         if (quickAdds.isNotEmpty) ...[
-          const SectionHeader('Quick add'),
+          SectionHeader(L.of(context).fuelQuickAdd),
           Wrap(
             spacing: Insets.sm,
             runSpacing: Insets.sm,
@@ -993,6 +1048,7 @@ class _MealsView extends StatelessWidget {
                     color: AppColors.primary,
                   ),
                   onPressed: () {
+                    if (!context.read<AppState>().requireWrite()) return;
                     final logged = edgeFuel.entryForLogAgain(entry);
                     unawaited(edgeFuel.addEntry(logged));
                     onLogged(edgeFuel, logged);
@@ -1020,7 +1076,9 @@ class _Macro extends StatelessWidget {
   final String label;
   final int value, target;
   final Color color;
-  const _Macro(this.label, this.value, this.target, this.color);
+  final bool prominent;
+  const _Macro(this.label, this.value, this.target, this.color,
+      {this.prominent = false});
   @override
   Widget build(BuildContext context) {
     final remaining = (target - value).clamp(0, target);
@@ -1035,9 +1093,11 @@ class _Macro extends StatelessWidget {
                     color: AppAccessibility.textSecondary(context))),
             Text(
                 target > 0
-                    ? '$remaining g left'
+                    ? L.of(context).fuelGramsLeft(remaining)
                     : L.of(context).nutritionGrams(value),
-                style: AppType.subhead(color: AppColors.textPrimary)),
+                style: prominent
+                    ? AppType.title1(color: AppColors.textPrimary)
+                    : AppType.subhead(color: AppColors.textPrimary)),
           ]),
       const SizedBox(height: Insets.sm),
       ClipRRect(

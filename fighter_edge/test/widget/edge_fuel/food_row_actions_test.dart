@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:fighter_edge/billing/subscription.dart';
+import 'package:fighter_edge/state/app_state.dart';
 
 import 'package:fighter_edge/features/edge_fuel/data/food_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/screens/nutrition_screen.dart';
-import 'package:fighter_edge/theme/app_icons.dart';
 
 import '../../helpers/test_harness.dart';
 
@@ -37,7 +38,7 @@ void main() {
         .loadAll());
 
     // Log one real meal through the same add flow a user would use.
-    await tester.tap(find.byIcon(AppIcons.plus).first);
+    await tester.tap(find.byKey(const ValueKey('fuel-log-food')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'banana');
     await tester.pumpAndSettle();
@@ -65,10 +66,11 @@ void main() {
     final calories = fuel(tester).consumedCalories;
     expect(calories, greaterThan(0));
 
-    await tester.scrollUntilVisible(find.byType(Dismissible).first, 200,
+    final row = find.byKey(ValueKey(fuel(tester).entries.single.id));
+    await tester.scrollUntilVisible(row, 200,
         scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.descendant(
-        of: find.byType(Dismissible).first, matching: find.text('Banana, raw')));
+    await tester
+        .tap(find.descendant(of: row, matching: find.text('Banana, raw')));
     await tester.pumpAndSettle();
 
     expect(find.text('Edit food'), findsOneWidget);
@@ -112,11 +114,15 @@ void main() {
 
   testWidgets('swiping a food away offers an Undo that restores it',
       (tester) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
     await pumpWithOneMeal(tester);
     final before = fuel(tester).entries.single;
-    await tester.scrollUntilVisible(find.byType(Dismissible).first, 200,
+    final row = find.byKey(ValueKey(before.id));
+    await tester.scrollUntilVisible(row, 200,
         scrollable: find.byType(Scrollable).first);
-    await tester.drag(find.byType(Dismissible).first, const Offset(-400, 0));
+    await tester.drag(row, const Offset(-400, 0));
     await tester.pumpAndSettle();
 
     expect(fuel(tester).entries, isEmpty);
@@ -125,5 +131,42 @@ void main() {
     await tester.pumpAndSettle();
     expect(fuel(tester).entries, hasLength(1));
     expect(fuel(tester).entries.single.id, before.id);
+  });
+
+  testWidgets('recent food repeats the last serving in one tap with Undo',
+      (tester) async {
+    await pumpWithOneMeal(tester);
+    expect(find.byKey(const ValueKey('fuel-log-food')).hitTestable(),
+        findsOneWidget);
+    final before = fuel(tester).entries.single;
+    final recent = find.byTooltip('Log Banana, raw again');
+    await tester.scrollUntilVisible(recent, -200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(recent);
+    await tester.pumpAndSettle();
+    expect(fuel(tester).entries, hasLength(2));
+    expect(fuel(tester).entries.last.calories, before.calories);
+    expect(fuel(tester).entries.last.proteinGrams, before.proteinGrams);
+    expect(fuel(tester).entries.last.id, isNot(before.id));
+    await tester.tap(find.text('Undo'));
+    await tester.pumpAndSettle();
+    expect(fuel(tester).entries.single.id, before.id);
+  });
+
+  testWidgets('read-only swipe keeps the food and invokes the access gate',
+      (tester) async {
+    await pumpWithOneMeal(tester);
+    final state = tester.element(find.byType(NutritionScreen)).read<AppState>();
+    state.accessSource = () => const AccessState.readOnly();
+    var blocked = false;
+    state.onWriteBlocked = () => blocked = true;
+    final row = find.byKey(ValueKey(fuel(tester).entries.single.id));
+    await tester.scrollUntilVisible(row, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.drag(row, const Offset(-400, 0));
+    await tester.pumpAndSettle();
+    expect(blocked, isTrue);
+    expect(fuel(tester).entries, hasLength(1));
+    expect(tester.takeException(), isNull);
   });
 }

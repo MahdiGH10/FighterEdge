@@ -60,8 +60,8 @@ void main() {
     await openApp(tester);
 
     // Fuel's header is only in the tree once Fuel has been opened.
-    expect(find.text('NUTRITION', skipOffstage: false), findsNothing);
+    expect(find.text('FUEL', skipOffstage: false), findsNothing);
     await goTo(tester, 'Fuel');
-    expect(find.text('NUTRITION'), findsOneWidget);
+    expect(find.text('FUEL'), findsOneWidget);
   });
 }
