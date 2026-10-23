@@ -9,9 +9,11 @@ import '../../../state/app_state.dart';
 import '../../../state/sync_tracker.dart';
 import '../../../theme/app_accessibility.dart';
 import '../../../theme/app_haptics.dart';
+import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/app_typography.dart';
 import '../../../widgets/app_scaffold.dart';
+import '../../../widgets/glass_surface.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/stat_card.dart';
 import '../../edge_fuel/data/edge_fuel_repository.dart';
@@ -54,38 +56,44 @@ class _WeeklyReviewScreenState extends State<WeeklyReviewScreen> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final locale = Localizations.localeOf(context).toString();
-    return ScreenScaffold(
-      title: l.reviewTitle,
-      showBack: true,
-      body: FutureBuilder<WeeklyReview>(
-        future: _review,
-        builder: (context, snapshot) {
-          final review = snapshot.data;
-          if (review == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(
-                Insets.lg, Insets.none, Insets.lg, Insets.xxl),
-            children: [
-              Text(
-                l.reviewWeekOf(
-                    DateFormat.MMMd(locale).format(review.weekStart)),
-                style: AppType.subhead(
-                    color: AppAccessibility.textSecondary(context)),
-              ),
-              const SizedBox(height: Insets.md),
-              _TrainingSection(review: review),
-              const SizedBox(height: Insets.md),
-              _FoodSection(review: review, weekStart: widget.weekStart),
-              const SizedBox(height: Insets.md),
-              _WeightSection(review: review),
-              const SizedBox(height: Insets.md),
-              _RecommendationSection(review: review),
-            ],
-          );
-        },
-      ),
+    return FutureBuilder<WeeklyReview>(
+      future: _review,
+      builder: (context, snapshot) {
+        final review = snapshot.data;
+        return ScreenScaffold(
+          title: l.reviewTitle,
+          showBack: true,
+          bottomNav: review == null ? null : _ReviewActions(review: review),
+          body: review == null
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                      Insets.lg, Insets.none, Insets.lg, Insets.xxl),
+                  children: [
+                    Text(
+                      l.reviewWeekOf(
+                          DateFormat.MMMd(locale).format(review.weekStart)),
+                      style: AppType.subhead(
+                          color: AppAccessibility.textSecondary(context)),
+                    ),
+                    const SizedBox(height: Insets.md),
+                    _TrainingSection(review: review),
+                    const SizedBox(height: Insets.md),
+                    _FoodSection(review: review, weekStart: widget.weekStart),
+                    const SizedBox(height: Insets.md),
+                    _WeightSection(review: review),
+                    const SizedBox(height: Insets.md),
+                    _RecommendationSection(review: review),
+                    const SizedBox(height: Insets.md),
+                    Text(
+                      'Targets are estimates, not medical advice.',
+                      style: AppType.micro(
+                          color: AppAccessibility.textSecondary(context)),
+                    ),
+                  ],
+                ),
+        );
+      },
     );
   }
 }
@@ -234,35 +242,99 @@ class _RecommendationSection extends StatelessWidget {
     final l = L.of(context);
     final plan = context.watch<PlanController>();
     final decision = plan.reviewDecision(review.weekStart);
-    final actionable = review.recommendation.kind != RecommendationKind.hold &&
-        decision == null;
-    return AppCard(
-      accent: AppAccessibility.accentText(context),
+    return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(l.reviewRecommendation, style: AppType.headline()),
           const SizedBox(height: Insets.sm),
-          Text(_sentence(l), style: AppType.body()),
-          const SizedBox(height: Insets.md),
+          Text(_sentence(l), style: AppType.title1()),
           if (decision != null)
-            Text(
-              decision == ReviewDecision.accepted
-                  ? l.reviewAccepted
-                  : l.reviewKept,
-              style: AppType.subhead(
-                  color: AppAccessibility.textSecondary(context)),
-            )
-          else if (actionable) ...[
-            PrimaryButton(l.reviewAccept,
-                expand: true, onPressed: () => _accept(context)),
-            const SizedBox(height: Insets.sm),
-            GhostButton(l.reviewKeepCurrent,
-                expand: true, onPressed: () => _keep(context)),
-          ] else
-            PrimaryButton(l.reviewGotIt,
-                expand: true, onPressed: () => _keep(context)),
+            Padding(
+              padding: const EdgeInsets.only(top: Insets.md),
+              child: Text(
+                decision == ReviewDecision.accepted
+                    ? l.reviewAccepted
+                    : l.reviewKept,
+                style: AppType.subhead(
+                    color: AppAccessibility.textSecondary(context)),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+}
+
+/// The choice stays in reach while the athlete reads the week's evidence.
+class _ReviewActions extends StatelessWidget {
+  const _ReviewActions({required this.review});
+  final WeeklyReview review;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final decision =
+        context.watch<PlanController>().reviewDecision(review.weekStart);
+    final actionable = review.recommendation.kind != RecommendationKind.hold;
+    final canWrite = context.watch<AppState>().canWrite;
+    final largeText = AppAccessibility.isLargeText(context);
+    final dockHeight = largeText && decision == null && actionable && canWrite
+        ? AppAccessibility.minTouchTarget +
+            AppAccessibility.minTouchTarget +
+            Insets.lg +
+            Insets.lg +
+            Insets.sm +
+            Insets.lg +
+            Insets.lg
+        : AppAccessibility.minTouchTarget + Insets.lg + Insets.lg;
+    return SafeArea(
+      top: false,
+      child: SizedBox(
+        height: dockHeight,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.backgroundRaised,
+            border: Border(
+                top: BorderSide(color: AppAccessibility.border(context))),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(Insets.lg),
+            child: decision != null || !canWrite
+                ? PrimaryButton(l.reviewGotIt,
+                    expand: true,
+                    onPressed: () => Navigator.of(context).maybePop())
+                : !actionable
+                    ? PrimaryButton(l.reviewGotIt,
+                        expand: true, onPressed: () => _keep(context))
+                    : largeText
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              PrimaryButton(l.reviewAccept,
+                                  expand: true,
+                                  onPressed: () => _accept(context)),
+                              const SizedBox(height: Insets.sm),
+                              GhostButton(l.reviewKeepCurrent,
+                                  expand: true,
+                                  onPressed: () => _keep(context)),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Expanded(
+                                  child: GhostButton(l.reviewKeepCurrent,
+                                      expand: true,
+                                      onPressed: () => _keep(context))),
+                              const SizedBox(width: Insets.sm),
+                              Expanded(
+                                  child: PrimaryButton(l.reviewAccept,
+                                      expand: true,
+                                      onPressed: () => _accept(context))),
+                            ],
+                          ),
+          ),
+        ),
       ),
     );
   }
