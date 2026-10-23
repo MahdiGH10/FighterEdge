@@ -1,5 +1,6 @@
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/main.dart';
+import 'package:fighter_edge/widgets/bottom_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,7 +18,9 @@ void main() {
   }
 
   Future<void> goTo(WidgetTester tester, String tab) async {
-    await tester.tap(find.text(tab));
+    // Home has its own Fuel action, so tap the label inside the bottom nav.
+    await tester.tap(find.descendant(
+        of: find.byType(AppBottomNav), matching: find.text(tab)));
     await tester.pumpAndSettle();
   }
 

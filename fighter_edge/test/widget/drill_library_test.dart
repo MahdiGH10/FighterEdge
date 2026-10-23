@@ -173,17 +173,25 @@ void main() {
     await tester.pumpWidget(wrapApp(const PaywallScreen(), repo: repo));
     await tester.pumpAndSettle();
 
+    // The paywall sells outcomes the app really delivers.
+    const outcomes = {
+      'Your camp week',
+      'Session mode',
+      'Fuel for training days',
+      'Weekly review',
+      'Safe weight path',
+      'Full Drill Library',
+      'Full Recipe Library',
+    };
     final seen = <String>{};
     for (var i = 0; i < 10; i++) {
-      for (final feature in Feature.values) {
-        if (find.text(feature.title).evaluate().isNotEmpty) {
-          seen.add(feature.title);
-        }
+      for (final title in outcomes) {
+        if (find.text(title).evaluate().isNotEmpty) seen.add(title);
       }
       await tester.drag(find.byType(ListView), const Offset(0, -300));
       await tester.pumpAndSettle();
     }
-    expect(seen, {for (final f in Feature.values) f.title});
+    expect(seen, outcomes);
     expect(find.text('All Timer Presets'), findsNothing);
     expect(find.text('Unlimited Weight History'), findsNothing);
     expect(find.text('Nutrition Analytics'), findsNothing);
