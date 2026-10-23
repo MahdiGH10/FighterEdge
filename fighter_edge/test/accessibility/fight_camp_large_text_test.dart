@@ -47,6 +47,11 @@ void main() {
         .pumpWidget(FighterEdgeApp(authRepo: repo, fightCampRepo: fights));
     await tester.pumpAndSettle();
     expectNoFlutterException(tester);
+    // Home leads with the Today card; the countdown sits further down and the
+    // list builds it lazily, so scroll to it.
+    await tester.scrollUntilVisible(find.textContaining('Fight night'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
     expect(find.textContaining('Fight night'), findsOneWidget);
 
     await tester.tap(find.textContaining('Fight night'));
