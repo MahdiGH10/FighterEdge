@@ -1,5 +1,7 @@
 # Fighter Edge — Claude Code Handoff
 
+> **Start with `HANDOFF_2026-10-22_V2.md`** (state of the V2 work, open PRs, next steps, owner steps and gotchas), then `V2_PLAN_20261019.md` and `FUEL_V2_SPEC.md`.
+
 ## V2 visual foundation (lane F, three stacked PRs)
 
 **6.1 Tokens (this slice).** `AppColors` now carries the approved V2 values: the

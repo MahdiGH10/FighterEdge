@@ -32,6 +32,16 @@ class _MarkedReminders implements ReminderGateway {
 
   @override
   Future<void> cancelAll() async {}
+
+  @override
+  Future<void> scheduleTrialEndReminder({
+    required DateTime at,
+    required String title,
+    required String body,
+  }) async {}
+
+  @override
+  Future<void> cancelTrialEndReminder() async {}
 }
 
 class _MarkedVoice extends SilentCoachVoice {

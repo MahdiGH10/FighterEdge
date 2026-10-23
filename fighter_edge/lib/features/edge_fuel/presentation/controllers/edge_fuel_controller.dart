@@ -311,9 +311,16 @@ class EdgeFuelController extends ChangeNotifier {
   /// Shows [day] immediately, then stores it. Returns whether storage
   /// confirmed the write. Never throws: callers include fire-and-forget
   /// taps, where an escaped error would become an uncaught crash report.
+  /// Asked before any food-log write; the app points it at
+  /// `AppState.requireWrite` so a read-only account cannot log food.
+  bool Function() writeGate = _openGate;
+
+  static bool _openGate() => true;
+
   Future<bool> _saveDay(NutritionDay day) async {
     final userId = _userId;
     if (userId == null) return false;
+    if (!writeGate()) return false;
     _day = day;
     notifyListeners();
     try {
