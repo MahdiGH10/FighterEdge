@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import '../widgets/glass_sheet.dart';
 
 import '../l10n/gen/app_localizations.dart';
 import '../legal/legal_links.dart';
 import '../screens/legal_screen.dart';
 import '../theme/app_accessibility.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/primary_button.dart';
@@ -19,12 +19,11 @@ Future<void> showConsentSheet(
   BuildContext context,
   ConsentController consent,
 ) {
-  return showModalBottomSheet<void>(
+  return showGlassSheet<void>(
     context: context,
     isDismissible: false,
     enableDrag: false,
     isScrollControlled: true,
-    backgroundColor: AppColors.surfaceElevated,
     builder: (sheetContext) => _ConsentSheet(consent: consent),
   );
 }

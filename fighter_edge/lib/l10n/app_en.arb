@@ -449,7 +449,7 @@
     }
   },
   "nutritionKcalLeft": "kcal left",
-  "nutritionOverTarget": "{kcal} kcal above target",
+  "nutritionOverTarget": "Today's target met, plus {kcal} kcal",
   "nutritionViewPlan": "View fuel plan",
   "nutritionRecipesFit": "Recipes that fit",
   "nutritionMacroGrams": "{value} / {target} g",

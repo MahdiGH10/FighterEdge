@@ -1001,7 +1001,7 @@ class LEn extends L {
 
   @override
   String nutritionOverTarget(int kcal) {
-    return '$kcal kcal above target';
+    return 'Today\'s target met, plus $kcal kcal';
   }
 
   @override

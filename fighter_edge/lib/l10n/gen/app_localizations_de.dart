@@ -1008,7 +1008,7 @@ class LDe extends L {
 
   @override
   String nutritionOverTarget(int kcal) {
-    return '$kcal kcal über dem Ziel';
+    return 'Tagesziel erreicht, plus $kcal kcal';
   }
 
   @override
