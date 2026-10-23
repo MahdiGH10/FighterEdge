@@ -65,9 +65,10 @@ void main() {
     final calories = fuel(tester).consumedCalories;
     expect(calories, greaterThan(0));
 
-    await tester.scrollUntilVisible(find.text('Banana, raw'), 200,
+    await tester.scrollUntilVisible(find.byType(Dismissible).first, 200,
         scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('Banana, raw'));
+    await tester.tap(find.descendant(
+        of: find.byType(Dismissible).first, matching: find.text('Banana, raw')));
     await tester.pumpAndSettle();
 
     expect(find.text('Edit food'), findsOneWidget);
@@ -107,5 +108,22 @@ void main() {
 
     await tapToggle(tester, 'Mark as eaten');
     expect(fuel(tester).consumedCalories, logged);
+  });
+
+  testWidgets('swiping a food away offers an Undo that restores it',
+      (tester) async {
+    await pumpWithOneMeal(tester);
+    final before = fuel(tester).entries.single;
+    await tester.scrollUntilVisible(find.byType(Dismissible).first, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.drag(find.byType(Dismissible).first, const Offset(-400, 0));
+    await tester.pumpAndSettle();
+
+    expect(fuel(tester).entries, isEmpty);
+    expect(find.text('Undo'), findsOneWidget);
+    await tester.tap(find.text('Undo'));
+    await tester.pumpAndSettle();
+    expect(fuel(tester).entries, hasLength(1));
+    expect(fuel(tester).entries.single.id, before.id);
   });
 }

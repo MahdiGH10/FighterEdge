@@ -115,7 +115,7 @@ void main() {
       expect(find.text('kcal left'), findsOneWidget);
       await tester.scrollUntilVisible(find.text('Protein'), 100,
           scrollable: find.byType(Scrollable).first);
-      expect(find.text('0 / 150 g'), findsOneWidget);
+      expect(find.text('150 g left'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.tap(find.bySemanticsLabel('Previous day'));
       await tester.pumpAndSettle();
