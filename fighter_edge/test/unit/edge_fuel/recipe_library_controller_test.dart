@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:fighter_edge/features/edge_fuel/data/asset_food_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/asset_recipe_catalog_repository.dart';
@@ -8,19 +9,44 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<String> _readRealAsset(String path) => File(path).readAsString();
 
+Future<String> _readPublishedFixture(String path) async {
+  final raw = await _readRealAsset(path);
+  if (!path.endsWith('edge_fuel_recipes_v1.json')) return raw;
+  final catalog = jsonDecode(raw) as Map<String, dynamic>;
+  for (final recipe in catalog['recipes'] as List<dynamic>) {
+    final record = recipe as Map<String, dynamic>;
+    record['status'] = 'published';
+    record['reviewerCredit'] = 'Test reviewer';
+  }
+  return jsonEncode(catalog);
+}
+
 RecipeLibraryController _controller() {
   final foods = AssetFoodCatalogRepository(loadString: _readRealAsset);
   return RecipeLibraryController(
     foodCatalog: foods,
     recipeCatalog: AssetRecipeCatalogRepository(
       foodCatalog: foods,
-      loadString: _readRealAsset,
+      loadString: _readPublishedFixture,
     ),
   );
 }
 
 void main() {
   group('RecipeLibraryController', () {
+    test('shipped draft recipes are unavailable to readers', () async {
+      final foods = AssetFoodCatalogRepository(loadString: _readRealAsset);
+      final controller = RecipeLibraryController(
+        foodCatalog: foods,
+        recipeCatalog: AssetRecipeCatalogRepository(
+          foodCatalog: foods,
+          loadString: _readRealAsset,
+        ),
+      );
+      await controller.load();
+      expect(controller.error, isNull);
+      expect(controller.visible, isEmpty);
+    });
     test('loads the catalog and derives listings', () async {
       final controller = _controller();
       await controller.load();

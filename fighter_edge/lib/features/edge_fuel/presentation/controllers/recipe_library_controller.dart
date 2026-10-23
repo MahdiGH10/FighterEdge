@@ -7,6 +7,7 @@ import '../../domain/calculators/recipe_nutrient_calculator.dart';
 import '../../domain/models/food_enums.dart';
 import '../../domain/models/food_item.dart';
 import '../../domain/models/recipe.dart';
+import '../../domain/policies/recipe_publication_gate.dart';
 
 /// A recipe paired with everything derived from it, computed once per catalog
 /// load instead of on every rebuild.
@@ -143,7 +144,7 @@ class RecipeLibraryController extends ChangeNotifier {
 
       _foodsById = foodsById;
       _all = [
-        for (final recipe in recipes)
+        for (final recipe in RecipePublicationGate.visible(recipes))
           RecipeListing(
             recipe: recipe,
             perServing: RecipeNutrientCalculator.perServing(recipe, foodsById),
