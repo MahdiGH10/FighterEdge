@@ -131,14 +131,27 @@ void main() {
       expect(WeightRatePolicy.dailyKcalFor(0.5, 80), closeTo(440, 1e-9));
     });
 
-    test('loss is capped at 1% and at 1 kg a week, whichever is tighter', () {
-      expect(WeightRatePolicy.maxPercentFor(NutritionGoal.loseFat, 80), 1.0);
-      expect(WeightRatePolicy.maxPercentFor(NutritionGoal.loseFat, 100), 1.0);
+    test('outside a camp loss is capped at 0.75% a week', () {
+      expect(WeightRatePolicy.maxPercentFor(NutritionGoal.loseFat, 80), 0.75);
+      expect(WeightRatePolicy.maxPercentFor(NutritionGoal.loseFat, 125), 0.75);
+      // 1 kg is still the tighter cap for a very heavy athlete.
       expect(
-        WeightRatePolicy.maxPercentFor(NutritionGoal.loseFat, 125),
-        closeTo(0.8, 1e-12),
+        WeightRatePolicy.maxPercentFor(NutritionGoal.loseFat, 150),
+        closeTo(1 / 1.5, 1e-12),
       );
       expect(WeightRatePolicy.maxPercentFor(NutritionGoal.loseFat, 0), 0);
+      expect(WeightRatePolicy.lossOptionsPercent, isNot(contains(1.0)));
+    });
+
+    test('in a fight camp loss is capped at 1% and 1 kg, whichever is tighter',
+        () {
+      double camp(double kg) =>
+          WeightRatePolicy.maxPercentFor(NutritionGoal.loseFat, kg,
+              inFightCamp: true);
+      expect(camp(80), 1.0);
+      expect(camp(100), 1.0);
+      expect(camp(125), closeTo(0.8, 1e-12));
+      expect(camp(0), 0);
     });
 
     test('gain is capped at 0.5%, maintenance at 0', () {
@@ -152,12 +165,21 @@ void main() {
         weightKg: 80,
         requestedPercent: 2.5,
       );
-      expect(r.percentPerWeek, 1.0);
+      expect(r.percentPerWeek, 0.75);
       expect(r.wasClamped, isTrue);
+      final camp = WeightRatePolicy.apply(
+        goal: NutritionGoal.loseFat,
+        weightKg: 80,
+        requestedPercent: 2.5,
+        inFightCamp: true,
+      );
+      expect(camp.percentPerWeek, 1.0);
+      expect(camp.wasClamped, isTrue);
       final heavy = WeightRatePolicy.apply(
         goal: NutritionGoal.loseFat,
         weightKg: 125,
         requestedPercent: 1.0,
+        inFightCamp: true,
       );
       expect(heavy.percentPerWeek, closeTo(0.8, 1e-12));
       expect(heavy.wasClamped, isTrue);
