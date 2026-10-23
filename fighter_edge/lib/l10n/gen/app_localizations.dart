@@ -1822,7 +1822,7 @@ abstract class L {
   /// No description provided for @nutritionOverTarget.
   ///
   /// In en, this message translates to:
-  /// **'{kcal} kcal above target'**
+  /// **'Today\'s target met, plus {kcal} kcal'**
   String nutritionOverTarget(int kcal);
 
   /// No description provided for @nutritionViewPlan.

@@ -346,6 +346,9 @@ class _ReviewActions extends StatelessWidget {
   }
 
   void _accept(BuildContext context) {
+    // A read-only account is sent to the paywall instead; the calorie change
+    // below saves a target without going through the plan.
+    if (!context.read<AppState>().requireWrite()) return;
     final plan = context.read<PlanController>();
     final r = review.recommendation;
     switch (r.kind) {

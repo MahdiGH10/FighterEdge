@@ -7,6 +7,26 @@ library;
 
 enum BillingProductPeriod { monthly, annual }
 
+/// A free trial the store itself offers for a product, as the store reports
+/// it for this customer. The paywall may only mention a trial when this is
+/// non-null, so eligibility and wording always come from the store.
+class BillingFreeTrial {
+  /// Trial length in whole days (a store "1 week" trial is 7).
+  final int days;
+
+  const BillingFreeTrial({required this.days}) : assert(days > 0);
+
+  @override
+  bool operator ==(Object other) =>
+      other is BillingFreeTrial && other.days == days;
+
+  @override
+  int get hashCode => days.hashCode;
+
+  @override
+  String toString() => 'BillingFreeTrial($days days)';
+}
+
 class BillingProduct {
   final String id;
   final BillingProductPeriod period;
@@ -20,6 +40,10 @@ class BillingProduct {
   final double? price;
   final Object? providerHandle;
 
+  /// The store's free-trial offer for this customer, or null when there is
+  /// none or the customer is not eligible (e.g. already used it).
+  final BillingFreeTrial? freeTrial;
+
   const BillingProduct({
     required this.id,
     required this.period,
@@ -27,6 +51,7 @@ class BillingProduct {
     required this.currencyCode,
     this.price,
     this.providerHandle,
+    this.freeTrial,
   });
 }
 
@@ -36,11 +61,16 @@ class BillingCustomerState {
   final bool willRenew;
   final String? managementUrl;
 
+  /// The store reports the active entitlement as a free trial. Display and
+  /// telemetry only; access still comes from the server.
+  final bool inTrial;
+
   const BillingCustomerState({
     required this.isPro,
     this.expiresAt,
     this.willRenew = false,
     this.managementUrl,
+    this.inTrial = false,
   });
 
   const BillingCustomerState.free() : this(isPro: false);

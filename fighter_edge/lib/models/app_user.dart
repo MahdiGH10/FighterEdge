@@ -18,6 +18,13 @@ class AppUser {
   /// offline display only.
   final DateTime? planExpiresAt;
   final bool planWillRenew;
+
+  /// TRIAL / INTRO / NORMAL as the webhook last reported it, or null.
+  final ProPeriod? planPeriod;
+
+  /// False when the profile could not be read from the server or its cache,
+  /// so [plan] is only a default. Access is then "unknown", not "read-only".
+  final bool entitlementConfirmed;
   final String? billingProvider;
   final String? billingManagementUrl;
   final DateTime createdAt;
@@ -43,6 +50,8 @@ class AppUser {
     required this.createdAt,
     this.planExpiresAt,
     this.planWillRenew = false,
+    this.planPeriod,
+    this.entitlementConfirmed = true,
     this.billingProvider,
     this.billingManagementUrl,
     this.emailVerified = false,
@@ -71,12 +80,25 @@ class AppUser {
         expires.add(Entitlements.expiryLeeway).isAfter(now);
   }
 
+  /// What this account may do at [now]; see [AccessState.derive].
+  AccessState accessAt(DateTime now, {AccessState? lastKnown}) =>
+      AccessState.derive(
+        plan: plan,
+        now: now,
+        expiresAt: planExpiresAt,
+        period: planPeriod,
+        confirmed: entitlementConfirmed,
+        lastKnown: lastKnown,
+      );
+
   AppUser copyWith({
     String? displayName,
     bool? emailVerified,
     Plan? plan,
     DateTime? planExpiresAt,
     bool? planWillRenew,
+    ProPeriod? planPeriod,
+    bool? entitlementConfirmed,
     String? billingProvider,
     String? billingManagementUrl,
     bool? onboardingComplete,
@@ -96,6 +118,8 @@ class AppUser {
       createdAt: createdAt,
       planExpiresAt: planExpiresAt ?? this.planExpiresAt,
       planWillRenew: planWillRenew ?? this.planWillRenew,
+      planPeriod: planPeriod ?? this.planPeriod,
+      entitlementConfirmed: entitlementConfirmed ?? this.entitlementConfirmed,
       billingProvider: billingProvider ?? this.billingProvider,
       billingManagementUrl: billingManagementUrl ?? this.billingManagementUrl,
       onboardingComplete: onboardingComplete ?? this.onboardingComplete,
@@ -116,6 +140,7 @@ class AppUser {
         'plan': plan.name,
         'planExpiresAt': planExpiresAt?.toIso8601String(),
         'planWillRenew': planWillRenew,
+        'planPeriod': planPeriod?.name,
         'billingProvider': billingProvider,
         'billingManagementUrl': billingManagementUrl,
         'createdAt': createdAt.toIso8601String(),
@@ -142,6 +167,9 @@ class AppUser {
         planExpiresAt:
             DateTime.tryParse(json['planExpiresAt'] as String? ?? ''),
         planWillRenew: (json['planWillRenew'] as bool?) ?? false,
+        planPeriod: ProPeriod.values
+            .where((p) => p.name == json['planPeriod'])
+            .firstOrNull,
         billingProvider: json['billingProvider'] as String?,
         billingManagementUrl: json['billingManagementUrl'] as String?,
         onboardingComplete: (json['onboardingComplete'] as bool?) ?? false,
