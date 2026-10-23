@@ -5,6 +5,7 @@ import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import 'glass_surface.dart';
 import 'premium_effects.dart';
 import 'press_scale.dart';
 
@@ -20,6 +21,21 @@ class ScreenScaffold extends StatefulWidget {
   final bool includeScaffold;
   final bool collapsingHeader;
 
+  /// Tab screens whose body is one scrolling list: the body runs behind the
+  /// header, and once scrolled the header turns to glass (the navigation
+  /// layer) over the content passing under it. The body's top
+  /// `MediaQuery.padding` then includes the header, so its list must use it as
+  /// top padding. Tabs that pin controls above their list leave this off:
+  /// nothing scrolls under their header, so there is nothing to blur.
+  final bool scrollsUnderHeader;
+
+  /// Bottom padding for a tab's scrolling content. The home shell draws the
+  /// glass nav over the body (`extendBody`), and the Scaffold folds the bar's
+  /// height into the body's `MediaQuery.padding.bottom`, so the last row ends
+  /// above the bar.
+  static double tabBottomPadding(BuildContext context) =>
+      MediaQuery.paddingOf(context).bottom + Insets.xxl;
+
   const ScreenScaffold({
     super.key,
     required this.title,
@@ -29,13 +45,15 @@ class ScreenScaffold extends StatefulWidget {
     this.floatingActionButton,
     this.bottomNav,
   })  : includeScaffold = true,
-        collapsingHeader = false;
+        collapsingHeader = false,
+        scrollsUnderHeader = false;
 
   const ScreenScaffold.tab({
     super.key,
     required this.title,
     required this.body,
     this.actions = const [],
+    this.scrollsUnderHeader = false,
   })  : showBack = false,
         floatingActionButton = null,
         bottomNav = null,
@@ -76,20 +94,61 @@ class _ScreenScaffoldState extends State<ScreenScaffold> {
             actions: widget.actions,
             showBack: widget.showBack,
           );
-    final content = AppBackground(
-      child: SafeArea(
-        bottom: false,
+    final Widget content;
+    if (widget.scrollsUnderHeader) {
+      final media = MediaQuery.of(context);
+      // Glass only once something is under it: at the top of the list the
+      // large title sits on the ground. Switched, never faded.
+      final glass = _scrollOffset >= 4;
+      final top = SafeArea(bottom: false, child: header);
+      content = AppBackground(
         child: NotificationListener<ScrollNotification>(
           onNotification: _handleScroll,
-          child: Column(
+          child: Stack(
             children: [
-              header,
-              Expanded(child: widget.body),
+              Positioned.fill(
+                child: MediaQuery(
+                  data: media.copyWith(
+                    padding: media.padding.copyWith(
+                      top: media.padding.top +
+                          _CollapsingTabHeader.expandedHeight,
+                    ),
+                  ),
+                  child: widget.body,
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: glass
+                    ? GlassSurface(
+                        kind: GlassKind.nav,
+                        edge: GlassEdge.bottom,
+                        child: top,
+                      )
+                    : top,
+              ),
             ],
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      content = AppBackground(
+        child: SafeArea(
+          bottom: false,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: _handleScroll,
+            child: Column(
+              children: [
+                header,
+                Expanded(child: widget.body),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     if (!widget.includeScaffold && Scaffold.maybeOf(context) != null) {
       return content;
     }
@@ -103,7 +162,7 @@ class _ScreenScaffoldState extends State<ScreenScaffold> {
 }
 
 class _CollapsingTabHeader extends StatelessWidget {
-  static const _expandedHeight = 96.0;
+  static const expandedHeight = 96.0;
   static const _collapsedHeight = 56.0;
   static const _collapseDistance = 64.0;
 
@@ -121,7 +180,7 @@ class _CollapsingTabHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = (scrollOffset / _collapseDistance).clamp(0.0, 1.0);
     final height =
-        _expandedHeight + ((_collapsedHeight - _expandedHeight) * progress);
+        expandedHeight + ((_collapsedHeight - expandedHeight) * progress);
     final largeOpacity = 1 - progress;
     final compactOpacity = progress;
     final displayTitle = title.toUpperCase();

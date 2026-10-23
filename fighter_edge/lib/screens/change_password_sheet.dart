@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../widgets/glass_sheet.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,13 +20,9 @@ import 'auth/auth_widgets.dart';
 /// Opens the change-password sheet. Resolves to true once the password has
 /// actually changed.
 Future<bool> showChangePasswordSheet(BuildContext context) async {
-  final changed = await showModalBottomSheet<bool>(
+  final changed = await showGlassSheet<bool>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(Radii.card)),
-    ),
     builder: (_) => const ChangePasswordSheet(),
   );
   return changed ?? false;

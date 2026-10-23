@@ -464,8 +464,8 @@ class _TodayView extends StatelessWidget {
     final over =
         hasTarget && edgeFuel.consumedCalories > edgeFuel.targetCalories;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
+      padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
+          ScreenScaffold.tabBottomPadding(context)),
       children: [
         // Only while a change was refused by the server.
         const SyncNotice(),
@@ -829,8 +829,8 @@ class _RecipesTab extends StatelessWidget {
     );
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
+      padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
+          ScreenScaffold.tabBottomPadding(context)),
       children: [
         AppCard(
           child: Column(
@@ -945,8 +945,8 @@ class _MealsView extends StatelessWidget {
     ];
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
+      padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
+          ScreenScaffold.tabBottomPadding(context)),
       children: [
         if (quickAdds.isNotEmpty) ...[
           const SectionHeader('Quick add'),
