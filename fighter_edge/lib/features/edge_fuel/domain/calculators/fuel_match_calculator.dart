@@ -8,6 +8,7 @@ import '../models/nutrition_setup_draft.dart';
 import '../models/nutrition_target.dart';
 import '../models/recipe.dart';
 import '../policies/fuel_add_on_catalog.dart';
+import '../policies/recipe_publication_gate.dart';
 import 'fuel_gap_picker.dart';
 import 'fuel_preference_filter.dart';
 import 'recipe_nutrient_calculator.dart';
@@ -103,7 +104,7 @@ class FuelMatchCalculator {
     final filter = FuelPreferenceFilter.from(preferences);
     final candidates = <_Candidate>[];
 
-    for (final recipe in recipes) {
+    for (final recipe in RecipePublicationGate.visible(recipes)) {
       final allergens = RecipeNutrientCalculator.allergensOf(recipe, foodsById);
       final diets = RecipeNutrientCalculator.dietTagsOf(recipe, foodsById);
       if (!filter.allowsRecipe(

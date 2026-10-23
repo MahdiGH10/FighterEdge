@@ -7,6 +7,7 @@ import '../models/fuel_gap.dart';
 import '../models/nutrition_setup_draft.dart';
 import '../models/recipe.dart';
 import '../policies/fuel_day_policy.dart';
+import '../policies/recipe_publication_gate.dart';
 import 'fuel_preference_filter.dart';
 import 'recipe_nutrient_calculator.dart';
 
@@ -111,7 +112,7 @@ class FuelGapPicker {
       ));
     }
 
-    for (final recipe in recipes) {
+    for (final recipe in RecipePublicationGate.visible(recipes)) {
       final allergens = RecipeNutrientCalculator.allergensOf(recipe, foodsById);
       final diets = RecipeNutrientCalculator.dietTagsOf(recipe, foodsById);
       if (!filter.allowsRecipe(
