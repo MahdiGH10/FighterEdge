@@ -341,8 +341,11 @@ jobs:
   release-launch:
     name: Release APK launch (Android emulator)
     needs: [android-release]
-    # Same draft rule as the integration test: emulator minutes are slow.
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    # Manual only ("Run workflow" on the Actions tab): it waits for a full
+    # release build and boots an emulator, which is too slow for every PR and
+    # merge. Run it before shipping a release APK: it caught a release-only
+    # crash at launch (a Room constructor) that every debug test missed.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
