@@ -39,6 +39,27 @@ the nav, headers and sheets move onto these in 6.3. **Limit:** the probe verdict
 is permanent for the install (no re-probe), and a single noisy start-up could
 demote a good phone to tinted; the owner can clear it only by reinstalling.
 
+**6.3 Chrome.** `AppBackground` paints the static glow (crimson core, ember halo,
+cool low pool, violet touch) once, in a `RepaintBoundary`; flat at the solid
+level. `AppBottomNav` is a `GlassSurface` (selected tab: primary text and a
+crimson-to-ember line; unselected: muted, which clears 4.5:1 on the nav glass at
+its brightest), `HomeShell` uses `extendBody`, and every tab scroller takes
+`ScreenScaffold.tabBottomPadding(context)`. `ScreenScaffold.tab(scrollsUnderHeader:
+true)` (Home, Profile) runs the body behind a header that turns to glass once
+scrolled; Train and Fuel pin controls above their list, so their header stays
+flat (nothing scrolls under it). Sheets go through `showGlassSheet` (all but the
+drill detail, a `DraggableScrollableSheet` that fills the modal height, which is
+a solid `surfaceElevated` sheet with `sheetShape`). Goldens: the component
+gallery has a Glass section and goldens for full (default, large text,
+pressed), tinted and solid levels, regenerated on Windows with
+`flutter test --tags golden --update-goldens`.
+`integration_test/glass_frame_benchmark_test.dart` is a profile-mode frame
+benchmark per level; **not run** (needs a real phone: `flutter test
+integration_test/glass_frame_benchmark_test.dart --profile -d <id>`). The
+`fighter-edge-ui` skill was rewritten for V2; it lives in the git-ignored
+`.claude/` folder, so this PR force-adds a copy that the owner can copy over
+the local one. **Not device-tested:** blur cost and the look on a real phone.
+
 ## START HERE: state as of 2026-10-01
 
 **Merged today: PR #26** (`78ec6df`). The Android manifest removes the three

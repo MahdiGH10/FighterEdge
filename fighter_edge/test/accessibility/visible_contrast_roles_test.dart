@@ -107,7 +107,7 @@ void main() {
               }),
             ),
           ));
-          expect(contrast(AppAccessibility.accentText(captured), entry.value),
+          expect(contrast(AppColors.textPrimary, entry.value),
               greaterThanOrEqualTo(4.5));
           expect(contrast(AppAccessibility.textMuted(captured), entry.value),
               greaterThanOrEqualTo(4.5));
