@@ -33,8 +33,9 @@ class CompletedOnboardingPlan {
 class PlanReadyView extends StatelessWidget {
   final CompletedOnboardingPlan plan;
   final bool isBusy;
-  final VoidCallback onOpenDashboard;
-  final VoidCallback onViewFuelPlan;
+
+  /// Account management remains reachable when this build has no store.
+  final VoidCallback? onContinueReadOnly;
 
   /// Opens the paywall: the entry gate, not an upsell.
   final VoidCallback onStartTrial;
@@ -44,14 +45,14 @@ class PlanReadyView extends StatelessWidget {
   /// "free" when this is set.
   final int? trialDays;
 
-  const PlanReadyView(
-      {super.key,
-      required this.plan,
-      required this.isBusy,
-      required this.onOpenDashboard,
-      required this.onViewFuelPlan,
-      required this.onStartTrial,
-      this.trialDays});
+  const PlanReadyView({
+    super.key,
+    required this.plan,
+    required this.isBusy,
+    this.onContinueReadOnly,
+    required this.onStartTrial,
+    this.trialDays,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,75 +67,101 @@ class PlanReadyView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: AppBackground(
-          child: SafeArea(
-              child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-            Insets.lg, Insets.xxl, Insets.lg, Insets.xxxl),
-        children: [
-          Text('Your first Fighter Edge plan is ready',
-              style: AppType.largeTitle()),
-          const SizedBox(height: Insets.md),
-          Text(l.planReadyExplanation,
-              style: AppType.callout(color: AppColors.textSecondary)),
-          const SizedBox(height: Insets.lg),
-          PlanPreviewCard(
-              campGoal: plan.campGoal,
-              nutritionGoal: plan.nutritionGoal,
-              level: plan.level,
-              days: plan.days),
-          const SizedBox(height: Insets.xl),
-          if (target?.isSuccess == true)
-            AppCard(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _PlanMetric(
-                    label: l.planReadyCalories,
-                    amount: target!.targetCalories,
-                    suffix: ' kcal'),
-                const SizedBox(height: Insets.lg),
-                if (large)
-                  ...macros.map((metric) => Padding(
-                      padding: const EdgeInsets.only(bottom: Insets.md),
-                      child: metric))
-                else
-                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    for (final metric in macros) Expanded(child: metric),
-                  ]),
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              Insets.lg,
+              Insets.xxl,
+              Insets.lg,
+              Insets.xxxl,
+            ),
+            children: [
+              Text(
+                'Your first Fighter Edge plan is ready',
+                style: AppType.largeTitle(),
+              ),
+              const SizedBox(height: Insets.md),
+              Text(
+                l.planReadyExplanation,
+                style: AppType.callout(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: Insets.lg),
+              PlanPreviewCard(
+                campGoal: plan.campGoal,
+                nutritionGoal: plan.nutritionGoal,
+                level: plan.level,
+                days: plan.days,
+              ),
+              const SizedBox(height: Insets.xl),
+              if (target?.isSuccess == true)
+                AppCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _PlanMetric(
+                        label: l.planReadyCalories,
+                        amount: target!.targetCalories,
+                        suffix: ' kcal',
+                      ),
+                      const SizedBox(height: Insets.lg),
+                      if (large)
+                        ...macros.map(
+                          (metric) => Padding(
+                            padding: const EdgeInsets.only(bottom: Insets.md),
+                            child: metric,
+                          ),
+                        )
+                      else
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (final metric in macros)
+                              Expanded(child: metric),
+                          ],
+                        ),
+                    ],
+                  ),
+                )
+              else
+                Text(
+                  l.planReadyMissingTarget,
+                  style: AppType.callout(color: AppColors.textSecondary),
+                ),
+              const SizedBox(height: Insets.xl),
+              PrimaryButton(
+                TrialGate.ctaLabel(l, trialDays),
+                expand: true,
+                onPressed: isBusy
+                    ? null
+                    : () {
+                        Telemetry.fromContext(context).track(
+                          TelemetryEvent.premiumCtaTapped,
+                          parameters: {
+                            'surface': 'plan_ready',
+                            'access': 'free',
+                          },
+                        );
+                        onStartTrial();
+                      },
+              ),
+              const SizedBox(height: Insets.sm),
+              if (onContinueReadOnly case final continueReadOnly?) ...[
+                const SizedBox(height: Insets.sm),
+                GhostButton(
+                  'Continue read-only',
+                  expand: true,
+                  onPressed: isBusy ? null : continueReadOnly,
+                ),
               ],
-            ))
-          else
-            Text(l.planReadyMissingTarget,
-                style: AppType.callout(color: AppColors.textSecondary)),
-          const SizedBox(height: Insets.xl),
-          PrimaryButton(TrialGate.ctaLabel(l, trialDays),
-              expand: true,
-              onPressed: isBusy
-                  ? null
-                  : () {
-                      Telemetry.fromContext(context)
-                          .track(TelemetryEvent.premiumCtaTapped, parameters: {
-                        'surface': 'plan_ready',
-                        'access': 'free'
-                      });
-                      onStartTrial();
-                    }),
-          const SizedBox(height: Insets.sm),
-          GhostButton(isBusy ? 'Opening your dashboard...' : 'Open dashboard',
-              expand: true, onPressed: isBusy ? null : onOpenDashboard),
-          const SizedBox(height: Insets.xs),
-          Text(l.planReadyNotNowNote,
-              textAlign: TextAlign.center,
-              style: AppType.micro(color: AppColors.textMuted)),
-          const SizedBox(height: Insets.sm),
-          GhostButton('View fuel plan',
-              expand: true, onPressed: isBusy ? null : onViewFuelPlan),
-          const SizedBox(height: Insets.md),
-          Text(
-              'Targets are estimates, not medical advice. Review your inputs anytime in EdgeFuel.',
-              style: AppType.micro(color: AppColors.textMuted)),
-        ],
-      ))),
+              const SizedBox(height: Insets.md),
+              Text(
+                'Targets are estimates, not medical advice. Review your inputs anytime in EdgeFuel.',
+                style: AppType.micro(color: AppColors.textMuted),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -143,8 +170,11 @@ class _PlanMetric extends StatelessWidget {
   final String label;
   final int? amount;
   final String suffix;
-  const _PlanMetric(
-      {required this.label, required this.amount, required this.suffix});
+  const _PlanMetric({
+    required this.label,
+    required this.amount,
+    required this.suffix,
+  });
   @override
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
