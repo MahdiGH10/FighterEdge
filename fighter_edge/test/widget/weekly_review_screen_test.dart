@@ -16,10 +16,15 @@ void main() {
   final week = DateTime.utc(2026, 10, 19);
 
   Future<PlanController> pump(WidgetTester tester,
-      {int days = 6, bool doEverything = false}) async {
-    tester.view.physicalSize = const Size(430, 1800);
+      {int days = 6,
+      bool doEverything = false,
+      Size size = const Size(430, 1800),
+      double textScale = 1}) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    tester.platformDispatcher.textScaleFactorTestValue = textScale;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     final repo = await makeRepo(signedIn: true);
     final data = InMemoryDataRepository();
     final userId = repo.currentUser!.id;
@@ -105,5 +110,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('You accepted this review.'), findsOneWidget);
     expect(find.text('Accept'), findsNothing);
+  });
+
+  testWidgets('review actions remain visible at 320px and 200% text',
+      (tester) async {
+    await pump(tester, size: const Size(320, 640), textScale: 2);
+    expect(find.text('Accept'), findsOneWidget);
+    expect(find.text('Keep current'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
