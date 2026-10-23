@@ -8,6 +8,7 @@ import '../../features/training_plan/domain/models/session_status.dart';
 import '../../features/training_plan/presentation/plan_controller.dart';
 import '../../features/training_plan/presentation/plan_labels.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../state/app_state.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_icons.dart';
 import '../../theme/app_theme.dart';
@@ -67,7 +68,7 @@ class TodayHero extends StatelessWidget {
       TodayState.done =>
         sessionTitle == null ? l.dashboardWeekDone : '$sessionTitle done',
       TodayState.recovery => l.dashboardRestDay,
-      TodayState.fightWeek => l.fightWeekTitle,
+      TodayState.fightWeek => l.fightWeekWater,
       TodayState.noPlan => l.dashboardNoPlan,
     };
     final detail = switch (state) {
@@ -75,7 +76,7 @@ class TodayHero extends StatelessWidget {
       TodayState.done =>
         sessionDetail ?? l.dashboardRecovery,
       TodayState.recovery => nextLine,
-      TodayState.fightWeek => l.fightWeekTitle,
+      TodayState.fightWeek => l.fightWeekOpen,
       TodayState.noPlan => l.dashboardPlanHint,
     };
     final fuelLine = fuel.hasUsableTarget
@@ -91,6 +92,7 @@ class TodayHero extends StatelessWidget {
     void onAction() {
       switch (state) {
         case TodayState.training:
+          if (!context.read<AppState>().requireWrite()) return;
           if (session != null) logSessionWithRpe(context, plan, session);
         case TodayState.done:
           onNavigate(2);

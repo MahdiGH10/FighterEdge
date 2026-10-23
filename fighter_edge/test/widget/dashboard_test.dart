@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/auth/local_auth_repository.dart';
+import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/training_plan/domain/models/session_status.dart';
 import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
@@ -110,6 +111,36 @@ void main() {
     await tester.tap(find.text('Round timer'));
     await tester.pumpAndSettle();
     expect(find.byType(RoundTimerScreen), findsOneWidget);
+  });
+
+  testWidgets('read-only Home never opens the session log sheet',
+      (tester) async {
+    tester.view.physicalSize = const Size(430, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final repo = await makeRepo(signedIn: true);
+    final data = InMemoryDataRepository();
+    final userId = repo.currentUser!.id;
+    final state = AppState(dataRepository: data, clock: () => wednesday)
+      ..setUser(userId);
+    final plan = PlanController(log: state, repository: data)
+      ..configure(userId: userId)
+      ..startFresh(
+          weeklyTrainingDays: 3,
+          goal: 'Build fight-camp structure',
+          level: 'Beginner');
+    state.accessSource = () => const AccessState.readOnly();
+    var blocked = false;
+    state.onWriteBlocked = () => blocked = true;
+    await tester.pumpWidget(wrapApp(DashboardScreen(onNavigate: (_) {}),
+        repo: repo, state: state, planController: plan));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Log session'));
+    await tester.pumpAndSettle();
+    expect(blocked, isTrue);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(state.trainingLog, isEmpty);
   });
 
   for (final scale in [1.0, 2.0]) {
