@@ -149,6 +149,8 @@ Recipe _recipe(String id, String foodId, {double grams = 100}) => Recipe(
       steps: const ['Cook it.'],
       mealType: MealType.lunch,
       prepMinutes: 10,
+      status: ContentStatus.published,
+      reviewerCredit: 'Test reviewer',
     );
 
 Future<Map<String, FoodItem>> _realFoods() async {
@@ -162,6 +164,21 @@ Future<Map<String, FoodItem>> _realFoods() async {
 }
 
 void main() {
+  test('gap picker never offers a draft recipe', () {
+    final draft = Recipe.fromJson({
+      ..._recipe('draft', 'chicken-breast').toJson(),
+      'status': 'draft',
+      'reviewerCredit': null,
+    });
+    final pick = FuelGapPicker.pick(
+      macro: FuelGapMacro.protein,
+      gramsLeft: 30,
+      addOns: const [],
+      foodsById: const {},
+      recipes: [draft],
+    );
+    expect(pick.options, isEmpty);
+  });
   group('gap picker', () {
     test('"Protein left: 34 g" gives three options from three groups', () {
       final pick = _pick();

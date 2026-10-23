@@ -84,6 +84,8 @@ Recipe _recipe(
       mealType: MealType.dinner,
       prepMinutes: minutes,
       costBand: costBand,
+      status: ContentStatus.published,
+      reviewerCredit: 'Test reviewer',
     );
 
 NutritionDay _day({
@@ -113,6 +115,20 @@ NutritionDay _day({
 }
 
 void main() {
+  test('draft recipes are never suggested', () {
+    final draft = Recipe.fromJson({
+      ..._recipe('draft', 'balanced').toJson(),
+      'status': 'draft',
+      'reviewerCredit': null,
+    });
+    final match = FuelMatchCalculator.calculate(
+      target: _target(),
+      day: _day(),
+      recipes: [draft],
+      foodsById: _foods,
+    );
+    expect(match.options, isEmpty);
+  });
   test('selects a catalog-backed portion for the exact remaining target', () {
     final match = FuelMatchCalculator.calculate(
       target: _target(),

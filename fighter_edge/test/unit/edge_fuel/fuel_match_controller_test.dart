@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:fighter_edge/features/edge_fuel/data/asset_food_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/asset_recipe_catalog_repository.dart';
@@ -10,6 +11,18 @@ import 'package:fighter_edge/features/edge_fuel/presentation/controllers/fuel_ma
 import 'package:flutter_test/flutter_test.dart';
 
 Future<String> _readRealAsset(String path) => File(path).readAsString();
+
+Future<String> _readPublishedFixture(String path) async {
+  final raw = await _readRealAsset(path);
+  if (!path.endsWith('edge_fuel_recipes_v1.json')) return raw;
+  final catalog = jsonDecode(raw) as Map<String, dynamic>;
+  for (final recipe in catalog['recipes'] as List<dynamic>) {
+    final record = recipe as Map<String, dynamic>;
+    record['status'] = 'published';
+    record['reviewerCredit'] = 'Test reviewer';
+  }
+  return jsonEncode(catalog);
+}
 
 NutritionTarget _target() => NutritionTarget(
       status: NutritionTargetStatus.success,
@@ -35,7 +48,7 @@ void main() {
       foodCatalog: foods,
       recipeCatalog: AssetRecipeCatalogRepository(
         foodCatalog: foods,
-        loadString: _readRealAsset,
+        loadString: _readPublishedFixture,
       ),
     );
     final day = _day();
