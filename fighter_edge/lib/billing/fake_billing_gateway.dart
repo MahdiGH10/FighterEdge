@@ -29,9 +29,11 @@ class FakeBillingGateway implements BillingGateway {
     this.restoreState = const BillingCustomerState.free(),
   });
 
-  final List<BillingProduct> products;
-  final BillingCustomerState purchaseState;
-  final BillingCustomerState restoreState;
+  /// Mutable so a test can walk one gateway through a whole lifecycle
+  /// (trial purchase, expiry, restore).
+  List<BillingProduct> products;
+  BillingCustomerState purchaseState;
+  BillingCustomerState restoreState;
   bool configured = false;
   final _updates = StreamController<BillingCustomerState>.broadcast();
 

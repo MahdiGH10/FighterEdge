@@ -25,6 +25,19 @@ abstract class ReminderGateway {
     required TimeOfDay time,
   });
 
-  /// Clears every scheduled reminder.
+  /// Clears every scheduled training reminder. A trial-end reminder is left
+  /// alone; see [cancelTrialEndReminder].
   Future<void> cancelAll();
+
+  /// Schedules the one-off "your free trial ends soon" notification for [at],
+  /// replacing any earlier one. [title] and [body] arrive localized from the
+  /// caller. Optional: a gateway that cannot schedule does nothing.
+  Future<void> scheduleTrialEndReminder({
+    required DateTime at,
+    required String title,
+    required String body,
+  }) async {}
+
+  /// Removes the trial-end reminder, if one is scheduled.
+  Future<void> cancelTrialEndReminder() async {}
 }

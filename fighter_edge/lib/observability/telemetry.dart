@@ -17,6 +17,13 @@ enum TelemetryEvent {
   subscriptionPurchaseResult,
   purchaseRestoreResult,
 
+  /// The store reported a free trial after a purchase. Observation only: it
+  /// does not grant access.
+  trialStarted,
+
+  /// The server-fed entitlement moved from trial to paid.
+  trialConverted,
+
   // Activation and habit funnel. Parameters are enums, small counts and 0/1
   // flags only — never a body measurement, a food, or anything typed.
   onboardingStepViewed,
@@ -39,6 +46,8 @@ extension TelemetryEventName on TelemetryEvent {
         TelemetryEvent.subscriptionPurchaseResult =>
           'subscription_purchase_result',
         TelemetryEvent.purchaseRestoreResult => 'purchase_restore_result',
+        TelemetryEvent.trialStarted => 'trial_started',
+        TelemetryEvent.trialConverted => 'trial_converted',
         TelemetryEvent.onboardingStepViewed => 'onboarding_step_viewed',
         TelemetryEvent.onboardingCompleted => 'onboarding_completed',
         TelemetryEvent.planRevealed => 'plan_revealed',
@@ -169,6 +178,7 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
           'corner_coach',
           'technique_library',
           'premium_recipe',
+          'read_only',
         });
       }
       return false;
@@ -176,7 +186,6 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
       if (key == 'surface') {
         return _oneOf(value, const {
           'plan_ready',
-          'paywall_waitlist',
         });
       }
       if (key == 'access') return _oneOf(value, const {'free', 'pro'});
@@ -194,6 +203,12 @@ bool _isSafeEventValue(TelemetryEvent event, String key, Object value) {
       return false;
     case TelemetryEvent.purchaseRestoreResult:
       if (key == 'status') return _oneOf(value, const {'active', 'none'});
+      return false;
+    case TelemetryEvent.trialStarted:
+    case TelemetryEvent.trialConverted:
+      if (key == 'billing_period') {
+        return _oneOf(value, const {'monthly', 'annual'});
+      }
       return false;
     case TelemetryEvent.onboardingStepViewed:
       if (key == 'step') return value is int && value >= 1 && value <= 7;
