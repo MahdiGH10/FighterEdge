@@ -4,7 +4,6 @@ import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
-import '../features/training_plan/presentation/plan_controller.dart';
 import '../l10n/decimal_format.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
@@ -30,7 +29,6 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final streakWeeks = context.watch<PlanController>().weeklyStreak.count;
     final weight = state.latestWeight;
     final auth = context.watch<AuthController>();
     final user = auth.user;
@@ -101,32 +99,31 @@ class ProfileScreen extends StatelessWidget {
           const SectionHeader('Subscription'),
           _SubscriptionCard(auth: auth),
           const SizedBox(height: Insets.xl),
-          const SectionHeader('Tools'),
-          const GroupedList(
+          const SectionHeader('Training'),
+          GroupedList(
             children: [
-              _ToolRow(
-                title: 'Weight tracker',
-                subtitle: 'Log weigh-ins and monitor the cut or gain',
-                route: AppRoutes.weightTracker,
-                screen: WeightTrackerScreen(),
+              GroupedRow(
+                title: 'Training days',
+                subtitle: '${user?.weeklyTrainingDays ?? 0} days each week',
               ),
               _ToolRow(
-                title: 'Settings',
-                subtitle: 'Units, safety, reminders and account controls',
-                route: AppRoutes.settings,
-                screen: SettingsScreen(),
+                title: 'Weight tracker',
+                subtitle: 'Your weigh-ins and weight history',
+                route: AppRoutes.weightTracker,
+                screen: WeightTrackerScreen(),
               ),
             ],
           ),
           const SizedBox(height: Insets.xl),
-          const SectionHeader('Stats'),
-          GroupedList(
+          const SectionHeader('Preferences, privacy and account'),
+          const GroupedList(
             children: [
-              _StatRow('Sessions completed', '${state.completedSessionCount}'),
-              _StatRow('Week streak',
-                  '$streakWeeks ${L.of(context).dashboardStatWeeks(streakWeeks)}'),
-              _StatRow(
-                  'Training days / week', '${user?.weeklyTrainingDays ?? 0}'),
+              _ToolRow(
+                title: 'Settings',
+                subtitle: 'Units, reminders, data and account controls',
+                route: AppRoutes.settings,
+                screen: SettingsScreen(),
+              ),
             ],
           ),
           const SizedBox(height: Insets.xl),
@@ -197,18 +194,5 @@ class _SubscriptionCard extends StatelessWidget {
                 const PaywallScreen(trigger: PaywallTrigger.profile)),
       )
     ]);
-  }
-}
-
-class _StatRow extends StatelessWidget {
-  final String label;
-  final String value;
-  const _StatRow(this.label, this.value);
-
-  @override
-  Widget build(BuildContext context) {
-    return GroupedRow(
-        title: label,
-        trailing: Text(value, style: AppType.callout(weight: FontWeight.w700)));
   }
 }
