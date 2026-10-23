@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../billing/subscription.dart';
 import '../data/data_repository.dart';
 import '../data/mock_data.dart';
 import '../features/training_plan/data/legacy_session_slot.dart';
@@ -40,6 +41,39 @@ class AppState extends ChangeNotifier {
 
   /// The same clock used to date training history and evaluate its streak.
   DateTime get now => _clock();
+
+  // ---- Read-only gate ----
+
+  /// What the account may do, read fresh at every check from the
+  /// server-derived `AuthController.accessState` (so a trial that lapses while
+  /// the app is open is noticed without a profile change). Until the app
+  /// supplies one (unit tests, the offline demo) access is unknown, which
+  /// leaves writes open.
+  AccessState Function() accessSource = _unknownAccess;
+
+  static AccessState _unknownAccess() => const AccessState.unknown();
+
+  /// Called when [requireWrite] refuses. The app opens the paywall from here
+  /// so no call site can forget to.
+  VoidCallback? onWriteBlocked;
+
+  /// The current access state.
+  AccessState get access => accessSource();
+
+  /// Whether new data may be saved right now.
+  bool get canWrite => access.canWrite;
+
+  /// The one choke point for saving new user data. Returns true when the
+  /// write may go ahead; in a read-only account it returns false and calls
+  /// [onWriteBlocked]. History, plan and weight views, settings, sign-out,
+  /// account deletion, consent withdrawal, restore and the safety text never
+  /// call this. Onboarding writes ([startFreshCamp]) happen before the
+  /// paywall and are deliberately outside it.
+  bool requireWrite() {
+    if (canWrite) return true;
+    onWriteBlocked?.call();
+    return false;
+  }
 
   List<WeightEntry> _weights;
 
@@ -184,6 +218,7 @@ class AppState extends ChangeNotifier {
   }
 
   void addWeight(DateTime date, double kg) {
+    if (!requireWrite()) return;
     final entry = WeightEntry(date, kg);
     _weights.add(entry);
     _resortWeights();
@@ -258,6 +293,7 @@ class AppState extends ChangeNotifier {
       _meals.where((m) => m.eaten).fold(0, (s, m) => s + m.fats);
 
   void toggleMeal(Meal meal) {
+    if (!requireWrite()) return;
     meal.eaten = !meal.eaten;
     final repo = _dataRepository;
     final userId = _userId;
@@ -269,6 +305,7 @@ class AppState extends ChangeNotifier {
   }
 
   void addMeal(Meal meal) {
+    if (!requireWrite()) return;
     _meals.add(meal);
     final repo = _dataRepository;
     final userId = _userId;
@@ -318,6 +355,7 @@ class AppState extends ChangeNotifier {
 
   /// Adds an entry to the log, or replaces the one with the same id.
   void addTrainingLogEntry(TrainingLogEntry entry) {
+    if (!requireWrite()) return;
     _upsertLocal(entry);
     final repo = _dataRepository;
     final userId = _userId;
@@ -330,6 +368,7 @@ class AppState extends ChangeNotifier {
 
   /// Removes the entry with [entryId], if there is one.
   void removeTrainingLogEntry(String entryId) {
+    if (!requireWrite()) return;
     final before = _log.length;
     _log.removeWhere((entry) => entry.id == entryId);
     if (_log.length == before) return;

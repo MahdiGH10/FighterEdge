@@ -32,6 +32,9 @@ enum PaywallTrigger {
   cornerCoach,
   techniqueLibrary,
   premiumRecipe,
+
+  /// A locked action in a read-only account opened the paywall.
+  readOnly,
 }
 
 extension PaywallTriggerCode on PaywallTrigger {
@@ -43,6 +46,7 @@ extension PaywallTriggerCode on PaywallTrigger {
         PaywallTrigger.cornerCoach => 'corner_coach',
         PaywallTrigger.techniqueLibrary => 'technique_library',
         PaywallTrigger.premiumRecipe => 'premium_recipe',
+        PaywallTrigger.readOnly => 'read_only',
       };
 }
 
