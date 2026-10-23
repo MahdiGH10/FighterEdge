@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
+import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/features/training_plan/domain/models/session_status.dart';
 import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
 import 'package:fighter_edge/features/weekly_review/domain/weekly_review.dart';
@@ -18,6 +19,7 @@ void main() {
   Future<PlanController> pump(WidgetTester tester,
       {int days = 6,
       bool doEverything = false,
+      bool readOnly = false,
       Size size = const Size(430, 1800),
       double textScale = 1}) async {
     tester.view.physicalSize = size;
@@ -41,6 +43,9 @@ void main() {
       }
     }
     now = sunday;
+    if (readOnly) {
+      state.accessSource = () => const AccessState.readOnly();
+    }
     await tester.pumpWidget(wrapApp(WeeklyReviewScreen(weekStart: week),
         repo: repo, state: state, planController: plan));
     await tester.pumpAndSettle();
@@ -118,5 +123,14 @@ void main() {
     expect(find.text('Accept'), findsOneWidget);
     expect(find.text('Keep current'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a read-only account can inspect the week without changing it',
+      (tester) async {
+    final plan = await pump(tester, readOnly: true);
+    expect(find.text('Accept'), findsNothing);
+    expect(find.text('Keep current'), findsNothing);
+    expect(find.text('Got it'), findsOneWidget);
+    expect(plan.reviewDecision(week), isNull);
   });
 }

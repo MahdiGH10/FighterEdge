@@ -277,8 +277,9 @@ class _ReviewActions extends StatelessWidget {
     final decision =
         context.watch<PlanController>().reviewDecision(review.weekStart);
     final actionable = review.recommendation.kind != RecommendationKind.hold;
+    final canWrite = context.watch<AppState>().canWrite;
     final largeText = AppAccessibility.isLargeText(context);
-    final dockHeight = largeText && decision == null && actionable
+    final dockHeight = largeText && decision == null && actionable && canWrite
         ? AppAccessibility.minTouchTarget +
             AppAccessibility.minTouchTarget +
             Insets.lg +
@@ -299,7 +300,7 @@ class _ReviewActions extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.all(Insets.lg),
-            child: decision != null
+            child: decision != null || !canWrite
                 ? PrimaryButton(l.reviewGotIt,
                     expand: true,
                     onPressed: () => Navigator.of(context).maybePop())
