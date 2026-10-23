@@ -1,5 +1,24 @@
 # Fighter Edge — Claude Code Handoff
 
+## Live merge log (2026-10-23)
+
+Merged to main: #62 V2 chrome (glow ground, glass nav/header/sheets; merged by
+the owner's other session), #64 Fuel V2 spec, nutrition research, V2 plan and
+approved mockups (docs only), #65 fighter safety domain (banned-advice
+validator, ARB copy lint, cut safety screen decision, camp-length caution;
+refuel and fight-week template behind flags that default to off, dietitian
+sign-off pending).
+
+Open and waiting: #57 trial access client (its golden job failed after #62
+changed the goldens; needs `gh pr update-branch 57` and a rerun), #69 paywall,
+#66 day types, #67 adaptive targets, #68 grocery list, #70 firebase 13 +
+rules-unit-testing 6 together (replaces #43/#44), #71 Fuel privacy audit
+(report only), #72 Profile. None of #66-#72 has been reviewed by the lead yet.
+
+The auto-mode classifier denied `gh pr update-branch 57` and a CI log read
+("Merge Without Review"); not retried another way. Agents hit the session
+limit; they can be resumed with SendMessage after the reset.
+
 > **Start with `HANDOFF_2026-10-22_V2.md`** (state of the V2 work, open PRs, next steps, owner steps and gotchas), then `V2_PLAN_20261019.md` and `FUEL_V2_SPEC.md`.
 
 ## V2 visual foundation (lane F, three stacked PRs)
