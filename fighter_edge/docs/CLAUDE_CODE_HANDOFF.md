@@ -1,23 +1,54 @@
 # Fighter Edge — Claude Code Handoff
 
-## Live merge log (2026-10-23)
+## Live merge log (2026-10-24)
 
-Merged to main: #62 V2 chrome (glow ground, glass nav/header/sheets; merged by
-the owner's other session), #64 Fuel V2 spec, nutrition research, V2 plan and
-approved mockups (docs only), #65 fighter safety domain (banned-advice
-validator, ARB copy lint, cut safety screen decision, camp-length caution;
-refuel and fight-week template behind flags that default to off, dietitian
-sign-off pending).
+**Workflow rule (owner, 2026-10-23):** one feature at a time. Branch from main,
+build, test, merge into main, delete the branch. No parallel feature branches
+and at most one sub-agent at a time. Sub-agents run on Sonnet 5.5.
 
-Open and waiting: #57 trial access client (its golden job failed after #62
-changed the goldens; needs `gh pr update-branch 57` and a rerun), #69 paywall,
-#66 day types, #67 adaptive targets, #68 grocery list, #70 firebase 13 +
-rules-unit-testing 6 together (replaces #43/#44), #71 Fuel privacy audit
-(report only), #72 Profile. None of #66-#72 has been reviewed by the lead yet.
+**On main since the V2 handoff:** trial access client (#57), outcome-based
+paywall with trial chip and read-only banner (#69), Home Today (#77), Sunday
+review (#76), Train week and session mode (#78), Profile (#72), V2 Fuel screen
+with remaining-first and pinned logging (#80), fighter safety domain (#65),
+Fuel day types and gap picker (#66), adaptive targets (#67), grocery list and
+recipe gate (#68). Earlier: V2 chrome (#62), Fuel V2 spec and research (#64).
+Refuel volumes, the fight-week template and all weight-cut numbers stay behind
+flags that default to off; every such value is marked "dietitian sign-off
+pending".
 
-The auto-mode classifier denied `gh pr update-branch 57` and a CI log read
-("Merge Without Review"); not retried another way. Agents hit the session
-limit; they can be resumed with SendMessage after the reset.
+**CI (changed on 2026-10-23):**
+- Pull requests run the fast checks only: Analyze & test, Golden tests,
+  Cloud Functions, Firestore rules (about 6-8 minutes).
+- Android release build, the integration and performance emulator tests and the
+  iOS build run on every push to main, nightly at 04:00 UTC, and by hand (#79).
+- "Release APK launch" is manual only (#75). Run it from the Actions tab before
+  shipping a release APK; it caught a release-only crash once.
+- The integration test starts with Reduce transparency on (#74): on the
+  CPU-rendered CI emulator the real blur sometimes killed the emulator as the
+  flow ended ("No tests were found", exit 79). Rerun that job once if it
+  fails with no assertion.
+- Cloud Functions runs `npm audit --omit=dev --audit-level=high`. It went red
+  on 2026-10-23 for a new body-parser advisory; fixed by a lockfile update
+  (#81). Two moderate `uuid` findings (via gaxios) remain; their fix is a
+  breaking bump. Expect new advisories to turn this job red again.
+- The repo is public (free Actions minutes). The tracked Firebase client keys
+  are public identifiers by design; restrict them in Google Cloud Console.
+
+**Still open:** #70 firebase 13 + rules-unit-testing 6 together (replaces
+#43/#44), #71 Fuel privacy audit (report only), #53 and #54 Dependabot.
+**Not built yet:** wiring the Fuel domain (N1 check-in, N3 day types and gap
+picker) into the Fuel screen, onboarding v2 with "Start your free week", then
+N4 UI, N5 level-aware Fuel UI, N6 privacy and notifications. Real session
+templates wait for coach sign-off.
+
+**Owner steps still open:** store products with a 7-day trial in Play Console,
+App Store Connect and RevenueCat; live Terms and Privacy URLs; Play Data safety
+(no ads); redeploy Cloud Functions (backend changed: trial billing, lockfile);
+dietitian sign-off list in `FUEL_V2_SPEC.md`; restrict the Firebase API keys.
+
+The auto-mode classifier blocks edits that make CI skip checks ("CI Bypass")
+and `gh pr merge`/`update-branch` calls it cannot tie to a request. A denied
+call is final; the owner ran the CI change by hand (#79).
 
 > **Start with `HANDOFF_2026-10-22_V2.md`** (state of the V2 work, open PRs, next steps, owner steps and gotchas), then `V2_PLAN_20261019.md` and `FUEL_V2_SPEC.md`.
 
