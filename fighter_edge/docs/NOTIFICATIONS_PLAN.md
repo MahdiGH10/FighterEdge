@@ -9,7 +9,7 @@ for whoever builds PRs 2 to 4. Read it, `CLAUDE.md`, and
 | PR | What | State |
 |---|---|---|
 | 1 | Pure-Dart planner in `lib/notifications/domain/` | Merged (#82) |
-| 2 | Scheduler, permission primer, Settings screen | Not started |
+| 2 | Scheduler, permission primer, Settings screen | In review, see "What PR 2 built" |
 | 3 | Wire real inputs, deep links, move the trial notice into the planner | Not started |
 | 4 | Weigh-in, protein nudge, fighter tips | Not started; waits for the privacy fix (N6) and "Hide numbers" / "Pause nutrition" modes |
 
@@ -124,6 +124,32 @@ state; changing settings changes what is scheduled within one reconcile;
 no duplicates after repeated reconciles; nothing scheduled beyond 7 days;
 unit and widget tests for every point above; manual device check list in the
 PR (Android and iOS: delivery, quiet hours, reboot, time-zone change).
+
+### What PR 2 built, and what it left for PR 3
+
+- Code: `notification_scheduler.dart` (reconciler), `notification_controller.dart`
+  (settings, permission, taps, the auto-pause question, debounce),
+  `notification_copy.dart` (ARB-backed words), the two stores, and
+  `screens/notifications/` (host, Settings screen, primer, question sheet).
+- The Settings screen has rows for the session reminder and the weekly review
+  only. Fuel window, fight countdown, weigh-in, protein and tips get a row
+  when their inputs are connected (PR 3 and 4), and so does the Pause
+  nutrition switch; until then a switch would do nothing. The planner, stores
+  and gateway already handle every channel.
+- The reconciler passes sessions only. PR 3 adds fuel day types, the fight
+  date and the trial end to `_inputs()` in `notification_host.dart`.
+- Taps open a tab: `/fuel` Fuel, `/home` Home, `/review` and
+  `/train/session/<id>` Train. PR 3 replaces that with real deep links.
+  `NotificationRoute.parse` accepts only those fixed paths.
+- A plan-owned pending notification is recognised by its payload starting
+  with `/`. The trial reminder (id 6200, no payload) is never touched. The old
+  weekly training ids (6101 to 6107) are cancelled on every run.
+- A notification counts as delivered once its time passes (the OS does not
+  tell a closed app), and as ignored 24 hours after that without a tap. The
+  planner treats a not-yet-decided one like an opened one, so auto-pause is
+  worked out when the app opens after a day or more without a notification.
+- Time zone: the gateway reads the device zone on every run, so a trip is
+  fixed the next time the app opens. It cannot react while the app is closed.
 
 ## PR 3: real inputs and the trial notice
 

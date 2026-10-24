@@ -30,6 +30,7 @@ import 'features/fight_camp/presentation/fight_camp_controller.dart';
 import 'features/training_plan/presentation/plan_controller.dart';
 import 'firebase_options.dart';
 import 'notifications/local_reminder_gateway.dart';
+import 'notifications/notification_controller.dart';
 import 'notifications/reminder_gateway.dart';
 import 'notifications/unavailable_reminder_gateway.dart';
 import 'observability/boot_failure.dart';
@@ -291,6 +292,11 @@ class FighterEdgeApp extends StatelessWidget {
           ),
         Provider<ReminderGateway>.value(
           value: reminderGateway ?? const UnavailableReminderGateway(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              NotificationController(gateway: context.read<ReminderGateway>())
+                ..load(),
         ),
         Provider<CoachVoice>.value(
           value: coachVoice ?? const SilentCoachVoice(),

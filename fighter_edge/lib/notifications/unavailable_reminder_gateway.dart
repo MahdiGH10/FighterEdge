@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'reminder_gateway.dart';
 
 /// Safe fallback for tests, web, and desktop: never touches a notifications
@@ -11,16 +9,22 @@ class UnavailableReminderGateway implements ReminderGateway {
   bool get isAvailable => false;
 
   @override
-  Future<bool> requestPermission() async => false;
+  Future<bool> requestPermission({bool provisional = false}) async => false;
 
   @override
-  Future<void> scheduleTrainingReminders({
-    required Set<int> weekdays,
-    required TimeOfDay time,
-  }) async {}
+  Future<bool> areNotificationsAllowed() async => false;
+
+  @override
+  Future<void> replaceScheduled(List<ScheduledReminder> reminders) async {}
 
   @override
   Future<void> cancelAll() async {}
+
+  @override
+  Stream<NotificationTap> get taps => const Stream.empty();
+
+  @override
+  Future<NotificationTap?> takeLaunchTap() async => null;
 
   @override
   Future<void> scheduleTrialEndReminder({

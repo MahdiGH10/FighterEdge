@@ -18,6 +18,7 @@ import '../screens/auth/magic_link_screen.dart';
 import '../screens/auth/verify_email_screen.dart';
 import '../screens/auth/signup_screen.dart';
 import '../screens/legal_screen.dart';
+import '../screens/notifications/notification_settings_screen.dart';
 import '../screens/paywall_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/round_timer_screen.dart';
@@ -39,6 +40,7 @@ class AppRoutes {
   static const profile = '/profile';
   static const roundTimer = '/round-timer';
   static const settings = '/settings';
+  static const notificationSettings = '/settings/notifications';
   static const weightTracker = '/weight-tracker';
   static const fuelPlan = '/fuel/plan';
   static const fuelSetup = '/fuel/setup';
@@ -199,6 +201,13 @@ GoRouter createAppRouter({AuthController? auth}) {
         pageBuilder: (context, state) => _appPage(
           state: state,
           child: const SettingsScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationSettings,
+        pageBuilder: (context, state) => _appPage(
+          state: state,
+          child: const NotificationSettingsScreen(),
         ),
       ),
       GoRoute(

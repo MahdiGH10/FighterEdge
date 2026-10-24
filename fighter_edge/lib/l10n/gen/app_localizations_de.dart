@@ -103,22 +103,6 @@ class LDe extends L {
   String get settingsTimerHapticsSubtitle => 'Rundensignale können vibrieren';
 
   @override
-  String get settingsCampReminders => 'Trainings-Erinnerungen';
-
-  @override
-  String get settingsCampRemindersUnavailable =>
-      'Auf diesem Gerät nicht verfügbar';
-
-  @override
-  String settingsCampRemindersOn(String time) {
-    return 'Ein Hinweis an deinen Trainingstagen, gegen $time';
-  }
-
-  @override
-  String get settingsCampRemindersOff =>
-      'Lass dich an deinen Trainingstagen erinnern';
-
-  @override
   String get settingsSectionSafety => 'Sicherheit & Vertrauen';
 
   @override
@@ -2010,4 +1994,212 @@ class LDe extends L {
   String fuelRepeatFood(String name) {
     return '$name erneut erfassen';
   }
+
+  @override
+  String get settingsNotifications => 'Benachrichtigungen';
+
+  @override
+  String get settingsNotificationsOff => 'Alle aus';
+
+  @override
+  String get settingsNotificationsPaused => 'Pausiert';
+
+  @override
+  String settingsNotificationsOn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Erinnerungen an',
+      one: '1 Erinnerung an',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notifScreenIntro =>
+      'Erinnerungen bleiben auf diesem Gerät. Du wählst jede einzeln und bekommst höchstens eine pro Tag.';
+
+  @override
+  String get notifPermissionOffAndroid =>
+      'Benachrichtigungen sind für Fighter Edge in den Handy-Einstellungen ausgeschaltet. Öffne für Erinnerungen Einstellungen, Apps, Fighter Edge, Benachrichtigungen und schalte sie ein.';
+
+  @override
+  String get notifPermissionOffIos =>
+      'Benachrichtigungen sind für Fighter Edge in den Handy-Einstellungen ausgeschaltet. Öffne für Erinnerungen Einstellungen, Mitteilungen, Fighter Edge und schalte „Mitteilungen erlauben“ ein.';
+
+  @override
+  String get notifSectionReminders => 'Erinnerungen';
+
+  @override
+  String get notifSessionTitle => 'Einheit-Erinnerung';
+
+  @override
+  String get notifSessionSubtitle =>
+      'Ein kurzer Hinweis vor deiner üblichen Trainingszeit';
+
+  @override
+  String get notifReviewTitle => 'Wochenrückblick';
+
+  @override
+  String get notifReviewSubtitle =>
+      'Ein Rückblick auf deine Woche am Sonntagabend';
+
+  @override
+  String get notifSectionTiming => 'Zeiten';
+
+  @override
+  String get notifUsualTime => 'Übliche Trainingszeit';
+
+  @override
+  String get notifSessionLead => 'Erinnere mich';
+
+  @override
+  String notifLeadOption(int minutes) {
+    return '$minutes Min. vorher';
+  }
+
+  @override
+  String get notifQuietStart => 'Ruhezeit beginnt';
+
+  @override
+  String get notifQuietEnd => 'Ruhezeit endet';
+
+  @override
+  String get notifQuietNote => 'Während der Ruhezeit wird nichts gesendet.';
+
+  @override
+  String get notifPauseAll => 'Alles pausieren';
+
+  @override
+  String get notifPauseAllSubtitle =>
+      'Schaltet jede Erinnerung stumm, bis du es wieder ausschaltest';
+
+  @override
+  String get notifHelpTitle => 'Erinnerungen kommen nicht an?';
+
+  @override
+  String get notifHelpBody =>
+      'Manche Handys beenden Apps im Hintergrund, um Akku zu sparen. Kommen Erinnerungen spät oder gar nicht, erlaube Fighter Edge in den Akku-Einstellungen, im Hintergrund zu laufen.';
+
+  @override
+  String get notifPrimerTitle =>
+      'Möchtest du eine Erinnerung vor deiner nächsten Einheit?';
+
+  @override
+  String get notifPrimerBody =>
+      'Ein kurzer Hinweis an deinen Trainingstagen, etwa eine Stunde vorher. Nie nachts. In den Einstellungen kannst du es ändern oder beenden.';
+
+  @override
+  String get notifPrimerYes => 'Ja, erinnere mich';
+
+  @override
+  String get notifPrimerNo => 'Jetzt nicht';
+
+  @override
+  String get notifAutoPauseTitle => 'Diese Erinnerungen behalten?';
+
+  @override
+  String get notifAutoPauseBodySession =>
+      'Die letzten Einheit-Erinnerungen blieben ungeöffnet, deshalb haben wir sie pausiert. Lass sie weiterlaufen oder schalte sie aus.';
+
+  @override
+  String get notifAutoPauseBodyReview =>
+      'Die letzten Wochenrückblicke blieben ungeöffnet, deshalb haben wir sie pausiert. Lass sie weiterlaufen oder schalte sie aus.';
+
+  @override
+  String get notifAutoPauseBodyGeneric =>
+      'Die letzten dieser Erinnerungen blieben ungeöffnet, deshalb haben wir sie pausiert. Lass sie weiterlaufen oder schalte sie aus.';
+
+  @override
+  String get notifAutoPauseKeep => 'Behalten';
+
+  @override
+  String get notifAutoPauseOff => 'Ausschalten';
+
+  @override
+  String get notifSessionSoonTitle => 'Deine Einheit steht bevor';
+
+  @override
+  String notifSessionSoonBody(String time) {
+    return 'Training um $time. Ein kurzes Aufwärmen vorab hilft dir beim Start.';
+  }
+
+  @override
+  String notifSessionSoonFuelTitle(String time) {
+    return 'Einheit um $time';
+  }
+
+  @override
+  String get notifSessionSoonFuelBody =>
+      'Dein Fuel-Fenster ist offen. Iss, was dir gut bekommt, und pack dann deine Sachen.';
+
+  @override
+  String get notifFuelWindowTitle => 'Fuel-Fenster ist offen';
+
+  @override
+  String notifFuelWindowBody(String time) {
+    return 'Deine Einheit um $time steht bevor. Iss, was dir gut bekommt, und trainiere dann.';
+  }
+
+  @override
+  String get notifReviewWeeklyTitle => 'Dein Wochenrückblick';
+
+  @override
+  String get notifReviewWeeklyBody =>
+      'Nimm dir eine Minute, sieh dir die Woche an und plane die nächste.';
+
+  @override
+  String get notifFightWeekTitle => 'Noch eine Woche bis zum Kampf';
+
+  @override
+  String get notifFightWeekBody =>
+      'Bleib bei deinen Einheiten und halte deine Routine einfach. Dein Camp-Plan zeigt, was als Nächstes kommt.';
+
+  @override
+  String get notifFightTomorrowTitle => 'Morgen ist Kampftag';
+
+  @override
+  String get notifFightTomorrowBody =>
+      'Ruh dich aus und bleib bei deiner Routine. Die Arbeit ist getan.';
+
+  @override
+  String get notifWeighInTitle => 'Gewichts-Check';
+
+  @override
+  String get notifWeighInBody =>
+      'Trag dein Gewicht ein, wenn du es verfolgst. Lass es aus, wenn heute nicht der Tag ist.';
+
+  @override
+  String get notifProteinTitle => 'Abendessen heute';
+
+  @override
+  String get notifProteinBody =>
+      'Eine proteinreiche Mahlzeit nach dem Training unterstützt deine Erholung.';
+
+  @override
+  String get notifTipTitle => 'Tipp für Kämpfer';
+
+  @override
+  String get notifTip0Body =>
+      'Schlaf gehört zum Training. Eine feste Schlafenszeit diese Woche zahlt sich in der nächsten Einheit aus.';
+
+  @override
+  String get notifTip1Body =>
+      'Fünf lockere Minuten Aufwärmen machen die erste Runde jeder Einheit besser.';
+
+  @override
+  String get notifTip2Body =>
+      'Such dir heute eine Technik zum Schärfen aus. Ein kleiner Fokus schlägt einen großen Plan.';
+
+  @override
+  String get notifTip3Body =>
+      'Iss nach einer harten Einheit eine richtige Mahlzeit. Erholung beginnt auf dem Teller.';
+
+  @override
+  String get notifTip4Body =>
+      'Leichte Mobilität zwischen den Einheiten hält Hüfte und Schultern bereit.';
+
+  @override
+  String get notifTip5Body =>
+      'Atme vor dem Sparring eine Minute lang ruhig. Ein ruhiger Start prägt deine Runden.';
 }

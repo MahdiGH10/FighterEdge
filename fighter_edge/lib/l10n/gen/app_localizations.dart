@@ -277,30 +277,6 @@ abstract class L {
   /// **'Round alerts can use vibration feedback'**
   String get settingsTimerHapticsSubtitle;
 
-  /// No description provided for @settingsCampReminders.
-  ///
-  /// In en, this message translates to:
-  /// **'Camp reminders'**
-  String get settingsCampReminders;
-
-  /// No description provided for @settingsCampRemindersUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Not available on this device'**
-  String get settingsCampRemindersUnavailable;
-
-  /// No description provided for @settingsCampRemindersOn.
-  ///
-  /// In en, this message translates to:
-  /// **'A nudge on the days you train, around {time}'**
-  String settingsCampRemindersOn(String time);
-
-  /// No description provided for @settingsCampRemindersOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Get a nudge on the days you train'**
-  String get settingsCampRemindersOff;
-
   /// No description provided for @settingsSectionSafety.
   ///
   /// In en, this message translates to:
@@ -3402,6 +3378,342 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Log {name} again'**
   String fuelRepeatFood(String name);
+
+  /// No description provided for @settingsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotifications;
+
+  /// No description provided for @settingsNotificationsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'All off'**
+  String get settingsNotificationsOff;
+
+  /// No description provided for @settingsNotificationsPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get settingsNotificationsPaused;
+
+  /// No description provided for @settingsNotificationsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reminder on} other{{count} reminders on}}'**
+  String settingsNotificationsOn(int count);
+
+  /// No description provided for @notifScreenIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders stay on this device. You pick each one, and you get at most one a day.'**
+  String get notifScreenIntro;
+
+  /// No description provided for @notifPermissionOffAndroid.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are turned off for Fighter Edge in your phone settings. To get reminders, open Settings, Apps, Fighter Edge, Notifications and turn them on.'**
+  String get notifPermissionOffAndroid;
+
+  /// No description provided for @notifPermissionOffIos.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are turned off for Fighter Edge in your phone settings. To get reminders, open Settings, Notifications, Fighter Edge and turn on Allow Notifications.'**
+  String get notifPermissionOffIos;
+
+  /// No description provided for @notifSectionReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get notifSectionReminders;
+
+  /// No description provided for @notifSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session reminder'**
+  String get notifSessionTitle;
+
+  /// No description provided for @notifSessionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A short note before your usual training time'**
+  String get notifSessionSubtitle;
+
+  /// No description provided for @notifReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review'**
+  String get notifReviewTitle;
+
+  /// No description provided for @notifReviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A Sunday evening look back at your week'**
+  String get notifReviewSubtitle;
+
+  /// No description provided for @notifSectionTiming.
+  ///
+  /// In en, this message translates to:
+  /// **'Timing'**
+  String get notifSectionTiming;
+
+  /// No description provided for @notifUsualTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Usual training time'**
+  String get notifUsualTime;
+
+  /// No description provided for @notifSessionLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me'**
+  String get notifSessionLead;
+
+  /// No description provided for @notifLeadOption.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min before'**
+  String notifLeadOption(int minutes);
+
+  /// No description provided for @notifQuietStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet hours start'**
+  String get notifQuietStart;
+
+  /// No description provided for @notifQuietEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet hours end'**
+  String get notifQuietEnd;
+
+  /// No description provided for @notifQuietNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is sent during quiet hours.'**
+  String get notifQuietNote;
+
+  /// No description provided for @notifPauseAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause all'**
+  String get notifPauseAll;
+
+  /// No description provided for @notifPauseAllSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Silence every reminder until you turn this off'**
+  String get notifPauseAllSubtitle;
+
+  /// No description provided for @notifHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders not arriving?'**
+  String get notifHelpTitle;
+
+  /// No description provided for @notifHelpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Some phones stop apps in the background to save battery. If reminders come late or not at all, let Fighter Edge run in the background in your battery settings.'**
+  String get notifHelpBody;
+
+  /// No description provided for @notifPrimerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Want a reminder before your next session?'**
+  String get notifPrimerTitle;
+
+  /// No description provided for @notifPrimerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'One short note on the days you train, about an hour before. Never at night. You can change or stop it in Settings.'**
+  String get notifPrimerBody;
+
+  /// No description provided for @notifPrimerYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, remind me'**
+  String get notifPrimerYes;
+
+  /// No description provided for @notifPrimerNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notifPrimerNo;
+
+  /// No description provided for @notifAutoPauseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep these reminders?'**
+  String get notifAutoPauseTitle;
+
+  /// No description provided for @notifAutoPauseBodySession.
+  ///
+  /// In en, this message translates to:
+  /// **'The last few session reminders went unopened, so we paused them. Keep them coming, or turn them off.'**
+  String get notifAutoPauseBodySession;
+
+  /// No description provided for @notifAutoPauseBodyReview.
+  ///
+  /// In en, this message translates to:
+  /// **'The last few weekly reviews went unopened, so we paused them. Keep them coming, or turn them off.'**
+  String get notifAutoPauseBodyReview;
+
+  /// No description provided for @notifAutoPauseBodyGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'The last few of these reminders went unopened, so we paused them. Keep them coming, or turn them off.'**
+  String get notifAutoPauseBodyGeneric;
+
+  /// No description provided for @notifAutoPauseKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep them'**
+  String get notifAutoPauseKeep;
+
+  /// No description provided for @notifAutoPauseOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off'**
+  String get notifAutoPauseOff;
+
+  /// No description provided for @notifSessionSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session is coming up'**
+  String get notifSessionSoonTitle;
+
+  /// No description provided for @notifSessionSoonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Training at {time}. A short warm-up first helps you start well.'**
+  String notifSessionSoonBody(String time);
+
+  /// No description provided for @notifSessionSoonFuelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session at {time}'**
+  String notifSessionSoonFuelTitle(String time);
+
+  /// No description provided for @notifSessionSoonFuelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your fuel window is open. Eat what sits well with you, then get your gear ready.'**
+  String get notifSessionSoonFuelBody;
+
+  /// No description provided for @notifFuelWindowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel window is open'**
+  String get notifFuelWindowTitle;
+
+  /// No description provided for @notifFuelWindowBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {time} session is coming. Eat what sits well with you, then train.'**
+  String notifFuelWindowBody(String time);
+
+  /// No description provided for @notifReviewWeeklyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your week in review'**
+  String get notifReviewWeeklyTitle;
+
+  /// No description provided for @notifReviewWeeklyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a minute to see how the week went and set up the next one.'**
+  String get notifReviewWeeklyBody;
+
+  /// No description provided for @notifFightWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One week to fight day'**
+  String get notifFightWeekTitle;
+
+  /// No description provided for @notifFightWeekBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your sessions steady and your routine simple. Your camp plan has what is next.'**
+  String get notifFightWeekBody;
+
+  /// No description provided for @notifFightTomorrowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight day is tomorrow'**
+  String get notifFightTomorrowTitle;
+
+  /// No description provided for @notifFightTomorrowBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest up and keep your routine. The work is done.'**
+  String get notifFightTomorrowBody;
+
+  /// No description provided for @notifWeighInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight check-in'**
+  String get notifWeighInTitle;
+
+  /// No description provided for @notifWeighInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Log your weight if you track it. Skip it if today is not the day.'**
+  String get notifWeighInBody;
+
+  /// No description provided for @notifProteinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dinner tonight'**
+  String get notifProteinTitle;
+
+  /// No description provided for @notifProteinBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A protein-rich meal after training helps you recover.'**
+  String get notifProteinBody;
+
+  /// No description provided for @notifTipTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fighter tip'**
+  String get notifTipTitle;
+
+  /// No description provided for @notifTip0Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep is part of training. A steady bedtime this week pays off in your next session.'**
+  String get notifTip0Body;
+
+  /// No description provided for @notifTip1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Five easy minutes of warm-up make the first round of any session better.'**
+  String get notifTip1Body;
+
+  /// No description provided for @notifTip2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one technique to sharpen today. A small focus beats a big plan.'**
+  String get notifTip2Body;
+
+  /// No description provided for @notifTip3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'After a hard session, eat a proper meal. Recovery starts on your plate.'**
+  String get notifTip3Body;
+
+  /// No description provided for @notifTip4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Light mobility between sessions keeps your hips and shoulders ready.'**
+  String get notifTip4Body;
+
+  /// No description provided for @notifTip5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathe slowly for a minute before sparring. A calm start sets up your rounds.'**
+  String get notifTip5Body;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

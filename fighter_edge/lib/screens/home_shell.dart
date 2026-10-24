@@ -6,6 +6,8 @@ import '../billing/trial_reminder.dart';
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../l10n/gen/app_localizations.dart';
+import '../notifications/notification_controller.dart';
+import '../notifications/notification_route.dart';
 import '../notifications/reminder_gateway.dart';
 import '../state/first_run_controller.dart';
 import '../state/glass_policy_controller.dart';
@@ -15,6 +17,7 @@ import '../widgets/coach_marks.dart';
 import '../widgets/fade_through.dart';
 import 'dashboard_screen.dart';
 import 'first_run/first_win_sheet.dart';
+import 'notifications/notification_host.dart';
 import 'nutrition_screen.dart';
 import 'profile_screen.dart';
 import 'training_camp_screen.dart';
@@ -63,6 +66,7 @@ class _HomeShellState extends State<HomeShell> {
   late final EdgeFuelController _fuel;
   late final FirstRunController _firstRun;
   late final AuthController _auth;
+  late final NotificationController _notifications;
   late final TrialReminderCoordinator _trialReminder;
 
   /// Keeps the "trial ends in 2 days" notification in line with the
@@ -84,10 +88,13 @@ class _HomeShellState extends State<HomeShell> {
     _trialReminder = TrialReminderCoordinator(
       gateway: context.read<ReminderGateway>(),
     );
+    _notifications = context.read<NotificationController>()
+      ..addListener(_openTappedNotification);
     _fuel = context.read<EdgeFuelController>()..addListener(_checkFirstWin);
     _firstRun = context.read<FirstRunController>()..addListener(_checkFirstWin);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _syncTrialReminder();
+      _openTappedNotification();
       _askForConsentOnce();
       // The shell is the first screen that draws glass, so this is where the
       // device finds out whether it can afford the blur. Runs once per install.
@@ -105,6 +112,7 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   void dispose() {
+    _notifications.removeListener(_openTappedNotification);
     _fuel.removeListener(_checkFirstWin);
     _firstRun.removeListener(_checkFirstWin);
     _auth.removeListener(_syncTrialReminder);
@@ -112,6 +120,21 @@ class _HomeShellState extends State<HomeShell> {
     // inherit this one's reminder.
     if (_auth.user == null) _trialReminder.cancel();
     super.dispose();
+  }
+
+  /// A tap on a notification opens the tab its route names. The route is the
+  /// only thing the notification carries; anything on top of the shell
+  /// (Settings, a sheet) is closed first so the tab is what the athlete sees.
+  void _openTappedNotification() {
+    if (!mounted || _notifications.pendingRoute == null) return;
+    final route = _notifications.takePendingRoute();
+    if (route == null) return;
+    Navigator.of(context).popUntil((r) => r.isFirst);
+    _goToTab(switch (NotificationRoute.destination(route)) {
+      NotificationDestination.home => _homeTab,
+      NotificationDestination.train => _trainTab,
+      NotificationDestination.fuel => _fuelTab,
+    });
   }
 
   void _goToTab(int i) {
@@ -179,7 +202,8 @@ class _HomeShellState extends State<HomeShell> {
     _visited.add(_index);
     // One backdrop group for the whole shell: the nav, a collapsed header and a
     // sheet over a tab share one copy of what is behind them.
-    return BackdropGroup(
+    return NotificationHost(
+        child: BackdropGroup(
       child: Scaffold(
         // The glass nav is drawn over the body, so lists scroll under it. Their
         // bottom padding clears it: ScreenScaffold.tabBottomPadding.
@@ -207,6 +231,6 @@ class _HomeShellState extends State<HomeShell> {
           itemKeys: _navKeys,
         ),
       ),
-    );
+    ));
   }
 }

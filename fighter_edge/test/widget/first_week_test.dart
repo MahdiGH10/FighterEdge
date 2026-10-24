@@ -7,8 +7,9 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dar
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/main.dart';
+import 'package:fighter_edge/notifications/domain/notification_channel.dart';
+import 'package:fighter_edge/notifications/notification_controller.dart';
 import 'package:fighter_edge/screens/home_shell.dart';
-import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/state/first_run_controller.dart';
 import 'package:fighter_edge/widgets/coach_marks.dart';
 
@@ -72,14 +73,30 @@ void main() {
     await shell.read<EdgeFuelController>().addEntry(meal('m1'));
     await tester.pumpAndSettle();
     expect(find.text('First meal logged.'), findsOneWidget);
-    expect(find.text('Want a nudge on training days?'), findsOneWidget);
+    // No permission was asked for before this moment.
+    expect(reminders.permissionRequests, 0);
 
-    await tester.tap(find.text('Remind me'));
+    // The primer follows the celebration; the OS prompt only comes after yes.
+    await tester.tap(find.text('Keep going'));
     await tester.pumpAndSettle();
     expect(find.text('First meal logged.'), findsNothing);
-    expect(shell.read<AppState>().campReminders, isTrue);
+    expect(
+        find.text('Want a reminder before your next session?'), findsOneWidget);
+    expect(reminders.permissionRequests, 0);
+
+    await tester.tap(find.text('Yes, remind me'));
+    await tester.pumpAndSettle();
+    expect(
+        find.text('Want a reminder before your next session?'), findsNothing);
+    expect(shell.read<FirstRunController>().remindersAsked, isTrue);
     expect(reminders.permissionRequests, 1);
-    expect(reminders.scheduledWeekdays, isNotNull);
+    expect(
+      shell
+          .read<NotificationController>()
+          .settings
+          .isEnabled(NotificationChannel.sessionReminder),
+      isTrue,
+    );
 
     // Later meals are just meals.
     await shell.read<EdgeFuelController>().addEntry(meal('m2'));

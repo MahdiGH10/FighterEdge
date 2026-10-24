@@ -104,20 +104,6 @@ class LEn extends L {
       'Round alerts can use vibration feedback';
 
   @override
-  String get settingsCampReminders => 'Camp reminders';
-
-  @override
-  String get settingsCampRemindersUnavailable => 'Not available on this device';
-
-  @override
-  String settingsCampRemindersOn(String time) {
-    return 'A nudge on the days you train, around $time';
-  }
-
-  @override
-  String get settingsCampRemindersOff => 'Get a nudge on the days you train';
-
-  @override
   String get settingsSectionSafety => 'Safety & trust';
 
   @override
@@ -1995,4 +1981,210 @@ class LEn extends L {
   String fuelRepeatFood(String name) {
     return 'Log $name again';
   }
+
+  @override
+  String get settingsNotifications => 'Notifications';
+
+  @override
+  String get settingsNotificationsOff => 'All off';
+
+  @override
+  String get settingsNotificationsPaused => 'Paused';
+
+  @override
+  String settingsNotificationsOn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reminders on',
+      one: '1 reminder on',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notifScreenIntro =>
+      'Reminders stay on this device. You pick each one, and you get at most one a day.';
+
+  @override
+  String get notifPermissionOffAndroid =>
+      'Notifications are turned off for Fighter Edge in your phone settings. To get reminders, open Settings, Apps, Fighter Edge, Notifications and turn them on.';
+
+  @override
+  String get notifPermissionOffIos =>
+      'Notifications are turned off for Fighter Edge in your phone settings. To get reminders, open Settings, Notifications, Fighter Edge and turn on Allow Notifications.';
+
+  @override
+  String get notifSectionReminders => 'Reminders';
+
+  @override
+  String get notifSessionTitle => 'Session reminder';
+
+  @override
+  String get notifSessionSubtitle =>
+      'A short note before your usual training time';
+
+  @override
+  String get notifReviewTitle => 'Weekly review';
+
+  @override
+  String get notifReviewSubtitle => 'A Sunday evening look back at your week';
+
+  @override
+  String get notifSectionTiming => 'Timing';
+
+  @override
+  String get notifUsualTime => 'Usual training time';
+
+  @override
+  String get notifSessionLead => 'Remind me';
+
+  @override
+  String notifLeadOption(int minutes) {
+    return '$minutes min before';
+  }
+
+  @override
+  String get notifQuietStart => 'Quiet hours start';
+
+  @override
+  String get notifQuietEnd => 'Quiet hours end';
+
+  @override
+  String get notifQuietNote => 'Nothing is sent during quiet hours.';
+
+  @override
+  String get notifPauseAll => 'Pause all';
+
+  @override
+  String get notifPauseAllSubtitle =>
+      'Silence every reminder until you turn this off';
+
+  @override
+  String get notifHelpTitle => 'Reminders not arriving?';
+
+  @override
+  String get notifHelpBody =>
+      'Some phones stop apps in the background to save battery. If reminders come late or not at all, let Fighter Edge run in the background in your battery settings.';
+
+  @override
+  String get notifPrimerTitle => 'Want a reminder before your next session?';
+
+  @override
+  String get notifPrimerBody =>
+      'One short note on the days you train, about an hour before. Never at night. You can change or stop it in Settings.';
+
+  @override
+  String get notifPrimerYes => 'Yes, remind me';
+
+  @override
+  String get notifPrimerNo => 'Not now';
+
+  @override
+  String get notifAutoPauseTitle => 'Keep these reminders?';
+
+  @override
+  String get notifAutoPauseBodySession =>
+      'The last few session reminders went unopened, so we paused them. Keep them coming, or turn them off.';
+
+  @override
+  String get notifAutoPauseBodyReview =>
+      'The last few weekly reviews went unopened, so we paused them. Keep them coming, or turn them off.';
+
+  @override
+  String get notifAutoPauseBodyGeneric =>
+      'The last few of these reminders went unopened, so we paused them. Keep them coming, or turn them off.';
+
+  @override
+  String get notifAutoPauseKeep => 'Keep them';
+
+  @override
+  String get notifAutoPauseOff => 'Turn off';
+
+  @override
+  String get notifSessionSoonTitle => 'Your session is coming up';
+
+  @override
+  String notifSessionSoonBody(String time) {
+    return 'Training at $time. A short warm-up first helps you start well.';
+  }
+
+  @override
+  String notifSessionSoonFuelTitle(String time) {
+    return 'Session at $time';
+  }
+
+  @override
+  String get notifSessionSoonFuelBody =>
+      'Your fuel window is open. Eat what sits well with you, then get your gear ready.';
+
+  @override
+  String get notifFuelWindowTitle => 'Fuel window is open';
+
+  @override
+  String notifFuelWindowBody(String time) {
+    return 'Your $time session is coming. Eat what sits well with you, then train.';
+  }
+
+  @override
+  String get notifReviewWeeklyTitle => 'Your week in review';
+
+  @override
+  String get notifReviewWeeklyBody =>
+      'Take a minute to see how the week went and set up the next one.';
+
+  @override
+  String get notifFightWeekTitle => 'One week to fight day';
+
+  @override
+  String get notifFightWeekBody =>
+      'Keep your sessions steady and your routine simple. Your camp plan has what is next.';
+
+  @override
+  String get notifFightTomorrowTitle => 'Fight day is tomorrow';
+
+  @override
+  String get notifFightTomorrowBody =>
+      'Rest up and keep your routine. The work is done.';
+
+  @override
+  String get notifWeighInTitle => 'Weight check-in';
+
+  @override
+  String get notifWeighInBody =>
+      'Log your weight if you track it. Skip it if today is not the day.';
+
+  @override
+  String get notifProteinTitle => 'Dinner tonight';
+
+  @override
+  String get notifProteinBody =>
+      'A protein-rich meal after training helps you recover.';
+
+  @override
+  String get notifTipTitle => 'Fighter tip';
+
+  @override
+  String get notifTip0Body =>
+      'Sleep is part of training. A steady bedtime this week pays off in your next session.';
+
+  @override
+  String get notifTip1Body =>
+      'Five easy minutes of warm-up make the first round of any session better.';
+
+  @override
+  String get notifTip2Body =>
+      'Pick one technique to sharpen today. A small focus beats a big plan.';
+
+  @override
+  String get notifTip3Body =>
+      'After a hard session, eat a proper meal. Recovery starts on your plate.';
+
+  @override
+  String get notifTip4Body =>
+      'Light mobility between sessions keeps your hips and shoulders ready.';
+
+  @override
+  String get notifTip5Body =>
+      'Breathe slowly for a minute before sparring. A calm start sets up your rounds.';
 }

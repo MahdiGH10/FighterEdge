@@ -1,6 +1,38 @@
-import 'package:flutter/material.dart';
+import 'domain/notification_channel.dart';
 
-/// Provider-neutral boundary for training-day reminders.
+/// One local notification the gateway should hold, already localized.
+///
+/// [fireAt] is a local wall-clock moment: the gateway converts it with the
+/// device time zone when it schedules, which is where daylight saving is
+/// handled. [route] is the only payload and carries no data.
+class ScheduledReminder {
+  const ScheduledReminder({
+    required this.id,
+    required this.channel,
+    required this.fireAt,
+    required this.title,
+    required this.body,
+    required this.route,
+  });
+
+  final int id;
+  final NotificationChannel channel;
+  final DateTime fireAt;
+  final String title;
+  final String body;
+  final String route;
+}
+
+/// A tap on a delivered notification. Carries the id it was scheduled with
+/// and the route payload, nothing else.
+class NotificationTap {
+  const NotificationTap({required this.id, this.route});
+
+  final int? id;
+  final String? route;
+}
+
+/// Provider-neutral boundary for local reminders.
 ///
 /// Mirrors the billing gateway: product code depends on this interface,
 /// never on a notifications SDK directly, so tests and platforms without
@@ -13,21 +45,31 @@ abstract class ReminderGateway {
   bool get isAvailable;
 
   /// Asks the OS for notification permission. Returns whether it was granted.
-  /// Safe to call repeatedly — already-granted or already-denied is not an
-  /// error.
-  Future<bool> requestPermission();
+  /// Safe to call repeatedly: already-granted or already-denied is not an
+  /// error. [provisional] asks iOS for quiet delivery without a prompt; other
+  /// platforms ignore it.
+  Future<bool> requestPermission({bool provisional = false});
 
-  /// Schedules a weekly reminder on each of [weekdays]
-  /// (`DateTime.monday`..`DateTime.sunday`) at [time], replacing whatever was
-  /// scheduled before. An empty set clears all reminders.
-  Future<void> scheduleTrainingReminders({
-    required Set<int> weekdays,
-    required TimeOfDay time,
-  });
+  /// Whether the OS currently lets the app post notifications. Never prompts.
+  Future<bool> areNotificationsAllowed();
 
-  /// Clears every scheduled training reminder. A trial-end reminder is left
+  /// Makes the plan-owned set of pending notifications exactly [reminders]:
+  /// plan-owned ones that are no longer wanted are cancelled, the rest are
+  /// scheduled (an existing id is replaced, never duplicated). The trial-end
+  /// reminder is not plan-owned and is left alone.
+  Future<void> replaceScheduled(List<ScheduledReminder> reminders);
+
+  /// Clears every plan-owned notification, and any weekly training reminder
+  /// an older version of the app scheduled. The trial-end reminder is left
   /// alone; see [cancelTrialEndReminder].
   Future<void> cancelAll();
+
+  /// Taps on delivered notifications while the app is running.
+  Stream<NotificationTap> get taps => const Stream.empty();
+
+  /// The tap that launched the app from a closed state, once. Null when the
+  /// app was started some other way.
+  Future<NotificationTap?> takeLaunchTap() async => null;
 
   /// Schedules the one-off "your free trial ends soon" notification for [at],
   /// replacing any earlier one. [title] and [body] arrive localized from the
