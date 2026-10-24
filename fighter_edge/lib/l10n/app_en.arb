@@ -848,5 +848,17 @@
   "paywallAfterTrialNote": "If you don't subscribe after the trial, your plan and logs stay readable. Logging and sessions need a subscription.",
   "paywallBenefitSessionTitle": "Session mode",
   "paywallBenefitSessionBody": "Rounds and rest timed for you, with a tactical and a recovery cue on every break.",
-  "paywallContinue": "Continue"
+  "paywallContinue": "Continue",
+  "fuelLogFood": "Log food",
+  "fuelRecentFoods": "Recent foods",
+  "fuelQuickAdd": "Quick add",
+  "fuelEmptyLog": "Nothing logged yet. Use Log food to add your first meal.",
+  "fuelGramsLeft": "{grams} g left",
+  "@fuelGramsLeft": {"placeholders": {"grams": {"type": "int"}}},
+  "fuelConsumedKcal": "{kcal} kcal logged",
+  "@fuelConsumedKcal": {"placeholders": {"kcal": {"type": "int"}}},
+  "fuelRemovedSnack": "{name} removed",
+  "@fuelRemovedSnack": {"placeholders": {"name": {"type": "String"}}},
+  "fuelRepeatFood": "Log {name} again",
+  "@fuelRepeatFood": {"placeholders": {"name": {"type": "String"}}}
 }

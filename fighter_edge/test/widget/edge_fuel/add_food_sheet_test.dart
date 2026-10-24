@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:fighter_edge/features/edge_fuel/data/food_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/screens/nutrition_screen.dart';
-import 'package:fighter_edge/theme/app_icons.dart';
+import 'package:fighter_edge/features/edge_fuel/presentation/widgets/add_food_sheet.dart';
 
 import '../../helpers/test_harness.dart';
 
@@ -35,7 +35,7 @@ void main() {
       'it back', (tester) async {
     await pumpNutrition(tester);
 
-    await tester.tap(find.byIcon(AppIcons.plus).first);
+    await tester.tap(find.byKey(const ValueKey('fuel-log-food')));
     await tester.pumpAndSettle();
     expect(find.text('Add to Today'), findsOneWidget);
 
@@ -65,11 +65,12 @@ void main() {
   testWidgets('a logged food is one tap away next time', (tester) async {
     await pumpNutrition(tester);
 
-    await tester.tap(find.byIcon(AppIcons.plus).first);
+    await tester.tap(find.byKey(const ValueKey('fuel-log-food')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'banana');
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Banana, raw'));
+    await tester.tap(find.descendant(
+        of: find.byType(AddFoodSheet), matching: find.text('Banana, raw')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add to today'));
     await tester.pumpAndSettle();
@@ -79,10 +80,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(fuel(tester).entries, isEmpty);
 
-    await tester.tap(find.byIcon(AppIcons.plus).first);
+    await tester.tap(find.byKey(const ValueKey('fuel-log-food')));
     await tester.pumpAndSettle();
     expect(find.text('Recent'), findsOneWidget);
-    await tester.tap(find.text('Banana, raw'));
+    await tester.tap(find.descendant(
+        of: find.byType(AddFoodSheet), matching: find.text('Banana, raw')));
     await tester.pumpAndSettle();
 
     expect(fuel(tester).entries.single.name, 'Banana, raw');
@@ -92,7 +94,7 @@ void main() {
       (tester) async {
     await pumpNutrition(tester);
 
-    await tester.tap(find.byIcon(AppIcons.plus).first);
+    await tester.tap(find.byKey(const ValueKey('fuel-log-food')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Enter macros manually'));
     await tester.pumpAndSettle();
@@ -104,7 +106,7 @@ void main() {
       (tester) async {
     await pumpNutrition(tester);
 
-    await tester.tap(find.byIcon(AppIcons.plus).first);
+    await tester.tap(find.byKey(const ValueKey('fuel-log-food')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'zzzz');
     await tester.pumpAndSettle();

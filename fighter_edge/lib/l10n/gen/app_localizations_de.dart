@@ -1977,4 +1977,37 @@ class LDe extends L {
 
   @override
   String get paywallContinue => 'Weiter';
+
+  @override
+  String get fuelLogFood => 'Essen erfassen';
+
+  @override
+  String get fuelRecentFoods => 'Zuletzt erfasst';
+
+  @override
+  String get fuelQuickAdd => 'Schnell hinzufügen';
+
+  @override
+  String get fuelEmptyLog =>
+      'Noch nichts erfasst. Füge über „Essen erfassen“ deine erste Mahlzeit hinzu.';
+
+  @override
+  String fuelGramsLeft(int grams) {
+    return '$grams g übrig';
+  }
+
+  @override
+  String fuelConsumedKcal(int kcal) {
+    return '$kcal kcal erfasst';
+  }
+
+  @override
+  String fuelRemovedSnack(String name) {
+    return '$name entfernt';
+  }
+
+  @override
+  String fuelRepeatFood(String name) {
+    return '$name erneut erfassen';
+  }
 }

@@ -702,5 +702,17 @@
   "paywallAfterTrialNote": "Wenn du nach dem Test kein Abo abschließt, bleiben dein Plan und deine Einträge lesbar. Eintragen und Einheiten brauchen ein Abo.",
   "paywallBenefitSessionTitle": "Einheiten-Modus",
   "paywallBenefitSessionBody": "Runden und Pausen werden für dich getimt, mit einem taktischen und einem Erholungs-Tipp in jeder Pause.",
-  "paywallContinue": "Weiter"
+  "paywallContinue": "Weiter",
+  "fuelLogFood": "Essen erfassen",
+  "fuelRecentFoods": "Zuletzt erfasst",
+  "fuelQuickAdd": "Schnell hinzufügen",
+  "fuelEmptyLog": "Noch nichts erfasst. Füge über „Essen erfassen“ deine erste Mahlzeit hinzu.",
+  "fuelGramsLeft": "{grams} g übrig",
+  "@fuelGramsLeft": {"placeholders": {"grams": {"type": "int"}}},
+  "fuelConsumedKcal": "{kcal} kcal erfasst",
+  "@fuelConsumedKcal": {"placeholders": {"kcal": {"type": "int"}}},
+  "fuelRemovedSnack": "{name} entfernt",
+  "@fuelRemovedSnack": {"placeholders": {"name": {"type": "String"}}},
+  "fuelRepeatFood": "{name} erneut erfassen",
+  "@fuelRepeatFood": {"placeholders": {"name": {"type": "String"}}}
 }

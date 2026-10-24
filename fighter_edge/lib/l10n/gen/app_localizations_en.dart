@@ -1962,4 +1962,37 @@ class LEn extends L {
 
   @override
   String get paywallContinue => 'Continue';
+
+  @override
+  String get fuelLogFood => 'Log food';
+
+  @override
+  String get fuelRecentFoods => 'Recent foods';
+
+  @override
+  String get fuelQuickAdd => 'Quick add';
+
+  @override
+  String get fuelEmptyLog =>
+      'Nothing logged yet. Use Log food to add your first meal.';
+
+  @override
+  String fuelGramsLeft(int grams) {
+    return '$grams g left';
+  }
+
+  @override
+  String fuelConsumedKcal(int kcal) {
+    return '$kcal kcal logged';
+  }
+
+  @override
+  String fuelRemovedSnack(String name) {
+    return '$name removed';
+  }
+
+  @override
+  String fuelRepeatFood(String name) {
+    return 'Log $name again';
+  }
 }
