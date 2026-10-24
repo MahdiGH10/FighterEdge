@@ -9,8 +9,8 @@ for whoever builds PRs 2 to 4. Read it, `CLAUDE.md`, and
 | PR | What | State |
 |---|---|---|
 | 1 | Pure-Dart planner in `lib/notifications/domain/` | Merged (#82) |
-| 2 | Scheduler, permission primer, Settings screen | In review, see "What PR 2 built" |
-| 3 | Wire real inputs, deep links, move the trial notice into the planner | Not started |
+| 2 | Scheduler, permission primer, Settings screen | Merged (#85) |
+| 3 | Wire real inputs, deep links, move the trial notice into the planner | In review, see "What PR 3 built" |
 | 4 | Weigh-in, protein nudge, fighter tips | Not started; waits for the privacy fix (N6) and "Hide numbers" / "Pause nutrition" modes |
 
 One feature, one branch, one PR, merged before the next starts.
@@ -125,7 +125,7 @@ no duplicates after repeated reconciles; nothing scheduled beyond 7 days;
 unit and widget tests for every point above; manual device check list in the
 PR (Android and iOS: delivery, quiet hours, reboot, time-zone change).
 
-### What PR 2 built, and what it left for PR 3
+### What PR 2 built (history; PR 3 changed the points marked below)
 
 - Code: `notification_scheduler.dart` (reconciler), `notification_controller.dart`
   (settings, permission, taps, the auto-pause question, debounce),
@@ -135,7 +135,8 @@ PR (Android and iOS: delivery, quiet hours, reboot, time-zone change).
   only. Fuel window, fight countdown, weigh-in, protein and tips get a row
   when their inputs are connected (PR 3 and 4), and so does the Pause
   nutrition switch; until then a switch would do nothing. The planner, stores
-  and gateway already handle every channel.
+  and gateway already handle every channel. (PR 3 added the fuel window and
+  fight countdown rows and Pause nutrition notes.)
 - The reconciler passes sessions only. PR 3 adds fuel day types, the fight
   date and the trial end to `_inputs()` in `notification_host.dart`.
 - Taps open a tab: `/fuel` Fuel, `/home` Home, `/review` and
@@ -161,6 +162,34 @@ PR (Android and iOS: delivery, quiet hours, reboot, time-zone change).
   `TrialReminderCoordinator`'s direct scheduling, keeping its behavior: one
   notice, 2 days before the trial ends, cancelled on conversion or sign-out.
 - Deep links for every route above, with tests.
+
+### What PR 3 built
+
+- `notification_inputs_reader.dart` gathers the planner's inputs from the
+  controllers on every reconcile: sessions (the Train tab's own rows), fuel
+  day types (through `TrainingPlanFuelBridge`, day type only, no tier or
+  number), the booked fight's date, the trial end, and the age from a
+  confirmed Fuel setup. `NotificationHost` listens to the fight camp and the
+  Fuel controller too.
+- Fuel window: Settings shows its row, and the Pause nutrition notes switch,
+  only to an adult with a confirmed Fuel setup. Fight-week days have their own
+  day type and get no fuel window. Under 18 or unknown age get none, whatever
+  is switched on.
+- Fight countdown: a row for everyone; it sends nothing without a booked fight.
+  Copy never mentions a cut, weight or a weigh-in.
+- Trial notice: `TrialReminderCoordinator` and the gateway's direct trial
+  methods are gone. The planner schedules the one notice at 10:00 two days
+  before the trial's end date. The controller always allows it (it is a
+  billing notice, not a choice, and Pause all does not silence it); it still
+  needs OS permission. Conversion, a lapse or sign-out removes it, and once
+  delivered it is not planned again. The gateway cancels the old direct trial
+  id (6200) on every run, so a device upgraded with one pending gets no double.
+- Deep links: `/home` Home, `/fuel` Fuel, `/review` Home plus the weekly review
+  screen for the week that is ready (Sunday or Monday, and not yet answered;
+  otherwise the athlete stays on Home), `/train/session/<id>` the Train tab.
+  There is no screen for a single session, so that link lands where the week
+  and today's session are listed.
+- Still not connected: weigh-in, protein and tips (PR 4).
 
 ## PR 4: the sensitive channels (after the privacy fix)
 

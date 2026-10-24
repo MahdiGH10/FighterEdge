@@ -331,7 +331,7 @@ void main() {
       expect(
           NotificationRoute.destination('/home'), NotificationDestination.home);
       expect(NotificationRoute.destination('/review'),
-          NotificationDestination.train);
+          NotificationDestination.review);
       expect(NotificationRoute.destination('/train/session/s-1'),
           NotificationDestination.train);
     });

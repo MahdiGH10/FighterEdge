@@ -914,5 +914,11 @@
   "notifTip2Body": "Pick one technique to sharpen today. A small focus beats a big plan.",
   "notifTip3Body": "After a hard session, eat a proper meal. Recovery starts on your plate.",
   "notifTip4Body": "Light mobility between sessions keeps your hips and shoulders ready.",
-  "notifTip5Body": "Breathe slowly for a minute before sparring. A calm start sets up your rounds."
+  "notifTip5Body": "Breathe slowly for a minute before sparring. A calm start sets up your rounds.",
+  "notifFuelTitle": "Fuel window",
+  "notifFuelSubtitle": "A heads-up before a hard session, when it is time to eat",
+  "notifFightTitle": "Fight countdown",
+  "notifFightSubtitle": "A note a week and a day before your fight",
+  "notifPauseNutrition": "Pause nutrition notes",
+  "notifPauseNutritionSubtitle": "Hides the fuel window until you switch this off"
 }

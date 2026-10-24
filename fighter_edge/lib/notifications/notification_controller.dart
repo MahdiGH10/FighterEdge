@@ -38,12 +38,14 @@ class NotificationController extends ChangeNotifier {
         ),
         _now = now ?? DateTime.now;
 
-  /// The channels the Settings screen offers. The others (fuel window, fight
-  /// countdown, weigh-in, protein, tips) get a row when the inputs that feed
-  /// them are connected.
+  /// The channels the Settings screen offers. Weigh-in, protein and tips get
+  /// a row when their slice lands. The trial notice is a billing notice, not
+  /// a choice, so it has no row (see [_planSettings]).
   static const List<NotificationChannel> userChannels = [
     NotificationChannel.sessionReminder,
+    NotificationChannel.fuelWindow,
     NotificationChannel.weeklyReview,
+    NotificationChannel.fightCountdown,
   ];
 
   final ReminderGateway _gateway;
@@ -86,6 +88,13 @@ class NotificationController extends ChangeNotifier {
   /// say where to turn notifications back on.
   bool get showPermissionNote =>
       isAvailable && _permissionRequested && _systemAllowed == false;
+
+  /// The settings the planner sees. The trial-ending notice is a billing
+  /// notice the athlete does not switch on: it is always allowed here, and the
+  /// planner still skips it when there is no trial, when it was already sent,
+  /// and when the OS does not let the app post. Pause all does not silence it.
+  NotificationSettings get _planSettings =>
+      _settings.withChannel(NotificationChannel.trialEnding, true);
 
   /// How many of the offered channels are on, for the Settings row.
   int get enabledCount =>
@@ -208,7 +217,7 @@ class NotificationController extends ChangeNotifier {
       final allowed = await _gateway.areNotificationsAllowed();
       final result = await _scheduler.reconcile(
         now: _now(),
-        settings: _settings,
+        settings: _planSettings,
         inputs: readInputs(),
         copy: NotificationCopy.forLocale(readLocale()),
         signedIn: readSignedIn(),
@@ -280,10 +289,10 @@ class NotificationController extends ChangeNotifier {
     return granted;
   }
 
-  void setUsualTime(int hour, int minute) => _update(_settings.copyWith(
-        usualTrainingHour: hour,
-        usualTrainingMinute: minute,
-      ));
+  void setUsualTime(int hour, int minute) => _update(
+        _settings.copyWith(
+            usualTrainingHour: hour, usualTrainingMinute: minute),
+      );
 
   void setSessionLead(int minutes) =>
       _update(_settings.copyWith(sessionLeadMinutes: minutes));
@@ -292,6 +301,9 @@ class NotificationController extends ChangeNotifier {
       _update(_settings.copyWith(quietHours: quietHours));
 
   void setPauseAll(bool value) => _update(_settings.copyWith(pauseAll: value));
+
+  void setPauseNutrition(bool value) =>
+      _update(_settings.copyWith(pauseNutrition: value));
 
   void _update(NotificationSettings next) {
     if (next == _settings) return;

@@ -2,10 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../notifications/domain/notification_channel.dart';
 import '../../notifications/domain/notification_settings.dart';
 import '../../notifications/notification_controller.dart';
+import '../../notifications/notification_inputs_reader.dart';
 import '../../theme/app_accessibility.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_haptics.dart';
@@ -29,6 +31,9 @@ class NotificationSettingsScreen extends StatelessWidget {
     final l = L.of(context);
     final controller = context.watch<NotificationController>();
     final settings = controller.settings;
+    final nutrition = NotificationInputsReader.nutritionAllowed(
+      context.watch<EdgeFuelController>(),
+    );
     final secondary = AppAccessibility.textSecondary(context);
 
     return ScreenScaffold(
@@ -76,6 +81,19 @@ class NotificationSettingsScreen extends StatelessWidget {
                 on,
               ),
             ),
+            // A fuel window is a nutrition note, so it is offered only to an
+            // adult with a confirmed Fuel setup.
+            if (nutrition)
+              _SwitchRow(
+                title: l.notifFuelTitle,
+                subtitle: l.notifFuelSubtitle,
+                value: settings.isEnabled(NotificationChannel.fuelWindow),
+                onChanged: (on) => _toggle(
+                  controller,
+                  NotificationChannel.fuelWindow,
+                  on,
+                ),
+              ),
             _SwitchRow(
               title: l.notifReviewTitle,
               subtitle: l.notifReviewSubtitle,
@@ -83,6 +101,16 @@ class NotificationSettingsScreen extends StatelessWidget {
               onChanged: (on) => _toggle(
                 controller,
                 NotificationChannel.weeklyReview,
+                on,
+              ),
+            ),
+            _SwitchRow(
+              title: l.notifFightTitle,
+              subtitle: l.notifFightSubtitle,
+              value: settings.isEnabled(NotificationChannel.fightCountdown),
+              onChanged: (on) => _toggle(
+                controller,
+                NotificationChannel.fightCountdown,
                 on,
               ),
             ),
@@ -130,6 +158,16 @@ class NotificationSettingsScreen extends StatelessWidget {
                 controller.setPauseAll(on);
               },
             ),
+            if (nutrition)
+              _SwitchRow(
+                title: l.notifPauseNutrition,
+                subtitle: l.notifPauseNutritionSubtitle,
+                value: settings.pauseNutrition,
+                onChanged: (on) {
+                  AppHaptics.commit();
+                  controller.setPauseNutrition(on);
+                },
+              ),
           ]),
           const SizedBox(height: Insets.xl),
           GroupedList(children: [

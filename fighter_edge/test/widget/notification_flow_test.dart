@@ -13,6 +13,7 @@ import 'package:fighter_edge/notifications/notification_controller.dart';
 import 'package:fighter_edge/notifications/notification_history_store.dart';
 import 'package:fighter_edge/notifications/notification_settings_store.dart';
 import 'package:fighter_edge/notifications/reminder_gateway.dart';
+import 'package:fighter_edge/features/weekly_review/presentation/weekly_review_screen.dart';
 import 'package:fighter_edge/screens/home_shell.dart';
 import 'package:fighter_edge/state/first_run_controller.dart';
 import 'package:fighter_edge/widgets/bottom_nav.dart';
@@ -175,9 +176,16 @@ void main() {
       await tester.pumpAndSettle();
       expect(tab(tester), 2);
 
-      gateway.tapController.add(const NotificationTap(id: 2, route: '/review'));
+      gateway.tapController
+          .add(const NotificationTap(id: 2, route: '/train/session/s-1'));
       await tester.pumpAndSettle();
       expect(tab(tester), 1);
+
+      // With no plan there is nothing to review: the athlete is on Home.
+      gateway.tapController.add(const NotificationTap(id: 4, route: '/review'));
+      await tester.pumpAndSettle();
+      expect(tab(tester), 0);
+      expect(find.byType(WeeklyReviewScreen), findsNothing);
 
       gateway.tapController.add(const NotificationTap(id: 3, route: '/home'));
       await tester.pumpAndSettle();
