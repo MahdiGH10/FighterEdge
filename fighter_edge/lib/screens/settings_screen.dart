@@ -5,9 +5,7 @@ import 'package:provider/provider.dart';
 import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
-import '../features/training_plan/presentation/plan_controller.dart';
-import '../notifications/reminder_gateway.dart';
-import '../notifications/training_reminder_schedule.dart';
+import '../notifications/notification_controller.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_haptics.dart';
@@ -25,6 +23,7 @@ import '../widgets/grouped_list.dart';
 import 'change_password_sheet.dart';
 import 'delete_account_flow.dart';
 import 'legal_screen.dart';
+import 'notifications/notification_settings_screen.dart';
 import 'paywall_screen.dart';
 import '../legal/legal_links.dart';
 import '../models/app_user.dart';
@@ -38,7 +37,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
-    final reminders = context.watch<ReminderGateway>();
+    final notifications = context.watch<NotificationController>();
     final consent = context.watch<ConsentController>();
     final glass = context.watch<GlassPolicyController>();
     final user = auth.user;
@@ -91,6 +90,17 @@ class SettingsScreen extends StatelessWidget {
               value: glass.reduceTransparency,
               onChanged: glass.setReduceTransparency,
             ),
+            // Where reminders cannot fire there is nothing to set up.
+            if (notifications.isAvailable)
+              _SettingsRow(
+                title: l.settingsNotifications,
+                subtitle: _notificationsSummary(l, notifications),
+                onTap: () => AppNavigation.push(
+                  context,
+                  AppRoutes.notificationSettings,
+                  fallbackBuilder: (_) => const NotificationSettingsScreen(),
+                ),
+              ),
           ]),
           const SizedBox(height: Insets.xl),
           _SectionLabel(l.settingsSectionSubscription),
@@ -126,20 +136,6 @@ class SettingsScreen extends StatelessWidget {
               subtitle: l.settingsTimerHapticsSubtitle,
               value: state.timerHaptics,
               onChanged: state.setTimerHaptics,
-            ),
-            _SwitchRow(
-              title: l.settingsCampReminders,
-              subtitle: !reminders.isAvailable
-                  ? l.settingsCampRemindersUnavailable
-                  : state.campReminders
-                      ? l.settingsCampRemindersOn(
-                          TrainingReminderSchedule.defaultTime.format(context))
-                      : l.settingsCampRemindersOff,
-              value: state.campReminders,
-              onChanged: reminders.isAvailable
-                  ? (value) =>
-                      _setCampReminders(context, state, reminders, value)
-                  : null,
             ),
           ]),
           const SizedBox(height: Insets.xl),
@@ -215,40 +211,6 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  /// Turning reminders on asks for permission first — a switch that looks
-  /// on while the OS is silently refusing every notification would be worse
-  /// than not offering the feature. Denied permission flips the switch back
-  /// off rather than leaving it lit with nothing behind it.
-  Future<void> _setCampReminders(
-    BuildContext context,
-    AppState state,
-    ReminderGateway reminders,
-    bool enabled,
-  ) async {
-    final plan = context.read<PlanController>();
-    if (!enabled) {
-      await state.setCampReminders(false);
-      await reminders.cancelAll();
-      return;
-    }
-    final granted = await reminders.requestPermission();
-    if (!granted) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-          'Notifications are turned off for Fighter Edge. Enable them in '
-          'your device settings to get camp reminders.',
-        ),
-      ));
-      return;
-    }
-    await state.setCampReminders(true);
-    await reminders.scheduleTrainingReminders(
-      weekdays: plan.trainingWeekdays,
-      time: TrainingReminderSchedule.defaultTime,
     );
   }
 
@@ -403,6 +365,14 @@ class _TrustCard extends StatelessWidget {
             style: AppType.subhead(
                 color: AppAccessibility.textSecondary(context))),
       );
+}
+
+String _notificationsSummary(L l, NotificationController c) {
+  if (c.settings.pauseAll) return l.settingsNotificationsPaused;
+  final count = c.enabledCount;
+  return count == 0
+      ? l.settingsNotificationsOff
+      : l.settingsNotificationsOn(count);
 }
 
 String _languageLabel(BuildContext context, L l) {

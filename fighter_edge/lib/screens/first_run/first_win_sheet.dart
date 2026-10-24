@@ -1,34 +1,29 @@
-import 'dart:async';
-import '../../widgets/glass_sheet.dart';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../theme/app_icons.dart';
 
-import '../../notifications/reminder_gateway.dart';
-import '../../features/training_plan/presentation/plan_controller.dart';
-import '../../notifications/training_reminder_schedule.dart';
-import '../../state/app_state.dart';
-import '../../state/first_run_controller.dart';
 import '../../theme/app_accessibility.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/app_haptics.dart';
+import '../../theme/app_icons.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_typography.dart';
+import '../../widgets/glass_sheet.dart';
 import '../../widgets/premium_effects.dart';
 import '../../widgets/primary_button.dart';
+import '../notifications/notification_primer_sheet.dart';
 
 /// Marks the first logged meal, and only then asks about reminders.
 ///
 /// The ask waits for this moment on purpose: before the user has done
 /// anything, "can we remind you?" is a request for trust not yet earned. Right
-/// after a win it reads as an offer to help repeat it.
-Future<void> showFirstWinSheet(BuildContext context) {
-  return showGlassSheet<void>(
+/// after a win it reads as an offer to help repeat it. The ask itself is the
+/// notification primer, shown once this sheet has closed.
+Future<void> showFirstWinSheet(BuildContext context) async {
+  await showGlassSheet<void>(
     context: context,
     isScrollControlled: true,
     builder: (_) => const FirstWinSheet(),
   );
+  if (!context.mounted || !shouldShowNotificationPrimer(context)) return;
+  await showNotificationPrimer(context);
 }
 
 class FirstWinSheet extends StatelessWidget {
@@ -36,32 +31,7 @@ class FirstWinSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final firstRun = context.read<FirstRunController>();
-    final reminders = context.read<ReminderGateway>();
-    final plan = context.read<PlanController>();
-    // Someone who already switched reminders on in Settings has answered,
-    // and there is nothing useful to offer where reminders cannot fire.
-    final askReminders = !state.campReminders &&
-        !firstRun.remindersAsked &&
-        reminders.isAvailable;
     final secondary = AppAccessibility.textSecondary(context);
-
-    void close({required bool remind}) {
-      if (askReminders) {
-        firstRun.markRemindersAsked();
-        if (remind) {
-          AppHaptics.commit();
-          unawaited(state.setCampReminders(true));
-          // Fired after the sheet is already closing: a system permission
-          // prompt appearing over the sheet is fine, and a denial here has
-          // nothing left in this sheet to update — Settings offers the same
-          // switch with a clear explanation if the user wants to retry.
-          unawaited(_enableReminders(reminders, plan));
-        }
-      }
-      Navigator.of(context).pop();
-    }
 
     return SafeArea(
       top: false,
@@ -87,48 +57,16 @@ class FirstWinSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: Insets.xl),
-            if (askReminders) ...[
-              Text('Want a nudge on training days?', style: AppType.headline()),
-              const SizedBox(height: Insets.xs),
-              Text(
-                'We’ll remind you to train and log on the days you picked. '
-                'Change it anytime in Settings.',
-                style: AppType.callout(color: secondary),
-              ),
-              const SizedBox(height: Insets.lg),
-              PrimaryButton(
-                'Remind me',
-                icon: AppIcons.bellRinging,
-                expand: true,
-                onPressed: () => close(remind: true),
-              ),
-              const SizedBox(height: Insets.sm),
-              GhostButton(
-                'Not now',
-                expand: true,
-                onPressed: () => close(remind: false),
-              ),
-            ] else
-              PrimaryButton(
-                'Keep going',
-                expand: true,
-                onPressed: () => close(remind: false),
-              ),
+            PrimaryButton(
+              'Keep going',
+              expand: true,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
           ],
         ),
       ),
     );
   }
-}
-
-Future<void> _enableReminders(
-    ReminderGateway reminders, PlanController plan) async {
-  final granted = await reminders.requestPermission();
-  if (!granted) return;
-  await reminders.scheduleTrainingReminders(
-    weekdays: plan.trainingWeekdays,
-    time: TrainingReminderSchedule.defaultTime,
-  );
 }
 
 class _WinBadge extends StatelessWidget {

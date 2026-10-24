@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ import 'package:fighter_edge/features/fight_camp/data/fight_camp_repository.dart
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/presentation/fight_camp_controller.dart';
 import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
+import 'package:fighter_edge/notifications/notification_controller.dart';
 import 'package:fighter_edge/notifications/reminder_gateway.dart';
 import 'package:fighter_edge/notifications/unavailable_reminder_gateway.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
@@ -124,6 +126,11 @@ Widget wrapApp(
       Provider<ReminderGateway>.value(
         value: reminderGateway ?? const UnavailableReminderGateway(),
       ),
+      ChangeNotifierProvider(
+        create: (context) =>
+            NotificationController(gateway: context.read<ReminderGateway>())
+              ..load(),
+      ),
       Provider<CoachVoice>.value(value: coachVoice ?? const SilentCoachVoice()),
       ChangeNotifierProvider<ConsentController>(
         create: (_) =>
@@ -196,40 +203,71 @@ Widget wrapApp(
 
 /// In-memory [ReminderGateway] for tests: reports as available, records what
 /// it was asked to do, and never touches a real notifications plugin.
+///
+/// It models the OS closely enough to catch duplicates: [pending] is keyed by
+/// id, so scheduling the same id twice leaves one notification, exactly as the
+/// real plugin does.
 class FakeReminderGateway implements ReminderGateway {
-  bool permissionGranted;
-  int permissionRequests = 0;
-  Set<int>? scheduledWeekdays;
-  TimeOfDay? scheduledTime;
-  bool cancelled = false;
+  FakeReminderGateway({this.permissionGranted = true, this.allowed = false});
 
-  FakeReminderGateway({this.permissionGranted = true});
+  /// What the OS answers when asked for permission.
+  bool permissionGranted;
+
+  /// Whether the OS currently lets the app post. Starts false (never asked)
+  /// unless a test says otherwise; a granted request turns it on.
+  bool allowed;
+
+  int permissionRequests = 0;
+  int provisionalRequests = 0;
+
+  /// The plan-owned notifications the OS holds, by id.
+  final Map<int, ScheduledReminder> pending = {};
+  int replaceCalls = 0;
+  int cancelAllCalls = 0;
 
   /// Flip to false to model a platform without local notifications.
   bool available = true;
+
+  final StreamController<NotificationTap> tapController =
+      StreamController<NotificationTap>.broadcast();
+  NotificationTap? launchTap;
 
   @override
   bool get isAvailable => available;
 
   @override
-  Future<bool> requestPermission() async {
+  Stream<NotificationTap> get taps => tapController.stream;
+
+  @override
+  Future<NotificationTap?> takeLaunchTap() async {
+    final tap = launchTap;
+    launchTap = null;
+    return tap;
+  }
+
+  @override
+  Future<bool> requestPermission({bool provisional = false}) async {
     permissionRequests++;
+    if (provisional) provisionalRequests++;
+    allowed = permissionGranted;
     return permissionGranted;
   }
 
   @override
-  Future<void> scheduleTrainingReminders({
-    required Set<int> weekdays,
-    required TimeOfDay time,
-  }) async {
-    scheduledWeekdays = weekdays;
-    scheduledTime = time;
+  Future<bool> areNotificationsAllowed() async => allowed;
+
+  @override
+  Future<void> replaceScheduled(List<ScheduledReminder> reminders) async {
+    replaceCalls++;
+    pending
+      ..clear()
+      ..addEntries([for (final r in reminders) MapEntry(r.id, r)]);
   }
 
   @override
   Future<void> cancelAll() async {
-    cancelled = true;
-    scheduledWeekdays = null;
+    cancelAllCalls++;
+    pending.clear();
   }
 
   /// When the trial-end reminder is set for, and what it says.

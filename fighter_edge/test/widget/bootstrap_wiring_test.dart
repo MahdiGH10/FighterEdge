@@ -17,32 +17,7 @@ import 'package:fighter_edge/training/reaction/coach_voice.dart';
 
 import '../helpers/test_harness.dart';
 
-class _MarkedReminders implements ReminderGateway {
-  @override
-  bool get isAvailable => true;
-
-  @override
-  Future<bool> requestPermission() async => true;
-
-  @override
-  Future<void> scheduleTrainingReminders({
-    required Set<int> weekdays,
-    required TimeOfDay time,
-  }) async {}
-
-  @override
-  Future<void> cancelAll() async {}
-
-  @override
-  Future<void> scheduleTrialEndReminder({
-    required DateTime at,
-    required String title,
-    required String body,
-  }) async {}
-
-  @override
-  Future<void> cancelTrialEndReminder() async {}
-}
+class _MarkedReminders extends FakeReminderGateway {}
 
 class _MarkedVoice extends SilentCoachVoice {
   const _MarkedVoice();

@@ -109,7 +109,6 @@ class AppState extends ChangeNotifier {
   String? _userId;
   bool _useMetricUnits = true;
   bool _timerHaptics = true;
-  bool _campReminders = false;
   bool _safeCutGuidance = true;
 
   void setUser(String? userId) {
@@ -234,7 +233,6 @@ class AppState extends ChangeNotifier {
   // ---- Settings ----
   bool get useMetricUnits => _useMetricUnits;
   bool get timerHaptics => _timerHaptics;
-  bool get campReminders => _campReminders;
   bool get safeCutGuidance => _safeCutGuidance;
 
   String get weightUnitLabel => _useMetricUnits ? 'kg' : 'lb';
@@ -260,13 +258,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('settings.timerHaptics', value);
-  }
-
-  Future<void> setCampReminders(bool value) async {
-    _campReminders = value;
-    notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('settings.campReminders', value);
   }
 
   Future<void> setSafeCutGuidance(bool value) async {
@@ -480,7 +471,6 @@ class AppState extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       _useMetricUnits = prefs.getBool('settings.useMetricUnits') ?? true;
       _timerHaptics = prefs.getBool('settings.timerHaptics') ?? true;
-      _campReminders = prefs.getBool('settings.campReminders') ?? false;
       _safeCutGuidance = prefs.getBool('settings.safeCutGuidance') ?? true;
       notifyListeners();
     } catch (_) {
