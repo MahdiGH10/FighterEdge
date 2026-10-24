@@ -52,6 +52,15 @@ call is final; the owner ran the CI change by hand (#79).
 
 > **Start with `HANDOFF_2026-10-22_V2.md`** (state of the V2 work, open PRs, next steps, owner steps and gotchas), then `V2_PLAN_20261019.md` and `FUEL_V2_SPEC.md`.
 
+## N3 domain prerequisites (2026-10-24)
+
+`AcceptedFuelWeekAllocator` allocates an accepted budget for display without
+recalculating or saving it. `FuelMatchCalculator.dayGap` gates the existing
+protein picker and the new typed kcal-only picker. Pending review flags remain
+off; minors/unknown age receive no amounts. Fight-week allocations remain
+withheld. See `FUEL_DAY_GAP_API.md` for the wiring contract. The screen wiring
+is the next slice after this prerequisite merges.
+
 ## V2 visual foundation (lane F, three stacked PRs)
 
 **6.1 Tokens (this slice).** `AppColors` now carries the approved V2 values: the

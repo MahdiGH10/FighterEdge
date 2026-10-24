@@ -9,6 +9,12 @@ import 'recipe.dart';
 enum FuelGapMacro { protein, carbohydrate }
 
 enum FuelGapStatus {
+  /// The caller has not confirmed adult eligibility.
+  adultRequired,
+
+  /// Reviewed portions or the dose policy have not been enabled.
+  awaitingSignOff,
+
   /// At least one option.
   ready,
 
