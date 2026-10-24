@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:fighter_edge/billing/subscription.dart';
@@ -18,8 +19,13 @@ import '../../helpers/test_harness.dart';
 /// the tests running against the real content without real I/O.
 late String _foodsJson;
 late String _recipesJson;
+late String _publishedRecipesJson;
 
-Future<void> _pumpLibrary(WidgetTester tester, {Plan plan = Plan.free}) async {
+Future<void> _pumpLibrary(
+  WidgetTester tester, {
+  Plan plan = Plan.free,
+  bool useShippedDrafts = false,
+}) async {
   final repo = await makeRepo(signedIn: true, plan: plan);
   final foods = AssetFoodCatalogRepository(loadString: (_) async => _foodsJson);
   await tester.pumpWidget(
@@ -29,7 +35,8 @@ Future<void> _pumpLibrary(WidgetTester tester, {Plan plan = Plan.free}) async {
       foodCatalogRepo: foods,
       recipeCatalogRepo: AssetRecipeCatalogRepository(
         foodCatalog: foods,
-        loadString: (_) async => _recipesJson,
+        loadString: (_) async =>
+            useShippedDrafts ? _recipesJson : _publishedRecipesJson,
       ),
     ),
   );
@@ -42,6 +49,21 @@ void main() {
     _recipesJson = File(
       'assets/data/edge_fuel_recipes_v1.json',
     ).readAsStringSync();
+    final publishedFixture = jsonDecode(_recipesJson) as Map<String, dynamic>;
+    for (final recipe in publishedFixture['recipes'] as List<dynamic>) {
+      final fixtureRecipe = recipe as Map<String, dynamic>;
+      fixtureRecipe['status'] = 'published';
+      fixtureRecipe['reviewerCredit'] = 'Test fixture reviewer';
+    }
+    _publishedRecipesJson = jsonEncode(publishedFixture);
+  });
+
+  testWidgets('shipped draft recipes stay hidden', (tester) async {
+    await _pumpLibrary(tester, useShippedDrafts: true);
+
+    expect(find.text('RECIPES'), findsOneWidget);
+    expect(find.text('Greek yogurt and berry bowl'), findsNothing);
+    expect(find.text('Nothing matches'), findsOneWidget);
   });
 
   testWidgets('renders recipes from the shipped catalog', (tester) async {

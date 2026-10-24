@@ -438,6 +438,9 @@ class GlassColors {
   /// Sheet inner light, alpha .06.
   static const Color sheetInnerLight = Color(0x0FFFFFFF);
 
+  /// The scrim behind a sheet, alpha .55.
+  static const Color sheetScrim = Color(0x8C040308);
+
   /// Grabber handle on a sheet, alpha .28.
   static const Color sheetGrabber = Color(0x47FFFFFF);
 

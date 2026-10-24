@@ -48,6 +48,52 @@ enum CheckInReason {
 
   /// Maintenance goal: weight is trending down while eating to plan.
   maintenanceDriftDown,
+
+  // ---- added with the adaptive check-in (AdaptiveWeeklyCheckIn) ----
+  /// Data tier 0: the target started fewer than 14 days ago. The formula is
+  /// still a starting estimate.
+  programTooNew,
+
+  /// A day in the last 7 was marked partial, or the user said logging was
+  /// partial. Partial days are not data, so the week is not judged.
+  partialLoggingFlagged,
+
+  /// A step down was due but the target sits at the energy-availability
+  /// floor (resting energy plus half the session energy).
+  atEnergyAvailabilityFloor,
+
+  /// The 8-week safety questions are due again. No cut is proposed until they
+  /// are answered.
+  safetyReaskDue,
+
+  /// The weight trend fell faster than 1% of body weight a week. No cut is
+  /// ever proposed with it; two check-ins in a row end in a referral.
+  lossAboveCap,
+
+  /// Logged intake averaged below resting energy two weeks running. The
+  /// outcome is a referral, never a number.
+  lowIntakeSafety,
+
+  /// Ten or more weeks of continuous deficit: an optional maintenance week is
+  /// offered. Not a metabolic reset; the evidence is mixed.
+  deficitDurationReached,
+
+  /// A step down was due but the target is already at its floor: the next
+  /// step is a slower pace or an optional maintenance week, not a lower
+  /// number.
+  plateauAtFloor,
+
+  /// Under 18 or no known age: no targets and no proposals (Fuel V2 rule 4).
+  ageNotEligible,
+
+  /// A self-declared clinical flag (pregnancy, eating-disorder history,
+  /// medicated diabetes, kidney or liver disease, a clinician-managed diet).
+  /// The outcome is a referral, never a number.
+  clinicalReviewFlagged,
+
+  /// The current target sits below today's floor (for example after the
+  /// training plan grew). The proposal lifts it back to the floor.
+  targetBelowFloor,
 }
 
 enum CheckInAction { hold, increase, decrease }

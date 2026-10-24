@@ -54,6 +54,7 @@ class NutritionTargetV2 {
     this.fiberGramsLow,
     this.fiberGramsHigh,
     this.minimumDailyKcal,
+    this.energyAvailabilityFloorKcal,
     this.appliedWeeklyChangePercent,
     this.proteinReferenceWeightKg,
     this.equationProfileUsed,
@@ -93,6 +94,12 @@ class NutritionTargetV2 {
   /// The lowest daily kcal this plan, or a check-in, may ever set: never
   /// below RMR, and never below the carbohydrate floor while losing fat.
   final int? minimumDailyKcal;
+
+  /// The lowest WEEKLY AVERAGE target a check-in may set: resting energy plus
+  /// half the average planned session energy (`EnergyAvailabilityProxy`),
+  /// never below resting energy. DIETITIAN SIGN-OFF PENDING. A check-in uses
+  /// the larger of this and [minimumDailyKcal].
+  final int? energyAvailabilityFloorKcal;
 
   /// Signed effective weekly change as a percent of body weight, from the
   /// final target. Negative means losing.
