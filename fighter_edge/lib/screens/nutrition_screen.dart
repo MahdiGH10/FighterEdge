@@ -19,6 +19,7 @@ import '../features/edge_fuel/presentation/widgets/fuel_what_is_left.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
+import '../state/app_state.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
@@ -44,6 +45,11 @@ class NutritionScreen extends StatefulWidget {
 class _NutritionScreenState extends State<NutritionScreen> {
   int _tab = 0;
 
+  // Feedback stays above the pinned logging action, including above the nav
+  // when this screen is hosted in HomeShell.
+  EdgeInsets get _feedbackMargin => const EdgeInsets.fromLTRB(Insets.lg,
+      Insets.sm, Insets.lg, AppAccessibility.minTouchTarget + Insets.xxl);
+
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
@@ -51,34 +57,27 @@ class _NutritionScreenState extends State<NutritionScreen> {
     final targetCalories = edgeFuel.targetCalories;
     final ratio =
         targetCalories == 0 ? 0.0 : edgeFuel.consumedCalories / targetCalories;
-    final ringColor = ratio > 1 ? AppColors.negative : AppColors.positive;
     final activeTab = switch (_tab) {
       0 => _TodayView(
           edgeFuel: edgeFuel,
           ratio: ratio,
-          ringColor: ringColor,
           onEdit: _editFood,
-          onAdd: () => _addFood(edgeFuel),
           onToggle: _confirmToggled,
+          onDelete: _deleteFood,
+          onLogged: _confirmLogged,
         ),
       1 => _MealsView(
           edgeFuel: edgeFuel,
           onEdit: _editFood,
           onLogged: _confirmLogged,
           onToggle: _confirmToggled,
+          onDelete: _deleteFood,
         ),
       _ => const _RecipesTab(),
     };
 
     return ScreenScaffold.tab(
-      title: l.nutritionTitle,
-      actions: [
-        HeaderIcon(
-          AppIcons.plus,
-          label: l.nutritionAddFood,
-          onTap: () => _addFood(edgeFuel),
-        ),
-      ],
+      title: l.navFuel,
       body: Column(
         children: [
           Padding(
@@ -93,12 +92,31 @@ class _NutritionScreenState extends State<NutritionScreen> {
           ),
           const SizedBox(height: Insets.lg),
           Expanded(child: activeTab),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Insets.lg,
+                Insets.sm,
+                Insets.lg,
+                Insets.md,
+              ),
+              child: PrimaryButton(
+                l.fuelLogFood,
+                key: const ValueKey('fuel-log-food'),
+                icon: AppIcons.plus,
+                expand: true,
+                onPressed: () => _addFood(edgeFuel),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Future<void> _addFood(EdgeFuelController edgeFuel) async {
+    if (!context.read<AppState>().requireWrite()) return;
     final l = L.of(context);
     final dayLabel = edgeFuel.isToday
         ? l.commonToday
@@ -123,6 +141,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
+          margin: _feedbackMargin,
           content: Text(
               L.of(context).nutritionAddedSnack(entry.name, entry.calories)),
           action: SnackBarAction(
@@ -141,6 +161,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
   /// again, since toggling the same stale [entry] object twice would flip
   /// to the same state both times.
   void _confirmToggled(EdgeFuelController edgeFuel, FoodLogEntry entry) {
+    if (!context.read<AppState>().requireWrite()) return;
     AppHaptics.commit();
     final l = L.of(context);
     final nowEaten = !entry.consumed;
@@ -149,6 +170,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
+          margin: _feedbackMargin,
           content: Text(nowEaten
               ? l.foodMarkedEaten(entry.name)
               : l.foodMarkedNotEaten(entry.name)),
@@ -161,15 +184,33 @@ class _NutritionScreenState extends State<NutritionScreen> {
       );
   }
 
+  void _deleteFood(EdgeFuelController edgeFuel, FoodLogEntry entry) {
+    if (!context.read<AppState>().requireWrite()) return;
+    unawaited(edgeFuel.deleteEntry(entry));
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: _feedbackMargin,
+        content: Text(L.of(context).fuelRemovedSnack(entry.name)),
+        action: SnackBarAction(
+          label: L.of(context).commonUndo,
+          onPressed: () => unawaited(edgeFuel.addEntry(entry)),
+        ),
+      ));
+  }
+
   Future<void> _editFood(
     EdgeFuelController edgeFuel, {
     FoodLogEntry? existing,
   }) async {
+    if (!context.read<AppState>().requireWrite()) return;
     final entry = await showDialog<FoodLogEntry>(
       context: context,
       builder: (_) => _FoodEntryDialog(existing: existing),
     );
-    if (entry == null) return;
+    if (entry == null || !mounted) return;
+    if (!context.read<AppState>().requireWrite()) return;
     // Shown at once; storage confirms in the background (audit A-4).
     if (existing == null) {
       unawaited(edgeFuel.addEntry(entry));
@@ -197,7 +238,10 @@ class _DateSwitcher extends StatelessWidget {
           HeaderIcon(
             AppIcons.caretLeft,
             label: l.nutritionPreviousDay,
-            onTap: () => edgeFuel.shiftDate(-1),
+            onTap: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              edgeFuel.shiftDate(-1);
+            },
           ),
           Expanded(
             child: Text(
@@ -212,7 +256,10 @@ class _DateSwitcher extends StatelessWidget {
           HeaderIcon(
             AppIcons.caretRight,
             label: l.nutritionNextDay,
-            onTap: () => edgeFuel.shiftDate(1),
+            onTap: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              edgeFuel.shiftDate(1);
+            },
           ),
         ],
       ),
@@ -442,18 +489,18 @@ class _DialogField extends StatelessWidget {
 class _TodayView extends StatelessWidget {
   final EdgeFuelController edgeFuel;
   final double ratio;
-  final Color ringColor;
   final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
       onEdit;
-  final VoidCallback onAdd;
   final void Function(EdgeFuelController, FoodLogEntry) onToggle;
+  final void Function(EdgeFuelController, FoodLogEntry) onDelete;
+  final void Function(EdgeFuelController, FoodLogEntry) onLogged;
   const _TodayView(
       {required this.edgeFuel,
       required this.ratio,
-      required this.ringColor,
       required this.onEdit,
-      required this.onAdd,
-      required this.onToggle});
+      required this.onToggle,
+      required this.onDelete,
+      required this.onLogged});
 
   @override
   Widget build(BuildContext context) {
@@ -461,95 +508,111 @@ class _TodayView extends StatelessWidget {
     final hasTarget = edgeFuel.hasUsableTarget;
     final left = (edgeFuel.targetCalories - edgeFuel.consumedCalories)
         .clamp(0, edgeFuel.targetCalories);
-    final over =
-        hasTarget && edgeFuel.consumedCalories > edgeFuel.targetCalories;
+    final recent = edgeFuel.recentFoods.take(3).toList();
     return ListView(
       padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
           ScreenScaffold.tabBottomPadding(context)),
       children: [
-        // Only while a change was refused by the server.
         const SyncNotice(),
-        AppCard(
+        const SizedBox(height: Insets.lg),
+        Row(children: [
+          Expanded(
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-              Center(
-                  child: ProgressRing(
-                progress: ratio.clamp(0.0, 1.0),
-                size: AppAccessibility.isLargeText(context)
-                    ? LayoutTokens.fuelRingLarge
-                    : LayoutTokens.fuelRing,
-                strokeWidth: Insets.sm,
-                color: ringColor,
-                child: Padding(
-                    padding: const EdgeInsets.all(Insets.xl),
-                    child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      AnimatedCount(
-                          value: (hasTarget ? left : edgeFuel.consumedCalories)
-                              .toDouble(),
-                          formatter: (value) => '${value.round()}',
-                          style: AppType.largeTitle()),
-                      Text(
-                          hasTarget
-                              ? l.nutritionKcalLeft
-                              : l.nutritionLoggedToday,
-                          textAlign: TextAlign.center,
-                          style: AppType.subhead(
-                              color: AppAccessibility.textSecondary(context))),
-                    ])),
-              )),
-              if (over) ...[
-                const SizedBox(height: Insets.md),
-                Text(
-                    l.nutritionOverTarget(
-                        edgeFuel.consumedCalories - edgeFuel.targetCalories),
-                    textAlign: TextAlign.center,
-                    style: AppType.subhead(color: AppColors.negative)),
-              ],
-              const SizedBox(height: Insets.xl),
-              _Macro(l.nutritionProtein, edgeFuel.consumedProtein,
-                  edgeFuel.targetProtein, AppColors.protein),
-              const SizedBox(height: Insets.md),
-              _Macro(l.nutritionCarbs, edgeFuel.consumedCarbs,
-                  edgeFuel.targetCarbs, AppColors.carbs),
-              const SizedBox(height: Insets.md),
-              _Macro(l.nutritionFats, edgeFuel.consumedFats,
-                  edgeFuel.targetFats, AppColors.fats),
-              const SizedBox(height: Insets.md),
-              // Accent colour and an arrow, so it reads as a link and not
-              // as a caption under the macros.
-              TextButton.icon(
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppAccessibility.accentText(context),
-                    minimumSize:
-                        const Size.fromHeight(AppAccessibility.minTouchTarget),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: AppAccessibility.heroNumeralScaler(context),
                   ),
-                  iconAlignment: IconAlignment.end,
-                  icon: const Icon(AppIcons.caretRight, size: IconSizes.row),
-                  onPressed: () => AppNavigation.push(
-                      context,
-                      edgeFuel.hasCompletedSetup
-                          ? AppRoutes.fuelPlan
-                          : AppRoutes.fuelSetup,
-                      fallbackBuilder: (_) => edgeFuel.hasCompletedSetup
-                          ? const EdgeFuelPlanScreen()
-                          : const EdgeFuelSetupScreen()),
-                  label: Text(
-                      hasTarget ? l.nutritionViewPlan : l.dashboardSetFuel)),
-              if (FuelWhatIsLeft.appliesTo(edgeFuel))
-                FuelWhatIsLeft(edgeFuel: edgeFuel, compact: true),
-            ])),
+                  child: AnimatedCount(
+                    value: (hasTarget ? left : edgeFuel.consumedCalories)
+                        .toDouble(),
+                    formatter: (value) => '${value.round()}',
+                    style: AppType.heroNumeral(),
+                  ),
+                ),
+                Text(
+                  hasTarget ? l.nutritionKcalLeft : l.nutritionLoggedToday,
+                  style: AppType.micro(color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          if (hasTarget)
+            ProgressRing(
+              progress: ratio.clamp(0.0, 1.0),
+              size: LayoutTokens.fuelSummaryRing,
+              strokeWidth: Insets.sm,
+              color: AppColors.primary,
+              child: Semantics(
+                label: l.fuelConsumedKcal(edgeFuel.consumedCalories),
+                excludeSemantics: true,
+                child: Text(
+                  '${(ratio.clamp(0.0, 1.0) * 100).round()}%',
+                  style: AppType.title2(),
+                ),
+              ),
+            ),
+        ]),
         const SizedBox(height: Insets.xl),
+        _Macro(l.nutritionProtein, edgeFuel.consumedProtein,
+            edgeFuel.targetProtein, AppColors.protein,
+            prominent: true),
+        const SizedBox(height: Insets.md),
+        _Macro(l.nutritionCarbs, edgeFuel.consumedCarbs, edgeFuel.targetCarbs,
+            AppColors.carbs),
+        const SizedBox(height: Insets.md),
+        _Macro(l.nutritionFats, edgeFuel.consumedFats, edgeFuel.targetFats,
+            AppColors.fats),
+        TextButton.icon(
+            style: TextButton.styleFrom(
+              foregroundColor: AppAccessibility.accentText(context),
+              minimumSize:
+                  const Size.fromHeight(AppAccessibility.minTouchTarget),
+            ),
+            iconAlignment: IconAlignment.end,
+            icon: const Icon(AppIcons.caretRight, size: IconSizes.row),
+            onPressed: () => AppNavigation.push(
+                context,
+                edgeFuel.hasCompletedSetup
+                    ? AppRoutes.fuelPlan
+                    : AppRoutes.fuelSetup,
+                fallbackBuilder: (_) => edgeFuel.hasCompletedSetup
+                    ? const EdgeFuelPlanScreen()
+                    : const EdgeFuelSetupScreen()),
+            label: Text(hasTarget ? l.nutritionViewPlan : l.dashboardSetFuel)),
+        if (FuelWhatIsLeft.appliesTo(edgeFuel))
+          FuelWhatIsLeft(edgeFuel: edgeFuel, compact: true),
+        const SizedBox(height: Insets.xl),
+        if (recent.isNotEmpty) ...[
+          Text(l.fuelRecentFoods,
+              style: AppType.micro(color: AppColors.textSecondary)),
+          const SizedBox(height: Insets.sm),
+          Wrap(spacing: Insets.sm, runSpacing: Insets.sm, children: [
+            for (final entry in recent)
+              ActionChip(
+                tooltip: l.fuelRepeatFood(entry.name),
+                label: Text(entry.name),
+                onPressed: () {
+                  if (!context.read<AppState>().requireWrite()) return;
+                  final logged = edgeFuel.entryForLogAgain(entry);
+                  unawaited(edgeFuel.addEntry(logged));
+                  onLogged(edgeFuel, logged);
+                },
+              ),
+          ]),
+          const SizedBox(height: Insets.xl),
+        ],
         SectionHeader(l.nutritionMeals),
         if (edgeFuel.entries.isEmpty)
-          _QuickStartMeals(edgeFuel: edgeFuel, onSearch: onAdd)
+          Text(l.fuelEmptyLog,
+              style: AppType.body(color: AppColors.textSecondary))
         else
-          _MealGroup(edgeFuel: edgeFuel, onEdit: onEdit, onToggle: onToggle),
-        if (edgeFuel.entries.isNotEmpty) ...[
-          const SizedBox(height: Insets.md),
-          PrimaryButton(l.nutritionAddFood,
-              icon: AppIcons.plus, expand: true, onPressed: onAdd),
-        ],
+          _MealGroup(
+              edgeFuel: edgeFuel,
+              onEdit: onEdit,
+              onToggle: onToggle,
+              onDelete: onDelete),
       ],
     );
   }
@@ -618,25 +681,51 @@ class _MealGroup extends StatelessWidget {
   final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
       onEdit;
   final void Function(EdgeFuelController, FoodLogEntry) onToggle;
+  final void Function(EdgeFuelController, FoodLogEntry) onDelete;
   const _MealGroup(
-      {required this.edgeFuel, required this.onEdit, required this.onToggle});
+      {required this.edgeFuel,
+      required this.onEdit,
+      required this.onToggle,
+      required this.onDelete});
   @override
   Widget build(BuildContext context) => GroupedList(children: [
         for (final entry in edgeFuel.entries)
-          _FoodRow(
-              entry: entry,
-              onToggle: () => onToggle(edgeFuel, entry),
-              onEdit: () => onEdit(edgeFuel, existing: entry),
-              onDelete: () => edgeFuel.deleteEntry(entry),
-              onSaveToggle: () => edgeFuel.toggleSavedFood(entry)),
+          Dismissible(
+            key: ValueKey(entry.id),
+            direction: DismissDirection.endToStart,
+            movementDuration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : MotionTokens.standard,
+            resizeDuration: MediaQuery.disableAnimationsOf(context)
+                ? null
+                : MotionTokens.fast,
+            confirmDismiss: (_) async =>
+                context.read<AppState>().requireWrite(),
+            background: const Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: Insets.lg),
+                child: Icon(AppIcons.x, color: AppColors.textSecondary),
+              ),
+            ),
+            onDismissed: (_) => onDelete(edgeFuel, entry),
+            child: _FoodRow(
+                entry: entry,
+                onToggle: () => onToggle(edgeFuel, entry),
+                onEdit: () => onEdit(edgeFuel, existing: entry),
+                onDelete: () => onDelete(edgeFuel, entry),
+                onSaveToggle: () {
+                  if (!context.read<AppState>().requireWrite()) return;
+                  edgeFuel.toggleSavedFood(entry);
+                }),
+          ),
       ]);
 }
 
 class _QuickStartMeals extends StatelessWidget {
   final EdgeFuelController edgeFuel;
-  final VoidCallback? onSearch;
 
-  const _QuickStartMeals({required this.edgeFuel, this.onSearch});
+  const _QuickStartMeals({required this.edgeFuel});
 
   static const _meals = [
     _QuickMeal(
@@ -672,15 +761,6 @@ class _QuickStartMeals extends StatelessWidget {
             style: AppType.subhead(color: AppColors.textSecondary),
           ),
           const SizedBox(height: Insets.md),
-          if (onSearch != null) ...[
-            PrimaryButton(
-              L.of(context).nutritionSearchFoods,
-              icon: AppIcons.magnifyingGlass,
-              expand: true,
-              onPressed: onSearch,
-            ),
-            const SizedBox(height: Insets.md),
-          ],
           for (final meal in _meals) ...[
             _QuickMealTile(
               meal: meal,
@@ -708,6 +788,7 @@ class _QuickStartMeals extends StatelessWidget {
   }
 
   Future<void> _addMeal(BuildContext context, _QuickMeal meal) async {
+    if (!context.read<AppState>().requireWrite()) return;
     AppHaptics.commit();
     unawaited(edgeFuel.addEntry(
       FoodLogEntry(
@@ -922,12 +1003,14 @@ class _MealsView extends StatelessWidget {
       onEdit;
   final void Function(EdgeFuelController, FoodLogEntry) onLogged;
   final void Function(EdgeFuelController, FoodLogEntry) onToggle;
+  final void Function(EdgeFuelController, FoodLogEntry) onDelete;
 
   const _MealsView({
     required this.edgeFuel,
     required this.onEdit,
     required this.onLogged,
     required this.onToggle,
+    required this.onDelete,
   });
 
   @override
@@ -949,7 +1032,7 @@ class _MealsView extends StatelessWidget {
           ScreenScaffold.tabBottomPadding(context)),
       children: [
         if (quickAdds.isNotEmpty) ...[
-          const SectionHeader('Quick add'),
+          SectionHeader(L.of(context).fuelQuickAdd),
           Wrap(
             spacing: Insets.sm,
             runSpacing: Insets.sm,
@@ -965,6 +1048,7 @@ class _MealsView extends StatelessWidget {
                     color: AppColors.primary,
                   ),
                   onPressed: () {
+                    if (!context.read<AppState>().requireWrite()) return;
                     final logged = edgeFuel.entryForLogAgain(entry);
                     unawaited(edgeFuel.addEntry(logged));
                     onLogged(edgeFuel, logged);
@@ -978,7 +1062,11 @@ class _MealsView extends StatelessWidget {
             L.of(context).fuelMealsLogged(eaten, edgeFuel.entries.length)),
         if (edgeFuel.entries.isEmpty) _QuickStartMeals(edgeFuel: edgeFuel),
         if (edgeFuel.entries.isNotEmpty)
-          _MealGroup(edgeFuel: edgeFuel, onEdit: onEdit, onToggle: onToggle),
+          _MealGroup(
+              edgeFuel: edgeFuel,
+              onEdit: onEdit,
+              onToggle: onToggle,
+              onDelete: onDelete),
       ],
     );
   }
@@ -988,10 +1076,12 @@ class _Macro extends StatelessWidget {
   final String label;
   final int value, target;
   final Color color;
-  const _Macro(this.label, this.value, this.target, this.color);
+  final bool prominent;
+  const _Macro(this.label, this.value, this.target, this.color,
+      {this.prominent = false});
   @override
   Widget build(BuildContext context) {
-    final over = target > 0 && value > target;
+    final remaining = (target - value).clamp(0, target);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Wrap(
           alignment: WrapAlignment.spaceBetween,
@@ -1003,10 +1093,11 @@ class _Macro extends StatelessWidget {
                     color: AppAccessibility.textSecondary(context))),
             Text(
                 target > 0
-                    ? L.of(context).nutritionMacroGrams(value, target)
+                    ? L.of(context).fuelGramsLeft(remaining)
                     : L.of(context).nutritionGrams(value),
-                style: AppType.subhead(
-                    color: over ? AppColors.negative : AppColors.textPrimary)),
+                style: prominent
+                    ? AppType.title1(color: AppColors.textPrimary)
+                    : AppType.subhead(color: AppColors.textPrimary)),
           ]),
       const SizedBox(height: Insets.sm),
       ClipRRect(
@@ -1015,7 +1106,7 @@ class _Macro extends StatelessWidget {
               value: target <= 0 ? 0 : (value / target).clamp(0.0, 1.0),
               minHeight: Insets.xs,
               backgroundColor: AppColors.track,
-              color: over ? AppColors.negative : color)),
+              color: color)),
     ]);
   }
 }

@@ -1,12 +1,28 @@
-import '../allergen_matching.dart';
-import '../models/food_enums.dart';
 import '../models/food_item.dart';
+import '../models/fuel_add_on.dart';
+import '../models/fuel_day_plan.dart';
+import '../models/fuel_gap.dart';
 import '../models/fuel_match.dart';
 import '../models/nutrition_day.dart';
 import '../models/nutrition_setup_draft.dart';
 import '../models/nutrition_target.dart';
 import '../models/recipe.dart';
+import '../policies/fuel_add_on_catalog.dart';
+import '../policies/recipe_publication_gate.dart';
+import 'fuel_gap_picker.dart';
+import 'fuel_preference_filter.dart';
 import 'recipe_nutrient_calculator.dart';
+
+/// How [FuelMatchCalculator.calculate] ranks recipe portions.
+enum FuelMatchMode {
+  /// The original ranking: the calories left lead (kcal 0.48, protein 0.30,
+  /// carbs 0.16, fat 0.06).
+  calorieFirst,
+
+  /// Protein leads (protein 0.48, kcal 0.30, carbs 0.14, fat 0.08), for
+  /// "Protein left" moments.
+  macroFirst,
+}
 
 /// Finds useful portions from the curated recipe catalog for the athlete's
 /// remaining daily nutrition target.
@@ -22,12 +38,54 @@ class FuelMatchCalculator {
   static const int maxOptions = 3;
   static const List<double> _portionOptions = [0.5, 1, 1.5, 2, 2.5];
 
+  static const Map<FuelMatchMode, _Weights> _weights = {
+    FuelMatchMode.calorieFirst:
+        _Weights(kcal: .48, protein: .30, carbs: .16, fat: .06),
+    FuelMatchMode.macroFirst:
+        _Weights(kcal: .30, protein: .48, carbs: .14, fat: .08),
+  };
+
+  /// The macro-first gap picker against today's target and log: "Protein
+  /// left: 34 g, 3 options". See [FuelGapPicker] for the rules. [addOns]
+  /// defaults to the curated catalog.
+  static FuelGapPick gap({
+    required NutritionTarget? target,
+    required NutritionDay? day,
+    required Map<String, FoodItem> foodsById,
+    FuelGapMacro macro = FuelGapMacro.protein,
+    double? weightKg,
+    FuelDayType? dayType,
+    Iterable<FuelAddOn> addOns = FuelAddOnCatalog.all,
+    Iterable<Recipe> recipes = const [],
+    NutritionSetupDraft? preferences,
+  }) {
+    final remaining = _Remaining.from(target, day);
+    if (remaining == null) {
+      return FuelGapPick(status: FuelGapStatus.needsMoreData, macro: macro);
+    }
+    return FuelGapPicker.pick(
+      macro: macro,
+      gramsLeft: switch (macro) {
+        FuelGapMacro.protein => remaining.protein,
+        FuelGapMacro.carbohydrate => remaining.carbohydrates,
+      },
+      kcalLeft: remaining.calories,
+      weightKg: weightKg,
+      dayType: dayType,
+      addOns: addOns,
+      foodsById: foodsById,
+      recipes: recipes,
+      preferences: preferences,
+    );
+  }
+
   static FuelMatch calculate({
     required NutritionTarget? target,
     required NutritionDay? day,
     required Iterable<Recipe> recipes,
     required Map<String, FoodItem> foodsById,
     NutritionSetupDraft? preferences,
+    FuelMatchMode mode = FuelMatchMode.calorieFirst,
   }) {
     final remaining = _Remaining.from(target, day);
     if (remaining == null) {
@@ -43,26 +101,20 @@ class FuelMatchCalculator {
       );
     }
 
-    final allergenMatch = AllergenMatcher.match(preferences?.allergens ?? []);
-    final requestedDiet = _dietFrom(preferences?.dietType);
-    final requestedBudget = _budgetFrom(preferences?.budgetBand);
-    final maximumMinutes = _maximumMinutesFrom(preferences?.cookingTimeBand);
-    final disliked = _normalisedTerms(preferences?.dislikedFoods ?? []);
+    final filter = FuelPreferenceFilter.from(preferences);
     final candidates = <_Candidate>[];
 
-    for (final recipe in recipes) {
+    for (final recipe in RecipePublicationGate.visible(recipes)) {
       final allergens = RecipeNutrientCalculator.allergensOf(recipe, foodsById);
-      if (allergens.intersection(allergenMatch.matched).isNotEmpty) continue;
-
       final diets = RecipeNutrientCalculator.dietTagsOf(recipe, foodsById);
-      if (requestedDiet != null && !diets.contains(requestedDiet)) continue;
-      if (requestedBudget != null && recipe.costBand != requestedBudget) {
+      if (!filter.allowsRecipe(
+        recipe,
+        foodsById,
+        allergens: allergens,
+        dietTags: diets,
+      )) {
         continue;
       }
-      if (maximumMinutes != null && recipe.totalMinutes > maximumMinutes) {
-        continue;
-      }
-      if (_containsDislikedFood(recipe, foodsById, disliked)) continue;
 
       final perServing = RecipeNutrientCalculator.perServing(recipe, foodsById);
       if (perServing.kcal <= 0) continue;
@@ -70,7 +122,7 @@ class FuelMatchCalculator {
       _Candidate? bestForRecipe;
       for (final servings in _portionOptions) {
         final nutrients = perServing.scaled(servings);
-        final score = _score(nutrients, remaining);
+        final score = _score(nutrients, remaining, mode);
         final candidate = _Candidate(
           option: FuelMatchOption(
             recipe: recipe,
@@ -102,13 +154,19 @@ class FuelMatchCalculator {
       carbohydratesRemaining: remaining.carbohydrates,
       fatsRemaining: remaining.fats,
       options: options,
-      unmatchedAllergenTerms: List.unmodifiable(allergenMatch.unmatched),
+      unmatchedAllergenTerms: filter.unmatchedAllergenTerms,
     );
   }
 
-  static double _score(RecipeNutrients nutrients, _Remaining remaining) {
-    // Calories provide the principal fit. Macros are weighted by their actual
-    // remaining gap, so a macro already met cannot distort the ranking.
+  static double _score(
+    RecipeNutrients nutrients,
+    _Remaining remaining,
+    FuelMatchMode mode,
+  ) {
+    // Calorie-first: calories give the principal fit. Macro-first: protein
+    // does. Macros are weighted by their actual remaining gap, so a macro
+    // already met cannot distort the ranking.
+    final w = _weights[mode]!;
     final calorieFit = _coverage(nutrients.kcal, remaining.calories);
     final proteinFit = _coverage(nutrients.proteinGrams, remaining.protein);
     final carbFit = _coverage(nutrients.carbGrams, remaining.carbohydrates);
@@ -116,10 +174,10 @@ class FuelMatchCalculator {
     final overshoot = nutrients.kcal > remaining.calories * 1.12
         ? (nutrients.kcal - remaining.calories * 1.12) / remaining.calories
         : 0.0;
-    return calorieFit * .48 +
-        proteinFit * .30 +
-        carbFit * .16 +
-        fatFit * .06 -
+    return calorieFit * w.kcal +
+        proteinFit * w.protein +
+        carbFit * w.carbs +
+        fatFit * w.fat -
         overshoot * .25;
   }
 
@@ -127,52 +185,6 @@ class FuelMatchCalculator {
     if (remaining <= 0) return 1;
     return (value / remaining).clamp(0, 1);
   }
-
-  static DietTag? _dietFrom(String? value) => switch (value?.trim()) {
-        'vegetarian' => DietTag.vegetarian,
-        'vegan' => DietTag.vegan,
-        'pescatarian' => DietTag.pescatarian,
-        'halal' => DietTag.halal,
-        _ => null,
-      };
-
-  static CostBand? _budgetFrom(String? value) => switch (value?.trim()) {
-        'low' => CostBand.low,
-        'medium' => CostBand.medium,
-        'high' => CostBand.high,
-        _ => null,
-      };
-
-  static int? _maximumMinutesFrom(String? value) => switch (value?.trim()) {
-        'quick' => 15,
-        'moderate' => 30,
-        _ => null,
-      };
-
-  static Set<String> _normalisedTerms(Iterable<String> values) =>
-      values.map(_normalise).where((value) => value.isNotEmpty).toSet();
-
-  static bool _containsDislikedFood(
-    Recipe recipe,
-    Map<String, FoodItem> foodsById,
-    Set<String> disliked,
-  ) {
-    if (disliked.isEmpty) return false;
-    final ingredients = recipe.ingredients
-        .map((ingredient) => foodsById[ingredient.foodId]?.name ?? '')
-        .join(' ');
-    final haystack =
-        _normalise('${recipe.title} ${recipe.description} $ingredients');
-    // The preference is a direct text match, rather than fuzzy matching. A
-    // fuzzy match could silently remove a dish based on an unrelated word.
-    return disliked.any(haystack.contains);
-  }
-
-  static String _normalise(String value) => value
-      .toLowerCase()
-      .replaceAll(RegExp(r'[^a-z0-9 ]'), ' ')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
 }
 
 class _Remaining {
@@ -233,4 +245,18 @@ class _Candidate {
     if (kcalOrder != 0) return kcalOrder;
     return option.recipe.id.compareTo(other.option.recipe.id);
   }
+}
+
+class _Weights {
+  const _Weights({
+    required this.kcal,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
+  });
+
+  final double kcal;
+  final double protein;
+  final double carbs;
+  final double fat;
 }

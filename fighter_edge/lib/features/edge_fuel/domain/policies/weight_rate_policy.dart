@@ -25,22 +25,34 @@ class WeightRatePolicy {
   /// weekly check-in corrects it from real data.
   static const double kcalPerKg = 7700;
 
-  /// Fat loss options per week (Helms 2014: 0.5-1%/wk keeps lean mass).
-  static const List<double> lossOptionsPercent = [0.25, 0.5, 0.75, 1.0];
+  /// Fat loss options per week outside a fight camp (Helms 2014: 0.5-1%/wk
+  /// keeps lean mass; Garthe 2011: slower was better for athletes; Fuel V2
+  /// spec 2026-10-22 caps it at 0.75%). 1.0% belongs to the fight-camp path
+  /// only. DIETITIAN SIGN-OFF PENDING.
+  static const List<double> lossOptionsPercent = [0.25, 0.5, 0.75];
   static const double lossDefaultPercent = 0.5;
 
   /// Muscle gain options per week. Inferred consensus; owner/expert review.
   static const List<double> gainOptionsPercent = [0.1, 0.25, 0.5];
   static const double gainDefaultPercent = 0.25;
 
-  /// Loss is capped at 1% of body weight AND 1 kg per week (ISSN 2025 camp
-  /// guidance: 0.5-1 kg/week). The tighter of the two applies.
-  static const double maxLossPercentPerWeek = 1.0;
+  /// Loss outside a fight camp is capped at 0.75% of body weight per week
+  /// (Fuel V2 spec, decision "weight-loss rate outside camp").
+  static const double maxLossPercentPerWeek = 0.75;
+
+  /// Inside a fight camp the cap is 1% of body weight AND 1 kg per week (ISSN
+  /// 2025 camp guidance: 0.5-1 kg/week). The tighter of the two applies.
+  static const double maxCampLossPercentPerWeek = 1.0;
   static const double maxLossKgPerWeek = 1.0;
   static const double maxGainPercentPerWeek = 0.5;
 
   /// The largest allowed weekly rate for [goal] at [weightKg], as a percent.
-  static double maxPercentFor(NutritionGoal goal, double weightKg) {
+  /// [inFightCamp] lifts the loss cap from 0.75% to the camp's 1%.
+  static double maxPercentFor(
+    NutritionGoal goal,
+    double weightKg, {
+    bool inFightCamp = false,
+  }) {
     switch (goal) {
       case NutritionGoal.maintain:
         return 0;
@@ -49,7 +61,9 @@ class WeightRatePolicy {
       case NutritionGoal.loseFat:
         if (!weightKg.isFinite || weightKg <= 0) return 0;
         final kgCap = maxLossKgPerWeek / weightKg * 100;
-        return kgCap < maxLossPercentPerWeek ? kgCap : maxLossPercentPerWeek;
+        final percentCap =
+            inFightCamp ? maxCampLossPercentPerWeek : maxLossPercentPerWeek;
+        return kgCap < percentCap ? kgCap : percentCap;
     }
   }
 
@@ -88,11 +102,12 @@ class WeightRatePolicy {
     required NutritionGoal goal,
     required double weightKg,
     double? requestedPercent,
+    bool inFightCamp = false,
   }) {
     if (goal == NutritionGoal.maintain) {
       return const AppliedWeightRate(percentPerWeek: 0, wasClamped: false);
     }
-    final cap = maxPercentFor(goal, weightKg);
+    final cap = maxPercentFor(goal, weightKg, inFightCamp: inFightCamp);
     final usable = requestedPercent != null &&
         requestedPercent.isFinite &&
         requestedPercent >= 0;

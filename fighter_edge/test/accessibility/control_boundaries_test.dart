@@ -72,10 +72,10 @@ void main() {
     final repo = await makeRepo(signedIn: true);
     await tester.pumpWidget(wrapApp(const NutritionScreen(), repo: repo));
     await tester.pumpAndSettle();
-    final heading = tester.getSemantics(find.text('NUTRITION'));
-    expect(heading.getSemanticsData().label, 'NUTRITION');
+    final heading = tester.getSemantics(find.text('FUEL'));
+    expect(heading.getSemanticsData().label, 'FUEL');
     expect(heading.getSemanticsData().flagsCollection.isHeader, isTrue);
-    final action = tester.getSemantics(find.bySemanticsLabel('Add food'));
+    final action = tester.getSemantics(find.bySemanticsLabel('Log food'));
     expect(action.getSemanticsData().flagsCollection.isButton, isTrue);
     tester.binding.renderViews.first.owner!.semanticsOwner!
         .performAction(action.id, SemanticsAction.tap);

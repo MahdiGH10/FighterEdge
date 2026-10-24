@@ -1,5 +1,6 @@
 import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/main.dart';
+import 'package:fighter_edge/widgets/bottom_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -33,17 +34,24 @@ void main() {
     expect(find.text('Ayoub'), findsOneWidget);
     expectNoFlutterException(tester);
 
-    await tester.tap(find.text('Train'));
+    Finder navLabel(String label) => find.descendant(
+        of: find.byType(AppBottomNav), matching: find.text(label));
+
+    await tester.tap(navLabel('Train'));
     await tester.pumpAndSettle();
     expect(find.text('TRAIN'), findsOneWidget);
     expectNoFlutterException(tester);
 
-    await tester.tap(find.text('Fuel'));
+    await tester.tap(navLabel('Fuel'));
     await tester.pumpAndSettle();
-    expect(find.text('NUTRITION'), findsOneWidget);
+    expect(find.text('FUEL'), findsOneWidget);
+    final logFood = tester.getRect(find.byKey(const ValueKey('fuel-log-food')));
+    final nav = tester.getRect(find.byType(AppBottomNav));
+    expect(logFood.bottom, lessThanOrEqualTo(nav.top));
+    expect(logFood.height, greaterThanOrEqualTo(48));
     expectNoFlutterException(tester);
 
-    await tester.tap(find.text('Profile'));
+    await tester.tap(navLabel('Profile'));
     await tester.pumpAndSettle();
     expect(find.text('PROFILE'), findsOneWidget);
     expectNoFlutterException(tester);

@@ -1,15 +1,20 @@
 name: Flutter CI
 
-# Every pull request, every push to main, and on demand. Job names are kept
-# stable ("Analyze & test", "Golden tests (Windows renderer)", "Android
-# release build", "Cloud Functions") so branch-protection rules keep matching.
+# Pull requests run the FAST checks only (format, analyze, tests, goldens,
+# Cloud Functions, Firestore rules): about 6-8 minutes. The slow jobs (Android
+# release build, the two emulator tests, the iOS build) run after a merge to
+# main, nightly, and on demand, so no PR waits for an emulator. A break they
+# find on main is fixed or reverted right away. Job names are kept stable
+# ("Analyze & test", "Golden tests (Windows renderer)", "Cloud Functions",
+# "Firestore rules") so the required-checks rule on main keeps matching.
 on:
   push:
     branches: [main]
   pull_request:
-    # ready_for_review too: the emulator and iOS jobs skip drafts, and
-    # without it a PR marked ready never runs them until its next push.
     types: [opened, synchronize, reopened, ready_for_review]
+  schedule:
+    # Nightly full run of main (04:00 UTC).
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 permissions:
@@ -173,6 +178,8 @@ jobs:
   android-release:
     name: Android release build
     needs: [analyze-and-test]
+    # Slow job: not on pull requests (see the header).
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     # A cold Gradle cache with the notification/timezone/desugaring graph has
     # passed 20 minutes before (2026-09-18), and a new plugin empties the
@@ -230,8 +237,8 @@ jobs:
   integration-test:
     name: Integration test (Android emulator)
     needs: [analyze-and-test]
-    # Skipped on draft PRs: emulator boot alone is several minutes.
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    # Slow job: not on pull requests (emulator boot alone is several minutes).
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -289,7 +296,7 @@ jobs:
   performance-smoke:
     name: Performance smoke test (Android emulator)
     needs: [analyze-and-test]
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -341,8 +348,11 @@ jobs:
   release-launch:
     name: Release APK launch (Android emulator)
     needs: [android-release]
-    # Same draft rule as the integration test: emulator minutes are slow.
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    # Manual only ("Run workflow" on the Actions tab): it waits for a full
+    # release build and boots an emulator, which is too slow for every PR and
+    # merge. Run it before shipping a release APK: it caught a release-only
+    # crash at launch (a Room constructor) that every debug test missed.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -393,8 +403,8 @@ jobs:
   ios-build:
     name: iOS build (no codesign)
     needs: [analyze-and-test]
-    # Skipped on draft PRs: macOS minutes are the expensive ones.
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    # Slow job: not on pull requests (macOS minutes are the expensive ones).
+    if: github.event_name != 'pull_request'
     runs-on: macos-latest
     timeout-minutes: 45
     steps:

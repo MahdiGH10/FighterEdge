@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/billing/subscription.dart';
+import 'package:fighter_edge/widgets/bottom_nav.dart';
 
 import 'helpers/test_harness.dart';
 
@@ -35,11 +36,15 @@ void main() {
     await tester.pumpWidget(FighterEdgeApp(authRepo: repo));
     await tester.pump();
 
-    expect(find.text('Train'), findsOneWidget);
-    expect(find.text('Fuel'), findsOneWidget);
-    expect(find.text('Profile'), findsOneWidget);
+    // Home also has a Fuel action, so look inside the bottom nav only.
+    Finder navLabel(String label) => find.descendant(
+        of: find.byType(AppBottomNav), matching: find.text(label));
 
-    await tester.tap(find.text('Train'));
+    expect(navLabel('Train'), findsOneWidget);
+    expect(navLabel('Fuel'), findsOneWidget);
+    expect(navLabel('Profile'), findsOneWidget);
+
+    await tester.tap(navLabel('Train'));
     await tester.pumpAndSettle();
     expect(find.text('TRAIN'), findsOneWidget);
 
@@ -50,9 +55,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Learn: The Jab'), findsOneWidget);
 
-    await tester.tap(find.text('Fuel'));
+    await tester.tap(navLabel('Fuel'));
     await tester.pumpAndSettle();
 
-    expect(find.text('NUTRITION'), findsOneWidget);
+    expect(find.text('FUEL'), findsOneWidget);
   });
 }

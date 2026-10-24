@@ -853,30 +853,6 @@ abstract class L {
   /// **'Session complete.'**
   String get timerAnnounceDone;
 
-  /// No description provided for @paywallWaitlistCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Notify me when Pro opens'**
-  String get paywallWaitlistCta;
-
-  /// No description provided for @paywallWaitlistJoined.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'re on the list'**
-  String get paywallWaitlistJoined;
-
-  /// No description provided for @paywallWaitlistThanks.
-  ///
-  /// In en, this message translates to:
-  /// **'Noted. Pro will appear here when it opens, with the price shown before any charge.'**
-  String get paywallWaitlistThanks;
-
-  /// No description provided for @paywallWaitlistBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro can\'t be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.'**
-  String get paywallWaitlistBody;
-
   /// No description provided for @paywallRenewalDisclosure.
   ///
   /// In en, this message translates to:
@@ -2077,18 +2053,6 @@ abstract class L {
   /// **'Your plan is based on your goals and training days. You can adjust it as your training changes.'**
   String get planReadyExplanation;
 
-  /// No description provided for @planReadyProTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'More training tools with Pro'**
-  String get planReadyProTitle;
-
-  /// No description provided for @planReadyProBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro includes all drills and recipes, and cues between rounds.'**
-  String get planReadyProBody;
-
   /// No description provided for @planReadyCalories.
   ///
   /// In en, this message translates to:
@@ -2152,7 +2116,7 @@ abstract class L {
   /// No description provided for @paywallPlainTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your corner, every day'**
+  /// **'Your camp, planned and fueled'**
   String get paywallPlainTitle;
 
   /// No description provided for @paywallPlainSubtitle.
@@ -2190,18 +2154,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Every striking, wrestling, BJJ and clinch drill, with how to train it.'**
   String get paywallBenefitDrillsBody;
-
-  /// No description provided for @paywallBenefitCuesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Corner Cues'**
-  String get paywallBenefitCuesTitle;
-
-  /// No description provided for @paywallBenefitCuesBody.
-  ///
-  /// In en, this message translates to:
-  /// **'A tactical and a recovery cue on every rest in the round timer.'**
-  String get paywallBenefitCuesBody;
 
   /// No description provided for @paywallAnnualPlan.
   ///
@@ -2280,18 +2232,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Your store purchase is recognized. Pro unlocks after the secure account sync completes.'**
   String get paywallSync;
-
-  /// No description provided for @paywallSoonTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro opens soon'**
-  String get paywallSoonTitle;
-
-  /// No description provided for @paywallNoPaymentToday.
-  ///
-  /// In en, this message translates to:
-  /// **'No payment today. We will ask again before any charge.'**
-  String get paywallNoPaymentToday;
 
   /// No description provided for @paywallPurchaseActive.
   ///
@@ -3234,6 +3174,234 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Plus the time the moves themselves take.'**
   String get reactionMoveTimeNote;
+
+  /// No description provided for @paywallBenefitCampTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your camp week'**
+  String get paywallBenefitCampTitle;
+
+  /// No description provided for @paywallBenefitCampBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Dated sessions for your week, built around your level and your fight date.'**
+  String get paywallBenefitCampBody;
+
+  /// No description provided for @paywallBenefitFuelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel for training days'**
+  String get paywallBenefitFuelTitle;
+
+  /// No description provided for @paywallBenefitFuelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Calorie and protein targets that move with the week you train.'**
+  String get paywallBenefitFuelBody;
+
+  /// No description provided for @paywallBenefitReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review'**
+  String get paywallBenefitReviewTitle;
+
+  /// No description provided for @paywallBenefitReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Each Sunday: what you did and what to change. You decide.'**
+  String get paywallBenefitReviewBody;
+
+  /// No description provided for @paywallBenefitWeightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe weight path'**
+  String get paywallBenefitWeightTitle;
+
+  /// No description provided for @paywallBenefitWeightBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A weight path to your fight date, with safety limits.'**
+  String get paywallBenefitWeightBody;
+
+  /// No description provided for @paywallTrialBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}-day free trial'**
+  String paywallTrialBadge(int days);
+
+  /// No description provided for @paywallTrialThen.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day free, then {price}} other{{days} days free, then {price}}}'**
+  String paywallTrialThen(int days, String price);
+
+  /// No description provided for @paywallStartTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start free trial'**
+  String get paywallStartTrial;
+
+  /// No description provided for @paywallTrialRenewalDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Free for {days, plural, =1{1 day} other{{days} days}}, then {price}, renewing automatically until you cancel. Cancel at least 24 hours before the trial ends in your store account settings to avoid being charged. Payment is charged to your Apple ID or Google Play account at the end of the trial.'**
+  String paywallTrialRenewalDisclosure(int days, String price);
+
+  /// No description provided for @paywallTrialActiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free trial is running'**
+  String get paywallTrialActiveTitle;
+
+  /// No description provided for @paywallTrialActiveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It becomes a paid plan when the trial ends unless you cancel in your store account.'**
+  String get paywallTrialActiveBody;
+
+  /// No description provided for @paywallUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions aren\'t available here yet'**
+  String get paywallUnavailableTitle;
+
+  /// No description provided for @paywallUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This version can\'t start a subscription yet. Your data stays saved.'**
+  String get paywallUnavailableBody;
+
+  /// No description provided for @readOnlyBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is saved. Subscribe to keep training.'**
+  String get readOnlyBanner;
+
+  /// No description provided for @readOnlyBannerCta.
+  ///
+  /// In en, this message translates to:
+  /// **'See plans'**
+  String get readOnlyBannerCta;
+
+  /// No description provided for @trialChipDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{Trial · ends today} =1{Trial · 1 day left} other{Trial · {days} days left}}'**
+  String trialChipDaysLeft(int days);
+
+  /// No description provided for @trialReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free trial ends in 2 days'**
+  String get trialReminderTitle;
+
+  /// No description provided for @trialReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It renews unless you cancel in your store account. Your data stays saved either way.'**
+  String get trialReminderBody;
+
+  /// No description provided for @planReadyStartFreeWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your free week'**
+  String get planReadyStartFreeWeek;
+
+  /// No description provided for @planReadyStartTrialDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your {days}-day free trial'**
+  String planReadyStartTrialDays(int days);
+
+  /// No description provided for @planReadyViewPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'See plans'**
+  String get planReadyViewPlans;
+
+  /// No description provided for @planReadyNotNowNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan stays saved. Logging needs a subscription.'**
+  String get planReadyNotNowNote;
+
+  /// No description provided for @paywallTrialCancelNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel in your store settings before the trial ends and you pay nothing.'**
+  String get paywallTrialCancelNote;
+
+  /// No description provided for @paywallAfterTrialNote.
+  ///
+  /// In en, this message translates to:
+  /// **'If you don\'t subscribe after the trial, your plan and logs stay readable. Logging and sessions need a subscription.'**
+  String get paywallAfterTrialNote;
+
+  /// No description provided for @paywallBenefitSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session mode'**
+  String get paywallBenefitSessionTitle;
+
+  /// No description provided for @paywallBenefitSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds and rest timed for you, with a tactical and a recovery cue on every break.'**
+  String get paywallBenefitSessionBody;
+
+  /// No description provided for @paywallContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get paywallContinue;
+
+  /// No description provided for @fuelLogFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Log food'**
+  String get fuelLogFood;
+
+  /// No description provided for @fuelRecentFoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent foods'**
+  String get fuelRecentFoods;
+
+  /// No description provided for @fuelQuickAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get fuelQuickAdd;
+
+  /// No description provided for @fuelEmptyLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged yet. Use Log food to add your first meal.'**
+  String get fuelEmptyLog;
+
+  /// No description provided for @fuelGramsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g left'**
+  String fuelGramsLeft(int grams);
+
+  /// No description provided for @fuelConsumedKcal.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal logged'**
+  String fuelConsumedKcal(int kcal);
+
+  /// No description provided for @fuelRemovedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed'**
+  String fuelRemovedSnack(String name);
+
+  /// No description provided for @fuelRepeatFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Log {name} again'**
+  String fuelRepeatFood(String name);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {
