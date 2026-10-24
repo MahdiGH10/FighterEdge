@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../notifications/domain/notification_channel.dart';
 import '../../notifications/domain/notification_settings.dart';
@@ -31,9 +32,12 @@ class NotificationSettingsScreen extends StatelessWidget {
     final l = L.of(context);
     final controller = context.watch<NotificationController>();
     final settings = controller.settings;
+    // A fuel window is a nutrition note: only an adult with a confirmed Fuel
+    // setup, and only while nutrition is not paused.
     final nutrition = NotificationInputsReader.nutritionAllowed(
-      context.watch<EdgeFuelController>(),
-    );
+          context.watch<EdgeFuelController>(),
+        ) &&
+        context.watch<NutritionModeController>().remindersAllowed;
     final secondary = AppAccessibility.textSecondary(context);
 
     return ScreenScaffold(
@@ -81,8 +85,6 @@ class NotificationSettingsScreen extends StatelessWidget {
                 on,
               ),
             ),
-            // A fuel window is a nutrition note, so it is offered only to an
-            // adult with a confirmed Fuel setup.
             if (nutrition)
               _SwitchRow(
                 title: l.notifFuelTitle,
@@ -158,16 +160,6 @@ class NotificationSettingsScreen extends StatelessWidget {
                 controller.setPauseAll(on);
               },
             ),
-            if (nutrition)
-              _SwitchRow(
-                title: l.notifPauseNutrition,
-                subtitle: l.notifPauseNutritionSubtitle,
-                value: settings.pauseNutrition,
-                onChanged: (on) {
-                  AppHaptics.commit();
-                  controller.setPauseNutrition(on);
-                },
-              ),
           ]),
           const SizedBox(height: Insets.xl),
           GroupedList(children: [

@@ -3739,17 +3739,77 @@ abstract class L {
   /// **'A note a week and a day before your fight'**
   String get notifFightSubtitle;
 
-  /// No description provided for @notifPauseNutrition.
+  /// No description provided for @nutritionPausedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Pause nutrition notes'**
-  String get notifPauseNutrition;
+  /// **'Nutrition is paused'**
+  String get nutritionPausedTitle;
 
-  /// No description provided for @notifPauseNutritionSubtitle.
+  /// No description provided for @nutritionPausedBody.
   ///
   /// In en, this message translates to:
-  /// **'Hides the fuel window until you switch this off'**
-  String get notifPauseNutritionSubtitle;
+  /// **'Food logging, nutrition numbers, weight tools and nutrition reminders are off. Training goes on as normal. Turn it back on whenever you like.'**
+  String get nutritionPausedBody;
+
+  /// No description provided for @nutritionPausedResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn nutrition back on'**
+  String get nutritionPausedResume;
+
+  /// No description provided for @settingsSectionNutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition'**
+  String get settingsSectionNutrition;
+
+  /// No description provided for @settingsNutritionDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition display'**
+  String get settingsNutritionDisplay;
+
+  /// No description provided for @settingsNutritionDisplayNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything on'**
+  String get settingsNutritionDisplayNormal;
+
+  /// No description provided for @settingsNutritionDisplayPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get settingsNutritionDisplayPaused;
+
+  /// No description provided for @nutritionModeNormalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show everything'**
+  String get nutritionModeNormalTitle;
+
+  /// No description provided for @nutritionModeNormalSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Targets, food log, weight and nutrition reminders.'**
+  String get nutritionModeNormalSubtitle;
+
+  /// No description provided for @nutritionModePausedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause nutrition'**
+  String get nutritionModePausedTitle;
+
+  /// No description provided for @nutritionModePausedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hides food, nutrition numbers, weight tools and nutrition reminders. Training continues.'**
+  String get nutritionModePausedSubtitle;
+
+  /// No description provided for @reviewHoldPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to change this week. Keep your plan as it is.'**
+  String get reviewHoldPaused;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

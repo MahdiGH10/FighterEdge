@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../../features/fight_camp/presentation/fight_camp_controller.dart';
 import '../../features/fight_camp/presentation/widgets/fight_countdown_card.dart';
 import '../../features/training_plan/domain/models/session_status.dart';
@@ -45,6 +46,7 @@ class TodayHero extends StatelessWidget {
     final l = L.of(context);
     final plan = context.watch<PlanController>();
     final fuel = context.watch<EdgeFuelController>();
+    final showNutrition = context.watch<NutritionModeController>().visible;
     final camp = context.watch<FightCampController>().camp;
     final row = plan.todayRow;
     final state = todayState(
@@ -85,7 +87,7 @@ class TodayHero extends StatelessWidget {
         : l.dashboardSetFuel;
     final action = switch (state) {
       TodayState.training => l.dashboardLogSession,
-      TodayState.done => l.navFuel,
+      TodayState.done => showNutrition ? l.navFuel : l.dashboardOpenCamp,
       TodayState.recovery || TodayState.noPlan => l.dashboardOpenCamp,
       TodayState.fightWeek => l.fightWeekTitle,
     };
@@ -95,7 +97,7 @@ class TodayHero extends StatelessWidget {
           if (!context.read<AppState>().requireWrite()) return;
           if (session != null) logSessionWithRpe(context, plan, session);
         case TodayState.done:
-          onNavigate(2);
+          onNavigate(showNutrition ? 2 : 1);
         case TodayState.recovery || TodayState.noPlan:
           onNavigate(1);
         case TodayState.fightWeek:
@@ -124,7 +126,7 @@ class TodayHero extends StatelessWidget {
                   : AppType.display()),
           const SizedBox(height: Insets.xs),
           Text(detail, style: AppType.callout(color: AppColors.textSecondary)),
-          if (state != TodayState.fightWeek) ...[
+          if (state != TodayState.fightWeek && showNutrition) ...[
             const SizedBox(height: Insets.md),
             Row(children: [
               Expanded(

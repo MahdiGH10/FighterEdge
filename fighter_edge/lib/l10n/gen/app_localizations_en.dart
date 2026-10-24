@@ -2202,9 +2202,42 @@ class LEn extends L {
   String get notifFightSubtitle => 'A note a week and a day before your fight';
 
   @override
-  String get notifPauseNutrition => 'Pause nutrition notes';
+  String get nutritionPausedTitle => 'Nutrition is paused';
 
   @override
-  String get notifPauseNutritionSubtitle =>
-      'Hides the fuel window until you switch this off';
+  String get nutritionPausedBody =>
+      'Food logging, nutrition numbers, weight tools and nutrition reminders are off. Training goes on as normal. Turn it back on whenever you like.';
+
+  @override
+  String get nutritionPausedResume => 'Turn nutrition back on';
+
+  @override
+  String get settingsSectionNutrition => 'Nutrition';
+
+  @override
+  String get settingsNutritionDisplay => 'Nutrition display';
+
+  @override
+  String get settingsNutritionDisplayNormal => 'Everything on';
+
+  @override
+  String get settingsNutritionDisplayPaused => 'Paused';
+
+  @override
+  String get nutritionModeNormalTitle => 'Show everything';
+
+  @override
+  String get nutritionModeNormalSubtitle =>
+      'Targets, food log, weight and nutrition reminders.';
+
+  @override
+  String get nutritionModePausedTitle => 'Pause nutrition';
+
+  @override
+  String get nutritionModePausedSubtitle =>
+      'Hides food, nutrition numbers, weight tools and nutrition reminders. Training continues.';
+
+  @override
+  String get reviewHoldPaused =>
+      'Nothing to change this week. Keep your plan as it is.';
 }

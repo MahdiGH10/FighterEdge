@@ -371,11 +371,23 @@ void main() {
       expect(channels, contains(NotificationChannel.fuelWindow));
       expect(c.enabledCount, 2);
 
-      c.setPauseNutrition(true);
+      // Nutrition paused (or numbers hidden): every nutrition reminder goes,
+      // whatever its switch says, and the others stay.
+      inputs = NotificationInputs(
+        sessions: inputs.sessions,
+        fuelDayTypes: inputs.fuelDayTypes,
+        fightDate: inputs.fightDate,
+        ageYears: inputs.ageYears,
+        nutritionRemindersAllowed: false,
+      );
       await c.reconcileNow();
       expect(
         gateway.pending.values.where((r) => r.channel.isNutrition),
         isEmpty,
+      );
+      expect(
+        gateway.pending.values.map((r) => r.channel),
+        contains(NotificationChannel.fightCountdown),
       );
       c.dispose();
     });

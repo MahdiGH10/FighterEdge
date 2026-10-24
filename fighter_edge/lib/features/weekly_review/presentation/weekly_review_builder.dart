@@ -23,6 +23,10 @@ Future<WeeklyReview> buildWeeklyReview({
   required AppState state,
   required EdgeFuelController fuel,
   required FightCampController fightCamp,
+
+  /// False while nutrition is paused: the review then reads no food log and no
+  /// weigh-ins, so it can neither show nor suggest anything about them.
+  bool includeNutrition = true,
 }) async {
   final start = calendarDay(weekStartDay);
   final sunday = addDays(start, 6);
@@ -53,7 +57,7 @@ Future<WeeklyReview> buildWeeklyReview({
 
   var nutrition = const ReviewNutrition();
   final target = fuel.target;
-  if (fuel.hasUsableTarget && target != null) {
+  if (includeNutrition && fuel.hasUsableTarget && target != null) {
     final days = await fuel.loadThisWeek(
       now: DateTime(sunday.year, sunday.month, sunday.day),
     );
@@ -63,11 +67,14 @@ Future<WeeklyReview> buildWeeklyReview({
     );
   }
 
-  final points = [for (final w in state.weights) WeightPoint(w.date, w.kg)];
+  final points = [
+    if (includeNutrition)
+      for (final w in state.weights) WeightPoint(w.date, w.kg),
+  ];
   final trend = WeightTrend.from(points, today: sunday);
   double? expected;
   final camp = fightCamp.camp;
-  if (camp != null) {
+  if (includeNutrition && camp != null) {
     final status = FightCampStatus.of(
       camp,
       weights: state.weights,

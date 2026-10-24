@@ -11,6 +11,7 @@ import '../../../theme/app_typography.dart';
 import '../../../widgets/press_scale.dart';
 import '../../daily_snapshot/presentation/daily_snapshot_builder.dart';
 import '../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../../edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../../edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../../fight_camp/presentation/fight_camp_controller.dart';
 import '../../training_plan/presentation/plan_controller.dart';
@@ -25,6 +26,10 @@ class CornerLineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The corner line is a food and weight cue; nutrition paused, no line.
+    if (!context.watch<NutritionModeController>().visible) {
+      return const SizedBox.shrink();
+    }
     final l = L.of(context);
     final state = context.watch<AppState>();
     final plan = context.watch<PlanController>();

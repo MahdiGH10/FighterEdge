@@ -17,6 +17,7 @@ import '../l10n/gen/app_localizations.dart';
 import '../models/training_log_entry.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
+import '../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../state/app_state.dart';
 import '../state/first_run_controller.dart';
 import '../theme/app_accessibility.dart';
@@ -57,6 +58,9 @@ class DashboardScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final firstRun = context.watch<FirstRunController>();
     final plan = context.watch<PlanController>();
+    // Weight, Fuel and the weigh-in shortcut are hidden while nutrition is
+    // paused (and until the athlete's choice has been read).
+    final showNutrition = context.watch<NutritionModeController>().visible;
     final user = auth.user;
     final week = plan.thisWeek;
     final streakWeeks = plan.weeklyStreak.count;
@@ -113,20 +117,22 @@ class DashboardScreen extends StatelessWidget {
             Wrap(
               spacing: Insets.sm,
               children: [
-                TextButton.icon(
-                  onPressed: () => AppNavigation.push(
-                    context,
-                    AppRoutes.weightTracker,
-                    fallbackBuilder: (_) => const WeightTrackerScreen(),
+                if (showNutrition) ...[
+                  TextButton.icon(
+                    onPressed: () => AppNavigation.push(
+                      context,
+                      AppRoutes.weightTracker,
+                      fallbackBuilder: (_) => const WeightTrackerScreen(),
+                    ),
+                    icon: const Icon(AppIcons.scales),
+                    label: Text(l.dashboardAddWeighIn),
                   ),
-                  icon: const Icon(AppIcons.scales),
-                  label: Text(l.dashboardAddWeighIn),
-                ),
-                TextButton.icon(
-                  onPressed: () => onNavigate(2),
-                  icon: const Icon(AppIcons.forkKnife),
-                  label: Text(l.navFuel),
-                ),
+                  TextButton.icon(
+                    onPressed: () => onNavigate(2),
+                    icon: const Icon(AppIcons.forkKnife),
+                    label: Text(l.navFuel),
+                  ),
+                ],
                 TextButton.icon(
                   onPressed: () => AppNavigation.push(
                     context,
@@ -210,15 +216,18 @@ class _DashboardStats extends StatelessWidget {
         ? '—'
         : formatFixedDecimal(state.displayWeight(state.latestWeight),
             Localizations.localeOf(context).toString());
+    final showWeight = context.watch<NutritionModeController>().visible;
     final stats = [
-      _Stat(
+      if (showWeight)
+        _Stat(
           label: l.dashboardStatWeight,
           value: weight,
           unit: state.weightUnitLabel,
           detail: state.weights.length < 2 ? l.dashboardAddWeighIn : null,
           heroTag: state.latestWeight == 0 ? null : weightHeroTag,
           onTap: () => AppNavigation.push(context, AppRoutes.weightTracker,
-              fallbackBuilder: (_) => const WeightTrackerScreen())),
+              fallbackBuilder: (_) => const WeightTrackerScreen()),
+        ),
       _Stat(
           label: l.dashboardStatSessions,
           value: '${state.completedSessionCount}',

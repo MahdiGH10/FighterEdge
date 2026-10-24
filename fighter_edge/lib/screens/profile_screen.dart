@@ -4,6 +4,7 @@ import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../l10n/decimal_format.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
@@ -35,6 +36,9 @@ class ProfileScreen extends StatelessWidget {
     // Height lives in the EdgeFuel setup draft — it is the only place the app
     // actually asks for it. Absent until the user completes nutrition setup.
     final heightCm = context.watch<EdgeFuelController>().draft?.heightCm;
+    // Height and weight are health measurements: gone while nutrition is
+    // paused, and until the athlete's choice has been read.
+    final showBody = context.watch<NutritionModeController>().visible;
     final largeText = AppAccessibility.isLargeText(context);
 
     final displayName =
@@ -44,8 +48,8 @@ class ProfileScreen extends StatelessWidget {
     // as an identity label here.
     final goalLine = (user?.goal.isNotEmpty ?? false) ? user!.goal : null;
     final measurements = [
-      if (heightCm != null) '${heightCm.round()} cm',
-      if (weight > 0)
+      if (showBody && heightCm != null) '${heightCm.round()} cm',
+      if (showBody && weight > 0)
         '${formatFixedDecimal(state.displayWeight(weight), Localizations.localeOf(context).toString())} '
             '${state.weightUnitLabel}',
     ].join(' · ');
@@ -106,12 +110,13 @@ class ProfileScreen extends StatelessWidget {
                 title: 'Training days',
                 subtitle: '${user?.weeklyTrainingDays ?? 0} days each week',
               ),
-              _ToolRow(
-                title: 'Weight tracker',
-                subtitle: 'Your weigh-ins and weight history',
-                route: AppRoutes.weightTracker,
-                screen: WeightTrackerScreen(),
-              ),
+              if (showBody)
+                const _ToolRow(
+                  title: 'Weight tracker',
+                  subtitle: 'Your weigh-ins and weight history',
+                  route: AppRoutes.weightTracker,
+                  screen: WeightTrackerScreen(),
+                ),
             ],
           ),
           const SizedBox(height: Insets.xl),

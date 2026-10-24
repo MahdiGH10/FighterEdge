@@ -773,6 +773,16 @@
   "notifFuelSubtitle": "Ein Hinweis vor einer harten Einheit, wenn es Zeit zum Essen ist",
   "notifFightTitle": "Kampf-Countdown",
   "notifFightSubtitle": "Ein Hinweis eine Woche und einen Tag vor deinem Kampf",
-  "notifPauseNutrition": "Ernährungshinweise pausieren",
-  "notifPauseNutritionSubtitle": "Blendet das Fuel-Fenster aus, bis du es wieder einschaltest"
+  "nutritionPausedTitle": "Ernährung ist pausiert",
+  "nutritionPausedBody": "Essensprotokoll, Ernährungszahlen, Gewichtsfunktionen und Ernährungshinweise sind aus. Das Training läuft ganz normal weiter. Schalte sie wieder ein, wann du möchtest.",
+  "nutritionPausedResume": "Ernährung wieder einschalten",
+  "settingsSectionNutrition": "Ernährung",
+  "settingsNutritionDisplay": "Ernährungsanzeige",
+  "settingsNutritionDisplayNormal": "Alles an",
+  "settingsNutritionDisplayPaused": "Pausiert",
+  "nutritionModeNormalTitle": "Alles anzeigen",
+  "nutritionModeNormalSubtitle": "Ziele, Essensprotokoll, Gewicht und Ernährungshinweise.",
+  "nutritionModePausedTitle": "Ernährung pausieren",
+  "nutritionModePausedSubtitle": "Blendet Essen, Ernährungszahlen, Gewichtsfunktionen und Ernährungshinweise aus. Das Training geht weiter.",
+  "reviewHoldPaused": "Diese Woche gibt es nichts zu ändern. Bleib bei deinem Plan."
 }

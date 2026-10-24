@@ -13,6 +13,7 @@ import '../../../../theme/app_typography.dart';
 import '../../../../widgets/grouped_list.dart';
 import '../../../../widgets/stat_card.dart';
 import '../../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../../../edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../../../edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../../domain/fight_camp.dart';
 import '../../domain/fight_week_plan.dart';
@@ -64,6 +65,10 @@ class FightCountdownSection extends StatelessWidget {
     final fights = context.watch<FightCampController>();
     final camp = fights.camp;
     final state = context.watch<AppState>();
+    // The countdown card carries the weight path and weigh-in steps.
+    if (!context.watch<NutritionModeController>().visible) {
+      return const SizedBox.shrink();
+    }
     if (camp == null || camp.daysToFight(state.now) < 0) {
       return const SizedBox.shrink();
     }
@@ -258,6 +263,10 @@ class AddFightRow extends StatelessWidget {
     final fights = context.watch<FightCampController>();
     final now = context.watch<AppState>().now;
     final camp = fights.camp;
+    // Booking a fight asks for a weight limit.
+    if (!context.watch<NutritionModeController>().visible) {
+      return const SizedBox.shrink();
+    }
     if (!fights.loaded || (camp != null && camp.daysToFight(now) >= 0)) {
       return const SizedBox.shrink();
     }

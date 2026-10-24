@@ -2218,9 +2218,42 @@ class LDe extends L {
       'Ein Hinweis eine Woche und einen Tag vor deinem Kampf';
 
   @override
-  String get notifPauseNutrition => 'Ernährungshinweise pausieren';
+  String get nutritionPausedTitle => 'Ernährung ist pausiert';
 
   @override
-  String get notifPauseNutritionSubtitle =>
-      'Blendet das Fuel-Fenster aus, bis du es wieder einschaltest';
+  String get nutritionPausedBody =>
+      'Essensprotokoll, Ernährungszahlen, Gewichtsfunktionen und Ernährungshinweise sind aus. Das Training läuft ganz normal weiter. Schalte sie wieder ein, wann du möchtest.';
+
+  @override
+  String get nutritionPausedResume => 'Ernährung wieder einschalten';
+
+  @override
+  String get settingsSectionNutrition => 'Ernährung';
+
+  @override
+  String get settingsNutritionDisplay => 'Ernährungsanzeige';
+
+  @override
+  String get settingsNutritionDisplayNormal => 'Alles an';
+
+  @override
+  String get settingsNutritionDisplayPaused => 'Pausiert';
+
+  @override
+  String get nutritionModeNormalTitle => 'Alles anzeigen';
+
+  @override
+  String get nutritionModeNormalSubtitle =>
+      'Ziele, Essensprotokoll, Gewicht und Ernährungshinweise.';
+
+  @override
+  String get nutritionModePausedTitle => 'Ernährung pausieren';
+
+  @override
+  String get nutritionModePausedSubtitle =>
+      'Blendet Essen, Ernährungszahlen, Gewichtsfunktionen und Ernährungshinweise aus. Das Training geht weiter.';
+
+  @override
+  String get reviewHoldPaused =>
+      'Diese Woche gibt es nichts zu ändern. Bleib bei deinem Plan.';
 }

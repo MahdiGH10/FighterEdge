@@ -19,6 +19,7 @@ class NotificationInputs {
     this.trialEndsAt,
     this.ageYears,
     this.weighInWeekdays = const {},
+    this.nutritionRemindersAllowed = true,
   });
 
   final List<ResolvedSession> sessions;
@@ -27,6 +28,11 @@ class NotificationInputs {
   final DateTime? trialEndsAt;
   final int? ageYears;
   final Set<int> weighInWeekdays;
+
+  /// False while the athlete has nutrition paused (or hidden its numbers):
+  /// the fuel window, weigh-in and protein notes are then not planned,
+  /// whatever their switches say.
+  final bool nutritionRemindersAllowed;
 }
 
 /// What one reconcile did.
@@ -99,7 +105,10 @@ class NotificationScheduler {
     final plan = systemAllowed
         ? _planner.plan(
             now: now,
-            settings: settings,
+            settings: settings.copyWith(
+              pauseNutrition:
+                  settings.pauseNutrition || !inputs.nutritionRemindersAllowed,
+            ),
             sessions: inputs.sessions,
             fuelDayTypes: inputs.fuelDayTypes,
             fightDate: inputs.fightDate,

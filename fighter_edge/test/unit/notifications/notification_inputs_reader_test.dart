@@ -7,7 +7,9 @@ import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/fuel_day_plan.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/policies/nutrition_display_mode.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import 'package:fighter_edge/features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
 import 'package:fighter_edge/features/fight_camp/domain/fight_camp.dart';
@@ -35,6 +37,7 @@ void main() {
   late EdgeFuelController edgeFuel;
   late AuthController auth;
   late NotificationInputsReader reader;
+  late NutritionModeController mode;
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
@@ -65,12 +68,14 @@ void main() {
     edgeFuel = EdgeFuelController(repository: fuelRepo)..setUser(_uid);
     final repo = await makeRepo(signedIn: true);
     auth = AuthController(repo);
+    mode = NutritionModeController()..setUser(_uid);
     await pumpEventQueue();
     reader = NotificationInputsReader(
       plan: plan,
       fightCamp: fight,
       edgeFuel: edgeFuel,
       auth: auth,
+      nutritionMode: mode,
     );
     addTearDown(() {
       plan.dispose();
@@ -148,6 +153,38 @@ void main() {
     });
   });
 
+  group('the nutrition mode', () {
+    test('normal allows nutrition reminders', () async {
+      await build();
+      await pumpEventQueue();
+      expect(reader.read().nutritionRemindersAllowed, isTrue);
+    });
+
+    test('paused, or hiding numbers, switches them all off', () async {
+      await build();
+      await pumpEventQueue();
+      await mode.setMode(NutritionDisplayMode.paused);
+      expect(reader.read().nutritionRemindersAllowed, isFalse);
+      await mode.setMode(NutritionDisplayMode.hideNumbers);
+      expect(reader.read().nutritionRemindersAllowed, isFalse);
+      await mode.setMode(NutritionDisplayMode.normal);
+      expect(reader.read().nutritionRemindersAllowed, isTrue);
+    });
+
+    test('and none are planned before the choice has been read', () async {
+      await build();
+      final fresh = NutritionModeController()..setUser(_uid);
+      final cautious = NotificationInputsReader(
+        plan: plan,
+        fightCamp: fight,
+        edgeFuel: edgeFuel,
+        auth: auth,
+        nutritionMode: fresh,
+      );
+      expect(cautious.read().nutritionRemindersAllowed, isFalse);
+    });
+  });
+
   group('age and the nutrition channels', () {
     test('unknown until the Fuel setup is confirmed', () async {
       await build();
@@ -189,6 +226,7 @@ void main() {
         fightCamp: fight,
         edgeFuel: edgeFuel,
         auth: auth,
+        nutritionMode: mode,
       );
       await pumpEventQueue();
       expect(reader.read().trialEndsAt, isNull);

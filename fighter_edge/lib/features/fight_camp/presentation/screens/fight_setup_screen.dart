@@ -16,6 +16,8 @@ import '../../../../widgets/app_text_field.dart';
 import '../../../../widgets/filter_chips.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../../../edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
+import '../../../edge_fuel/presentation/widgets/nutrition_paused_view.dart';
 import '../../../edge_fuel/presentation/widgets/choice_card.dart';
 import '../../domain/calendar.dart';
 import '../../domain/fight_camp.dart';
@@ -160,6 +162,9 @@ class _FightSetupScreenState extends State<FightSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    if (!context.watch<NutritionModeController>().visible) {
+      return NutritionPausedScreen(title: l.fightSetupTitle);
+    }
     final state = context.watch<AppState>();
     final copy =
         FightCampCopy(l, state, Localizations.localeOf(context).toString());

@@ -13,6 +13,8 @@ import '../../../../widgets/grouped_list.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../../widgets/stat_card.dart';
 import '../../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../../../edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
+import '../../../edge_fuel/presentation/widgets/nutrition_paused_view.dart';
 import '../../domain/calendar.dart';
 import '../../domain/fight_camp.dart';
 import '../../domain/fight_week_plan.dart';
@@ -33,6 +35,9 @@ class FightWeekScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    if (!context.watch<NutritionModeController>().visible) {
+      return NutritionPausedScreen(title: l.fightWeekTitle);
+    }
     final state = context.watch<AppState>();
     final fights = context.watch<FightCampController>();
     final camp = fights.camp;

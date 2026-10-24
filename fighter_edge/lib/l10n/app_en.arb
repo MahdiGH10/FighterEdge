@@ -919,6 +919,16 @@
   "notifFuelSubtitle": "A heads-up before a hard session, when it is time to eat",
   "notifFightTitle": "Fight countdown",
   "notifFightSubtitle": "A note a week and a day before your fight",
-  "notifPauseNutrition": "Pause nutrition notes",
-  "notifPauseNutritionSubtitle": "Hides the fuel window until you switch this off"
+  "nutritionPausedTitle": "Nutrition is paused",
+  "nutritionPausedBody": "Food logging, nutrition numbers, weight tools and nutrition reminders are off. Training goes on as normal. Turn it back on whenever you like.",
+  "nutritionPausedResume": "Turn nutrition back on",
+  "settingsSectionNutrition": "Nutrition",
+  "settingsNutritionDisplay": "Nutrition display",
+  "settingsNutritionDisplayNormal": "Everything on",
+  "settingsNutritionDisplayPaused": "Paused",
+  "nutritionModeNormalTitle": "Show everything",
+  "nutritionModeNormalSubtitle": "Targets, food log, weight and nutrition reminders.",
+  "nutritionModePausedTitle": "Pause nutrition",
+  "nutritionModePausedSubtitle": "Hides food, nutrition numbers, weight tools and nutrition reminders. Training continues.",
+  "reviewHoldPaused": "Nothing to change this week. Keep your plan as it is."
 }

@@ -2,6 +2,7 @@ import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/domain/calculators/training_plan_fuel_bridge.dart';
 import '../features/edge_fuel/domain/models/fuel_day_plan.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../features/fight_camp/domain/calendar.dart';
 import '../features/fight_camp/presentation/fight_camp_controller.dart';
 import '../features/training_plan/presentation/plan_controller.dart';
@@ -20,6 +21,8 @@ import 'notification_scheduler.dart';
 /// * The trial end is the server-fed access state's, for the one billing
 ///   notice. A passing "unknown" state keeps the last value rather than drop
 ///   the notice.
+/// * The nutrition mode switches every nutrition reminder off while nutrition
+///   is paused, and until the choice has been read.
 /// * Age comes from the confirmed Fuel setup and is used only to hide the
 ///   nutrition channels from athletes under 18 or of unknown age.
 class NotificationInputsReader {
@@ -28,15 +31,18 @@ class NotificationInputsReader {
     required FightCampController fightCamp,
     required EdgeFuelController edgeFuel,
     required AuthController auth,
+    required NutritionModeController nutritionMode,
   })  : _plan = plan,
         _fightCamp = fightCamp,
         _edgeFuel = edgeFuel,
-        _auth = auth;
+        _auth = auth,
+        _nutritionMode = nutritionMode;
 
   final PlanController _plan;
   final FightCampController _fightCamp;
   final EdgeFuelController _edgeFuel;
   final AuthController _auth;
+  final NutritionModeController _nutritionMode;
 
   /// The last trial end seen while the access state was known.
   DateTime? _lastTrialEnd;
@@ -47,6 +53,7 @@ class NotificationInputsReader {
         fightDate: _fightCamp.camp?.fightDate,
         trialEndsAt: _trialEnd(),
         ageYears: ageYears,
+        nutritionRemindersAllowed: _nutritionMode.remindersAllowed,
       );
 
   /// The athlete's age, only from a confirmed Fuel setup.

@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
+import '../features/edge_fuel/domain/policies/nutrition_display_mode.dart';
+import '../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../notifications/notification_controller.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../theme/app_accessibility.dart';
@@ -38,6 +40,7 @@ class SettingsScreen extends StatelessWidget {
     final auth = context.watch<AuthController>();
     final state = context.watch<AppState>();
     final notifications = context.watch<NotificationController>();
+    final nutritionMode = context.watch<NutritionModeController>();
     final consent = context.watch<ConsentController>();
     final glass = context.watch<GlassPolicyController>();
     final user = auth.user;
@@ -136,6 +139,17 @@ class SettingsScreen extends StatelessWidget {
               subtitle: l.settingsTimerHapticsSubtitle,
               value: state.timerHaptics,
               onChanged: state.setTimerHaptics,
+            ),
+          ]),
+          const SizedBox(height: Insets.xl),
+          _SectionLabel(l.settingsSectionNutrition),
+          GroupedList(children: [
+            _SettingsRow(
+              title: l.settingsNutritionDisplay,
+              subtitle: nutritionMode.mode == NutritionDisplayMode.paused
+                  ? l.settingsNutritionDisplayPaused
+                  : l.settingsNutritionDisplayNormal,
+              onTap: () => _pickNutritionMode(context),
             ),
           ]),
           const SizedBox(height: Insets.xl),
@@ -365,6 +379,111 @@ class _TrustCard extends StatelessWidget {
             style: AppType.subhead(
                 color: AppAccessibility.textSecondary(context))),
       );
+}
+
+/// How much of the nutrition side to show. Two choices today; "Hide numbers"
+/// follows once every number surface is covered.
+Future<void> _pickNutritionMode(BuildContext context) async {
+  final controller = context.read<NutritionModeController>();
+  final l = L.of(context);
+  final current = controller.mode;
+  await showGlassSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) => SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                Insets.xl, Insets.none, Insets.xl, Insets.sm),
+            child: Text(l.settingsNutritionDisplay, style: AppType.title1()),
+          ),
+          for (final option in [
+            (
+              NutritionDisplayMode.normal,
+              l.nutritionModeNormalTitle,
+              l.nutritionModeNormalSubtitle,
+            ),
+            (
+              NutritionDisplayMode.paused,
+              l.nutritionModePausedTitle,
+              l.nutritionModePausedSubtitle,
+            ),
+          ])
+            _ModeOption(
+              title: option.$2,
+              subtitle: option.$3,
+              selected: current == option.$1,
+              onTap: () {
+                AppHaptics.commit();
+                controller.setMode(option.$1);
+                Navigator.of(sheetContext).pop();
+              },
+            ),
+          const SizedBox(height: Insets.lg),
+        ],
+      ),
+    ),
+  );
+}
+
+class _ModeOption extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ModeOption({
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: '$title. $subtitle',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints:
+              const BoxConstraints(minHeight: AppAccessibility.minTouchTarget),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: Insets.xl, vertical: Insets.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: AppType.body()),
+                      const SizedBox(height: Insets.xs),
+                      Text(
+                        subtitle,
+                        style: AppType.subhead(
+                            color: AppAccessibility.textSecondary(context)),
+                      ),
+                    ],
+                  ),
+                ),
+                if (selected)
+                  const Icon(AppIcons.check, color: AppColors.accentText),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 String _notificationsSummary(L l, NotificationController c) {

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../../features/fight_camp/presentation/fight_camp_controller.dart';
 import '../../features/training_plan/presentation/plan_controller.dart';
 import '../../notifications/notification_controller.dart';
@@ -41,6 +42,7 @@ class _NotificationHostState extends State<NotificationHost>
   late final AuthController _auth;
   late final FightCampController _fightCamp;
   late final EdgeFuelController _edgeFuel;
+  late final NutritionModeController _nutritionMode;
   late final NotificationInputsReader _reader;
   bool _asking = false;
 
@@ -53,11 +55,13 @@ class _NotificationHostState extends State<NotificationHost>
     _auth = context.read<AuthController>();
     _fightCamp = context.read<FightCampController>();
     _edgeFuel = context.read<EdgeFuelController>();
+    _nutritionMode = context.read<NutritionModeController>();
     _reader = NotificationInputsReader(
       plan: _plan,
       fightCamp: _fightCamp,
       edgeFuel: _edgeFuel,
       auth: _auth,
+      nutritionMode: _nutritionMode,
     );
     WidgetsBinding.instance.addObserver(this);
     _plan.addListener(_changed);
@@ -65,6 +69,7 @@ class _NotificationHostState extends State<NotificationHost>
     _auth.addListener(_changed);
     _fightCamp.addListener(_changed);
     _edgeFuel.addListener(_changed);
+    _nutritionMode.addListener(_changed);
     _controller.addListener(_maybeAsk);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
@@ -127,6 +132,7 @@ class _NotificationHostState extends State<NotificationHost>
     _auth.removeListener(_changed);
     _fightCamp.removeListener(_changed);
     _edgeFuel.removeListener(_changed);
+    _nutritionMode.removeListener(_changed);
     _controller.removeListener(_maybeAsk);
     // The shell leaves the tree on sign-out: the next account must not
     // inherit this one's reminders.
