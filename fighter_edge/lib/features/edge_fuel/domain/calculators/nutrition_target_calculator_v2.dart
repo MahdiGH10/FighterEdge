@@ -7,6 +7,7 @@ import '../policies/nutrition_policy_v2.dart';
 import '../policies/energy_availability_proxy.dart';
 import '../policies/nutrition_safety_policy.dart';
 import '../policies/session_energy_table.dart';
+import 'fuel_week_allocation.dart';
 import '../policies/weight_rate_policy.dart';
 
 /// Pure-Dart training-aware nutrition engine (policy version 2).
@@ -323,34 +324,11 @@ class NutritionTargetCalculatorV2 {
     required List<double> deviations,
     required double shift,
     required int minimumDay,
-  }) {
-    final raw = [for (final d in deviations) average + shift * d];
-    final rounded = [for (final r in raw) NutritionPolicyV2.roundToTen(r)];
-    for (final r in rounded) {
-      if (r < minimumDay && shift > 0) return null;
-    }
-    var residue = average * 7 - rounded.fold<int>(0, (a, b) => a + b);
-    if (residue == 0) return rounded;
-    // Days rounded furthest down take the extra ten first; days rounded
-    // furthest up give one back first.
-    final order = List<int>.generate(7, (i) => i)
-      ..sort((a, b) {
-        final byError = (raw[b] - rounded[b]).compareTo(raw[a] - rounded[a]);
-        return residue > 0 ? byError : -byError;
-      });
-    final step = residue > 0 ? 10 : -10;
-    var guard = 0;
-    while (residue != 0 && guard++ < 70) {
-      var placed = false;
-      for (final i in order) {
-        if (residue == 0) break;
-        if (rounded[i] + step < minimumDay) continue;
-        rounded[i] += step;
-        residue -= step;
-        placed = true;
-      }
-      if (!placed) return null;
-    }
-    return residue == 0 ? rounded : null;
-  }
+  }) =>
+      FuelWeekAllocation.split(
+        average: average,
+        deviations: deviations,
+        shift: shift,
+        minimums: List.filled(7, minimumDay),
+      );
 }

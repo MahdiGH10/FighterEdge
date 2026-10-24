@@ -9,12 +9,15 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dar
 import 'package:fighter_edge/features/edge_fuel/domain/models/fuel_add_on.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/fuel_day_plan.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/fuel_gap.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/accepted_fuel_week.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/calculators/fuel_day_planner.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/recipe.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/policies/fuel_add_on_catalog.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/policies/fuel_day_policy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _allDiets = {
@@ -164,6 +167,88 @@ Future<Map<String, FoodItem>> _realFoods() async {
 }
 
 void main() {
+  group('calorie-only gap', () {
+    test('ranks portions by calorie fit with three different food groups', () {
+      final result = FuelGapPicker.pickCalories(
+          kcalLeft: 300, addOns: _addOns, foodsById: _foods);
+      expect(result.status, FuelGapStatus.ready);
+      expect(result.options.map((o) => o.addOn.id),
+          ['rice-180', 'tofu-150', 'chicken-150']);
+      expect(result.options.map((o) => o.addOn.group).toSet(), hasLength(3));
+      final option = result.options.first;
+      expect(option.reason.addsKcal, 234);
+      expect(option.reason.leavesKcal, 66);
+      expect(option.reason.code, FuelGapReasonCode.closesGap);
+      expect(() => result.options.clear(), throwsUnsupportedError);
+    });
+
+    test('uses the existing calorie cap and filters, never a protein proxy',
+        () {
+      final result = FuelGapPicker.pickCalories(
+          kcalLeft: 150,
+          addOns: _addOns,
+          foodsById: _foods,
+          preferences: const NutritionSetupDraft(allergens: ['milk']));
+      expect(result.status, FuelGapStatus.ready);
+      for (final option in result.options) {
+        expect(option.nutrients.kcal, inInclusiveRange(150 * .25, 150 * 1.1));
+        expect(option.food.allergens, isNot(contains(Allergen.milk)));
+      }
+      final fruitOnly = FuelGapPicker.pickCalories(
+          kcalLeft: 150,
+          addOns: _addOns.where((a) => a.group == AddOnGroup.fruit),
+          foodsById: _foods);
+      expect(fruitOnly.options.single.addOn.id, 'banana-118');
+      expect(fruitOnly.options.single.nutrients.proteinGrams, lessThan(5));
+    });
+
+    test('closed/negative gaps and no matches have no options', () {
+      final closed = FuelGapPicker.pickCalories(
+          kcalLeft: 149, addOns: _addOns, foodsById: _foods);
+      expect(closed.status, FuelGapStatus.gapClosed);
+      expect(closed.options, isEmpty);
+      expect(
+          FuelGapPicker.pickCalories(
+                  kcalLeft: -1, addOns: _addOns, foodsById: _foods)
+              .status,
+          FuelGapStatus.needsMoreData);
+      expect(
+          FuelGapPicker.pickCalories(
+                  kcalLeft: 300, addOns: const [], foodsById: _foods)
+              .status,
+          FuelGapStatus.noMatch);
+    });
+
+    test('is order-independent and passes unresolved allergies through', () {
+      final a = FuelGapPicker.pickCalories(
+          kcalLeft: 300,
+          addOns: _addOns,
+          foodsById: _foods,
+          preferences: const NutritionSetupDraft(allergens: ['kiwi']));
+      final b = FuelGapPicker.pickCalories(
+          kcalLeft: 300, addOns: _addOns.reversed, foodsById: _foods);
+      expect(
+          a.options.map((o) => o.addOn.id), b.options.map((o) => o.addOn.id));
+      expect(a.unmatchedAllergenTerms, ['kiwi']);
+      expect(() => a.unmatchedAllergenTerms.clear(), throwsUnsupportedError);
+    });
+
+    test('does not rank malformed nutrient records', () {
+      final invalid = {
+        'zero': _food('zero', kcal: 0, protein: 0),
+        'nan': _food('nan', kcal: double.nan, protein: 1),
+        'bad-protein':
+            _food('bad-protein', kcal: 200, protein: double.infinity),
+      };
+      final result = FuelGapPicker.pickCalories(
+          kcalLeft: 300,
+          addOns: [
+            for (final id in invalid.keys) _addOn(id, id, AddOnGroup.meat, 100)
+          ],
+          foodsById: invalid);
+      expect(result.options, isEmpty);
+    });
+  });
   test('gap picker never offers a draft recipe', () {
     final draft = Recipe.fromJson({
       ..._recipe('draft', 'chicken-breast').toJson(),
@@ -478,6 +563,115 @@ void main() {
         foodsById: _foods,
       );
       expect(pick.status, FuelGapStatus.needsMoreData);
+    });
+
+    test('UI entry point gates age and review before exposing amounts', () {
+      expect(FuelDayPolicy.amountsEnabledByDefault, isFalse);
+      expect(FuelAddOnCatalog.dietitianSignOffPending, isTrue);
+      for (final age in [null, 17]) {
+        for (final enabled in [false, true]) {
+          final pick = FuelMatchCalculator.dayGap(
+              target: target(),
+              day: day(),
+              foodsById: _foods,
+              ageYears: age,
+              reviewedAmountsEnabled: enabled);
+          expect(pick.status, FuelGapStatus.adultRequired);
+          expect(pick.protein, isNull);
+          expect(pick.calories, isNull);
+        }
+      }
+      final pending = FuelMatchCalculator.dayGap(
+          target: target(), day: day(), foodsById: _foods, ageYears: 30);
+      expect(pending.status, FuelGapStatus.awaitingSignOff);
+      expect(pending.protein, isNull);
+      expect(pending.calories, isNull);
+    });
+
+    test('UI entry point prefers protein, then returns a typed calorie gap',
+        () {
+      final accepted = target();
+      final before = accepted.toJson();
+      final protein = FuelMatchCalculator.dayGap(
+          target: accepted,
+          day: day(),
+          foodsById: _foods,
+          ageYears: 30,
+          addOns: _addOns,
+          reviewedAmountsEnabled: true,
+          weightKg: 90);
+      expect(protein.protein!.gramsLeft, 34);
+      expect(protein.calories, isNull);
+      final energy = FuelMatchCalculator.dayGap(
+          target: target(),
+          day: day(protein: 160),
+          foodsById: _foods,
+          ageYears: 30,
+          addOns: _addOns,
+          reviewedAmountsEnabled: true);
+      expect(energy.protein, isNull);
+      expect(energy.calories!.kcalLeft, 300);
+      expect(energy.calories!.options, hasLength(3));
+      expect(accepted.toJson(), before);
+      final closed = FuelMatchCalculator.dayGap(
+          target: target(),
+          day: day(protein: 160, kcal: 2400),
+          foodsById: _foods,
+          ageYears: 30,
+          addOns: _addOns,
+          reviewedAmountsEnabled: true);
+      expect(closed.status, FuelGapStatus.gapClosed);
+      expect(closed.calories!.options, isEmpty);
+    });
+
+    test('uses allocated numbers and refuses a log from another date', () {
+      final allocated = AcceptedFuelDay(
+          plan: FuelDayPlanner.planDay(
+              date: DateTime(2026, 1, 1), plan: const []),
+          calories: 2600,
+          proteinGrams: 160,
+          carbGrams: 330,
+          fatGrams: 70);
+      final pick = FuelMatchCalculator.dayGap(
+          target: target(),
+          allocatedDay: allocated,
+          day: day(protein: 160),
+          foodsById: _foods,
+          ageYears: 30,
+          addOns: _addOns,
+          reviewedAmountsEnabled: true);
+      expect(pick.calories!.kcalLeft, 500);
+      final otherDate = AcceptedFuelDay(
+          plan: FuelDayPlanner.planDay(
+              date: DateTime(2026, 1, 2), plan: const []),
+          calories: 2600,
+          proteinGrams: 160,
+          carbGrams: 330,
+          fatGrams: 70);
+      final invalid = FuelMatchCalculator.dayGap(
+          target: target(),
+          allocatedDay: otherDate,
+          day: day(),
+          foodsById: _foods,
+          ageYears: 30,
+          reviewedAmountsEnabled: true);
+      expect(invalid.status, FuelGapStatus.needsMoreData);
+      expect(invalid.protein, isNull);
+      expect(invalid.calories, isNull);
+    });
+
+    test('UI entry point refuses invalid age and missing targets', () {
+      for (final age in [30, 121]) {
+        final pick = FuelMatchCalculator.dayGap(
+            target: null,
+            day: day(),
+            foodsById: _foods,
+            ageYears: age,
+            reviewedAmountsEnabled: true);
+        expect(pick.status, FuelGapStatus.needsMoreData);
+        expect(pick.protein, isNull);
+        expect(pick.calories, isNull);
+      }
     });
   });
 

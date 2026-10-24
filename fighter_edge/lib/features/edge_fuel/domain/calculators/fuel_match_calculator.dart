@@ -2,12 +2,16 @@ import '../models/food_item.dart';
 import '../models/fuel_add_on.dart';
 import '../models/fuel_day_plan.dart';
 import '../models/fuel_gap.dart';
+import '../models/fuel_day_gap.dart';
+import '../models/accepted_fuel_week.dart';
 import '../models/fuel_match.dart';
 import '../models/nutrition_day.dart';
 import '../models/nutrition_setup_draft.dart';
 import '../models/nutrition_target.dart';
 import '../models/recipe.dart';
 import '../policies/fuel_add_on_catalog.dart';
+import '../policies/fuel_day_policy.dart';
+import '../policies/nutrition_policy.dart';
 import '../policies/recipe_publication_gate.dart';
 import 'fuel_gap_picker.dart';
 import 'fuel_preference_filter.dart';
@@ -34,7 +38,7 @@ enum FuelMatchMode {
 class FuelMatchCalculator {
   FuelMatchCalculator._();
 
-  static const int minimumUsefulCalories = 150;
+  static const int minimumUsefulCalories = FuelGapPicker.minimumUsefulCalories;
   static const int maxOptions = 3;
   static const List<double> _portionOptions = [0.5, 1, 1.5, 2, 2.5];
 
@@ -45,9 +49,66 @@ class FuelMatchCalculator {
         _Weights(kcal: .30, protein: .48, carbs: .14, fat: .08),
   };
 
+  /// UI entry point for day suggestions. Unknown/minor age and unreviewed
+  /// catalog portions/dose assumptions return no amounts or options.
+  /// [reviewedAmountsEnabled] must come from a recorded reviewed-build flag,
+  /// never billing or a user toggle. Existing pending flags remain unchanged.
+  /// [allocatedDay] uses the accepted-week adapter's view numbers without
+  /// making a new persisted target. A log from another date is refused.
+  static FuelDayGap dayGap({
+    required NutritionTarget? target,
+    required NutritionDay? day,
+    required Map<String, FoodItem> foodsById,
+    required int? ageYears,
+    AcceptedFuelDay? allocatedDay,
+    double? weightKg,
+    FuelDayType? dayType,
+    Iterable<FuelAddOn> addOns = FuelAddOnCatalog.all,
+    NutritionSetupDraft? preferences,
+    bool reviewedAmountsEnabled = FuelDayPolicy.amountsEnabledByDefault &&
+        !FuelAddOnCatalog.dietitianSignOffPending,
+  }) {
+    if (ageYears == null || ageYears < NutritionPolicy.minimumAgeYears) {
+      return const FuelDayGap.blocked(FuelGapStatus.adultRequired);
+    }
+    if (!reviewedAmountsEnabled) {
+      return const FuelDayGap.blocked(FuelGapStatus.awaitingSignOff);
+    }
+    final logDate = day == null ? null : DateTime.tryParse(day.localDate);
+    if (allocatedDay != null &&
+        day != null &&
+        (logDate == null ||
+            !FuelCalendar.sameDay(logDate, allocatedDay.plan.date))) {
+      return const FuelDayGap.blocked(FuelGapStatus.needsMoreData);
+    }
+    final remaining = _Remaining.from(target, day, allocatedDay: allocatedDay);
+    if (ageYears > 120 || remaining == null) {
+      return const FuelDayGap.blocked(FuelGapStatus.needsMoreData);
+    }
+    if (remaining.protein >= FuelGapPicker.minimumGapGrams) {
+      return FuelDayGap.protein(FuelGapPicker.pick(
+        macro: FuelGapMacro.protein,
+        gramsLeft: remaining.protein,
+        kcalLeft: remaining.calories,
+        foodsById: foodsById,
+        addOns: addOns,
+        weightKg: weightKg,
+        dayType: allocatedDay?.plan.type ?? dayType,
+        preferences: preferences,
+      ));
+    }
+    return FuelDayGap.calories(FuelGapPicker.pickCalories(
+      kcalLeft: remaining.calories,
+      addOns: addOns,
+      foodsById: foodsById,
+      preferences: preferences,
+    ));
+  }
+
   /// The macro-first gap picker against today's target and log: "Protein
   /// left: 34 g, 3 options". See [FuelGapPicker] for the rules. [addOns]
   /// defaults to the curated catalog.
+  /// Low-level: presentation code uses [dayGap] for age/review gating.
   static FuelGapPick gap({
     required NutritionTarget? target,
     required NutritionDay? day,
@@ -200,12 +261,13 @@ class _Remaining {
     required this.fats,
   });
 
-  static _Remaining? from(NutritionTarget? target, NutritionDay? day) {
+  static _Remaining? from(NutritionTarget? target, NutritionDay? day,
+      {AcceptedFuelDay? allocatedDay}) {
     if (target?.isSuccess != true) return null;
-    final calories = target!.targetCalories;
-    final protein = target.proteinGrams;
-    final carbs = target.carbGrams;
-    final fats = target.fatGrams;
+    final calories = allocatedDay?.calories ?? target!.targetCalories;
+    final protein = allocatedDay?.proteinGrams ?? target!.proteinGrams;
+    final carbs = allocatedDay?.carbGrams ?? target!.carbGrams;
+    final fats = allocatedDay?.fatGrams ?? target!.fatGrams;
     if (calories == null ||
         protein == null ||
         carbs == null ||

@@ -4,6 +4,7 @@ import '../models/food_item.dart';
 import '../models/fuel_add_on.dart';
 import '../models/fuel_day_plan.dart';
 import '../models/fuel_gap.dart';
+import '../models/fuel_calorie_gap.dart';
 import '../models/nutrition_setup_draft.dart';
 import '../models/recipe.dart';
 import '../policies/fuel_day_policy.dart';
@@ -30,6 +31,76 @@ class FuelGapPicker {
   const FuelGapPicker._();
 
   static const int maxOptions = 3;
+
+  /// Shared with the existing calorie-first meal matcher.
+  static const int minimumUsefulCalories = 150;
+
+  /// Low-level ranking for a kcal-only gap. Review and age eligibility are
+  /// enforced by FuelMatchCalculator.dayGap before calling this method.
+  /// Uses the existing 10% room, minimum-share filter, and group diversity.
+  /// It does not introduce a protein dose or treat kcal as grams.
+  static FuelCalorieGapPick pickCalories({
+    required int kcalLeft,
+    required Iterable<FuelAddOn> addOns,
+    required Map<String, FoodItem> foodsById,
+    NutritionSetupDraft? preferences,
+  }) {
+    if (kcalLeft < 0) {
+      return FuelCalorieGapPick(status: FuelGapStatus.needsMoreData);
+    }
+    if (kcalLeft < minimumUsefulCalories) {
+      return FuelCalorieGapPick(
+          status: FuelGapStatus.gapClosed, kcalLeft: kcalLeft);
+    }
+    final filter = FuelPreferenceFilter.from(preferences);
+    final candidates = <FuelCalorieGapOption>[];
+    for (final addOn in addOns) {
+      final food = foodsById[addOn.foodId];
+      if (food == null || !filter.allowsAddOn(addOn, food)) continue;
+      final n = RecipeNutrientCalculator.forFood(food, addOn.grams);
+      if (!n.kcal.isFinite ||
+          n.kcal <= 0 ||
+          [n.proteinGrams, n.carbGrams, n.fatGrams]
+              .any((v) => !v.isFinite || v < 0) ||
+          n.kcal < kcalLeft * minimumShareOfPart ||
+          n.kcal > kcalLeft * kcalCapFactor) {
+        continue;
+      }
+      final left = math.max(0, kcalLeft - n.kcalRounded);
+      candidates.add(FuelCalorieGapOption(
+        addOn: addOn,
+        food: food,
+        nutrients: n,
+        reason: FuelCalorieGapReason(
+          code: left < minimumUsefulCalories
+              ? FuelGapReasonCode.closesGap
+              : FuelGapReasonCode.addsPart,
+          addsKcal: n.kcalRounded,
+          leavesKcal: left,
+        ),
+      ));
+    }
+    candidates.sort((a, b) {
+      final byDistance = (a.nutrients.kcal - kcalLeft)
+          .abs()
+          .compareTo((b.nutrients.kcal - kcalLeft).abs());
+      if (byDistance != 0) return byDistance;
+      final byKcal = a.nutrients.kcal.compareTo(b.nutrients.kcal);
+      return byKcal != 0 ? byKcal : a.addOn.id.compareTo(b.addOn.id);
+    });
+    final used = <AddOnGroup>{};
+    final options = <FuelCalorieGapOption>[];
+    for (final option in candidates) {
+      if (options.length == maxOptions) break;
+      if (used.add(option.addOn.group)) options.add(option);
+    }
+    return FuelCalorieGapPick(
+      status: options.isEmpty ? FuelGapStatus.noMatch : FuelGapStatus.ready,
+      kcalLeft: kcalLeft,
+      options: options,
+      unmatchedAllergenTerms: filter.unmatchedAllergenTerms,
+    );
+  }
 
   /// Less than this is left: nothing to add.
   static const int minimumGapGrams = 5;
