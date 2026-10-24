@@ -3402,6 +3402,168 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Log {name} again'**
   String fuelRepeatFood(String name);
+
+  /// No description provided for @fuelDayRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest day'**
+  String get fuelDayRest;
+
+  /// No description provided for @fuelDayEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy training day'**
+  String get fuelDayEasy;
+
+  /// No description provided for @fuelDayHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard training day'**
+  String get fuelDayHard;
+
+  /// No description provided for @fuelDayDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'Double training day'**
+  String get fuelDayDouble;
+
+  /// No description provided for @fuelDayFightWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight week'**
+  String get fuelDayFightWeek;
+
+  /// No description provided for @fuelDayAdultRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Targets are available for confirmed adults.'**
+  String get fuelDayAdultRequired;
+
+  /// No description provided for @fuelDayTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s target from your dated plan'**
+  String get fuelDayTarget;
+
+  /// No description provided for @fuelDayAcceptedAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted daily average · day allocation pending review'**
+  String get fuelDayAcceptedAverage;
+
+  /// No description provided for @fuelDayNoTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up Fuel to see your accepted target.'**
+  String get fuelDayNoTarget;
+
+  /// No description provided for @fuelDayKcal.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal target'**
+  String fuelDayKcal(int kcal);
+
+  /// No description provided for @fuelDayProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g protein target'**
+  String fuelDayProtein(int grams);
+
+  /// No description provided for @fuelDayCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g carb target'**
+  String fuelDayCarbs(int grams);
+
+  /// No description provided for @fuelSessionNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Session {number}'**
+  String fuelSessionNumber(int number);
+
+  /// No description provided for @fuelHintPrePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Before: plan a familiar meal.'**
+  String get fuelHintPrePlan;
+
+  /// No description provided for @fuelHintPreOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Before: food is optional for this session.'**
+  String get fuelHintPreOptional;
+
+  /// No description provided for @fuelHintPreNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Before: no special meal timing needed.'**
+  String get fuelHintPreNone;
+
+  /// No description provided for @fuelHintPostCarbProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'After: include carbohydrate and protein in a meal.'**
+  String get fuelHintPostCarbProtein;
+
+  /// No description provided for @fuelHintPostProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'After: include protein in a meal.'**
+  String get fuelHintPostProtein;
+
+  /// No description provided for @fuelHintPostOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'After: a usual meal is an option.'**
+  String get fuelHintPostOptional;
+
+  /// No description provided for @fuelHintPostNone.
+  ///
+  /// In en, this message translates to:
+  /// **'After: no special meal timing needed.'**
+  String get fuelHintPostNone;
+
+  /// No description provided for @fuelGapProteinLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein left: {grams} g'**
+  String fuelGapProteinLeft(int grams);
+
+  /// No description provided for @fuelGapKcalLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy left: {kcal} kcal'**
+  String fuelGapKcalLeft(int kcal);
+
+  /// No description provided for @fuelGapProteinReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {grams} g protein, {kcal} kcal · leaves {left} g'**
+  String fuelGapProteinReason(int grams, int kcal, int left);
+
+  /// No description provided for @fuelGapKcalReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {kcal} kcal · leaves {left} kcal'**
+  String fuelGapKcalReason(int kcal, int left);
+
+  /// No description provided for @fuelGapCheckAllergens.
+  ///
+  /// In en, this message translates to:
+  /// **'Check ingredients for any allergies not listed here.'**
+  String get fuelGapCheckAllergens;
+
+  /// No description provided for @fuelGapNoOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching portions right now.'**
+  String get fuelGapNoOptions;
+
+  /// No description provided for @fuelGapOption.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {grams} g · add'**
+  String fuelGapOption(String name, int grams);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

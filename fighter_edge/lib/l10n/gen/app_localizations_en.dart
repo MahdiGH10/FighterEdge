@@ -1995,4 +1995,108 @@ class LEn extends L {
   String fuelRepeatFood(String name) {
     return 'Log $name again';
   }
+
+  @override
+  String get fuelDayRest => 'Rest day';
+
+  @override
+  String get fuelDayEasy => 'Easy training day';
+
+  @override
+  String get fuelDayHard => 'Hard training day';
+
+  @override
+  String get fuelDayDouble => 'Double training day';
+
+  @override
+  String get fuelDayFightWeek => 'Fight week';
+
+  @override
+  String get fuelDayAdultRequired =>
+      'Targets are available for confirmed adults.';
+
+  @override
+  String get fuelDayTarget => 'Today\'s target from your dated plan';
+
+  @override
+  String get fuelDayAcceptedAverage =>
+      'Accepted daily average · day allocation pending review';
+
+  @override
+  String get fuelDayNoTarget => 'Set up Fuel to see your accepted target.';
+
+  @override
+  String fuelDayKcal(int kcal) {
+    return '$kcal kcal target';
+  }
+
+  @override
+  String fuelDayProtein(int grams) {
+    return '$grams g protein target';
+  }
+
+  @override
+  String fuelDayCarbs(int grams) {
+    return '$grams g carb target';
+  }
+
+  @override
+  String fuelSessionNumber(int number) {
+    return 'Session $number';
+  }
+
+  @override
+  String get fuelHintPrePlan => 'Before: plan a familiar meal.';
+
+  @override
+  String get fuelHintPreOptional =>
+      'Before: food is optional for this session.';
+
+  @override
+  String get fuelHintPreNone => 'Before: no special meal timing needed.';
+
+  @override
+  String get fuelHintPostCarbProtein =>
+      'After: include carbohydrate and protein in a meal.';
+
+  @override
+  String get fuelHintPostProtein => 'After: include protein in a meal.';
+
+  @override
+  String get fuelHintPostOptional => 'After: a usual meal is an option.';
+
+  @override
+  String get fuelHintPostNone => 'After: no special meal timing needed.';
+
+  @override
+  String fuelGapProteinLeft(int grams) {
+    return 'Protein left: $grams g';
+  }
+
+  @override
+  String fuelGapKcalLeft(int kcal) {
+    return 'Energy left: $kcal kcal';
+  }
+
+  @override
+  String fuelGapProteinReason(int grams, int kcal, int left) {
+    return 'Adds $grams g protein, $kcal kcal · leaves $left g';
+  }
+
+  @override
+  String fuelGapKcalReason(int kcal, int left) {
+    return 'Adds $kcal kcal · leaves $left kcal';
+  }
+
+  @override
+  String get fuelGapCheckAllergens =>
+      'Check ingredients for any allergies not listed here.';
+
+  @override
+  String get fuelGapNoOptions => 'No matching portions right now.';
+
+  @override
+  String fuelGapOption(String name, int grams) {
+    return '$name · $grams g · add';
+  }
 }

@@ -5,10 +5,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../theme/app_icons.dart';
 
 import '../features/edge_fuel/domain/models/food_log_entry.dart';
+import '../features/edge_fuel/domain/calculators/accepted_fuel_week_allocator.dart';
+import '../features/edge_fuel/domain/calculators/fuel_day_planner.dart';
+import '../features/edge_fuel/domain/calculators/fuel_match_calculator.dart';
+import '../features/edge_fuel/domain/calculators/portion_calculator.dart';
+import '../features/edge_fuel/domain/calculators/training_plan_fuel_bridge.dart';
+import '../features/edge_fuel/domain/models/accepted_fuel_week.dart';
+import '../features/edge_fuel/domain/models/food_item.dart';
+import '../features/edge_fuel/domain/models/fuel_add_on.dart';
+import '../features/edge_fuel/domain/models/fuel_day_plan.dart';
+import '../features/edge_fuel/domain/models/fuel_gap.dart';
+import '../features/edge_fuel/domain/policies/fuel_add_on_catalog.dart';
+import '../features/edge_fuel/domain/policies/fuel_day_policy.dart';
+import '../features/edge_fuel/domain/policies/nutrition_policy.dart';
+import '../features/edge_fuel/data/food_catalog_repository.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/edge_fuel/presentation/widgets/fuel_day_panel.dart';
+import '../features/training_plan/presentation/plan_controller.dart';
 import '../features/edge_fuel/domain/models/food_enums.dart';
 import '../features/edge_fuel/presentation/controllers/recipe_library_controller.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
@@ -44,23 +61,60 @@ class NutritionScreen extends StatefulWidget {
 
 class _NutritionScreenState extends State<NutritionScreen> {
   int _tab = 0;
+  Future<Map<String, FoodItem>>? _addOnFoods;
 
   // Feedback stays above the pinned logging action, including above the nav
   // when this screen is hosted in HomeShell.
-  EdgeInsets get _feedbackMargin => const EdgeInsets.fromLTRB(Insets.lg,
-      Insets.sm, Insets.lg, AppAccessibility.minTouchTarget + Insets.xxl);
+  EdgeInsets get _feedbackMargin => const EdgeInsets.fromLTRB(
+        Insets.lg,
+        Insets.sm,
+        Insets.lg,
+        AppAccessibility.minTouchTarget + Insets.xxl,
+      );
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final edgeFuel = context.watch<EdgeFuelController>();
-    final targetCalories = edgeFuel.targetCalories;
+    final planController = context.watch<PlanController>();
+    final age = edgeFuel.draft?.ageYears;
+    final adult = age != null && age >= NutritionPolicy.minimumAgeYears;
+    final week = planController.weekContaining(edgeFuel.selectedDate);
+    final fuelDays = week == null
+        ? const <FuelDayPlan>[]
+        : TrainingPlanFuelBridge.planWeek(
+            week,
+            fight: planController.inputs?.fight,
+          );
+    final selected = fuelDays.where(
+      (day) => FuelCalendar.sameDay(day.date, edgeFuel.selectedDate),
+    );
+    final fuelDay = selected.isEmpty ? null : selected.first;
+    final allocation = AcceptedFuelWeekAllocator.allocate(
+      acceptedTarget: edgeFuel.target,
+      days: fuelDays,
+      ageYears: age,
+      weightKg: edgeFuel.draft?.currentWeightKg,
+    );
+    final allocated = allocation.isReady && fuelDay != null
+        ? allocation.days
+            .where((day) => FuelCalendar.sameDay(day.plan.date, fuelDay.date))
+            .firstOrNull
+        : null;
+    final targetCalories =
+        adult ? allocated?.calories ?? edgeFuel.targetCalories : 0;
     final ratio =
         targetCalories == 0 ? 0.0 : edgeFuel.consumedCalories / targetCalories;
     final activeTab = switch (_tab) {
       0 => _TodayView(
           edgeFuel: edgeFuel,
           ratio: ratio,
+          adult: adult,
+          fuelDay: fuelDay,
+          allocated: allocated,
+          addOnFoods: _foodsForSuggestions(
+              adult && edgeFuel.hasUsableTarget && fuelDay != null),
+          onAddOn: (addOn, food) => _logAddOn(edgeFuel, addOn, food),
           onEdit: _editFood,
           onToggle: _confirmToggled,
           onDelete: _deleteFood,
@@ -82,13 +136,16 @@ class _NutritionScreenState extends State<NutritionScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
-            child: Column(children: [
-              _DateSwitcher(edgeFuel: edgeFuel),
-              const SizedBox(height: Insets.sm),
-              _NutritionSegments(
+            child: Column(
+              children: [
+                _DateSwitcher(edgeFuel: edgeFuel),
+                const SizedBox(height: Insets.sm),
+                _NutritionSegments(
                   selected: _tab,
-                  onSelected: (index) => setState(() => _tab = index)),
-            ]),
+                  onSelected: (index) => setState(() => _tab = index),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: Insets.lg),
           Expanded(child: activeTab),
@@ -113,6 +170,36 @@ class _NutritionScreenState extends State<NutritionScreen> {
         ],
       ),
     );
+  }
+
+  Future<Map<String, FoodItem>>? _foodsForSuggestions(bool eligible) {
+    // Both reviews must be recorded before the catalog portions can surface.
+    if (!eligible ||
+        !FuelDayPolicy.amountsEnabledByDefault ||
+        FuelAddOnCatalog.dietitianSignOffPending) {
+      return null;
+    }
+    return _addOnFoods ??= context.read<FoodCatalogRepository>().loadAll().then(
+          (foods) => {for (final food in foods) food.id: food},
+        );
+  }
+
+  void _logAddOn(EdgeFuelController edgeFuel, FuelAddOn addOn, FoodItem food) {
+    if (!context.read<AppState>().requireWrite()) return;
+    final nutrients = PortionCalculator.forGrams(food, addOn.grams);
+    final entry = FoodLogEntry(
+      id: 'food-${DateTime.now().microsecondsSinceEpoch}',
+      name: food.name,
+      notes: PortionCalculator.label(addOn.grams),
+      calories: nutrients.calories,
+      proteinGrams: nutrients.proteinGrams,
+      carbGrams: nutrients.carbGrams,
+      fatGrams: nutrients.fatGrams,
+      source: FoodLogSource.catalog,
+      loggedAt: DateTime.now(),
+    );
+    unawaited(edgeFuel.addEntry(entry));
+    _confirmLogged(edgeFuel, entry);
   }
 
   Future<void> _addFood(EdgeFuelController edgeFuel) async {
@@ -144,7 +231,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
           behavior: SnackBarBehavior.floating,
           margin: _feedbackMargin,
           content: Text(
-              L.of(context).nutritionAddedSnack(entry.name, entry.calories)),
+            L.of(context).nutritionAddedSnack(entry.name, entry.calories),
+          ),
           action: SnackBarAction(
             label: L.of(context).commonUndo,
             textColor: AppColors.accentText,
@@ -172,9 +260,11 @@ class _NutritionScreenState extends State<NutritionScreen> {
         SnackBar(
           behavior: SnackBarBehavior.floating,
           margin: _feedbackMargin,
-          content: Text(nowEaten
-              ? l.foodMarkedEaten(entry.name)
-              : l.foodMarkedNotEaten(entry.name)),
+          content: Text(
+            nowEaten
+                ? l.foodMarkedEaten(entry.name)
+                : l.foodMarkedNotEaten(entry.name),
+          ),
           action: SnackBarAction(
             label: l.commonUndo,
             textColor: AppColors.accentText,
@@ -189,15 +279,17 @@ class _NutritionScreenState extends State<NutritionScreen> {
     unawaited(edgeFuel.deleteEntry(entry));
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        behavior: SnackBarBehavior.floating,
-        margin: _feedbackMargin,
-        content: Text(L.of(context).fuelRemovedSnack(entry.name)),
-        action: SnackBarAction(
-          label: L.of(context).commonUndo,
-          onPressed: () => unawaited(edgeFuel.addEntry(entry)),
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          margin: _feedbackMargin,
+          content: Text(L.of(context).fuelRemovedSnack(entry.name)),
+          action: SnackBarAction(
+            label: L.of(context).commonUndo,
+            onPressed: () => unawaited(edgeFuel.addEntry(entry)),
+          ),
         ),
-      ));
+      );
   }
 
   Future<void> _editFood(
@@ -343,8 +435,13 @@ class _FoodEntryDialogState extends State<_FoodEntryDialog> {
       _carbsError = _macroError(_carbs.text);
       _fatsError = _macroError(_fats.text);
     });
-    if ([_nameError, _caloriesError, _proteinError, _carbsError, _fatsError]
-        .any((e) => e != null)) {
+    if ([
+      _nameError,
+      _caloriesError,
+      _proteinError,
+      _carbsError,
+      _fatsError,
+    ].any((e) => e != null)) {
       return;
     }
     final existing = widget.existing;
@@ -489,130 +586,214 @@ class _DialogField extends StatelessWidget {
 class _TodayView extends StatelessWidget {
   final EdgeFuelController edgeFuel;
   final double ratio;
+  final bool adult;
+  final FuelDayPlan? fuelDay;
+  final AcceptedFuelDay? allocated;
+  final Future<Map<String, FoodItem>>? addOnFoods;
+  final void Function(FuelAddOn, FoodItem) onAddOn;
   final Future<void> Function(EdgeFuelController, {FoodLogEntry? existing})
       onEdit;
   final void Function(EdgeFuelController, FoodLogEntry) onToggle;
   final void Function(EdgeFuelController, FoodLogEntry) onDelete;
   final void Function(EdgeFuelController, FoodLogEntry) onLogged;
-  const _TodayView(
-      {required this.edgeFuel,
-      required this.ratio,
-      required this.onEdit,
-      required this.onToggle,
-      required this.onDelete,
-      required this.onLogged});
+  const _TodayView({
+    required this.edgeFuel,
+    required this.ratio,
+    required this.adult,
+    required this.fuelDay,
+    required this.allocated,
+    required this.addOnFoods,
+    required this.onAddOn,
+    required this.onEdit,
+    required this.onToggle,
+    required this.onDelete,
+    required this.onLogged,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final hasTarget = edgeFuel.hasUsableTarget;
-    final left = (edgeFuel.targetCalories - edgeFuel.consumedCalories)
-        .clamp(0, edgeFuel.targetCalories);
+    final hasTarget = adult && edgeFuel.hasUsableTarget;
+    final calories = allocated?.calories ?? edgeFuel.targetCalories;
+    final protein = allocated?.proteinGrams ?? edgeFuel.targetProtein;
+    final carbs = allocated?.carbGrams ?? edgeFuel.targetCarbs;
+    final fats = allocated?.fatGrams ?? edgeFuel.targetFats;
+    final left = (calories - edgeFuel.consumedCalories).clamp(0, calories);
     final recent = edgeFuel.recentFoods.take(3).toList();
     return ListView(
-      padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
-          ScreenScaffold.tabBottomPadding(context)),
+      padding: EdgeInsets.fromLTRB(
+        Insets.lg,
+        Insets.none,
+        Insets.lg,
+        ScreenScaffold.tabBottomPadding(context),
+      ),
       children: [
         const SyncNotice(),
         const SizedBox(height: Insets.lg),
-        Row(children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-                    textScaler: AppAccessibility.heroNumeralScaler(context),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaler: AppAccessibility.heroNumeralScaler(context),
+                    ),
+                    child: AnimatedCount(
+                      value: (hasTarget ? left : edgeFuel.consumedCalories)
+                          .toDouble(),
+                      formatter: (value) => '${value.round()}',
+                      style: AppType.heroNumeral(),
+                    ),
                   ),
-                  child: AnimatedCount(
-                    value: (hasTarget ? left : edgeFuel.consumedCalories)
-                        .toDouble(),
-                    formatter: (value) => '${value.round()}',
-                    style: AppType.heroNumeral(),
+                  Text(
+                    hasTarget ? l.nutritionKcalLeft : l.nutritionLoggedToday,
+                    style: AppType.micro(color: AppColors.textSecondary),
                   ),
-                ),
-                Text(
-                  hasTarget ? l.nutritionKcalLeft : l.nutritionLoggedToday,
-                  style: AppType.micro(color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          if (hasTarget)
-            ProgressRing(
-              progress: ratio.clamp(0.0, 1.0),
-              size: LayoutTokens.fuelSummaryRing,
-              strokeWidth: Insets.sm,
-              color: AppColors.primary,
-              child: Semantics(
-                label: l.fuelConsumedKcal(edgeFuel.consumedCalories),
-                excludeSemantics: true,
-                child: Text(
-                  '${(ratio.clamp(0.0, 1.0) * 100).round()}%',
-                  style: AppType.title2(),
-                ),
+                ],
               ),
             ),
-        ]),
+            if (hasTarget)
+              ProgressRing(
+                progress: ratio.clamp(0.0, 1.0),
+                size: LayoutTokens.fuelSummaryRing,
+                strokeWidth: Insets.sm,
+                color: AppColors.primary,
+                child: Semantics(
+                  label: l.fuelConsumedKcal(edgeFuel.consumedCalories),
+                  excludeSemantics: true,
+                  child: Text(
+                    '${(ratio.clamp(0.0, 1.0) * 100).round()}%',
+                    style: AppType.title2(),
+                  ),
+                ),
+              ),
+          ],
+        ),
         const SizedBox(height: Insets.xl),
-        _Macro(l.nutritionProtein, edgeFuel.consumedProtein,
-            edgeFuel.targetProtein, AppColors.protein,
-            prominent: true),
+        _Macro(
+          l.nutritionProtein,
+          edgeFuel.consumedProtein,
+          hasTarget ? protein : 0,
+          AppColors.protein,
+          prominent: true,
+        ),
         const SizedBox(height: Insets.md),
-        _Macro(l.nutritionCarbs, edgeFuel.consumedCarbs, edgeFuel.targetCarbs,
-            AppColors.carbs),
+        _Macro(
+          l.nutritionCarbs,
+          edgeFuel.consumedCarbs,
+          hasTarget ? carbs : 0,
+          AppColors.carbs,
+        ),
         const SizedBox(height: Insets.md),
-        _Macro(l.nutritionFats, edgeFuel.consumedFats, edgeFuel.targetFats,
-            AppColors.fats),
+        _Macro(
+          l.nutritionFats,
+          edgeFuel.consumedFats,
+          hasTarget ? fats : 0,
+          AppColors.fats,
+        ),
+        if (fuelDay != null) ...[
+          const SizedBox(height: Insets.xl),
+          FuelDayPanel(
+            day: fuelDay!,
+            allocated: allocated,
+            acceptedTarget: hasTarget ? edgeFuel.target : null,
+            adult: adult,
+            hints: edgeFuel.isToday
+                ? FuelDayPlanner.hints(fuelDay!, adultConfirmed: adult)
+                : const [],
+          ),
+        ],
         TextButton.icon(
-            style: TextButton.styleFrom(
-              foregroundColor: AppAccessibility.accentText(context),
-              minimumSize:
-                  const Size.fromHeight(AppAccessibility.minTouchTarget),
-            ),
-            iconAlignment: IconAlignment.end,
-            icon: const Icon(AppIcons.caretRight, size: IconSizes.row),
-            onPressed: () => AppNavigation.push(
-                context,
-                edgeFuel.hasCompletedSetup
-                    ? AppRoutes.fuelPlan
-                    : AppRoutes.fuelSetup,
-                fallbackBuilder: (_) => edgeFuel.hasCompletedSetup
-                    ? const EdgeFuelPlanScreen()
-                    : const EdgeFuelSetupScreen()),
-            label: Text(hasTarget ? l.nutritionViewPlan : l.dashboardSetFuel)),
-        if (FuelWhatIsLeft.appliesTo(edgeFuel))
+          style: TextButton.styleFrom(
+            foregroundColor: AppAccessibility.accentText(context),
+            minimumSize: const Size.fromHeight(AppAccessibility.minTouchTarget),
+          ),
+          iconAlignment: IconAlignment.end,
+          icon: const Icon(AppIcons.caretRight, size: IconSizes.row),
+          onPressed: () => AppNavigation.push(
+            context,
+            edgeFuel.hasCompletedSetup
+                ? AppRoutes.fuelPlan
+                : AppRoutes.fuelSetup,
+            fallbackBuilder: (_) => edgeFuel.hasCompletedSetup
+                ? const EdgeFuelPlanScreen()
+                : const EdgeFuelSetupScreen(),
+          ),
+          label: Text(hasTarget ? l.nutritionViewPlan : l.dashboardSetFuel),
+        ),
+        if (hasTarget &&
+            allocated == null &&
+            FuelWhatIsLeft.appliesTo(edgeFuel))
           FuelWhatIsLeft(edgeFuel: edgeFuel, compact: true),
+        if (fuelDay != null && hasTarget && addOnFoods != null)
+          FutureBuilder<Map<String, FoodItem>>(
+            future: addOnFoods,
+            builder: (context, snapshot) {
+              final gap = FuelMatchCalculator.dayGap(
+                target: edgeFuel.target,
+                day: edgeFuel.day,
+                allocatedDay: allocated,
+                ageYears: edgeFuel.draft?.ageYears,
+                weightKg: edgeFuel.draft?.currentWeightKg,
+                dayType: fuelDay!.type,
+                preferences: edgeFuel.draft,
+                foodsById: snapshot.data ?? const {},
+              );
+              if (gap.status != FuelGapStatus.ready &&
+                  gap.status != FuelGapStatus.noMatch) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(top: Insets.lg),
+                child: FuelGapPanel(
+                  gap: gap,
+                  canWrite: context.watch<AppState>().canWrite,
+                  onAddOn: onAddOn,
+                ),
+              );
+            },
+          ),
         const SizedBox(height: Insets.xl),
         if (recent.isNotEmpty) ...[
-          Text(l.fuelRecentFoods,
-              style: AppType.micro(color: AppColors.textSecondary)),
+          Text(
+            l.fuelRecentFoods,
+            style: AppType.micro(color: AppColors.textSecondary),
+          ),
           const SizedBox(height: Insets.sm),
-          Wrap(spacing: Insets.sm, runSpacing: Insets.sm, children: [
-            for (final entry in recent)
-              ActionChip(
-                tooltip: l.fuelRepeatFood(entry.name),
-                label: Text(entry.name),
-                onPressed: () {
-                  if (!context.read<AppState>().requireWrite()) return;
-                  final logged = edgeFuel.entryForLogAgain(entry);
-                  unawaited(edgeFuel.addEntry(logged));
-                  onLogged(edgeFuel, logged);
-                },
-              ),
-          ]),
+          Wrap(
+            spacing: Insets.sm,
+            runSpacing: Insets.sm,
+            children: [
+              for (final entry in recent)
+                ActionChip(
+                  tooltip: l.fuelRepeatFood(entry.name),
+                  label: Text(entry.name),
+                  onPressed: () {
+                    if (!context.read<AppState>().requireWrite()) return;
+                    final logged = edgeFuel.entryForLogAgain(entry);
+                    unawaited(edgeFuel.addEntry(logged));
+                    onLogged(edgeFuel, logged);
+                  },
+                ),
+            ],
+          ),
           const SizedBox(height: Insets.xl),
         ],
         SectionHeader(l.nutritionMeals),
         if (edgeFuel.entries.isEmpty)
-          Text(l.fuelEmptyLog,
-              style: AppType.body(color: AppColors.textSecondary))
+          Text(
+            l.fuelEmptyLog,
+            style: AppType.body(color: AppColors.textSecondary),
+          )
         else
           _MealGroup(
-              edgeFuel: edgeFuel,
-              onEdit: onEdit,
-              onToggle: onToggle,
-              onDelete: onDelete),
+            edgeFuel: edgeFuel,
+            onEdit: onEdit,
+            onToggle: onToggle,
+            onDelete: onDelete,
+          ),
       ],
     );
   }
@@ -628,51 +809,65 @@ class _NutritionSegments extends StatelessWidget {
     final labels = [
       l.nutritionTabToday,
       l.nutritionTabMeals,
-      l.nutritionTabRecipes
+      l.nutritionTabRecipes,
     ];
     if (AppAccessibility.isLargeText(context)) {
-      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        for (final (index, label) in labels.indexed)
-          Semantics(
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (index, label) in labels.indexed)
+            Semantics(
               selected: selected == index,
               child: TextButton(
-                  style: TextButton.styleFrom(
-                      minimumSize: const Size.fromHeight(
-                          AppAccessibility.minTouchTarget),
-                      backgroundColor: selected == index
-                          ? AppColors.surfaceElevated
-                          : AppColors.surface,
-                      foregroundColor: AppColors.textPrimary),
-                  onPressed: () => onSelected(index),
-                  child: Text(label, style: AppType.callout()))),
-      ]);
+                style: TextButton.styleFrom(
+                  minimumSize: const Size.fromHeight(
+                    AppAccessibility.minTouchTarget,
+                  ),
+                  backgroundColor: selected == index
+                      ? AppColors.surfaceElevated
+                      : AppColors.surface,
+                  foregroundColor: AppColors.textPrimary,
+                ),
+                onPressed: () => onSelected(index),
+                child: Text(label, style: AppType.callout()),
+              ),
+            ),
+        ],
+      );
     }
     return SizedBox(
-        width: double.infinity,
-        child: CupertinoSlidingSegmentedControl<int>(
-          groupValue: selected,
-          backgroundColor: AppColors.surface,
-          thumbColor: AppColors.surfaceElevated,
-          padding: const EdgeInsets.all(Insets.xs),
-          onValueChanged: (value) {
-            if (value != null) {
-              AppHaptics.selection();
-              onSelected(value);
-            }
-          },
-          children: {
-            for (final (index, label) in labels.indexed)
-              index: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                      minHeight: AppAccessibility.minTouchTarget),
-                  child: Center(
-                      child: Text(label,
-                          style: AppType.subhead(
-                              color: selected == index
-                                  ? AppColors.textPrimary
-                                  : AppAccessibility.textSecondary(context)))))
-          },
-        ));
+      width: double.infinity,
+      child: CupertinoSlidingSegmentedControl<int>(
+        groupValue: selected,
+        backgroundColor: AppColors.surface,
+        thumbColor: AppColors.surfaceElevated,
+        padding: const EdgeInsets.all(Insets.xs),
+        onValueChanged: (value) {
+          if (value != null) {
+            AppHaptics.selection();
+            onSelected(value);
+          }
+        },
+        children: {
+          for (final (index, label) in labels.indexed)
+            index: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: AppAccessibility.minTouchTarget,
+              ),
+              child: Center(
+                child: Text(
+                  label,
+                  style: AppType.subhead(
+                    color: selected == index
+                        ? AppColors.textPrimary
+                        : AppAccessibility.textSecondary(context),
+                  ),
+                ),
+              ),
+            ),
+        },
+      ),
+    );
   }
 }
 
@@ -682,34 +877,36 @@ class _MealGroup extends StatelessWidget {
       onEdit;
   final void Function(EdgeFuelController, FoodLogEntry) onToggle;
   final void Function(EdgeFuelController, FoodLogEntry) onDelete;
-  const _MealGroup(
-      {required this.edgeFuel,
-      required this.onEdit,
-      required this.onToggle,
-      required this.onDelete});
+  const _MealGroup({
+    required this.edgeFuel,
+    required this.onEdit,
+    required this.onToggle,
+    required this.onDelete,
+  });
   @override
-  Widget build(BuildContext context) => GroupedList(children: [
-        for (final entry in edgeFuel.entries)
-          Dismissible(
-            key: ValueKey(entry.id),
-            direction: DismissDirection.endToStart,
-            movementDuration: MediaQuery.disableAnimationsOf(context)
-                ? Duration.zero
-                : MotionTokens.standard,
-            resizeDuration: MediaQuery.disableAnimationsOf(context)
-                ? null
-                : MotionTokens.fast,
-            confirmDismiss: (_) async =>
-                context.read<AppState>().requireWrite(),
-            background: const Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: Insets.lg),
-                child: Icon(AppIcons.x, color: AppColors.textSecondary),
+  Widget build(BuildContext context) => GroupedList(
+        children: [
+          for (final entry in edgeFuel.entries)
+            Dismissible(
+              key: ValueKey(entry.id),
+              direction: DismissDirection.endToStart,
+              movementDuration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : MotionTokens.standard,
+              resizeDuration: MediaQuery.disableAnimationsOf(context)
+                  ? null
+                  : MotionTokens.fast,
+              confirmDismiss: (_) async =>
+                  context.read<AppState>().requireWrite(),
+              background: const Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Insets.lg),
+                  child: Icon(AppIcons.x, color: AppColors.textSecondary),
+                ),
               ),
-            ),
-            onDismissed: (_) => onDelete(edgeFuel, entry),
-            child: _FoodRow(
+              onDismissed: (_) => onDelete(edgeFuel, entry),
+              child: _FoodRow(
                 entry: entry,
                 onToggle: () => onToggle(edgeFuel, entry),
                 onEdit: () => onEdit(edgeFuel, existing: entry),
@@ -717,9 +914,11 @@ class _MealGroup extends StatelessWidget {
                 onSaveToggle: () {
                   if (!context.read<AppState>().requireWrite()) return;
                   edgeFuel.toggleSavedFood(entry);
-                }),
-          ),
-      ]);
+                },
+              ),
+            ),
+        ],
+      );
 }
 
 class _QuickStartMeals extends StatelessWidget {
@@ -762,14 +961,12 @@ class _QuickStartMeals extends StatelessWidget {
           ),
           const SizedBox(height: Insets.md),
           for (final meal in _meals) ...[
-            _QuickMealTile(
-              meal: meal,
-              onTap: () => _addMeal(context, meal),
-            ),
+            _QuickMealTile(meal: meal, onTap: () => _addMeal(context, meal)),
             if (meal != _meals.last)
               Divider(
-                  height: Insets.xxs / 2,
-                  color: AppAccessibility.border(context)),
+                height: Insets.xxs / 2,
+                color: AppAccessibility.border(context),
+              ),
           ],
           const SizedBox(height: Insets.md),
           GhostButton(
@@ -790,23 +987,24 @@ class _QuickStartMeals extends StatelessWidget {
   Future<void> _addMeal(BuildContext context, _QuickMeal meal) async {
     if (!context.read<AppState>().requireWrite()) return;
     AppHaptics.commit();
-    unawaited(edgeFuel.addEntry(
-      FoodLogEntry(
-        id: 'quick-${DateTime.now().microsecondsSinceEpoch}',
-        name: meal.name,
-        notes: meal.notes,
-        calories: meal.calories,
-        proteinGrams: meal.protein,
-        carbGrams: meal.carbs,
-        fatGrams: meal.fats,
-        source: FoodLogSource.manual,
-        loggedAt: DateTime.now(),
+    unawaited(
+      edgeFuel.addEntry(
+        FoodLogEntry(
+          id: 'quick-${DateTime.now().microsecondsSinceEpoch}',
+          name: meal.name,
+          notes: meal.notes,
+          calories: meal.calories,
+          proteinGrams: meal.protein,
+          carbGrams: meal.carbs,
+          fatGrams: meal.fats,
+          source: FoodLogSource.manual,
+          loggedAt: DateTime.now(),
+        ),
       ),
-    ));
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${meal.name} added to today')),
     );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('${meal.name} added to today')));
   }
 }
 
@@ -858,17 +1056,22 @@ class _QuickMealTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(meal.name,
-                      style: AppType.callout(weight: FontWeight.w800)),
+                  Text(
+                    meal.name,
+                    style: AppType.callout(weight: FontWeight.w800),
+                  ),
                   const SizedBox(height: Insets.xxs),
-                  Text(meal.notes,
-                      style: AppType.micro(color: AppColors.textMuted)),
+                  Text(
+                    meal.notes,
+                    style: AppType.micro(color: AppColors.textMuted),
+                  ),
                   const SizedBox(height: Insets.xs),
                   Text(
                     '${meal.calories} kcal · ${meal.protein}g protein · ${meal.carbs}g carbs',
                     style: AppType.micro(
-                        color: AppColors.textSecondary,
-                        weight: FontWeight.w700),
+                      color: AppColors.textSecondary,
+                      weight: FontWeight.w700,
+                    ),
                   ),
                 ],
               ),
@@ -897,21 +1100,21 @@ class _RecipesTab extends StatelessWidget {
     const beforeTraining = _RecipeShortcut(
       icon: AppIcons.lightning,
       label: 'Before training',
-      filters: RecipeFilters(
-        trainingTiming: TrainingTiming.preTraining,
-      ),
+      filters: RecipeFilters(trainingTiming: TrainingTiming.preTraining),
     );
     const afterTraining = _RecipeShortcut(
       icon: AppIcons.arrowCounterClockwise,
       label: 'After training',
-      filters: RecipeFilters(
-        trainingTiming: TrainingTiming.postTraining,
-      ),
+      filters: RecipeFilters(trainingTiming: TrainingTiming.postTraining),
     );
 
     return ListView(
-      padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
-          ScreenScaffold.tabBottomPadding(context)),
+      padding: EdgeInsets.fromLTRB(
+        Insets.lg,
+        Insets.none,
+        Insets.lg,
+        ScreenScaffold.tabBottomPadding(context),
+      ),
       children: [
         AppCard(
           child: Column(
@@ -1023,13 +1226,18 @@ class _MealsView extends StatelessWidget {
     };
     final quickAdds = [
       ...edgeFuel.savedFoods,
-      ...edgeFuel.recentFoods
-          .where((r) => !savedKeys.contains(r.name.trim().toLowerCase())),
+      ...edgeFuel.recentFoods.where(
+        (r) => !savedKeys.contains(r.name.trim().toLowerCase()),
+      ),
     ];
 
     return ListView(
-      padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
-          ScreenScaffold.tabBottomPadding(context)),
+      padding: EdgeInsets.fromLTRB(
+        Insets.lg,
+        Insets.none,
+        Insets.lg,
+        ScreenScaffold.tabBottomPadding(context),
+      ),
       children: [
         if (quickAdds.isNotEmpty) ...[
           SectionHeader(L.of(context).fuelQuickAdd),
@@ -1059,14 +1267,16 @@ class _MealsView extends StatelessWidget {
           const SizedBox(height: Insets.lg),
         ],
         SectionHeader(
-            L.of(context).fuelMealsLogged(eaten, edgeFuel.entries.length)),
+          L.of(context).fuelMealsLogged(eaten, edgeFuel.entries.length),
+        ),
         if (edgeFuel.entries.isEmpty) _QuickStartMeals(edgeFuel: edgeFuel),
         if (edgeFuel.entries.isNotEmpty)
           _MealGroup(
-              edgeFuel: edgeFuel,
-              onEdit: onEdit,
-              onToggle: onToggle,
-              onDelete: onDelete),
+            edgeFuel: edgeFuel,
+            onEdit: onEdit,
+            onToggle: onToggle,
+            onDelete: onDelete,
+          ),
       ],
     );
   }
@@ -1077,37 +1287,52 @@ class _Macro extends StatelessWidget {
   final int value, target;
   final Color color;
   final bool prominent;
-  const _Macro(this.label, this.value, this.target, this.color,
-      {this.prominent = false});
+  const _Macro(
+    this.label,
+    this.value,
+    this.target,
+    this.color, {
+    this.prominent = false,
+  });
   @override
   Widget build(BuildContext context) {
     final remaining = (target - value).clamp(0, target);
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Wrap(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Wrap(
           alignment: WrapAlignment.spaceBetween,
           spacing: Insets.sm,
           runSpacing: Insets.xs,
           children: [
-            Text(label,
-                style: AppType.subhead(
-                    color: AppAccessibility.textSecondary(context))),
             Text(
-                target > 0
-                    ? L.of(context).fuelGramsLeft(remaining)
-                    : L.of(context).nutritionGrams(value),
-                style: prominent
-                    ? AppType.title1(color: AppColors.textPrimary)
-                    : AppType.subhead(color: AppColors.textPrimary)),
-          ]),
-      const SizedBox(height: Insets.sm),
-      ClipRRect(
+              label,
+              style: AppType.subhead(
+                color: AppAccessibility.textSecondary(context),
+              ),
+            ),
+            Text(
+              target > 0
+                  ? L.of(context).fuelGramsLeft(remaining)
+                  : L.of(context).nutritionGrams(value),
+              style: prominent
+                  ? AppType.title1(color: AppColors.textPrimary)
+                  : AppType.subhead(color: AppColors.textPrimary),
+            ),
+          ],
+        ),
+        const SizedBox(height: Insets.sm),
+        ClipRRect(
           borderRadius: BorderRadius.circular(Radii.chip),
           child: LinearProgressIndicator(
-              value: target <= 0 ? 0 : (value / target).clamp(0.0, 1.0),
-              minHeight: Insets.xs,
-              backgroundColor: AppColors.track,
-              color: color)),
-    ]);
+            value: target <= 0 ? 0 : (value / target).clamp(0.0, 1.0),
+            minHeight: Insets.xs,
+            backgroundColor: AppColors.track,
+            color: color,
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -1168,8 +1393,10 @@ class _FoodRow extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: Insets.xxs),
-                      Text('${entry.calories} kcal',
-                          style: AppType.subhead(color: secondary)),
+                      Text(
+                        '${entry.calories} kcal',
+                        style: AppType.subhead(color: secondary),
+                      ),
                       Text(
                         entry.notes,
                         style: AppType.subhead(
@@ -1185,8 +1412,10 @@ class _FoodRow extends StatelessWidget {
           ),
           _ToggleCheck(checked: entry.consumed, onTap: onToggle),
           PopupMenuButton<String>(
-            icon: const Icon(AppIcons.dotsThreeVertical,
-                color: AppColors.textMuted),
+            icon: const Icon(
+              AppIcons.dotsThreeVertical,
+              color: AppColors.textMuted,
+            ),
             color: AppColors.surface,
             onSelected: (value) {
               if (value == 'edit') onEdit();
@@ -1200,9 +1429,11 @@ class _FoodRow extends StatelessWidget {
               ),
               PopupMenuItem(
                 value: 'save',
-                child: Text(entry.saved
-                    ? L.of(context).commonUnsave
-                    : L.of(context).commonSaveMeal),
+                child: Text(
+                  entry.saved
+                      ? L.of(context).commonUnsave
+                      : L.of(context).commonSaveMeal,
+                ),
               ),
               PopupMenuItem(
                 value: 'delete',

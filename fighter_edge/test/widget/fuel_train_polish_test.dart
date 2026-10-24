@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
@@ -102,6 +103,8 @@ void main() {
         addTearDown(tester.platformDispatcher.clearLocaleTestValue);
         final repo = await makeRepo(signedIn: true);
         final fuelRepo = InMemoryEdgeFuelRepository();
+        await fuelRepo.saveProfileDraft(repo.currentUser!.id,
+            const NutritionSetupDraft(ageYears: 28, confirmed: true));
         await fuelRepo.saveTarget(
             repo.currentUser!.id,
             NutritionTarget(
