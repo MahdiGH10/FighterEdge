@@ -39,6 +39,28 @@ void main() {
       );
     });
 
+    test('an unverified user may start the trial once the email was sent', () {
+      final user = _user(verified: false);
+      expect(
+        VerificationGate.allows(user, VerifiedAction.purchasePro,
+            supportsVerification: true, verificationEmailSent: true),
+        isTrue,
+      );
+      expect(
+        VerificationGate.allows(user, VerifiedAction.purchasePro,
+            supportsVerification: true, verificationEmailSent: false),
+        isFalse,
+      );
+    });
+
+    test('a signed-out user is refused even if an email was sent', () {
+      expect(
+        VerificationGate.allows(null, VerifiedAction.purchasePro,
+            supportsVerification: true, verificationEmailSent: true),
+        isFalse,
+      );
+    });
+
     test('the gate is open when the backend has no verification concept', () {
       // Otherwise the local/dev repository could never reach gated surfaces.
       final user = _user(verified: false);

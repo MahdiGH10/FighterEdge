@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -25,6 +27,7 @@ import 'features/fight_camp/data/fight_camp_repository.dart';
 import 'features/fight_camp/data/firestore_fight_camp_repository.dart';
 import 'features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'features/fight_camp/presentation/fight_camp_controller.dart';
+import 'features/training_plan/presentation/plan_controller.dart';
 import 'firebase_options.dart';
 import 'notifications/local_reminder_gateway.dart';
 import 'notifications/reminder_gateway.dart';
@@ -34,12 +37,13 @@ import 'observability/error_reporter.dart';
 import 'observability/telemetry.dart';
 import 'privacy/consent.dart';
 import 'routing/app_router.dart';
+import 'screens/paywall_screen.dart';
 import 'security/app_check.dart';
 import 'state/app_state.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'state/first_run_controller.dart';
+import 'state/glass_policy_controller.dart';
 import 'state/locale_controller.dart';
-import 'state/streak_controller.dart';
 import 'state/sync_tracker.dart';
 import 'training/reaction/coach_voice.dart';
 import 'training/reaction/tts_coach_voice.dart';
@@ -316,6 +320,7 @@ class FighterEdgeApp extends StatelessWidget {
                   sync: context.read<SyncTracker>(),
                 );
             appState.setUser(auth.user?.id);
+            appState.accessSource = () => auth.accessState;
             return appState;
           },
         ),
@@ -324,29 +329,44 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<FoodCatalogRepository>.value(value: resolvedFoodCatalog),
         Provider<RecipeCatalogRepository>.value(value: resolvedRecipeCatalog),
         ChangeNotifierProvider(create: (_) => LocaleController()..load()),
+        ChangeNotifierProvider(create: (_) => GlassPolicyController()..load()),
         ChangeNotifierProxyProvider<AuthController, FirstRunController>(
           create: (_) => FirstRunController(),
           update: (_, auth, firstRun) =>
               (firstRun ?? FirstRunController())..setUser(auth.user?.id),
-        ),
-        ChangeNotifierProxyProvider<AuthController, StreakController>(
-          create: (context) =>
-              StreakController(clock: () => context.read<AppState>().now),
-          update: (context, auth, streak) => (streak ??
-              StreakController(clock: () => context.read<AppState>().now))
-            ..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, FightCampController>(
           create: (_) => FightCampController(
             repository: resolvedFightCampRepo,
             errorReporter: errorReporter ?? const NoopErrorReporter(),
           ),
-          update: (_, auth, controller) => (controller ??
+          update: (context, auth, controller) => (controller ??
               FightCampController(
                 repository: resolvedFightCampRepo,
                 errorReporter: errorReporter ?? const NoopErrorReporter(),
               ))
+            ..writeGate = context.read<AppState>().requireWrite
             ..setUser(auth.user?.id),
+        ),
+        ChangeNotifierProxyProvider2<AuthController, FightCampController,
+            PlanController>(
+          create: (context) => PlanController(
+            log: context.read<AppState>(),
+            repository: dataRepo,
+            sync: context.read<SyncTracker>(),
+          ),
+          update: (context, auth, fightCamp, plan) => (plan ??
+              PlanController(
+                log: context.read<AppState>(),
+                repository: dataRepo,
+                sync: context.read<SyncTracker>(),
+              ))
+            ..configure(
+              userId: auth.user?.id,
+              fight: fightCamp.camp,
+              goal: auth.user?.goal ?? '',
+              level: auth.user?.experienceLevel ?? '',
+            ),
         ),
         ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
           create: (context) => EdgeFuelController(
@@ -363,6 +383,7 @@ class FighterEdgeApp extends StatelessWidget {
                   errorReporter: errorReporter ?? const NoopErrorReporter(),
                   sync: context.read<SyncTracker>(),
                 );
+            edgeFuel.writeGate = context.read<AppState>().requireWrite;
             edgeFuel.setUser(auth.user?.id);
             return edgeFuel;
           },
@@ -384,6 +405,8 @@ class _FighterEdgeMaterialApp extends StatefulWidget {
 class _FighterEdgeMaterialAppState extends State<_FighterEdgeMaterialApp> {
   late final GoRouter _router;
   late final VoidCallback _stopSessionReset;
+  late final AppState _appState;
+  bool _paywallOpen = false;
 
   @override
   void initState() {
@@ -391,10 +414,27 @@ class _FighterEdgeMaterialAppState extends State<_FighterEdgeMaterialApp> {
     final auth = context.read<AuthController>();
     _router = createAppRouter(auth: auth);
     _stopSessionReset = resetStackOnSessionChange(_router, auth);
+    // A refused write in a read-only account opens the paywall from here.
+    _appState = context.read<AppState>();
+    _appState.onWriteBlocked = () => unawaited(_openReadOnlyPaywall());
+  }
+
+  Future<void> _openReadOnlyPaywall() async {
+    if (_paywallOpen) return;
+    _paywallOpen = true;
+    try {
+      await _router.push<void>(
+        AppRoutes.paywall,
+        extra: const PaywallRouteArgs(trigger: PaywallTrigger.readOnly),
+      );
+    } finally {
+      _paywallOpen = false;
+    }
   }
 
   @override
   void dispose() {
+    _appState.onWriteBlocked = null;
     _stopSessionReset();
     _router.dispose();
     super.dispose();
@@ -411,7 +451,9 @@ class _FighterEdgeMaterialAppState extends State<_FighterEdgeMaterialApp> {
       localizationsDelegates: L.localizationsDelegates,
       supportedLocales: L.supportedLocales,
       routerConfig: _router,
-      builder: AppAccessibility.builder,
+      builder: (context, child) => GlassPolicyHost(
+        child: AppAccessibility.builder(context, child),
+      ),
     );
   }
 }

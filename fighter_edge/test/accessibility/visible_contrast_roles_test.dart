@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
+import 'package:fighter_edge/theme/app_accessibility.dart';
 import 'package:fighter_edge/theme/app_colors.dart';
 import 'package:fighter_edge/theme/app_icons.dart';
 import 'package:fighter_edge/theme/app_theme.dart';
@@ -81,5 +82,37 @@ void main() {
     expect(contrast(AppColors.onPrimary, button().color),
         greaterThanOrEqualTo(4.5));
     await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  group('nav labels over glass, at its brightest and on the fallbacks', () {
+    // Tab labels are 11pt text on the navigation glass, so they take the
+    // worst case of every level the bar can be drawn at.
+    final backdrops = <String, Color>{
+      'full glass': GlassColors.worstCaseBackdrop(GlassKind.nav),
+      'tinted': Color.alphaBlend(GlassColors.navFillTinted, AppColors.ember),
+      'solid': GlassColors.solidFill(GlassKind.nav),
+    };
+    for (final highContrast in [false, true]) {
+      for (final entry in backdrops.entries) {
+        testWidgets(
+            'selected and unselected labels, ${entry.key}, high=$highContrast',
+            (tester) async {
+          late BuildContext captured;
+          await tester.pumpWidget(MaterialApp(
+            home: MediaQuery(
+              data: MediaQueryData(highContrast: highContrast),
+              child: Builder(builder: (context) {
+                captured = context;
+                return const SizedBox.shrink();
+              }),
+            ),
+          ));
+          expect(contrast(AppColors.textPrimary, entry.value),
+              greaterThanOrEqualTo(4.5));
+          expect(contrast(AppAccessibility.textMuted(captured), entry.value),
+              greaterThanOrEqualTo(4.5));
+        });
+      }
+    }
   });
 }

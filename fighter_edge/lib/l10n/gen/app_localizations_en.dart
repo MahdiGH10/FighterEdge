@@ -57,6 +57,13 @@ class LEn extends L {
   String get settingsLanguageGerman => 'Deutsch';
 
   @override
+  String get settingsReduceTransparency => 'Reduce transparency';
+
+  @override
+  String get settingsReduceTransparencySubtitle =>
+      'Solid backgrounds instead of frosted glass. High contrast does this too';
+
+  @override
   String get settingsLanguageBeta =>
       'German is partly translated — the rest stays in English for now.';
 
@@ -167,9 +174,6 @@ class LEn extends L {
   String get dashboardTitle => 'Dashboard';
 
   @override
-  String get dashboardWeeklyOverview => 'Weekly overview';
-
-  @override
   String get dashboardNextSession => 'Next session';
 
   @override
@@ -191,27 +195,7 @@ class LEn extends L {
   String get dashboardStatCompleted => 'completed';
 
   @override
-  String dashboardStatDays(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'days',
-      one: 'day',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get dashboardAddWeighIn => 'Add weigh-in';
-
-  @override
-  String get dashboardStreakAtRisk => 'At risk';
-
-  @override
-  String get dashboardStreakOnFire => 'On fire';
-
-  @override
-  String get dashboardStreakLogToday => 'Log today';
 
   @override
   String get fuelWeekTitle => 'Fuel this week';
@@ -442,20 +426,6 @@ class LEn extends L {
 
   @override
   String get timerAnnounceDone => 'Session complete.';
-
-  @override
-  String get paywallWaitlistCta => 'Notify me when Pro opens';
-
-  @override
-  String get paywallWaitlistJoined => 'You\'re on the list';
-
-  @override
-  String get paywallWaitlistThanks =>
-      'Noted. Pro will appear here when it opens, with the price shown before any charge.';
-
-  @override
-  String get paywallWaitlistBody =>
-      'Pro can\'t be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.';
 
   @override
   String get paywallRenewalDisclosure =>
@@ -799,9 +769,6 @@ class LEn extends L {
   String get authHidePassword => 'Hide password';
 
   @override
-  String get dashboardThisWeek => 'This week';
-
-  @override
   String get dashboardFighter => 'Fighter';
 
   @override
@@ -838,6 +805,162 @@ class LEn extends L {
   String get dashboardOpenCamp => 'Open camp';
 
   @override
+  String dashboardStatWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'weeks',
+      one: 'week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyCardTitle => 'This week';
+
+  @override
+  String get weeklyCardRestWeek => 'Rest week';
+
+  @override
+  String get weeklyCardRestWeekHint =>
+      'No sessions planned. Rest is part of the plan.';
+
+  @override
+  String weeklyCardProgress(int done, int planned) {
+    return '$done of $planned done';
+  }
+
+  @override
+  String weeklyCardNext(String day, String session) {
+    return 'Next: $day $session';
+  }
+
+  @override
+  String get weeklyCardAllDone => 'All planned sessions done';
+
+  @override
+  String get weeklyCardNothingLeft => 'No more sessions planned this week';
+
+  @override
+  String weeklyCardTarget(int target) {
+    return '$target needed to count this week';
+  }
+
+  @override
+  String weeklyCardStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks in a row',
+      one: '1 week in a row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyCardReview => 'Weekly review';
+
+  @override
+  String get reviewTitle => 'Weekly review';
+
+  @override
+  String reviewWeekOf(String date) {
+    return 'Week of $date';
+  }
+
+  @override
+  String get reviewTraining => 'Training';
+
+  @override
+  String reviewSessionsDone(int done, int planned) {
+    return '$done of $planned sessions done';
+  }
+
+  @override
+  String get reviewFood => 'Food';
+
+  @override
+  String get reviewFoodNoTarget =>
+      'Set up Fuel to compare your week with a target.';
+
+  @override
+  String get reviewFoodNoLogs => 'No meals logged this week.';
+
+  @override
+  String reviewFoodAverage(int average, int target) {
+    return 'Average $average kcal a day against a target of $target.';
+  }
+
+  @override
+  String get reviewWeight => 'Weight';
+
+  @override
+  String get reviewWeightNoData => 'Not enough weigh-ins for a trend yet.';
+
+  @override
+  String get reviewWeightNoPath => 'No weight path to compare with.';
+
+  @override
+  String reviewWeightPath(String change) {
+    return 'Path: $change this week';
+  }
+
+  @override
+  String get reviewRecommendation => 'Recommendation';
+
+  @override
+  String get reviewRecMoveSession =>
+      'You have a planned session left over. Move it to today?';
+
+  @override
+  String reviewRecLower(int kcal) {
+    return 'Your weight is above your path and you ate to your target. Lower your daily target by $kcal kcal?';
+  }
+
+  @override
+  String reviewRecRaise(int kcal) {
+    return 'Your weight is below your path and you ate to your target. Raise your daily target by $kcal kcal?';
+  }
+
+  @override
+  String get reviewHoldOnPath => 'You are on path. Keep your plan as it is.';
+
+  @override
+  String get reviewHoldNoTarget =>
+      'Set up Fuel to get a calorie target before changes can be suggested.';
+
+  @override
+  String get reviewHoldNeedLogs =>
+      'Log at least four days of food before your target is changed.';
+
+  @override
+  String get reviewHoldIntake =>
+      'You were not close to your target this week, so it stays. Aim for it first.';
+
+  @override
+  String get reviewHoldNoPath =>
+      'Not enough weigh-ins, or no path to judge the scale by. Your target stays.';
+
+  @override
+  String get reviewHoldFloor =>
+      'Eating less would go under your resting energy estimate. Your target stays.';
+
+  @override
+  String get reviewAccept => 'Accept';
+
+  @override
+  String get reviewKeepCurrent => 'Keep current';
+
+  @override
+  String get reviewGotIt => 'Got it';
+
+  @override
+  String get reviewAccepted => 'You accepted this review.';
+
+  @override
+  String get reviewKept => 'You kept your current plan.';
+
+  @override
   String get dashboardSetFuel => 'Set a fuel target';
 
   @override
@@ -861,30 +984,6 @@ class LEn extends L {
   String get dashboardConfirmEmail => 'Confirm your email';
 
   @override
-  String get dashboardRiskTitle => 'Streak at risk';
-
-  @override
-  String dashboardFreezeHint(int count) {
-    return 'Yesterday is unlogged. Protect it with a freeze ($count left).';
-  }
-
-  @override
-  String get dashboardLogHint =>
-      'No freeze is available. Log a session today to start again.';
-
-  @override
-  String get dashboardFreeze => 'Freeze';
-
-  @override
-  String get dashboardLogNow => 'Log now';
-
-  @override
-  String get dashboardFreezeUsed => 'Freeze used — yesterday is protected.';
-
-  @override
-  String get dashboardLogged => 'Logged';
-
-  @override
   String get dashboardYesterday => 'Yesterday';
 
   @override
@@ -902,7 +1001,7 @@ class LEn extends L {
 
   @override
   String nutritionOverTarget(int kcal) {
-    return '$kcal kcal above target';
+    return 'Today\'s target met, plus $kcal kcal';
   }
 
   @override
@@ -923,6 +1022,80 @@ class LEn extends L {
 
   @override
   String get trainingSessionDone => 'Done';
+
+  @override
+  String get tplGenericSkill => 'Skill session';
+
+  @override
+  String get tplGenericSparring => 'Sparring session';
+
+  @override
+  String get tplGenericConditioning => 'Conditioning session';
+
+  @override
+  String get tplGenericStrength => 'Strength session';
+
+  @override
+  String get tplGenericRecovery => 'Recovery session';
+
+  @override
+  String get tplGenericGymClass => 'Gym class';
+
+  @override
+  String get planDisciplineBoxing => 'Boxing';
+
+  @override
+  String get planDisciplineKickboxing => 'Kickboxing';
+
+  @override
+  String get planDisciplineMuayThai => 'Muay Thai';
+
+  @override
+  String get planDisciplineWrestling => 'Wrestling';
+
+  @override
+  String get planDisciplineBjj => 'BJJ';
+
+  @override
+  String get planDisciplineMma => 'MMA';
+
+  @override
+  String planSessionMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String planSessionSubtitle(String discipline, int minutes) {
+    return '$discipline · $minutes min';
+  }
+
+  @override
+  String get planStatusSkipped => 'Skipped';
+
+  @override
+  String get planStatusNotDone => 'Not done';
+
+  @override
+  String planStatusMovedTo(String day) {
+    return 'Moved to $day';
+  }
+
+  @override
+  String planStatusMovedFrom(String day) {
+    return 'Moved from $day';
+  }
+
+  @override
+  String get planActionSkip => 'Skip';
+
+  @override
+  String get planActionMoveToToday => 'Move to today';
+
+  @override
+  String get planActionPutBack => 'Put back';
+
+  @override
+  String get planActionMore => 'More options';
 
   @override
   String trainingLogNamedSession(String session) {
@@ -978,13 +1151,6 @@ class LEn extends L {
       'Your plan is based on your goals and training days. You can adjust it as your training changes.';
 
   @override
-  String get planReadyProTitle => 'More training tools with Pro';
-
-  @override
-  String get planReadyProBody =>
-      'Pro includes all drills and recipes, and cues between rounds.';
-
-  @override
   String get planReadyCalories => 'Daily calories';
 
   @override
@@ -1018,7 +1184,7 @@ class LEn extends L {
   }
 
   @override
-  String get paywallPlainTitle => 'Your corner, every day';
+  String get paywallPlainTitle => 'Your camp, planned and fueled';
 
   @override
   String get paywallPlainSubtitle => 'One plan. Everything in Fighter Edge.';
@@ -1039,13 +1205,6 @@ class LEn extends L {
   @override
   String get paywallBenefitDrillsBody =>
       'Every striking, wrestling, BJJ and clinch drill, with how to train it.';
-
-  @override
-  String get paywallBenefitCuesTitle => 'Corner Cues';
-
-  @override
-  String get paywallBenefitCuesBody =>
-      'A tactical and a recovery cue on every rest in the round timer.';
 
   @override
   String get paywallAnnualPlan => 'Annual plan';
@@ -1087,13 +1246,6 @@ class LEn extends L {
   @override
   String get paywallSync =>
       'Your store purchase is recognized. Pro unlocks after the secure account sync completes.';
-
-  @override
-  String get paywallSoonTitle => 'Pro opens soon';
-
-  @override
-  String get paywallNoPaymentToday =>
-      'No payment today. We will ask again before any charge.';
 
   @override
   String get paywallPurchaseActive => 'Pro is active on your account.';
@@ -1678,4 +1830,169 @@ class LEn extends L {
 
   @override
   String get reactionMoveTimeNote => 'Plus the time the moves themselves take.';
+
+  @override
+  String get paywallBenefitCampTitle => 'Your camp week';
+
+  @override
+  String get paywallBenefitCampBody =>
+      'Dated sessions for your week, built around your level and your fight date.';
+
+  @override
+  String get paywallBenefitFuelTitle => 'Fuel for training days';
+
+  @override
+  String get paywallBenefitFuelBody =>
+      'Calorie and protein targets that move with the week you train.';
+
+  @override
+  String get paywallBenefitReviewTitle => 'Weekly review';
+
+  @override
+  String get paywallBenefitReviewBody =>
+      'Each Sunday: what you did and what to change. You decide.';
+
+  @override
+  String get paywallBenefitWeightTitle => 'Safe weight path';
+
+  @override
+  String get paywallBenefitWeightBody =>
+      'A weight path to your fight date, with safety limits.';
+
+  @override
+  String paywallTrialBadge(int days) {
+    return '$days-day free trial';
+  }
+
+  @override
+  String paywallTrialThen(int days, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days free, then $price',
+      one: '1 day free, then $price',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get paywallStartTrial => 'Start free trial';
+
+  @override
+  String paywallTrialRenewalDisclosure(int days, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return 'Free for $_temp0, then $price, renewing automatically until you cancel. Cancel at least 24 hours before the trial ends in your store account settings to avoid being charged. Payment is charged to your Apple ID or Google Play account at the end of the trial.';
+  }
+
+  @override
+  String get paywallTrialActiveTitle => 'Your free trial is running';
+
+  @override
+  String get paywallTrialActiveBody =>
+      'It becomes a paid plan when the trial ends unless you cancel in your store account.';
+
+  @override
+  String get paywallUnavailableTitle =>
+      'Subscriptions aren\'t available here yet';
+
+  @override
+  String get paywallUnavailableBody =>
+      'This version can\'t start a subscription yet. Your data stays saved.';
+
+  @override
+  String get readOnlyBanner =>
+      'Your data is saved. Subscribe to keep training.';
+
+  @override
+  String get readOnlyBannerCta => 'See plans';
+
+  @override
+  String trialChipDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Trial · $days days left',
+      one: 'Trial · 1 day left',
+      zero: 'Trial · ends today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get trialReminderTitle => 'Your free trial ends in 2 days';
+
+  @override
+  String get trialReminderBody =>
+      'It renews unless you cancel in your store account. Your data stays saved either way.';
+
+  @override
+  String get planReadyStartFreeWeek => 'Start your free week';
+
+  @override
+  String planReadyStartTrialDays(int days) {
+    return 'Start your $days-day free trial';
+  }
+
+  @override
+  String get planReadyViewPlans => 'See plans';
+
+  @override
+  String get planReadyNotNowNote =>
+      'Your plan stays saved. Logging needs a subscription.';
+
+  @override
+  String get paywallTrialCancelNote =>
+      'Cancel in your store settings before the trial ends and you pay nothing.';
+
+  @override
+  String get paywallAfterTrialNote =>
+      'If you don\'t subscribe after the trial, your plan and logs stay readable. Logging and sessions need a subscription.';
+
+  @override
+  String get paywallBenefitSessionTitle => 'Session mode';
+
+  @override
+  String get paywallBenefitSessionBody =>
+      'Rounds and rest timed for you, with a tactical and a recovery cue on every break.';
+
+  @override
+  String get paywallContinue => 'Continue';
+
+  @override
+  String get fuelLogFood => 'Log food';
+
+  @override
+  String get fuelRecentFoods => 'Recent foods';
+
+  @override
+  String get fuelQuickAdd => 'Quick add';
+
+  @override
+  String get fuelEmptyLog =>
+      'Nothing logged yet. Use Log food to add your first meal.';
+
+  @override
+  String fuelGramsLeft(int grams) {
+    return '$grams g left';
+  }
+
+  @override
+  String fuelConsumedKcal(int kcal) {
+    return '$kcal kcal logged';
+  }
+
+  @override
+  String fuelRemovedSnack(String name) {
+    return '$name removed';
+  }
+
+  @override
+  String fuelRepeatFood(String name) {
+    return 'Log $name again';
+  }
 }

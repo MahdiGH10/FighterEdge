@@ -1,8 +1,8 @@
 import 'dart:ui' show Size;
 import 'package:fighter_edge/screens/profile_screen.dart';
 import 'package:fighter_edge/screens/training_camp_screen.dart';
+import 'package:fighter_edge/models/training_log_entry.dart';
 import 'package:fighter_edge/state/app_state.dart';
-import 'package:fighter_edge/state/streak_engine.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -89,14 +89,12 @@ void main() {
       expect(find.text('Get to 74 kg'), findsNothing);
     });
 
-    testWidgets('stats reflect real state and the onboarding answer',
+    testWidgets('quiet training summary reflects the onboarding answer',
         (tester) async {
       tester.view.physicalSize = const Size(430, 1600);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       final repo = await _repoWithRealUser(weeklyTrainingDays: 6);
-      // A default AppState with no repository seeds sample sessions, so build
-      // the expectation from the same state the screen reads.
       final state = AppState();
 
       await tester.pumpWidget(
@@ -104,17 +102,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Sessions completed'), findsOneWidget);
-      expect(find.text('${state.completedSessionCount}'), findsWidgets);
-      final streakDays = StreakEngine.streakDays(
-          StreakEngine.completedDateKeys(state.sessions),
-          now: state.now);
-      // Singular for one day (the demo week's streak depends on the weekday).
-      expect(find.text('$streakDays ${streakDays == 1 ? 'day' : 'days'}'),
-          findsOneWidget);
-      // Straight from the onboarding answer, not a constant.
-      expect(find.text('Training days / week'), findsOneWidget);
-      expect(find.text('6'), findsOneWidget);
+      expect(find.text('Sessions completed'), findsNothing);
+      expect(find.text('Week streak'), findsNothing);
+      expect(find.text('Training days'), findsOneWidget);
+      expect(find.text('6 days each week'), findsOneWidget);
+      expect(find.text('Preferences, privacy and account'), findsOneWidget);
     });
   });
 
@@ -140,16 +132,25 @@ void main() {
         'History tab renders the log through the lazy sliver list (P-4)',
         (tester) async {
       final repo = await _repoWithRealUser();
+      final state = AppState();
+      for (final (i, title)
+          in ['Striking', 'Wrestling', 'Conditioning', 'BJJ'].indexed) {
+        state.addTrainingLogEntry(TrainingLogEntry(
+          id: 'log-$i',
+          completedAt: DateTime(2026, 9, 14 + i, 18),
+          source: TrainingSource.planned,
+          title: title,
+        ));
+      }
 
       await tester.pumpWidget(
-        wrapApp(const TrainingCampScreen(), repo: repo, state: AppState()),
+        wrapApp(const TrainingCampScreen(), repo: repo, state: state),
       );
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('History'));
       await tester.pumpAndSettle();
 
-      // The demo seed's completed slots (mock_data.dart).
       expect(find.text('Session history'), findsOneWidget);
       expect(find.text('Striking'), findsOneWidget);
       expect(find.text('Wrestling'), findsOneWidget);

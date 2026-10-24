@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/l10n/gen/app_localizations.dart';
+import 'package:fighter_edge/state/glass_policy_controller.dart';
 import 'package:fighter_edge/state/locale_controller.dart';
 import 'package:fighter_edge/auth/local_auth_repository.dart';
 import 'package:fighter_edge/billing/billing_gateway.dart';
@@ -21,12 +22,12 @@ import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fu
 import 'package:fighter_edge/features/fight_camp/data/fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/presentation/fight_camp_controller.dart';
+import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
 import 'package:fighter_edge/notifications/reminder_gateway.dart';
 import 'package:fighter_edge/notifications/unavailable_reminder_gateway.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
 import 'package:fighter_edge/state/app_state.dart';
 import 'package:fighter_edge/state/first_run_controller.dart';
-import 'package:fighter_edge/state/streak_controller.dart';
 import 'package:fighter_edge/state/sync_tracker.dart';
 import 'package:fighter_edge/training/reaction/coach_voice.dart';
 import 'package:fighter_edge/privacy/consent.dart';
@@ -81,6 +82,7 @@ Widget wrapApp(
   Widget home, {
   required LocalAuthRepository repo,
   AppState? state,
+  PlanController? planController,
   EdgeFuelRepository? edgeFuelRepo,
   FoodCatalogRepository? foodCatalogRepo,
   RecipeCatalogRepository? recipeCatalogRepo,
@@ -129,17 +131,11 @@ Widget wrapApp(
       ),
       Provider<Telemetry>.value(value: telemetry),
       ChangeNotifierProvider(create: (_) => LocaleController()..load()),
+      ChangeNotifierProvider(create: (_) => GlassPolicyController()..load()),
       ChangeNotifierProxyProvider<AuthController, FirstRunController>(
         create: (_) => FirstRunController(),
         update: (_, auth, firstRun) =>
             (firstRun ?? FirstRunController())..setUser(auth.user?.id),
-      ),
-      ChangeNotifierProxyProvider<AuthController, StreakController>(
-        create: (context) =>
-            StreakController(clock: () => context.read<AppState>().now),
-        update: (context, auth, streak) => (streak ??
-            StreakController(clock: () => context.read<AppState>().now))
-          ..setUser(auth.user?.id),
       ),
       Provider<FightCampRepository>.value(value: resolvedFightCampRepo),
       ChangeNotifierProxyProvider<AuthController, FightCampController>(
@@ -150,6 +146,24 @@ Widget wrapApp(
                 repository: resolvedFightCampRepo,
                 refuelGuidance: refuelGuidance))
           ..setUser(auth.user?.id),
+      ),
+      ChangeNotifierProxyProvider2<AuthController, FightCampController,
+          PlanController>(
+        create: (context) =>
+            planController ??
+            PlanController(
+                log: context.read<AppState>(),
+                sync: context.read<SyncTracker>()),
+        update: (context, auth, fightCamp, plan) => (plan ??
+            PlanController(
+                log: context.read<AppState>(),
+                sync: context.read<SyncTracker>()))
+          ..configure(
+            userId: auth.user?.id,
+            fight: fightCamp.camp,
+            goal: auth.user?.goal ?? '',
+            level: auth.user?.experienceLevel ?? '',
+          ),
       ),
       ChangeNotifierProxyProvider<AuthController, EdgeFuelController>(
         create: (context) => EdgeFuelController(
@@ -172,6 +186,8 @@ Widget wrapApp(
         locale: context.watch<LocaleController>().locale,
         localizationsDelegates: L.localizationsDelegates,
         supportedLocales: L.supportedLocales,
+        builder: (context, child) =>
+            GlassPolicyHost(child: child ?? const SizedBox.shrink()),
         home: home,
       ),
     ),
@@ -189,8 +205,11 @@ class FakeReminderGateway implements ReminderGateway {
 
   FakeReminderGateway({this.permissionGranted = true});
 
+  /// Flip to false to model a platform without local notifications.
+  bool available = true;
+
   @override
-  bool get isAvailable => true;
+  bool get isAvailable => available;
 
   @override
   Future<bool> requestPermission() async {
@@ -211,6 +230,29 @@ class FakeReminderGateway implements ReminderGateway {
   Future<void> cancelAll() async {
     cancelled = true;
     scheduledWeekdays = null;
+  }
+
+  /// When the trial-end reminder is set for, and what it says.
+  DateTime? trialReminderAt;
+  String? trialReminderTitle;
+  int trialReminderCancels = 0;
+  int trialReminderSchedules = 0;
+
+  @override
+  Future<void> scheduleTrialEndReminder({
+    required DateTime at,
+    required String title,
+    required String body,
+  }) async {
+    trialReminderSchedules++;
+    trialReminderAt = at;
+    trialReminderTitle = title;
+  }
+
+  @override
+  Future<void> cancelTrialEndReminder() async {
+    trialReminderCancels++;
+    trialReminderAt = null;
   }
 }
 

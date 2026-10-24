@@ -1,6 +1,7 @@
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/food_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
 import 'package:fighter_edge/screens/dashboard_screen.dart';
 import 'package:fighter_edge/screens/nutrition_screen.dart';
 import 'package:fighter_edge/screens/profile_screen.dart';
@@ -146,11 +147,15 @@ void main() {
         (tester) async {
       phone(tester);
       final repo = await makeRepo(signedIn: true, onboarded: true);
-      final state = AppState();
+      final state = AppState(clock: () => DateTime(2026, 9, 24, 18));
+      final plan = PlanController(log: state)
+        ..startFresh(
+            weeklyTrainingDays: 6, goal: 'Gain muscle', level: 'Intermediate');
       await tester.pumpWidget(wrapApp(
         const Scaffold(body: TrainingCampScreen()),
         repo: repo,
         state: state,
+        planController: plan,
       ));
       await tester.pumpAndSettle();
 
@@ -162,8 +167,8 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(AlertDialog), findsNothing);
-      expect(
-          state.sessions.any((s) => s.note == 'felt sharp on entries'), isTrue);
+      expect(state.trainingLog.any((e) => e.note == 'felt sharp on entries'),
+          isTrue);
     });
   });
 

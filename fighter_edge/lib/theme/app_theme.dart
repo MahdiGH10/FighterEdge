@@ -34,6 +34,12 @@ class Radii {
   /// than [button] so a tile inside a card reads as nested, not parallel.
   static const double tile = 8;
   static const double chip = 100;
+
+  /// Hero cards (Today, weekly target): the V2 tinted-glass look.
+  static const double hero = 24;
+
+  /// Top corners of a bottom sheet.
+  static const double sheet = 24;
 }
 
 /// Keyboard focus indication, drawn only when focus arrived by keyboard.
@@ -52,6 +58,9 @@ class LayoutTokens {
   /// Calorie ring leaves room for its label at normal and large text sizes.
   static const double fuelRing = 176;
   static const double fuelRingLarge = 240;
+
+  /// Secondary consumed ring beside the V2 remaining calorie figure.
+  static const double fuelSummaryRing = 96;
   static const double narrowScreen = 360;
 
   /// Fixed demo and content regions, not text bounding boxes.

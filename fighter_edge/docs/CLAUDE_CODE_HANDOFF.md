@@ -1,5 +1,117 @@
 # Fighter Edge — Claude Code Handoff
 
+## Live merge log (2026-10-24)
+
+**Workflow rule (owner, 2026-10-23):** one feature at a time. Branch from main,
+build, test, merge into main, delete the branch. No parallel feature branches
+and at most one sub-agent at a time. Sub-agents run on Sonnet 5.5.
+
+**On main since the V2 handoff:** trial access client (#57), outcome-based
+paywall with trial chip and read-only banner (#69), Home Today (#77), Sunday
+review (#76), Train week and session mode (#78), Profile (#72), V2 Fuel screen
+with remaining-first and pinned logging (#80), fighter safety domain (#65),
+Fuel day types and gap picker (#66), adaptive targets (#67), grocery list and
+recipe gate (#68). Earlier: V2 chrome (#62), Fuel V2 spec and research (#64).
+Refuel volumes, the fight-week template and all weight-cut numbers stay behind
+flags that default to off; every such value is marked "dietitian sign-off
+pending".
+
+**CI (changed on 2026-10-23):**
+- Pull requests run the fast checks only: Analyze & test, Golden tests,
+  Cloud Functions, Firestore rules (about 6-8 minutes).
+- Android release build, the integration and performance emulator tests and the
+  iOS build run on every push to main, nightly at 04:00 UTC, and by hand (#79).
+- "Release APK launch" is manual only (#75). Run it from the Actions tab before
+  shipping a release APK; it caught a release-only crash once.
+- The integration test starts with Reduce transparency on (#74): on the
+  CPU-rendered CI emulator the real blur sometimes killed the emulator as the
+  flow ended ("No tests were found", exit 79). Rerun that job once if it
+  fails with no assertion.
+- Cloud Functions runs `npm audit --omit=dev --audit-level=high`. It went red
+  on 2026-10-23 for a new body-parser advisory; fixed by a lockfile update
+  (#81). Two moderate `uuid` findings (via gaxios) remain; their fix is a
+  breaking bump. Expect new advisories to turn this job red again.
+- The repo is public (free Actions minutes). The tracked Firebase client keys
+  are public identifiers by design; restrict them in Google Cloud Console.
+
+**Still open:** #70 firebase 13 + rules-unit-testing 6 together (replaces
+#43/#44), #71 Fuel privacy audit (report only), #53 and #54 Dependabot.
+**Not built yet:** wiring the Fuel domain (N1 check-in, N3 day types and gap
+picker) into the Fuel screen, onboarding v2 with "Start your free week", then
+N4 UI, N5 level-aware Fuel UI, N6 privacy and notifications. Real session
+templates wait for coach sign-off.
+
+**Owner steps still open:** store products with a 7-day trial in Play Console,
+App Store Connect and RevenueCat; live Terms and Privacy URLs; Play Data safety
+(no ads); redeploy Cloud Functions (backend changed: trial billing, lockfile);
+dietitian sign-off list in `FUEL_V2_SPEC.md`; restrict the Firebase API keys.
+
+The auto-mode classifier blocks edits that make CI skip checks ("CI Bypass")
+and `gh pr merge`/`update-branch` calls it cannot tie to a request. A denied
+call is final; the owner ran the CI change by hand (#79).
+
+> **Start with `HANDOFF_2026-10-22_V2.md`** (state of the V2 work, open PRs, next steps, owner steps and gotchas), then `V2_PLAN_20261019.md` and `FUEL_V2_SPEC.md`.
+
+## V2 visual foundation (lane F, three stacked PRs)
+
+**6.1 Tokens (this slice).** `AppColors` now carries the approved V2 values: the
+`#08070C` ground and its surface ramp, saturated crimson (`#E0222B`, ramp
+`crimson50-900`) and a new ember ramp (`ember50-900`, `emberSoft`), pink-red
+`negative`, gold `premium` for Pro only, green `positive` for done only. Protein
+is violet now (green means done). `GlassColors` (same file) holds the glass
+tint, rim, inner-light and glow tokens and the text-on-glass rule:
+`GlassColors.allowsText(kind, color)` judges a colour at the brightest glow
+corner (`worstCaseBackdrop`); on hero and sheet glass only Text, Text 2, Ember
+soft, Gold and Done green pass small text. `test/unit/color_contrast_test.dart`
+pins that table and the solid fallbacks. Fonts unchanged: Oswald (variable) and
+Barlow (static 400-700) were already bundled; no Inter, nothing added.
+**Not changed yet:** `Radii.card/button/tile` and the type sizes (only
+`Radii.hero` and `Radii.sheet` were added); screens still use their old layout
+with the new colours. Goldens regenerated (Windows renderer):
+`flutter test --tags golden --update-goldens`.
+
+**6.2 Glass primitives.** `lib/widgets/glass_surface.dart`: `GlassSurface`
+(navigation layer: `ClipRRect` + `BackdropFilter.grouped` +
+`ImageFilterConfig.blur(sigma 16, bounded: true)`, tint, hairline, inner light;
+for the bottom nav, a collapsed header, sheets) and `GlassCard` (hero tint, rim
+and inner light painted by one `CustomPainter`, **no blur**).
+`lib/theme/glass_policy.dart`: `GlassLevel` full / tinted / solid and
+`GlassPolicy.resolve`: the "Reduce transparency" setting or
+`MediaQuery.highContrast` gives solid, a slow frame probe gives tinted, the
+lowest wins. `lib/state/frame_probe.dart` watches the first 120 raster times
+(p90 above 16 ms is slow, nearest-rank) through an injectable
+`RasterTimingSource`; `GlassPolicyController` persists the setting
+(`settings.reduceTransparency`) and the verdict (`glass.frameProbe.v1`, once per
+install) and `GlassPolicyHost` (in `MaterialApp.router`'s builder) publishes the
+policy. `HomeShell` owns the one `BackdropGroup` and starts the probe. Budget:
+at most 3 blurs live (`GlassBlurBudget` reports a fourth in debug); hidden tabs
+(tickers off) and the tinted/solid levels count none; never in list items, never
+animated. Setting added to Settings > App, EN + DE. **Not yet used by any screen:**
+the nav, headers and sheets move onto these in 6.3. **Limit:** the probe verdict
+is permanent for the install (no re-probe), and a single noisy start-up could
+demote a good phone to tinted; the owner can clear it only by reinstalling.
+
+**6.3 Chrome.** `AppBackground` paints the static glow (crimson core, ember halo,
+cool low pool, violet touch) once, in a `RepaintBoundary`; flat at the solid
+level. `AppBottomNav` is a `GlassSurface` (selected tab: primary text and a
+crimson-to-ember line; unselected: muted, which clears 4.5:1 on the nav glass at
+its brightest), `HomeShell` uses `extendBody`, and every tab scroller takes
+`ScreenScaffold.tabBottomPadding(context)`. `ScreenScaffold.tab(scrollsUnderHeader:
+true)` (Home, Profile) runs the body behind a header that turns to glass once
+scrolled; Train and Fuel pin controls above their list, so their header stays
+flat (nothing scrolls under it). Sheets go through `showGlassSheet` (all but the
+drill detail, a `DraggableScrollableSheet` that fills the modal height, which is
+a solid `surfaceElevated` sheet with `sheetShape`). Goldens: the component
+gallery has a Glass section and goldens for full (default, large text,
+pressed), tinted and solid levels, regenerated on Windows with
+`flutter test --tags golden --update-goldens`.
+`integration_test/glass_frame_benchmark_test.dart` is a profile-mode frame
+benchmark per level; **not run** (needs a real phone: `flutter test
+integration_test/glass_frame_benchmark_test.dart --profile -d <id>`). The
+`fighter-edge-ui` skill was rewritten for V2; it lives in the git-ignored
+`.claude/` folder, so this PR force-adds a copy that the owner can copy over
+the local one. **Not device-tested:** blur cost and the look on a real phone.
+
 ## START HERE: state as of 2026-10-01
 
 **Merged today: PR #26** (`78ec6df`). The Android manifest removes the three

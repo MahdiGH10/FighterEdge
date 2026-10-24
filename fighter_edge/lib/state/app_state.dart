@@ -1,17 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../theme/app_icons.dart';
 
+import '../billing/subscription.dart';
 import '../data/data_repository.dart';
 import '../data/mock_data.dart';
+import '../features/training_plan/data/legacy_session_slot.dart';
 import '../models/meal.dart';
 import '../models/training_log_entry.dart';
-import '../models/training_session.dart';
 import '../models/weight_entry.dart';
-import 'streak_engine.dart';
 import 'sync_tracker.dart';
 
 /// Holds the mutable state for the three interactive features:
@@ -26,10 +24,8 @@ class AppState extends ChangeNotifier {
         _clock = clock ?? DateTime.now,
         _weights = dataRepository == null ? MockData.seedWeights() : [],
         _meals = dataRepository == null ? MockData.seedMeals() : [],
-        _sessions = dataRepository == null ? List.of(MockData.week) : [],
         _log = [] {
     _resortWeights();
-    if (dataRepository == null) _log = _demoLog(_sessions, _clock());
     unawaited(_loadSettings());
   }
 
@@ -45,6 +41,39 @@ class AppState extends ChangeNotifier {
 
   /// The same clock used to date training history and evaluate its streak.
   DateTime get now => _clock();
+
+  // ---- Read-only gate ----
+
+  /// What the account may do, read fresh at every check from the
+  /// server-derived `AuthController.accessState` (so a trial that lapses while
+  /// the app is open is noticed without a profile change). Until the app
+  /// supplies one (unit tests, the offline demo) access is unknown, which
+  /// leaves writes open.
+  AccessState Function() accessSource = _unknownAccess;
+
+  static AccessState _unknownAccess() => const AccessState.unknown();
+
+  /// Called when [requireWrite] refuses. The app opens the paywall from here
+  /// so no call site can forget to.
+  VoidCallback? onWriteBlocked;
+
+  /// The current access state.
+  AccessState get access => accessSource();
+
+  /// Whether new data may be saved right now.
+  bool get canWrite => access.canWrite;
+
+  /// The one choke point for saving new user data. Returns true when the
+  /// write may go ahead; in a read-only account it returns false and calls
+  /// [onWriteBlocked]. History, plan and weight views, settings, sign-out,
+  /// account deletion, consent withdrawal, restore and the safety text never
+  /// call this. Onboarding writes ([startFreshCamp]) happen before the
+  /// paywall and are deliberately outside it.
+  bool requireWrite() {
+    if (canWrite) return true;
+    onWriteBlocked?.call();
+    return false;
+  }
 
   List<WeightEntry> _weights;
 
@@ -62,16 +91,17 @@ class AppState extends ChangeNotifier {
 
   List<Meal> _meals;
 
-  /// The weekly plan: a template that repeats every week. Whether a slot is
-  /// done is never stored on it; that comes from [_log], per week.
-  List<TrainingSession> _sessions;
+  /// The old weekday-string schedule, kept only so completions stored on it
+  /// can be moved into the log once. The plan itself lives in
+  /// `PlanController`.
+  List<LegacySessionSlot> _legacySlots = [];
 
   /// Every piece of training ever logged, newest first.
   List<TrainingLogEntry> _log;
   DateTime _nutritionDate = DateTime.now();
   StreamSubscription<List<WeightEntry>>? _weightSub;
   StreamSubscription<List<Meal>>? _mealSub;
-  StreamSubscription<List<TrainingSession>>? _sessionSub;
+  StreamSubscription<List<LegacySessionSlot>>? _sessionSub;
   StreamSubscription<List<TrainingLogEntry>>? _logSub;
   bool _sessionsLoaded = false;
   bool _logLoaded = false;
@@ -100,8 +130,8 @@ class AppState extends ChangeNotifier {
       // fine here — nothing else could ever be shown.
       _weights = MockData.seedWeights();
       _meals = MockData.seedMeals();
-      _sessions = List.of(MockData.week);
-      _log = _demoLog(_sessions, _clock());
+      _legacySlots = [];
+      _log = [];
       _resortWeights();
       notifyListeners();
       return;
@@ -114,7 +144,7 @@ class AppState extends ChangeNotifier {
       // (audit A-3). Empty is the only honest state here.
       _weights = [];
       _meals = [];
-      _sessions = [];
+      _legacySlots = [];
       _log = [];
       _resortWeights();
       notifyListeners();
@@ -136,9 +166,9 @@ class AppState extends ChangeNotifier {
 
     _watchMealsForCurrentDate(repo, userId);
 
-    _sessionSub = repo.watchSessions(userId).listen(
+    _sessionSub = repo.watchLegacySessions(userId).listen(
       (sessions) {
-        _sessions = List.of(sessions);
+        _legacySlots = List.of(sessions);
         _sessionsLoaded = true;
         _migrateLegacyCompletions(repo, userId);
         notifyListeners();
@@ -188,6 +218,7 @@ class AppState extends ChangeNotifier {
   }
 
   void addWeight(DateTime date, double kg) {
+    if (!requireWrite()) return;
     final entry = WeightEntry(date, kg);
     _weights.add(entry);
     _resortWeights();
@@ -262,6 +293,7 @@ class AppState extends ChangeNotifier {
       _meals.where((m) => m.eaten).fold(0, (s, m) => s + m.fats);
 
   void toggleMeal(Meal meal) {
+    if (!requireWrite()) return;
     meal.eaten = !meal.eaten;
     final repo = _dataRepository;
     final userId = _userId;
@@ -273,6 +305,7 @@ class AppState extends ChangeNotifier {
   }
 
   void addMeal(Meal meal) {
+    if (!requireWrite()) return;
     _meals.add(meal);
     final repo = _dataRepository;
     final userId = _userId;
@@ -305,13 +338,8 @@ class AppState extends ChangeNotifier {
 
   // ---- Training ----
 
-  /// This week's plan: each slot's `completed`, `completedAt`, RPE and note
-  /// come from this week's log entry for it, so the plan starts every Monday
-  /// fresh while last week's work stays in the log.
-  List<TrainingSession> get sessions =>
-      List.unmodifiable([for (final slot in _sessions) _asThisWeek(slot)]);
-
-  /// Every entry, newest first.
+  /// Every piece of training ever logged, newest first. What the plan says
+  /// should happen lives in `PlanController`; this is what did.
   List<TrainingLogEntry> get trainingLog => List.unmodifiable(_log);
 
   /// The calendar days (see `mealDateKey`) with training that counts toward
@@ -325,59 +353,9 @@ class AppState extends ChangeNotifier {
   int get completedSessionCount =>
       _log.where((entry) => entry.source.countsAsTrainingDay).length;
 
-  /// The log, newest first, shaped as sessions for the History list and
-  /// Recent activity.
-  List<TrainingSession> get completedSessionsDesc => List.unmodifiable([
-        for (final entry in _log) _asSession(entry),
-      ]);
-
-  void toggleSession(TrainingSession session) {
-    final index = _sessions.indexWhere((item) => item.id == session.id);
-    if (index == -1) return;
-    completeSession(session, completed: !_isDoneThisWeek(session.id));
-  }
-
-  /// Marks a plan slot done this week (or updates its RPE and note if it
-  /// already is), or with `completed: false` removes this week's entry for
-  /// it. Earlier weeks are never touched.
-  void completeSession(
-    TrainingSession session, {
-    bool completed = true,
-    int rpe = 7,
-    String note = '',
-  }) {
-    final slot = _sessions.where((item) => item.id == session.id).firstOrNull;
-    if (slot == null) return;
-    final existing = _thisWeekEntryFor(slot.id);
-    if (!completed) {
-      if (existing == null) return;
-      _log.removeWhere((entry) => entry.id == existing.id);
-      final repo = _dataRepository;
-      final userId = _userId;
-      if (repo != null && userId != null) {
-        unawaited(_sync.run('log-${existing.id}', 'training_log_delete_failed',
-            () => repo.deleteTrainingLogEntry(userId, existing.id)));
-      }
-      notifyListeners();
-      return;
-    }
-    final now = _clock();
-    addTrainingLogEntry(
-      existing?.copyWith(rpe: rpe.clamp(1, 10), note: note.trim()) ??
-          TrainingLogEntry(
-            id: TrainingLogEntry.plannedId(slot.id, now),
-            completedAt: now,
-            source: TrainingSource.planned,
-            title: slot.title,
-            planSlotId: slot.id,
-            rpe: rpe.clamp(1, 10),
-            note: note.trim(),
-          ),
-    );
-  }
-
   /// Adds an entry to the log, or replaces the one with the same id.
   void addTrainingLogEntry(TrainingLogEntry entry) {
+    if (!requireWrite()) return;
     _upsertLocal(entry);
     final repo = _dataRepository;
     final userId = _userId;
@@ -388,56 +366,20 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool _isDoneThisWeek(String slotId) => _thisWeekEntryFor(slotId) != null;
-
-  /// The newest entry for [slotId] in the current Monday-to-Sunday week.
-  TrainingLogEntry? _thisWeekEntryFor(String slotId) {
-    final start = StreakEngine.weekStart(_clock());
-    final end = start.add(const Duration(days: 7));
-    for (final entry in _log) {
-      if (entry.planSlotId != slotId) continue;
-      if (entry.completedAt.isBefore(start)) continue;
-      if (!entry.completedAt.isBefore(end)) continue;
-      return entry; // _log is newest first
+  /// Removes the entry with [entryId], if there is one.
+  void removeTrainingLogEntry(String entryId) {
+    if (!requireWrite()) return;
+    final before = _log.length;
+    _log.removeWhere((entry) => entry.id == entryId);
+    if (_log.length == before) return;
+    final repo = _dataRepository;
+    final userId = _userId;
+    if (repo != null && userId != null) {
+      unawaited(_sync.run('log-$entryId', 'training_log_delete_failed',
+          () => repo.deleteTrainingLogEntry(userId, entryId)));
     }
-    return null;
+    notifyListeners();
   }
-
-  TrainingSession _asThisWeek(TrainingSession slot) {
-    final entry = _thisWeekEntryFor(slot.id);
-    return slot.copyWith(
-      completed: entry != null,
-      completedAt: entry?.completedAt,
-      clearCompletedAt: entry == null,
-      rpe: entry?.rpe ?? 0,
-      note: entry?.note ?? '',
-    );
-  }
-
-  /// A log entry dressed as a session, borrowing its plan slot's icon and
-  /// subtitle when it has one.
-  TrainingSession _asSession(TrainingLogEntry entry) {
-    final slot =
-        _sessions.where((item) => item.id == entry.planSlotId).firstOrNull;
-    return TrainingSession(
-      id: entry.id,
-      day: slot?.day ?? '',
-      title: entry.title,
-      subtitle: slot?.subtitle ?? '',
-      icon: slot?.icon ?? _sourceIcon(entry.source),
-      completed: true,
-      completedAt: entry.completedAt,
-      rpe: entry.rpe,
-      note: entry.note,
-    );
-  }
-
-  static IconData _sourceIcon(TrainingSource source) => switch (source) {
-        TrainingSource.planned => AppIcons.boxingGlove,
-        TrainingSource.timer => AppIcons.timer,
-        TrainingSource.reaction => AppIcons.lightning,
-        TrainingSource.manual => AppIcons.barbell,
-      };
 
   void _upsertLocal(TrainingLogEntry entry) {
     _log
@@ -459,7 +401,7 @@ class AppState extends ChangeNotifier {
     if (!_sessionsLoaded || !_logLoaded || _migratedFor == userId) return;
     _migratedFor = userId;
     final known = {for (final entry in _log) entry.id};
-    for (final slot in _sessions) {
+    for (final slot in _legacySlots) {
       final completedAt = slot.completedAt;
       if (!slot.completed || completedAt == null) continue;
       final entry = TrainingLogEntry(
@@ -473,12 +415,11 @@ class AppState extends ChangeNotifier {
       );
       final isNew = !known.contains(entry.id);
       if (isNew) _upsertLocal(entry);
-      final cleared = slot.copyWith(
-          completed: false, clearCompletedAt: true, rpe: 0, note: '');
+      final cleared = slot.cleared();
       unawaited(() async {
         try {
           if (isNew) await repo.saveTrainingLogEntry(userId, entry);
-          await repo.saveSession(userId, cleared);
+          await repo.saveLegacySession(userId, cleared);
         } catch (_) {
           // Left as it was; the next launch tries again, and the
           // deterministic id keeps that safe.
@@ -487,34 +428,12 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  /// The offline demo's completed slots as log entries in the current week,
-  /// never dated after now.
-  static List<TrainingLogEntry> _demoLog(
-      List<TrainingSession> week, DateTime now) {
-    final monday = StreakEngine.weekStart(now);
-    final entries = <TrainingLogEntry>[];
-    for (final (index, slot) in week.indexed) {
-      if (!slot.completed) continue;
-      final day = monday.add(Duration(days: index, hours: 18));
-      final completedAt = day.isAfter(now) ? now : day;
-      entries.add(TrainingLogEntry(
-        id: TrainingLogEntry.plannedId(slot.id, completedAt),
-        completedAt: completedAt,
-        source: TrainingSource.planned,
-        title: slot.title,
-        planSlotId: slot.id,
-      ));
-    }
-    return entries..sort((a, b) => b.completedAt.compareTo(a.completedAt));
-  }
-
-  Future<void> startFreshCamp({
-    required double? startingWeightKg,
-    required int weeklyTrainingDays,
-  }) async {
+  /// Clears the weight and meal history for a new camp, optionally with a
+  /// first weigh-in. The training plan is made separately
+  /// (`PlanController.startFresh`).
+  Future<void> startFreshCamp({required double? startingWeightKg}) async {
     final repo = _dataRepository;
     final userId = _userId;
-    final sessions = _freshPlan(weeklyTrainingDays);
 
     _weights = [];
     if (startingWeightKg != null && startingWeightKg > 0) {
@@ -528,12 +447,7 @@ class AppState extends ChangeNotifier {
     _resortWeights();
 
     _meals = [];
-    _sessions = sessions;
     if (repo != null && userId != null) {
-      for (final session in sessions) {
-        unawaited(_sync.run('session-${session.id}', 'session_save_failed',
-            () => repo.saveSession(userId, session)));
-      }
       unawaited(_sync.run('meals', 'meals_save_failed',
           () => repo.saveMealsForDate(userId, _nutritionDate, const [])));
     }
@@ -574,53 +488,5 @@ class AppState extends ChangeNotifier {
       // initialized. Keep safe defaults instead of making domain logic depend
       // on platform storage.
     }
-  }
-
-  List<TrainingSession> _freshPlan(int weeklyTrainingDays) {
-    final templates = [
-      const TrainingSession(
-        day: 'Mon',
-        title: 'Striking',
-        subtitle: 'Boxing fundamentals + combinations',
-        icon: AppIcons.boxingGlove,
-        completed: false,
-      ),
-      const TrainingSession(
-        day: 'Tue',
-        title: 'Wrestling',
-        subtitle: 'Entries, finishes + control',
-        icon: AppIcons.handGrabbing,
-        completed: false,
-      ),
-      const TrainingSession(
-        day: 'Wed',
-        title: 'Conditioning',
-        subtitle: 'Intervals + core',
-        icon: AppIcons.lightning,
-        completed: false,
-      ),
-      const TrainingSession(
-        day: 'Thu',
-        title: 'BJJ',
-        subtitle: 'Guard, transitions + submissions',
-        icon: AppIcons.handFist,
-        completed: false,
-      ),
-      const TrainingSession(
-        day: 'Fri',
-        title: 'Strength',
-        subtitle: 'Explosive upper/lower body',
-        icon: AppIcons.barbell,
-        completed: false,
-      ),
-      const TrainingSession(
-        day: 'Sat',
-        title: 'Recovery',
-        subtitle: 'Mobility + easy zone 2',
-        icon: AppIcons.flowerLotus,
-        completed: false,
-      ),
-    ];
-    return List.of(templates.take(weeklyTrainingDays.clamp(2, 6)));
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../models/training_session.dart';
-import '../state/app_state.dart';
+import '../features/training_plan/domain/models/planned_session.dart';
+import '../features/training_plan/presentation/plan_controller.dart';
+import '../features/training_plan/presentation/plan_labels.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_typography.dart';
@@ -12,23 +14,36 @@ import '../theme/app_typography.dart';
 /// the timer and never logs without the athlete choosing an RPE.
 Future<void> logSessionWithRpe(
   BuildContext context,
-  AppState state,
-  TrainingSession session,
+  PlanController plan,
+  PlannedSession session,
 ) async {
+  final title = PlanLabels.title(L.of(context), session);
+  final existing = plan.logEntryFor(session.id);
   final result = await showDialog<({int rpe, String note})>(
     context: context,
-    builder: (_) => SessionLogDialog(session: session),
+    builder: (_) => SessionLogDialog(
+      title: title,
+      initialRpe: existing?.rpe ?? 0,
+      initialNote: existing?.note ?? '',
+    ),
   );
   if (result == null) return;
-  state.completeSession(session, rpe: result.rpe, note: result.note);
+  plan.complete(session, title: title, rpe: result.rpe, note: result.note);
   AppHaptics.success();
 }
 
 /// Owns the note controller so it is disposed with the dialog, after its exit
 /// animation, never while a focused field is still on screen.
 class SessionLogDialog extends StatefulWidget {
-  final TrainingSession session;
-  const SessionLogDialog({super.key, required this.session});
+  final String title;
+  final int initialRpe;
+  final String initialNote;
+  const SessionLogDialog({
+    super.key,
+    required this.title,
+    required this.initialRpe,
+    required this.initialNote,
+  });
 
   @override
   State<SessionLogDialog> createState() => _SessionLogDialogState();
@@ -41,8 +56,8 @@ class _SessionLogDialogState extends State<SessionLogDialog> {
   @override
   void initState() {
     super.initState();
-    _rpe = widget.session.rpe == 0 ? 7 : widget.session.rpe;
-    _note = TextEditingController(text: widget.session.note);
+    _rpe = widget.initialRpe == 0 ? 7 : widget.initialRpe;
+    _note = TextEditingController(text: widget.initialNote);
   }
 
   @override
@@ -54,7 +69,7 @@ class _SessionLogDialogState extends State<SessionLogDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Log ${widget.session.title}', style: AppType.title2()),
+      title: Text('Log ${widget.title}', style: AppType.title2()),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

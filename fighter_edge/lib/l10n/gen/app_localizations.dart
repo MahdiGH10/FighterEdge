@@ -193,6 +193,18 @@ abstract class L {
   /// **'Deutsch'**
   String get settingsLanguageGerman;
 
+  /// No description provided for @settingsReduceTransparency.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce transparency'**
+  String get settingsReduceTransparency;
+
+  /// No description provided for @settingsReduceTransparencySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid backgrounds instead of frosted glass. High contrast does this too'**
+  String get settingsReduceTransparencySubtitle;
+
   /// No description provided for @settingsLanguageBeta.
   ///
   /// In en, this message translates to:
@@ -391,12 +403,6 @@ abstract class L {
   /// **'Dashboard'**
   String get dashboardTitle;
 
-  /// No description provided for @dashboardWeeklyOverview.
-  ///
-  /// In en, this message translates to:
-  /// **'Weekly overview'**
-  String get dashboardWeeklyOverview;
-
   /// No description provided for @dashboardNextSession.
   ///
   /// In en, this message translates to:
@@ -439,35 +445,11 @@ abstract class L {
   /// **'completed'**
   String get dashboardStatCompleted;
 
-  /// No description provided for @dashboardStatDays.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{day} other{days}}'**
-  String dashboardStatDays(int count);
-
   /// No description provided for @dashboardAddWeighIn.
   ///
   /// In en, this message translates to:
   /// **'Add weigh-in'**
   String get dashboardAddWeighIn;
-
-  /// No description provided for @dashboardStreakAtRisk.
-  ///
-  /// In en, this message translates to:
-  /// **'At risk'**
-  String get dashboardStreakAtRisk;
-
-  /// No description provided for @dashboardStreakOnFire.
-  ///
-  /// In en, this message translates to:
-  /// **'On fire'**
-  String get dashboardStreakOnFire;
-
-  /// No description provided for @dashboardStreakLogToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Log today'**
-  String get dashboardStreakLogToday;
 
   /// No description provided for @fuelWeekTitle.
   ///
@@ -870,30 +852,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Session complete.'**
   String get timerAnnounceDone;
-
-  /// No description provided for @paywallWaitlistCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Notify me when Pro opens'**
-  String get paywallWaitlistCta;
-
-  /// No description provided for @paywallWaitlistJoined.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'re on the list'**
-  String get paywallWaitlistJoined;
-
-  /// No description provided for @paywallWaitlistThanks.
-  ///
-  /// In en, this message translates to:
-  /// **'Noted. Pro will appear here when it opens, with the price shown before any charge.'**
-  String get paywallWaitlistThanks;
-
-  /// No description provided for @paywallWaitlistBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro can\'t be bought on this build yet. Tap below and this device will remember you asked. The store price is always shown before any payment.'**
-  String get paywallWaitlistBody;
 
   /// No description provided for @paywallRenewalDisclosure.
   ///
@@ -1477,12 +1435,6 @@ abstract class L {
   /// **'Hide password'**
   String get authHidePassword;
 
-  /// No description provided for @dashboardThisWeek.
-  ///
-  /// In en, this message translates to:
-  /// **'This week'**
-  String get dashboardThisWeek;
-
   /// No description provided for @dashboardFighter.
   ///
   /// In en, this message translates to:
@@ -1549,6 +1501,234 @@ abstract class L {
   /// **'Open camp'**
   String get dashboardOpenCamp;
 
+  /// No description provided for @dashboardStatWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{week} other{weeks}}'**
+  String dashboardStatWeeks(int count);
+
+  /// No description provided for @weeklyCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get weeklyCardTitle;
+
+  /// No description provided for @weeklyCardRestWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest week'**
+  String get weeklyCardRestWeek;
+
+  /// No description provided for @weeklyCardRestWeekHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions planned. Rest is part of the plan.'**
+  String get weeklyCardRestWeekHint;
+
+  /// No description provided for @weeklyCardProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {planned} done'**
+  String weeklyCardProgress(int done, int planned);
+
+  /// No description provided for @weeklyCardNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {day} {session}'**
+  String weeklyCardNext(String day, String session);
+
+  /// No description provided for @weeklyCardAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All planned sessions done'**
+  String get weeklyCardAllDone;
+
+  /// No description provided for @weeklyCardNothingLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'No more sessions planned this week'**
+  String get weeklyCardNothingLeft;
+
+  /// No description provided for @weeklyCardTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{target} needed to count this week'**
+  String weeklyCardTarget(int target);
+
+  /// No description provided for @weeklyCardStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week in a row} other{{count} weeks in a row}}'**
+  String weeklyCardStreak(int count);
+
+  /// No description provided for @weeklyCardReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review'**
+  String get weeklyCardReview;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewWeekOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {date}'**
+  String reviewWeekOf(String date);
+
+  /// No description provided for @reviewTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get reviewTraining;
+
+  /// No description provided for @reviewSessionsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {planned} sessions done'**
+  String reviewSessionsDone(int done, int planned);
+
+  /// No description provided for @reviewFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get reviewFood;
+
+  /// No description provided for @reviewFoodNoTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up Fuel to compare your week with a target.'**
+  String get reviewFoodNoTarget;
+
+  /// No description provided for @reviewFoodNoLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'No meals logged this week.'**
+  String get reviewFoodNoLogs;
+
+  /// No description provided for @reviewFoodAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average {average} kcal a day against a target of {target}.'**
+  String reviewFoodAverage(int average, int target);
+
+  /// No description provided for @reviewWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get reviewWeight;
+
+  /// No description provided for @reviewWeightNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough weigh-ins for a trend yet.'**
+  String get reviewWeightNoData;
+
+  /// No description provided for @reviewWeightNoPath.
+  ///
+  /// In en, this message translates to:
+  /// **'No weight path to compare with.'**
+  String get reviewWeightNoPath;
+
+  /// No description provided for @reviewWeightPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Path: {change} this week'**
+  String reviewWeightPath(String change);
+
+  /// No description provided for @reviewRecommendation.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendation'**
+  String get reviewRecommendation;
+
+  /// No description provided for @reviewRecMoveSession.
+  ///
+  /// In en, this message translates to:
+  /// **'You have a planned session left over. Move it to today?'**
+  String get reviewRecMoveSession;
+
+  /// No description provided for @reviewRecLower.
+  ///
+  /// In en, this message translates to:
+  /// **'Your weight is above your path and you ate to your target. Lower your daily target by {kcal} kcal?'**
+  String reviewRecLower(int kcal);
+
+  /// No description provided for @reviewRecRaise.
+  ///
+  /// In en, this message translates to:
+  /// **'Your weight is below your path and you ate to your target. Raise your daily target by {kcal} kcal?'**
+  String reviewRecRaise(int kcal);
+
+  /// No description provided for @reviewHoldOnPath.
+  ///
+  /// In en, this message translates to:
+  /// **'You are on path. Keep your plan as it is.'**
+  String get reviewHoldOnPath;
+
+  /// No description provided for @reviewHoldNoTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up Fuel to get a calorie target before changes can be suggested.'**
+  String get reviewHoldNoTarget;
+
+  /// No description provided for @reviewHoldNeedLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Log at least four days of food before your target is changed.'**
+  String get reviewHoldNeedLogs;
+
+  /// No description provided for @reviewHoldIntake.
+  ///
+  /// In en, this message translates to:
+  /// **'You were not close to your target this week, so it stays. Aim for it first.'**
+  String get reviewHoldIntake;
+
+  /// No description provided for @reviewHoldNoPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough weigh-ins, or no path to judge the scale by. Your target stays.'**
+  String get reviewHoldNoPath;
+
+  /// No description provided for @reviewHoldFloor.
+  ///
+  /// In en, this message translates to:
+  /// **'Eating less would go under your resting energy estimate. Your target stays.'**
+  String get reviewHoldFloor;
+
+  /// No description provided for @reviewAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get reviewAccept;
+
+  /// No description provided for @reviewKeepCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current'**
+  String get reviewKeepCurrent;
+
+  /// No description provided for @reviewGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get reviewGotIt;
+
+  /// No description provided for @reviewAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'You accepted this review.'**
+  String get reviewAccepted;
+
+  /// No description provided for @reviewKept.
+  ///
+  /// In en, this message translates to:
+  /// **'You kept your current plan.'**
+  String get reviewKept;
+
   /// No description provided for @dashboardSetFuel.
   ///
   /// In en, this message translates to:
@@ -1591,48 +1771,6 @@ abstract class L {
   /// **'Confirm your email'**
   String get dashboardConfirmEmail;
 
-  /// No description provided for @dashboardRiskTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Streak at risk'**
-  String get dashboardRiskTitle;
-
-  /// No description provided for @dashboardFreezeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Yesterday is unlogged. Protect it with a freeze ({count} left).'**
-  String dashboardFreezeHint(int count);
-
-  /// No description provided for @dashboardLogHint.
-  ///
-  /// In en, this message translates to:
-  /// **'No freeze is available. Log a session today to start again.'**
-  String get dashboardLogHint;
-
-  /// No description provided for @dashboardFreeze.
-  ///
-  /// In en, this message translates to:
-  /// **'Freeze'**
-  String get dashboardFreeze;
-
-  /// No description provided for @dashboardLogNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Log now'**
-  String get dashboardLogNow;
-
-  /// No description provided for @dashboardFreezeUsed.
-  ///
-  /// In en, this message translates to:
-  /// **'Freeze used — yesterday is protected.'**
-  String get dashboardFreezeUsed;
-
-  /// No description provided for @dashboardLogged.
-  ///
-  /// In en, this message translates to:
-  /// **'Logged'**
-  String get dashboardLogged;
-
   /// No description provided for @dashboardYesterday.
   ///
   /// In en, this message translates to:
@@ -1660,7 +1798,7 @@ abstract class L {
   /// No description provided for @nutritionOverTarget.
   ///
   /// In en, this message translates to:
-  /// **'{kcal} kcal above target'**
+  /// **'Today\'s target met, plus {kcal} kcal'**
   String nutritionOverTarget(int kcal);
 
   /// No description provided for @nutritionViewPlan.
@@ -1692,6 +1830,138 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Done'**
   String get trainingSessionDone;
+
+  /// No description provided for @tplGenericSkill.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill session'**
+  String get tplGenericSkill;
+
+  /// No description provided for @tplGenericSparring.
+  ///
+  /// In en, this message translates to:
+  /// **'Sparring session'**
+  String get tplGenericSparring;
+
+  /// No description provided for @tplGenericConditioning.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditioning session'**
+  String get tplGenericConditioning;
+
+  /// No description provided for @tplGenericStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength session'**
+  String get tplGenericStrength;
+
+  /// No description provided for @tplGenericRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery session'**
+  String get tplGenericRecovery;
+
+  /// No description provided for @tplGenericGymClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym class'**
+  String get tplGenericGymClass;
+
+  /// No description provided for @planDisciplineBoxing.
+  ///
+  /// In en, this message translates to:
+  /// **'Boxing'**
+  String get planDisciplineBoxing;
+
+  /// No description provided for @planDisciplineKickboxing.
+  ///
+  /// In en, this message translates to:
+  /// **'Kickboxing'**
+  String get planDisciplineKickboxing;
+
+  /// No description provided for @planDisciplineMuayThai.
+  ///
+  /// In en, this message translates to:
+  /// **'Muay Thai'**
+  String get planDisciplineMuayThai;
+
+  /// No description provided for @planDisciplineWrestling.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrestling'**
+  String get planDisciplineWrestling;
+
+  /// No description provided for @planDisciplineBjj.
+  ///
+  /// In en, this message translates to:
+  /// **'BJJ'**
+  String get planDisciplineBjj;
+
+  /// No description provided for @planDisciplineMma.
+  ///
+  /// In en, this message translates to:
+  /// **'MMA'**
+  String get planDisciplineMma;
+
+  /// No description provided for @planSessionMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String planSessionMinutes(int minutes);
+
+  /// No description provided for @planSessionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{discipline} · {minutes} min'**
+  String planSessionSubtitle(String discipline, int minutes);
+
+  /// No description provided for @planStatusSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get planStatusSkipped;
+
+  /// No description provided for @planStatusNotDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not done'**
+  String get planStatusNotDone;
+
+  /// No description provided for @planStatusMovedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {day}'**
+  String planStatusMovedTo(String day);
+
+  /// No description provided for @planStatusMovedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved from {day}'**
+  String planStatusMovedFrom(String day);
+
+  /// No description provided for @planActionSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get planActionSkip;
+
+  /// No description provided for @planActionMoveToToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to today'**
+  String get planActionMoveToToday;
+
+  /// No description provided for @planActionPutBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Put back'**
+  String get planActionPutBack;
+
+  /// No description provided for @planActionMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get planActionMore;
 
   /// No description provided for @trainingLogNamedSession.
   ///
@@ -1783,18 +2053,6 @@ abstract class L {
   /// **'Your plan is based on your goals and training days. You can adjust it as your training changes.'**
   String get planReadyExplanation;
 
-  /// No description provided for @planReadyProTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'More training tools with Pro'**
-  String get planReadyProTitle;
-
-  /// No description provided for @planReadyProBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro includes all drills and recipes, and cues between rounds.'**
-  String get planReadyProBody;
-
   /// No description provided for @planReadyCalories.
   ///
   /// In en, this message translates to:
@@ -1858,7 +2116,7 @@ abstract class L {
   /// No description provided for @paywallPlainTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your corner, every day'**
+  /// **'Your camp, planned and fueled'**
   String get paywallPlainTitle;
 
   /// No description provided for @paywallPlainSubtitle.
@@ -1896,18 +2154,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Every striking, wrestling, BJJ and clinch drill, with how to train it.'**
   String get paywallBenefitDrillsBody;
-
-  /// No description provided for @paywallBenefitCuesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Corner Cues'**
-  String get paywallBenefitCuesTitle;
-
-  /// No description provided for @paywallBenefitCuesBody.
-  ///
-  /// In en, this message translates to:
-  /// **'A tactical and a recovery cue on every rest in the round timer.'**
-  String get paywallBenefitCuesBody;
 
   /// No description provided for @paywallAnnualPlan.
   ///
@@ -1986,18 +2232,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Your store purchase is recognized. Pro unlocks after the secure account sync completes.'**
   String get paywallSync;
-
-  /// No description provided for @paywallSoonTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro opens soon'**
-  String get paywallSoonTitle;
-
-  /// No description provided for @paywallNoPaymentToday.
-  ///
-  /// In en, this message translates to:
-  /// **'No payment today. We will ask again before any charge.'**
-  String get paywallNoPaymentToday;
 
   /// No description provided for @paywallPurchaseActive.
   ///
@@ -2940,6 +3174,234 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Plus the time the moves themselves take.'**
   String get reactionMoveTimeNote;
+
+  /// No description provided for @paywallBenefitCampTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your camp week'**
+  String get paywallBenefitCampTitle;
+
+  /// No description provided for @paywallBenefitCampBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Dated sessions for your week, built around your level and your fight date.'**
+  String get paywallBenefitCampBody;
+
+  /// No description provided for @paywallBenefitFuelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel for training days'**
+  String get paywallBenefitFuelTitle;
+
+  /// No description provided for @paywallBenefitFuelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Calorie and protein targets that move with the week you train.'**
+  String get paywallBenefitFuelBody;
+
+  /// No description provided for @paywallBenefitReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review'**
+  String get paywallBenefitReviewTitle;
+
+  /// No description provided for @paywallBenefitReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Each Sunday: what you did and what to change. You decide.'**
+  String get paywallBenefitReviewBody;
+
+  /// No description provided for @paywallBenefitWeightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe weight path'**
+  String get paywallBenefitWeightTitle;
+
+  /// No description provided for @paywallBenefitWeightBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A weight path to your fight date, with safety limits.'**
+  String get paywallBenefitWeightBody;
+
+  /// No description provided for @paywallTrialBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}-day free trial'**
+  String paywallTrialBadge(int days);
+
+  /// No description provided for @paywallTrialThen.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day free, then {price}} other{{days} days free, then {price}}}'**
+  String paywallTrialThen(int days, String price);
+
+  /// No description provided for @paywallStartTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start free trial'**
+  String get paywallStartTrial;
+
+  /// No description provided for @paywallTrialRenewalDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Free for {days, plural, =1{1 day} other{{days} days}}, then {price}, renewing automatically until you cancel. Cancel at least 24 hours before the trial ends in your store account settings to avoid being charged. Payment is charged to your Apple ID or Google Play account at the end of the trial.'**
+  String paywallTrialRenewalDisclosure(int days, String price);
+
+  /// No description provided for @paywallTrialActiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free trial is running'**
+  String get paywallTrialActiveTitle;
+
+  /// No description provided for @paywallTrialActiveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It becomes a paid plan when the trial ends unless you cancel in your store account.'**
+  String get paywallTrialActiveBody;
+
+  /// No description provided for @paywallUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions aren\'t available here yet'**
+  String get paywallUnavailableTitle;
+
+  /// No description provided for @paywallUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This version can\'t start a subscription yet. Your data stays saved.'**
+  String get paywallUnavailableBody;
+
+  /// No description provided for @readOnlyBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is saved. Subscribe to keep training.'**
+  String get readOnlyBanner;
+
+  /// No description provided for @readOnlyBannerCta.
+  ///
+  /// In en, this message translates to:
+  /// **'See plans'**
+  String get readOnlyBannerCta;
+
+  /// No description provided for @trialChipDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{Trial · ends today} =1{Trial · 1 day left} other{Trial · {days} days left}}'**
+  String trialChipDaysLeft(int days);
+
+  /// No description provided for @trialReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free trial ends in 2 days'**
+  String get trialReminderTitle;
+
+  /// No description provided for @trialReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It renews unless you cancel in your store account. Your data stays saved either way.'**
+  String get trialReminderBody;
+
+  /// No description provided for @planReadyStartFreeWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your free week'**
+  String get planReadyStartFreeWeek;
+
+  /// No description provided for @planReadyStartTrialDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your {days}-day free trial'**
+  String planReadyStartTrialDays(int days);
+
+  /// No description provided for @planReadyViewPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'See plans'**
+  String get planReadyViewPlans;
+
+  /// No description provided for @planReadyNotNowNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan stays saved. Logging needs a subscription.'**
+  String get planReadyNotNowNote;
+
+  /// No description provided for @paywallTrialCancelNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel in your store settings before the trial ends and you pay nothing.'**
+  String get paywallTrialCancelNote;
+
+  /// No description provided for @paywallAfterTrialNote.
+  ///
+  /// In en, this message translates to:
+  /// **'If you don\'t subscribe after the trial, your plan and logs stay readable. Logging and sessions need a subscription.'**
+  String get paywallAfterTrialNote;
+
+  /// No description provided for @paywallBenefitSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session mode'**
+  String get paywallBenefitSessionTitle;
+
+  /// No description provided for @paywallBenefitSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds and rest timed for you, with a tactical and a recovery cue on every break.'**
+  String get paywallBenefitSessionBody;
+
+  /// No description provided for @paywallContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get paywallContinue;
+
+  /// No description provided for @fuelLogFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Log food'**
+  String get fuelLogFood;
+
+  /// No description provided for @fuelRecentFoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent foods'**
+  String get fuelRecentFoods;
+
+  /// No description provided for @fuelQuickAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get fuelQuickAdd;
+
+  /// No description provided for @fuelEmptyLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged yet. Use Log food to add your first meal.'**
+  String get fuelEmptyLog;
+
+  /// No description provided for @fuelGramsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g left'**
+  String fuelGramsLeft(int grams);
+
+  /// No description provided for @fuelConsumedKcal.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal logged'**
+  String fuelConsumedKcal(int kcal);
+
+  /// No description provided for @fuelRemovedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed'**
+  String fuelRemovedSnack(String name);
+
+  /// No description provided for @fuelRepeatFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Log {name} again'**
+  String fuelRepeatFood(String name);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

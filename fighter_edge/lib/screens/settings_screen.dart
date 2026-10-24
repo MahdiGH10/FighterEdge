@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import '../widgets/glass_sheet.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_icons.dart';
 
 import '../controllers/auth_controller.dart';
+import '../features/training_plan/presentation/plan_controller.dart';
 import '../notifications/reminder_gateway.dart';
 import '../notifications/training_reminder_schedule.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -12,6 +14,7 @@ import '../theme/app_haptics.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
+import '../state/glass_policy_controller.dart';
 import '../state/locale_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -37,6 +40,7 @@ class SettingsScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final reminders = context.watch<ReminderGateway>();
     final consent = context.watch<ConsentController>();
+    final glass = context.watch<GlassPolicyController>();
     final user = auth.user;
 
     // Signing out or deleting the account makes the router take this page
@@ -80,6 +84,12 @@ class SettingsScreen extends StatelessWidget {
               title: l.settingsLanguage,
               subtitle: _languageLabel(context, l),
               onTap: () => _pickLanguage(context),
+            ),
+            _SwitchRow(
+              title: l.settingsReduceTransparency,
+              subtitle: l.settingsReduceTransparencySubtitle,
+              value: glass.reduceTransparency,
+              onChanged: glass.setReduceTransparency,
             ),
           ]),
           const SizedBox(height: Insets.xl),
@@ -218,6 +228,7 @@ class SettingsScreen extends StatelessWidget {
     ReminderGateway reminders,
     bool enabled,
   ) async {
+    final plan = context.read<PlanController>();
     if (!enabled) {
       await state.setCampReminders(false);
       await reminders.cancelAll();
@@ -236,7 +247,7 @@ class SettingsScreen extends StatelessWidget {
     }
     await state.setCampReminders(true);
     await reminders.scheduleTrainingReminders(
-      weekdays: TrainingReminderSchedule.weekdaysFor(state.sessions),
+      weekdays: plan.trainingWeekdays,
       time: TrainingReminderSchedule.defaultTime,
     );
   }
@@ -303,12 +314,8 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _showInfo(BuildContext context, String title, String message) {
-    showModalBottomSheet<void>(
+    showGlassSheet<void>(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Radii.card)),
-      ),
       builder: (context) => Padding(
         padding: const EdgeInsets.all(Insets.xl),
         child: Column(
@@ -413,9 +420,8 @@ Future<void> _pickLanguage(BuildContext context) async {
   final controller = context.read<LocaleController>();
   final l = L.of(context);
   final current = controller.locale?.languageCode;
-  await showModalBottomSheet<void>(
+  await showGlassSheet<void>(
     context: context,
-    backgroundColor: AppColors.surface,
     showDragHandle: true,
     builder: (sheetContext) => SafeArea(
       top: false,

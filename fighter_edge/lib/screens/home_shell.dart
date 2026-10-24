@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_icons.dart';
 
+import '../billing/trial_reminder.dart';
 import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../l10n/gen/app_localizations.dart';
-import '../state/app_state.dart';
+import '../notifications/reminder_gateway.dart';
 import '../state/first_run_controller.dart';
-import '../state/streak_controller.dart';
+import '../state/glass_policy_controller.dart';
 import '../theme/app_haptics.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/coach_marks.dart';
@@ -61,19 +62,36 @@ class _HomeShellState extends State<HomeShell> {
 
   late final EdgeFuelController _fuel;
   late final FirstRunController _firstRun;
-  late final StreakController _streak;
+  late final AuthController _auth;
+  late final TrialReminderCoordinator _trialReminder;
+
+  /// Keeps the "trial ends in 2 days" notification in line with the
+  /// server-fed access state. Never decides access itself.
+  void _syncTrialReminder() {
+    if (!mounted) return;
+    final l = L.of(context);
+    _trialReminder.sync(
+      _auth.accessState,
+      title: l.trialReminderTitle,
+      body: l.trialReminderBody,
+    );
+  }
 
   @override
   void initState() {
     super.initState();
+    _auth = context.read<AuthController>()..addListener(_syncTrialReminder);
+    _trialReminder = TrialReminderCoordinator(
+      gateway: context.read<ReminderGateway>(),
+    );
     _fuel = context.read<EdgeFuelController>()..addListener(_checkFirstWin);
     _firstRun = context.read<FirstRunController>()..addListener(_checkFirstWin);
-    _streak = context.read<StreakController>()..addListener(_syncStreakEarn);
-    // The controller loads its persisted state asynchronously; this first
-    // call is usually a no-op that the load's own notify (above) retries.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _syncStreakEarn();
+      _syncTrialReminder();
       _askForConsentOnce();
+      // The shell is the first screen that draws glass, so this is where the
+      // device finds out whether it can afford the blur. Runs once per install.
+      if (mounted) context.read<GlassPolicyController>().startProbe();
     });
   }
 
@@ -89,19 +107,11 @@ class _HomeShellState extends State<HomeShell> {
   void dispose() {
     _fuel.removeListener(_checkFirstWin);
     _firstRun.removeListener(_checkFirstWin);
-    _streak.removeListener(_syncStreakEarn);
+    _auth.removeListener(_syncTrialReminder);
+    // The shell leaves the tree on sign-out: the next account must not
+    // inherit this one's reminder.
+    if (_auth.user == null) _trialReminder.cancel();
     super.dispose();
-  }
-
-  /// Banks a freeze for last week if it qualified. Cheap and idempotent —
-  /// [StreakController.syncWeeklyEarn] only does real work once per week.
-  void _syncStreakEarn() {
-    if (!mounted) return;
-    final isPro = context.read<AuthController>().isPro;
-    _streak.syncWeeklyEarn(
-      completedDateKeys: context.read<AppState>().trainingDayKeys,
-      isPro: isPro,
-    );
   }
 
   void _goToTab(int i) {
@@ -136,7 +146,7 @@ class _HomeShellState extends State<HomeShell> {
         target: _navKeys[_trainTab],
         title: 'Train',
         body: 'Your week of sessions. Tick one off when it’s done — that '
-            'is what builds your streak.',
+            'is what builds your week.',
       ),
       CoachMarkStep(
         target: _navKeys[_fuelTab],
@@ -167,28 +177,35 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     _visited.add(_index);
-    return Scaffold(
-      // Tabs are peers: nothing slides, because nothing moved. Every tab the
-      // athlete has opened stays mounted, so its scroll position, sub-tab and
-      // segment are still there on return; tabs never opened are not built,
-      // and hidden tabs have their tickers paused.
-      body: FadeThrough(
-        switchKey: _index,
-        child: IndexedStack(
-          index: _index,
-          children: [
-            for (var i = 0; i < _navCount; i++)
-              _visited.contains(i)
-                  ? TickerMode(enabled: i == _index, child: _page(i))
-                  : const SizedBox.shrink(),
-          ],
+    // One backdrop group for the whole shell: the nav, a collapsed header and a
+    // sheet over a tab share one copy of what is behind them.
+    return BackdropGroup(
+      child: Scaffold(
+        // The glass nav is drawn over the body, so lists scroll under it. Their
+        // bottom padding clears it: ScreenScaffold.tabBottomPadding.
+        extendBody: true,
+        // Tabs are peers: nothing slides, because nothing moved. Every tab the
+        // athlete has opened stays mounted, so its scroll position, sub-tab and
+        // segment are still there on return; tabs never opened are not built,
+        // and hidden tabs have their tickers paused.
+        body: FadeThrough(
+          switchKey: _index,
+          child: IndexedStack(
+            index: _index,
+            children: [
+              for (var i = 0; i < _navCount; i++)
+                _visited.contains(i)
+                    ? TickerMode(enabled: i == _index, child: _page(i))
+                    : const SizedBox.shrink(),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: AppBottomNav(
-        items: _navItems(context),
-        currentIndex: _index,
-        onTap: _goToTab,
-        itemKeys: _navKeys,
+        bottomNavigationBar: AppBottomNav(
+          items: _navItems(context),
+          currentIndex: _index,
+          onTap: _goToTab,
+          itemKeys: _navKeys,
+        ),
       ),
     );
   }

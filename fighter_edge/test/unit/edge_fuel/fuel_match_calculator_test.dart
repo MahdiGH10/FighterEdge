@@ -84,6 +84,8 @@ Recipe _recipe(
       mealType: MealType.dinner,
       prepMinutes: minutes,
       costBand: costBand,
+      status: ContentStatus.published,
+      reviewerCredit: 'Test reviewer',
     );
 
 NutritionDay _day({
@@ -113,6 +115,20 @@ NutritionDay _day({
 }
 
 void main() {
+  test('draft recipes are never suggested', () {
+    final draft = Recipe.fromJson({
+      ..._recipe('draft', 'balanced').toJson(),
+      'status': 'draft',
+      'reviewerCredit': null,
+    });
+    final match = FuelMatchCalculator.calculate(
+      target: _target(),
+      day: _day(),
+      recipes: [draft],
+      foodsById: _foods,
+    );
+    expect(match.options, isEmpty);
+  });
   test('selects a catalog-backed portion for the exact remaining target', () {
     final match = FuelMatchCalculator.calculate(
       target: _target(),
@@ -206,5 +222,62 @@ void main() {
     );
 
     expect(match.status, FuelMatchStatus.needsMoreData);
+  });
+
+  group('modes', () {
+    const starch = FoodItem(
+      id: 'starch',
+      name: 'Rice and bread',
+      category: FoodCategory.grain,
+      kcalPer100g: 400,
+      proteinPer100g: 5,
+      carbsPer100g: 85,
+      fatPer100g: 2,
+      fibrePer100g: 2,
+    );
+    const lean = FoodItem(
+      id: 'lean',
+      name: 'Grilled fish',
+      category: FoodCategory.protein,
+      kcalPer100g: 150,
+      proteinPer100g: 30,
+      carbsPer100g: 2,
+      fatPer100g: 2,
+      fibrePer100g: 0,
+    );
+    const foods = {'starch': starch, 'lean': lean};
+
+    FuelMatch run(FuelMatchMode? mode) => mode == null
+        ? FuelMatchCalculator.calculate(
+            target: _target(),
+            day: _day(calories: 400),
+            recipes: [_recipe('starch', 'starch'), _recipe('lean', 'lean')],
+            foodsById: foods,
+          )
+        : FuelMatchCalculator.calculate(
+            target: _target(),
+            day: _day(calories: 400),
+            recipes: [_recipe('starch', 'starch'), _recipe('lean', 'lean')],
+            foodsById: foods,
+            mode: mode,
+          );
+
+    test('calorie-first stays the default and leads with the calories', () {
+      final byDefault = run(null);
+      final calorieFirst = run(FuelMatchMode.calorieFirst);
+      expect(byDefault.options.map((o) => o.recipe.id), ['starch', 'lean']);
+      expect(
+        calorieFirst.options.map((o) => '${o.recipe.id}x${o.servings}'),
+        byDefault.options.map((o) => '${o.recipe.id}x${o.servings}'),
+      );
+      expect(byDefault.options.first.servings, 1.5);
+    });
+
+    test('macro-first leads with protein', () {
+      final match = run(FuelMatchMode.macroFirst);
+      expect(match.status, FuelMatchStatus.ready);
+      expect(match.options.map((o) => o.recipe.id), ['lean', 'starch']);
+      expect(match.options.first.servings, 2.5);
+    });
   });
 }

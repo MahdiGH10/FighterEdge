@@ -38,6 +38,45 @@ BillingException translateRevenueCatError(
   return BillingException(code.name, message ?? fallback);
 }
 
+int? _periodDays(rc.PeriodUnit unit, int count) => switch (unit) {
+      rc.PeriodUnit.day => count,
+      rc.PeriodUnit.week => count * 7,
+      rc.PeriodUnit.month => count * 30,
+      rc.PeriodUnit.year => count * 365,
+      rc.PeriodUnit.unknown => null,
+    };
+
+/// The free trial the store offers [product], or null.
+///
+/// Never guesses: a trial is reported only when the store data shows a
+/// zero-price phase. On Google Play the default option is the offer the
+/// customer is eligible for, so its free phase counts. On the App Store the
+/// product always carries its intro offer, so it counts only when the
+/// eligibility check came back [rc.IntroEligibilityStatus.introEligibilityStatusEligible];
+/// unknown or ineligible means no trial claim.
+BillingFreeTrial? freeTrialFromStoreProduct(
+  rc.StoreProduct product, {
+  rc.IntroEligibilityStatus? eligibility,
+}) {
+  final phase = product.defaultOption?.freePhase;
+  if (phase != null) {
+    final period = phase.billingPeriod;
+    if (phase.price.amountMicros != 0 || period == null) return null;
+    final days = _periodDays(period.unit, period.value);
+    final cycles = phase.billingCycleCount ?? 1;
+    if (days == null || days <= 0 || cycles <= 0) return null;
+    return BillingFreeTrial(days: days * cycles);
+  }
+  final intro = product.introductoryPrice;
+  if (intro == null || intro.price != 0) return null;
+  if (eligibility != rc.IntroEligibilityStatus.introEligibilityStatusEligible) {
+    return null;
+  }
+  final days = _periodDays(intro.periodUnit, intro.periodNumberOfUnits);
+  if (days == null || days <= 0 || intro.cycles <= 0) return null;
+  return BillingFreeTrial(days: days * intro.cycles);
+}
+
 /// RevenueCat adapter. Public store keys are intentionally supplied through
 /// `--dart-define`; no secret or entitlement decision lives in the client.
 class RevenueCatBillingGateway implements BillingGateway {
@@ -91,6 +130,7 @@ class RevenueCatBillingGateway implements BillingGateway {
     final current = offerings.current;
     if (current == null) return const [];
 
+    final eligibility = await _introEligibility(current.availablePackages);
     final products = <BillingProduct>[];
     for (final package in current.availablePackages) {
       final period = switch (package.packageType) {
@@ -107,9 +147,29 @@ class RevenueCatBillingGateway implements BillingGateway {
         currencyCode: package.storeProduct.currencyCode,
         price: package.storeProduct.price,
         providerHandle: package,
+        freeTrial: freeTrialFromStoreProduct(
+          package.storeProduct,
+          eligibility: eligibility[package.storeProduct.identifier]?.status,
+        ),
       ));
     }
     return products;
+  }
+
+  /// App Store intro-offer eligibility per product. Google Play reports
+  /// eligibility through the default option instead, and a failed check
+  /// simply means no trial is claimed.
+  Future<Map<String, rc.IntroEligibility>> _introEligibility(
+    List<rc.Package> packages,
+  ) async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return const {};
+    try {
+      return await rc.Purchases.checkTrialOrIntroductoryPriceEligibility([
+        for (final package in packages) package.storeProduct.identifier,
+      ]);
+    } catch (_) {
+      return const {};
+    }
   }
 
   @override
@@ -185,6 +245,8 @@ class RevenueCatBillingGateway implements BillingGateway {
       expiresAt: DateTime.tryParse(entitlement?.expirationDate ?? ''),
       willRenew: entitlement?.willRenew ?? false,
       managementUrl: info.managementURL,
+      inTrial: entitlement?.isActive == true &&
+          entitlement?.periodType == rc.PeriodType.trial,
     );
   }
 }

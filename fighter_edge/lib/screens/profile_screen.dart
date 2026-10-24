@@ -8,8 +8,6 @@ import '../l10n/decimal_format.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
 import '../state/app_state.dart';
-import '../state/streak_controller.dart';
-import '../state/streak_engine.dart';
 import '../theme/app_accessibility.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -31,12 +29,6 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final streak = context.watch<StreakController>();
-    final streakDays = StreakEngine.streakDays(
-      state.trainingDayKeys,
-      protectedDateKeys: streak.protectedDateKeys,
-      now: state.now,
-    );
     final weight = state.latestWeight;
     final auth = context.watch<AuthController>();
     final user = auth.user;
@@ -78,75 +70,80 @@ class ProfileScreen extends StatelessWidget {
         ],
       ],
     );
-    final body = ListView(
-      padding: const EdgeInsets.fromLTRB(
-          Insets.lg, Insets.none, Insets.lg, Insets.xxl),
-      children: [
-        if (largeText)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final body = Builder(
+      builder: (context) => ListView(
+        padding: EdgeInsets.fromLTRB(
+            Insets.lg,
+            MediaQuery.paddingOf(context).top,
+            Insets.lg,
+            ScreenScaffold.tabBottomPadding(context)),
+        children: [
+          if (largeText)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const FighterAvatar(size: 64),
+                const SizedBox(height: Insets.md),
+                details,
+              ],
+            )
+          else
+            Row(
+              children: [
+                const FighterAvatar(size: 64),
+                const SizedBox(width: Insets.lg),
+                Expanded(child: details),
+              ],
+            ),
+          const SizedBox(height: Insets.xl),
+          const SectionHeader('Subscription'),
+          _SubscriptionCard(auth: auth),
+          const SizedBox(height: Insets.xl),
+          const SectionHeader('Training'),
+          GroupedList(
             children: [
-              const FighterAvatar(size: 64),
-              const SizedBox(height: Insets.md),
-              details,
-            ],
-          )
-        else
-          Row(
-            children: [
-              const FighterAvatar(size: 64),
-              const SizedBox(width: Insets.lg),
-              Expanded(child: details),
+              GroupedRow(
+                title: 'Training days',
+                subtitle: '${user?.weeklyTrainingDays ?? 0} days each week',
+              ),
+              _ToolRow(
+                title: 'Weight tracker',
+                subtitle: 'Your weigh-ins and weight history',
+                route: AppRoutes.weightTracker,
+                screen: WeightTrackerScreen(),
+              ),
             ],
           ),
-        const SizedBox(height: Insets.xl),
-        const SectionHeader('Subscription'),
-        _SubscriptionCard(auth: auth),
-        const SizedBox(height: Insets.xl),
-        const SectionHeader('Tools'),
-        const GroupedList(
-          children: [
-            _ToolRow(
-              title: 'Weight tracker',
-              subtitle: 'Log weigh-ins and monitor the cut or gain',
-              route: AppRoutes.weightTracker,
-              screen: WeightTrackerScreen(),
-            ),
-            _ToolRow(
-              title: 'Settings',
-              subtitle: 'Units, safety, reminders and account controls',
-              route: AppRoutes.settings,
-              screen: SettingsScreen(),
-            ),
-          ],
-        ),
-        const SizedBox(height: Insets.xl),
-        const SectionHeader('Stats'),
-        GroupedList(
-          children: [
-            _StatRow('Sessions completed', '${state.completedSessionCount}'),
-            _StatRow('Current streak',
-                '$streakDays ${L.of(context).dashboardStatDays(streakDays)}'),
-            _StatRow(
-                'Training days / week', '${user?.weeklyTrainingDays ?? 0}'),
-          ],
-        ),
-        const SizedBox(height: Insets.xl),
-        GhostButton(
-          'Sign out',
-          icon: AppIcons.signOut,
-          expand: true,
-          onPressed: () async {
-            await auth.signOut();
-            if (context.mounted) {
-              Navigator.of(context).popUntil((r) => r.isFirst);
-            }
-          },
-        ),
-      ],
+          const SizedBox(height: Insets.xl),
+          const SectionHeader('Preferences, privacy and account'),
+          const GroupedList(
+            children: [
+              _ToolRow(
+                title: 'Settings',
+                subtitle: 'Units, reminders, data and account controls',
+                route: AppRoutes.settings,
+                screen: SettingsScreen(),
+              ),
+            ],
+          ),
+          const SizedBox(height: Insets.xl),
+          GhostButton(
+            'Sign out',
+            icon: AppIcons.signOut,
+            expand: true,
+            onPressed: () async {
+              await auth.signOut();
+              if (context.mounted) {
+                Navigator.of(context).popUntil((r) => r.isFirst);
+              }
+            },
+          ),
+        ],
+      ),
     );
     if (asTab) {
-      return ScreenScaffold.tab(title: 'Profile', body: body);
+      return ScreenScaffold.tab(
+          title: 'Profile', scrollsUnderHeader: true, body: body);
     }
     return ScreenScaffold(title: 'Profile', showBack: true, body: body);
   }
@@ -197,18 +194,5 @@ class _SubscriptionCard extends StatelessWidget {
                 const PaywallScreen(trigger: PaywallTrigger.profile)),
       )
     ]);
-  }
-}
-
-class _StatRow extends StatelessWidget {
-  final String label;
-  final String value;
-  const _StatRow(this.label, this.value);
-
-  @override
-  Widget build(BuildContext context) {
-    return GroupedRow(
-        title: label,
-        trailing: Text(value, style: AppType.callout(weight: FontWeight.w700)));
   }
 }

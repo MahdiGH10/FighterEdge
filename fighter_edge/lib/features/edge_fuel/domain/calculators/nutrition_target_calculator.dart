@@ -10,6 +10,10 @@ import '../policies/nutrition_safety_policy.dart';
 /// calorie or macro target may be produced; an AI gateway (later sprint)
 /// may explain this output but must never recompute or override it
 /// (master prompt §4.1–§4.2).
+///
+/// This is the frozen policy-v1 engine: its outputs are byte-identical to
+/// what existing users already hold. Policy v2 lives in
+/// `NutritionTargetCalculatorV2`.
 class NutritionTargetCalculator {
   const NutritionTargetCalculator._();
 
@@ -27,7 +31,7 @@ class NutritionTargetCalculator {
       if (missing.isNotEmpty) {
         return NutritionTarget(
           status: NutritionTargetStatus.needsMoreData,
-          policyVersion: NutritionPolicy.version,
+          policyVersion: NutritionPolicy.v1,
           calculatedAt: now,
           reasons: missing,
         );
@@ -40,7 +44,7 @@ class NutritionTargetCalculator {
     if (!safety.isAllowed) {
       return NutritionTarget(
         status: safety.status,
-        policyVersion: NutritionPolicy.version,
+        policyVersion: NutritionPolicy.v1,
         calculatedAt: now,
         reasons: safety.reasons,
       );
@@ -60,7 +64,7 @@ class NutritionTargetCalculator {
     if (rmr.isNaN || rmr.isInfinite || rmr <= 0) {
       return NutritionTarget(
         status: NutritionTargetStatus.unsupported,
-        policyVersion: NutritionPolicy.version,
+        policyVersion: NutritionPolicy.v1,
         calculatedAt: now,
         reasons: const ['rmrCalculationOutOfRange'],
       );
@@ -180,7 +184,7 @@ class NutritionTargetCalculator {
 
     return NutritionTarget(
       status: NutritionTargetStatus.success,
-      policyVersion: NutritionPolicy.version,
+      policyVersion: NutritionPolicy.v1,
       calculatedAt: now,
       warnings: warnings,
       estimatedRmrKcal: estimatedRmrKcal,
