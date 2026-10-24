@@ -5,6 +5,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import 'glass_surface.dart';
 import 'press_scale.dart';
 
 class NavItem {
@@ -16,10 +17,12 @@ class NavItem {
   const NavItem(this.icon, this.label, {this.activeIcon});
 }
 
-/// Persistent bottom navigation: a flat, full-width bar on the screen
-/// background, separated by a hairline. The selected tab is a filled icon, the
-/// accent colour and a short line on the bar's top edge; nothing floats, blurs
-/// or sits in a pill.
+/// Persistent bottom navigation: a full-width glass bar ([GlassSurface], the
+/// navigation layer) that content scrolls under; the home shell extends its
+/// body behind it. The selected tab is a filled icon, primary text and a short
+/// crimson-to-ember line on the bar's top edge; nothing floats or sits in a
+/// pill. At the tinted and solid glass levels the bar keeps the same geometry
+/// on a near-opaque or opaque fill.
 class AppBottomNav extends StatelessWidget {
   final List<NavItem> items;
   final int currentIndex;
@@ -39,13 +42,8 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.backgroundRaised,
-        border: Border(
-          top: BorderSide(color: AppAccessibility.border(context)),
-        ),
-      ),
+    return GlassSurface(
+      kind: GlassKind.nav,
       child: SafeArea(
         top: false,
         child: Row(
@@ -77,11 +75,10 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // accentText rather than primary: the label is 11pt, and small accent text
-    // needs the brighter tone to clear AA on this surface.
-    final color = selected
-        ? AppAccessibility.accentText(context)
-        : AppAccessibility.textMuted(context);
+    // Primary text when selected, muted otherwise: both clear 4.5:1 on the nav
+    // glass at its brightest (see the nav rows of color_contrast_test).
+    final color =
+        selected ? AppColors.textPrimary : AppAccessibility.textMuted(context);
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     return Semantics(
       button: true,
@@ -132,9 +129,12 @@ class _NavButton extends StatelessWidget {
               duration: reduceMotion ? Duration.zero : MotionTokens.fast,
               // Not the spring: an overshoot would push the width below zero.
               curve: MotionTokens.count,
-              width: selected ? 28 : 0,
+              width: selected ? 24 : 0,
               height: 2,
-              color: AppColors.primary,
+              decoration: const BoxDecoration(
+                gradient: AppColors.progressRamp,
+                borderRadius: BorderRadius.all(Radius.circular(2)),
+              ),
             ),
           ],
         ),

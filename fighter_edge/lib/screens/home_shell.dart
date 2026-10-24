@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_icons.dart';
 
+import '../billing/trial_reminder.dart';
+import '../controllers/auth_controller.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../l10n/gen/app_localizations.dart';
+import '../notifications/reminder_gateway.dart';
 import '../state/first_run_controller.dart';
 import '../state/glass_policy_controller.dart';
 import '../theme/app_haptics.dart';
@@ -59,13 +62,32 @@ class _HomeShellState extends State<HomeShell> {
 
   late final EdgeFuelController _fuel;
   late final FirstRunController _firstRun;
+  late final AuthController _auth;
+  late final TrialReminderCoordinator _trialReminder;
+
+  /// Keeps the "trial ends in 2 days" notification in line with the
+  /// server-fed access state. Never decides access itself.
+  void _syncTrialReminder() {
+    if (!mounted) return;
+    final l = L.of(context);
+    _trialReminder.sync(
+      _auth.accessState,
+      title: l.trialReminderTitle,
+      body: l.trialReminderBody,
+    );
+  }
 
   @override
   void initState() {
     super.initState();
+    _auth = context.read<AuthController>()..addListener(_syncTrialReminder);
+    _trialReminder = TrialReminderCoordinator(
+      gateway: context.read<ReminderGateway>(),
+    );
     _fuel = context.read<EdgeFuelController>()..addListener(_checkFirstWin);
     _firstRun = context.read<FirstRunController>()..addListener(_checkFirstWin);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncTrialReminder();
       _askForConsentOnce();
       // The shell is the first screen that draws glass, so this is where the
       // device finds out whether it can afford the blur. Runs once per install.
@@ -85,6 +107,10 @@ class _HomeShellState extends State<HomeShell> {
   void dispose() {
     _fuel.removeListener(_checkFirstWin);
     _firstRun.removeListener(_checkFirstWin);
+    _auth.removeListener(_syncTrialReminder);
+    // The shell leaves the tree on sign-out: the next account must not
+    // inherit this one's reminder.
+    if (_auth.user == null) _trialReminder.cancel();
     super.dispose();
   }
 
@@ -155,6 +181,9 @@ class _HomeShellState extends State<HomeShell> {
     // sheet over a tab share one copy of what is behind them.
     return BackdropGroup(
       child: Scaffold(
+        // The glass nav is drawn over the body, so lists scroll under it. Their
+        // bottom padding clears it: ScreenScaffold.tabBottomPadding.
+        extendBody: true,
         // Tabs are peers: nothing slides, because nothing moved. Every tab the
         // athlete has opened stays mounted, so its scroll position, sub-tab and
         // segment are still there on return; tabs never opened are not built,

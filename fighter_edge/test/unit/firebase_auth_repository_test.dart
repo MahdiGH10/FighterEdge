@@ -115,6 +115,52 @@ void main() {
       expect(user.onboardingComplete, isTrue);
     });
 
+    test('reads the webhook-written trial period into the access state',
+        () async {
+      final expires = DateTime.now().add(const Duration(days: 6));
+      await firestore.collection('users').doc('athlete-1').set({
+        'plan': 'pro',
+        'billing': {
+          'expiresAtMs': expires.millisecondsSinceEpoch,
+          'proPeriod': 'TRIAL',
+          'willRenew': true,
+        },
+      });
+      final auth = MockFirebaseAuth(mockUser: athlete());
+
+      final user = await repo(auth: auth).signInWithGoogle();
+
+      expect(user.planPeriod, ProPeriod.trial);
+      expect(user.entitlementConfirmed, isTrue);
+      final access = user.accessAt(DateTime.now());
+      expect(access.isTrial, isTrue);
+      expect(access.trialEndsAt?.millisecondsSinceEpoch,
+          expires.millisecondsSinceEpoch);
+    });
+
+    test('an unknown proPeriod is ignored, not treated as a trial', () async {
+      await firestore.collection('users').doc('athlete-1').set({
+        'plan': 'pro',
+        'billing': {'proPeriod': 'PROMOTIONAL'},
+      });
+      final user = await repo(auth: MockFirebaseAuth(mockUser: athlete()))
+          .signInWithGoogle();
+      expect(user.planPeriod, isNull);
+      expect(user.accessAt(DateTime.now()).isActive, isTrue);
+    });
+
+    test('a free profile is read-only, with the server answer confirmed',
+        () async {
+      await firestore
+          .collection('users')
+          .doc('athlete-1')
+          .set({'plan': 'free'});
+      final user = await repo(auth: MockFirebaseAuth(mockUser: athlete()))
+          .signInWithGoogle();
+      expect(user.entitlementConfirmed, isTrue);
+      expect(user.accessAt(DateTime.now()).isReadOnly, isTrue);
+    });
+
     test('email sign-in hydrates the same profile', () async {
       final auth = MockFirebaseAuth(mockUser: athlete());
       final user = await repo(auth: auth).signInWithEmail(

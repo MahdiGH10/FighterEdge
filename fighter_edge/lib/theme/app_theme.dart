@@ -58,6 +58,9 @@ class LayoutTokens {
   /// Calorie ring leaves room for its label at normal and large text sizes.
   static const double fuelRing = 176;
   static const double fuelRingLarge = 240;
+
+  /// Secondary consumed ring beside the V2 remaining calorie figure.
+  static const double fuelSummaryRing = 96;
   static const double narrowScreen = 360;
 
   /// Fixed demo and content regions, not text bounding boxes.

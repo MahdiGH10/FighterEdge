@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fighter_edge/state/locale_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
@@ -87,45 +88,58 @@ void main() {
     });
   }
 
-  for (final scale in [1.0, 2.0]) {
-    testWidgets('Fuel has one calorie hero and readable macros at scale $scale',
-        (tester) async {
-      tester.view.physicalSize = const Size(320, 568);
-      tester.view.devicePixelRatio = 1;
-      tester.platformDispatcher.textScaleFactorTestValue = scale;
-      addTearDown(tester.view.reset);
-      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-      final repo = await makeRepo(signedIn: true);
-      final fuelRepo = InMemoryEdgeFuelRepository();
-      await fuelRepo.saveTarget(
-          repo.currentUser!.id,
-          NutritionTarget(
-              status: NutritionTargetStatus.success,
-              policyVersion: 1,
-              calculatedAt: DateTime(2026, 9, 26),
-              targetCalories: 2500,
-              proteinGrams: 150,
-              carbGrams: 280,
-              fatGrams: 87));
-      await tester.pumpWidget(
-          wrapApp(const NutritionScreen(), repo: repo, edgeFuelRepo: fuelRepo));
-      await tester.pumpAndSettle();
-      expect(find.byType(ProgressRing), findsOneWidget);
-      expect(find.text('2500'), findsOneWidget);
-      expect(find.text('kcal left'), findsOneWidget);
-      await tester.scrollUntilVisible(find.text('Protein'), 100,
-          scrollable: find.byType(Scrollable).first);
-      expect(find.text('0 / 150 g'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.tap(find.bySemanticsLabel('Previous day'));
-      await tester.pumpAndSettle();
-      expect(
-          tester
-              .element(find.byType(NutritionScreen))
-              .read<EdgeFuelController>()
-              .isToday,
-          isFalse);
-      expect(tester.takeException(), isNull);
-    });
+  for (final language in ['en', 'de']) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets(
+          'Fuel has one calorie hero and readable macros in $language at scale $scale',
+          (tester) async {
+        tester.view.physicalSize = const Size(320, 568);
+        tester.view.devicePixelRatio = 1;
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        tester.platformDispatcher.localeTestValue = Locale(language);
+        addTearDown(tester.view.reset);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+        final repo = await makeRepo(signedIn: true);
+        final fuelRepo = InMemoryEdgeFuelRepository();
+        await fuelRepo.saveTarget(
+            repo.currentUser!.id,
+            NutritionTarget(
+                status: NutritionTargetStatus.success,
+                policyVersion: 1,
+                calculatedAt: DateTime(2026, 9, 26),
+                targetCalories: 2500,
+                proteinGrams: 150,
+                carbGrams: 280,
+                fatGrams: 87));
+        await tester.pumpWidget(wrapApp(const NutritionScreen(),
+            repo: repo, edgeFuelRepo: fuelRepo));
+        await tester.pumpAndSettle();
+        await tester
+            .element(find.byType(NutritionScreen))
+            .read<LocaleController>()
+            .setLocale(Locale(language));
+        await tester.pumpAndSettle();
+        expect(find.byType(ProgressRing), findsOneWidget);
+        expect(find.text('2500'), findsOneWidget);
+        expect(find.text(language == 'en' ? 'kcal left' : 'kcal übrig'),
+            findsOneWidget);
+        await tester.scrollUntilVisible(find.text('Protein'), 100,
+            scrollable: find.byType(Scrollable).first);
+        expect(find.text(language == 'en' ? '150 g left' : '150 g übrig'),
+            findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.bySemanticsLabel(
+            language == 'en' ? 'Previous day' : 'Vorheriger Tag'));
+        await tester.pumpAndSettle();
+        expect(
+            tester
+                .element(find.byType(NutritionScreen))
+                .read<EdgeFuelController>()
+                .isToday,
+            isFalse);
+        expect(tester.takeException(), isNull);
+      });
+    }
   }
 }
