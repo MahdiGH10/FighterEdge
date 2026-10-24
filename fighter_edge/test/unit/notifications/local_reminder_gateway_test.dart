@@ -140,42 +140,48 @@ void main() {
     expect(os, hasLength(2));
   });
 
-  test('cancels plan-owned reminders that are no longer wanted, only those',
-      () async {
-    // Left over from an earlier plan, from the trial path, and from the
-    // weekly training reminders an older version scheduled.
+  test('cancels plan-owned reminders that are no longer wanted', () async {
+    // Left over from an earlier plan.
     os[111] = {'id': 111, 'title': 'old', 'body': '', 'payload': '/review'};
     os[999] = {'id': 999, 'title': 'old', 'body': '', 'payload': '/home'};
-    os[6200] = {'id': 6200, 'title': 'trial', 'body': '', 'payload': ''};
-    os[6103] = {'id': 6103, 'title': 'weekly', 'body': '', 'payload': ''};
 
     await LocalReminderGateway().replaceScheduled([reminder(111, inDays(2))]);
 
-    expect(os.keys.toSet(), {111, 6200}, reason: 'trial kept, legacy gone');
+    expect(os.keys.toSet(), {111});
     expect(cancelled, contains(999));
-    expect(cancelled, contains(6103));
-    expect(cancelled, isNot(contains(6200)));
     expect(cancelled, isNot(contains(111)));
+  });
+
+  test('clears what older versions scheduled directly, so nobody gets two',
+      () async {
+    // The weekly training reminders, and the trial-end reminder that the
+    // planner owns now.
+    os[6103] = {'id': 6103, 'title': 'weekly', 'body': '', 'payload': ''};
+    os[6200] = {'id': 6200, 'title': 'trial', 'body': '', 'payload': ''};
+
+    await LocalReminderGateway().replaceScheduled([reminder(111, inDays(2))]);
+
+    expect(os.keys.toSet(), {111});
+    expect(cancelled, contains(6103));
+    expect(cancelled, contains(6200));
     // Every legacy weekday id is cleared, so nobody gets both kinds.
     for (var weekday = 1; weekday <= 7; weekday++) {
       expect(cancelled, contains(6100 + weekday));
     }
   });
 
-  test('an empty plan clears the plan-owned set and nothing else', () async {
+  test('an empty plan clears the plan-owned set', () async {
     os[111] = {'id': 111, 'title': 'x', 'body': '', 'payload': '/home'};
-    os[6200] = {'id': 6200, 'title': 'trial', 'body': '', 'payload': ''};
     await LocalReminderGateway().replaceScheduled(const []);
-    expect(os.keys.toSet(), {6200});
+    expect(os, isEmpty);
   });
 
-  test('cancelAll clears plan-owned and legacy, keeps the trial notice',
-      () async {
+  test('cancelAll clears plan-owned and legacy notifications', () async {
     os[111] = {'id': 111, 'title': 'x', 'body': '', 'payload': '/home'};
     os[6101] = {'id': 6101, 'title': 'weekly', 'body': '', 'payload': ''};
     os[6200] = {'id': 6200, 'title': 'trial', 'body': '', 'payload': ''};
     await LocalReminderGateway().cancelAll();
-    expect(os.keys.toSet(), {6200});
+    expect(os, isEmpty);
   });
 
   test('never schedules more than the iOS limit allows, soonest first',

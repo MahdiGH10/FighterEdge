@@ -2202,4 +2202,25 @@ class LDe extends L {
   @override
   String get notifTip5Body =>
       'Atme vor dem Sparring eine Minute lang ruhig. Ein ruhiger Start prägt deine Runden.';
+
+  @override
+  String get notifFuelTitle => 'Fuel-Fenster';
+
+  @override
+  String get notifFuelSubtitle =>
+      'Ein Hinweis vor einer harten Einheit, wenn es Zeit zum Essen ist';
+
+  @override
+  String get notifFightTitle => 'Kampf-Countdown';
+
+  @override
+  String get notifFightSubtitle =>
+      'Ein Hinweis eine Woche und einen Tag vor deinem Kampf';
+
+  @override
+  String get notifPauseNutrition => 'Ernährungshinweise pausieren';
+
+  @override
+  String get notifPauseNutritionSubtitle =>
+      'Blendet das Fuel-Fenster aus, bis du es wieder einschaltest';
 }

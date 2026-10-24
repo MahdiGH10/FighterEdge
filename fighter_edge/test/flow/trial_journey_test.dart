@@ -1,6 +1,7 @@
 import 'package:fighter_edge/billing/billing_gateway.dart';
 import 'package:fighter_edge/billing/fake_billing_gateway.dart';
 import 'package:fighter_edge/billing/subscription.dart';
+import 'package:fighter_edge/notifications/domain/notification_channel.dart';
 import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
 import 'package:fighter_edge/theme/app_icons.dart';
@@ -51,7 +52,8 @@ void main() {
         willRenew: true,
       ),
     );
-    final reminders = FakeReminderGateway();
+    // Notifications are allowed, so the trial notice can be scheduled.
+    final reminders = FakeReminderGateway(allowed: true);
     final telemetry = MemoryTelemetry();
     await tester.pumpWidget(
       FighterEdgeApp(
@@ -141,7 +143,19 @@ void main() {
       find.text('Your data is saved. Subscribe to keep training.'),
       findsNothing,
     );
-    expect(reminders.trialReminderAt, isNotNull);
+    await tester.pump(const Duration(seconds: 1));
+    final notices = reminders.pending.values
+        .where((r) => r.channel == NotificationChannel.trialEnding)
+        .toList();
+    expect(notices, hasLength(1));
+    // Two days before the trial ends, in the morning, with a route only.
+    final endDay = DateTime(trialEnd.year, trialEnd.month, trialEnd.day);
+    expect(
+      notices.single.fireAt,
+      DateTime(endDay.year, endDay.month, endDay.day - 2, 10),
+    );
+    expect(notices.single.title, 'Your free trial ends in 2 days');
+    expect(notices.single.route, '/home');
 
     // The trial lapses (EXPIRATION webhook): read-only banner, reminder gone.
     store.emitCustomerInfo(const BillingCustomerState.free());
@@ -156,7 +170,12 @@ void main() {
       find.text('Your data is saved. Subscribe to keep training.'),
       findsOneWidget,
     );
-    expect(reminders.trialReminderCancels, greaterThan(0));
+    await tester.pump(const Duration(seconds: 1));
+    expect(
+      reminders.pending.values
+          .where((r) => r.channel == NotificationChannel.trialEnding),
+      isEmpty,
+    );
 
     // Restore finds a live subscription in the store, yet the profile is
     // still free, so the banner stays.

@@ -55,13 +55,13 @@ abstract class ReminderGateway {
 
   /// Makes the plan-owned set of pending notifications exactly [reminders]:
   /// plan-owned ones that are no longer wanted are cancelled, the rest are
-  /// scheduled (an existing id is replaced, never duplicated). The trial-end
-  /// reminder is not plan-owned and is left alone.
+  /// scheduled (an existing id is replaced, never duplicated). Notifications
+  /// that older versions of the app scheduled directly (weekly training
+  /// reminders and the trial-end reminder) are cancelled too.
   Future<void> replaceScheduled(List<ScheduledReminder> reminders);
 
-  /// Clears every plan-owned notification, and any weekly training reminder
-  /// an older version of the app scheduled. The trial-end reminder is left
-  /// alone; see [cancelTrialEndReminder].
+  /// Clears every plan-owned notification, and anything an older version of
+  /// the app scheduled directly.
   Future<void> cancelAll();
 
   /// Taps on delivered notifications while the app is running.
@@ -70,16 +70,4 @@ abstract class ReminderGateway {
   /// The tap that launched the app from a closed state, once. Null when the
   /// app was started some other way.
   Future<NotificationTap?> takeLaunchTap() async => null;
-
-  /// Schedules the one-off "your free trial ends soon" notification for [at],
-  /// replacing any earlier one. [title] and [body] arrive localized from the
-  /// caller. Optional: a gateway that cannot schedule does nothing.
-  Future<void> scheduleTrialEndReminder({
-    required DateTime at,
-    required String title,
-    required String body,
-  }) async {}
-
-  /// Removes the trial-end reminder, if one is scheduled.
-  Future<void> cancelTrialEndReminder() async {}
 }

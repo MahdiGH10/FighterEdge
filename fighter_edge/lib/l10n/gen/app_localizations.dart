@@ -3714,6 +3714,42 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Breathe slowly for a minute before sparring. A calm start sets up your rounds.'**
   String get notifTip5Body;
+
+  /// No description provided for @notifFuelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel window'**
+  String get notifFuelTitle;
+
+  /// No description provided for @notifFuelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A heads-up before a hard session, when it is time to eat'**
+  String get notifFuelSubtitle;
+
+  /// No description provided for @notifFightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fight countdown'**
+  String get notifFightTitle;
+
+  /// No description provided for @notifFightSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A note a week and a day before your fight'**
+  String get notifFightSubtitle;
+
+  /// No description provided for @notifPauseNutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause nutrition notes'**
+  String get notifPauseNutrition;
+
+  /// No description provided for @notifPauseNutritionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hides the fuel window until you switch this off'**
+  String get notifPauseNutritionSubtitle;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

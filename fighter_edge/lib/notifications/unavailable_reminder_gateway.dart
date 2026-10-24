@@ -25,14 +25,4 @@ class UnavailableReminderGateway implements ReminderGateway {
 
   @override
   Future<NotificationTap?> takeLaunchTap() async => null;
-
-  @override
-  Future<void> scheduleTrialEndReminder({
-    required DateTime at,
-    required String title,
-    required String body,
-  }) async {}
-
-  @override
-  Future<void> cancelTrialEndReminder() async {}
 }

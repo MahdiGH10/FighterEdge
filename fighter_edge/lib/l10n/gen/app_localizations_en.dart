@@ -2187,4 +2187,24 @@ class LEn extends L {
   @override
   String get notifTip5Body =>
       'Breathe slowly for a minute before sparring. A calm start sets up your rounds.';
+
+  @override
+  String get notifFuelTitle => 'Fuel window';
+
+  @override
+  String get notifFuelSubtitle =>
+      'A heads-up before a hard session, when it is time to eat';
+
+  @override
+  String get notifFightTitle => 'Fight countdown';
+
+  @override
+  String get notifFightSubtitle => 'A note a week and a day before your fight';
+
+  @override
+  String get notifPauseNutrition => 'Pause nutrition notes';
+
+  @override
+  String get notifPauseNutritionSubtitle =>
+      'Hides the fuel window until you switch this off';
 }

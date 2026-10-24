@@ -768,5 +768,11 @@
   "notifTip2Body": "Such dir heute eine Technik zum Schärfen aus. Ein kleiner Fokus schlägt einen großen Plan.",
   "notifTip3Body": "Iss nach einer harten Einheit eine richtige Mahlzeit. Erholung beginnt auf dem Teller.",
   "notifTip4Body": "Leichte Mobilität zwischen den Einheiten hält Hüfte und Schultern bereit.",
-  "notifTip5Body": "Atme vor dem Sparring eine Minute lang ruhig. Ein ruhiger Start prägt deine Runden."
+  "notifTip5Body": "Atme vor dem Sparring eine Minute lang ruhig. Ein ruhiger Start prägt deine Runden.",
+  "notifFuelTitle": "Fuel-Fenster",
+  "notifFuelSubtitle": "Ein Hinweis vor einer harten Einheit, wenn es Zeit zum Essen ist",
+  "notifFightTitle": "Kampf-Countdown",
+  "notifFightSubtitle": "Ein Hinweis eine Woche und einen Tag vor deinem Kampf",
+  "notifPauseNutrition": "Ernährungshinweise pausieren",
+  "notifPauseNutritionSubtitle": "Blendet das Fuel-Fenster aus, bis du es wieder einschaltest"
 }

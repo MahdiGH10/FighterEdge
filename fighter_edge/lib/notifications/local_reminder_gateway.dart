@@ -15,9 +15,9 @@ import 'reminder_gateway.dart';
 /// The notifications the planner owns are scheduled one by one with
 /// `zonedSchedule`, each under the planner's stable id, so scheduling the same
 /// plan twice replaces instead of duplicating. A plan-owned notification is
-/// recognised by its payload, which is always a route starting with `/`; the
-/// trial-end reminder has no payload and is never touched by
-/// [replaceScheduled].
+/// recognised by its payload, which is always a route starting with `/`. The
+/// older direct reminders (weekly training, trial end) have no payload and are
+/// cancelled by [replaceScheduled], as the planner owns those notices now.
 ///
 /// Uses [AndroidScheduleMode.inexactAllowWhileIdle] deliberately: a reminder
 /// does not need to fire on the second, and staying inexact means the app
@@ -36,13 +36,14 @@ class LocalReminderGateway implements ReminderGateway {
 
   /// The weekly training reminders older versions scheduled directly:
   /// `DateTime.monday`(1)..`DateTime.sunday`(7) added to this base. They are
-  /// cancelled on every [replaceScheduled] so nobody gets both kinds.
+  /// cancelled on every run so nobody gets both kinds.
   static const _legacyTrainingBase = 6100;
 
-  /// The one-off trial-end notification. It has its own path until the
-  /// planner takes it over.
-  static const _trialReminderId = 6200;
-  static const _trialChannelId = 'trial_reminders';
+  /// The one-off trial-end notification an older version scheduled directly.
+  /// The planner owns that notice now; this id is cancelled on every run so a
+  /// device upgraded with one still pending never gets two.
+  static const _legacyTrialReminderId = 6200;
+
   static const _trialChannelName = 'Subscription reminders';
   static const _trialChannelDescription =
       'A heads-up before your free trial ends.';
@@ -165,7 +166,7 @@ class LocalReminderGateway implements ReminderGateway {
     try {
       await _ensureInitialized();
       await _syncTimeZone();
-      await _cancelLegacyTraining();
+      await _cancelLegacy();
 
       final wanted = ([...reminders]
             ..sort((a, b) => a.fireAt.compareTo(b.fireAt)))
@@ -201,7 +202,7 @@ class LocalReminderGateway implements ReminderGateway {
     if (!isAvailable) return;
     try {
       await _ensureInitialized();
-      await _cancelLegacyTraining();
+      await _cancelLegacy();
       final pending = await _plugin.pendingNotificationRequests();
       for (final p in pending) {
         if (_isPlanOwned(p)) await _plugin.cancel(id: p.id);
@@ -213,10 +214,11 @@ class LocalReminderGateway implements ReminderGateway {
   static bool _isPlanOwned(PendingNotificationRequest request) =>
       request.payload?.startsWith('/') ?? false;
 
-  Future<void> _cancelLegacyTraining() async {
+  Future<void> _cancelLegacy() async {
     for (var weekday = DateTime.monday; weekday <= DateTime.sunday; weekday++) {
       await _plugin.cancel(id: _legacyTrainingBase + weekday);
     }
+    await _plugin.cancel(id: _legacyTrialReminderId);
   }
 
   /// Wall-clock time in the device zone. A time that does not exist on a
@@ -288,45 +290,4 @@ class LocalReminderGateway implements ReminderGateway {
             description: _trialChannelDescription,
           ),
       };
-
-  @override
-  Future<void> scheduleTrialEndReminder({
-    required DateTime at,
-    required String title,
-    required String body,
-  }) async {
-    if (!isAvailable) return;
-    try {
-      await _ensureInitialized();
-      await _plugin.zonedSchedule(
-        id: _trialReminderId,
-        title: title,
-        body: body,
-        scheduledDate: tz.TZDateTime.from(at, tz.local),
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
-            _trialChannelId,
-            _trialChannelName,
-            channelDescription: _trialChannelDescription,
-            importance: Importance.defaultImportance,
-            icon: _androidIcon,
-            color: AppColors.primary,
-          ),
-          iOS: DarwinNotificationDetails(presentSound: true),
-        ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      );
-    } catch (_) {
-      // A reminder that cannot be scheduled must never surface as an error.
-    }
-  }
-
-  @override
-  Future<void> cancelTrialEndReminder() async {
-    if (!isAvailable) return;
-    try {
-      await _ensureInitialized();
-      await _plugin.cancel(id: _trialReminderId);
-    } catch (_) {}
-  }
 }
