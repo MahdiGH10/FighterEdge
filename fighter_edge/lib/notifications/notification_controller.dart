@@ -302,9 +302,6 @@ class NotificationController extends ChangeNotifier {
 
   void setPauseAll(bool value) => _update(_settings.copyWith(pauseAll: value));
 
-  void setPauseNutrition(bool value) =>
-      _update(_settings.copyWith(pauseNutrition: value));
-
   void _update(NotificationSettings next) {
     if (next == _settings) return;
     _settings = next;

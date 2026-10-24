@@ -23,6 +23,7 @@ import 'features/edge_fuel/data/recipe_catalog_repository.dart';
 import 'features/edge_fuel/data/firestore_edge_fuel_repository.dart';
 import 'features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import 'features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import 'features/fight_camp/data/fight_camp_repository.dart';
 import 'features/fight_camp/data/firestore_fight_camp_repository.dart';
 import 'features/fight_camp/data/in_memory_fight_camp_repository.dart';
@@ -340,6 +341,11 @@ class FighterEdgeApp extends StatelessWidget {
           create: (_) => FirstRunController(),
           update: (_, auth, firstRun) =>
               (firstRun ?? FirstRunController())..setUser(auth.user?.id),
+        ),
+        ChangeNotifierProxyProvider<AuthController, NutritionModeController>(
+          create: (_) => NutritionModeController(),
+          update: (_, auth, controller) =>
+              (controller ?? NutritionModeController())..setUser(auth.user?.id),
         ),
         ChangeNotifierProxyProvider<AuthController, FightCampController>(
           create: (_) => FightCampController(

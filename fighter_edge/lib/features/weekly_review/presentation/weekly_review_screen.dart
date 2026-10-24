@@ -18,6 +18,7 @@ import '../../../widgets/primary_button.dart';
 import '../../../widgets/stat_card.dart';
 import '../../edge_fuel/data/edge_fuel_repository.dart';
 import '../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../../edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../../edge_fuel/presentation/widgets/fuel_week_card.dart';
 import '../../fight_camp/presentation/fight_camp_controller.dart';
 import '../../training_plan/presentation/plan_controller.dart';
@@ -38,24 +39,30 @@ class WeeklyReviewScreen extends StatefulWidget {
 }
 
 class _WeeklyReviewScreenState extends State<WeeklyReviewScreen> {
-  late final Future<WeeklyReview> _review;
+  Future<WeeklyReview>? _review;
 
-  @override
-  void initState() {
-    super.initState();
-    _review = buildWeeklyReview(
-      weekStartDay: widget.weekStart,
-      plan: context.read<PlanController>(),
-      state: context.read<AppState>(),
-      fuel: context.read<EdgeFuelController>(),
-      fightCamp: context.read<FightCampController>(),
-    );
-  }
+  /// Whether the food and weight parts of the review are shown. Decided once,
+  /// as soon as the athlete's nutrition choice is known (it is read at
+  /// start-up, so this is usually the first frame). A paused review never
+  /// reads the food log or the weigh-ins at all.
+  bool _showNutrition = false;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final locale = Localizations.localeOf(context).toString();
+    final mode = context.watch<NutritionModeController>();
+    if (_review == null && mode.loaded) {
+      _showNutrition = mode.visible;
+      _review = buildWeeklyReview(
+        includeNutrition: _showNutrition,
+        weekStartDay: widget.weekStart,
+        plan: context.read<PlanController>(),
+        state: context.read<AppState>(),
+        fuel: context.read<EdgeFuelController>(),
+        fightCamp: context.read<FightCampController>(),
+      );
+    }
     return FutureBuilder<WeeklyReview>(
       future: _review,
       builder: (context, snapshot) {
@@ -79,17 +86,21 @@ class _WeeklyReviewScreenState extends State<WeeklyReviewScreen> {
                     const SizedBox(height: Insets.md),
                     _TrainingSection(review: review),
                     const SizedBox(height: Insets.md),
-                    _FoodSection(review: review, weekStart: widget.weekStart),
+                    if (_showNutrition) ...[
+                      _FoodSection(review: review, weekStart: widget.weekStart),
+                      const SizedBox(height: Insets.md),
+                      _WeightSection(review: review),
+                      const SizedBox(height: Insets.md),
+                    ],
+                    _RecommendationSection(
+                        review: review, nutritionShown: _showNutrition),
                     const SizedBox(height: Insets.md),
-                    _WeightSection(review: review),
-                    const SizedBox(height: Insets.md),
-                    _RecommendationSection(review: review),
-                    const SizedBox(height: Insets.md),
-                    Text(
-                      'Targets are estimates, not medical advice.',
-                      style: AppType.micro(
-                          color: AppAccessibility.textSecondary(context)),
-                    ),
+                    if (_showNutrition)
+                      Text(
+                        'Targets are estimates, not medical advice.',
+                        style: AppType.micro(
+                            color: AppAccessibility.textSecondary(context)),
+                      ),
                   ],
                 ),
         );
@@ -212,8 +223,14 @@ class _WeightSection extends StatelessWidget {
 }
 
 class _RecommendationSection extends StatelessWidget {
-  const _RecommendationSection({required this.review});
+  const _RecommendationSection({
+    required this.review,
+    required this.nutritionShown,
+  });
   final WeeklyReview review;
+
+  /// False while nutrition is paused: a hold then says nothing about food.
+  final bool nutritionShown;
 
   String _sentence(L l) {
     final r = review.recommendation;
@@ -225,6 +242,7 @@ class _RecommendationSection extends StatelessWidget {
             ? l.reviewRecLower(-r.calorieDelta)
             : l.reviewRecRaise(r.calorieDelta);
       case RecommendationKind.hold:
+        if (!nutritionShown) return l.reviewHoldPaused;
         return switch (r.reason) {
           ReviewReason.onPath => l.reviewHoldOnPath,
           ReviewReason.noTarget => l.reviewHoldNoTarget,

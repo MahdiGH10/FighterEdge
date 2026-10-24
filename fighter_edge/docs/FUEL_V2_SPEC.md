@@ -129,7 +129,9 @@ From `combat.md`.
   adults who are on track or at weight (rule 8).
 - Supplement and anti-doping education card. Education only, no doses.
 - Eating-disorder and tone layer: "Hide numbers" and "Pause nutrition" modes,
-  a copy lint that fails the build on banned words.
+  a copy lint that fails the build on banned words. Status: Pause nutrition is
+  built (see `NOTIFICATIONS_PLAN.md`, "Nutrition display modes"); Hide numbers
+  is not; the copy lint exists.
 
 ### N5 — Level-aware Fuel UI and onboarding questions
 

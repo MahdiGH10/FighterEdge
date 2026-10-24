@@ -11,7 +11,7 @@ for whoever builds PRs 2 to 4. Read it, `CLAUDE.md`, and
 | 1 | Pure-Dart planner in `lib/notifications/domain/` | Merged (#82) |
 | 2 | Scheduler, permission primer, Settings screen | Merged (#85) |
 | 3 | Wire real inputs, deep links, move the trial notice into the planner | In review, see "What PR 3 built" |
-| 4 | Weigh-in, protein nudge, fighter tips | Not started; waits for the privacy fix (N6) and "Hide numbers" / "Pause nutrition" modes |
+| 4 | Weigh-in, protein nudge, fighter tips | Not started; waits for the privacy fix (N6) and the "Hide numbers" mode ("Pause nutrition" is done, see "Nutrition display modes") |
 
 One feature, one branch, one PR, merged before the next starts.
 
@@ -136,7 +136,8 @@ PR (Android and iOS: delivery, quiet hours, reboot, time-zone change).
   when their inputs are connected (PR 3 and 4), and so does the Pause
   nutrition switch; until then a switch would do nothing. The planner, stores
   and gateway already handle every channel. (PR 3 added the fuel window and
-  fight countdown rows and Pause nutrition notes.)
+  fight countdown rows. The Pause nutrition notes switch added then was replaced by the
+  app-wide Pause nutrition mode.)
 - The reconciler passes sessions only. PR 3 adds fuel day types, the fight
   date and the trial end to `_inputs()` in `notification_host.dart`.
 - Taps open a tab: `/fuel` Fuel, `/home` Home, `/review` and
@@ -171,8 +172,7 @@ PR (Android and iOS: delivery, quiet hours, reboot, time-zone change).
   number), the booked fight's date, the trial end, and the age from a
   confirmed Fuel setup. `NotificationHost` listens to the fight camp and the
   Fuel controller too.
-- Fuel window: Settings shows its row, and the Pause nutrition notes switch,
-  only to an adult with a confirmed Fuel setup. Fight-week days have their own
+- Fuel window: Settings shows its row only to an adult with a confirmed Fuel setup. Fight-week days have their own
   day type and get no fuel window. Under 18 or unknown age get none, whatever
   is switched on.
 - Fight countdown: a row for everyone; it sends nothing without a booked fight.
@@ -190,6 +190,39 @@ PR (Android and iOS: delivery, quiet hours, reboot, time-zone change).
   There is no screen for a single session, so that link lands where the week
   and today's session are listed.
 - Still not connected: weigh-in, protein and tips (PR 4).
+
+### Nutrition display modes (the first PR 4 prerequisite)
+
+`NutritionDisplayMode` (`lib/features/edge_fuel/domain/policies/`) has three
+values; `NutritionModeController` keeps the athlete's choice on the device,
+per account, and nothing else ever sets it.
+
+- **normal**: everything on.
+- **paused** (offered in Settings > Nutrition display): the Fuel tab, food
+  logging, nutrition numbers, weight and weight-cut tools, and every nutrition
+  reminder are off. Training goes on. What it hides today:
+  - the Fuel tab (a calm note with one way back);
+  - Home: the Fuel line and link, the weigh-in shortcut, the weight card, the
+    corner line, the fight countdown card and the "add a fight" row (booking a
+    fight asks for a weight limit);
+  - the first-week "log a meal" step;
+  - Profile: height, weight and the weight tracker row;
+  - the weight tracker, fight setup, fight path and fight week screens;
+  - the weekly review's food and weight parts (it reads neither, and its
+    recommendation says nothing about food);
+  - the fuel window, weigh-in and protein notes (`nutritionRemindersAllowed`
+    on `NotificationInputs`, so the planner skips them whatever their switches
+    say).
+  A fight that is already booked keeps its date, so the fight countdown note
+  (7 and 1 day, no cut wording) still works.
+- **hideNumbers**: defined in the domain, not offered yet. It needs every
+  number surface covered (the Fuel today view, rows, rings, recipes, setup,
+  the weekly review, weight, the fight screens) before it can be switched on,
+  because a mode that hides some numbers would mislead the people it is for.
+  It already switches the nutrition reminders off.
+- Until the stored choice has been read, nothing nutrition-shaped is drawn and
+  no nutrition reminder is planned, so a paused athlete never sees a flash of
+  numbers at start-up. With no account the answer is known at once (normal).
 
 ## PR 4: the sensitive channels (after the privacy fix)
 

@@ -20,6 +20,7 @@ import 'package:fighter_edge/features/edge_fuel/data/food_catalog_repository.dar
 import 'package:fighter_edge/features/edge_fuel/data/recipe_catalog_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import 'package:fighter_edge/features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import 'package:fighter_edge/features/fight_camp/data/fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/presentation/fight_camp_controller.dart';
@@ -143,6 +144,11 @@ Widget wrapApp(
         create: (_) => FirstRunController(),
         update: (_, auth, firstRun) =>
             (firstRun ?? FirstRunController())..setUser(auth.user?.id),
+      ),
+      ChangeNotifierProxyProvider<AuthController, NutritionModeController>(
+        create: (_) => NutritionModeController(),
+        update: (_, auth, controller) =>
+            (controller ?? NutritionModeController())..setUser(auth.user?.id),
       ),
       Provider<FightCampRepository>.value(value: resolvedFightCampRepo),
       ChangeNotifierProxyProvider<AuthController, FightCampController>(

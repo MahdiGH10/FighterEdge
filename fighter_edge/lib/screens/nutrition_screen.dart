@@ -9,6 +9,7 @@ import '../theme/app_icons.dart';
 
 import '../features/edge_fuel/domain/models/food_log_entry.dart';
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../features/edge_fuel/domain/models/food_enums.dart';
 import '../features/edge_fuel/presentation/controllers/recipe_library_controller.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
@@ -16,6 +17,7 @@ import '../features/edge_fuel/presentation/screens/recipe_library_screen.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../features/edge_fuel/presentation/widgets/add_food_sheet.dart';
 import '../features/edge_fuel/presentation/widgets/fuel_what_is_left.dart';
+import '../features/edge_fuel/presentation/widgets/nutrition_paused_view.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../routing/app_navigation.dart';
 import '../routing/app_router.dart';
@@ -53,6 +55,16 @@ class _NutritionScreenState extends State<NutritionScreen> {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    final mode = context.watch<NutritionModeController>();
+    // Nothing nutrition-shaped is drawn until the athlete's choice is known,
+    // and none while nutrition is paused.
+    if (!mode.visible) {
+      return ScreenScaffold.tab(
+        title: l.navFuel,
+        body:
+            mode.loaded ? const NutritionPausedView() : const SizedBox.shrink(),
+      );
+    }
     final edgeFuel = context.watch<EdgeFuelController>();
     final targetCalories = edgeFuel.targetCalories;
     final ratio =

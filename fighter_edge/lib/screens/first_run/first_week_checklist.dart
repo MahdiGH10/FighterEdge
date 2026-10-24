@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_icons.dart';
 
 import '../../l10n/gen/app_localizations.dart';
+import '../../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../../state/app_state.dart';
 import '../../state/first_run_controller.dart';
 import '../../theme/app_accessibility.dart';
@@ -37,6 +38,8 @@ class FirstWeekChecklist extends StatelessWidget {
   Widget build(BuildContext context) {
     final firstRun = context.watch<FirstRunController>();
     final state = context.watch<AppState>();
+    // Logging a meal is not asked of an athlete who has nutrition paused.
+    final showMeal = context.watch<NutritionModeController>().visible;
 
     final items = [
       const _Item(
@@ -52,13 +55,14 @@ class FirstWeekChecklist extends StatelessWidget {
         done: firstRun.tourDone,
         onTap: onStartTour,
       ),
-      _Item(
-        title: 'Log your first meal',
-        subtitle: 'One tap from Fuel. It starts your day’s score.',
-        icon: AppIcons.forkKnife,
-        done: firstRun.firstMealLogged,
-        onTap: onLogMeal,
-      ),
+      if (showMeal)
+        _Item(
+          title: 'Log your first meal',
+          subtitle: 'One tap from Fuel. It starts your day’s score.',
+          icon: AppIcons.forkKnife,
+          done: firstRun.firstMealLogged,
+          onTap: onLogMeal,
+        ),
       _Item(
         title: 'Complete a session',
         subtitle: 'Tick one off in Train to start your streak.',

@@ -8,6 +8,7 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dar
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import 'package:fighter_edge/features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import 'package:fighter_edge/l10n/gen/app_localizations.dart';
 import 'package:fighter_edge/screens/round_timer_screen.dart';
 import 'package:fighter_edge/screens/weight_tracker_screen.dart';
@@ -117,6 +118,7 @@ void main() {
                     repository: InMemoryEdgeFuelRepository(),
                   ),
             ),
+            ChangeNotifierProvider(create: (_) => NutritionModeController()),
           ],
           child: const MaterialApp(
             localizationsDelegates: L.localizationsDelegates,

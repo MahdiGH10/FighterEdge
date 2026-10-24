@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import '../theme/app_icons.dart';
 
 import '../features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import '../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
+import '../features/edge_fuel/presentation/widgets/nutrition_paused_view.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../l10n/decimal_format.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -42,6 +44,9 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.watch<NutritionModeController>().visible) {
+      return const NutritionPausedScreen(title: 'Weight tracker');
+    }
     final state = context.watch<AppState>();
     // The goal is the target weight the user set in EdgeFuel. There is no
     // other source of truth for it, so without one there is no goal to show.

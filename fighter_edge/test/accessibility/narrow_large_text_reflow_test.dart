@@ -4,6 +4,7 @@ import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_reposit
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
+import 'package:fighter_edge/features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import 'package:fighter_edge/l10n/gen/app_localizations.dart';
 import 'package:fighter_edge/screens/onboarding/onboarding_steps.dart';
@@ -195,6 +196,7 @@ void main() {
                 repository: InMemoryEdgeFuelRepository(),
               ),
             ),
+            ChangeNotifierProvider(create: (_) => NutritionModeController()),
           ],
           child: MaterialApp(
             theme: AppTheme.dark(),

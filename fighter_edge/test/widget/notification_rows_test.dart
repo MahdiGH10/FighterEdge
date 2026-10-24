@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/policies/nutrition_display_mode.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/main.dart';
 import 'package:fighter_edge/notifications/domain/notification_channel.dart';
@@ -22,13 +24,18 @@ void main() {
 
   /// [age] null means no confirmed Fuel setup.
   Future<void> open(WidgetTester tester,
-      {int? age, bool confirmed = true}) async {
+      {int? age, bool confirmed = true, NutritionDisplayMode? mode}) async {
     tester.view.physicalSize = const Size(1400, 3400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
     final repo = await makeRepo(signedIn: true, onboarded: true);
+    if (mode != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+          'fe_nutrition_mode.${repo.currentUser!.id}', mode.storageName);
+    }
     final fuelRepo = InMemoryEdgeFuelRepository();
     if (age != null) {
       await fuelRepo.saveProfileDraft(
@@ -73,7 +80,6 @@ void main() {
       (tester) async {
     await open(tester);
     expect(row('Fuel window'), findsNothing);
-    expect(row('Pause nutrition notes'), findsNothing);
   });
 
   testWidgets('an unconfirmed Fuel setup does not unlock them', (tester) async {
@@ -84,14 +90,23 @@ void main() {
   testWidgets('under 18 never sees the fuel window', (tester) async {
     await open(tester, age: 17);
     expect(row('Fuel window'), findsNothing);
-    expect(row('Pause nutrition notes'), findsNothing);
   });
 
   testWidgets('an adult with a confirmed setup does', (tester) async {
     await open(tester, age: 18);
     expect(row('Fuel window'), findsOneWidget);
-    expect(row('Pause nutrition notes'), findsOneWidget);
     expect(tester.widget<Switch>(switchFor('Fuel window')).value, isFalse);
+  });
+
+  testWidgets(
+      'paused nutrition takes the fuel window row away, even for an adult',
+      (tester) async {
+    await open(tester, age: 30, mode: NutritionDisplayMode.paused);
+    expect(row('Fuel window'), findsNothing);
+    // The other reminders are untouched.
+    expect(row('Session reminder'), findsOneWidget);
+    expect(row('Weekly review'), findsOneWidget);
+    expect(row('Fight countdown'), findsOneWidget);
   });
 
   testWidgets('switching the fuel window on asks once and turns it on',
@@ -106,15 +121,6 @@ void main() {
       controller(tester).settings.isEnabled(NotificationChannel.fuelWindow),
       isTrue,
     );
-  });
-
-  testWidgets('Pause nutrition notes is remembered', (tester) async {
-    await open(tester, age: 30);
-    await tester.tap(switchFor('Pause nutrition notes'));
-    await tester.pumpAndSettle();
-    expect(controller(tester).settings.pauseNutrition, isTrue);
-    expect(tester.widget<Switch>(switchFor('Pause nutrition notes')).value,
-        isTrue);
   });
 
   testWidgets('the fight countdown switch asks once and turns on',
@@ -159,11 +165,7 @@ void main() {
         .push(AppRoutes.notificationSettings);
     await tester.pumpAndSettle();
 
-    for (final title in [
-      'Fuel window',
-      'Fight countdown',
-      'Pause nutrition notes',
-    ]) {
+    for (final title in ['Fuel window', 'Fight countdown']) {
       // The list builds rows lazily: scroll until the row exists.
       await tester.scrollUntilVisible(
         row(title),
