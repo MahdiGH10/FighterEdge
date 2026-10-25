@@ -356,6 +356,19 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
     }
   });
 
+  it("allows only the owner to edit individual food entries", async () => {
+    const owner = ownerDb("alice").collection("users").doc("alice")
+      .collection("nutritionDays").doc("2026-10-25")
+      .collection("entries").doc("entry-a");
+    const other = ownerDb("mallory").collection("users").doc("alice")
+      .collection("nutritionDays").doc("2026-10-25")
+      .collection("entries").doc("entry-a");
+    await assertSucceeds(owner.set({ id: "entry-a", calories: 300 }));
+    await assertSucceeds(owner.get());
+    await assertFails(other.get());
+    await assertFails(other.set({ id: "entry-a", calories: 0 }));
+  });
+
   it("still denies collections the rules do not name", async () => {
     const db = ownerDb("alice");
     await assertFails(

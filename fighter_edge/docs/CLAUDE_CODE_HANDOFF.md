@@ -1,5 +1,24 @@
 # Fighter Edge — Claude Code Handoff
 
+## Food log integrity (2026-10-25, F02/F03)
+
+Interactive food changes now write one document per entry at
+`users/{uid}/nutritionDays/{date}/entries/{encodedEntryId}`. An upsert is
+idempotent; deletion writes a tombstone, so old day arrays and old `meals`
+documents remain readable without being rewritten. Day reads merge the old
+data with the entry documents and derive totals from the merged entries.
+The first day snapshot must load before a food action is offered, including
+the direct recipe-detail route. Failed writes retain their exact account,
+date and entry operation for Retry. A later successful entry does not clear
+another entry's failed-save notice.
+
+**Rollout order:** deploy the new Firestore rules for the nested `entries`
+collection before shipping a client with this change. Merging the PR does
+not deploy rules. No live device or deployed-rules check was done in this
+slice. The local two-device, restart, legacy-day, offline/reconnect and
+retry tests passed; the rules emulator ran under Java 21. The next serial
+slice is F01 screening.
+
 ## Live merge log (2026-10-24)
 
 **Workflow rule (owner, 2026-10-23):** one feature at a time. Branch from main,

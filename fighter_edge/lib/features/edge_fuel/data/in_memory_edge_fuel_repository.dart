@@ -87,6 +87,42 @@ class InMemoryEdgeFuelRepository implements EdgeFuelRepository {
     _dayControllers[key]?.add(normalized);
   }
 
+  @override
+  Future<void> upsertFoodEntry(
+    String userId,
+    String localDate,
+    FoodLogEntry entry,
+  ) async {
+    final day = _dayForMutation(userId, localDate);
+    await saveNutritionDay(
+      userId,
+      day.copyWith(entries: [
+        for (final existing in day.entries)
+          if (existing.id != entry.id) existing,
+        entry,
+      ]),
+    );
+  }
+
+  @override
+  Future<void> deleteFoodEntry(
+    String userId,
+    String localDate,
+    String entryId,
+  ) async {
+    final day = _dayForMutation(userId, localDate);
+    await saveNutritionDay(
+      userId,
+      day.copyWith(
+        entries: day.entries.where((entry) => entry.id != entryId).toList(),
+      ),
+    );
+  }
+
+  NutritionDay _dayForMutation(String userId, String localDate) =>
+      _days['$userId:$localDate'] ??
+      _migratedOrEmptyDay(userId, DateTime.parse(localDate));
+
   Future<void> seedLegacyMeals(
     String userId,
     DateTime localDate,

@@ -1,7 +1,6 @@
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
-import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/models/weight_entry.dart';
 import 'package:fighter_edge/screens/dashboard_screen.dart';
@@ -30,9 +29,10 @@ class _RefusingFuelRepository extends InMemoryEdgeFuelRepository {
   bool refuse = true;
 
   @override
-  Future<void> saveNutritionDay(String userId, NutritionDay day) async {
+  Future<void> upsertFoodEntry(
+      String userId, String localDate, FoodLogEntry entry) async {
     if (refuse) throw StateError('permission-denied');
-    return super.saveNutritionDay(userId, day);
+    return super.upsertFoodEntry(userId, localDate, entry);
   }
 }
 

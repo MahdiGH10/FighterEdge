@@ -4,12 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
-import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_day.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/observability/error_reporter.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
+import 'package:fighter_edge/state/sync_tracker.dart';
 
 /// A repository whose target stream is controlled directly, so a test can
 /// inject an error without going through Firestore.
@@ -37,7 +37,8 @@ class _OfflineRepository extends InMemoryEdgeFuelRepository {
   final pending = <Completer<void>>[];
 
   @override
-  Future<void> saveNutritionDay(String userId, NutritionDay day) {
+  Future<void> upsertFoodEntry(
+      String userId, String localDate, FoodLogEntry entry) {
     final ack = Completer<void>();
     pending.add(ack);
     return ack.future;
@@ -46,7 +47,14 @@ class _OfflineRepository extends InMemoryEdgeFuelRepository {
 
 class _RejectingRepository extends InMemoryEdgeFuelRepository {
   @override
-  Future<void> saveNutritionDay(String userId, NutritionDay day) async {
+  Future<void> upsertFoodEntry(
+      String userId, String localDate, FoodLogEntry entry) async {
+    throw StateError('permission-denied');
+  }
+
+  @override
+  Future<void> deleteFoodEntry(
+      String userId, String localDate, String entryId) async {
     throw StateError('permission-denied');
   }
 }
@@ -113,10 +121,13 @@ void main() {
     controller.dispose();
   });
 
-  test('a later successful save clears the failure flag', () async {
+  test('another entry succeeding does not hide an earlier failed entry',
+      () async {
     var reject = true;
     final repo = _TogglingRepository(() => reject);
-    final controller = EdgeFuelController(repository: repo)..setUser('u1');
+    final sync = SyncTracker();
+    final controller = EdgeFuelController(repository: repo, sync: sync)
+      ..setUser('u1');
     await Future<void>.delayed(Duration.zero);
 
     await controller.addEntry(_meal('a'));
@@ -124,8 +135,11 @@ void main() {
 
     reject = false;
     await controller.addEntry(_meal('b'));
+    expect(controller.lastSaveFailed, isTrue);
+    await sync.retry();
     expect(controller.lastSaveFailed, isFalse);
     controller.dispose();
+    sync.dispose();
   });
 
   test(
@@ -155,8 +169,9 @@ class _TogglingRepository extends InMemoryEdgeFuelRepository {
   final bool Function() _reject;
 
   @override
-  Future<void> saveNutritionDay(String userId, NutritionDay day) async {
+  Future<void> upsertFoodEntry(
+      String userId, String localDate, FoodLogEntry entry) async {
     if (_reject()) throw StateError('unavailable');
-    return super.saveNutritionDay(userId, day);
+    return super.upsertFoodEntry(userId, localDate, entry);
   }
 }
