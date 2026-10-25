@@ -406,6 +406,51 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<void> signOut() => _auth.signOut();
 
   @override
+  Future<void> reauthenticateForDeletion({String? currentPassword}) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const AuthException('signed-out', 'Sign in before deleting.');
+    }
+    try {
+      if (canChangePassword) {
+        final email = user.email;
+        if (email == null ||
+            currentPassword == null ||
+            currentPassword.isEmpty) {
+          throw const AuthException(
+              'password-required', 'Enter your current password.');
+        }
+        await user.reauthenticateWithCredential(
+          EmailAuthProvider.credential(email: email, password: currentPassword),
+        );
+      } else {
+        final ids = user.providerData.map((p) => p.providerId).toSet();
+        final AuthProvider provider;
+        if (ids.contains(GoogleAuthProvider.PROVIDER_ID)) {
+          provider = GoogleAuthProvider();
+        } else if (ids.contains('apple.com')) {
+          provider = OAuthProvider('apple.com');
+        } else {
+          throw const AuthException('unsupported-provider',
+              'Sign in again before deleting your account.');
+        }
+        if (_isWeb) {
+          await user.reauthenticateWithPopup(provider);
+        } else {
+          await user.reauthenticateWithProvider(provider);
+        }
+      }
+      await user.getIdToken(true);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+        throw const AuthException(
+            'wrong-password', 'Your current password is incorrect.');
+      }
+      throw AuthException(e.code, _message(e));
+    }
+  }
+
+  @override
   Future<void> deleteAccount() async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -414,13 +459,14 @@ class FirebaseAuthRepository implements AuthRepository {
     try {
       // Runs server-side with the Admin SDK — Firestore rules deliberately
       // block a client from deleting `users/{uid}` itself (billing state is
-      // server-owned), and this also sidesteps Firebase's "requires a
-      // recent sign-in" client-side re-auth requirement entirely.
+      // server-owned). The callable checks the refreshed token's auth time.
       await _functions().httpsCallable('deleteAccount').call();
     } on FirebaseFunctionsException catch (e) {
       throw AuthException(
         e.code,
-        'Could not delete your account. Please try again.',
+        e.code == 'failed-precondition'
+            ? 'Sign in again before deleting your account.'
+            : 'Could not delete your account. Please try again.',
       );
     }
     _cached = null;

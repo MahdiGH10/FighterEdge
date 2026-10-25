@@ -4,6 +4,7 @@ import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 
 import '../auth/auth_repository.dart';
+import '../auth/deleted_account_local_data.dart';
 import '../auth/local_auth_repository.dart';
 import '../auth/verification_gate.dart';
 import '../billing/subscription.dart';
@@ -23,6 +24,7 @@ class AuthController extends ChangeNotifier {
   final BillingGateway _billing;
   final Telemetry _telemetry;
   final ErrorReporter _errorReporter;
+  final Future<void> Function()? _clearDeletedNotifications;
   StreamSubscription<AppUser?>? _sub;
   StreamSubscription<BillingCustomerState>? _billingUpdates;
 
@@ -49,9 +51,11 @@ class AuthController extends ChangeNotifier {
     BillingGateway? billingGateway,
     Telemetry? telemetry,
     ErrorReporter? errorReporter,
+    Future<void> Function()? clearDeletedNotifications,
   })  : _billing = billingGateway ?? const UnavailableBillingGateway(),
         _telemetry = telemetry ?? const NoopTelemetry(),
-        _errorReporter = errorReporter ?? const NoopErrorReporter() {
+        _errorReporter = errorReporter ?? const NoopErrorReporter(),
+        _clearDeletedNotifications = clearDeletedNotifications {
     // Seed status synchronously from the current snapshot: a broadcast stream
     // will not replay the initial event emitted before this subscription.
     _user = _repo.currentUser;
@@ -270,8 +274,14 @@ class AuthController extends ChangeNotifier {
       });
 
   /// Permanently deletes the account and all of its data. Irreversible.
-  Future<void> deleteAccount() => _run(() async {
+  Future<void> deleteAccount({String? currentPassword}) => _run(() async {
+        final userId = _user?.id;
+        await _repo.reauthenticateForDeletion(currentPassword: currentPassword);
         await _repo.deleteAccount();
+        if (userId != null) {
+          await const DeletedAccountLocalData().clear(userId);
+        }
+        await _clearDeletedNotifications?.call();
         _onUserChanged(null);
       });
 

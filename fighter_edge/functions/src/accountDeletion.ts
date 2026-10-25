@@ -17,6 +17,15 @@ export interface AccountDataDeletion {
   ledgerEntriesUnlinked: number;
 }
 
+/** The callable must enforce this before touching any account data. */
+export function requireRecentAuth(authTime: unknown, nowMs: number): void {
+  const seconds = typeof authTime === "number" ? authTime : Number.NaN;
+  const ageMs = nowMs - seconds * 1000;
+  if (!Number.isFinite(ageMs) || ageMs < -60_000 || ageMs > 5 * 60_000) {
+    throw new HttpsError("failed-precondition", "Sign in again before deleting your account.");
+  }
+}
+
 /**
  * Deletes everything the service holds about [uid] except the Auth user:
  *
@@ -52,9 +61,8 @@ export async function deleteAccountData(
  * `firestore.rules` deliberately blocks `delete` on the `users/{uid}`
  * document from the client (billing/entitlement state is server-owned, and a
  * client-side delete-then-recreate would be a way around that) — only the
- * Admin SDK, which bypasses security rules, can remove it. This also avoids
- * Firebase's "requires a recent sign-in" client-side constraint entirely: an
- * authenticated callable request is enough, no re-auth prompt needed.
+ * Admin SDK, which bypasses security rules, can remove it. The callable
+ * enforces recent sign-in from the token before deleting anything.
  *
  * Data is wiped before the Auth user, so a failure partway through leaves a
  * signed-in account the athlete can retry deleting, rather than a
@@ -69,6 +77,7 @@ export const deleteAccount = onCall(
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
+    requireRecentAuth(request.auth.token.auth_time, Date.now());
     const uid = request.auth.uid;
 
     let outcome: AccountDataDeletion;

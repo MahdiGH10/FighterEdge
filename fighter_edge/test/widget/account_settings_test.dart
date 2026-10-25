@@ -97,7 +97,10 @@ void main() {
 
     await tester.tap(find.text('Delete account'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'DELETE');
+    await tester.enterText(
+        find.byKey(const ValueKey('delete-confirmation')), 'DELETE');
+    await tester.enterText(
+        find.byKey(const ValueKey('delete-password')), testPassword);
     await tester.pump();
     await tester.tap(find.text('Delete forever'));
     await tester.pumpAndSettle();

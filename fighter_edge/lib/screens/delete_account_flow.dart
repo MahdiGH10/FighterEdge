@@ -13,14 +13,16 @@ import '../theme/app_typography.dart';
 /// data on the server. Settings uses it, and so does the health-data consent
 /// screen: withdrawing that consent means deleting the data.
 Future<void> confirmAndDeleteAccount(BuildContext context) async {
-  final confirmed = await showDialog<bool>(
+  final currentPassword = await showDialog<String>(
     context: context,
     builder: (_) => const DeleteAccountDialog(),
   );
-  if (confirmed != true || !context.mounted) return;
+  if (currentPassword == null || !context.mounted) return;
 
   try {
-    await context.read<AuthController>().deleteAccount();
+    await context.read<AuthController>().deleteAccount(
+          currentPassword: currentPassword.isEmpty ? null : currentPassword,
+        );
   } on AuthException catch (e) {
     // Repository messages are already written for the athlete
     // ("Sign in again before deleting", etc.).
@@ -50,11 +52,13 @@ class DeleteAccountDialog extends StatefulWidget {
 
 class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
   final _controller = TextEditingController();
+  final _password = TextEditingController();
   bool _confirmed = false;
 
   @override
   void dispose() {
     _controller.dispose();
+    _password.dispose();
     super.dispose();
   }
 
@@ -65,49 +69,72 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
     final user = context.read<AuthController>().user;
     final subscribed = user != null &&
         (user.plan == Plan.pro || user.planWillRenew || user.isPro);
+    final needsPassword = context.read<AuthController>().canChangePassword;
     return AlertDialog(
       title: const Text('Delete your account?'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'This permanently erases your account, weight history, training '
-            'sessions, and nutrition data. This cannot be undone.',
-            style: AppType.subhead(color: AppColors.textSecondary),
-          ),
-          if (subscribed) ...[
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'This permanently erases your account, weight history, training '
+              'sessions, and nutrition data. This cannot be undone.',
+              style: AppType.subhead(color: AppColors.textSecondary),
+            ),
+            if (subscribed) ...[
+              const SizedBox(height: Insets.md),
+              Text(
+                L.of(context).deleteAccountSubscriptionWarning,
+                key: const ValueKey('delete-subscription-warning'),
+                style: AppType.subhead(
+                  weight: FontWeight.w700,
+                  color: AppColors.warning,
+                ),
+              ),
+            ],
             const SizedBox(height: Insets.md),
             Text(
-              L.of(context).deleteAccountSubscriptionWarning,
-              key: const ValueKey('delete-subscription-warning'),
-              style: AppType.subhead(
-                weight: FontWeight.w700,
-                color: AppColors.warning,
-              ),
+              'Type DELETE to confirm.',
+              style: AppType.subhead(weight: FontWeight.w700),
             ),
+            const SizedBox(height: Insets.sm),
+            TextField(
+              key: const ValueKey('delete-confirmation'),
+              controller: _controller,
+              autofocus: true,
+              textCapitalization: TextCapitalization.characters,
+              onChanged: (v) =>
+                  setState(() => _confirmed = v.trim() == 'DELETE'),
+            ),
+            if (needsPassword) ...[
+              const SizedBox(height: Insets.md),
+              const Text(
+                  'Enter your current password to confirm your identity.'),
+              const SizedBox(height: Insets.sm),
+              TextField(
+                key: const ValueKey('delete-password'),
+                controller: _password,
+                obscureText: true,
+                onChanged: (_) => setState(() {}),
+              ),
+            ] else ...[
+              const SizedBox(height: Insets.md),
+              const Text(
+                  'Your sign-in provider will ask you to confirm your identity.'),
+            ],
           ],
-          const SizedBox(height: Insets.md),
-          Text(
-            'Type DELETE to confirm.',
-            style: AppType.subhead(weight: FontWeight.w700),
-          ),
-          const SizedBox(height: Insets.sm),
-          TextField(
-            controller: _controller,
-            autofocus: true,
-            textCapitalization: TextCapitalization.characters,
-            onChanged: (v) => setState(() => _confirmed = v.trim() == 'DELETE'),
-          ),
-        ],
+        ),
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
         TextButton(
-          onPressed: _confirmed ? () => Navigator.of(context).pop(true) : null,
+          onPressed: _confirmed && (!needsPassword || _password.text.isNotEmpty)
+              ? () => Navigator.of(context).pop(_password.text)
+              : null,
           style: TextButton.styleFrom(foregroundColor: AppColors.negative),
           child: const Text('Delete forever'),
         ),

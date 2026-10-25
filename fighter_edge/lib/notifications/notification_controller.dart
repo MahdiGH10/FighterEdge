@@ -173,6 +173,22 @@ class NotificationController extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// Erases device notification choices and history after account deletion.
+  /// The controller stays alive across auth changes, so reset its memory too.
+  Future<void> clearDeletedAccount() async {
+    _timer?.cancel();
+    await _idle;
+    await clearScheduled();
+    await _settingsStore.clear();
+    await _scheduler.clearHistory();
+    _settings = NotificationSettings();
+    _permissionRequested = false;
+    _autoPaused = const {};
+    _asked.clear();
+    _pendingRoute = null;
+    notifyListeners();
+  }
+
   /// Schedules a reconcile soon. Safe to call as often as needed.
   void requestReconcile() {
     if (_disposed || !isAvailable || !_loaded || _readInputs == null) return;

@@ -59,6 +59,13 @@ class NotificationSettingsStore {
     }
   }
 
+  Future<void> clear() async {
+    final prefs = await _prefs;
+    await prefs.remove(settingsKey);
+    await prefs.remove(permissionRequestedKey);
+    await prefs.remove(legacyCampRemindersKey);
+  }
+
   /// Whether the OS permission prompt has already been shown. Lets Settings
   /// tell "never asked" from "asked and turned down".
   Future<bool> loadPermissionRequested() async {
