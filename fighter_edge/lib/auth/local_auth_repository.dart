@@ -215,6 +215,21 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> reauthenticateForDeletion({String? currentPassword}) async {
+    final current = _current;
+    if (current == null) {
+      throw const AuthException('signed-out', 'Sign in before deleting.');
+    }
+    if (!canChangePassword) return;
+    final account = _accounts()[current.email] as Map<String, dynamic>?;
+    if (currentPassword == null ||
+        account?['passwordHash'] != _hash(currentPassword)) {
+      throw const AuthException(
+          'wrong-password', 'Your current password is incorrect.');
+    }
+  }
+
+  @override
   Future<void> deleteAccount() async {
     final current = _current;
     if (current == null) {

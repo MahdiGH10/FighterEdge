@@ -216,6 +216,10 @@ class NotificationHistoryStore {
     }
   }
 
+  Future<void> clear() async {
+    await (await _prefs).remove(key);
+  }
+
   static String encode(NotificationLedger ledger) => jsonEncode({
         'v': version,
         'scheduled': [

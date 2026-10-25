@@ -75,6 +75,10 @@ abstract class AuthRepository {
 
   Future<void> signOut();
 
+  /// Obtain a new sign-in proof before an irreversible deletion. Email
+  /// accounts use their current password; provider accounts open their provider.
+  Future<void> reauthenticateForDeletion({String? currentPassword});
+
   /// Permanently deletes the signed-in user's account and all of their data.
   /// Irreversible. Signs the user out as part of completing.
   Future<void> deleteAccount();

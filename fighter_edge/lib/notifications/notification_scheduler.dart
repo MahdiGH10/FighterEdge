@@ -77,6 +77,8 @@ class NotificationScheduler {
   final NotificationHistoryStore _historyStore;
   final NotificationPlanner _planner;
 
+  Future<void> clearHistory() => _historyStore.clear();
+
   /// Plans and schedules. [signedIn] false, or an OS that does not allow
   /// notifications, leaves nothing scheduled.
   Future<ReconcileResult> reconcile({

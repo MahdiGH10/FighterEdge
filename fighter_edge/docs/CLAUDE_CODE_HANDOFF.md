@@ -1,5 +1,21 @@
 # Fighter Edge — Claude Code Handoff
 
+## Account deletion and local state (2026-10-25, F04/F17)
+
+The deletion callable now rejects missing, stale, malformed, and implausibly
+future `auth_time` values before billing, Firestore, or Auth deletion. The client
+reauthenticates email users with their current password and Google or Apple
+users with the provider, then refreshes the ID token before calling the server.
+The typed DELETE confirmation remains in place. After successful server
+deletion, the app removes that account's food memory, nutrition display mode,
+and first-run flags; it cancels notifications and clears device notification
+choices and history. A restart/account-switch test checks that another
+account's local keys survive. Live deployed deletion and signed-device
+provider prompts still need owner validation. **Deploy the deletion function
+before shipping the client** so old clients are also subject to the recent
+sign-in check. Merging this PR does not deploy the function. The next serial
+slice is F06 paywall truth.
+
 ## Target and review integrity (2026-10-25, F05/F12)
 
 Weekly calorie proposals now run through the v1 calculator with the current

@@ -308,6 +308,8 @@ class FighterEdgeApp extends StatelessWidget {
             billingGateway: billingGateway,
             telemetry: telemetry,
             errorReporter: errorReporter,
+            clearDeletedNotifications: () =>
+                context.read<NotificationController>().clearDeletedAccount(),
           ),
         ),
         ChangeNotifierProvider(

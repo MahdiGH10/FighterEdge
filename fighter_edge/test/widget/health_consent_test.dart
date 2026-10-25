@@ -102,7 +102,10 @@ void main() {
 
       await tester.tap(find.text('Delete my account instead'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'DELETE');
+      await tester.enterText(
+          find.byKey(const ValueKey('delete-confirmation')), 'DELETE');
+      await tester.enterText(
+          find.byKey(const ValueKey('delete-password')), testPassword);
       await tester.pump();
       await tester.tap(find.text('Delete forever'));
       await tester.pumpAndSettle();
@@ -143,7 +146,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Type DELETE to confirm.'), findsOneWidget);
 
-      await tester.enterText(find.byType(TextField), 'DELETE');
+      await tester.enterText(
+          find.byKey(const ValueKey('delete-confirmation')), 'DELETE');
+      await tester.enterText(
+          find.byKey(const ValueKey('delete-password')), testPassword);
       await tester.pump();
       await tester.tap(find.text('Delete forever'));
       await tester.pumpAndSettle();

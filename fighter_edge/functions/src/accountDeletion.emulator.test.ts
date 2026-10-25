@@ -7,12 +7,31 @@ import { after, before, describe, it } from "node:test";
 import { deleteApp, initializeApp, App } from "firebase-admin/app";
 import { Firestore, getFirestore } from "firebase-admin/firestore";
 
-import { deleteAccountData } from "./accountDeletion";
+import { deleteAccountData, requireRecentAuth } from "./accountDeletion";
 import { FetchLike, processRevenueCatEvent, RevenueCatUnavailable } from "./entitlements";
 
 const emulator = process.env.FIRESTORE_EMULATOR_HOST;
 const NOW = Date.parse("2026-09-24T12:00:00Z");
 const id = (label: string) => `${label}-${Math.random().toString(36).slice(2, 10)}`;
+
+describe("deletion authentication time", () => {
+  it("accepts a fresh authentication", () => {
+    assert.doesNotThrow(() => requireRecentAuth(NOW / 1000 - 299, NOW));
+  });
+
+  for (const [label, value] of [
+    ["stale", NOW / 1000 - 301],
+    ["missing", undefined],
+    ["malformed", "recent"],
+    ["future", NOW / 1000 + 120],
+  ] as const) {
+    it(`rejects ${label} authentication`, () => {
+      assert.throws(() => requireRecentAuth(value, NOW), {
+        code: "failed-precondition",
+      });
+    });
+  }
+});
 
 /** RevenueCat double that answers every call with [status]. */
 function fakeRevenueCat(status: number) {
