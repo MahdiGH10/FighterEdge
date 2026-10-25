@@ -2,6 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_profile.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
@@ -149,6 +151,11 @@ void main() {
       final repo = await makeRepo(signedIn: true);
       final edgeFuelRepo = InMemoryEdgeFuelRepository();
       await edgeFuelRepo.saveTarget(repo.currentUser!.id, _target());
+      await edgeFuelRepo.saveProfileDraft(
+          repo.currentUser!.id,
+          const NutritionSetupDraft(
+              confirmed: true,
+              screeningStatus: NutritionScreeningStatus.completed));
       await tester.pumpWidget(wrapApp(
         Theme(data: AppTheme.dark(), child: const EdgeFuelPlanScreen()),
         repo: repo,
@@ -362,6 +369,10 @@ void main() {
               targetWeight: target,
               nutritionGoal: NutritionGoal.maintain,
               error: null,
+              safetyFlags: const NutritionSafetyFlags(),
+              screeningStatus: NutritionScreeningStatus.unanswered,
+              onSafetyFlags: (_) {},
+              onScreeningReviewed: (_) {},
             ),
           ),
         ),

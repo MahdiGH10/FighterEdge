@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import '../../theme/app_icons.dart';
 
 import '../../features/edge_fuel/domain/models/nutrition_enums.dart';
+import '../../features/edge_fuel/domain/models/nutrition_profile.dart';
 import '../../features/edge_fuel/presentation/nutrition_copy.dart';
+import '../../features/edge_fuel/presentation/widgets/safety_screening_fields.dart';
 import '../../theme/app_accessibility.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
@@ -37,6 +39,8 @@ class OnboardingStepContent {
     required TextEditingController height,
     required TextEditingController currentWeight,
     required TextEditingController targetWeight,
+    required NutritionSafetyFlags safetyFlags,
+    required NutritionScreeningStatus screeningStatus,
     required String? error,
     required List<String> campGoals,
     required List<String> levels,
@@ -46,6 +50,8 @@ class OnboardingStepContent {
     required ValueChanged<int> onDays,
     required ValueChanged<ActivityLevel> onActivity,
     required ValueChanged<EquationProfile> onEquationProfile,
+    required ValueChanged<NutritionSafetyFlags> onSafetyFlags,
+    required ValueChanged<bool> onScreeningReviewed,
   }) {
     return switch (index) {
       0 => OnboardingStepContent(
@@ -94,6 +100,10 @@ class OnboardingStepContent {
             targetWeight: targetWeight,
             nutritionGoal: nutritionGoal,
             error: error,
+            safetyFlags: safetyFlags,
+            screeningStatus: screeningStatus,
+            onSafetyFlags: onSafetyFlags,
+            onScreeningReviewed: onScreeningReviewed,
           ),
         ),
       // Its own step, not a footnote under the body fields: one decision per
@@ -176,6 +186,10 @@ class BodyInputs extends StatelessWidget {
   final TextEditingController targetWeight;
   final NutritionGoal nutritionGoal;
   final String? error;
+  final NutritionSafetyFlags safetyFlags;
+  final NutritionScreeningStatus screeningStatus;
+  final ValueChanged<NutritionSafetyFlags> onSafetyFlags;
+  final ValueChanged<bool> onScreeningReviewed;
 
   const BodyInputs({
     super.key,
@@ -185,6 +199,10 @@ class BodyInputs extends StatelessWidget {
     required this.targetWeight,
     required this.nutritionGoal,
     required this.error,
+    required this.safetyFlags,
+    required this.screeningStatus,
+    required this.onSafetyFlags,
+    required this.onScreeningReviewed,
   });
 
   @override
@@ -264,6 +282,13 @@ class BodyInputs extends StatelessWidget {
             ),
           ),
         ],
+        const SizedBox(height: Insets.xl),
+        SafetyScreeningFields(
+          flags: safetyFlags,
+          status: screeningStatus,
+          onFlagsChanged: onSafetyFlags,
+          onReviewedChanged: onScreeningReviewed,
+        ),
       ],
     );
   }

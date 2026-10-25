@@ -7,6 +7,7 @@ import '../../controllers/auth_controller.dart';
 import '../../features/edge_fuel/data/edge_fuel_repository.dart';
 import '../../features/edge_fuel/domain/calculators/nutrition_target_calculator.dart';
 import '../../features/edge_fuel/domain/models/nutrition_enums.dart';
+import '../../features/edge_fuel/domain/models/nutrition_profile.dart';
 import '../../features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import '../../features/edge_fuel/domain/models/nutrition_target.dart';
 import '../../features/edge_fuel/presentation/nutrition_copy.dart';
@@ -51,6 +52,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _days = 4;
   ActivityLevel _activity = ActivityLevel.moderate;
   EquationProfile _equationProfile = EquationProfile.neutral;
+  NutritionSafetyFlags _safetyFlags = const NutritionSafetyFlags();
+  NutritionScreeningStatus _screeningStatus =
+      NutritionScreeningStatus.unanswered;
   String? _error;
   CompletedOnboardingPlan? _completedPlan;
 
@@ -112,6 +116,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: _height,
       currentWeight: _currentWeight,
       targetWeight: _targetWeight,
+      safetyFlags: _safetyFlags,
+      screeningStatus: _screeningStatus,
       error: _error,
       campGoals: _campGoals,
       levels: _levels,
@@ -127,6 +133,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       onDays: (value) => setState(() => _days = value),
       onActivity: (value) => setState(() => _activity = value),
       onEquationProfile: (value) => setState(() => _equationProfile = value),
+      onSafetyFlags: (flags) => setState(() {
+        _safetyFlags = flags;
+        _screeningStatus = NutritionScreeningStatus.unanswered;
+      }),
+      onScreeningReviewed: (reviewed) => setState(() {
+        _screeningStatus = !reviewed
+            ? NutritionScreeningStatus.unanswered
+            : _safetyFlags.any
+                ? NutritionScreeningStatus.needsReview
+                : NutritionScreeningStatus.completed;
+        _error = null;
+      }),
     );
     final isLastStep = _step == _stepCount - 1;
 
@@ -303,6 +321,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (createNutritionTarget && userId != null) {
         nutritionTarget = await _saveInitialEdgeFuelPlan(userId);
         if (nutritionTarget == null) return;
+      } else if (!createNutritionTarget && userId != null) {
+        // Skipping detailed targets still records the screening outcome. A
+        // previous target cannot become eligible through unanswered flags.
+        await context.read<EdgeFuelRepository>().saveProfileDraft(
+              userId,
+              NutritionSetupDraft(
+                safetyFlags: _safetyFlags,
+                screeningStatus: _screeningStatus,
+              ),
+            );
       }
 
       await state.startFreshCamp(startingWeightKg: currentWeight);
@@ -357,6 +385,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       now: DateTime.now(),
     );
     if (!target.isSuccess) {
+      await context.read<EdgeFuelRepository>().saveProfileDraft(
+            userId,
+            profileDraft.copyWith(confirmed: false),
+          );
       final reason = target.reasons.isEmpty
           ? 'These details need review before we create a target.'
           : NutritionCopy.reason(target.reasons.first);
@@ -433,6 +465,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       weeklyTrainingDays: _days,
       goalPace: goalPace,
       mealsPerDay: 3,
+      safetyFlags: _safetyFlags,
+      screeningStatus: _screeningStatus,
     );
   }
 
@@ -471,6 +505,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
     if (currentWeight == null || currentWeight < 35 || currentWeight > 220) {
       return 'Enter current weight in kg, from 35 to 220 (for example 78).';
+    }
+    if (_screeningStatus == NutritionScreeningStatus.unanswered) {
+      return 'Review every health question before creating a target.';
     }
     if (_targetWeight.text.trim().isEmpty) return null;
     if (targetWeight == null || targetWeight < 35 || targetWeight > 220) {

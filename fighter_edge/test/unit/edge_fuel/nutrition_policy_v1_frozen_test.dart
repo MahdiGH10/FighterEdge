@@ -42,6 +42,7 @@ const _higher = EquationProfile.higherOffset;
 const _frozen = <String, _Frozen>{
   'maintainModerate': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.maintain,
       ageYears: 30,
       heightCm: 180,
@@ -65,6 +66,7 @@ const _frozen = <String, _Frozen>{
   ),
   'maintainNeutralLight': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.maintain,
       ageYears: 41,
       heightCm: 168,
@@ -88,6 +90,7 @@ const _frozen = <String, _Frozen>{
   ),
   'loseStandardModerate': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.loseFat,
       ageYears: 30,
       heightCm: 180,
@@ -113,6 +116,7 @@ const _frozen = <String, _Frozen>{
   ),
   'loseGentleLower': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.loseFat,
       ageYears: 27,
       heightCm: 165,
@@ -138,6 +142,7 @@ const _frozen = <String, _Frozen>{
   ),
   'loseUpperHigh': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.loseFat,
       ageYears: 30,
       heightCm: 180,
@@ -163,6 +168,7 @@ const _frozen = <String, _Frozen>{
   ),
   'loseVeryHighStandard': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.loseFat,
       ageYears: 25,
       heightCm: 175,
@@ -188,6 +194,7 @@ const _frozen = <String, _Frozen>{
   ),
   'gainStandard': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.gainMuscle,
       ageYears: 30,
       heightCm: 180,
@@ -213,6 +220,7 @@ const _frozen = <String, _Frozen>{
   ),
   'gainConservativeVeryLow': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.gainMuscle,
       ageYears: 22,
       heightCm: 172,
@@ -238,6 +246,7 @@ const _frozen = <String, _Frozen>{
   ),
   'minor': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.maintain,
       ageYears: 16,
       heightCm: 170,
@@ -250,6 +259,7 @@ const _frozen = <String, _Frozen>{
   ),
   'pregnant': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.maintain,
       ageYears: 29,
       heightCm: 165,
@@ -263,6 +273,7 @@ const _frozen = <String, _Frozen>{
   ),
   'missingTarget': _Frozen(
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.loseFat,
       ageYears: 30,
       heightCm: 180,

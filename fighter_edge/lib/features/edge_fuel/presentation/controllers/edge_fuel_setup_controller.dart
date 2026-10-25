@@ -38,7 +38,9 @@ class EdgeFuelSetupController extends ChangeNotifier {
 
   /// Every field the calculator needs is present. Does not mean the values
   /// are safe/valid — that's checked when [confirm] actually calculates.
-  bool get canReview => _draft.hasRequiredCalculatorInputs;
+  bool get canReview =>
+      _draft.hasRequiredCalculatorInputs &&
+      _draft.screeningStatus != NutritionScreeningStatus.unanswered;
 
   Future<void> _load() async {
     final existing = await _repository.watchProfileDraft(_userId).first;
@@ -68,6 +70,7 @@ class EdgeFuelSetupController extends ChangeNotifier {
     EquationProfile? equationProfile,
   }) =>
       _update((d) => d.copyWith(
+            confirmed: false,
             ageYears: ageYears,
             heightCm: heightCm,
             currentWeightKg: currentWeightKg,
@@ -105,7 +108,20 @@ class EdgeFuelSetupController extends ChangeNotifier {
           ));
 
   Future<void> setSafetyFlags(NutritionSafetyFlags flags) =>
-      _update((d) => d.copyWith(safetyFlags: flags));
+      _update((d) => d.copyWith(
+            safetyFlags: flags,
+            screeningStatus: NutritionScreeningStatus.unanswered,
+            confirmed: false,
+          ));
+
+  Future<void> setScreeningReviewed(bool reviewed) => _update((d) => d.copyWith(
+        screeningStatus: !reviewed
+            ? NutritionScreeningStatus.unanswered
+            : d.safetyFlags.any
+                ? NutritionScreeningStatus.needsReview
+                : NutritionScreeningStatus.completed,
+        confirmed: false,
+      ));
 
   Future<void> goToStep(int step) =>
       _update((d) => d.copyWith(currentStep: step));
@@ -129,6 +145,10 @@ class EdgeFuelSetupController extends ChangeNotifier {
     if (profile == null) return false;
     final target = NutritionTargetCalculator.calculate(profile, now: _clock());
     _previewTarget = target;
+    if (!target.isSuccess) {
+      notifyListeners();
+      return false;
+    }
     _draft = _draft.copyWith(confirmed: true);
     await _repository.saveProfileDraft(_userId, _draft);
     await _repository.saveTarget(_userId, target);

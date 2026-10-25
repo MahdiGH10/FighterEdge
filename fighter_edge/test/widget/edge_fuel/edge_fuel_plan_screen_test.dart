@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 
@@ -46,6 +47,11 @@ void main() {
       final repo = await makeRepo(signedIn: true);
       final edgeFuelRepo = InMemoryEdgeFuelRepository();
       await edgeFuelRepo.saveTarget(repo.currentUser!.id, _successTarget());
+      await edgeFuelRepo.saveProfileDraft(
+          repo.currentUser!.id,
+          const NutritionSetupDraft(
+              confirmed: true,
+              screeningStatus: NutritionScreeningStatus.completed));
 
       await tester.pumpWidget(wrapApp(
         const EdgeFuelPlanScreen(),
@@ -70,6 +76,11 @@ void main() {
       final repo = await makeRepo(signedIn: true);
       final edgeFuelRepo = InMemoryEdgeFuelRepository();
       await edgeFuelRepo.saveTarget(repo.currentUser!.id, _successTarget());
+      await edgeFuelRepo.saveProfileDraft(
+          repo.currentUser!.id,
+          const NutritionSetupDraft(
+              confirmed: true,
+              screeningStatus: NutritionScreeningStatus.completed));
 
       await tester.pumpWidget(wrapApp(
         const EdgeFuelPlanScreen(),

@@ -1,5 +1,6 @@
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
 import 'package:fighter_edge/features/fight_camp/domain/calendar.dart';
@@ -41,7 +42,10 @@ void main() {
     final edgeFuel = InMemoryEdgeFuelRepository();
     await edgeFuel.saveProfileDraft(
       repo.currentUser!.id,
-      const NutritionSetupDraft(ageYears: 30, confirmed: true),
+      const NutritionSetupDraft(
+          ageYears: 30,
+          confirmed: true,
+          screeningStatus: NutritionScreeningStatus.completed),
     );
     await fights.saveFight(
       repo.currentUser!.id,

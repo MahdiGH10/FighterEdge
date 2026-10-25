@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/policies/nutrition_display_mode.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/main.dart';
@@ -40,7 +41,10 @@ void main() {
     if (age != null) {
       await fuelRepo.saveProfileDraft(
         repo.currentUser!.id,
-        NutritionSetupDraft(ageYears: age, confirmed: confirmed),
+        NutritionSetupDraft(
+            ageYears: age,
+            confirmed: confirmed,
+            screeningStatus: NutritionScreeningStatus.completed),
       );
     }
     gateway = FakeReminderGateway();
@@ -153,7 +157,10 @@ void main() {
     final fuelRepo = InMemoryEdgeFuelRepository();
     await fuelRepo.saveProfileDraft(
       repo.currentUser!.id,
-      const NutritionSetupDraft(ageYears: 30, confirmed: true),
+      const NutritionSetupDraft(
+          ageYears: 30,
+          confirmed: true,
+          screeningStatus: NutritionScreeningStatus.completed),
     );
     await tester.pumpWidget(FighterEdgeApp(
       authRepo: repo,

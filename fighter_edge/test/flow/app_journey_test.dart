@@ -74,6 +74,9 @@ void main() {
       await tester.enterText(find.byType(TextField).at(0), '28');
       await tester.enterText(find.byType(TextField).at(1), '178');
       await tester.enterText(find.byType(TextField).at(2), '77.2');
+      await tester.ensureVisible(find.text('I reviewed every health question'));
+      await tester.tap(find.text('I reviewed every health question'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
       expect(find.text('Which formula fits your body?'), findsOneWidget);

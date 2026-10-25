@@ -1,5 +1,20 @@
 # Fighter Edge — Claude Code Handoff
 
+## Explicit health screening (2026-10-25, F01)
+
+Nutrition drafts and profiles now store `screeningStatus`: `unanswered`,
+`completed`, or `needsReview`. Older saved records default to `unanswered`;
+their confirmed flag and existing target do not clear the camp gate or show
+an automated Fuel target. Both initial onboarding and the later Fuel wizard
+ask the same six yes/no health questions and require an explicit review check.
+Any flagged answer requires professional review; skipping detailed targets
+keeps setup restricted. Reopening a saved profile preserves the gate.
+
+This is a client-side eligibility gate, not a clinical sign-off. Target and
+draft writes are still separate; F05/F12 is the next serial slice for
+constraint and save integrity. No signed-device or live Firebase check was
+done in this slice.
+
 ## Food log integrity (2026-10-25, F02/F03)
 
 Interactive food changes now write one document per entry at

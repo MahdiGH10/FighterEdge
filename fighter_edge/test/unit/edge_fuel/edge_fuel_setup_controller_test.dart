@@ -20,6 +20,9 @@ void main() {
         equationProfile: EquationProfile.higherOffset,
       );
       await first.setActivityLevel(ActivityLevel.moderate);
+      expect(first.canReview, isFalse,
+          reason: 'unchecked health questions are unanswered');
+      await first.setScreeningReviewed(true);
       await first.goToStep(2);
 
       final resumed = EdgeFuelSetupController(repository: repo, userId: 'u1');
@@ -28,6 +31,7 @@ void main() {
       expect(resumed.draft.goal, NutritionGoal.maintain);
       expect(resumed.draft.ageYears, 30);
       expect(resumed.draft.currentStep, 2);
+      expect(resumed.draft.screeningStatus, NutritionScreeningStatus.completed);
       expect(resumed.canReview, isTrue);
     });
 
@@ -46,6 +50,7 @@ void main() {
         equationProfile: EquationProfile.higherOffset,
       );
       await controller.setActivityLevel(ActivityLevel.moderate);
+      await controller.setScreeningReviewed(true);
 
       final ok = await controller.confirm();
 
@@ -91,12 +96,47 @@ void main() {
       await controller.setSafetyFlags(
         const NutritionSafetyFlags(kidneyDisease: true),
       );
+      await controller.setScreeningReviewed(true);
 
       controller.refreshPreview();
 
       expect(controller.previewTarget?.status,
           NutritionTargetStatus.needsProfessionalReview);
       expect(await repo.watchTarget('u1').first, isNull);
+    });
+
+    test('editing a reviewed answer resets screening and blocks confirmation',
+        () async {
+      final repo = InMemoryEdgeFuelRepository();
+      final controller =
+          EdgeFuelSetupController(repository: repo, userId: 'u1');
+      await Future<void>.delayed(Duration.zero);
+      await controller.setGoal(NutritionGoal.maintain);
+      await controller.setBodyInputs(
+        ageYears: 30,
+        heightCm: 180,
+        currentWeightKg: 80,
+        equationProfile: EquationProfile.higherOffset,
+      );
+      await controller.setActivityLevel(ActivityLevel.moderate);
+      expect(await controller.confirm(), isFalse);
+      await controller.setScreeningReviewed(true);
+      expect(await controller.confirm(), isTrue);
+      await controller.setSafetyFlags(
+        const NutritionSafetyFlags(kidneyDisease: true),
+      );
+      expect(controller.draft.screeningStatus,
+          NutritionScreeningStatus.unanswered);
+      expect(controller.draft.confirmed, isFalse);
+      expect(controller.canReview, isFalse);
+      expect(await controller.confirm(), isFalse);
+      await controller.setScreeningReviewed(true);
+      expect(controller.draft.screeningStatus,
+          NutritionScreeningStatus.needsReview);
+      controller.refreshPreview();
+      expect(controller.previewTarget?.status,
+          NutritionTargetStatus.needsProfessionalReview);
+      expect(await controller.confirm(), isFalse);
     });
   });
 }

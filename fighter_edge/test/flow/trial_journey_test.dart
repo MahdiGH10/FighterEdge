@@ -91,6 +91,9 @@ void main() {
     await tester.enterText(find.byType(TextField).at(0), '28');
     await tester.enterText(find.byType(TextField).at(1), '178');
     await tester.enterText(find.byType(TextField).at(2), '77.2');
+    await tester.ensureVisible(find.text('I reviewed every health question'));
+    await tester.tap(find.text('I reviewed every health question'));
+    await tester.pumpAndSettle();
     for (var i = 0; i < 3; i++) {
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();

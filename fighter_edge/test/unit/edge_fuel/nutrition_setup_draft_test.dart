@@ -19,6 +19,7 @@ void main() {
         currentWeightKg: 80,
         equationProfile: EquationProfile.higherOffset,
         normalActivityLevel: ActivityLevel.moderate,
+        screeningStatus: NutritionScreeningStatus.completed,
       );
       expect(draft.hasRequiredCalculatorInputs, isTrue);
       expect(draft.toProfile(), isNotNull);
@@ -39,6 +40,7 @@ void main() {
       final complete = base.copyWith(
         targetWeightKg: 74,
         goalPace: GoalPace.standard,
+        screeningStatus: NutritionScreeningStatus.completed,
       );
       expect(complete.hasRequiredCalculatorInputs, isTrue);
       expect(complete.toProfile(), isNotNull);
@@ -67,6 +69,7 @@ void main() {
         cookingTimeBand: 'quick',
         bodyFatPercent: 14.5,
         safetyFlags: NutritionSafetyFlags(kidneyDisease: true),
+        screeningStatus: NutritionScreeningStatus.needsReview,
       );
 
       final restored = NutritionSetupDraft.fromJson(draft.toJson());
@@ -90,6 +93,7 @@ void main() {
       expect(restored.cookingTimeBand, draft.cookingTimeBand);
       expect(restored.bodyFatPercent, draft.bodyFatPercent);
       expect(restored.safetyFlags.kidneyDisease, isTrue);
+      expect(restored.screeningStatus, NutritionScreeningStatus.needsReview);
     });
 
     test('fromJson tolerates an empty map', () {
@@ -98,6 +102,17 @@ void main() {
       expect(restored.currentStep, 0);
       expect(restored.confirmed, isFalse);
       expect(restored.allergens, isEmpty);
+      expect(restored.screeningStatus, NutritionScreeningStatus.unanswered);
+    });
+
+    test('an old confirmed draft without screening evidence stays unanswered',
+        () {
+      final restored = NutritionSetupDraft.fromJson(const {
+        'confirmed': true,
+        'safetyFlags': {'kidneyDisease': false},
+      });
+      expect(restored.screeningStatus, NutritionScreeningStatus.unanswered);
+      expect(restored.confirmed, isTrue);
     });
   });
 }

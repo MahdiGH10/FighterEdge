@@ -1,5 +1,6 @@
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/daily_snapshot/presentation/daily_snapshot_builder.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_profile.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/fight_camp/data/in_memory_fight_camp_repository.dart';
@@ -17,7 +18,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// A Thursday, the day of the weigh-in.
 final now = DateTime(2026, 10, 1, 9);
 
-const confirmed = NutritionSetupDraft(ageYears: 30, confirmed: true);
+const confirmed = NutritionSetupDraft(
+    ageYears: 30,
+    confirmed: true,
+    screeningStatus: NutritionScreeningStatus.completed);
 
 /// The coach screen and the Corner Brief both hand this builder the Fuel
 /// draft. Age and the camp screening gate come from it together, so a surface
@@ -86,6 +90,7 @@ void main() {
         fuelDraft: const NutritionSetupDraft(
           ageYears: 30,
           confirmed: true,
+          screeningStatus: NutritionScreeningStatus.needsReview,
           safetyFlags: NutritionSafetyFlags(kidneyDisease: true),
         ));
     final camp = snapshot.camp!;
@@ -96,7 +101,10 @@ void main() {
 
   test('a minor gets no camp guidance', () async {
     final snapshot = buildDailySnapshot(state, plan, await campOnWeighInDay(),
-        fuelDraft: const NutritionSetupDraft(ageYears: 17, confirmed: true));
+        fuelDraft: const NutritionSetupDraft(
+            ageYears: 17,
+            confirmed: true,
+            screeningStatus: NutritionScreeningStatus.completed));
     final camp = snapshot.camp!;
     expect(camp.weightPath.status, WeightPathStatus.notSupported);
     expect(camp.fightWeekCut, isNull);

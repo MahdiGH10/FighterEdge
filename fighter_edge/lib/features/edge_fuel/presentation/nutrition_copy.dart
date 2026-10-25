@@ -107,6 +107,10 @@ class NutritionCopy {
       };
 
   static const Map<String, String> _reasons = {
+    'screeningUnanswered':
+        'Review the health questions before an automated target can be shown.',
+    'screeningNeedsReview':
+        'Please check with a qualified professional before an automated plan.',
     'underAge': 'Automated plans are only available to adults 18 and over.',
     'invalidVitals': "Height, weight, or age don't look like valid numbers.",
     'underweightForFatLoss':

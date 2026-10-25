@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fighter_edge/features/corner_brief/presentation/corner_line_row.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import 'package:fighter_edge/widgets/stat_card.dart';
@@ -38,6 +39,11 @@ void main() {
     final edgeFuelRepo = InMemoryEdgeFuelRepository();
     if (withTarget) {
       await edgeFuelRepo.saveTarget(repo.currentUser!.id, _target());
+      await edgeFuelRepo.saveProfileDraft(
+          repo.currentUser!.id,
+          const NutritionSetupDraft(
+              confirmed: true,
+              screeningStatus: NutritionScreeningStatus.completed));
     }
     await tester.pumpWidget(wrapApp(
       const Scaffold(body: SingleChildScrollView(child: CornerLineRow())),

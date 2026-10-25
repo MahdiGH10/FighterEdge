@@ -42,6 +42,13 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('Male physiology'));
       await tester.pump();
+      await Scrollable.ensureVisible(
+        tester.element(find.text('I reviewed every health question')),
+        alignment: .5,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('I reviewed every health question'));
+      await tester.pump();
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
@@ -123,6 +130,7 @@ void main() {
             equationProfile: EquationProfile.neutral,
             normalActivityLevel: ActivityLevel.moderate,
             weeklyTrainingDays: 4,
+            screeningStatus: NutritionScreeningStatus.completed,
           ));
       await tester.pumpWidget(wrapApp(
           const MediaQuery(
@@ -154,6 +162,7 @@ void main() {
           normalActivityLevel: ActivityLevel.moderate,
           weeklyTrainingDays: 4,
           safetyFlags: NutritionSafetyFlags(kidneyDisease: true),
+          screeningStatus: NutritionScreeningStatus.needsReview,
         ),
       );
 
