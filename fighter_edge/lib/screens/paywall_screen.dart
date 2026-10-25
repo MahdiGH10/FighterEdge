@@ -703,7 +703,7 @@ class _PlanTile extends StatelessWidget {
 
 /// What the subscription is for, as outcomes the athlete can check against
 /// the app: the camp week, session mode, fuel for training days, the weekly
-/// review, the safe weight path, drills and recipes. When a locked feature
+/// review, the safe weight path and drills. When a shipped locked feature
 /// brought the athlete here, its outcome leads the list.
 class _Benefits extends StatelessWidget {
   final Feature? highlight;
@@ -761,14 +761,6 @@ class _Benefits extends StatelessWidget {
           icon: Feature.fullTechniqueLibrary.icon,
           title: l.paywallBenefitDrillsTitle,
           body: l.paywallBenefitDrillsBody,
-        ),
-      ),
-      (
-        Feature.edgeFuelPremiumRecipes,
-        _BenefitRow(
-          icon: Feature.edgeFuelPremiumRecipes.icon,
-          title: l.paywallBenefitRecipesTitle,
-          body: l.paywallBenefitRecipesBody,
         ),
       ),
     ];

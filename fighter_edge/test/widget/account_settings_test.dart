@@ -80,6 +80,12 @@ void main() {
     await tester.pump();
     await openSettings(tester);
 
+    expect(
+      find.text('Full drill library, session mode, and training-day fuel'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('recipe libraries'), findsNothing);
+
     await tester.tap(find.text('Delete account'));
     await tester.pumpAndSettle();
     expect(

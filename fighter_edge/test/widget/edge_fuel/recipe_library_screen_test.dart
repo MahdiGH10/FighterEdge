@@ -63,10 +63,12 @@ void main() {
 
     expect(find.text('RECIPES'), findsOneWidget);
     expect(find.text('Greek yogurt and berry bowl'), findsNothing);
-    expect(find.text('Nothing matches'), findsOneWidget);
+    expect(find.text('No recipes published yet'), findsOneWidget);
+    expect(find.text('Nothing matches'), findsNothing);
+    expect(find.text('Clear filters'), findsNothing);
   });
 
-  testWidgets('renders recipes from the shipped catalog', (tester) async {
+  testWidgets('renders published recipe fixtures', (tester) async {
     await _pumpLibrary(tester);
 
     // AppHeader and PrimaryButton both uppercase their labels.
