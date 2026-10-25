@@ -35,8 +35,10 @@ class EdgeFuelController extends ChangeNotifier {
   /// Shared "not saved" state behind the notice on Home and Fuel. Optional
   /// so the controller still works on its own in tests.
   final SyncTracker? _sync;
-  static const _syncKey = 'nutrition-day';
   bool _lastSaveFailed = false;
+  final Map<String, _FoodMutation> _unconfirmed = {};
+  final Map<String, int> _writeVersions = {};
+  final Set<String> _failedKeys = {};
 
   /// True when the most recent change could not be stored. Any later
   /// successful save clears it. The change stays on screen either way.
@@ -55,6 +57,7 @@ class EdgeFuelController extends ChangeNotifier {
   NutritionSetupDraft? get draft => _draft;
   NutritionTarget? get target => _target;
   NutritionDay? get day => _day;
+  bool get dayLoaded => _day != null;
   bool get hasCompletedSetup => _draft?.confirmed == true;
   DateTime get selectedDate => _selectedDate;
   bool get isToday => mealDateKey(_selectedDate) == mealDateKey(DateTime.now());
@@ -88,6 +91,10 @@ class EdgeFuelController extends ChangeNotifier {
     _target = null;
     _day = null;
     _memory = null;
+    _unconfirmed.clear();
+    _writeVersions.clear();
+    _failedKeys.clear();
+    _lastSaveFailed = false;
 
     if (userId == null) {
       notifyListeners();
@@ -154,11 +161,15 @@ class EdgeFuelController extends ChangeNotifier {
   /// so UI flows should not wait on it (audit A-4). It never throws: a
   /// failed write is reported and surfaces as [lastSaveFailed].
   Future<void> addEntry(FoodLogEntry entry) async {
-    final day = _activeDay();
+    final day = _day;
+    if (day == null || _userId == null || !writeGate()) return;
     final firstToday = day.entries.isEmpty;
-    final saved = await _saveDay(
-      day.copyWith(entries: [...day.entries, entry], updatedAt: DateTime.now()),
-    );
+    final saved = await _applyMutation(_FoodMutation(
+      userId: _userId!,
+      localDate: day.localDate,
+      entryId: entry.id,
+      entry: entry,
+    ));
     if (!saved) return;
     _memory?.remember(entry);
     // Every way of logging food (quick add, search, a recipe) lands here, so
@@ -171,16 +182,15 @@ class EdgeFuelController extends ChangeNotifier {
   }
 
   Future<void> updateEntry(FoodLogEntry entry) async {
-    final day = _activeDay();
-    await _saveDay(
-      day.copyWith(
-        entries: [
-          for (final existing in day.entries)
-            if (existing.id == entry.id) entry else existing,
-        ],
-        updatedAt: DateTime.now(),
-      ),
-    );
+    final day = _day;
+    if (day == null || _userId == null || !writeGate()) return;
+    if (!day.entries.any((existing) => existing.id == entry.id)) return;
+    await _applyMutation(_FoodMutation(
+      userId: _userId!,
+      localDate: day.localDate,
+      entryId: entry.id,
+      entry: entry,
+    ));
   }
 
   Future<void> toggleEntry(FoodLogEntry entry) {
@@ -188,16 +198,14 @@ class EdgeFuelController extends ChangeNotifier {
   }
 
   Future<void> deleteEntry(FoodLogEntry entry) async {
-    final day = _activeDay();
-    await _saveDay(
-      day.copyWith(
-        entries: [
-          for (final existing in day.entries)
-            if (existing.id != entry.id) existing,
-        ],
-        updatedAt: DateTime.now(),
-      ),
-    );
+    final day = _day;
+    if (day == null || _userId == null || !writeGate()) return;
+    if (!day.entries.any((existing) => existing.id == entry.id)) return;
+    await _applyMutation(_FoodMutation(
+      userId: _userId!,
+      localDate: day.localDate,
+      entryId: entry.id,
+    ));
   }
 
   /// This calendar week's days, Monday through [now]'s date, oldest first.
@@ -249,23 +257,15 @@ class EdgeFuelController extends ChangeNotifier {
   /// any of today's entries with the same name so the star reads the same.
   Future<void> toggleSavedFood(FoodLogEntry entry) async {
     final memory = _memory;
-    if (memory == null) return;
+    final day = _day;
+    if (memory == null || day == null || !writeGate()) return;
     final saved = memory.toggleSaved(entry);
     final key = FoodMemory.keyOf(entry);
-    final day = _activeDay();
-    if (!day.entries.any((e) => FoodMemory.keyOf(e) == key)) {
-      notifyListeners();
-      return;
-    }
-    await _saveDay(
-      day.copyWith(
-        entries: [
-          for (final e in day.entries)
-            if (FoodMemory.keyOf(e) == key) e.copyWith(saved: saved) else e,
-        ],
-        updatedAt: DateTime.now(),
-      ),
-    );
+    notifyListeners();
+    await Future.wait([
+      for (final e in day.entries)
+        if (FoodMemory.keyOf(e) == key) updateEntry(e.copyWith(saved: saved)),
+    ]);
   }
 
   @override
@@ -281,6 +281,8 @@ class EdgeFuelController extends ChangeNotifier {
     final userId = _userId;
     if (userId == null) return;
     _daySub?.cancel();
+    _day = null;
+    final dateKey = mealDateKey(_selectedDate);
     _daySub = _repository
         .watchNutritionDay(
       userId,
@@ -289,23 +291,24 @@ class EdgeFuelController extends ChangeNotifier {
     )
         .listen(
       (day) {
-        _day = day;
+        if (_disposed ||
+            _userId != userId ||
+            mealDateKey(_selectedDate) != dateKey) {
+          return;
+        }
+        var visible = day;
+        for (final mutation in _unconfirmed.values) {
+          if (mutation.userId == userId && mutation.localDate == dateKey) {
+            visible = _withMutation(visible, mutation);
+          }
+        }
+        _day = visible;
         notifyListeners();
       },
       onError: (Object error) {
         if (kDebugMode) debugPrint('[edge_fuel] day stream error: $error');
       },
     );
-  }
-
-  NutritionDay _activeDay() {
-    return _day ??
-        NutritionDay.empty(
-          localDate: mealDateKey(_selectedDate),
-          timeZone: _selectedDate.timeZoneName,
-          now: DateTime.now(),
-          targetSnapshot: hasUsableTarget ? _target : null,
-        );
   }
 
   /// Shows [day] immediately, then stores it. Returns whether storage
@@ -317,36 +320,86 @@ class EdgeFuelController extends ChangeNotifier {
 
   static bool _openGate() => true;
 
-  Future<bool> _saveDay(NutritionDay day) async {
-    final userId = _userId;
-    if (userId == null) return false;
-    if (!writeGate()) return false;
-    _day = day;
+  Future<bool> _applyMutation(_FoodMutation mutation) async {
+    if (_userId != mutation.userId || !writeGate()) return false;
+    final day = _day;
+    if (day == null || day.localDate != mutation.localDate) return false;
+    _day = _withMutation(day, mutation);
+    _unconfirmed[mutation.key] = mutation;
     notifyListeners();
+    return _writeMutation(mutation);
+  }
+
+  NutritionDay _withMutation(NutritionDay day, _FoodMutation mutation) =>
+      day.copyWith(
+        entries: [
+          for (final entry in day.entries)
+            if (entry.id != mutation.entryId) entry,
+          if (mutation.entry != null) mutation.entry!,
+        ],
+        updatedAt: DateTime.now(),
+      );
+
+  Future<bool> _writeMutation(_FoodMutation mutation) async {
+    if (_disposed || _userId != mutation.userId) return true;
+    final key = mutation.key;
+    final version = (_writeVersions[key] ?? 0) + 1;
+    _writeVersions[key] = version;
     try {
-      await _repository.saveNutritionDay(userId, day);
-      _sync?.markSaved(_syncKey);
-      if (_lastSaveFailed) {
-        _lastSaveFailed = false;
-        if (!_disposed) notifyListeners();
+      if (mutation.entry == null) {
+        await _repository.deleteFoodEntry(
+          mutation.userId,
+          mutation.localDate,
+          mutation.entryId,
+        );
+      } else {
+        await _repository.upsertFoodEntry(
+          mutation.userId,
+          mutation.localDate,
+          mutation.entry!,
+        );
+      }
+      if (!_disposed &&
+          _userId == mutation.userId &&
+          _writeVersions[key] == version) {
+        _unconfirmed.remove(key);
+        _failedKeys.remove(key);
+        _lastSaveFailed = _failedKeys.isNotEmpty;
+        _sync?.markSaved(key);
+        notifyListeners();
       }
       return true;
     } catch (error, stack) {
       _errorReporter.report(error, stack, reason: 'nutrition_day_save_failed');
-      _lastSaveFailed = true;
-      // The retry stores the day as it is *then*, never this attempt's copy,
-      // so it cannot undo an entry added or removed in between.
-      _sync?.markFailed(_syncKey, _retrySaveDay);
-      if (!_disposed) notifyListeners();
+      if (!_disposed &&
+          _userId == mutation.userId &&
+          _writeVersions[key] == version) {
+        _failedKeys.add(key);
+        _lastSaveFailed = true;
+        // This closure keeps the account, date and exact entry operation.
+        // A newer edit of this entry replaces it under the same key.
+        _sync?.markFailed(key, () => _writeMutation(mutation));
+        notifyListeners();
+      }
       return false;
     }
   }
 
-  Future<bool> _retrySaveDay() async {
-    final day = _day;
-    if (day == null || _disposed) return true;
-    return _saveDay(day);
-  }
-
   String _manualId() => 'food-${DateTime.now().microsecondsSinceEpoch}';
+}
+
+class _FoodMutation {
+  const _FoodMutation({
+    required this.userId,
+    required this.localDate,
+    required this.entryId,
+    this.entry,
+  });
+
+  final String userId;
+  final String localDate;
+  final String entryId;
+  final FoodLogEntry? entry;
+
+  String get key => 'nutrition-day:$userId:$localDate:$entryId';
 }

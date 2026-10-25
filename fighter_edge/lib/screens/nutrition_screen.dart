@@ -69,6 +69,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
       );
     }
     final edgeFuel = context.watch<EdgeFuelController>();
+    if (!edgeFuel.dayLoaded) {
+      // The first snapshot may contain an existing log from another device.
+      // Keep every entry action unavailable until that snapshot is merged.
+      return ScreenScaffold.tab(
+        title: l.navFuel,
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
     final targetCalories = edgeFuel.targetCalories;
     final ratio =
         targetCalories == 0 ? 0.0 : edgeFuel.consumedCalories / targetCalories;

@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../data/data_repository.dart';
@@ -39,6 +42,24 @@ class FirestoreEdgeFuelRepository implements EdgeFuelRepository {
           .doc(userId)
           .collection('nutritionDays')
           .doc(mealDateKey(localDate));
+
+  CollectionReference<Map<String, dynamic>> _entries(
+    String userId,
+    String localDate,
+  ) =>
+      _db
+          .collection('users')
+          .doc(userId)
+          .collection('nutritionDays')
+          .doc(localDate)
+          .collection('entries');
+
+  DocumentReference<Map<String, dynamic>> _entryDoc(
+    String userId,
+    String localDate,
+    String entryId,
+  ) =>
+      _entries(userId, localDate).doc(base64Url.encode(utf8.encode(entryId)));
 
   DocumentReference<Map<String, dynamic>> _legacyMealDoc(
     String userId,
@@ -93,50 +114,143 @@ class FirestoreEdgeFuelRepository implements EdgeFuelRepository {
     DateTime localDate, {
     NutritionTarget? targetSnapshot,
   }) {
-    return _dayDoc(userId, localDate).snapshots().asyncMap((snapshot) async {
-      final data = snapshot.data();
-      if (data != null) {
-        return NutritionDay.fromJson(_normalizedTimestamps(data));
-      }
+    final dateKey = mealDateKey(localDate);
+    DocumentSnapshot<Map<String, dynamic>>? daySnapshot;
+    QuerySnapshot<Map<String, dynamic>>? entrySnapshot;
+    DocumentSnapshot<Map<String, dynamic>>? legacySnapshot;
+    StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? daySub;
+    StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? entrySub;
+    StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? legacySub;
+    late final StreamController<NutritionDay> controller;
 
-      final migrated = await _migrateLegacyMealsIfPresent(
-        userId,
-        localDate,
-        targetSnapshot: targetSnapshot,
-      );
-      return migrated ??
-          NutritionDay.empty(
-            localDate: mealDateKey(localDate),
-            timeZone: localDate.timeZoneName,
-            now: DateTime.now(),
-            targetSnapshot: targetSnapshot,
-          );
-    });
+    void emit() {
+      if (controller.isClosed || daySnapshot == null || entrySnapshot == null) {
+        return;
+      }
+      final data = daySnapshot!.data();
+      if (data == null && legacySnapshot == null) return;
+      final legacyMeals = data == null
+          ? _legacyEntries(legacySnapshot!.data(), localDate)
+          : const <FoodLogEntry>[];
+
+      final base = data == null
+          ? NutritionDay.empty(
+              localDate: dateKey,
+              timeZone: localDate.timeZoneName,
+              now: DateTime.now(),
+              targetSnapshot: targetSnapshot,
+            ).copyWith(
+              entries: legacyMeals,
+              migratedFromLegacyMeals: legacyMeals.isNotEmpty,
+            )
+          : NutritionDay.fromJson(_normalizedTimestamps(data));
+      // Old day arrays stay readable. Each new entry document overrides the
+      // same ID, including a tombstone for a deleted legacy entry.
+      final byId = {for (final entry in base.entries) entry.id: entry};
+      for (final document in entrySnapshot!.docs) {
+        final record = document.data();
+        final id = record['id'];
+        if (id is! String || id.isEmpty) continue;
+        if (record['deleted'] == true) {
+          byId.remove(id);
+        } else {
+          byId[id] = FoodLogEntry.fromJson(record);
+        }
+      }
+      final entries = byId.values.toList()
+        ..sort((a, b) {
+          final time = a.loggedAt.compareTo(b.loggedAt);
+          return time != 0 ? time : a.id.compareTo(b.id);
+        });
+      controller.add(base.copyWith(entries: entries));
+    }
+
+    controller = StreamController<NutritionDay>(
+      onListen: () {
+        daySub = _dayDoc(userId, localDate).snapshots().listen(
+          (snapshot) {
+            daySnapshot = snapshot;
+            emit();
+          },
+          onError: controller.addError,
+        );
+        entrySub = _entries(userId, dateKey).snapshots().listen(
+          (snapshot) {
+            entrySnapshot = snapshot;
+            emit();
+          },
+          onError: controller.addError,
+        );
+        legacySub = _legacyMealDoc(userId, localDate).snapshots().listen(
+          (snapshot) {
+            legacySnapshot = snapshot;
+            emit();
+          },
+          onError: controller.addError,
+        );
+      },
+      onCancel: () async {
+        await daySub?.cancel();
+        await entrySub?.cancel();
+        await legacySub?.cancel();
+        await controller.close();
+      },
+    );
+    return controller.stream;
   }
 
   @override
   Future<void> saveNutritionDay(String userId, NutritionDay day) {
-    return _db
-        .collection('users')
-        .doc(userId)
-        .collection('nutritionDays')
-        .doc(day.localDate)
-        .set({
-      ...day.toJson(),
-      'totals': FoodLogTotals.fromEntries(day.entries).toJson(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    // Used by imports/fixtures, not interactive edits. Never replace the
+    // legacy entries array or delete other devices' entry documents.
+    final batch = _db.batch();
+    final metadata = day.toJson()
+      ..remove('entries')
+      ..remove('totals');
+    batch.set(
+        _dayDoc(userId, DateTime.parse(day.localDate)),
+        {
+          ...metadata,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true));
+    for (final entry in day.entries) {
+      batch.set(_entryDoc(userId, day.localDate, entry.id), {
+        ...entry.toJson(),
+        'deleted': false,
+      });
+    }
+    return batch.commit();
   }
 
-  Future<NutritionDay?> _migrateLegacyMealsIfPresent(
+  @override
+  Future<void> upsertFoodEntry(
     String userId,
-    DateTime localDate, {
-    NutritionTarget? targetSnapshot,
-  }) async {
-    final legacySnapshot = await _legacyMealDoc(userId, localDate).get();
-    final data = legacySnapshot.data();
+    String localDate,
+    FoodLogEntry entry,
+  ) =>
+      _entryDoc(userId, localDate, entry.id).set({
+        ...entry.toJson(),
+        'deleted': false,
+      });
+
+  @override
+  Future<void> deleteFoodEntry(
+    String userId,
+    String localDate,
+    String entryId,
+  ) =>
+      _entryDoc(userId, localDate, entryId).set({
+        'id': entryId,
+        'deleted': true,
+      });
+
+  List<FoodLogEntry> _legacyEntries(
+    Map<String, dynamic>? data,
+    DateTime localDate,
+  ) {
     final rawMeals = data?['meals'] as List<dynamic>? ?? const [];
-    if (rawMeals.isEmpty) return null;
+    if (rawMeals.isEmpty) return const [];
 
     final entries = <FoodLogEntry>[];
     for (final raw in rawMeals) {
@@ -155,22 +269,7 @@ class FirestoreEdgeFuelRepository implements EdgeFuelRepository {
         ),
       );
     }
-    if (entries.isEmpty) return null;
-
-    final now = DateTime.now();
-    final migrated = NutritionDay.empty(
-      localDate: mealDateKey(localDate),
-      timeZone: localDate.timeZoneName,
-      now: now,
-      targetSnapshot: targetSnapshot,
-    ).copyWith(
-      entries: entries,
-      migratedFromLegacyMeals: true,
-      loggingCoverage: entries.length < 3 ? 'partial' : 'full',
-      updatedAt: now,
-    );
-    await saveNutritionDay(userId, migrated);
-    return migrated;
+    return entries;
   }
 
   Map<String, dynamic> _normalizedTimestamps(Map<String, dynamic> data) {

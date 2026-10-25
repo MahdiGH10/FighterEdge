@@ -1,4 +1,5 @@
 import '../domain/models/nutrition_setup_draft.dart';
+import '../domain/models/food_log_entry.dart';
 import '../domain/models/nutrition_day.dart';
 import '../domain/models/nutrition_target.dart';
 
@@ -21,5 +22,15 @@ abstract class EdgeFuelRepository {
     NutritionTarget? targetSnapshot,
   });
 
+  /// Legacy/fixture day seeding. Interactive food changes use the entry
+  /// operations below so one device cannot replace another device's log.
   Future<void> saveNutritionDay(String userId, NutritionDay day);
+
+  Future<void> upsertFoodEntry(
+    String userId,
+    String localDate,
+    FoodLogEntry entry,
+  );
+
+  Future<void> deleteFoodEntry(String userId, String localDate, String entryId);
 }

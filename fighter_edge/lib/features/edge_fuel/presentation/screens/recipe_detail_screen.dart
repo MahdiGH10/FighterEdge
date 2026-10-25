@@ -81,6 +81,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       _servings,
     );
     final scale = _servings / (recipe.servings < 1 ? 1 : recipe.servings);
+    final dayLoaded = context.watch<EdgeFuelController>().dayLoaded;
 
     return ScreenScaffold(
       title: recipe.title,
@@ -141,7 +142,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           PrimaryButton(
             _adding ? 'Adding…' : 'Add to today',
             icon: AppIcons.plusCircle,
-            onPressed: _adding ? null : () => _addToDay(nutrients),
+            onPressed:
+                _adding || !dayLoaded ? null : () => _addToDay(nutrients),
           ),
         ],
       ),
@@ -150,6 +152,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
   Future<void> _addToDay(RecipeNutrients nutrients) async {
     final edgeFuel = context.read<EdgeFuelController>();
+    if (!edgeFuel.dayLoaded) return;
     final recipe = widget.listing.recipe;
     setState(() => _adding = true);
 
