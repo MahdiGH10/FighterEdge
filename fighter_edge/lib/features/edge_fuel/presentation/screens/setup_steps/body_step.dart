@@ -10,6 +10,7 @@ import '../../../domain/models/nutrition_enums.dart';
 import '../../controllers/edge_fuel_setup_controller.dart';
 import '../../nutrition_copy.dart';
 import '../../widgets/choice_card.dart';
+import '../../widgets/safety_screening_fields.dart';
 
 /// Step 2 of 6 — body inputs and the equation-profile choice (master prompt
 /// §6.2, "Inclusive equation UX"). Also carries the safety-flag screening
@@ -66,7 +67,6 @@ class _BodyStepState extends State<BodyStep> {
     final draft = controller.draft;
     final needsTarget =
         draft.goal != null && draft.goal != NutritionGoal.maintain;
-    final flags = draft.safetyFlags;
 
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
@@ -137,49 +137,11 @@ class _BodyStepState extends State<BodyStep> {
             onTap: () => controller.setBodyInputs(equationProfile: profile),
           ),
         const SizedBox(height: Insets.xl),
-        Text('Quick health check', style: AppType.title2()),
-        const SizedBox(height: Insets.xs),
-        Text(
-          "We store only yes/no flags, never details. If any apply, we'll ask you "
-          "to check with a qualified professional before showing an automated plan.",
-          style: AppType.subhead(color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: Insets.sm),
-        _SafetyCheck(
-          label: 'Pregnant or breastfeeding',
-          value: flags.pregnantOrBreastfeeding,
-          onChanged: (v) => controller
-              .setSafetyFlags(flags.copyWith(pregnantOrBreastfeeding: v)),
-        ),
-        _SafetyCheck(
-          label: 'Eating-disorder history or symptoms',
-          value: flags.eatingDisorderHistoryOrSymptoms,
-          onChanged: (v) => controller.setSafetyFlags(
-              flags.copyWith(eatingDisorderHistoryOrSymptoms: v)),
-        ),
-        _SafetyCheck(
-          label: 'Diabetes requiring medication',
-          value: flags.diabetesRequiringMedication,
-          onChanged: (v) => controller
-              .setSafetyFlags(flags.copyWith(diabetesRequiringMedication: v)),
-        ),
-        _SafetyCheck(
-          label: 'Kidney disease',
-          value: flags.kidneyDisease,
-          onChanged: (v) =>
-              controller.setSafetyFlags(flags.copyWith(kidneyDisease: v)),
-        ),
-        _SafetyCheck(
-          label: 'Serious liver disease',
-          value: flags.seriousLiverDisease,
-          onChanged: (v) =>
-              controller.setSafetyFlags(flags.copyWith(seriousLiverDisease: v)),
-        ),
-        _SafetyCheck(
-          label: 'Another clinician-managed diet',
-          value: flags.otherClinicianManagedDiet,
-          onChanged: (v) => controller
-              .setSafetyFlags(flags.copyWith(otherClinicianManagedDiet: v)),
+        SafetyScreeningFields(
+          flags: draft.safetyFlags,
+          status: draft.screeningStatus,
+          onFlagsChanged: controller.setSafetyFlags,
+          onReviewedChanged: controller.setScreeningReviewed,
         ),
       ],
     );
@@ -205,29 +167,5 @@ class _BodyStepState extends State<BodyStep> {
     if (value != null) {
       widget.controller.setBodyInputs(targetWeightKg: value);
     }
-  }
-}
-
-class _SafetyCheck extends StatelessWidget {
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  const _SafetyCheck(
-      {required this.label, required this.value, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.xxs),
-      child: CheckboxListTile(
-        value: value,
-        onChanged: (v) => onChanged(v ?? false),
-        controlAffinity: ListTileControlAffinity.leading,
-        contentPadding: EdgeInsets.zero,
-        dense: true,
-        activeColor: AppColors.primary,
-        title: Text(label, style: AppType.subhead(weight: FontWeight.w600)),
-      ),
-    );
   }
 }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/features/training_plan/presentation/plan_controller.dart';
@@ -112,6 +113,11 @@ void main() {
                 proteinGrams: 150,
                 carbGrams: 280,
                 fatGrams: 87));
+        await fuelRepo.saveProfileDraft(
+            repo.currentUser!.id,
+            const NutritionSetupDraft(
+                confirmed: true,
+                screeningStatus: NutritionScreeningStatus.completed));
         await tester.pumpWidget(wrapApp(const NutritionScreen(),
             repo: repo, edgeFuelRepo: fuelRepo));
         await tester.pumpAndSettle();

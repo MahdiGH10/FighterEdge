@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import 'package:fighter_edge/observability/error_reporter.dart';
@@ -146,6 +147,11 @@ void main() {
       'a target stream error keeps the last known target instead of '
       'crashing or hanging (A-5)', () async {
     final repo = _FlakyEdgeFuelRepository();
+    await repo.saveProfileDraft(
+        'u1',
+        const NutritionSetupDraft(
+            confirmed: true,
+            screeningStatus: NutritionScreeningStatus.completed));
     final controller = EdgeFuelController(repository: repo)..setUser('u1');
     await Future<void>.delayed(Duration.zero);
 

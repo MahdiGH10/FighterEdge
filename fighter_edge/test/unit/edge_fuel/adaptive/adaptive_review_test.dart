@@ -168,6 +168,7 @@ void main() {
 
   test('works on a real policy-v2 formula', () {
     const profile = NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: NutritionGoal.loseFat,
       ageYears: 28,
       heightCm: 178,

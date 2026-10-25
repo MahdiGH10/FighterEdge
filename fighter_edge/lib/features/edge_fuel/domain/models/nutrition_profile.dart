@@ -99,6 +99,7 @@ class NutritionProfile {
   /// Only supplied if the user already knows it — never estimated.
   final double? bodyFatPercent;
   final NutritionSafetyFlags safetyFlags;
+  final NutritionScreeningStatus screeningStatus;
 
   const NutritionProfile({
     required this.goal,
@@ -112,6 +113,7 @@ class NutritionProfile {
     this.goalPace,
     this.bodyFatPercent,
     this.safetyFlags = const NutritionSafetyFlags(),
+    this.screeningStatus = NutritionScreeningStatus.unanswered,
   });
 
   NutritionProfile copyWith({
@@ -125,6 +127,7 @@ class NutritionProfile {
     GoalPace? goalPace,
     double? bodyFatPercent,
     NutritionSafetyFlags? safetyFlags,
+    NutritionScreeningStatus? screeningStatus,
   }) {
     return NutritionProfile(
       schemaVersion: schemaVersion,
@@ -138,6 +141,7 @@ class NutritionProfile {
       goalPace: goalPace ?? this.goalPace,
       bodyFatPercent: bodyFatPercent ?? this.bodyFatPercent,
       safetyFlags: safetyFlags ?? this.safetyFlags,
+      screeningStatus: screeningStatus ?? this.screeningStatus,
     );
   }
 
@@ -153,6 +157,7 @@ class NutritionProfile {
         'goalPace': goalPace?.name,
         'bodyFatPercent': bodyFatPercent,
         'safetyFlags': safetyFlags.toJson(),
+        'screeningStatus': screeningStatus.name,
       };
 
   factory NutritionProfile.fromJson(Map<String, dynamic> json) {
@@ -177,6 +182,11 @@ class NutritionProfile {
           ? NutritionSafetyFlags.fromJson(
               Map<String, dynamic>.from(json['safetyFlags'] as Map))
           : const NutritionSafetyFlags(),
+      screeningStatus: enumFromName(
+            NutritionScreeningStatus.values,
+            json['screeningStatus'],
+          ) ??
+          NutritionScreeningStatus.unanswered,
     );
   }
 }

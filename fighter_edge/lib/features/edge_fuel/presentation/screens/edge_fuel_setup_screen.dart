@@ -158,6 +158,7 @@ class _EdgeFuelSetupBodyState extends State<_EdgeFuelSetupBody> {
             draft.heightCm != null &&
             draft.currentWeightKg != null &&
             draft.equationProfile != null &&
+            draft.screeningStatus != NutritionScreeningStatus.unanswered &&
             (!needsTarget || draft.targetWeightKg != null);
       case 2:
         return draft.normalActivityLevel != null;

@@ -48,6 +48,10 @@ enum GoalPace {
 /// is paired with a wider maintenance range, not false precision.
 enum ConfidenceLabel { high, medium, low }
 
+/// Explicit outcome of the health questions. Absence of an answer is never
+/// equivalent to answering "no" to every question.
+enum NutritionScreeningStatus { unanswered, completed, needsReview }
+
 /// The outcome of a target calculation. Never collapse a safety problem
 /// into a generic exception — this is the typed alternative (master prompt
 /// §7.6).

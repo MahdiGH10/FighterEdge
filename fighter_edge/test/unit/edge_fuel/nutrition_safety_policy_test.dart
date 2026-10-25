@@ -11,8 +11,10 @@ NutritionProfile _adultProfile({
   NutritionGoal goal = NutritionGoal.maintain,
   double? targetWeightKg,
   NutritionSafetyFlags safetyFlags = const NutritionSafetyFlags(),
+  NutritionScreeningStatus screeningStatus = NutritionScreeningStatus.completed,
 }) {
   return NutritionProfile(
+    screeningStatus: screeningStatus,
     goal: goal,
     ageYears: ageYears,
     heightCm: heightCm,
@@ -31,6 +33,21 @@ void main() {
       final result = NutritionSafetyPolicy.evaluate(_adultProfile());
       expect(result.isAllowed, isTrue);
       expect(result.status, NutritionTargetStatus.success);
+    });
+
+    test('unanswered screening never permits an automated target', () {
+      final result = NutritionSafetyPolicy.evaluate(_adultProfile(
+        screeningStatus: NutritionScreeningStatus.unanswered,
+      ));
+      expect(result.status, NutritionTargetStatus.needsMoreData);
+      expect(result.reasons, contains('screeningUnanswered'));
+    });
+
+    test('explicit needs-review state requires professional review', () {
+      final result = NutritionSafetyPolicy.evaluate(_adultProfile(
+        screeningStatus: NutritionScreeningStatus.needsReview,
+      ));
+      expect(result.status, NutritionTargetStatus.needsProfessionalReview);
     });
 
     test('under 18 is unsupported regardless of anything else', () {

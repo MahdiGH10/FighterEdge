@@ -5,6 +5,7 @@ import 'package:fighter_edge/billing/subscription.dart';
 import 'package:fighter_edge/controllers/auth_controller.dart';
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/fuel_day_plan.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/policies/nutrition_display_mode.dart';
@@ -90,7 +91,10 @@ void main() {
   Future<void> confirmFuelSetup(int age) async {
     await fuelRepo.saveProfileDraft(
       _uid,
-      NutritionSetupDraft(ageYears: age, confirmed: true),
+      NutritionSetupDraft(
+          ageYears: age,
+          confirmed: true,
+          screeningStatus: NutritionScreeningStatus.completed),
     );
     await pumpEventQueue();
   }

@@ -1,5 +1,6 @@
 import 'package:fighter_edge/data/in_memory_data_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_profile.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
@@ -77,10 +78,17 @@ void main() {
           NutritionSetupDraft(
               ageYears: ageYears ?? 30,
               confirmed: screeningConfirmed ?? true,
+              screeningStatus: safetyFlags.any
+                  ? NutritionScreeningStatus.needsReview
+                  : NutritionScreeningStatus.completed,
               safetyFlags: safetyFlags));
     } else {
       await edgeFuel.saveProfileDraft(
-          uid, const NutritionSetupDraft(ageYears: 30, confirmed: true));
+          uid,
+          const NutritionSetupDraft(
+              ageYears: 30,
+              confirmed: true,
+              screeningStatus: NutritionScreeningStatus.completed));
     }
     await tester.pumpWidget(wrapApp(
       home ?? const FightWeekScreen(),

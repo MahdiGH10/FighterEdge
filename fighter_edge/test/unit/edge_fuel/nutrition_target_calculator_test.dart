@@ -21,6 +21,7 @@ NutritionProfile _maintainProfile({
   ActivityLevel activity = ActivityLevel.moderate,
 }) {
   return NutritionProfile(
+    screeningStatus: NutritionScreeningStatus.completed,
     goal: NutritionGoal.maintain,
     ageYears: _vectorAge,
     heightCm: _vectorHeightCm,
@@ -38,6 +39,7 @@ NutritionProfile _loseFatProfile({
   double currentWeightKg = _vectorWeightKg,
 }) {
   return NutritionProfile(
+    screeningStatus: NutritionScreeningStatus.completed,
     goal: NutritionGoal.loseFat,
     ageYears: _vectorAge,
     heightCm: _vectorHeightCm,
@@ -54,6 +56,7 @@ NutritionProfile _gainMuscleProfile({
   GoalPace pace = GoalPace.gainStandard,
 }) {
   return NutritionProfile(
+    screeningStatus: NutritionScreeningStatus.completed,
     goal: NutritionGoal.gainMuscle,
     ageYears: _vectorAge,
     heightCm: _vectorHeightCm,
@@ -176,6 +179,7 @@ void main() {
       // and a very low activity coefficient pushes maintenance close to RMR,
       // so the upper-limit pace deficit would otherwise cross below RMR.
       const profile = NutritionProfile(
+        screeningStatus: NutritionScreeningStatus.completed,
         goal: NutritionGoal.loseFat,
         ageYears: 45,
         heightCm: 150,
@@ -257,6 +261,7 @@ void main() {
     test('zero height is unsupported, not a crash', () {
       final profile = _maintainProfile();
       final invalid = NutritionProfile(
+        screeningStatus: NutritionScreeningStatus.completed,
         goal: profile.goal,
         ageYears: profile.ageYears,
         heightCm: 0,
@@ -272,6 +277,7 @@ void main() {
     test('NaN weight is rejected, never propagated', () {
       final profile = _maintainProfile();
       final invalid = NutritionProfile(
+        screeningStatus: NutritionScreeningStatus.completed,
         goal: profile.goal,
         ageYears: profile.ageYears,
         heightCm: profile.heightCm,
@@ -303,6 +309,7 @@ void main() {
 
     test('missing target weight for a loss goal is needsMoreData', () {
       const profile = NutritionProfile(
+        screeningStatus: NutritionScreeningStatus.completed,
         goal: NutritionGoal.loseFat,
         ageYears: _vectorAge,
         heightCm: _vectorHeightCm,
@@ -321,6 +328,7 @@ void main() {
   group('Under-18 rejection', () {
     test('a 17-year-old profile is unsupported', () {
       const profile = NutritionProfile(
+        screeningStatus: NutritionScreeningStatus.completed,
         goal: NutritionGoal.maintain,
         ageYears: 17,
         heightCm: 175,
@@ -384,6 +392,7 @@ void main() {
       // which is below the ~2334.5 kcal the carb floor + protein target
       // require at this weight — the conflict must trigger.
       const heavyOlderProfile = NutritionProfile(
+        screeningStatus: NutritionScreeningStatus.completed,
         goal: NutritionGoal.loseFat,
         ageYears: 60,
         heightCm: 160,
@@ -464,6 +473,7 @@ void main() {
           NutritionTargetCalculator.calculate(_maintainProfile(), now: _now);
       final unsupported = NutritionTargetCalculator.calculate(
         const NutritionProfile(
+          screeningStatus: NutritionScreeningStatus.completed,
           goal: NutritionGoal.maintain,
           ageYears: 10,
           heightCm: 140,

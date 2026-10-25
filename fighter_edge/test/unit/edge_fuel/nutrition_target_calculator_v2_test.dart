@@ -25,6 +25,7 @@ NutritionProfile _profile({
   NutritionSafetyFlags flags = const NutritionSafetyFlags(),
 }) =>
     NutritionProfile(
+      screeningStatus: NutritionScreeningStatus.completed,
       goal: goal,
       ageYears: age,
       heightCm: height,

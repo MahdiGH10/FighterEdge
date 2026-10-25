@@ -44,6 +44,7 @@ class NutritionSetupDraft {
 
   final double? bodyFatPercent;
   final NutritionSafetyFlags safetyFlags;
+  final NutritionScreeningStatus screeningStatus;
 
   const NutritionSetupDraft({
     this.schemaVersion = currentSchemaVersion,
@@ -66,6 +67,7 @@ class NutritionSetupDraft {
     this.cookingTimeBand,
     this.bodyFatPercent,
     this.safetyFlags = const NutritionSafetyFlags(),
+    this.screeningStatus = NutritionScreeningStatus.unanswered,
   });
 
   const NutritionSetupDraft.empty() : this();
@@ -102,6 +104,7 @@ class NutritionSetupDraft {
       goalPace: goalPace,
       bodyFatPercent: bodyFatPercent,
       safetyFlags: safetyFlags,
+      screeningStatus: screeningStatus,
     );
   }
 
@@ -125,6 +128,7 @@ class NutritionSetupDraft {
     String? cookingTimeBand,
     double? bodyFatPercent,
     NutritionSafetyFlags? safetyFlags,
+    NutritionScreeningStatus? screeningStatus,
   }) {
     return NutritionSetupDraft(
       schemaVersion: schemaVersion,
@@ -147,6 +151,7 @@ class NutritionSetupDraft {
       cookingTimeBand: cookingTimeBand ?? this.cookingTimeBand,
       bodyFatPercent: bodyFatPercent ?? this.bodyFatPercent,
       safetyFlags: safetyFlags ?? this.safetyFlags,
+      screeningStatus: screeningStatus ?? this.screeningStatus,
     );
   }
 
@@ -171,6 +176,7 @@ class NutritionSetupDraft {
         'cookingTimeBand': cookingTimeBand,
         'bodyFatPercent': bodyFatPercent,
         'safetyFlags': safetyFlags.toJson(),
+        'screeningStatus': screeningStatus.name,
       };
 
   factory NutritionSetupDraft.fromJson(Map<String, dynamic> json) {
@@ -202,6 +208,11 @@ class NutritionSetupDraft {
           ? NutritionSafetyFlags.fromJson(
               Map<String, dynamic>.from(json['safetyFlags'] as Map))
           : const NutritionSafetyFlags(),
+      screeningStatus: enumFromName(
+            NutritionScreeningStatus.values,
+            json['screeningStatus'],
+          ) ??
+          NutritionScreeningStatus.unanswered,
     );
   }
 }

@@ -16,6 +16,9 @@ class SafetyCheckResult {
   const SafetyCheckResult.unsupported(this.reasons)
       : status = NutritionTargetStatus.unsupported;
 
+  const SafetyCheckResult.needsMoreData(this.reasons)
+      : status = NutritionTargetStatus.needsMoreData;
+
   const SafetyCheckResult.needsProfessionalReview(this.reasons)
       : status = NutritionTargetStatus.needsProfessionalReview;
 
@@ -56,9 +59,15 @@ class NutritionSafetyPolicy {
       return SafetyCheckResult.unsupported(unsupportedReasons);
     }
 
-    if (profile.safetyFlags.any) {
+    if (profile.screeningStatus == NutritionScreeningStatus.unanswered) {
+      return const SafetyCheckResult.needsMoreData(['screeningUnanswered']);
+    }
+
+    if (profile.screeningStatus == NutritionScreeningStatus.needsReview ||
+        profile.safetyFlags.any) {
+      final reasons = _flagReasons(profile.safetyFlags);
       return SafetyCheckResult.needsProfessionalReview(
-        _flagReasons(profile.safetyFlags),
+        reasons.isEmpty ? const ['screeningNeedsReview'] : reasons,
       );
     }
 

@@ -8,6 +8,7 @@ import '../../../../observability/telemetry.dart';
 import '../../data/edge_fuel_repository.dart';
 import '../../domain/models/food_log_entry.dart';
 import '../../domain/models/nutrition_setup_draft.dart';
+import '../../domain/models/nutrition_enums.dart';
 import '../../domain/models/nutrition_day.dart';
 import '../../domain/models/nutrition_target.dart';
 import '../../../../state/sync_tracker.dart';
@@ -55,10 +56,13 @@ class EdgeFuelController extends ChangeNotifier {
   bool _disposed = false;
 
   NutritionSetupDraft? get draft => _draft;
-  NutritionTarget? get target => _target;
+  NutritionTarget? get target => hasCompletedSetup ? _target : null;
   NutritionDay? get day => _day;
   bool get dayLoaded => _day != null;
-  bool get hasCompletedSetup => _draft?.confirmed == true;
+  bool get hasCompletedSetup =>
+      _draft?.confirmed == true &&
+      _draft?.screeningStatus == NutritionScreeningStatus.completed &&
+      _draft?.safetyFlags.any == false;
   DateTime get selectedDate => _selectedDate;
   bool get isToday => mealDateKey(_selectedDate) == mealDateKey(DateTime.now());
   List<FoodLogEntry> get entries =>
