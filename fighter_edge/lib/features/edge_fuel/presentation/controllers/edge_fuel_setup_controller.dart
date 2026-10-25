@@ -31,6 +31,8 @@ class EdgeFuelSetupController extends ChangeNotifier {
   bool _isLoading = true;
   NutritionSetupDraft _draft = const NutritionSetupDraft.empty();
   NutritionTarget? _previewTarget;
+  Future<void> _pendingSave = Future<void>.value();
+  bool _draftSaveFailed = false;
 
   bool get isLoading => _isLoading;
   NutritionSetupDraft get draft => _draft;
@@ -52,9 +54,24 @@ class EdgeFuelSetupController extends ChangeNotifier {
   Future<void> _update(
     NutritionSetupDraft Function(NutritionSetupDraft) mutate,
   ) async {
-    _draft = mutate(_draft);
+    _draft = mutate(_draft).copyWith(confirmed: false);
     notifyListeners();
-    await _repository.saveProfileDraft(_userId, _draft);
+    await _enqueueDraftSave();
+  }
+
+  Future<void> _enqueueDraftSave() {
+    final snapshot = _draft;
+    _pendingSave = _pendingSave.then((_) async {
+      try {
+        await _repository.saveProfileDraft(_userId, snapshot);
+        _draftSaveFailed = false;
+      } catch (_) {
+        // Field callbacks are not awaited by every widget. Keep the draft
+        // restricted and let the next write or confirmation retry it.
+        _draftSaveFailed = true;
+      }
+    });
+    return _pendingSave;
   }
 
   // ---- Step 1: Goal ----
@@ -123,8 +140,11 @@ class EdgeFuelSetupController extends ChangeNotifier {
         confirmed: false,
       ));
 
-  Future<void> goToStep(int step) =>
-      _update((d) => d.copyWith(currentStep: step));
+  Future<void> goToStep(int step) async {
+    _draft = _draft.copyWith(currentStep: step);
+    notifyListeners();
+    await _enqueueDraftSave();
+  }
 
   /// Recomputes a live preview for the Review step without persisting
   /// anything — lets the user see the plan before committing to it.
@@ -141,6 +161,11 @@ class EdgeFuelSetupController extends ChangeNotifier {
   /// if required inputs are still missing — callers should check
   /// [canReview] before offering this action.
   Future<bool> confirm() async {
+    await _pendingSave;
+    if (_draftSaveFailed) {
+      await _enqueueDraftSave();
+      if (_draftSaveFailed) throw StateError('Could not save setup draft');
+    }
     final profile = _draft.toProfile();
     if (profile == null) return false;
     final target = NutritionTargetCalculator.calculate(profile, now: _clock());
@@ -149,9 +174,9 @@ class EdgeFuelSetupController extends ChangeNotifier {
       notifyListeners();
       return false;
     }
-    _draft = _draft.copyWith(confirmed: true);
-    await _repository.saveProfileDraft(_userId, _draft);
-    await _repository.saveTarget(_userId, target);
+    final confirmed = _draft.copyWith(confirmed: true);
+    await _repository.saveConfirmedPlan(_userId, confirmed, target);
+    _draft = confirmed;
     notifyListeners();
     return true;
   }

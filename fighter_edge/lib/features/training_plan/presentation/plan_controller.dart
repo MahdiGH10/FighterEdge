@@ -417,6 +417,29 @@ class PlanController extends ChangeNotifier {
     _adopt(stored.withReview(calendarDay(weekStart), decision));
   }
 
+  /// Prepare a review decision for an atomic target + plan repository write.
+  /// The live plan stays unchanged until [adoptCommittedReview] is called.
+  StoredTrainingPlan? prepareAcceptedReview(DateTime weekStart) {
+    if (!_log.canWrite) return null;
+    return _stored
+        ?.withReview(calendarDay(weekStart), ReviewDecision.accepted)
+        .copyWith(
+          generatorVersion: TrainingPlanGenerator.version,
+          templateSetVersion: _templates.version,
+        );
+  }
+
+  void adoptCommittedReview(String userId, DateTime weekStart) {
+    if (_disposed || _userId != userId || _stored == null) return;
+    _stored = _stored!.withReview(
+      calendarDay(weekStart),
+      ReviewDecision.accepted,
+    );
+    _loaded = true;
+    _invalidate(inputs: true);
+    notifyListeners();
+  }
+
   void _adjust(SessionAdjustment adjustment) {
     final stored = _stored;
     if (stored == null) return;

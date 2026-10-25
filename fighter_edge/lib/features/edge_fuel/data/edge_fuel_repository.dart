@@ -2,6 +2,7 @@ import '../domain/models/nutrition_setup_draft.dart';
 import '../domain/models/food_log_entry.dart';
 import '../domain/models/nutrition_day.dart';
 import '../domain/models/nutrition_target.dart';
+import '../../training_plan/data/stored_training_plan.dart';
 
 /// Persistence boundary for EdgeFuel. Mirrors the existing `DataRepository`
 /// convention (watchX returns a live stream, saveX writes) so the two
@@ -15,6 +16,16 @@ abstract class EdgeFuelRepository {
   Stream<NutritionTarget?> watchTarget(String userId);
 
   Future<void> saveTarget(String userId, NutritionTarget target);
+
+  /// Commits both sides of setup together. A failed write must leave neither
+  /// a confirmed draft nor a new target visible.
+  Future<void> saveConfirmedPlan(
+      String userId, NutritionSetupDraft draft, NutritionTarget target);
+
+  /// Commits an accepted weekly calorie target and its review decision in
+  /// one operation. The caller updates its in-memory plan only after success.
+  Future<void> saveAcceptedReview(String userId, NutritionTarget target,
+      StoredTrainingPlan plan, DateTime weekStart);
 
   Stream<NutritionDay> watchNutritionDay(
     String userId,

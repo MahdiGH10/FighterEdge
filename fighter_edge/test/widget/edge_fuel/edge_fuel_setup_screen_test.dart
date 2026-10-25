@@ -5,13 +5,62 @@ import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_reposit
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_profile.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 
 import '../../helpers/test_harness.dart';
 
+class _RejectingSetupRepository extends InMemoryEdgeFuelRepository {
+  bool reject = true;
+
+  @override
+  Future<void> saveConfirmedPlan(
+      String userId, NutritionSetupDraft draft, NutritionTarget target) async {
+    if (reject) throw StateError('batch rejected');
+    await super.saveConfirmedPlan(userId, draft, target);
+  }
+}
+
 void main() {
   group('EdgeFuelSetupScreen', () {
+    testWidgets('failed confirmation keeps review open for retry',
+        (tester) async {
+      tester.view.physicalSize = const Size(430, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final repo = await makeRepo(signedIn: true);
+      final fuel = _RejectingSetupRepository();
+      await fuel.saveProfileDraft(
+          repo.currentUser!.id,
+          const NutritionSetupDraft(
+            currentStep: 5,
+            goal: NutritionGoal.maintain,
+            ageYears: 30,
+            heightCm: 180,
+            currentWeightKg: 80,
+            equationProfile: EquationProfile.higherOffset,
+            normalActivityLevel: ActivityLevel.moderate,
+            screeningStatus: NutritionScreeningStatus.completed,
+          ));
+      await tester.pumpWidget(
+          wrapApp(const EdgeFuelSetupScreen(), repo: repo, edgeFuelRepo: fuel));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('Confirm my plan'), 300,
+          scrollable: find.byType(Scrollable).first);
+      await tester.tap(find.text('Confirm my plan'));
+      await tester.pumpAndSettle();
+      expect(find.text('Could not save your Fuel plan. Try again.'),
+          findsOneWidget);
+      expect(find.byType(EdgeFuelSetupScreen), findsOneWidget);
+      expect(await fuel.watchTarget(repo.currentUser!.id).first, isNull);
+
+      fuel.reject = false;
+      await tester.tap(find.text('Confirm my plan'));
+      await tester.pumpAndSettle();
+      expect(find.byType(EdgeFuelPlanScreen), findsOneWidget);
+    });
+
     testWidgets('complete setup for a maintenance goal reaches the Plan screen',
         (tester) async {
       tester.view.physicalSize = const Size(430, 1400);
