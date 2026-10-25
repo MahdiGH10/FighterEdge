@@ -27,7 +27,7 @@ class CornerLineRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The corner line is a food and weight cue; nutrition paused, no line.
-    if (!context.watch<NutritionModeController>().visible) {
+    if (!context.watch<NutritionModeController>().numbersVisible) {
       return const SizedBox.shrink();
     }
     final l = L.of(context);

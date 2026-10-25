@@ -146,9 +146,12 @@ class SettingsScreen extends StatelessWidget {
           GroupedList(children: [
             _SettingsRow(
               title: l.settingsNutritionDisplay,
-              subtitle: nutritionMode.mode == NutritionDisplayMode.paused
-                  ? l.settingsNutritionDisplayPaused
-                  : l.settingsNutritionDisplayNormal,
+              subtitle: switch (nutritionMode.mode) {
+                NutritionDisplayMode.paused => l.settingsNutritionDisplayPaused,
+                NutritionDisplayMode.hideNumbers =>
+                  l.settingsNutritionDisplayHidden,
+                NutritionDisplayMode.normal => l.settingsNutritionDisplayNormal,
+              },
               onTap: () => _pickNutritionMode(context),
             ),
           ]),
@@ -381,8 +384,8 @@ class _TrustCard extends StatelessWidget {
       );
 }
 
-/// How much of the nutrition side to show. Two choices today; "Hide numbers"
-/// follows once every number surface is covered.
+/// How much of the nutrition side to show: everything, no numbers, or none of
+/// the nutrition side at all.
 Future<void> _pickNutritionMode(BuildContext context) async {
   final controller = context.read<NutritionModeController>();
   final l = L.of(context);
@@ -406,6 +409,11 @@ Future<void> _pickNutritionMode(BuildContext context) async {
               NutritionDisplayMode.normal,
               l.nutritionModeNormalTitle,
               l.nutritionModeNormalSubtitle,
+            ),
+            (
+              NutritionDisplayMode.hideNumbers,
+              l.nutritionModeHideTitle,
+              l.nutritionModeHideSubtitle,
             ),
             (
               NutritionDisplayMode.paused,

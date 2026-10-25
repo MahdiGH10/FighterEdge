@@ -3810,6 +3810,54 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Nothing to change this week. Keep your plan as it is.'**
   String get reviewHoldPaused;
+
+  /// No description provided for @nutritionNumbersHiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbers are hidden'**
+  String get nutritionNumbersHiddenTitle;
+
+  /// No description provided for @nutritionNumbersHiddenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories, grams, targets and weights are hidden. You can still log what you eat by name. Show them again whenever you like.'**
+  String get nutritionNumbersHiddenBody;
+
+  /// No description provided for @nutritionNumbersHiddenShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show numbers'**
+  String get nutritionNumbersHiddenShow;
+
+  /// No description provided for @nutritionModeHideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide numbers'**
+  String get nutritionModeHideTitle;
+
+  /// No description provided for @nutritionModeHideSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hides calories, grams, targets and weight. You can still log foods by name.'**
+  String get nutritionModeHideSubtitle;
+
+  /// No description provided for @settingsNutritionDisplayHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbers hidden'**
+  String get settingsNutritionDisplayHidden;
+
+  /// No description provided for @nutritionAddedSnackNoNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added'**
+  String nutritionAddedSnackNoNumbers(String name);
+
+  /// No description provided for @nutritionLoggedByName.
+  ///
+  /// In en, this message translates to:
+  /// **'Log what you eat. The numbers stay hidden.'**
+  String get nutritionLoggedByName;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

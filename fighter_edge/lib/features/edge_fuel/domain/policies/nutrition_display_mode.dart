@@ -11,9 +11,11 @@ enum NutritionDisplayMode {
   /// Everything on, as the app ships.
   normal,
 
-  /// No calories, grams, weights or progress numbers anywhere. Food can still
-  /// be logged by name. (Not offered yet: it needs every number surface
-  /// covered first, so it ships as its own slice.)
+  /// No calories, macros, targets, percentages or weights anywhere, and no way
+  /// to type nutrient numbers in. Food is still logged by name, from the food
+  /// list and from what was logged before. (The amount of a portion, such as
+  /// 150 g, is still chosen when adding a food: it is how much was eaten, not
+  /// a nutrient.)
   hideNumbers,
 
   /// Nutrition steps out of the way: the Fuel tab, its numbers, weight and

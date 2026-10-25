@@ -2240,4 +2240,33 @@ class LEn extends L {
   @override
   String get reviewHoldPaused =>
       'Nothing to change this week. Keep your plan as it is.';
+
+  @override
+  String get nutritionNumbersHiddenTitle => 'Numbers are hidden';
+
+  @override
+  String get nutritionNumbersHiddenBody =>
+      'Calories, grams, targets and weights are hidden. You can still log what you eat by name. Show them again whenever you like.';
+
+  @override
+  String get nutritionNumbersHiddenShow => 'Show numbers';
+
+  @override
+  String get nutritionModeHideTitle => 'Hide numbers';
+
+  @override
+  String get nutritionModeHideSubtitle =>
+      'Hides calories, grams, targets and weight. You can still log foods by name.';
+
+  @override
+  String get settingsNutritionDisplayHidden => 'Numbers hidden';
+
+  @override
+  String nutritionAddedSnackNoNumbers(String name) {
+    return '$name added';
+  }
+
+  @override
+  String get nutritionLoggedByName =>
+      'Log what you eat. The numbers stay hidden.';
 }

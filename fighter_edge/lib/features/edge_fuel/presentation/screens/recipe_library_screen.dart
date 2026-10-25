@@ -18,6 +18,8 @@ import '../../data/recipe_catalog_repository.dart';
 import '../../domain/models/food_enums.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../controllers/recipe_library_controller.dart';
+import '../controllers/nutrition_mode_controller.dart';
+import '../widgets/nutrition_paused_view.dart';
 import '../widgets/allergen_notice.dart';
 import '../widgets/recipe_card.dart';
 import 'recipe_detail_screen.dart';
@@ -33,6 +35,9 @@ class RecipeLibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.watch<NutritionModeController>().numbersVisible) {
+      return const NutritionPausedScreen(title: 'Recipes');
+    }
     return ChangeNotifierProvider(
       create: (ctx) {
         final controller = RecipeLibraryController(

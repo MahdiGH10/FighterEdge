@@ -56,6 +56,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final mode = context.watch<NutritionModeController>();
+    final numbers = mode.numbersVisible;
+    // The recipe library is made of macros, so it goes with the numbers.
+    final tab = !numbers && _tab > 1 ? 0 : _tab;
     // Nothing nutrition-shaped is drawn until the athlete's choice is known,
     // and none while nutrition is paused.
     if (!mode.visible) {
@@ -69,7 +72,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
     final targetCalories = edgeFuel.targetCalories;
     final ratio =
         targetCalories == 0 ? 0.0 : edgeFuel.consumedCalories / targetCalories;
-    final activeTab = switch (_tab) {
+    final activeTab = switch (tab) {
       0 => _TodayView(
           edgeFuel: edgeFuel,
           ratio: ratio,
@@ -98,7 +101,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
               _DateSwitcher(edgeFuel: edgeFuel),
               const SizedBox(height: Insets.sm),
               _NutritionSegments(
-                  selected: _tab,
+                  selected: tab,
+                  showRecipes: numbers,
                   onSelected: (index) => setState(() => _tab = index)),
             ]),
           ),
@@ -155,8 +159,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
         SnackBar(
           behavior: SnackBarBehavior.floating,
           margin: _feedbackMargin,
-          content: Text(
-              L.of(context).nutritionAddedSnack(entry.name, entry.calories)),
+          content: Text(context.read<NutritionModeController>().numbersVisible
+              ? L.of(context).nutritionAddedSnack(entry.name, entry.calories)
+              : L.of(context).nutritionAddedSnackNoNumbers(entry.name)),
           action: SnackBarAction(
             label: L.of(context).commonUndo,
             textColor: AppColors.accentText,
@@ -216,6 +221,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
     EdgeFuelController edgeFuel, {
     FoodLogEntry? existing,
   }) async {
+    // Typing nutrient numbers in is what this mode takes away.
+    if (!context.read<NutritionModeController>().numbersVisible) return;
     if (!context.read<AppState>().requireWrite()) return;
     final entry = await showDialog<FoodLogEntry>(
       context: context,
@@ -521,80 +528,84 @@ class _TodayView extends StatelessWidget {
     final left = (edgeFuel.targetCalories - edgeFuel.consumedCalories)
         .clamp(0, edgeFuel.targetCalories);
     final recent = edgeFuel.recentFoods.take(3).toList();
+    final numbers = context.watch<NutritionModeController>().numbersVisible;
     return ListView(
       padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
           ScreenScaffold.tabBottomPadding(context)),
       children: [
         const SyncNotice(),
         const SizedBox(height: Insets.lg),
-        Row(children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-                    textScaler: AppAccessibility.heroNumeralScaler(context),
+        if (numbers) ...[
+          Row(children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaler: AppAccessibility.heroNumeralScaler(context),
+                    ),
+                    child: AnimatedCount(
+                      value: (hasTarget ? left : edgeFuel.consumedCalories)
+                          .toDouble(),
+                      formatter: (value) => '${value.round()}',
+                      style: AppType.heroNumeral(),
+                    ),
                   ),
-                  child: AnimatedCount(
-                    value: (hasTarget ? left : edgeFuel.consumedCalories)
-                        .toDouble(),
-                    formatter: (value) => '${value.round()}',
-                    style: AppType.heroNumeral(),
+                  Text(
+                    hasTarget ? l.nutritionKcalLeft : l.nutritionLoggedToday,
+                    style: AppType.micro(color: AppColors.textSecondary),
                   ),
-                ),
-                Text(
-                  hasTarget ? l.nutritionKcalLeft : l.nutritionLoggedToday,
-                  style: AppType.micro(color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          if (hasTarget)
-            ProgressRing(
-              progress: ratio.clamp(0.0, 1.0),
-              size: LayoutTokens.fuelSummaryRing,
-              strokeWidth: Insets.sm,
-              color: AppColors.primary,
-              child: Semantics(
-                label: l.fuelConsumedKcal(edgeFuel.consumedCalories),
-                excludeSemantics: true,
-                child: Text(
-                  '${(ratio.clamp(0.0, 1.0) * 100).round()}%',
-                  style: AppType.title2(),
-                ),
+                ],
               ),
             ),
-        ]),
-        const SizedBox(height: Insets.xl),
-        _Macro(l.nutritionProtein, edgeFuel.consumedProtein,
-            edgeFuel.targetProtein, AppColors.protein,
-            prominent: true),
-        const SizedBox(height: Insets.md),
-        _Macro(l.nutritionCarbs, edgeFuel.consumedCarbs, edgeFuel.targetCarbs,
-            AppColors.carbs),
-        const SizedBox(height: Insets.md),
-        _Macro(l.nutritionFats, edgeFuel.consumedFats, edgeFuel.targetFats,
-            AppColors.fats),
-        TextButton.icon(
-            style: TextButton.styleFrom(
-              foregroundColor: AppAccessibility.accentText(context),
-              minimumSize:
-                  const Size.fromHeight(AppAccessibility.minTouchTarget),
-            ),
-            iconAlignment: IconAlignment.end,
-            icon: const Icon(AppIcons.caretRight, size: IconSizes.row),
-            onPressed: () => AppNavigation.push(
-                context,
-                edgeFuel.hasCompletedSetup
-                    ? AppRoutes.fuelPlan
-                    : AppRoutes.fuelSetup,
-                fallbackBuilder: (_) => edgeFuel.hasCompletedSetup
-                    ? const EdgeFuelPlanScreen()
-                    : const EdgeFuelSetupScreen()),
-            label: Text(hasTarget ? l.nutritionViewPlan : l.dashboardSetFuel)),
-        if (FuelWhatIsLeft.appliesTo(edgeFuel))
-          FuelWhatIsLeft(edgeFuel: edgeFuel, compact: true),
+            if (hasTarget)
+              ProgressRing(
+                progress: ratio.clamp(0.0, 1.0),
+                size: LayoutTokens.fuelSummaryRing,
+                strokeWidth: Insets.sm,
+                color: AppColors.primary,
+                child: Semantics(
+                  label: l.fuelConsumedKcal(edgeFuel.consumedCalories),
+                  excludeSemantics: true,
+                  child: Text(
+                    '${(ratio.clamp(0.0, 1.0) * 100).round()}%',
+                    style: AppType.title2(),
+                  ),
+                ),
+              ),
+          ]),
+          const SizedBox(height: Insets.xl),
+          _Macro(l.nutritionProtein, edgeFuel.consumedProtein,
+              edgeFuel.targetProtein, AppColors.protein,
+              prominent: true),
+          const SizedBox(height: Insets.md),
+          _Macro(l.nutritionCarbs, edgeFuel.consumedCarbs, edgeFuel.targetCarbs,
+              AppColors.carbs),
+          const SizedBox(height: Insets.md),
+          _Macro(l.nutritionFats, edgeFuel.consumedFats, edgeFuel.targetFats,
+              AppColors.fats),
+          TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: AppAccessibility.accentText(context),
+                minimumSize:
+                    const Size.fromHeight(AppAccessibility.minTouchTarget),
+              ),
+              iconAlignment: IconAlignment.end,
+              icon: const Icon(AppIcons.caretRight, size: IconSizes.row),
+              onPressed: () => AppNavigation.push(
+                  context,
+                  edgeFuel.hasCompletedSetup
+                      ? AppRoutes.fuelPlan
+                      : AppRoutes.fuelSetup,
+                  fallbackBuilder: (_) => edgeFuel.hasCompletedSetup
+                      ? const EdgeFuelPlanScreen()
+                      : const EdgeFuelSetupScreen()),
+              label:
+                  Text(hasTarget ? l.nutritionViewPlan : l.dashboardSetFuel)),
+          if (FuelWhatIsLeft.appliesTo(edgeFuel))
+            FuelWhatIsLeft(edgeFuel: edgeFuel, compact: true),
+        ],
         const SizedBox(height: Insets.xl),
         if (recent.isNotEmpty) ...[
           Text(l.fuelRecentFoods,
@@ -615,6 +626,11 @@ class _TodayView extends StatelessWidget {
           ]),
           const SizedBox(height: Insets.xl),
         ],
+        if (!numbers) ...[
+          Text(l.nutritionLoggedByName,
+              style: AppType.body(color: AppColors.textSecondary)),
+          const SizedBox(height: Insets.lg),
+        ],
         SectionHeader(l.nutritionMeals),
         if (edgeFuel.entries.isEmpty)
           Text(l.fuelEmptyLog,
@@ -632,15 +648,20 @@ class _TodayView extends StatelessWidget {
 
 class _NutritionSegments extends StatelessWidget {
   final int selected;
+  final bool showRecipes;
   final ValueChanged<int> onSelected;
-  const _NutritionSegments({required this.selected, required this.onSelected});
+  const _NutritionSegments({
+    required this.selected,
+    required this.showRecipes,
+    required this.onSelected,
+  });
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final labels = [
       l.nutritionTabToday,
       l.nutritionTabMeals,
-      l.nutritionTabRecipes
+      if (showRecipes) l.nutritionTabRecipes,
     ];
     if (AppAccessibility.isLargeText(context)) {
       return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -876,12 +897,13 @@ class _QuickMealTile extends StatelessWidget {
                   Text(meal.notes,
                       style: AppType.micro(color: AppColors.textMuted)),
                   const SizedBox(height: Insets.xs),
-                  Text(
-                    '${meal.calories} kcal · ${meal.protein}g protein · ${meal.carbs}g carbs',
-                    style: AppType.micro(
-                        color: AppColors.textSecondary,
-                        weight: FontWeight.w700),
-                  ),
+                  if (context.watch<NutritionModeController>().numbersVisible)
+                    Text(
+                      '${meal.calories} kcal · ${meal.protein}g protein · ${meal.carbs}g carbs',
+                      style: AppType.micro(
+                          color: AppColors.textSecondary,
+                          weight: FontWeight.w700),
+                    ),
                 ],
               ),
             ),
@@ -1070,8 +1092,9 @@ class _MealsView extends StatelessWidget {
           ),
           const SizedBox(height: Insets.lg),
         ],
-        SectionHeader(
-            L.of(context).fuelMealsLogged(eaten, edgeFuel.entries.length)),
+        SectionHeader(context.watch<NutritionModeController>().numbersVisible
+            ? L.of(context).fuelMealsLogged(eaten, edgeFuel.entries.length)
+            : L.of(context).nutritionMeals),
         if (edgeFuel.entries.isEmpty) _QuickStartMeals(edgeFuel: edgeFuel),
         if (edgeFuel.entries.isNotEmpty)
           _MealGroup(
@@ -1141,6 +1164,7 @@ class _FoodRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final secondary = AppAccessibility.textSecondary(context);
+    final numbers = context.watch<NutritionModeController>().numbersVisible;
     // The row itself used to toggle eaten/not-eaten on any tap, with no
     // visible control and no way back — the exact bug a tester hit. A tap on
     // the row now opens it for editing, matching what tapping a list row
@@ -1153,8 +1177,10 @@ class _FoodRow extends StatelessWidget {
           Expanded(
             child: Semantics(
               button: true,
-              label: '${entry.name}, ${entry.notes}, ${entry.calories} kcal'
-                  '${entry.saved ? ', saved' : ''}',
+              label: numbers
+                  ? '${entry.name}, ${entry.notes}, ${entry.calories} kcal'
+                      '${entry.saved ? ', saved' : ''}'
+                  : '${entry.name}${entry.saved ? ', saved' : ''}',
               child: PressScale(
                 onTap: onEdit,
                 child: ExcludeSemantics(
@@ -1180,15 +1206,17 @@ class _FoodRow extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: Insets.xxs),
-                      Text('${entry.calories} kcal',
-                          style: AppType.subhead(color: secondary)),
-                      Text(
-                        entry.notes,
-                        style: AppType.subhead(
-                          weight: FontWeight.w500,
-                          color: secondary,
+                      if (numbers) ...[
+                        Text('${entry.calories} kcal',
+                            style: AppType.subhead(color: secondary)),
+                        Text(
+                          entry.notes,
+                          style: AppType.subhead(
+                            weight: FontWeight.w500,
+                            color: secondary,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -1206,10 +1234,11 @@ class _FoodRow extends StatelessWidget {
               if (value == 'delete') onDelete();
             },
             itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'edit',
-                child: Text(L.of(context).commonEdit),
-              ),
+              if (numbers)
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Text(L.of(context).commonEdit),
+                ),
               PopupMenuItem(
                 value: 'save',
                 child: Text(entry.saved

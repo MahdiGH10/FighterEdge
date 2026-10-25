@@ -11,7 +11,7 @@ for whoever builds PRs 2 to 4. Read it, `CLAUDE.md`, and
 | 1 | Pure-Dart planner in `lib/notifications/domain/` | Merged (#82) |
 | 2 | Scheduler, permission primer, Settings screen | Merged (#85) |
 | 3 | Wire real inputs, deep links, move the trial notice into the planner | In review, see "What PR 3 built" |
-| 4 | Weigh-in, protein nudge, fighter tips | Not started; waits for the privacy fix (N6) and the "Hide numbers" mode ("Pause nutrition" is done, see "Nutrition display modes") |
+| 4 | Weigh-in, protein nudge, fighter tips | Not started; waits for the privacy fix (N6) only (Pause nutrition and Hide numbers are done, see "Nutrition display modes") |
 
 One feature, one branch, one PR, merged before the next starts.
 
@@ -215,11 +215,21 @@ per account, and nothing else ever sets it.
     say).
   A fight that is already booked keeps its date, so the fight countdown note
   (7 and 1 day, no cut wording) still works.
-- **hideNumbers**: defined in the domain, not offered yet. It needs every
-  number surface covered (the Fuel today view, rows, rings, recipes, setup,
-  the weekly review, weight, the fight screens) before it can be switched on,
-  because a mode that hides some numbers would mislead the people it is for.
-  It already switches the nutrition reminders off.
+- **hideNumbers** (offered in Settings): no calories, macros, targets,
+  percentages or weights anywhere, and no way to type nutrient numbers in.
+  Food is still logged by name. What it does:
+  - Fuel tab: the Today header, ring, macros, plan link and "what is left" are
+    gone; meal rows show the name only; the Recipes tab is gone; tapping a row
+    does not open the number editor; the log snackbar says "X added".
+  - Add food: results and remembered foods show names only, the portion step
+    shows no nutrient summary, and "Enter macros manually" is gone. The portion
+    amount (150 g) stays: it is how much was eaten, not a nutrient.
+  - The Fuel plan, Fuel setup, recipe library and recipe screens, the weight
+    tracker and the fight screens show a note ("Numbers are hidden", with
+    "Show numbers").
+  - Home and Profile drop the weight and the Fuel line, like paused; the Fuel
+    link stays. The weekly review drops its food and weight parts.
+  - Nutrition reminders are off, as in paused.
 - Until the stored choice has been read, nothing nutrition-shaped is drawn and
   no nutrition reminder is planned, so a paused athlete never sees a flash of
   numbers at start-up. With no account the answer is known at once (normal).

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+
+import '../../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
 import '../../theme/app_accessibility.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_icons.dart';
@@ -32,6 +35,7 @@ class FirstWinSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final secondary = AppAccessibility.textSecondary(context);
+    final numbers = context.watch<NutritionModeController>().numbersVisible;
 
     return SafeArea(
       top: false,
@@ -51,8 +55,10 @@ class FirstWinSheet extends StatelessWidget {
             PremiumReveal(
               index: 2,
               child: Text(
-                "You're on the board. Every meal you log shows how today "
-                'stacks up against your target.',
+                numbers
+                    ? "You're on the board. Every meal you log shows how today "
+                        'stacks up against your target.'
+                    : "You're on the board. Keep logging what you eat.",
                 style: AppType.body(color: secondary),
               ),
             ),

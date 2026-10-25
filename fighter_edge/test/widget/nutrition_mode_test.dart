@@ -228,6 +228,13 @@ void main() {
           findsOneWidget);
     });
 
+    testWidgets('hidden numbers read the same as paused', (tester) async {
+      await bootReview(tester, NutritionDisplayMode.hideNumbers);
+      expect(find.text('Training'), findsOneWidget);
+      expect(find.text('Food'), findsNothing);
+      expect(find.text('Weight'), findsNothing);
+    });
+
     testWidgets('paused shows training and a neutral line, nothing about food',
         (tester) async {
       await bootReview(tester, NutritionDisplayMode.paused);

@@ -19,6 +19,7 @@ import '../../domain/calculators/portion_calculator.dart';
 import '../../domain/models/food_item.dart';
 import '../../domain/models/food_log_entry.dart';
 import '../controllers/edge_fuel_controller.dart';
+import '../controllers/nutrition_mode_controller.dart';
 import '../recipe_copy.dart';
 
 /// What the add-food sheet ended with.
@@ -116,6 +117,9 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
 
     final l = L.of(context);
     final edgeFuel = context.watch<EdgeFuelController>();
+    // With numbers hidden the sheet shows names only and offers no way to type
+    // nutrient numbers in.
+    final numbers = context.watch<NutritionModeController>().numbersVisible;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -181,17 +185,19 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
                   },
                 ),
         ),
-        const Divider(height: 1),
-        SafeArea(
-          top: false,
-          child: _SheetRow(
-            icon: AppIcons.notePencil,
-            title: l.addFoodManual,
-            subtitle: l.addFoodManualSubtitle,
-            onTap: () =>
-                Navigator.of(context).pop(const ManualEntryRequested()),
+        if (numbers) ...[
+          const Divider(height: 1),
+          SafeArea(
+            top: false,
+            child: _SheetRow(
+              icon: AppIcons.notePencil,
+              title: l.addFoodManual,
+              subtitle: l.addFoodManualSubtitle,
+              onTap: () =>
+                  Navigator.of(context).pop(const ManualEntryRequested()),
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -252,11 +258,14 @@ class _RememberedRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final numbers = context.watch<NutritionModeController>().numbersVisible;
     return _SheetRow(
       icon: AppIcons.plusCircle,
       title: food.name,
-      subtitle: '${food.calories} kcal · ${food.proteinGrams}g protein'
-          '${food.notes.isEmpty ? '' : ' · ${food.notes}'}',
+      subtitle: numbers
+          ? '${food.calories} kcal · ${food.proteinGrams}g protein'
+              '${food.notes.isEmpty ? '' : ' · ${food.notes}'}'
+          : '',
       semanticHint: 'Logs it again',
       onTap: () => onLog(food),
     );
@@ -294,13 +303,17 @@ class _SearchResults extends StatelessWidget {
           itemCount: foods.length,
           itemBuilder: (_, i) {
             final food = foods[i];
+            final numbers =
+                context.watch<NutritionModeController>().numbersVisible;
             return _SheetRow(
               icon: AppIcons.caretRight,
               title: food.name,
-              subtitle: L.of(context).addFoodPerHundred(
-                    food.kcalPer100g.round(),
-                    food.proteinPer100g.toStringAsFixed(0),
-                  ),
+              subtitle: numbers
+                  ? L.of(context).addFoodPerHundred(
+                        food.kcalPer100g.round(),
+                        food.proteinPer100g.toStringAsFixed(0),
+                      )
+                  : '',
               onTap: () => onPick(food),
             );
           },
@@ -485,8 +498,12 @@ class _PortionStepState extends State<_PortionStep> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: Insets.xl),
-                    _NutrientSummary(nutrients: nutrients),
+                    if (context
+                        .watch<NutritionModeController>()
+                        .numbersVisible) ...[
+                      const SizedBox(height: Insets.xl),
+                      _NutrientSummary(nutrients: nutrients),
+                    ],
                   ],
                 ),
               ),
@@ -656,7 +673,7 @@ class _SheetRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: '$title, $subtitle',
+      label: subtitle.isEmpty ? title : '$title, $subtitle',
       hint: semanticHint,
       excludeSemantics: true,
       child: InkWell(
@@ -674,12 +691,14 @@ class _SheetRow extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title, style: AppType.headline()),
-                      const SizedBox(height: Insets.xxs),
-                      Text(
-                        subtitle,
-                        style: AppType.subhead(
-                            color: AppAccessibility.textSecondary(context)),
-                      ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: Insets.xxs),
+                        Text(
+                          subtitle,
+                          style: AppType.subhead(
+                              color: AppAccessibility.textSecondary(context)),
+                        ),
+                      ],
                     ],
                   ),
                 ),

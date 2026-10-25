@@ -46,7 +46,9 @@ class TodayHero extends StatelessWidget {
     final l = L.of(context);
     final plan = context.watch<PlanController>();
     final fuel = context.watch<EdgeFuelController>();
-    final showNutrition = context.watch<NutritionModeController>().visible;
+    final mode = context.watch<NutritionModeController>();
+    final showNutrition = mode.visible;
+    final showNumbers = mode.numbersVisible;
     final camp = context.watch<FightCampController>().camp;
     final row = plan.todayRow;
     final state = todayState(
@@ -126,7 +128,7 @@ class TodayHero extends StatelessWidget {
                   : AppType.display()),
           const SizedBox(height: Insets.xs),
           Text(detail, style: AppType.callout(color: AppColors.textSecondary)),
-          if (state != TodayState.fightWeek && showNutrition) ...[
+          if (state != TodayState.fightWeek && showNumbers) ...[
             const SizedBox(height: Insets.md),
             Row(children: [
               Expanded(

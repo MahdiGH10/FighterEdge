@@ -53,7 +53,7 @@ class _WeeklyReviewScreenState extends State<WeeklyReviewScreen> {
     final locale = Localizations.localeOf(context).toString();
     final mode = context.watch<NutritionModeController>();
     if (_review == null && mode.loaded) {
-      _showNutrition = mode.visible;
+      _showNutrition = mode.numbersVisible;
       _review = buildWeeklyReview(
         includeNutrition: _showNutrition,
         weekStartDay: widget.weekStart,

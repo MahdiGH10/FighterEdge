@@ -2256,4 +2256,33 @@ class LDe extends L {
   @override
   String get reviewHoldPaused =>
       'Diese Woche gibt es nichts zu ändern. Bleib bei deinem Plan.';
+
+  @override
+  String get nutritionNumbersHiddenTitle => 'Zahlen sind ausgeblendet';
+
+  @override
+  String get nutritionNumbersHiddenBody =>
+      'Kalorien, Gramm, Ziele und Gewichte sind ausgeblendet. Du kannst weiterhin eintragen, was du isst. Blende sie wieder ein, wann du möchtest.';
+
+  @override
+  String get nutritionNumbersHiddenShow => 'Zahlen anzeigen';
+
+  @override
+  String get nutritionModeHideTitle => 'Zahlen ausblenden';
+
+  @override
+  String get nutritionModeHideSubtitle =>
+      'Blendet Kalorien, Gramm, Ziele und Gewicht aus. Du kannst Essen weiterhin mit Namen eintragen.';
+
+  @override
+  String get settingsNutritionDisplayHidden => 'Zahlen ausgeblendet';
+
+  @override
+  String nutritionAddedSnackNoNumbers(String name) {
+    return '$name hinzugefügt';
+  }
+
+  @override
+  String get nutritionLoggedByName =>
+      'Trag ein, was du isst. Die Zahlen bleiben ausgeblendet.';
 }
