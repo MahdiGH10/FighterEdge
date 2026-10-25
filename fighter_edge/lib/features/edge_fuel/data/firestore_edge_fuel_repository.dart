@@ -9,6 +9,8 @@ import '../domain/models/food_log_entry.dart';
 import '../domain/models/nutrition_setup_draft.dart';
 import '../domain/models/nutrition_day.dart';
 import '../domain/models/nutrition_target.dart';
+import '../../training_plan/data/stored_training_plan.dart';
+import '../../training_plan/domain/models/date_key.dart';
 import 'edge_fuel_repository.dart';
 
 /// Firestore-backed EdgeFuel storage. Paths match master prompt §12:
@@ -106,6 +108,48 @@ class FirestoreEdgeFuelRepository implements EdgeFuelRepository {
       ...target.toJson(),
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> saveConfirmedPlan(
+      String userId, NutritionSetupDraft draft, NutritionTarget target) {
+    final batch = _db.batch();
+    batch.set(_profileDoc(userId), {
+      ...draft.toJson(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    batch.set(_targetDoc(userId), {
+      ...target.toJson(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    return batch.commit();
+  }
+
+  @override
+  Future<void> saveAcceptedReview(String userId, NutritionTarget target,
+      StoredTrainingPlan plan, DateTime weekStart) {
+    final reviewKey = dateKey(weekStart);
+    if (plan.reviews[reviewKey]?.name != 'accepted') {
+      throw StateError('Review was not prepared for acceptance');
+    }
+    final planDoc = _db
+        .collection('users')
+        .doc(userId)
+        .collection('trainingPlan')
+        .doc('current');
+    return _db.runTransaction((transaction) async {
+      final savedPlan = await transaction.get(planDoc);
+      if (!savedPlan.exists) throw StateError('Training plan is missing');
+      final reviews = savedPlan.data()?['reviews'];
+      if (reviews is Map && reviews.containsKey(reviewKey)) {
+        throw StateError('Review already has a decision');
+      }
+      transaction.set(_targetDoc(userId), {
+        ...target.toJson(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      transaction.update(planDoc, {'reviews.$reviewKey': 'accepted'});
+    });
   }
 
   @override

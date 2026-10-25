@@ -183,14 +183,23 @@ class _EdgeFuelSetupBodyState extends State<_EdgeFuelSetupBody> {
     if (_confirming) return;
     _confirming = true;
     final controller = context.read<EdgeFuelSetupController>();
-    final ok = await controller.confirm();
-    _confirming = false;
-    if (!mounted || !ok) return;
-    AppNavigation.replace(
-      context,
-      AppRoutes.fuelPlan,
-      fallbackBuilder: (_) => const EdgeFuelPlanScreen(),
-    );
+    try {
+      final ok = await controller.confirm();
+      if (!mounted || !ok) return;
+      AppNavigation.replace(
+        context,
+        AppRoutes.fuelPlan,
+        fallbackBuilder: (_) => const EdgeFuelPlanScreen(),
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Could not save your Fuel plan. Try again.'),
+        ));
+      }
+    } finally {
+      _confirming = false;
+    }
   }
 }
 

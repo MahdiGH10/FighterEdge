@@ -6,6 +6,7 @@ import '../domain/models/food_log_entry.dart';
 import '../domain/models/nutrition_setup_draft.dart';
 import '../domain/models/nutrition_day.dart';
 import '../domain/models/nutrition_target.dart';
+import '../../training_plan/data/stored_training_plan.dart';
 import 'edge_fuel_repository.dart';
 
 /// In-process fake used for tests and as the offline/unauthenticated
@@ -14,6 +15,7 @@ import 'edge_fuel_repository.dart';
 class InMemoryEdgeFuelRepository implements EdgeFuelRepository {
   final Map<String, NutritionSetupDraft> _drafts = {};
   final Map<String, NutritionTarget> _targets = {};
+  final Map<String, StoredTrainingPlan> _acceptedPlans = {};
   final Map<String, NutritionDay> _days = {};
   final Map<String, List<Meal>> _legacyMeals = {};
   final Map<String, StreamController<NutritionSetupDraft?>> _draftControllers =
@@ -55,6 +57,26 @@ class InMemoryEdgeFuelRepository implements EdgeFuelRepository {
     _targets[userId] = target;
     _targetControllers[userId]?.add(target);
   }
+
+  @override
+  Future<void> saveConfirmedPlan(
+      String userId, NutritionSetupDraft draft, NutritionTarget target) async {
+    _drafts[userId] = draft;
+    _targets[userId] = target;
+    _draftControllers[userId]?.add(draft);
+    _targetControllers[userId]?.add(target);
+  }
+
+  @override
+  Future<void> saveAcceptedReview(String userId, NutritionTarget target,
+      StoredTrainingPlan plan, DateTime weekStart) async {
+    _targets[userId] = target;
+    _acceptedPlans[userId] = plan;
+    _targetControllers[userId]?.add(target);
+  }
+
+  StoredTrainingPlan? acceptedReviewPlan(String userId) =>
+      _acceptedPlans[userId];
 
   @override
   Stream<NutritionDay> watchNutritionDay(

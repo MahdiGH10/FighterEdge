@@ -1,5 +1,21 @@
 # Fighter Edge — Claude Code Handoff
 
+## Target and review integrity (2026-10-25, F05/F12)
+
+Weekly calorie proposals now run through the v1 calculator with the current
+screened profile. A step that crosses the RMR, carbohydrate or goal limits
+is declined rather than changing carbohydrate alone. Protein, fat, fiber,
+warnings and applied adjustment are recalculated from the same policy.
+
+Initial onboarding and the Fuel wizard commit the confirmed draft and target
+in one Firestore batch. The wizard waits for older draft autosaves before
+confirmation. A calorie review writes its new target and accepted week in
+one transaction; a rejected transaction leaves the old target and review
+pending for retry. The Firestore review update touches only that week's
+decision so it does not overwrite unrelated training-plan edits. No live Firebase or
+signed-device check was done in this slice. The next serial slice is F04/F17
+account deletion and local state cleanup.
+
 ## Explicit health screening (2026-10-25, F01)
 
 Nutrition drafts and profiles now store `screeningStatus`: `unanswered`,

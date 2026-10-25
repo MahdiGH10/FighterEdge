@@ -6,7 +6,6 @@ import '../../../controllers/auth_controller.dart';
 import '../../../l10n/decimal_format.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../state/app_state.dart';
-import '../../../state/sync_tracker.dart';
 import '../../../theme/app_accessibility.dart';
 import '../../../theme/app_haptics.dart';
 import '../../../theme/app_colors.dart';
@@ -22,9 +21,9 @@ import '../../edge_fuel/presentation/controllers/nutrition_mode_controller.dart'
 import '../../edge_fuel/presentation/widgets/fuel_week_card.dart';
 import '../../fight_camp/presentation/fight_camp_controller.dart';
 import '../../training_plan/presentation/plan_controller.dart';
-import '../domain/target_adjustment.dart';
 import '../domain/weekly_review.dart';
 import 'weekly_review_builder.dart';
+import 'weekly_target_acceptance.dart';
 
 /// The weekly review: what the week held, and one recommendation the athlete
 /// accepts or declines. Nothing changes until they accept.
@@ -285,16 +284,24 @@ class _RecommendationSection extends StatelessWidget {
 }
 
 /// The choice stays in reach while the athlete reads the week's evidence.
-class _ReviewActions extends StatelessWidget {
+class _ReviewActions extends StatefulWidget {
   const _ReviewActions({required this.review});
   final WeeklyReview review;
+
+  @override
+  State<_ReviewActions> createState() => _ReviewActionsState();
+}
+
+class _ReviewActionsState extends State<_ReviewActions> {
+  bool _saving = false;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final decision =
-        context.watch<PlanController>().reviewDecision(review.weekStart);
-    final actionable = review.recommendation.kind != RecommendationKind.hold;
+        context.watch<PlanController>().reviewDecision(widget.review.weekStart);
+    final actionable =
+        widget.review.recommendation.kind != RecommendationKind.hold;
     final canWrite = context.watch<AppState>().canWrite;
     final largeText = AppAccessibility.isLargeText(context);
     final dockHeight = largeText && decision == null && actionable && canWrite
@@ -331,11 +338,13 @@ class _ReviewActions extends StatelessWidget {
                             children: [
                               PrimaryButton(l.reviewAccept,
                                   expand: true,
-                                  onPressed: () => _accept(context)),
+                                  onPressed:
+                                      _saving ? null : () => _accept(context)),
                               const SizedBox(height: Insets.sm),
                               GhostButton(l.reviewKeepCurrent,
                                   expand: true,
-                                  onPressed: () => _keep(context)),
+                                  onPressed:
+                                      _saving ? null : () => _keep(context)),
                             ],
                           )
                         : Row(
@@ -343,12 +352,16 @@ class _ReviewActions extends StatelessWidget {
                               Expanded(
                                   child: GhostButton(l.reviewKeepCurrent,
                                       expand: true,
-                                      onPressed: () => _keep(context))),
+                                      onPressed: _saving
+                                          ? null
+                                          : () => _keep(context))),
                               const SizedBox(width: Insets.sm),
                               Expanded(
                                   child: PrimaryButton(l.reviewAccept,
                                       expand: true,
-                                      onPressed: () => _accept(context))),
+                                      onPressed: _saving
+                                          ? null
+                                          : () => _accept(context))),
                             ],
                           ),
           ),
@@ -360,16 +373,16 @@ class _ReviewActions extends StatelessWidget {
   void _keep(BuildContext context) {
     context
         .read<PlanController>()
-        .recordReview(review.weekStart, ReviewDecision.kept);
+        .recordReview(widget.review.weekStart, ReviewDecision.kept);
     Navigator.of(context).maybePop();
   }
 
-  void _accept(BuildContext context) {
+  Future<void> _accept(BuildContext context) async {
     // A read-only account is sent to the paywall instead; the calorie change
     // below saves a target without going through the plan.
     if (!context.read<AppState>().requireWrite()) return;
     final plan = context.read<PlanController>();
-    final r = review.recommendation;
+    final r = widget.review.recommendation;
     switch (r.kind) {
       case RecommendationKind.moveSession:
         final row =
@@ -381,21 +394,51 @@ class _ReviewActions extends StatelessWidget {
         final fuel = context.read<EdgeFuelController>();
         final userId = context.read<AuthController>().user?.id;
         final target = fuel.target;
-        final adjusted = target == null
-            ? null
-            : TargetAdjustment.apply(target, r.calorieDelta,
-                now: context.read<AppState>().now);
-        if (adjusted != null && userId != null) {
-          final repo = context.read<EdgeFuelRepository>();
-          final sync = context.read<SyncTracker>();
-          sync.run('review-target', 'review_target_save_failed',
-              () => repo.saveTarget(userId, adjusted));
+        final profile = fuel.draft?.toProfile();
+        if (target == null || profile == null || userId == null) {
+          _showSaveError(
+              'This target cannot be adjusted safely. Keep the current plan.');
+          return;
         }
+        setState(() => _saving = true);
+        try {
+          final accepted = await WeeklyTargetAcceptance.accept(
+            repository: context.read<EdgeFuelRepository>(),
+            plan: plan,
+            userId: userId,
+            weekStart: widget.review.weekStart,
+            target: target,
+            profile: profile,
+            deltaKcal: r.calorieDelta,
+            now: context.read<AppState>().now,
+          );
+          if (!context.mounted) return;
+          if (!accepted) {
+            _showSaveError(
+                'This target cannot be adjusted safely. Keep the current plan.');
+            return;
+          }
+          AppHaptics.success();
+          Navigator.of(context).maybePop();
+        } catch (_) {
+          if (context.mounted) {
+            _showSaveError('Could not save the review. Try again.');
+          }
+        } finally {
+          if (mounted) setState(() => _saving = false);
+        }
+        return;
       case RecommendationKind.hold:
         break;
     }
-    plan.recordReview(review.weekStart, ReviewDecision.accepted);
+    if (!context.mounted) return;
+    plan.recordReview(widget.review.weekStart, ReviewDecision.accepted);
     AppHaptics.success();
     Navigator.of(context).maybePop();
+  }
+
+  void _showSaveError(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }

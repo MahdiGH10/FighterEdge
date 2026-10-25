@@ -1,9 +1,10 @@
+import '../../edge_fuel/domain/calculators/nutrition_target_calculator.dart';
+import '../../edge_fuel/domain/models/nutrition_profile.dart';
 import '../../edge_fuel/domain/models/nutrition_target.dart';
+import '../../edge_fuel/domain/policies/nutrition_policy.dart';
 
-/// Applies an accepted calorie step to the target the nutrition policy
-/// produced. It never changes the policy: protein and fat stay as they were,
-/// and the carbohydrate grams absorb the difference, so the macros still
-/// add up to the new calories.
+/// Recalculates a proposed weekly step through the nutrition policy. A step
+/// that crosses a floor or cannot be expressed exactly is declined.
 class TargetAdjustment {
   TargetAdjustment._();
 
@@ -13,34 +14,25 @@ class TargetAdjustment {
   static NutritionTarget? apply(
     NutritionTarget target,
     int deltaKcal, {
+    required NutritionProfile profile,
     required DateTime now,
   }) {
     final kcal = target.targetCalories;
-    final carbs = target.carbGrams;
-    if (!target.isSuccess || kcal == null || carbs == null) return null;
+    if (!target.isSuccess ||
+        target.policyVersion != NutritionPolicy.v1 ||
+        kcal == null ||
+        deltaKcal == 0) {
+      return null;
+    }
     final newKcal = kcal + deltaKcal;
-    final newCarbs = carbs + (deltaKcal / 4).round();
-    if (newKcal <= 0 || newCarbs < 0) return null;
-    return NutritionTarget(
-      status: target.status,
-      policyVersion: target.policyVersion,
-      calculatedAt: now,
-      reasons: target.reasons,
-      warnings: target.warnings,
-      estimatedRmrKcal: target.estimatedRmrKcal,
-      maintenanceRangeLowKcal: target.maintenanceRangeLowKcal,
-      maintenanceRangeHighKcal: target.maintenanceRangeHighKcal,
-      targetCalories: newKcal,
-      proteinGrams: target.proteinGrams,
-      fatGrams: target.fatGrams,
-      carbGrams: newCarbs,
-      fiberGramsLow: target.fiberGramsLow,
-      fiberGramsHigh: target.fiberGramsHigh,
-      proteinReferenceWeightKg: target.proteinReferenceWeightKg,
-      equationProfileUsed: target.equationProfileUsed,
-      activityCoefficientUsed: target.activityCoefficientUsed,
-      appliedGoalAdjustmentPercent: target.appliedGoalAdjustmentPercent,
-      confidence: target.confidence,
+    if (newKcal <= 0) return null;
+    final recalculated = NutritionTargetCalculator.calculate(
+      profile,
+      now: now,
+      requestedCalories: newKcal,
     );
+    return recalculated.isSuccess && recalculated.targetCalories == newKcal
+        ? recalculated
+        : null;
   }
 }

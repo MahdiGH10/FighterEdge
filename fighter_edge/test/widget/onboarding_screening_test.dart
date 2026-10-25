@@ -3,11 +3,24 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_enums.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_draft.dart';
+import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/fight_camp/domain/camp_screening.dart';
 import 'package:fighter_edge/features/fight_camp/presentation/camp_screening_from_draft.dart';
 import 'package:fighter_edge/screens/onboarding/onboarding_screen.dart';
 
 import '../helpers/test_harness.dart';
+
+class _FailingOnboardingPlanRepository extends InMemoryEdgeFuelRepository {
+  bool reject = true;
+
+  @override
+  Future<void> saveConfirmedPlan(
+      String userId, NutritionSetupDraft draft, NutritionTarget target) async {
+    if (reject) throw StateError('batch rejected');
+    await super.saveConfirmedPlan(userId, draft, target);
+  }
+}
 
 Future<void> _tapVisible(WidgetTester tester, String label) async {
   final finder = find.text(label);
@@ -39,6 +52,39 @@ Future<void> _finishQuestions(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('failed initial plan commit leaves setup restricted and retries',
+      (tester) async {
+    tester.view.physicalSize = const Size(430, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final authRepo = await makeRepo(signedIn: true);
+    final fuelRepo = _FailingOnboardingPlanRepository();
+    await tester.pumpWidget(wrapApp(
+      const OnboardingScreen(),
+      repo: authRepo,
+      edgeFuelRepo: fuelRepo,
+    ));
+    await tester.pumpAndSettle();
+    await _reachBody(tester);
+    await _tapVisible(tester, 'I reviewed every health question');
+    await _finishQuestions(tester);
+    expect(find.text('Could not save setup. Try again.'), findsOneWidget);
+    expect(await fuelRepo.watchTarget(authRepo.currentUser!.id).first, isNull);
+    expect(await fuelRepo.watchProfileDraft(authRepo.currentUser!.id).first,
+        isNull);
+
+    fuelRepo.reject = false;
+    await _tapVisible(tester, 'Start my plan');
+    expect(find.text('Your first Fighter Edge plan is ready'), findsOneWidget);
+    expect(
+        (await fuelRepo.watchProfileDraft(authRepo.currentUser!.id).first)
+            ?.confirmed,
+        isTrue);
+    expect(
+        (await fuelRepo.watchTarget(authRepo.currentUser!.id).first)?.isSuccess,
+        isTrue);
+  });
+
   testWidgets('initial onboarding requires explicit review before a target',
       (tester) async {
     tester.view.physicalSize = const Size(430, 1400);

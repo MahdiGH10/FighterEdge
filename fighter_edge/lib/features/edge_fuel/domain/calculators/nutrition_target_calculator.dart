@@ -20,6 +20,7 @@ class NutritionTargetCalculator {
   static NutritionTarget calculate(
     NutritionProfile profile, {
     required DateTime now,
+    int? requestedCalories,
   }) {
     // 1. Missing-data pre-check — distinct from "unsupported": we simply
     // don't have enough information yet, not "this profile can never work."
@@ -95,6 +96,21 @@ class NutritionTargetCalculator {
       NutritionGoal.maintain => maintenanceKcal,
     };
 
+    // A weekly review may request a new total, but it must still travel
+    // through every floor and macro calculation below. Never edit a saved
+    // target's carbohydrate grams in isolation.
+    if (requestedCalories != null) {
+      rawTarget = requestedCalories.toDouble();
+      if (profile.goal == NutritionGoal.loseFat &&
+          rawTarget > maintenanceKcal) {
+        rawTarget = maintenanceKcal;
+      }
+      if (profile.goal == NutritionGoal.gainMuscle &&
+          rawTarget < maintenanceKcal) {
+        rawTarget = maintenanceKcal;
+      }
+    }
+
     final warnings = <String>[];
 
     // 6. Protein reference weight + grams (§7.5). Only "losing" uses the
@@ -111,7 +127,7 @@ class NutritionTargetCalculator {
     // 7. Never let the automated target fall below RMR (§7.4). Only a
     // deficit (loseFat) can trigger this — gain/maintain are always >= RMR
     // because every activity coefficient is >= 1.0.
-    if (profile.goal == NutritionGoal.loseFat && rawTarget < rmr) {
+    if (rawTarget < rmr) {
       rawTarget = rmr;
       warnings.add('goalPaceReducedToProtectRmr');
     }
@@ -120,9 +136,10 @@ class NutritionTargetCalculator {
     // correction for a fat-loss deficit under high/very-high training load
     // (§7.5: "reduce the deficit ... rather than hiding the conflict").
     const fatPercent = NutritionPolicy.fatPercentOfEnergyDefault;
-    final carbFloorApplies = profile.goal == NutritionGoal.loseFat &&
-        (profile.activityLevel == ActivityLevel.high ||
-            profile.activityLevel == ActivityLevel.veryHigh);
+    final carbFloorApplies =
+        (profile.goal == NutritionGoal.loseFat || requestedCalories != null) &&
+            (profile.activityLevel == ActivityLevel.high ||
+                profile.activityLevel == ActivityLevel.veryHigh);
     if (carbFloorApplies) {
       final floorKcal = NutritionPolicy.carbPerformanceFloorGPerKg *
           profile.currentWeightKg *

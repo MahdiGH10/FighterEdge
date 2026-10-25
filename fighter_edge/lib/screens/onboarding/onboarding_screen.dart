@@ -193,6 +193,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ),
               const SizedBox(height: Insets.xl),
+              if (_error != null && _step != 2) ...[
+                Text(
+                  _error!,
+                  style: AppType.subhead(
+                    weight: FontWeight.w700,
+                    color: AppColors.negative,
+                  ),
+                ),
+                const SizedBox(height: Insets.md),
+              ],
               PlanPreviewCard(
                 campGoal: _campGoal,
                 nutritionGoal: _nutritionGoal,
@@ -397,8 +407,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
 
     final repo = context.read<EdgeFuelRepository>();
-    await repo.saveProfileDraft(userId, profileDraft);
-    await repo.saveTarget(userId, target);
+    await repo.saveConfirmedPlan(userId, profileDraft, target);
     return target;
   }
 
