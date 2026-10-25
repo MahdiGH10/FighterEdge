@@ -58,9 +58,11 @@ class DashboardScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final firstRun = context.watch<FirstRunController>();
     final plan = context.watch<PlanController>();
-    // Weight, Fuel and the weigh-in shortcut are hidden while nutrition is
-    // paused (and until the athlete's choice has been read).
-    final showNutrition = context.watch<NutritionModeController>().visible;
+    // Weight and the weigh-in shortcut go with the numbers; Fuel goes only
+    // while nutrition is paused (and until the choice has been read).
+    final nutritionMode = context.watch<NutritionModeController>();
+    final showNutrition = nutritionMode.visible;
+    final showNumbers = nutritionMode.numbersVisible;
     final user = auth.user;
     final week = plan.thisWeek;
     final streakWeeks = plan.weeklyStreak.count;
@@ -117,7 +119,7 @@ class DashboardScreen extends StatelessWidget {
             Wrap(
               spacing: Insets.sm,
               children: [
-                if (showNutrition) ...[
+                if (showNumbers)
                   TextButton.icon(
                     onPressed: () => AppNavigation.push(
                       context,
@@ -127,12 +129,12 @@ class DashboardScreen extends StatelessWidget {
                     icon: const Icon(AppIcons.scales),
                     label: Text(l.dashboardAddWeighIn),
                   ),
+                if (showNutrition)
                   TextButton.icon(
                     onPressed: () => onNavigate(2),
                     icon: const Icon(AppIcons.forkKnife),
                     label: Text(l.navFuel),
                   ),
-                ],
                 TextButton.icon(
                   onPressed: () => AppNavigation.push(
                     context,
@@ -216,7 +218,7 @@ class _DashboardStats extends StatelessWidget {
         ? '—'
         : formatFixedDecimal(state.displayWeight(state.latestWeight),
             Localizations.localeOf(context).toString());
-    final showWeight = context.watch<NutritionModeController>().visible;
+    final showWeight = context.watch<NutritionModeController>().numbersVisible;
     final stats = [
       if (showWeight)
         _Stat(

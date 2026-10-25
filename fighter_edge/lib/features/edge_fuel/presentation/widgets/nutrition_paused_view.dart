@@ -22,6 +22,10 @@ class NutritionPausedView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final secondary = AppAccessibility.textSecondary(context);
+    // Numbers hidden is a lighter step than paused: food can still be logged by
+    // name, so the note says only what is hidden.
+    final hidden = context.watch<NutritionModeController>().mode ==
+        NutritionDisplayMode.hideNumbers;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(Insets.xl),
@@ -31,12 +35,18 @@ class NutritionPausedView extends StatelessWidget {
           children: [
             Icon(AppIcons.moon, color: secondary),
             const SizedBox(height: Insets.lg),
-            Text(l.nutritionPausedTitle, style: AppType.title1()),
+            Text(
+              hidden ? l.nutritionNumbersHiddenTitle : l.nutritionPausedTitle,
+              style: AppType.title1(),
+            ),
             const SizedBox(height: Insets.sm),
-            Text(l.nutritionPausedBody, style: AppType.body(color: secondary)),
+            Text(
+              hidden ? l.nutritionNumbersHiddenBody : l.nutritionPausedBody,
+              style: AppType.body(color: secondary),
+            ),
             const SizedBox(height: Insets.xl),
             PrimaryButton(
-              l.nutritionPausedResume,
+              hidden ? l.nutritionNumbersHiddenShow : l.nutritionPausedResume,
               expand: true,
               onPressed: () {
                 AppHaptics.commit();

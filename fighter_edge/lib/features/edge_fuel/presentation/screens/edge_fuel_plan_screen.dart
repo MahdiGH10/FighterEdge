@@ -16,6 +16,8 @@ import '../../../../widgets/stat_card.dart';
 import '../../domain/models/nutrition_enums.dart';
 import '../../domain/models/nutrition_target.dart';
 import '../controllers/edge_fuel_controller.dart';
+import '../controllers/nutrition_mode_controller.dart';
+import '../widgets/nutrition_paused_view.dart';
 import '../nutrition_copy.dart';
 import '../widgets/fuel_what_is_left.dart';
 import 'edge_fuel_setup_screen.dart';
@@ -28,6 +30,9 @@ class EdgeFuelPlanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.watch<NutritionModeController>().numbersVisible) {
+      return const NutritionPausedScreen(title: 'Your plan');
+    }
     final edgeFuel = context.watch<EdgeFuelController>();
     final target = edgeFuel.target;
 

@@ -15,6 +15,8 @@ import '../../../../widgets/primary_button.dart';
 import '../../data/edge_fuel_repository.dart';
 import '../../domain/models/nutrition_enums.dart';
 import '../controllers/edge_fuel_setup_controller.dart';
+import '../controllers/nutrition_mode_controller.dart';
+import '../widgets/nutrition_paused_view.dart';
 import 'edge_fuel_plan_screen.dart';
 import 'setup_steps/activity_step.dart';
 import 'setup_steps/body_step.dart';
@@ -31,6 +33,9 @@ class EdgeFuelSetupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.watch<NutritionModeController>().numbersVisible) {
+      return const NutritionPausedScreen(title: 'Fuel setup');
+    }
     final userId = context.read<AuthController>().user?.id;
     if (userId == null) {
       return const ScreenScaffold(

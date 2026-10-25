@@ -162,7 +162,7 @@ class _FightSetupScreenState extends State<FightSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    if (!context.watch<NutritionModeController>().visible) {
+    if (!context.watch<NutritionModeController>().numbersVisible) {
       return NutritionPausedScreen(title: l.fightSetupTitle);
     }
     final state = context.watch<AppState>();

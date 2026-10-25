@@ -44,7 +44,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.watch<NutritionModeController>().visible) {
+    if (!context.watch<NutritionModeController>().numbersVisible) {
       return const NutritionPausedScreen(title: 'Weight tracker');
     }
     final state = context.watch<AppState>();

@@ -66,7 +66,7 @@ class FightCountdownSection extends StatelessWidget {
     final camp = fights.camp;
     final state = context.watch<AppState>();
     // The countdown card carries the weight path and weigh-in steps.
-    if (!context.watch<NutritionModeController>().visible) {
+    if (!context.watch<NutritionModeController>().numbersVisible) {
       return const SizedBox.shrink();
     }
     if (camp == null || camp.daysToFight(state.now) < 0) {
@@ -264,7 +264,7 @@ class AddFightRow extends StatelessWidget {
     final now = context.watch<AppState>().now;
     final camp = fights.camp;
     // Booking a fight asks for a weight limit.
-    if (!context.watch<NutritionModeController>().visible) {
+    if (!context.watch<NutritionModeController>().numbersVisible) {
       return const SizedBox.shrink();
     }
     if (!fights.loaded || (camp != null && camp.daysToFight(now) >= 0)) {

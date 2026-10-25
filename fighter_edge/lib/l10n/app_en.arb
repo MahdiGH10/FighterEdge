@@ -930,5 +930,14 @@
   "nutritionModeNormalSubtitle": "Targets, food log, weight and nutrition reminders.",
   "nutritionModePausedTitle": "Pause nutrition",
   "nutritionModePausedSubtitle": "Hides food, nutrition numbers, weight tools and nutrition reminders. Training continues.",
-  "reviewHoldPaused": "Nothing to change this week. Keep your plan as it is."
+  "reviewHoldPaused": "Nothing to change this week. Keep your plan as it is.",
+  "nutritionNumbersHiddenTitle": "Numbers are hidden",
+  "nutritionNumbersHiddenBody": "Calories, grams, targets and weights are hidden. You can still log what you eat by name. Show them again whenever you like.",
+  "nutritionNumbersHiddenShow": "Show numbers",
+  "nutritionModeHideTitle": "Hide numbers",
+  "nutritionModeHideSubtitle": "Hides calories, grams, targets and weight. You can still log foods by name.",
+  "settingsNutritionDisplayHidden": "Numbers hidden",
+  "nutritionAddedSnackNoNumbers": "{name} added",
+  "@nutritionAddedSnackNoNumbers": {"placeholders": {"name": {"type": "String"}}},
+  "nutritionLoggedByName": "Log what you eat. The numbers stay hidden."
 }

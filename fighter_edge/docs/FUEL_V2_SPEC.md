@@ -131,7 +131,7 @@ From `combat.md`.
 - Eating-disorder and tone layer: "Hide numbers" and "Pause nutrition" modes,
   a copy lint that fails the build on banned words. Status: Pause nutrition is
   built (see `NOTIFICATIONS_PLAN.md`, "Nutrition display modes"); Hide numbers
-  is not; the copy lint exists.
+  is built too; the copy lint exists.
 
 ### N5 — Level-aware Fuel UI and onboarding questions
 

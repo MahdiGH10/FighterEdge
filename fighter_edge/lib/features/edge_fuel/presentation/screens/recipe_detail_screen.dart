@@ -24,6 +24,8 @@ import '../../domain/models/recipe.dart';
 import '../../data/recipe_photos.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../controllers/recipe_library_controller.dart';
+import '../controllers/nutrition_mode_controller.dart';
+import '../widgets/nutrition_paused_view.dart';
 import '../recipe_copy.dart';
 import '../widgets/allergen_notice.dart';
 import '../widgets/recipe_photo_image.dart';
@@ -58,6 +60,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final recipe = widget.listing.recipe;
+    if (!context.watch<NutritionModeController>().numbersVisible) {
+      return NutritionPausedScreen(title: recipe.title);
+    }
 
     // Master prompt §10: opening a premium recipe is an allowed upgrade
     // moment. It is also the ONLY one EF-3 introduces — never while the user

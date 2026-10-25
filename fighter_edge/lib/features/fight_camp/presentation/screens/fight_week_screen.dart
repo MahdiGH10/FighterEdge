@@ -35,7 +35,7 @@ class FightWeekScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    if (!context.watch<NutritionModeController>().visible) {
+    if (!context.watch<NutritionModeController>().numbersVisible) {
       return NutritionPausedScreen(title: l.fightWeekTitle);
     }
     final state = context.watch<AppState>();

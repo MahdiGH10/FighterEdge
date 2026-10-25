@@ -784,5 +784,14 @@
   "nutritionModeNormalSubtitle": "Ziele, Essensprotokoll, Gewicht und Ernährungshinweise.",
   "nutritionModePausedTitle": "Ernährung pausieren",
   "nutritionModePausedSubtitle": "Blendet Essen, Ernährungszahlen, Gewichtsfunktionen und Ernährungshinweise aus. Das Training geht weiter.",
-  "reviewHoldPaused": "Diese Woche gibt es nichts zu ändern. Bleib bei deinem Plan."
+  "reviewHoldPaused": "Diese Woche gibt es nichts zu ändern. Bleib bei deinem Plan.",
+  "nutritionNumbersHiddenTitle": "Zahlen sind ausgeblendet",
+  "nutritionNumbersHiddenBody": "Kalorien, Gramm, Ziele und Gewichte sind ausgeblendet. Du kannst weiterhin eintragen, was du isst. Blende sie wieder ein, wann du möchtest.",
+  "nutritionNumbersHiddenShow": "Zahlen anzeigen",
+  "nutritionModeHideTitle": "Zahlen ausblenden",
+  "nutritionModeHideSubtitle": "Blendet Kalorien, Gramm, Ziele und Gewicht aus. Du kannst Essen weiterhin mit Namen eintragen.",
+  "settingsNutritionDisplayHidden": "Zahlen ausgeblendet",
+  "nutritionAddedSnackNoNumbers": "{name} hinzugefügt",
+  "@nutritionAddedSnackNoNumbers": {"placeholders": {"name": {"type": "String"}}},
+  "nutritionLoggedByName": "Trag ein, was du isst. Die Zahlen bleiben ausgeblendet."
 }

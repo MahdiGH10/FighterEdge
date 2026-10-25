@@ -38,7 +38,7 @@ class ProfileScreen extends StatelessWidget {
     final heightCm = context.watch<EdgeFuelController>().draft?.heightCm;
     // Height and weight are health measurements: gone while nutrition is
     // paused, and until the athlete's choice has been read.
-    final showBody = context.watch<NutritionModeController>().visible;
+    final showBody = context.watch<NutritionModeController>().numbersVisible;
     final largeText = AppAccessibility.isLargeText(context);
 
     final displayName =
