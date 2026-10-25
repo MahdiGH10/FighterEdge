@@ -26,7 +26,7 @@
   "settingsManagePro": "Pro verwalten",
   "settingsUpgradePro": "Auf Pro upgraden",
   "settingsManageProSubtitle": "Status aktualisieren und Zahlungen verwalten, sobald verbunden",
-  "settingsUpgradeProSubtitle": "Komplette Drill- und Rezept-Bibliothek, Ecken-Tipps",
+  "settingsUpgradeProSubtitle": "Alle Drills, Session-Modus und Ernährung für Trainingstage",
   "settingsSectionTraining": "Trainingseinstellungen",
   "settingsMetricUnits": "Metrische Einheiten",
   "settingsMetricUnitsKg": "Gewicht in kg",
@@ -458,7 +458,7 @@
   },
   "profileFreePlan": "Kostenloser Plan",
   "profileProActive": "Pro-Abonnement aktiv",
-  "profileProDescription": "Alle Übungen und Rezepte",
+  "profileProDescription": "Camp-Pläne, Session-Modus und alle Drills",
   "profileUpgrade": "Upgrade",
   "profileManage": "Verwalten",
   "settingsProPlan": "Pro",
@@ -474,8 +474,6 @@
       }
     }
   },
-  "paywallBenefitRecipesTitle": "Alle Rezepte",
-  "paywallBenefitRecipesBody": "Jedes Rezept, auf deine Portionen skaliert und auf deine Allergene geprüft.",
   "paywallBenefitDrillsTitle": "Alle Drills",
   "paywallBenefitDrillsBody": "Jeder Drill für Striking, Ringen, BJJ und Clinch, mit Trainingsanleitung.",
   "paywallAnnualPlan": "Jahresabo",

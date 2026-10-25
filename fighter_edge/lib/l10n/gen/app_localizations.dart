@@ -238,7 +238,7 @@ abstract class L {
   /// No description provided for @settingsUpgradeProSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Full drill and recipe libraries, corner cues'**
+  /// **'Full drill library, session mode, and training-day fuel'**
   String get settingsUpgradeProSubtitle;
 
   /// No description provided for @settingsSectionTraining.
@@ -2056,7 +2056,7 @@ abstract class L {
   /// No description provided for @profileProDescription.
   ///
   /// In en, this message translates to:
-  /// **'All drills and recipes'**
+  /// **'Camp plans, session mode, and the full drill library'**
   String get profileProDescription;
 
   /// No description provided for @profileUpgrade.
@@ -2106,18 +2106,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Recipes for your day'**
   String get fuelRecipesTitle;
-
-  /// No description provided for @paywallBenefitRecipesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Full Recipe Library'**
-  String get paywallBenefitRecipesTitle;
-
-  /// No description provided for @paywallBenefitRecipesBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Every recipe, scaled to your servings and checked for your allergens.'**
-  String get paywallBenefitRecipesBody;
 
   /// No description provided for @paywallBenefitDrillsTitle.
   ///

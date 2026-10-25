@@ -45,6 +45,7 @@ void main() {
       );
       await controller.load();
       expect(controller.error, isNull);
+      expect(controller.hasPublishedRecipes, isFalse);
       expect(controller.visible, isEmpty);
     });
     test('loads the catalog and derives listings', () async {
@@ -53,6 +54,7 @@ void main() {
 
       expect(controller.isLoading, isFalse);
       expect(controller.error, isNull);
+      expect(controller.hasPublishedRecipes, isTrue);
       expect(controller.visible, hasLength(24));
       expect(controller.visible.first.perServing.kcalRounded, greaterThan(0));
     });

@@ -143,11 +143,8 @@ class AccessState {
 
 /// The gate-able capabilities of the app.
 ///
-/// This list is also the paywall: each Pro feature carries its own paywall
-/// copy below, and the paywall renders exactly these. A benefit that is not a
-/// real, gated feature cannot be advertised — which is the point. (An
-/// earlier paywall sold timer presets and weight history that were free
-/// anyway, and analytics that did not exist.)
+/// Entitlement keys for gated UI. The paywall lists only benefits that ship;
+/// the recipe key remains reserved until reviewed recipes are published.
 enum Feature {
   /// EdgeFuel premium recipes (master prompt §10) — its own entitlement case
   /// so it can be reasoned about, priced, and server-verified on its own.

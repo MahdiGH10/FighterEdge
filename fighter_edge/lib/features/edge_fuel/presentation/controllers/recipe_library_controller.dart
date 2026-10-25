@@ -124,6 +124,7 @@ class RecipeLibraryController extends ChangeNotifier {
   bool get isLoading => _loading;
   String? get error => _error;
   bool get isLoaded => !_loading && _error == null && _all.isNotEmpty;
+  bool get hasPublishedRecipes => _all.isNotEmpty;
   RecipeFilters get filters => _filters;
   Map<String, FoodItem> get foodsById => _foodsById;
 

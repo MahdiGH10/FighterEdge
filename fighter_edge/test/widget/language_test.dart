@@ -26,7 +26,7 @@ void main() {
 
     expect(find.text('EINSTELLUNGEN'), findsOneWidget);
     expect(find.text('Sprache'), findsOneWidget);
-    expect(find.textContaining('Ecken-Tipps'), findsOneWidget);
+    expect(find.textContaining('Session-Modus'), findsOneWidget);
 
     // Back to English from the German screen.
     await tester.tap(find.text('Sprache'));

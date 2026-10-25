@@ -181,7 +181,6 @@ void main() {
       'Weekly review',
       'Safe weight path',
       'Full Drill Library',
-      'Full Recipe Library',
     };
     final seen = <String>{};
     for (var i = 0; i < 10; i++) {
@@ -192,6 +191,7 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(seen, outcomes);
+    expect(find.text('Full Recipe Library'), findsNothing);
     expect(find.text('All Timer Presets'), findsNothing);
     expect(find.text('Unlimited Weight History'), findsNothing);
     expect(find.text('Nutrition Analytics'), findsNothing);

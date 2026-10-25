@@ -91,6 +91,19 @@ class _RecipeLibraryViewState extends State<_RecipeLibraryView> {
               message: controller.error!,
             ),
           ),
+        _ when !controller.hasPublishedRecipes => const CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: EmptyState(
+                  icon: AppIcons.forkKnife,
+                  title: 'No recipes published yet',
+                  message:
+                      'The recipe library is empty while recipes await review.',
+                ),
+              ),
+            ],
+          ),
         _ => _Body(controller: controller, isPro: isPro, search: _search),
       },
     );

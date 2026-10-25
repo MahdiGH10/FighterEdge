@@ -82,7 +82,7 @@ class LDe extends L {
 
   @override
   String get settingsUpgradeProSubtitle =>
-      'Komplette Drill- und Rezept-Bibliothek, Ecken-Tipps';
+      'Alle Drills, Session-Modus und Ernährung für Trainingstage';
 
   @override
   String get settingsSectionTraining => 'Trainingseinstellungen';
@@ -1155,7 +1155,8 @@ class LDe extends L {
   String get profileProActive => 'Pro-Abonnement aktiv';
 
   @override
-  String get profileProDescription => 'Alle Übungen und Rezepte';
+  String get profileProDescription =>
+      'Camp-Pläne, Session-Modus und alle Drills';
 
   @override
   String get profileUpgrade => 'Upgrade';
@@ -1182,13 +1183,6 @@ class LDe extends L {
 
   @override
   String get fuelRecipesTitle => 'Rezepte für deinen Tag';
-
-  @override
-  String get paywallBenefitRecipesTitle => 'Alle Rezepte';
-
-  @override
-  String get paywallBenefitRecipesBody =>
-      'Jedes Rezept, auf deine Portionen skaliert und auf deine Allergene geprüft.';
 
   @override
   String get paywallBenefitDrillsTitle => 'Alle Drills';

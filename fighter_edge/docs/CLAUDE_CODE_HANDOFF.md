@@ -1,5 +1,14 @@
 # Fighter Edge — Claude Code Handoff
 
+## Subscription and recipe truth (2026-10-25, F06)
+
+The paywall no longer sells a full recipe library. Settings and the Profile
+subscription card describe shipped camp, session, fuel and drill features.
+When the recipe catalog loads with zero published recipes, the library says
+that nothing is published yet; a published catalog with filters that match
+nothing still shows the filter-specific empty state. Recipe publication
+statuses were not changed. The next serial slice is F13 read failures.
+
 ## Account deletion and local state (2026-10-25, F04/F17)
 
 The deletion callable now rejects missing, stale, malformed, and implausibly

@@ -26,7 +26,7 @@
   "settingsManagePro": "Manage Pro",
   "settingsUpgradePro": "Upgrade to Pro",
   "settingsManageProSubtitle": "Refresh status and manage billing once connected",
-  "settingsUpgradeProSubtitle": "Full drill and recipe libraries, corner cues",
+  "settingsUpgradeProSubtitle": "Full drill library, session mode, and training-day fuel",
   "settingsSectionTraining": "Training preferences",
   "settingsMetricUnits": "Metric units",
   "settingsMetricUnitsKg": "Weights show in kg",
@@ -564,7 +564,7 @@
   },
   "profileFreePlan": "Free plan",
   "profileProActive": "Pro subscription active",
-  "profileProDescription": "All drills and recipes",
+  "profileProDescription": "Camp plans, session mode, and the full drill library",
   "profileUpgrade": "Upgrade",
   "profileManage": "Manage",
   "settingsProPlan": "Pro",
@@ -580,8 +580,6 @@
       }
     }
   },
-  "paywallBenefitRecipesTitle": "Full Recipe Library",
-  "paywallBenefitRecipesBody": "Every recipe, scaled to your servings and checked for your allergens.",
   "paywallBenefitDrillsTitle": "Full Drill Library",
   "paywallBenefitDrillsBody": "Every striking, wrestling, BJJ and clinch drill, with how to train it.",
   "paywallAnnualPlan": "Annual plan",

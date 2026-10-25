@@ -82,7 +82,7 @@ class LEn extends L {
 
   @override
   String get settingsUpgradeProSubtitle =>
-      'Full drill and recipe libraries, corner cues';
+      'Full drill library, session mode, and training-day fuel';
 
   @override
   String get settingsSectionTraining => 'Training preferences';
@@ -1150,7 +1150,8 @@ class LEn extends L {
   String get profileProActive => 'Pro subscription active';
 
   @override
-  String get profileProDescription => 'All drills and recipes';
+  String get profileProDescription =>
+      'Camp plans, session mode, and the full drill library';
 
   @override
   String get profileUpgrade => 'Upgrade';
@@ -1177,13 +1178,6 @@ class LEn extends L {
 
   @override
   String get fuelRecipesTitle => 'Recipes for your day';
-
-  @override
-  String get paywallBenefitRecipesTitle => 'Full Recipe Library';
-
-  @override
-  String get paywallBenefitRecipesBody =>
-      'Every recipe, scaled to your servings and checked for your allergens.';
 
   @override
   String get paywallBenefitDrillsTitle => 'Full Drill Library';
