@@ -99,6 +99,7 @@ abstract final class ReactionTiming {
   static const teepMs = 800;
   static const lowKickMs = 900;
   static const midKickMs = 1100;
+  static const sideKickMs = 1200;
   static const highKickMs = 1250;
 
   // Movement and defence.
@@ -210,7 +211,8 @@ abstract final class ReactionTiming {
         'uppercut' || 'lead_uppercut' => uppercutMs,
         'teep' => teepMs,
         'low_kick' => lowKickMs,
-        'middle_kick' => midKickMs,
+        'middle_kick' || 'left_kick' || 'right_kick' => midKickMs,
+        'side_kick' => sideKickMs,
         'high_kick' => highKickMs,
         'slip_left' || 'slip_right' => slipMs,
         'step_left' || 'step_right' || 'step_back' || 'step_in' => stepMs,
@@ -234,6 +236,9 @@ abstract final class ReactionTiming {
         'teep' ||
         'low_kick' ||
         'middle_kick' ||
+        'left_kick' ||
+        'right_kick' ||
+        'side_kick' ||
         'high_kick' =>
           finishAfterKickMs,
         'sprawl' ||

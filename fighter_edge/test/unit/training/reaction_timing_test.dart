@@ -68,6 +68,9 @@ void main() {
         'teep': 800,
         'low_kick': 900,
         'middle_kick': 1100,
+        'left_kick': 1100,
+        'right_kick': 1100,
+        'side_kick': 1200,
         'high_kick': 1250,
         'slip_left': 400,
         'slip_right': 400,
@@ -107,6 +110,9 @@ void main() {
       expect(ReactionTiming.finishCostMs(ReactionCommands.stepLeft), 300);
       expect(ReactionTiming.finishCostMs(ReactionCommands.highKick), 500);
       expect(ReactionTiming.finishCostMs(ReactionCommands.teep), 500);
+      expect(ReactionTiming.finishCostMs(ReactionCommands.leftKick), 500);
+      expect(ReactionTiming.finishCostMs(ReactionCommands.rightKick), 500);
+      expect(ReactionTiming.finishCostMs(ReactionCommands.sideKick), 500);
       expect(ReactionTiming.finishCostMs(ReactionCommands.sprawl), 500);
     });
 

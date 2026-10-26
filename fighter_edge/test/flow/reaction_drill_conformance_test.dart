@@ -74,6 +74,7 @@ const _cost = {
   'Jab': 300, 'Cross': 400, 'Hook': 450, 'Back hook': 450, //
   'Uppercut': 450, 'Lead uppercut': 450,
   'Teep': 800, 'Low kick': 900, 'Middle kick': 1100, 'High kick': 1250,
+  'Left kick': 1100, 'Right kick': 1100, 'Side kick': 1200,
   'Slip left': 400, 'Slip right': 400,
   'Step left': 400, 'Step right': 400, 'Step back': 400, 'Step in': 400,
   'Pivot left': 500, 'Pivot right': 500,
@@ -83,7 +84,10 @@ const _cost = {
   'Level change front roll': 3100, 'Level change back roll': 3600,
 };
 
-const _kicks = {'Teep', 'Low kick', 'Middle kick', 'High kick'};
+const _kicks = {
+  'Teep', 'Low kick', 'Middle kick', 'High kick', //
+  'Left kick', 'Right kick', 'Side kick',
+};
 const _grapplingCalls = {
   'Sprawl', 'Shoot', 'Front roll', 'Cartwheel', 'Back roll', //
   'Level change front roll', 'Level change back roll',
