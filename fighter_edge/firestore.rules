@@ -10,55 +10,91 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isOwner(uid);
       allow create: if isOwner(uid) && isFreeProfileCreate() &&
-        consentsValid({});
+        profileCreateShape() && consentsValid({}) &&
+        profileHealthWriteAllowed({}, request.resource.data);
       allow update: if isOwner(uid) && billingFieldsUnchanged() &&
-        consentsValid(resource.data);
+        profileUpdateShape() && consentsValid(resource.data) &&
+        onboardingCannotReopen() &&
+        profileHealthWriteAllowed(resource.data, request.resource.data);
       allow delete: if false;
 
       match /weights/{entryId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && healthWriteAllowed(uid, true) &&
+          validWeight(request.resource.data);
+        allow delete: if isOwner(uid);
       }
 
       match /meals/{dateKey} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) &&
+          (paidHealthWrite(uid) ||
+            (onboardingHealthWrite(uid) && request.resource.data.meals == [])) &&
+          validMealDay(request.resource.data, dateKey);
+        allow delete: if isOwner(uid);
       }
 
       match /sessions/{sessionId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && paidHealthWrite(uid) &&
+          validSession(request.resource.data, sessionId);
+        allow delete: if isOwner(uid);
       }
 
       // Every logged training occurrence (plan sessions, timer workouts,
       // Reaction drills). Owner-only, like the rest of the athlete's data.
       match /trainingLog/{entryId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && paidHealthWrite(uid) &&
+          validTrainingLog(request.resource.data, entryId);
+        allow delete: if isOwner(uid);
       }
 
       // The training plan: the inputs the dated week is generated from and
       // the athlete's skip/move choices. Owner-only.
       match /trainingPlan/{docId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && docId == 'current' &&
+          healthWriteAllowed(uid, true) && validTrainingPlan(request.resource.data);
+        allow delete: if isOwner(uid);
       }
 
       // The athlete's next fight (date, weigh-in, weight limit). Owner-only.
       match /fightCamp/{docId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && docId == 'current' &&
+          paidHealthWrite(uid) && validFightCamp(request.resource.data);
+        allow delete: if isOwner(uid);
       }
 
       match /nutritionProfile/{docId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && docId == 'current' &&
+          healthWriteAllowed(uid, true) && validNutritionProfile(request.resource.data);
+        allow delete: if isOwner(uid);
       }
 
       match /nutritionTargets/{docId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && docId == 'current' &&
+          healthWriteAllowed(uid, true) && validNutritionTarget(request.resource.data);
+        allow delete: if isOwner(uid);
       }
 
       match /nutritionDays/{dateKey} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && paidHealthWrite(uid) &&
+          validNutritionDay(request.resource.data, dateKey);
+        allow delete: if isOwner(uid);
 
         // Food edits are independent documents. A second device can append
         // to the same day without replacing the first device's entries.
         match /entries/{entryId} {
-          allow read, write: if isOwner(uid);
+          allow read: if isOwner(uid);
+          allow create, update: if isOwner(uid) &&
+            ((paidHealthWrite(uid) && validFoodEntry(request.resource.data)) ||
+              validFoodTombstone(request.resource.data));
+          allow delete: if isOwner(uid);
         }
       }
 
@@ -92,6 +128,225 @@ service cloud.firestore {
 
     function isOwner(uid) {
       return request.auth != null && request.auth.uid == uid;
+    }
+
+    function profileData(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data;
+    }
+
+    function hasHealthConsentIn(profile) {
+      let consents = profile.get('consents', {});
+      return consents is map &&
+        consents.get('healthData', null) is map &&
+        consents.healthData.get('version', 0) is int &&
+        consents.healthData.version >= 1 &&
+        consents.healthData.get('grantedAt', null) is timestamp;
+    }
+
+    // Mirrors the server's one-hour renewal leeway. A missing/null expiry is
+    // a server-owned lifetime grant; clients cannot edit plan or billing.
+    function isPaidProfile(profile) {
+      let billing = profile.get('billing', {});
+      return profile.get('plan', 'free') == 'pro' &&
+        (!(billing is map) ||
+          billing.get('expiresAtMs', null) == null ||
+          (billing.expiresAtMs is number &&
+            billing.expiresAtMs + 3600000 > request.time.toMillis()));
+    }
+
+    function paidHealthWrite(uid) {
+      return exists(/databases/$(database)/documents/users/$(uid)) &&
+        hasHealthConsentIn(profileData(uid)) && isPaidProfile(profileData(uid));
+    }
+
+    function onboardingHealthWrite(uid) {
+      return exists(/databases/$(database)/documents/users/$(uid)) &&
+        hasHealthConsentIn(profileData(uid)) &&
+        profileData(uid).get('onboardingComplete', false) != true;
+    }
+
+    function healthWriteAllowed(uid, onboardingAllowed) {
+      return paidHealthWrite(uid) ||
+        (onboardingAllowed && onboardingHealthWrite(uid));
+    }
+
+    function profileCreateShape() {
+      return request.resource.data.keys().hasOnly([
+        'email', 'displayName', 'plan', 'createdAt', 'consents',
+        'goal', 'experienceLevel', 'weeklyTrainingDays', 'startingWeightKg',
+        'onboardingComplete', 'onboardedAt'
+      ]);
+    }
+
+    function profileUpdateShape() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'email', 'displayName', 'createdAt', 'consents',
+        'goal', 'experienceLevel', 'weeklyTrainingDays', 'startingWeightKg',
+        'onboardingComplete', 'onboardedAt'
+      ]);
+    }
+
+    function onboardingCannotReopen() {
+      return resource.data.get('onboardingComplete', false) != true ||
+        request.resource.data.get('onboardingComplete', false) == true;
+    }
+
+    function profileHealthWriteAllowed(before, after) {
+      return !after.diff(before).affectedKeys().hasAny([
+        'goal', 'experienceLevel', 'weeklyTrainingDays', 'startingWeightKg',
+        'onboardingComplete', 'onboardedAt'
+      ]) ||
+        (hasHealthConsentIn(after) &&
+          (isPaidProfile(before) || before.get('onboardingComplete', false) != true));
+    }
+
+    function validWeight(data) {
+      return data.keys().hasAll(['date', 'kg']) &&
+        data.keys().hasOnly(['date', 'kg']) &&
+        data.date is string && data.kg is number &&
+        data.kg > 0 && data.kg <= 500;
+    }
+
+    function optionalIntRange(data, key, low, high) {
+      return data.get(key, null) == null ||
+        (data[key] is int && data[key] >= low && data[key] <= high);
+    }
+
+    function optionalNumberRange(data, key, low, high) {
+      return data.get(key, null) == null ||
+        (data[key] is number && data[key] >= low && data[key] <= high);
+    }
+
+    function validMealDay(data, dateKey) {
+      return data.keys().hasAll(['date', 'meals', 'updatedAt']) &&
+        data.keys().hasOnly(['date', 'meals', 'updatedAt']) &&
+        data.date == dateKey && data.meals is list &&
+        data.meals.size() <= 100 && data.updatedAt is timestamp;
+    }
+
+    function validSession(data, sessionId) {
+      return data.keys().hasAll(['id', 'day', 'title', 'completed']) &&
+        data.keys().hasOnly([
+          'id', 'day', 'title', 'subtitle', 'iconName', 'completed',
+          'completedAt', 'rpe', 'note'
+        ]) && data.id == sessionId && data.day is string &&
+        data.title is string && data.completed is bool;
+    }
+
+    function validTrainingLog(data, entryId) {
+      return data.keys().hasAll(['id', 'completedAtMs', 'source', 'title']) &&
+        data.keys().hasOnly([
+          'id', 'completedAt', 'completedAtMs', 'dateKey', 'source', 'title',
+          'planSlotId', 'durationSeconds', 'rpe', 'note', 'detail'
+        ]) && data.id == entryId && data.completedAtMs is number &&
+        data.source in ['planned', 'timer', 'reaction', 'manual'] &&
+        data.title is string &&
+        data.get('rpe', 0) is int && data.get('rpe', 0) >= 0 &&
+        data.get('rpe', 0) <= 10;
+    }
+
+    function validTrainingPlan(data) {
+      return data.keys().hasAll(['schemaVersion', 'origin', 'inputs', 'adjustments']) &&
+        data.keys().hasOnly([
+          'schemaVersion', 'origin', 'generatorVersion', 'templateSetVersion',
+          'inputs', 'reviews', 'adjustments'
+        ]) && data.schemaVersion is int && data.origin is string &&
+        data.inputs is map &&
+        data.inputs.keys().hasAll([
+          'disciplines', 'goal', 'level', 'weekdays', 'gymClassWeekdays',
+          'sessionMinutes', 'startDate'
+        ]) && data.inputs.keys().hasOnly([
+          'disciplines', 'goal', 'level', 'weekdays', 'gymClassWeekdays',
+          'sessionMinutes', 'startDate'
+        ]) && data.inputs.disciplines is list &&
+        data.inputs.goal is string && data.inputs.level is string &&
+        data.inputs.weekdays is list && data.inputs.gymClassWeekdays is list &&
+        data.inputs.startDate is string && data.adjustments is list &&
+        data.get('reviews', {}) is map;
+    }
+
+    function validFightCamp(data) {
+      return data.keys().hasAll([
+        'fightDate', 'weighInDate', 'weightLimitKg', 'category', 'campWeeks'
+      ]) && data.keys().hasOnly([
+        'fightDate', 'weighInDate', 'weightLimitKg', 'category', 'campWeeks'
+      ]) && data.fightDate is string && data.weighInDate is string &&
+        data.weightLimitKg is number && data.weightLimitKg > 0 &&
+        data.category is string && data.campWeeks is int;
+    }
+
+    function validNutritionProfile(data) {
+      return data.keys().hasAll([
+        'schemaVersion', 'confirmed', 'screeningStatus', 'safetyFlags'
+      ]) && data.keys().hasOnly([
+        'schemaVersion', 'currentStep', 'confirmed', 'goal', 'ageYears',
+        'heightCm', 'currentWeightKg', 'targetWeightKg', 'equationProfile',
+        'normalActivityLevel', 'weeklyTrainingDays', 'goalPace', 'dietType',
+        'allergens', 'dislikedFoods', 'mealsPerDay', 'budgetBand',
+        'cookingTimeBand', 'bodyFatPercent', 'safetyFlags',
+        'screeningStatus', 'updatedAt'
+      ]) && data.schemaVersion is int && data.confirmed is bool &&
+        data.screeningStatus in ['unanswered', 'completed', 'needsReview'] &&
+        data.safetyFlags is map &&
+        optionalIntRange(data, 'ageYears', 0, 130) &&
+        optionalNumberRange(data, 'heightCm', 0, 300) &&
+        optionalNumberRange(data, 'currentWeightKg', 0, 500) &&
+        optionalNumberRange(data, 'targetWeightKg', 0, 500) &&
+        optionalNumberRange(data, 'bodyFatPercent', 0, 100) &&
+        optionalIntRange(data, 'weeklyTrainingDays', 0, 7) &&
+        data.get('updatedAt', request.time) is timestamp;
+    }
+
+    function validNutritionTarget(data) {
+      return data.keys().hasAll(['status', 'policyVersion', 'calculatedAt']) &&
+        data.keys().hasOnly([
+          'status', 'policyVersion', 'calculatedAt', 'reasons', 'warnings',
+          'estimatedRmrKcal', 'maintenanceRangeLowKcal',
+          'maintenanceRangeHighKcal', 'targetCalories', 'proteinGrams',
+          'fatGrams', 'carbGrams', 'fiberGramsLow', 'fiberGramsHigh',
+          'proteinReferenceWeightKg', 'equationProfileUsed',
+          'activityCoefficientUsed', 'appliedGoalAdjustmentPercent',
+          'confidence', 'updatedAt'
+        ]) && data.status in [
+          'success', 'needsMoreData', 'unsupported', 'needsProfessionalReview'
+        ] && data.policyVersion is int && data.calculatedAt is string &&
+        optionalIntRange(data, 'targetCalories', 0, 10000) &&
+        optionalIntRange(data, 'proteinGrams', 0, 1000) &&
+        optionalIntRange(data, 'fatGrams', 0, 1000) &&
+        optionalIntRange(data, 'carbGrams', 0, 1500) &&
+        data.get('updatedAt', request.time) is timestamp;
+    }
+
+    function validNutritionDay(data, dateKey) {
+      return data.keys().hasAll(['localDate', 'schemaVersion', 'updatedAt']) &&
+        data.keys().hasOnly([
+          'schemaVersion', 'localDate', 'timeZone', 'targetSnapshot', 'entries',
+          'totals', 'hydrationCheckIns', 'activitySnapshot', 'loggingCoverage',
+          'migratedFromLegacyMeals', 'createdAt', 'updatedAt'
+        ]) && data.localDate == dateKey && data.schemaVersion is int &&
+        (data.updatedAt is timestamp || data.updatedAt is string);
+    }
+
+    function validFoodTombstone(data) {
+      return data.keys().hasAll(['id', 'deleted']) &&
+        data.keys().hasOnly(['id', 'deleted']) &&
+        data.id is string && data.id.size() > 0 && data.deleted == true;
+    }
+
+    function validFoodEntry(data) {
+      return data.keys().hasAll([
+        'schemaVersion', 'id', 'name', 'calories', 'proteinGrams',
+        'carbGrams', 'fatGrams', 'loggedAt', 'deleted'
+      ]) && data.keys().hasOnly([
+        'schemaVersion', 'id', 'name', 'notes', 'calories', 'proteinGrams',
+        'carbGrams', 'fatGrams', 'consumed', 'saved', 'source', 'loggedAt',
+        'deleted'
+      ]) && data.schemaVersion is int && data.id is string &&
+        data.id.size() > 0 && data.name is string && data.deleted == false &&
+        data.calories is int && data.calories >= 0 &&
+        data.proteinGrams is int && data.proteinGrams >= 0 &&
+        data.carbGrams is int && data.carbGrams >= 0 &&
+        data.fatGrams is int && data.fatGrams >= 0 && data.loggedAt is string;
     }
 
     function isFreeProfileCreate() {

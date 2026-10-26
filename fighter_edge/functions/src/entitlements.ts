@@ -164,6 +164,9 @@ export async function writeEntitlement(
     const previous =
       (snap.data()?.billing as { lastEventTimestampMs?: number } | undefined)
         ?.lastEventTimestampMs ?? 0;
+    const lastSyncAtMs =
+      (snap.data()?.billing as { lastSyncAtMs?: number } | undefined)
+        ?.lastSyncAtMs;
     if (source.timestampMs < previous) return "stale";
     tx.set(
       userRef,
@@ -181,6 +184,7 @@ export async function writeEntitlement(
           lastEventType: source.type,
           lastEventTimestampMs: source.timestampMs,
           updatedAt: new Date(source.timestampMs).toISOString(),
+          ...(typeof lastSyncAtMs === "number" ? { lastSyncAtMs } : {}),
           ...extraBilling,
         },
       },
@@ -354,11 +358,19 @@ export async function syncEntitlement(
 ): Promise<SyncResult> {
   if (!deps.apiKey) return { status: "unavailable" };
   const userRef = db.collection("users").doc(uid);
-  const snap = await userRef.get();
-  if (!snap.exists) return { status: "unavailable" };
-  const lastSyncAtMs =
-    (snap.data()?.billing as { lastSyncAtMs?: number } | undefined)?.lastSyncAtMs ?? 0;
-  if (deps.nowMs - lastSyncAtMs < SYNC_THROTTLE_MS) return { status: "throttled" };
+  // Reserve the account's slot before the external request. Concurrent
+  // callers race in Firestore's transaction instead of both hitting RC.
+  const reservation = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(userRef);
+    if (!snap.exists) return "missing";
+    const lastSyncAtMs =
+      (snap.data()?.billing as { lastSyncAtMs?: number } | undefined)?.lastSyncAtMs ?? 0;
+    if (deps.nowMs - lastSyncAtMs < SYNC_THROTTLE_MS) return "throttled";
+    tx.update(userRef, { "billing.lastSyncAtMs": deps.nowMs });
+    return "reserved";
+  });
+  if (reservation === "missing") return { status: "unavailable" };
+  if (reservation === "throttled") return { status: "throttled" };
 
   let entitlement: RevenueCatEntitlement;
   try {

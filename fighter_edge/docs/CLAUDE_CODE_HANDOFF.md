@@ -1,5 +1,29 @@
 # Fighter Edge — Claude Code Handoff
 
+## Trusted write boundary (2026-10-26, F10/F11)
+
+Firestore rules now require versioned health consent and a live server-owned
+Pro entitlement for ongoing health-data writes. The initial weight, empty
+meal day, training plan, Fuel draft and target are permitted while onboarding
+is incomplete and consent is present; a completed profile cannot be changed
+back to incomplete. Writes validate the app's record keys and core value
+types. Owners retain read access and may remove their own records after
+access or consent changes. The rules emulator covers paid, free, expired,
+unconsented, onboarding and malformed cases.
+
+`syncEntitlement` now reserves its per-account throttle timestamp in a
+Firestore transaction before contacting RevenueCat, so concurrent calls
+make one request. The reservation remains during an outage, and later
+webhook writes preserve it. Emulator tests cover concurrent calls and an
+unavailable RevenueCat response.
+
+**Rollout:** these code changes are not a live rules/function deployment.
+The repository currently has no deploy credentials configured in GitHub;
+its deploy workflow skips the deploy job on a main push. Deploy the rules
+and function together before relying on server-side write enforcement.
+No signed-device or live-write check was performed. The next serial slice
+is F16/F18 weigh-in editing, unavailable tabs and onboarding persistence.
+
 ## Read failures (2026-10-26, F13)
 
 Repository read streams now report loading, empty, ready, stale and failed
