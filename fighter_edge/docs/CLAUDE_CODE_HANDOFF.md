@@ -1,5 +1,8 @@
 # Fighter Edge — Claude Code Handoff
 
+For the consolidated Codex audit-fix, re-audit, CI repair, verification and
+remaining-release-work report, see `docs/CODEX_SESSION_REPORT_20261026.md`.
+
 ## Post-audit onboarding CI repair (2026-10-26)
 
 The initial onboarding health check now gives each checkbox its own transparent
