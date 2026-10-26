@@ -11,8 +11,10 @@ The Android integration journey now attempts to continue before screening is
 reviewed, checks the restriction message, reviews the questions, and then
 continues. The local headless app journey, screening widget tests, format, and
 static analysis pass. A local Android emulator run was stopped during the
-debug build when the audit worktree nearly exhausted disk space; the on-device
-journey still needs a successful CI run before this slice is considered verified.
+debug build when the audit worktree nearly exhausted disk space. Full branch
+CI run 40345651914 then passed the Android integration journey, release APK
+launch, performance smoke test, and all other jobs. This verifies the device
+CI repair, not a signed store or live Firebase journey.
 
 ## Navigation, German setup and current docs (2026-10-26, audit task 9)
 
