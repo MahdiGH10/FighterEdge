@@ -8,6 +8,7 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.d
 import 'package:fighter_edge/features/fight_camp/domain/camp_screening.dart';
 import 'package:fighter_edge/features/fight_camp/presentation/camp_screening_from_draft.dart';
 import 'package:fighter_edge/screens/onboarding/onboarding_screen.dart';
+import 'package:fighter_edge/theme/glass_policy.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -52,6 +53,28 @@ Future<void> _finishQuestions(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('health screening renders in reduced transparency',
+      (tester) async {
+    tester.view.physicalSize = const Size(430, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final authRepo = await makeRepo(signedIn: true);
+    await tester.pumpWidget(wrapApp(
+      const GlassPolicyScope(
+        policy: GlassPolicy(reduceTransparency: true),
+        child: OnboardingScreen(),
+      ),
+      repo: authRepo,
+    ));
+    await tester.pumpAndSettle();
+    await _reachBody(tester);
+
+    expect(find.text('Quick health check'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await _tapVisible(tester, 'I reviewed every health question');
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('failed initial plan commit leaves setup restricted and retries',
       (tester) async {
     tester.view.physicalSize = const Size(430, 1400);
