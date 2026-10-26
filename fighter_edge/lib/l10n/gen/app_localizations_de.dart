@@ -730,9 +730,6 @@ class LDe extends L {
   String get reactionStatDuration => 'Dauer';
 
   @override
-  String get reactionStatMoves => 'Bewegungen';
-
-  @override
   String get reactionStatReact => 'Reaktion';
 
   @override
@@ -2707,7 +2704,7 @@ class LDe extends L {
 
   @override
   String get reactionMoveTimeNote =>
-      'Dazu kommt die Zeit für die Bewegungen selbst.';
+      'Dazu kommt die Zeit für die Bewegung selbst.';
 
   @override
   String get paywallBenefitCampTitle => 'Deine Camp-Woche';

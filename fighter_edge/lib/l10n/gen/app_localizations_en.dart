@@ -697,7 +697,7 @@ class LEn extends L {
 
   @override
   String get reactionSoundHint =>
-      'Sound on. Every run is shuffled — nothing to memorize.';
+      'Sound on. One move per call, shuffled every run.';
 
   @override
   String get reactionDisciplineGrappling => 'Wrestling';
@@ -722,9 +722,6 @@ class LEn extends L {
 
   @override
   String get reactionStatDuration => 'Duration';
-
-  @override
-  String get reactionStatMoves => 'Moves';
 
   @override
   String get reactionStatReact => 'Reaction';
@@ -2679,7 +2676,7 @@ class LEn extends L {
   }
 
   @override
-  String get reactionMoveTimeNote => 'Plus the time the moves themselves take.';
+  String get reactionMoveTimeNote => 'Plus the time the move itself takes.';
 
   @override
   String get paywallBenefitCampTitle => 'Your camp week';

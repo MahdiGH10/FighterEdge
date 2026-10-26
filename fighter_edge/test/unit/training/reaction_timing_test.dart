@@ -27,21 +27,20 @@ List<ReactionCommand> _all() => {
 
 void main() {
   group('Worked examples (nominal, no jitter, speech excluded)', () {
-    int gap(List<ReactionCommand> c, ReactionLevel l) =>
+    int gap(ReactionCommand c, ReactionLevel l) =>
         ReactionTiming.nominalGapMs(c, l);
 
     test('a front roll gives about 5.4 s on Beginner and 3.3 s on Advanced+',
         () {
-      expect(gap([ReactionCommands.frontRoll], ReactionLevel.beginner), 5400);
-      expect(
-          gap([ReactionCommands.frontRoll], ReactionLevel.advancedPlus), 3300);
+      expect(gap(ReactionCommands.frontRoll, ReactionLevel.beginner), 5400);
+      expect(gap(ReactionCommands.frontRoll, ReactionLevel.advancedPlus), 3300);
     });
 
     test('a single jab gives about 2.3 s on Beginner and 1.1 s on Advanced+',
         () {
       // 2280 and 1140 ms.
-      expect(gap([ReactionCommands.jab], ReactionLevel.beginner), 2280);
-      expect(gap([ReactionCommands.jab], ReactionLevel.advancedPlus), 1140);
+      expect(gap(ReactionCommands.jab, ReactionLevel.beginner), 2280);
+      expect(gap(ReactionCommands.jab, ReactionLevel.advancedPlus), 1140);
     });
 
     test('a roll never gets the old 1 s', () {
@@ -51,7 +50,7 @@ void main() {
           ReactionCommands.backRoll,
           ReactionCommands.cartwheel,
         ]) {
-          expect(gap([c], l), greaterThan(3000), reason: '$c $l');
+          expect(gap(c, l), greaterThan(3000), reason: '$c $l');
         }
       }
     });
@@ -103,43 +102,34 @@ void main() {
           ReactionTiming.moveCostMs(const ReactionCommand('new', 'New')), 1100);
     });
 
-    test('the finish cost follows the last move of the call', () {
+    test('the finish cost follows the move', () {
       expect(ReactionTiming.finishCostMs(ReactionCommands.jab), 300);
       expect(ReactionTiming.finishCostMs(ReactionCommands.stepLeft), 300);
       expect(ReactionTiming.finishCostMs(ReactionCommands.highKick), 500);
       expect(ReactionTiming.finishCostMs(ReactionCommands.teep), 500);
       expect(ReactionTiming.finishCostMs(ReactionCommands.sprawl), 500);
-      // Only the last move counts, once per call.
-      final a = ReactionTiming.movementMs(
-          [ReactionCommands.highKick, ReactionCommands.jab],
-          ReactionLevel.advanced);
-      expect(a, 1250 + 300 + 300);
     });
 
-    test('the movement is the sum of the moves at the level\'s pace', () {
-      final combo = [
-        ReactionCommands.jab,
-        ReactionCommands.cross,
-        ReactionCommands.lowKick,
-      ];
-      expect(ReactionTiming.movementMs(combo, ReactionLevel.advanced),
-          300 + 400 + 900 + 500);
-      expect(ReactionTiming.movementMs(combo, ReactionLevel.beginner),
-          (1.3 * 2100).round());
+    test('the movement is the move plus its finish at the level\'s pace', () {
+      expect(
+          ReactionTiming.movementMs(
+              ReactionCommands.lowKick, ReactionLevel.advanced),
+          900 + 500);
+      expect(
+          ReactionTiming.movementMs(
+              ReactionCommands.lowKick, ReactionLevel.beginner),
+          (1.3 * 1400).round());
     });
   });
 
   group('Levels only ever get harder', () {
-    test('margin, speed and recall fall; the rest never shrink', () {
+    test('margin and speed fall; the rest never shrink', () {
       for (var i = 1; i < _levels.length; i++) {
         final easy = ReactionTiming.of(_levels[i - 1]);
         final hard = ReactionTiming.of(_levels[i]);
         expect(hard.marginMs, lessThan(easy.marginMs));
         expect(hard.speed, lessThan(easy.speed));
-        expect(hard.recallMs, lessThan(easy.recallMs));
         expect(hard.jitter, greaterThanOrEqualTo(easy.jitter));
-        expect(hard.maxMoves, greaterThanOrEqualTo(easy.maxMoves));
-        expect(hard.minMoves, greaterThanOrEqualTo(easy.minMoves));
         expect(hard.roundWork, greaterThanOrEqualTo(easy.roundWork));
       }
     });
@@ -179,74 +169,37 @@ void main() {
 
     test('the nominal gap strictly falls with the level, for every move', () {
       for (final c in _all()) {
-        for (var n = 1; n <= 5; n++) {
-          // The same n-move call (the move repeated is fine for a cost
-          // test), judged at each level.
-          final combo = List.filled(n, c);
-          for (var i = 1; i < _levels.length; i++) {
-            expect(
-              ReactionTiming.nominalGapMs(combo, _levels[i]),
-              lessThan(ReactionTiming.nominalGapMs(combo, _levels[i - 1])),
-              reason: '$c x$n ${_levels[i]}',
-            );
-          }
-        }
-      }
-    });
-
-    test('the nominal gap strictly falls with the level, for seeded combos',
-        () {
-      final random = Random(11);
-      for (final d in ReactionDiscipline.values) {
-        for (var k = 0; k < 300; k++) {
-          final n = 1 + random.nextInt(5);
-          final combo = [
-            for (var i = 0; i < n; i++)
-              d.commands[random.nextInt(d.commands.length)],
-          ];
-          for (var i = 1; i < _levels.length; i++) {
-            expect(
-              ReactionTiming.nominalGapMs(combo, _levels[i]),
-              lessThan(ReactionTiming.nominalGapMs(combo, _levels[i - 1])),
-              reason: '$combo ${_levels[i]}',
-            );
-          }
+        for (var i = 1; i < _levels.length; i++) {
+          expect(
+            ReactionTiming.nominalGapMs(c, _levels[i]),
+            lessThan(ReactionTiming.nominalGapMs(c, _levels[i - 1])),
+            reason: '$c ${_levels[i]}',
+          );
         }
       }
     });
 
     test('the reaction the picker shows shrinks with the level', () {
-      for (final d in ReactionDiscipline.values) {
-        for (var i = 1; i < _levels.length; i++) {
-          final easy = ReactionTiming.reactionRangeMs(d, _levels[i - 1]);
-          final hard = ReactionTiming.reactionRangeMs(d, _levels[i]);
-          expect(hard.$1, lessThan(easy.$1), reason: '$d ${_levels[i]}');
-          expect(hard.$2, lessThan(easy.$2), reason: '$d ${_levels[i]}');
-        }
+      for (var i = 1; i < _levels.length; i++) {
+        final easy = ReactionTiming.reactionRangeMs(_levels[i - 1]);
+        final hard = ReactionTiming.reactionRangeMs(_levels[i]);
+        expect(hard.$1, lessThan(easy.$1), reason: '${_levels[i]}');
+        expect(hard.$2, lessThan(easy.$2), reason: '${_levels[i]}');
       }
+      // The nominal margin, less and plus the level's jitter.
       expect(
-          ReactionTiming.reactionRangeMs(
-              ReactionDiscipline.striking, ReactionLevel.beginner),
-          (1500, 1800));
-      expect(
-          ReactionTiming.reactionRangeMs(
-              ReactionDiscipline.grappling, ReactionLevel.advancedPlus),
-          (600, 600));
+          ReactionTiming.reactionRangeMs(ReactionLevel.beginner), (1125, 1875));
+      expect(ReactionTiming.reactionRangeMs(ReactionLevel.advancedPlus),
+          (390, 810));
     });
   });
 
   group('Jitter', () {
-    final combos = <List<ReactionCommand>>[
-      [ReactionCommands.jab],
-      [ReactionCommands.frontRoll],
-      [ReactionCommands.highKick, ReactionCommands.cross],
-      [
-        ReactionCommands.stepLeft,
-        ReactionCommands.hook,
-        ReactionCommands.teep,
-        ReactionCommands.sprawl,
-        ReactionCommands.backRoll,
-      ],
+    const combos = <ReactionCommand>[
+      ReactionCommands.jab,
+      ReactionCommands.frontRoll,
+      ReactionCommands.highKick,
+      ReactionCommands.backRoll,
     ];
 
     test('the floor holds even with absurd jitter', () {
@@ -273,11 +226,7 @@ void main() {
         for (final d in ReactionDiscipline.values) {
           for (final l in _levels) {
             for (var i = 0; i < 400; i++) {
-              final n = 1 + random.nextInt(5);
-              final combo = [
-                for (var k = 0; k < n; k++)
-                  d.commands[random.nextInt(d.commands.length)],
-              ];
+              final combo = d.commands[random.nextInt(d.commands.length)];
               expect(ReactionTiming.sampleGapMs(combo, l, random),
                   greaterThanOrEqualTo(ReactionTiming.floorMs(combo, l)));
             }
@@ -290,7 +239,7 @@ void main() {
       for (final combo in combos) {
         for (final l in _levels) {
           final movement = ReactionTiming.movementMs(combo, l);
-          final reaction = ReactionTiming.reactionMs(combo.length, l);
+          final reaction = ReactionTiming.reactionMs(l);
           for (final f in [-0.35, -0.1, 0.0, 0.2, 0.35]) {
             final gap = ReactionTiming.gapMs(combo, l, jitterFraction: f);
             expect(gap - movement, (reaction * (1 + f)).round(),
@@ -300,9 +249,9 @@ void main() {
       }
       // The same jitter moves a slow call and a fast call by the same amount.
       const l = ReactionLevel.advanced;
-      final slow = [ReactionCommands.backRoll];
-      final fast = [ReactionCommands.jab];
-      int shift(List<ReactionCommand> c) =>
+      const slow = ReactionCommands.backRoll;
+      const fast = ReactionCommands.jab;
+      int shift(ReactionCommand c) =>
           ReactionTiming.gapMs(c, l, jitterFraction: 0.3) -
           ReactionTiming.nominalGapMs(c, l);
       expect(shift(slow), shift(fast));
@@ -315,7 +264,7 @@ void main() {
         final j = ReactionTiming.of(l).jitter;
         for (final combo in combos) {
           final movement = ReactionTiming.movementMs(combo, l);
-          final reaction = ReactionTiming.reactionMs(combo.length, l);
+          final reaction = ReactionTiming.reactionMs(l);
           for (var i = 0; i < 500; i++) {
             final reactionPart =
                 ReactionTiming.sampleGapMs(combo, l, random) - movement;
@@ -330,9 +279,9 @@ void main() {
 
     test('scripted draws hit the extremes', () {
       const l = ReactionLevel.intermediate;
-      final combo = [ReactionCommands.jab];
+      const combo = ReactionCommands.jab;
       final movement = ReactionTiming.movementMs(combo, l);
-      final reaction = ReactionTiming.reactionMs(1, l);
+      final reaction = ReactionTiming.reactionMs(l);
 
       // Shortest: u = 0, no breather.
       expect(ReactionTiming.sampleGapMs(combo, l, _Scripted([0.0, 0.5])),
@@ -355,10 +304,10 @@ void main() {
     test('the distribution is skewed short, with the odd long breather', () {
       final random = Random(9);
       const l = ReactionLevel.advanced;
-      final combo = [ReactionCommands.jab, ReactionCommands.cross];
+      const combo = ReactionCommands.jab;
       final nominal = ReactionTiming.nominalGapMs(combo, l);
       final movement = ReactionTiming.movementMs(combo, l);
-      final reaction = ReactionTiming.reactionMs(2, l);
+      final reaction = ReactionTiming.reactionMs(l);
       final gaps = [
         for (var i = 0; i < 20000; i++)
           ReactionTiming.sampleGapMs(combo, l, random),
@@ -423,20 +372,6 @@ void main() {
     test('the timeout is twice the estimate plus a second', () {
       expect(SpeechEstimate.timeout('Jab!'),
           const Duration(milliseconds: 2 * 440 + 1000));
-    });
-
-    test('a long call gets longer than the old fixed 6 s', () {
-      final line = '${[
-        ReactionCommands.levelChangeFrontRoll,
-        ReactionCommands.levelChangeBackRoll,
-        ReactionCommands.leadUppercut,
-        ReactionCommands.middleKick,
-        ReactionCommands.pivotRight,
-      ].map((c) => c.spoken).join(', ')}!';
-      expect(SpeechEstimate.timeout(line),
-          greaterThan(const Duration(seconds: 6)));
-      expect(
-          SpeechEstimate.timeout('Jab!'), lessThan(const Duration(seconds: 6)));
     });
 
     test('every call the drill can make has a sane estimate', () {

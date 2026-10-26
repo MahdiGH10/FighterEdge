@@ -281,7 +281,7 @@ class FakeReminderGateway implements ReminderGateway {
 /// in capitals, led by its step number when it is part of a sequence
 /// ("KICK CHECK", or "2  KICK CHECK").
 Finder findDrillMove(String label) {
-  final move = RegExp(r'^(\d+  )?' + RegExp.escape(label.toUpperCase()) + r'$');
+  final move = RegExp(r'^' + RegExp.escape(label.toUpperCase()) + r'$');
   return find.byWidgetPredicate(
     (w) => w is RichText && move.hasMatch(w.text.toPlainText()),
     description: 'drill move "$label"',

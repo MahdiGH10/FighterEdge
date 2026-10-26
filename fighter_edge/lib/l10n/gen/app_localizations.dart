@@ -1312,7 +1312,7 @@ abstract class L {
   /// No description provided for @reactionSoundHint.
   ///
   /// In en, this message translates to:
-  /// **'Sound on. Every run is shuffled — nothing to memorize.'**
+  /// **'Sound on. One move per call, shuffled every run.'**
   String get reactionSoundHint;
 
   /// No description provided for @reactionDisciplineGrappling.
@@ -1362,12 +1362,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Duration'**
   String get reactionStatDuration;
-
-  /// No description provided for @reactionStatMoves.
-  ///
-  /// In en, this message translates to:
-  /// **'Moves'**
-  String get reactionStatMoves;
 
   /// No description provided for @reactionStatReact.
   ///
@@ -4642,7 +4636,7 @@ abstract class L {
   /// No description provided for @reactionMoveTimeNote.
   ///
   /// In en, this message translates to:
-  /// **'Plus the time the moves themselves take.'**
+  /// **'Plus the time the move itself takes.'**
   String get reactionMoveTimeNote;
 
   /// No description provided for @paywallBenefitCampTitle.

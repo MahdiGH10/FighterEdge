@@ -201,8 +201,8 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
   }
 }
 
-/// Duration, call length, and reaction time — the three numbers that make a
-/// level harder than the one before it — plus any extra reset or rest time.
+/// Duration and reaction time — the two numbers that make a level harder than
+/// the one before it — plus any extra reset or rest time.
 class _SpecCard extends StatelessWidget {
   final ReactionDrillSpec spec;
   const _SpecCard({required this.spec});
@@ -216,14 +216,10 @@ class _SpecCard extends StatelessWidget {
         '${seconds.format(minMs / 1000)}–${seconds.format(maxMs / 1000)}';
 
     final (fastest, slowest) = spec.reactionMs;
-    final moves = spec.minLength == spec.maxLength
-        ? '${spec.minLength}'
-        : '${spec.minLength}–${spec.maxLength}';
     final stats = [
       _Stat(
           label: l.reactionStatDuration,
           value: '${spec.rounds} × ${formatDrillClock(spec.roundDuration)}'),
-      _Stat(label: l.reactionStatMoves, value: moves),
       _Stat(label: l.reactionStatReact, value: '${range(fastest, slowest)} s'),
     ];
 
@@ -238,7 +234,7 @@ class _SpecCard extends StatelessWidget {
             blockRest.maxCalls),
     ];
 
-    // Three columns only while the labels fit; at large text they stack so
+    // Columns only while the labels fit; at large text they stack so
     // no label breaks mid-word and no unit is orphaned on its own line.
     final Widget statLayout = AppAccessibility.isLargeText(context)
         ? Column(

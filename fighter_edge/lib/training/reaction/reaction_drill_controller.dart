@@ -91,8 +91,6 @@ class ReactionDrillController extends ChangeNotifier {
 
   int _calls = 0;
   int get calls => _calls;
-  int _commands = 0;
-  int get commands => _commands;
 
   bool get hasVoice => _voice.isAvailable;
   bool get isRunning =>
@@ -126,7 +124,6 @@ class ReactionDrillController extends ChangeNotifier {
     _restLeft = Duration.zero;
     _cue = null;
     _calls = 0;
-    _commands = 0;
     return _go(countdownSeconds);
   }
 
@@ -197,7 +194,6 @@ class ReactionDrillController extends ChangeNotifier {
       }
       _cue = cue;
       _calls++;
-      _commands += cue.commands.length;
       notifyListeners();
       await _voice.say(cue.spoken);
       if (run != _run) return;

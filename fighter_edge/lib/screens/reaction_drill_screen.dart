@@ -326,9 +326,9 @@ class _Stage extends StatelessWidget {
   }
 }
 
-/// One call, as big as the screen allows. A seven-move sequence gets the same
-/// type as a single move and only shrinks if it truly does not fit — the
-/// hardest levels are where the athlete most needs to read it from the floor.
+/// One call: a single move, as big as the screen allows, and nothing else
+/// competing with it. It only shrinks if a long name ("Level change – front
+/// roll") truly does not fit.
 class _Call extends StatelessWidget {
   final ReactionCue? cue;
   final int number;
@@ -337,33 +337,17 @@ class _Call extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final commands = cue?.commands ?? const [];
-    final sequence = commands.length > 1;
+    final command = cue?.command;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
-    // Each line fits the width on its own, so one long move ("Level change
-    // – front roll") shrinks alone instead of shrinking the whole call.
-    Widget lines(Color color, double width) => SizedBox(
+    Widget move(Color color, double width) => SizedBox(
           width: width,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var i = 0; i < commands.length; i++)
-                Padding(
-                  padding:
-                      EdgeInsets.only(top: i == 0 ? Insets.none : Insets.xs),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: _MoveLine(
-                      label: commands[i].label,
-                      // In a sequence, the order is part of the call.
-                      step: sequence ? i + 1 : null,
-                      color: color,
-                    ),
-                  ),
+          child: command == null
+              ? null
+              : FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: _MoveLine(label: command.label, color: color),
                 ),
-            ],
-          ),
         );
 
     return Semantics(
@@ -380,21 +364,21 @@ class _Call extends StatelessWidget {
           const SizedBox(height: Insets.sm),
           Flexible(
             child: LayoutBuilder(
-              // The whole call shrinks only if it is too tall for the screen.
+              // The move shrinks only if it is too wide or tall for the screen.
               builder: (context, constraints) => FittedBox(
                 fit: BoxFit.scaleDown,
                 // A new call lands in the accent red and settles to white:
                 // the change of colour is what a glance from the floor
                 // catches.
                 child: reduceMotion
-                    ? lines(AppColors.textPrimary, constraints.maxWidth)
+                    ? move(AppColors.textPrimary, constraints.maxWidth)
                     : TweenAnimationBuilder<Color?>(
                         tween: ColorTween(
                           begin: AppColors.accentText,
                           end: AppColors.textPrimary,
                         ),
                         duration: MotionTokens.reveal,
-                        builder: (_, color, __) => lines(
+                        builder: (_, color, __) => move(
                             color ?? AppColors.textPrimary,
                             constraints.maxWidth),
                       ),
@@ -407,14 +391,12 @@ class _Call extends StatelessWidget {
   }
 }
 
-/// One move of a call. A compound move ("Level change – front roll") stays
-/// on one line, its second half lighter, so it reads as one move, not two.
+/// The move. A compound move ("Level change – front roll") stays on one line,
+/// its second half lighter, so it reads as one move, not two.
 class _MoveLine extends StatelessWidget {
   final String label;
-  final int? step;
   final Color color;
-  const _MoveLine(
-      {required this.label, required this.step, required this.color});
+  const _MoveLine({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -423,11 +405,6 @@ class _MoveLine extends StatelessWidget {
     return Text.rich(
       TextSpan(
         children: [
-          if (step != null)
-            TextSpan(
-              text: '$step  ',
-              style: AppType.title1(color: AppAccessibility.textMuted(context)),
-            ),
           TextSpan(text: parts.first),
           if (parts.length > 1)
             TextSpan(

@@ -3112,3 +3112,7 @@ The owner approved the direction of docs/PRODUCT_AUDIT_20261004.md: Phase 0 in f
 Next: owner decisions on TRAINING_PLAN_PROPOSAL.md (§9), NUTRITION_COMPETITOR_RESEARCH.md (§10–§16) and UI_REDESIGN_SPEC.md, then Phase 1 (plan domain with placeholder templates, weekly consistency, Today state, onboarding v2).
 - CI note: the "Integration test (Android emulator)" job sometimes hangs right after "Installing app-debug.apk" and never prints the test's start line, until the 35-min timeout cancels it (#38 once, #41 twice). The same test passes locally in ~40 s at 1080x2400 and at 320x640, and passed on rerun. Treat a hang with no test output as runner flake and rerun the job; a hang after test output is real.
 - Phase 0 is complete: #37-#41 merged on 2026-10-05.
+
+## Continuation update — 2026-10-26 (single-move reaction calls)
+
+Every Reaction call is now exactly one move, at every level and discipline: the voice says one line ("Hook!") and the screen shows that one move and nothing else. Levels differ only by pace: the reaction margin (1.5 s Beginner to 0.6 s Advanced+), the movement speed factor, jitter, round length, and wrestling block rest. Removed the multi-move settings (`minMoves`, `maxMoves`, `recallMs`, spec `minLength`/`maxLength`, the picker "Moves" stat). `ReactionCue` now holds one `command`. The picker shows the reaction range with jitter applied (for example 1.1-1.9 s on Beginner). Timing numbers for single moves are unchanged, so the worked examples still hold. The sections above that describe multi-move calls are history.

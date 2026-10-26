@@ -151,12 +151,12 @@ enum ReactionDiscipline {
 enum ReactionLevel { beginner, intermediate, advanced, advancedPlus }
 
 /// Everything that makes one level of one discipline hard: how many rounds it
-/// has and how long they are, how long each call is, and any extra breathing
-/// time. The time the athlete gets after each call comes from
+/// has and how long they are, and any extra breathing time. Every call is one
+/// move. The time the athlete gets after each call comes from
 /// [ReactionTiming], because it depends on what the call asks for.
 ///
 /// Every gap is measured from the moment the voice *finishes* the call, so
-/// a five-move sequence never eats into its own reaction time.
+/// a long line never eats into its own reaction time.
 class ReactionDrillSpec {
   final ReactionDiscipline discipline;
   final ReactionLevel level;
@@ -165,10 +165,6 @@ class ReactionDrillSpec {
   final int rounds;
   final Duration roundDuration;
   final Duration restDuration;
-
-  /// Commands per call, inclusive.
-  final int minLength;
-  final int maxLength;
 
   /// Extra rest after every few calls; null for none.
   final BlockRest? blockRest;
@@ -179,8 +175,6 @@ class ReactionDrillSpec {
     required this.rounds,
     required this.roundDuration,
     required this.restDuration,
-    required this.minLength,
-    required this.maxLength,
     this.blockRest,
   });
 
@@ -192,17 +186,14 @@ class ReactionDrillSpec {
 
   /// The reaction time after the voice stops, in ms, as (shortest, longest)
   /// before jitter, movement time not included. What the picker shows.
-  (int, int) get reactionMs =>
-      ReactionTiming.reactionRangeMs(discipline, level);
+  (int, int) get reactionMs => ReactionTiming.reactionRangeMs(level);
 
   static ReactionDrillSpec of(
     ReactionDiscipline discipline,
     ReactionLevel level,
   ) {
     final t = ReactionTiming.of(level);
-    // Wrestling calls are always a single command: rolls and sprawls are
-    // whole-body movements, not something to chain mid-sentence. Breathing
-    // room between blocks of calls is a wrestling thing too.
+    // Breathing room between blocks of calls is a wrestling thing.
     final grappling = discipline == ReactionDiscipline.grappling;
     return ReactionDrillSpec(
       discipline: discipline,
@@ -210,17 +201,15 @@ class ReactionDrillSpec {
       rounds: ReactionTiming.roundsFor(discipline),
       roundDuration: t.roundWork,
       restDuration: t.roundRest,
-      minLength: grappling ? 1 : t.minMoves,
-      maxLength: grappling ? 1 : t.maxMoves,
       blockRest: grappling ? t.grapplingBlockRest : null,
     );
   }
 }
 
-/// One call from the coach: one or more commands said as a single breath
-/// ("Step left, hook!"), then silence for the athlete to move.
+/// One call from the coach: a single move said on its own ("Hook!"), then
+/// silence for the athlete to move.
 class ReactionCue {
-  final List<ReactionCommand> commands;
+  final ReactionCommand command;
 
   /// Silence after the voice finishes, before the next call.
   final Duration gapAfter;
@@ -230,12 +219,11 @@ class ReactionCue {
   /// before the round ends.
   final Duration minGap;
 
-  const ReactionCue(this.commands, this.gapAfter,
-      {this.minGap = Duration.zero});
+  const ReactionCue(this.command, this.gapAfter, {this.minGap = Duration.zero});
 
-  /// The line the voice speaks: short, clipped, no filler words.
-  String get spoken => '${commands.map((c) => c.spoken).join(', ')}!';
+  /// The line the voice speaks: one move, clipped, no filler words.
+  String get spoken => '${command.spoken}!';
 
   @override
-  String toString() => '${commands.join(' > ')} (+${gapAfter.inMilliseconds})';
+  String toString() => '$command (+${gapAfter.inMilliseconds})';
 }

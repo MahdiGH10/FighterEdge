@@ -5,9 +5,8 @@ import 'reaction_timing.dart';
 
 /// Endless, unpredictable calls for one [ReactionDrillSpec].
 ///
-/// This is deliberately *not* a combo generator: "Step left, pivot right,
-/// sprawl" is a fine call, because the drill trains reacting, not
-/// memorizing textbook combinations.
+/// Each call is a single move: the drill trains reacting to one thing at a
+/// time, not memorizing combinations.
 ///
 /// Commands are dealt from a shuffled deck that refills when it runs out, so
 /// every command in the discipline comes up within one pass through the deck
@@ -30,10 +29,9 @@ class ReactionCueGenerator {
   }
 
   ReactionCue next() {
-    final length = _between(spec.minLength, spec.maxLength);
-    final commands = [for (var i = 0; i < length; i++) _deal()];
+    final command = _deal();
 
-    var gapMs = ReactionTiming.sampleGapMs(commands, spec.level, _random);
+    var gapMs = ReactionTiming.sampleGapMs(command, spec.level, _random);
     final block = spec.blockRest;
     if (block != null && ++_callsInBlock >= _blockSize) {
       gapMs += block.rest.inMilliseconds;
@@ -41,10 +39,10 @@ class ReactionCueGenerator {
       _blockSize = _nextBlockSize();
     }
     return ReactionCue(
-      List.unmodifiable(commands),
+      command,
       Duration(milliseconds: gapMs),
       minGap:
-          Duration(milliseconds: ReactionTiming.floorMs(commands, spec.level)),
+          Duration(milliseconds: ReactionTiming.floorMs(command, spec.level)),
     );
   }
 
