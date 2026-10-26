@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../l10n/gen/app_localizations.dart';
 import '../../../../../theme/app_icons.dart';
 
 import '../../../../../theme/app_accessibility.dart';
@@ -51,6 +52,7 @@ class _FoodStepState extends State<FoodStep> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final controller = widget.controller;
     final draft = controller.draft;
     final mealsPerDay = draft.mealsPerDay ?? 3;
@@ -58,14 +60,14 @@ class _FoodStepState extends State<FoodStep> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('Food preferences', style: AppType.title1()),
+        Text(l.fuelFoodQuestion, style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
-          "Optional now — shapes meal suggestions once recipes launch.",
+          l.fuelFoodHint,
           style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
-        Text('Diet type', style: AppType.subhead(weight: FontWeight.w800)),
+        Text(l.fuelDietType, style: AppType.subhead(weight: FontWeight.w800)),
         const SizedBox(height: Insets.sm),
         _ChipRow(
           options: _diets,
@@ -75,7 +77,7 @@ class _FoodStepState extends State<FoodStep> {
         const SizedBox(height: Insets.lg),
         AppTextField(
           controller: _allergens,
-          label: 'Allergens (comma-separated)',
+          label: l.fuelAllergens,
           icon: AppIcons.warning,
           onChanged: (_) => _commitList(_allergens,
               (list) => controller.setFoodPreferences(allergens: list)),
@@ -83,19 +85,20 @@ class _FoodStepState extends State<FoodStep> {
         const SizedBox(height: Insets.md),
         AppTextField(
           controller: _dislikes,
-          label: 'Disliked foods (comma-separated)',
+          label: l.fuelDislikes,
           icon: AppIcons.thumbsDown,
           onChanged: (_) => _commitList(_dislikes,
               (list) => controller.setFoodPreferences(dislikedFoods: list)),
         ),
         const SizedBox(height: Insets.lg),
-        Text('Meals per day', style: AppType.subhead(weight: FontWeight.w800)),
+        Text(l.fuelMealsPerDay,
+            style: AppType.subhead(weight: FontWeight.w800)),
         const SizedBox(height: Insets.sm),
         Row(
           children: [
             _StepButton(
               icon: AppIcons.minus,
-              semanticLabel: 'Fewer meals per day',
+              semanticLabel: l.fuelFewerMeals,
               onTap: mealsPerDay <= 2
                   ? null
                   : () => controller.setFoodPreferences(
@@ -108,7 +111,7 @@ class _FoodStepState extends State<FoodStep> {
             ),
             _StepButton(
               icon: AppIcons.plus,
-              semanticLabel: 'More meals per day',
+              semanticLabel: l.fuelMoreMeals,
               onTap: mealsPerDay >= 6
                   ? null
                   : () => controller.setFoodPreferences(
@@ -117,7 +120,7 @@ class _FoodStepState extends State<FoodStep> {
           ],
         ),
         const SizedBox(height: Insets.lg),
-        Text('Budget', style: AppType.subhead(weight: FontWeight.w800)),
+        Text(l.fuelBudget, style: AppType.subhead(weight: FontWeight.w800)),
         const SizedBox(height: Insets.sm),
         _ChipRow(
           options: _budgets,
@@ -125,7 +128,7 @@ class _FoodStepState extends State<FoodStep> {
           onSelected: (v) => controller.setFoodPreferences(budgetBand: v),
         ),
         const SizedBox(height: Insets.lg),
-        Text('Cooking time available',
+        Text(l.fuelCookingTime,
             style: AppType.subhead(weight: FontWeight.w800)),
         const SizedBox(height: Insets.sm),
         _ChipRow(
@@ -161,13 +164,14 @@ class _ChipRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return Wrap(
       spacing: Insets.sm,
       runSpacing: Insets.sm,
       children: [
         for (final value in options)
           ChoiceChip(
-            label: Text(_capitalize(value)),
+            label: Text(_optionLabel(l, value)),
             selected: value == selected,
             onSelected: (_) => onSelected(value),
             selectedColor: AppColors.primarySoft,
@@ -187,8 +191,20 @@ class _ChipRow extends StatelessWidget {
     );
   }
 
-  String _capitalize(String value) =>
-      value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
+  String _optionLabel(L l, String value) => switch (value) {
+        'omnivore' => l.fuelDietOmnivore,
+        'vegetarian' => l.fuelDietVegetarian,
+        'vegan' => l.fuelDietVegan,
+        'pescatarian' => l.fuelDietPescatarian,
+        'halal' => l.fuelDietHalal,
+        'low' => l.fuelBudgetLow,
+        'medium' => l.fuelBudgetMedium,
+        'high' => l.fuelBudgetHigh,
+        'quick' => l.fuelCookingQuick,
+        'moderate' => l.fuelCookingModerate,
+        'extended' => l.fuelCookingExtended,
+        _ => value,
+      };
 }
 
 class _StepButton extends StatelessWidget {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../l10n/gen/app_localizations.dart';
 
 import '../../../../../theme/app_colors.dart';
 import '../../../../../theme/app_theme.dart';
@@ -16,22 +17,22 @@ class ActivityStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final draft = controller.draft;
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('Your normal activity', style: AppType.title1()),
+        Text(l.fuelActivityQuestion, style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
-          "Day-to-day movement outside training — Fighter Edge sessions are "
-          "counted separately next.",
+          l.fuelActivityHint,
           style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
         for (final level in ActivityLevel.values)
           ChoiceCard(
-            title: NutritionCopy.activityLabel(level),
-            description: NutritionCopy.activityDescription(level),
+            title: NutritionCopy.activityLabelL(l, level),
+            description: NutritionCopy.activityDescriptionL(l, level),
             selected: draft.normalActivityLevel == level,
             onTap: () => controller.setActivityLevel(level),
           ),

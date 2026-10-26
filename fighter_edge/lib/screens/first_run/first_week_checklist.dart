@@ -36,36 +36,37 @@ class FirstWeekChecklist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final firstRun = context.watch<FirstRunController>();
     final state = context.watch<AppState>();
     // Logging a meal is not asked of an athlete who has nutrition paused.
     final showMeal = context.watch<NutritionModeController>().visible;
 
     final items = [
-      const _Item(
-        title: 'Build your plan',
-        subtitle: 'Your target and training week are set.',
+      _Item(
+        title: l.firstWeekPlanTitle,
+        subtitle: l.firstWeekPlanHint,
         icon: AppIcons.flag,
         done: true,
       ),
       _Item(
-        title: 'Take the 30-second tour',
-        subtitle: 'See where everything lives.',
+        title: l.firstWeekTourTitle,
+        subtitle: l.firstWeekTourHint,
         icon: AppIcons.compass,
         done: firstRun.tourDone,
         onTap: onStartTour,
       ),
       if (showMeal)
         _Item(
-          title: 'Log your first meal',
-          subtitle: 'One tap from Fuel. It starts your day’s score.',
+          title: l.firstWeekMealTitle,
+          subtitle: l.firstWeekMealHint,
           icon: AppIcons.forkKnife,
           done: firstRun.firstMealLogged,
           onTap: onLogMeal,
         ),
       _Item(
-        title: 'Complete a session',
-        subtitle: 'Tick one off in Train to start your streak.',
+        title: l.firstWeekSessionTitle,
+        subtitle: l.firstWeekSessionHint,
         icon: AppIcons.boxingGlove,
         done: state.completedSessionCount > 0,
         onTap: onTrain,
@@ -87,7 +88,7 @@ class FirstWeekChecklist extends StatelessWidget {
             tilePadding: const EdgeInsets.symmetric(horizontal: Insets.lg),
             childrenPadding: const EdgeInsets.fromLTRB(
                 Insets.lg, Insets.none, Insets.lg, Insets.sm),
-            title: Text('Your first week', style: AppType.headline()),
+            title: Text(l.firstWeekTitle, style: AppType.headline()),
             subtitle: Text(
                 L
                     .of(context)
@@ -113,12 +114,12 @@ class FirstWeekChecklist extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  allDone ? 'First week: set' : 'Your first week',
+                  allDone ? l.firstWeekCompletedTitle : l.firstWeekTitle,
                   style: AppType.title2(),
                 ),
               ),
               Text(
-                '$doneCount of ${items.length}',
+                l.firstWeekProgress(doneCount, items.length),
                 style: AppType.subhead(
                   weight: FontWeight.w700,
                   color: AppAccessibility.textSecondary(context),
@@ -135,14 +136,13 @@ class FirstWeekChecklist extends StatelessWidget {
           const SizedBox(height: Insets.md),
           if (allDone) ...[
             Text(
-              'Plan built, meal logged, first session done. That is a real '
-              'start — keep the streak going this week.',
+              l.firstWeekCompleteHint,
               style: AppType.callout(
                   color: AppAccessibility.textSecondary(context)),
             ),
             const SizedBox(height: Insets.lg),
             PrimaryButton(
-              'Done',
+              l.firstWeekDone,
               icon: AppIcons.check,
               expand: true,
               onPressed: () {
@@ -219,7 +219,9 @@ class _ItemRow extends StatelessWidget {
     // it is done rides along in the label instead.
     return Semantics(
       button: tappable,
-      label: item.done ? '${item.title}, done' : item.title,
+      label: item.done
+          ? L.of(context).firstWeekSemanticsDone(item.title)
+          : item.title,
       hint: item.done ? null : item.subtitle,
       excludeSemantics: true,
       child: InkWell(

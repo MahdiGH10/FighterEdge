@@ -1,6 +1,9 @@
 # FighterEdge Product and Monetization Strategy
 
-Status: approved direction for the next implementation phases
+Status: historical product strategy (2026-09). For the shipped feature set,
+read `CLAUDE_CODE_HANDOFF.md` and the current paywall. AI coaching, published
+recipes, meal plans, grocery lists, and exports below are proposals, not
+features available to buy today.
 
 ## Product promise
 

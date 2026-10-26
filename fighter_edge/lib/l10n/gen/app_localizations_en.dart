@@ -347,6 +347,150 @@ class LEn extends L {
   String get trainTabDrills => 'Drills';
 
   @override
+  String trainWeekNumber(int number) {
+    return 'WEEK $number';
+  }
+
+  @override
+  String trainWeekDone(int completed, int target) {
+    return '$completed of $target done';
+  }
+
+  @override
+  String get trainRestHint => 'Rest days never count against you';
+
+  @override
+  String get trainTodayHeading => 'TODAY';
+
+  @override
+  String trainAboutMinutes(int minutes) {
+    return 'About $minutes min';
+  }
+
+  @override
+  String get trainStartSession => 'Start session';
+
+  @override
+  String get trainThisWeekHeading => 'THIS WEEK';
+
+  @override
+  String get trainEmptyWeek =>
+      'No sessions planned yet. Your training week appears here once your camp is set up.';
+
+  @override
+  String get trainEmptyHistory => 'Complete or log a session to build history';
+
+  @override
+  String get trainHistoryTitle => 'Session history';
+
+  @override
+  String get profileAthleteFallback => 'Fighter';
+
+  @override
+  String get profileSubscriptionSection => 'Subscription';
+
+  @override
+  String get profileTrainingSection => 'Training';
+
+  @override
+  String get profileTrainingDays => 'Training days';
+
+  @override
+  String profileTrainingDaysValue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days each week',
+      one: '1 day each week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileWeightTracker => 'Weight tracker';
+
+  @override
+  String get profileWeightTrackerHint => 'Your weigh-ins and weight history';
+
+  @override
+  String get profilePreferencesSection => 'Preferences, privacy and account';
+
+  @override
+  String get profileSettingsHint =>
+      'Units, reminders, data and account controls';
+
+  @override
+  String get firstWeekPlanTitle => 'Build your plan';
+
+  @override
+  String get firstWeekPlanHint => 'Your target and training week are set.';
+
+  @override
+  String get firstWeekTourTitle => 'Take the 30-second tour';
+
+  @override
+  String get firstWeekTourHint => 'See where everything lives.';
+
+  @override
+  String get firstWeekMealTitle => 'Log your first meal';
+
+  @override
+  String get firstWeekMealHint =>
+      'One tap from Fuel. It starts your day’s score.';
+
+  @override
+  String get firstWeekSessionTitle => 'Complete a session';
+
+  @override
+  String get firstWeekSessionHint =>
+      'Complete one in Train to start building consistency.';
+
+  @override
+  String get firstWeekTitle => 'Your first week';
+
+  @override
+  String get firstWeekCompletedTitle => 'First week: set';
+
+  @override
+  String firstWeekProgress(int completed, int total) {
+    return '$completed of $total';
+  }
+
+  @override
+  String get firstWeekCompleteHint =>
+      'Plan built, meal logged, first session done. That is a real start — keep training this week.';
+
+  @override
+  String get firstWeekDone => 'Done';
+
+  @override
+  String firstWeekSemanticsDone(String title) {
+    return '$title, done';
+  }
+
+  @override
+  String get firstWinTitle => 'First meal logged.';
+
+  @override
+  String get firstWinWithNumbers =>
+      'You\'re on the board. Every meal you log shows how today stacks up against your target.';
+
+  @override
+  String get firstWinWithoutNumbers =>
+      'You\'re on the board. Keep logging what you eat.';
+
+  @override
+  String get firstWinContinue => 'Keep going';
+
+  @override
+  String sessionLogRpe(int value) {
+    return 'RPE $value / 10';
+  }
+
+  @override
+  String get sessionLogReflection => 'Quick reflection';
+
+  @override
   String get timerTitle => 'Round Timer';
 
   @override
@@ -1146,8 +1290,721 @@ class LEn extends L {
   String get welcomeProgressTitle => 'See your progress.';
 
   @override
+  String get welcomeCampTitle => 'Your camp, organised.';
+
+  @override
+  String get welcomeCampBody =>
+      'Training week, weight and fuel in one place — built around the days you can actually train.';
+
+  @override
+  String get welcomeFuelTitle => 'Fuel that matches the work.';
+
+  @override
+  String get welcomeFuelBody =>
+      'EdgeFuel sets your calories and macros from your body and your training load, then keeps score as you log.';
+
+  @override
+  String get welcomeProgressBody =>
+      'Your training rhythm, weight trend and session history show progress week over week — not just today.';
+
+  @override
+  String get welcomeWeeklyPlan => 'Weekly plan';
+
+  @override
+  String get welcomeSessionLog => 'Session log';
+
+  @override
+  String get welcomeWeighIns => 'Weigh-ins';
+
+  @override
+  String get welcomeDailyTarget => 'Daily target';
+
+  @override
+  String get welcomeMacroSplit => 'Macro split';
+
+  @override
+  String get welcomeMealLog => 'Meal log';
+
+  @override
+  String get welcomeStreaks => 'Consistency';
+
+  @override
+  String get welcomeWeightTrend => 'Weight trend';
+
+  @override
+  String get welcomeHistory => 'History';
+
+  @override
+  String get welcomeSkip => 'Skip';
+
+  @override
+  String get welcomeBuildPlan => 'Build my plan';
+
+  @override
+  String get welcomeDuration => 'About 2 minutes · 7 quick questions';
+
+  @override
+  String welcomePage(int current, int total) {
+    return 'Page $current of $total';
+  }
+
+  @override
+  String get setupCampEyebrow => 'Fresh account';
+
+  @override
+  String get setupCampQuestion => 'What should Fighter Edge build first?';
+
+  @override
+  String get setupCampHint =>
+      'Pick the outcome that should shape your first training camp.';
+
+  @override
+  String get setupNutritionEyebrow => 'Nutrition goal';
+
+  @override
+  String get setupNutritionQuestion => 'What should EdgeFuel optimize for?';
+
+  @override
+  String get setupNutritionHint =>
+      'This creates your first calorie and macro target. You can edit it later.';
+
+  @override
+  String get setupBodyEyebrow => 'Body basics';
+
+  @override
+  String get setupBodyQuestion => 'Tell us your starting point.';
+
+  @override
+  String get setupBodyHint =>
+      'No weight class needed. Use normal body details so your target is personal.';
+
+  @override
+  String get setupEquationEyebrow => 'Calorie formula';
+
+  @override
+  String get setupEquationQuestion => 'Which formula fits your body?';
+
+  @override
+  String get setupEquationHint =>
+      'Calorie formulas differ slightly between male and female physiology — about 80 kcal a day either way. It only fine-tunes your estimate, so skip it if you\'d rather.';
+
+  @override
+  String get setupActivityEyebrow => 'Daily activity';
+
+  @override
+  String get setupActivityQuestion => 'Outside the gym, how active are you?';
+
+  @override
+  String get setupActivityHint =>
+      'This is separate from training days so calories are not double-counted.';
+
+  @override
+  String get setupRhythmEyebrow => 'Training rhythm';
+
+  @override
+  String get setupRhythmQuestion => 'How many days can you train?';
+
+  @override
+  String get setupRhythmHint =>
+      'Choose a realistic week. Consistency beats an impossible plan.';
+
+  @override
+  String get setupReviewEyebrow => 'Review';
+
+  @override
+  String get setupReviewQuestion => 'Your first plan is ready.';
+
+  @override
+  String get setupReviewHint =>
+      'Fighter Edge will start you fresh: clean dashboard, training week, and an EdgeFuel target.';
+
+  @override
+  String get setupCampStructure => 'Build fight-camp structure';
+
+  @override
+  String get setupCampLoseWeight => 'Lose weight safely';
+
+  @override
+  String get setupCampGainMuscle => 'Gain muscle';
+
+  @override
+  String get setupCampTechnique => 'Improve technique';
+
+  @override
+  String get setupCampCompetition => 'Get competition ready';
+
+  @override
+  String get setupGoalLoseDescription =>
+      'Reduce body fat while preserving strength and training quality.';
+
+  @override
+  String get setupGoalMaintainLabel => 'Maintain';
+
+  @override
+  String get setupGoalMaintainDescription =>
+      'Hold your current weight and support consistent performance.';
+
+  @override
+  String get setupGoalGainDescription =>
+      'Build muscle with a controlled calorie surplus.';
+
+  @override
+  String get setupEquationHigher => 'Male physiology';
+
+  @override
+  String get setupEquationLower => 'Female physiology';
+
+  @override
+  String get setupEquationNeutral => 'Prefer not to say';
+
+  @override
+  String get setupEquationHigherHint => 'The standard formula for male bodies.';
+
+  @override
+  String get setupEquationLowerHint =>
+      'The standard formula for female bodies.';
+
+  @override
+  String get setupEquationNeutralHint =>
+      'We\'ll use the midpoint and show a slightly wider range.';
+
+  @override
+  String get setupActivityVeryLow => 'Very low';
+
+  @override
+  String get setupActivityLight => 'Light';
+
+  @override
+  String get setupActivityModerate => 'Moderate';
+
+  @override
+  String get setupActivityHigh => 'High';
+
+  @override
+  String get setupActivityVeryHigh => 'Very high';
+
+  @override
+  String get setupActivityVeryLowHint =>
+      'Mostly sitting — desk job, minimal walking.';
+
+  @override
+  String get setupActivityLightHint =>
+      'On your feet sometimes — teaching, light retail, short walks.';
+
+  @override
+  String get setupActivityModerateHint =>
+      'Regularly active — physical job, daily walking, errands on foot.';
+
+  @override
+  String get setupActivityHighHint =>
+      'Very active day-to-day — physical labor, long shifts on your feet.';
+
+  @override
+  String get setupActivityVeryHighHint =>
+      'Constant movement — manual labor, courier work, farming.';
+
+  @override
+  String get setupAge => 'Age';
+
+  @override
+  String get setupHeight => 'Height cm';
+
+  @override
+  String get setupCurrentWeight => 'Current weight kg';
+
+  @override
+  String get setupTargetMilestone => 'Target milestone in kg';
+
+  @override
+  String get setupGainMilestone => 'Gain milestone in kg';
+
+  @override
+  String get setupOptionalMilestone =>
+      'Optional: leave blank and Fighter Edge starts with a safe 5% milestone.';
+
+  @override
+  String get setupSummaryCamp => 'Camp';
+
+  @override
+  String get setupSummaryNutrition => 'Nutrition';
+
+  @override
+  String get setupSummaryExperience => 'Experience';
+
+  @override
+  String get setupSummaryTraining => 'Training';
+
+  @override
+  String get setupSummaryActivity => 'Daily activity';
+
+  @override
+  String setupDaysPerWeek(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days per week',
+      one: '1 day per week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String setupDaysUnit(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days per week',
+      one: 'day per week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get setupFewerDays => 'Fewer days';
+
+  @override
+  String get setupMoreDays => 'More days';
+
+  @override
+  String get setupCreatingPlan => 'Creating your plan...';
+
+  @override
+  String get setupStartPlan => 'Start my plan';
+
+  @override
+  String get setupContinue => 'Continue';
+
+  @override
+  String get setupSkipTarget => 'Skip detailed target for now';
+
+  @override
+  String get setupSaveError => 'Could not save setup. Try again.';
+
+  @override
+  String get setupBodyMissing => 'Complete your body details first.';
+
+  @override
+  String get setupReviewNeeded =>
+      'These details need review before we create a target.';
+
+  @override
+  String get setupOpenError => 'Could not open your plan. Try again.';
+
+  @override
+  String get setupAgeError =>
+      'Enter an age from 18 to 90 for automated targets.';
+
+  @override
+  String get setupHeightError => 'Enter height in cm, for example 178.';
+
+  @override
+  String get setupWeightError =>
+      'Enter current weight in kg, from 35 to 220 (for example 78).';
+
+  @override
+  String get setupScreeningError =>
+      'Review every health question before creating a target.';
+
+  @override
+  String get setupTargetError =>
+      'Target weight should be a realistic kg value.';
+
+  @override
+  String get setupLossTargetError =>
+      'For weight loss, target weight should be below current weight.';
+
+  @override
+  String get setupGainTargetError =>
+      'For weight gain, target weight should be above current weight.';
+
+  @override
+  String get setupHealthTitle => 'Quick health check';
+
+  @override
+  String get setupHealthHint =>
+      'We store only yes/no flags, never details. If any apply, we\'ll ask you to check with a qualified professional before showing an automated plan.';
+
+  @override
+  String get setupHealthPregnant => 'Pregnant or breastfeeding';
+
+  @override
+  String get setupHealthEatingDisorder => 'Eating-disorder history or symptoms';
+
+  @override
+  String get setupHealthDiabetes => 'Diabetes requiring medication';
+
+  @override
+  String get setupHealthKidney => 'Kidney disease';
+
+  @override
+  String get setupHealthLiver => 'Serious liver disease';
+
+  @override
+  String get setupHealthOtherDiet => 'Another clinician-managed diet';
+
+  @override
+  String get setupHealthReviewed => 'I reviewed every health question';
+
+  @override
+  String get setupReasonScreeningUnanswered =>
+      'Review the health questions before an automated target can be shown.';
+
+  @override
+  String get setupReasonScreeningNeedsReview =>
+      'Please check with a qualified professional before an automated plan.';
+
+  @override
+  String get setupReasonUnderAge =>
+      'Automated plans are only available to adults 18 and over.';
+
+  @override
+  String get setupReasonInvalidVitals =>
+      'Height, weight, or age don\'t look like valid numbers.';
+
+  @override
+  String get setupReasonUnderweight =>
+      'Your current stats indicate an underweight range, so an automated fat-loss plan is blocked.';
+
+  @override
+  String get setupReasonInvalidFatLoss =>
+      'Your target weight should be below your current weight for a fat-loss plan.';
+
+  @override
+  String get setupReasonInvalidMuscleGain =>
+      'Your target weight should be above your current weight for a muscle-gain plan.';
+
+  @override
+  String get setupReasonMissingTarget =>
+      'A target weight is needed for this goal.';
+
+  @override
+  String get setupReasonMissingPace => 'A pace is needed for this goal.';
+
+  @override
+  String get setupReasonRmrRange =>
+      'Your inputs produced an estimate outside a safe range — double-check height, weight, and age.';
+
+  @override
+  String get fuelSetupTitle => 'Fuel setup';
+
+  @override
+  String get fuelSetupSignIn => 'Sign in to set up EdgeFuel.';
+
+  @override
+  String get fuelStepGoal => 'Goal';
+
+  @override
+  String get fuelStepBody => 'Body';
+
+  @override
+  String get fuelStepActivity => 'Activity';
+
+  @override
+  String get fuelStepTraining => 'Training';
+
+  @override
+  String get fuelStepFood => 'Food';
+
+  @override
+  String get fuelStepReview => 'Review';
+
+  @override
+  String fuelStepProgress(int current, int total, String title) {
+    return 'Step $current of $total · $title';
+  }
+
+  @override
+  String get fuelSetupNext => 'Next';
+
+  @override
+  String get fuelSetupSaveError => 'Could not save your Fuel plan. Try again.';
+
+  @override
+  String get fuelGoalQuestion => 'What are you training for?';
+
+  @override
+  String get fuelGoalHint =>
+      'This sets the direction of your plan. You can adjust the pace later.';
+
+  @override
+  String get fuelBodyQuestion => 'Tell us about your body';
+
+  @override
+  String get fuelBodyHint =>
+      'Used only to estimate your energy needs — never shown publicly.';
+
+  @override
+  String get fuelAge => 'Age in years';
+
+  @override
+  String get fuelHeight => 'Height in cm';
+
+  @override
+  String get fuelCurrentWeight => 'Current weight in kg';
+
+  @override
+  String get fuelTargetWeight => 'Target weight in kg';
+
+  @override
+  String get fuelActivityQuestion => 'Your normal activity';
+
+  @override
+  String get fuelActivityHint =>
+      'Day-to-day movement outside training — Fighter Edge sessions are counted separately next.';
+
+  @override
+  String get fuelTrainingQuestion => 'Your training week';
+
+  @override
+  String get fuelTrainingHint =>
+      'Fighter Edge sessions per week — used so we never double-count training inside your activity level.';
+
+  @override
+  String get fuelFewerDays => 'Fewer training days per week';
+
+  @override
+  String get fuelMoreDays => 'More training days per week';
+
+  @override
+  String fuelDaysUnit(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days / week',
+      one: 'day / week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fuelPaceQuestion => 'How fast?';
+
+  @override
+  String get fuelPaceGentle => 'Gentle';
+
+  @override
+  String get fuelPaceStandard => 'Standard';
+
+  @override
+  String get fuelPaceUpper => 'Upper limit';
+
+  @override
+  String get fuelPaceConservative => 'Conservative';
+
+  @override
+  String get fuelPaceGentleHint => '~0.25% body weight per week.';
+
+  @override
+  String get fuelPaceStandardHint =>
+      '~0.5% body weight per week — recommended.';
+
+  @override
+  String get fuelPaceUpperHint =>
+      '~0.75% body weight per week, the automated limit.';
+
+  @override
+  String get fuelPaceConservativeHint => '~0.10–0.25% body weight per week.';
+
+  @override
+  String get fuelPaceGainHint =>
+      '~0.25–0.50% body weight per week — recommended.';
+
+  @override
+  String get fuelFoodQuestion => 'Food preferences';
+
+  @override
+  String get fuelFoodHint =>
+      'Optional now — shapes meal suggestions once recipes launch.';
+
+  @override
+  String get fuelDietType => 'Diet type';
+
+  @override
+  String get fuelDietOmnivore => 'Omnivore';
+
+  @override
+  String get fuelDietVegetarian => 'Vegetarian';
+
+  @override
+  String get fuelDietVegan => 'Vegan';
+
+  @override
+  String get fuelDietPescatarian => 'Pescatarian';
+
+  @override
+  String get fuelDietHalal => 'Halal';
+
+  @override
+  String get fuelAllergens => 'Allergens (comma-separated)';
+
+  @override
+  String get fuelDislikes => 'Disliked foods (comma-separated)';
+
+  @override
+  String get fuelMealsPerDay => 'Meals per day';
+
+  @override
+  String get fuelFewerMeals => 'Fewer meals per day';
+
+  @override
+  String get fuelMoreMeals => 'More meals per day';
+
+  @override
+  String get fuelBudget => 'Budget';
+
+  @override
+  String get fuelBudgetLow => 'Low';
+
+  @override
+  String get fuelBudgetMedium => 'Medium';
+
+  @override
+  String get fuelBudgetHigh => 'High';
+
+  @override
+  String get fuelCookingTime => 'Cooking time available';
+
+  @override
+  String get fuelCookingQuick => 'Quick';
+
+  @override
+  String get fuelCookingModerate => 'Moderate';
+
+  @override
+  String get fuelCookingExtended => 'Extended';
+
+  @override
+  String get fuelReviewMoreSteps => 'A few steps left';
+
+  @override
+  String get fuelReviewMoreStepsHint =>
+      'Finish the earlier steps to see your personalized plan.';
+
+  @override
+  String get fuelReviewUnsupported => 'We can\'t automate this yet';
+
+  @override
+  String get fuelReviewProfessional => 'Please check with a professional first';
+
+  @override
+  String get fuelReviewProfessionalIntro =>
+      'Based on what you shared, an automated plan isn\'t appropriate here:';
+
+  @override
+  String get fuelReviewProfessionalOutro =>
+      'Speak with a qualified professional before starting an automated plan. You can still track meals and habits without calorie targets.';
+
+  @override
+  String get fuelReviewTitle => 'Your plan';
+
+  @override
+  String get fuelReviewHint =>
+      'An estimate, not a diagnosis. You can revisit this any time.';
+
+  @override
+  String get fuelReviewDailyTarget => 'Daily target';
+
+  @override
+  String fuelReviewMaintenanceRange(String low, String high) {
+    return 'Maintenance range $low–$high kcal';
+  }
+
+  @override
+  String get fuelReviewAssumptions => 'Assumptions';
+
+  @override
+  String get fuelReviewGoal => 'Goal';
+
+  @override
+  String get fuelReviewEquation => 'Equation';
+
+  @override
+  String get fuelReviewActivity => 'Daily activity';
+
+  @override
+  String get fuelReviewPace => 'Pace';
+
+  @override
+  String get fuelReviewProteinBasedOn => 'Protein based on';
+
+  @override
+  String get fuelReviewConfidence => 'Confidence';
+
+  @override
+  String get fuelReviewFiber => 'Fiber range';
+
+  @override
+  String get fuelReviewWorthKnowing => 'Worth knowing';
+
+  @override
+  String get fuelReviewConfirm => 'Confirm my plan';
+
+  @override
+  String get fuelReviewFooter =>
+      'You can hide calorie numbers and use meal tracking only, or adjust these targets later in Fuel settings.';
+
+  @override
+  String get fuelConfidenceHigh => 'High confidence';
+
+  @override
+  String get fuelConfidenceMedium => 'Medium confidence';
+
+  @override
+  String get fuelConfidenceLow => 'Low confidence';
+
+  @override
+  String get fuelWarningRmr =>
+      'Your pace was reduced so your target never drops below your estimated resting energy.';
+
+  @override
+  String get fuelWarningCarbs =>
+      'Your deficit was reduced to keep enough carbohydrate for high training load.';
+
+  @override
+  String get fuelWarningProtein =>
+      'Even at maintenance calories, this protein target leaves little room for carbohydrate — consider a lower protein target or lighter training load.';
+
+  @override
+  String get fuelWarningZeroCarbs =>
+      'Carbohydrate grams were clamped to zero after fat and protein were allocated.';
+
+  @override
+  String get fuelPlanEmpty => 'No plan yet';
+
+  @override
+  String get fuelPlanEmptyHint =>
+      'Run the EdgeFuel setup to get a personalized daily target.';
+
+  @override
+  String get fuelPlanStart => 'Start setup';
+
+  @override
+  String get fuelPlanCalculationTitle => 'How this was calculated';
+
+  @override
+  String get fuelPlanMidpoint => 'midpoint';
+
+  @override
+  String fuelPlanCalculation(String rmr, String equation) {
+    return 'Estimated resting energy: $rmr kcal (Mifflin–St Jeor, $equation). Multiplied by your activity factor, then adjusted for your goal pace. This is an estimate, not a diagnosis — recalculate any time by revisiting setup.';
+  }
+
+  @override
+  String get fuelPlanRedo => 'Redo setup';
+
+  @override
   String get planReadyExplanation =>
       'Your plan is based on your goals and training days. You can adjust it as your training changes.';
+
+  @override
+  String get planReadyTitle => 'Your first Fighter Edge plan is ready';
+
+  @override
+  String get planReadyReadOnly => 'Continue read-only';
+
+  @override
+  String get planReadyDisclaimer =>
+      'Targets are estimates, not medical advice. Review your inputs anytime in EdgeFuel.';
 
   @override
   String get planReadyCalories => 'Daily calories';

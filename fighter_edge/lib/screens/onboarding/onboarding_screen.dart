@@ -241,6 +241,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
     }
     final step = OnboardingStepContent.fromIndex(
+      l: L.of(context),
       index: _step,
       campGoal: _campGoal,
       nutritionGoal: _nutritionGoal,
@@ -348,10 +349,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               const SizedBox(height: Insets.xl),
               PrimaryButton(
                 auth.isBusy || _submitting
-                    ? 'Creating your plan...'
+                    ? L.of(context).setupCreatingPlan
                     : isLastStep
-                        ? 'Start my plan'
-                        : 'Continue',
+                        ? L.of(context).setupStartPlan
+                        : L.of(context).setupContinue,
                 icon: isLastStep ? AppIconsFill.flag : AppIcons.arrowRight,
                 expand: true,
                 onPressed: auth.isBusy || _submitting ? null : _continue,
@@ -363,7 +364,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(Insets.sm),
                   child: Text(
-                    'Skip detailed target for now',
+                    L.of(context).setupSkipTarget,
                     textAlign: TextAlign.center,
                     style: AppType.subhead(
                       weight: FontWeight.w700,
@@ -528,17 +529,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       telemetry.track(TelemetryEvent.planRevealed);
     } catch (_) {
       if (!mounted) return;
-      setState(() => _error = 'Could not save setup. Try again.');
+      setState(() => _error = L.of(context).setupSaveError);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
   }
 
   Future<NutritionTarget?> _saveInitialEdgeFuelPlan(String userId) async {
+    final l = L.of(context);
     final profileDraft = _buildConfirmedNutritionDraft();
     final profile = profileDraft.toProfile();
     if (profile == null) {
-      setState(() => _error = 'Complete your body details first.');
+      setState(() => _error = L.of(context).setupBodyMissing);
       return null;
     }
 
@@ -552,8 +554,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             profileDraft.copyWith(confirmed: false),
           );
       final reason = target.reasons.isEmpty
-          ? 'These details need review before we create a target.'
-          : NutritionCopy.reason(target.reasons.first);
+          ? l.setupReviewNeeded
+          : NutritionCopy.reasonL(l, target.reasons.first);
       setState(() => _error = reason);
       return null;
     }
@@ -611,7 +613,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
     } catch (_) {
       if (!mounted) return;
-      setState(() => _error = 'Could not open your plan. Try again.');
+      setState(() => _error = L.of(context).setupOpenError);
     } finally {
       if (mounted) setState(() => _finishing = false);
     }
@@ -669,34 +671,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   String? _bodyError() {
+    final l = L.of(context);
     final age = int.tryParse(_age.text.trim());
     final height = _parseDouble(_height.text);
     final currentWeight = _parseDouble(_currentWeight.text);
     final targetWeight = _parseDouble(_targetWeight.text);
 
     if (age == null || age < 18 || age > 90) {
-      return 'Enter an age from 18 to 90 for automated targets.';
+      return l.setupAgeError;
     }
     if (height == null || height < 120 || height > 230) {
-      return 'Enter height in cm, for example 178.';
+      return l.setupHeightError;
     }
     if (currentWeight == null || currentWeight < 35 || currentWeight > 220) {
-      return 'Enter current weight in kg, from 35 to 220 (for example 78).';
+      return l.setupWeightError;
     }
     if (_screeningStatus == NutritionScreeningStatus.unanswered) {
-      return 'Review every health question before creating a target.';
+      return l.setupScreeningError;
     }
     if (_targetWeight.text.trim().isEmpty) return null;
     if (targetWeight == null || targetWeight < 35 || targetWeight > 220) {
-      return 'Target weight should be a realistic kg value.';
+      return l.setupTargetError;
     }
     if (_nutritionGoal == NutritionGoal.loseFat &&
         targetWeight >= currentWeight) {
-      return 'For weight loss, target weight should be below current weight.';
+      return l.setupLossTargetError;
     }
     if (_nutritionGoal == NutritionGoal.gainMuscle &&
         targetWeight <= currentWeight) {
-      return 'For weight gain, target weight should be above current weight.';
+      return l.setupGainTargetError;
     }
     return null;
   }

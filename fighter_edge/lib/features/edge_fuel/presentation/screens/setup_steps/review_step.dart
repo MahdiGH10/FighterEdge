@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../l10n/gen/app_localizations.dart';
 import '../../../../../theme/app_icons.dart';
 
 import '../../../../../theme/app_colors.dart';
@@ -26,11 +27,12 @@ class ReviewStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     if (!controller.canReview) {
-      return const _Message(
+      return _Message(
         icon: AppIcons.clipboardText,
-        title: 'A few steps left',
-        message: 'Finish the earlier steps to see your personalized plan.',
+        title: l.fuelReviewMoreSteps,
+        message: l.fuelReviewMoreStepsHint,
       );
     }
 
@@ -43,26 +45,26 @@ class ReviewStep extends StatelessWidget {
       case NutritionTargetStatus.unsupported:
         return _Message(
           icon: AppIcons.prohibit,
-          title: "We can't automate this yet",
-          message: target.reasons.map(NutritionCopy.reason).join('\n'),
+          title: l.fuelReviewUnsupported,
+          message: target.reasons
+              .map((code) => NutritionCopy.reasonL(l, code))
+              .join('\n'),
           tone: AppColors.negative,
         );
       case NutritionTargetStatus.needsProfessionalReview:
         return _Message(
           icon: AppIcons.firstAid,
-          title: 'Please check with a professional first',
-          message:
-              'Based on what you shared, an automated plan isn\'t appropriate here:\n'
-              '${target.reasons.map(NutritionCopy.reason).join('\n')}\n\n'
-              'Speak with a qualified professional before starting an automated plan. '
-              'You can still track meals and habits without calorie targets.',
+          title: l.fuelReviewProfessional,
+          message: '${l.fuelReviewProfessionalIntro}\n'
+              '${target.reasons.map((code) => NutritionCopy.reasonL(l, code)).join('\n')}\n\n'
+              '${l.fuelReviewProfessionalOutro}',
           tone: AppColors.warning,
         );
       case NutritionTargetStatus.needsMoreData:
-        return const _Message(
+        return _Message(
           icon: AppIcons.clipboardText,
-          title: 'A few steps left',
-          message: 'Finish the earlier steps to see your personalized plan.',
+          title: l.fuelReviewMoreSteps,
+          message: l.fuelReviewMoreStepsHint,
         );
       case NutritionTargetStatus.success:
         return _ReviewSuccess(
@@ -86,14 +88,15 @@ class _ReviewSuccess extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final draft = controller.draft;
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('Your plan', style: AppType.title1()),
+        Text(l.fuelReviewTitle, style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
-          'An estimate, not a diagnosis. You can revisit this any time.',
+          l.fuelReviewHint,
           style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
@@ -101,7 +104,7 @@ class _ReviewSuccess extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Daily target',
+              Text(l.fuelReviewDailyTarget,
                   style: AppType.micro(
                       weight: FontWeight.w700,
                       color: AppColors.textMuted,
@@ -111,7 +114,9 @@ class _ReviewSuccess extends StatelessWidget {
                   style: AppType.largeTitle()),
               const SizedBox(height: Insets.xxs),
               Text(
-                'Maintenance range ${target.maintenanceRangeLowKcal}–${target.maintenanceRangeHighKcal} kcal',
+                l.fuelReviewMaintenanceRange(
+                    target.maintenanceRangeLowKcal?.toString() ?? '—',
+                    target.maintenanceRangeHighKcal?.toString() ?? '—'),
                 style: AppType.subhead(color: AppColors.textSecondary),
               ),
             ],
@@ -128,29 +133,35 @@ class _ReviewSuccess extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Assumptions',
+              Text(l.fuelReviewAssumptions,
                   style: AppType.micro(
                       weight: FontWeight.w700,
                       color: AppColors.textMuted,
                       spacing: 0.8)),
               const SizedBox(height: Insets.sm),
               if (draft.goal != null)
-                _Assumption('Goal', NutritionCopy.goalLabel(draft.goal!)),
+                _Assumption(
+                    l.fuelReviewGoal, NutritionCopy.goalLabelL(l, draft.goal!)),
               if (target.equationProfileUsed != null)
-                _Assumption('Equation',
-                    NutritionCopy.equationLabel(target.equationProfileUsed!)),
+                _Assumption(
+                    l.fuelReviewEquation,
+                    NutritionCopy.equationLabelL(
+                        l, target.equationProfileUsed!)),
               if (draft.normalActivityLevel != null)
-                _Assumption('Daily activity',
-                    NutritionCopy.activityLabel(draft.normalActivityLevel!)),
+                _Assumption(
+                    l.fuelReviewActivity,
+                    NutritionCopy.activityLabelL(
+                        l, draft.normalActivityLevel!)),
               if (draft.goalPace != null)
-                _Assumption('Pace', NutritionCopy.paceLabel(draft.goalPace!)),
+                _Assumption(l.fuelReviewPace,
+                    NutritionCopy.paceLabelL(l, draft.goalPace!)),
               if (target.proteinReferenceWeightKg != null)
-                _Assumption('Protein based on',
+                _Assumption(l.fuelReviewProteinBasedOn,
                     '${target.proteinReferenceWeightKg!.toStringAsFixed(1)} kg'),
               if (target.confidence != null)
-                _Assumption('Confidence',
-                    NutritionCopy.confidenceLabel(target.confidence!)),
-              _Assumption('Fiber range',
+                _Assumption(l.fuelReviewConfidence,
+                    NutritionCopy.confidenceLabelL(l, target.confidence!)),
+              _Assumption(l.fuelReviewFiber,
                   '${target.fiberGramsLow}–${target.fiberGramsHigh} g'),
             ],
           ),
@@ -167,7 +178,7 @@ class _ReviewSuccess extends StatelessWidget {
                     const Icon(AppIcons.info,
                         color: AppColors.warning, size: 18),
                     const SizedBox(width: Insets.sm),
-                    Text('Worth knowing',
+                    Text(l.fuelReviewWorthKnowing,
                         style: AppType.subhead(weight: FontWeight.w800)),
                   ],
                 ),
@@ -175,7 +186,7 @@ class _ReviewSuccess extends StatelessWidget {
                 for (final code in target.warnings)
                   Padding(
                     padding: const EdgeInsets.only(bottom: Insets.xs),
-                    child: Text('• ${NutritionCopy.warning(code)}',
+                    child: Text('• ${NutritionCopy.warningL(l, code)}',
                         style: AppType.subhead(color: AppColors.textSecondary)),
                   ),
               ],
@@ -184,15 +195,14 @@ class _ReviewSuccess extends StatelessWidget {
         ],
         const SizedBox(height: Insets.xl),
         PrimaryButton(
-          'Confirm my plan',
+          l.fuelReviewConfirm,
           icon: AppIcons.checkCircle,
           expand: true,
           onPressed: () => onConfirmed(),
         ),
         const SizedBox(height: Insets.md),
         Text(
-          'You can hide calorie numbers and use meal tracking only, or adjust '
-          'these targets later in Fuel settings.',
+          l.fuelReviewFooter,
           textAlign: TextAlign.center,
           style: AppType.micro(color: AppColors.textMuted),
         ),
@@ -215,10 +225,11 @@ class _MacroRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final chips = [
-      _MacroChip('Protein', protein, AppColors.protein),
-      _MacroChip('Carbs', carbs, AppColors.carbs),
-      _MacroChip('Fats', fats, AppColors.fats),
+      _MacroChip(l.nutritionProtein, protein, AppColors.protein),
+      _MacroChip(l.nutritionCarbs, carbs, AppColors.carbs),
+      _MacroChip(l.nutritionFats, fats, AppColors.fats),
     ];
     if (AppAccessibility.isLargeText(context)) {
       return Column(

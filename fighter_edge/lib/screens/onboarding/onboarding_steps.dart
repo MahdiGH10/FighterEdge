@@ -4,8 +4,8 @@ import '../../theme/app_icons.dart';
 
 import '../../features/edge_fuel/domain/models/nutrition_enums.dart';
 import '../../features/edge_fuel/domain/models/nutrition_profile.dart';
-import '../../features/edge_fuel/presentation/nutrition_copy.dart';
 import '../../features/edge_fuel/presentation/widgets/safety_screening_fields.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../theme/app_accessibility.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
@@ -28,6 +28,7 @@ class OnboardingStepContent {
   });
 
   factory OnboardingStepContent.fromIndex({
+    required L l,
     required int index,
     required String campGoal,
     required NutritionGoal nutritionGoal,
@@ -55,29 +56,28 @@ class OnboardingStepContent {
   }) {
     return switch (index) {
       0 => OnboardingStepContent(
-          eyebrow: 'Fresh account',
-          title: 'What should Fighter Edge build first?',
-          subtitle:
-              'Pick the outcome that should shape your first training camp.',
+          eyebrow: l.setupCampEyebrow,
+          title: l.setupCampQuestion,
+          subtitle: l.setupCampHint,
           child: ChoiceWrap(
             values: campGoals,
             selected: campGoal,
+            labelFor: (value) => setupCampGoal(l, value),
             onSelected: onCampGoal,
           ),
         ),
       1 => OnboardingStepContent(
-          eyebrow: 'Nutrition goal',
-          title: 'What should EdgeFuel optimize for?',
-          subtitle:
-              'This creates your first calorie and macro target. You can edit it later.',
+          eyebrow: l.setupNutritionEyebrow,
+          title: l.setupNutritionQuestion,
+          subtitle: l.setupNutritionHint,
           child: Column(
             children: [
               for (final goal in NutritionGoal.values)
                 SelectCard<NutritionGoal>(
                   value: goal,
                   selected: nutritionGoal,
-                  title: NutritionCopy.goalLabel(goal),
-                  description: NutritionCopy.goalDescription(goal),
+                  title: setupGoalLabel(l, goal),
+                  description: setupGoalDescription(l, goal),
                   icon: switch (goal) {
                     NutritionGoal.loseFat => AppIcons.trendDown,
                     NutritionGoal.maintain => AppIcons.scales,
@@ -89,10 +89,9 @@ class OnboardingStepContent {
           ),
         ),
       2 => OnboardingStepContent(
-          eyebrow: 'Body basics',
-          title: 'Tell us your starting point.',
-          subtitle:
-              'No weight class needed. Use normal body details so your target is personal.',
+          eyebrow: l.setupBodyEyebrow,
+          title: l.setupBodyQuestion,
+          subtitle: l.setupBodyHint,
           child: BodyInputs(
             age: age,
             height: height,
@@ -109,17 +108,17 @@ class OnboardingStepContent {
       // Its own step, not a footnote under the body fields: one decision per
       // screen, and this one needs a sentence of explanation to be fair.
       3 => OnboardingStepContent(
-          eyebrow: 'Calorie formula',
-          title: 'Which formula fits your body?',
-          subtitle: NutritionCopy.equationExplainer,
+          eyebrow: l.setupEquationEyebrow,
+          title: l.setupEquationQuestion,
+          subtitle: l.setupEquationHint,
           child: Column(
             children: [
               for (final profile in EquationProfile.values)
                 SelectCard<EquationProfile>(
                   value: profile,
                   selected: equationProfile,
-                  title: NutritionCopy.equationLabel(profile),
-                  description: NutritionCopy.equationDescription(profile),
+                  title: setupEquationLabel(l, profile),
+                  description: setupEquationDescription(l, profile),
                   icon: AppIcons.calculator,
                   onSelected: onEquationProfile,
                 ),
@@ -127,18 +126,17 @@ class OnboardingStepContent {
           ),
         ),
       4 => OnboardingStepContent(
-          eyebrow: 'Daily activity',
-          title: 'Outside the gym, how active are you?',
-          subtitle:
-              'This is separate from training days so calories are not double-counted.',
+          eyebrow: l.setupActivityEyebrow,
+          title: l.setupActivityQuestion,
+          subtitle: l.setupActivityHint,
           child: Column(
             children: [
               for (final level in ActivityLevel.values)
                 SelectCard<ActivityLevel>(
                   value: level,
                   selected: activity,
-                  title: NutritionCopy.activityLabel(level),
-                  description: NutritionCopy.activityDescription(level),
+                  title: setupActivityLabel(l, level),
+                  description: setupActivityDescription(l, level),
                   icon: AppIcons.personSimpleWalk,
                   onSelected: onActivity,
                 ),
@@ -146,15 +144,15 @@ class OnboardingStepContent {
           ),
         ),
       5 => OnboardingStepContent(
-          eyebrow: 'Training rhythm',
-          title: 'How many days can you train?',
-          subtitle:
-              'Choose a realistic week. Consistency beats an impossible plan.',
+          eyebrow: l.setupRhythmEyebrow,
+          title: l.setupRhythmQuestion,
+          subtitle: l.setupRhythmHint,
           child: Column(
             children: [
               ChoiceWrap(
                 values: levels,
                 selected: level,
+                labelFor: (value) => onboardingLevel(l, value),
                 onSelected: onLevel,
               ),
               const SizedBox(height: Insets.xl),
@@ -163,10 +161,9 @@ class OnboardingStepContent {
           ),
         ),
       _ => OnboardingStepContent(
-          eyebrow: 'Review',
-          title: 'Your first plan is ready.',
-          subtitle:
-              'Fighter Edge will start you fresh: clean dashboard, training week, and an EdgeFuel target.',
+          eyebrow: l.setupReviewEyebrow,
+          title: l.setupReviewQuestion,
+          subtitle: l.setupReviewHint,
           child: ReviewSummary(
             campGoal: campGoal,
             nutritionGoal: nutritionGoal,
@@ -178,6 +175,56 @@ class OnboardingStepContent {
     };
   }
 }
+
+/// Labels are translated at display time; saved setup values remain stable.
+String setupCampGoal(L l, String value) => switch (value) {
+      'Lose weight safely' => l.setupCampLoseWeight,
+      'Gain muscle' => l.setupCampGainMuscle,
+      'Improve technique' => l.setupCampTechnique,
+      'Get competition ready' => l.setupCampCompetition,
+      _ => l.setupCampStructure,
+    };
+
+String setupGoalLabel(L l, NutritionGoal goal) => switch (goal) {
+      NutritionGoal.loseFat => l.onboardingLoseFat,
+      NutritionGoal.maintain => l.setupGoalMaintainLabel,
+      NutritionGoal.gainMuscle => l.onboardingGainMuscle,
+    };
+
+String setupGoalDescription(L l, NutritionGoal goal) => switch (goal) {
+      NutritionGoal.loseFat => l.setupGoalLoseDescription,
+      NutritionGoal.maintain => l.setupGoalMaintainDescription,
+      NutritionGoal.gainMuscle => l.setupGoalGainDescription,
+    };
+
+String setupEquationLabel(L l, EquationProfile profile) => switch (profile) {
+      EquationProfile.higherOffset => l.setupEquationHigher,
+      EquationProfile.lowerOffset => l.setupEquationLower,
+      EquationProfile.neutral => l.setupEquationNeutral,
+    };
+
+String setupEquationDescription(L l, EquationProfile profile) =>
+    switch (profile) {
+      EquationProfile.higherOffset => l.setupEquationHigherHint,
+      EquationProfile.lowerOffset => l.setupEquationLowerHint,
+      EquationProfile.neutral => l.setupEquationNeutralHint,
+    };
+
+String setupActivityLabel(L l, ActivityLevel level) => switch (level) {
+      ActivityLevel.veryLow => l.setupActivityVeryLow,
+      ActivityLevel.light => l.setupActivityLight,
+      ActivityLevel.moderate => l.setupActivityModerate,
+      ActivityLevel.high => l.setupActivityHigh,
+      ActivityLevel.veryHigh => l.setupActivityVeryHigh,
+    };
+
+String setupActivityDescription(L l, ActivityLevel level) => switch (level) {
+      ActivityLevel.veryLow => l.setupActivityVeryLowHint,
+      ActivityLevel.light => l.setupActivityLightHint,
+      ActivityLevel.moderate => l.setupActivityModerateHint,
+      ActivityLevel.high => l.setupActivityHighHint,
+      ActivityLevel.veryHigh => l.setupActivityVeryHighHint,
+    };
 
 class BodyInputs extends StatelessWidget {
   final TextEditingController age;
@@ -207,21 +254,22 @@ class BodyInputs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final showTarget = nutritionGoal != NutritionGoal.maintain;
     final targetLabel = nutritionGoal == NutritionGoal.loseFat
-        ? 'Target milestone in kg'
-        : 'Gain milestone in kg';
+        ? l.setupTargetMilestone
+        : l.setupGainMilestone;
 
     final ageField = AppTextField(
       controller: age,
-      label: 'Age',
+      label: l.setupAge,
       icon: AppIcons.cake,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
     );
     final heightField = AppTextField(
       controller: height,
-      label: 'Height cm',
+      label: l.setupHeight,
       icon: AppIcons.ruler,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [_decimalInput],
@@ -247,7 +295,7 @@ class BodyInputs extends StatelessWidget {
         const SizedBox(height: Insets.md),
         AppTextField(
           controller: currentWeight,
-          label: 'Current weight kg',
+          label: l.setupCurrentWeight,
           icon: AppIcons.scales,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [_decimalInput],
@@ -265,7 +313,7 @@ class BodyInputs extends StatelessWidget {
           ),
           const SizedBox(height: Insets.sm),
           Text(
-            'Optional: leave blank and Fighter Edge starts with a safe 5% milestone.',
+            l.setupOptionalMilestone,
             style: AppType.subhead(
               weight: FontWeight.w500,
               color: AppColors.textMuted,
@@ -312,16 +360,20 @@ class ReviewSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return Column(
       children: [
-        _SummaryRow('Camp', campGoal, AppIcons.flag),
-        _SummaryRow('Nutrition', NutritionCopy.goalLabel(nutritionGoal),
-            AppIcons.forkKnife),
-        _SummaryRow('Experience', level, AppIcons.medal),
-        _SummaryRow('Training', '$days days per week', AppIcons.boxingGlove),
         _SummaryRow(
-          'Daily activity',
-          NutritionCopy.activityLabel(activity),
+            l.setupSummaryCamp, setupCampGoal(l, campGoal), AppIcons.flag),
+        _SummaryRow(l.setupSummaryNutrition, setupGoalLabel(l, nutritionGoal),
+            AppIcons.forkKnife),
+        _SummaryRow(l.setupSummaryExperience, onboardingLevel(l, level),
+            AppIcons.medal),
+        _SummaryRow(l.setupSummaryTraining, l.setupDaysPerWeek(days),
+            AppIcons.boxingGlove),
+        _SummaryRow(
+          l.setupSummaryActivity,
+          setupActivityLabel(l, activity),
           AppIcons.personSimpleWalk,
         ),
       ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../l10n/gen/app_localizations.dart';
 
 import '../../../../../theme/app_colors.dart';
 import '../../../../../theme/app_theme.dart';
@@ -15,21 +16,22 @@ class GoalStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final draft = controller.draft;
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('What are you training for?', style: AppType.title1()),
+        Text(l.fuelGoalQuestion, style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
-          "This sets the direction of your plan. You can adjust the pace later.",
+          l.fuelGoalHint,
           style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
         for (final goal in NutritionGoal.values)
           ChoiceCard(
-            title: NutritionCopy.goalLabel(goal),
-            description: NutritionCopy.goalDescription(goal),
+            title: NutritionCopy.goalLabelL(l, goal),
+            description: NutritionCopy.goalDescriptionL(l, goal),
             selected: draft.goal == goal,
             onTap: () => controller.setGoal(goal),
           ),

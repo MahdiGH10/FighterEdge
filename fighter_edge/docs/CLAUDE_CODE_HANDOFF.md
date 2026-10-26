@@ -1,5 +1,21 @@
 # Fighter Edge — Claude Code Handoff
 
+## Navigation, German setup and current docs (2026-10-26, audit task 9)
+
+Bottom navigation now exposes one accessible label and tap action per tab.
+Welcome, initial onboarding, health screening, plan reveal, Train, Profile,
+Fuel setup and plan, and the first-week surfaces resolve their fixed interface
+copy through EN/DE resources; saved camp goals
+remain stable English codes and are translated only when displayed. Train dates
+follow the selected locale. German widget tests cover these journeys, and the
+nav semantics action is tested directly. The README and current-facing
+handoffs identify the AI and recipe material in older planning docs as
+historical proposals rather than purchasable features. A broader translation
+pass is still needed in other secondary screens.
+
+The nine audit fix tasks are complete after this slice merges. Live backend
+deployment and the owner-only release checks remain separate work.
+
 ## Weigh-ins and onboarding draft (2026-10-26, F16/F18)
 
 Saved weigh-ins now have Edit and Delete actions in the Weight history. Edits

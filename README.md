@@ -6,7 +6,7 @@ what should I do next?**
 
 The product combines a personalized EdgeFuel nutrition loop, training and
 weight logging, a round timer, onboarding, and an optional Pro subscription for
-deeper analytics, premium recipes, technique content, and the AI Fighter Brief.
+the full drill library, session mode, and training-day fuel.
 The app is intentionally dark, focused, and athletic rather than a generic
 fitness dashboard.
 
@@ -17,7 +17,7 @@ fighter_edge/
   lib/                         Flutter application
     auth/                      Firebase/local authentication contracts
     billing/                   RevenueCat gateway and entitlement UI
-    features/edge_fuel/        Nutrition domain, data, UI, and AI boundary
+    features/edge_fuel/        Nutrition domain, data, and UI
     observability/             Privacy-safe analytics and error reporting
     routing/                   App routes and navigation
     screens/                   Product screens
@@ -44,12 +44,13 @@ Implemented and tested:
 - Fresh first-run onboarding with a personalized plan reveal, guided tour, and
   first-win checklist.
 - EdgeFuel deterministic nutrition calculations, safety checks, daily targets,
-  food logging, allergen filtering, serving scaling, and recipe catalog.
+  food logging, allergen filtering, and serving scaling. The recipe catalog has
+  no published recipes yet.
 - Training sessions, streaks, weight tracking, charts, and a round timer.
 - Free/Pro feature gates, annual-first paywall presentation, restore/manage
   purchase affordances, and privacy-safe premium conversion telemetry.
-- Server-backed EdgeFuel AI boundary with schema validation, quota handling, and
-  safety enforcement. The deterministic target remains authoritative.
+- A deterministic Corner Brief line on Home. AI proxy and validation code
+  remains in the backend but is not offered as a current in-app feature.
 - Firestore rules that prevent clients from granting or modifying billing
   entitlements.
 
@@ -59,7 +60,7 @@ Not yet production-complete:
   `REVENUECAT_WEBHOOK_AUTH`.
 - App Store/Google Play products and sandbox purchase/restore tests still need
   account-level configuration.
-- Production legal URLs, account deletion verification, store metadata,
+- Production legal URLs, live account deletion verification, store metadata,
   release signing, and final device QA remain release work.
 
 Never place OpenRouter, Firebase Admin, RevenueCat, or store secrets in this
@@ -148,7 +149,7 @@ builds take:
 - [`fighter_edge/docs/DESIGN_SYSTEM_PLAN.md`](fighter_edge/docs/DESIGN_SYSTEM_PLAN.md)
   — design-system phases and decisions.
 - [`fighter_edge/docs/PRODUCT_MONETIZATION_STRATEGY.md`](fighter_edge/docs/PRODUCT_MONETIZATION_STRATEGY.md)
-  — free/Pro value strategy.
+  — historical free/Pro proposals; verify the current paywall before using it.
 - [`fighter_edge/docs/RELEASE_QUALITY_AND_TEST_STRATEGY.md`](fighter_edge/docs/RELEASE_QUALITY_AND_TEST_STRATEGY.md)
   — quality gates and release planning.
 - [`fighter_edge/docs/OBSERVABILITY_AND_STORE_SETUP.md`](fighter_edge/docs/OBSERVABILITY_AND_STORE_SETUP.md)
