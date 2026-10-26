@@ -721,6 +721,21 @@ class LEn extends L {
   String get reactionLevelAdvancedPlus => 'Advanced+';
 
   @override
+  String get reactionCoachVoice => 'Coach voice';
+
+  @override
+  String get reactionVoiceUsMale => 'US male';
+
+  @override
+  String get reactionVoiceUkMale => 'UK male';
+
+  @override
+  String get reactionVoiceUsFemale => 'US female';
+
+  @override
+  String get reactionVoicePhone => 'Phone voice';
+
+  @override
   String get reactionPaceSteady => 'Steady';
 
   @override

@@ -727,6 +727,21 @@ class LDe extends L {
   String get reactionLevelAdvancedPlus => 'Fortgeschritten+';
 
   @override
+  String get reactionCoachVoice => 'Coach-Stimme';
+
+  @override
+  String get reactionVoiceUsMale => 'US männlich';
+
+  @override
+  String get reactionVoiceUkMale => 'UK männlich';
+
+  @override
+  String get reactionVoiceUsFemale => 'US weiblich';
+
+  @override
+  String get reactionVoicePhone => 'Handy-Stimme';
+
+  @override
   String get reactionPaceSteady => 'Gleichmäßig';
 
   @override

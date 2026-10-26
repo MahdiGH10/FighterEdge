@@ -1357,6 +1357,36 @@ abstract class L {
   /// **'Advanced+'**
   String get reactionLevelAdvancedPlus;
 
+  /// No description provided for @reactionCoachVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach voice'**
+  String get reactionCoachVoice;
+
+  /// No description provided for @reactionVoiceUsMale.
+  ///
+  /// In en, this message translates to:
+  /// **'US male'**
+  String get reactionVoiceUsMale;
+
+  /// No description provided for @reactionVoiceUkMale.
+  ///
+  /// In en, this message translates to:
+  /// **'UK male'**
+  String get reactionVoiceUkMale;
+
+  /// No description provided for @reactionVoiceUsFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'US female'**
+  String get reactionVoiceUsFemale;
+
+  /// No description provided for @reactionVoicePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone voice'**
+  String get reactionVoicePhone;
+
   /// No description provided for @reactionPaceSteady.
   ///
   /// In en, this message translates to:

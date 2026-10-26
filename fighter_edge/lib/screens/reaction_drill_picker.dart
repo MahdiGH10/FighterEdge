@@ -12,8 +12,10 @@ import '../theme/app_accessibility.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../training/reaction/coach_voice.dart';
+import '../training/reaction/coach_voice_choice.dart';
 import '../training/reaction/reaction_cue_generator.dart';
 import '../training/reaction/reaction_drill.dart';
+import '../training/reaction/selectable_coach_voice.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/premium_effects.dart';
@@ -32,6 +34,13 @@ String reactionLevelLabel(L l, ReactionLevel level) => switch (level) {
       ReactionLevel.intermediate => l.reactionLevelIntermediate,
       ReactionLevel.advanced => l.reactionLevelAdvanced,
       ReactionLevel.advancedPlus => l.reactionLevelAdvancedPlus,
+    };
+
+String reactionVoiceLabel(L l, CoachVoiceChoice voice) => switch (voice) {
+      CoachVoiceChoice.usMale => l.reactionVoiceUsMale,
+      CoachVoiceChoice.ukMale => l.reactionVoiceUkMale,
+      CoachVoiceChoice.usFemale => l.reactionVoiceUsFemale,
+      CoachVoiceChoice.phone => l.reactionVoicePhone,
     };
 
 String reactionPaceLabel(L l, ReactionPace pace) => switch (pace) {
@@ -133,6 +142,14 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
     await voice.say(ReactionCueGenerator(_spec).next().spoken);
   }
 
+  /// Switches the coach and lets the athlete hear it straight away.
+  Future<void> _pickVoice(
+      SelectableCoachVoice voices, CoachVoiceChoice choice) async {
+    await voices.select(choice);
+    if (!mounted) return;
+    await _testVoice();
+  }
+
   void _start() {
     Navigator.of(context).push(CupertinoPageRoute(
       builder: (_) => ReactionDrillScreen(spec: _spec),
@@ -143,6 +160,7 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final spec = _spec;
+    final voices = context.read<SelectableCoachVoice?>();
     return ListView(
       padding: EdgeInsets.fromLTRB(Insets.lg, Insets.none, Insets.lg,
           ScreenScaffold.tabBottomPadding(context)),
@@ -160,6 +178,29 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
                     weight: FontWeight.w500,
                     color: AppAccessibility.textSecondary(context)),
               ),
+              if (voices != null) ...[
+                const SizedBox(height: Insets.md),
+                Text(
+                  l.reactionCoachVoice.toUpperCase(),
+                  style: AppType.micro(
+                      weight: FontWeight.w800,
+                      color: AppAccessibility.textMuted(context)),
+                ),
+                const SizedBox(height: Insets.xs),
+                ValueListenableBuilder<CoachVoiceChoice>(
+                  valueListenable: voices.choiceListenable,
+                  builder: (context, choice, _) => FilterChips(
+                    options: [
+                      for (final v in CoachVoiceChoice.values)
+                        reactionVoiceLabel(l, v),
+                    ],
+                    selectedIndex: choice.index,
+                    onSelected: (i) =>
+                        _pickVoice(voices, CoachVoiceChoice.values[i]),
+                    columns: 2,
+                  ),
+                ),
+              ],
               const SizedBox(height: Insets.sm),
               GhostButton(
                 l.reactionTestVoice,
