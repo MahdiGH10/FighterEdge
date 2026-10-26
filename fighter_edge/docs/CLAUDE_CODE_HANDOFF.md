@@ -1,5 +1,18 @@
 # Fighter Edge — Claude Code Handoff
 
+## Weigh-ins and onboarding draft (2026-10-26, F16/F18)
+
+Saved weigh-ins now have Edit and Delete actions in the Weight history. Edits
+keep the original record ID and date; deletes remove the repository record,
+and both immediately recalculate the weight trend. The unimplemented Body Fat
+and Measurements tabs have been removed. Onboarding saves its current step,
+answers and ready-plan state in an account-keyed device draft after health-data
+consent. It restores on restart, clears on successful completion or account
+deletion, and guards plan submission and finishing against repeated taps.
+Repository, widget and restart tests cover these paths. No signed-device check
+was performed. The next serial slice is the small navigation, localization and
+documentation cleanup.
+
 ## Trusted write boundary (2026-10-26, F10/F11)
 
 Firestore rules now require versioned health consent and a live server-owned

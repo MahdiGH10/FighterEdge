@@ -24,8 +24,6 @@ import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/animated_count.dart';
 import '../widgets/app_scaffold.dart';
-import '../widgets/empty_state.dart';
-import '../widgets/filter_chips.dart';
 import '../widgets/number_hero.dart';
 import '../widgets/stat_card.dart';
 
@@ -40,8 +38,6 @@ class WeightTrackerScreen extends StatefulWidget {
 }
 
 class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
-  int _tab = 0;
-
   @override
   Widget build(BuildContext context) {
     if (!context.watch<NutritionModeController>().numbersVisible) {
@@ -60,52 +56,19 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
       // A header action, like Nutrition's "Add food", rather than a stock
       // floating button hovering over the history list.
       actions: [
-        if (_tab == 0)
-          HeaderIcon(
-            AppIcons.plus,
-            label: L.of(context).weightAddWeighIn,
-            onTap: () => _addWeighIn(context, state),
-          ),
+        HeaderIcon(
+          AppIcons.plus,
+          label: L.of(context).weightAddWeighIn,
+          onTap: () => _addWeighIn(context, state),
+        ),
       ],
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
-            child: FilterChips(
-              options: const ['Weight', 'Body Fat', 'Measurements'],
-              selectedIndex: _tab,
-              onSelected: (i) => setState(() => _tab = i),
-              // Sized to their labels, so "Measurements" is never cut to
-              // "Measure…"; at large text the row scrolls with an edge fade.
-            ),
-          ),
-          const SizedBox(height: Insets.xl),
-          Expanded(
-            child: IndexedStack(
-              index: _tab,
-              children: [
-                _WeightView(
-                  state: state,
-                  delta: delta,
-                  losing: losing,
-                  goalKg: goalKg,
-                ),
-                const EmptyState(
-                  icon: AppIcons.percent,
-                  title: 'Body Fat',
-                  message:
-                      'Log a body-fat measurement to start\ntracking your composition trend.',
-                ),
-                const EmptyState(
-                  icon: AppIcons.ruler,
-                  title: 'Measurements',
-                  message:
-                      'Track chest, waist, arms and more\nto see where the weight is moving.',
-                ),
-              ],
-            ),
-          ),
-        ],
+      body: _WeightView(
+        state: state,
+        delta: delta,
+        losing: losing,
+        goalKg: goalKg,
+        onEdit: (entry) => _editWeighIn(context, state, entry),
+        onDelete: (entry) => _deleteWeighIn(context, state, entry),
       ),
     );
   }
@@ -120,6 +83,40 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
       AppHaptics.commit();
     }
   }
+
+  Future<void> _editWeighIn(
+      BuildContext context, AppState state, WeightEntry entry) async {
+    final value = await showDialog<double>(
+      context: context,
+      builder: (_) => _WeighInDialog(state: state, initialKg: entry.kg),
+    );
+    if (value != null) {
+      state.updateWeight(entry, state.weightToKg(value));
+      AppHaptics.commit();
+    }
+  }
+
+  Future<void> _deleteWeighIn(
+      BuildContext context, AppState state, WeightEntry entry) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(L.of(dialogContext).weightDeleteWeighIn),
+        content: Text(L.of(dialogContext).weightDeleteConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(L.of(dialogContext).commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(L.of(dialogContext).commonDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) state.deleteWeight(entry);
+  }
 }
 
 /// The realistic weigh-in range, in kg. Same limits the onboarding form
@@ -131,7 +128,8 @@ const double _maxWeighInKg = 220;
 /// animation. Typed in the user's unit; the caller converts to kg.
 class _WeighInDialog extends StatefulWidget {
   final AppState state;
-  const _WeighInDialog({required this.state});
+  final double? initialKg;
+  const _WeighInDialog({required this.state, this.initialKg});
 
   @override
   State<_WeighInDialog> createState() => _WeighInDialogState();
@@ -149,10 +147,11 @@ class _WeighInDialogState extends State<_WeighInDialog> {
     // the locale-formatted pre-fill happens here, not in initState; the
     // flag keeps a later dependency change from overwriting a typed edit.
     final s = widget.state;
-    if (!_prefilled && s.latestWeight != 0) {
+    final initial = widget.initialKg ?? s.latestWeight;
+    if (!_prefilled && initial != 0) {
       _prefilled = true;
-      _controller.text = formatFixedDecimal(s.displayWeight(s.latestWeight),
-          Localizations.localeOf(context).toString());
+      _controller.text = formatFixedDecimal(
+          s.displayWeight(initial), Localizations.localeOf(context).toString());
     }
   }
 
@@ -180,7 +179,9 @@ class _WeighInDialogState extends State<_WeighInDialog> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return AlertDialog(
-      title: Text('Add Weigh-In', style: AppType.title2()),
+      title: Text(
+          widget.initialKg == null ? 'Add Weigh-In' : l.weightEditWeighIn,
+          style: AppType.title2()),
       content: TextField(
         controller: _controller,
         autofocus: true,
@@ -222,17 +223,21 @@ class _WeighInDialogState extends State<_WeighInDialog> {
   }
 }
 
-/// Tab 0 — current weight, trend chart, and weigh-in history.
+/// Current weight, trend chart, and editable weigh-in history.
 class _WeightView extends StatelessWidget {
   final AppState state;
   final double delta;
   final bool losing;
   final double? goalKg;
+  final ValueChanged<WeightEntry> onEdit;
+  final ValueChanged<WeightEntry> onDelete;
   const _WeightView({
     required this.state,
     required this.delta,
     required this.losing,
     required this.goalKg,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   String _fmt(double kg, String locale) =>
@@ -345,6 +350,8 @@ class _WeightView extends StatelessWidget {
                     entry: history[i],
                     display: _fmt(history[i].kg, locale),
                     unit: state.weightUnitLabel,
+                    onEdit: onEdit,
+                    onDelete: onDelete,
                   ),
                 ],
               ],
@@ -514,10 +521,14 @@ class _HistoryRow extends StatelessWidget {
   final WeightEntry entry;
   final String display;
   final String unit;
+  final ValueChanged<WeightEntry> onEdit;
+  final ValueChanged<WeightEntry> onDelete;
   const _HistoryRow({
     required this.entry,
     required this.display,
     required this.unit,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -537,6 +548,19 @@ class _HistoryRow extends StatelessWidget {
           const SizedBox(width: Insets.md),
           Text('$display $unit',
               style: AppType.callout(weight: FontWeight.w700)),
+          PopupMenuButton<String>(
+            key: ValueKey('weight-actions-${entry.stableId}'),
+            tooltip: L.of(context).weightWeighInActions,
+            icon: const Icon(AppIcons.dotsThreeVertical),
+            onSelected: (action) =>
+                action == 'edit' ? onEdit(entry) : onDelete(entry),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                  value: 'edit', child: Text(L.of(context).commonEdit)),
+              PopupMenuItem(
+                  value: 'delete', child: Text(L.of(context).commonDelete)),
+            ],
+          ),
         ],
       ),
     );

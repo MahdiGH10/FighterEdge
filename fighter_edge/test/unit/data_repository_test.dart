@@ -42,6 +42,46 @@ void main() {
     expect(secondState.latestWeight, 75.5);
   });
 
+  test('editing and deleting weigh-ins persists and recalculates trends',
+      () async {
+    final repo = InMemoryDataRepository();
+    addTearDown(repo.dispose);
+    final state = AppState(dataRepository: repo)..setUser('fighter-a');
+    addTearDown(state.dispose);
+    await Future<void>.delayed(Duration.zero);
+
+    state.addWeight(DateTime(2026, 7, 20), 76);
+    state.addWeight(DateTime(2026, 7, 21), 75);
+    await Future<void>.delayed(Duration.zero);
+    final earlier = state.weights.first;
+    final latest = state.weights.last;
+    final latestId = latest.stableId;
+
+    state.updateWeight(latest, 73);
+    await Future<void>.delayed(Duration.zero);
+    expect(state.weights.last.stableId, latestId);
+    expect(state.latestWeight, 73);
+    expect(state.weeklyDelta, closeTo(-3, 0.001));
+
+    final restored = AppState(dataRepository: repo)..setUser('fighter-a');
+    addTearDown(restored.dispose);
+    await Future<void>.delayed(Duration.zero);
+    expect(restored.latestWeight, 73);
+    expect(restored.weights.last.stableId, latestId);
+
+    restored.deleteWeight(restored.weights.last);
+    await Future<void>.delayed(Duration.zero);
+    expect(restored.latestWeight, earlier.kg);
+    expect(restored.weights, hasLength(1));
+    expect(restored.weeklyDelta, 0);
+
+    final restarted = AppState(dataRepository: repo)..setUser('fighter-a');
+    addTearDown(restarted.dispose);
+    await Future<void>.delayed(Duration.zero);
+    expect(restarted.weights, hasLength(1));
+    expect(restarted.latestWeight, earlier.kg);
+  });
+
   test('AppState persists today meal toggles through the repository', () async {
     final repo = InMemoryDataRepository();
     addTearDown(repo.dispose);

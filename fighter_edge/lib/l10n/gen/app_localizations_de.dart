@@ -253,6 +253,19 @@ class LDe extends L {
   String get weightAddWeighIn => 'Gewicht erfassen';
 
   @override
+  String get weightEditWeighIn => 'Wiegen bearbeiten';
+
+  @override
+  String get weightDeleteWeighIn => 'Wiegen löschen?';
+
+  @override
+  String get weightDeleteConfirm =>
+      'Dieser Eintrag wird aus dem Verlauf entfernt und dein Trend neu berechnet.';
+
+  @override
+  String get weightWeighInActions => 'Aktionen für Wiegeeintrag';
+
+  @override
   String get nutritionSearchFoods => 'Lebensmittel suchen';
 
   @override

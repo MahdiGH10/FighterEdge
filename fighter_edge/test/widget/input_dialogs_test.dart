@@ -225,6 +225,35 @@ void main() {
       expect(find.byType(AlertDialog), findsNothing);
       expect(state.latestWeight, 81.5);
     });
+
+    testWidgets('history actions edit and delete the selected weigh-in',
+        (tester) async {
+      final state = await openTracker(tester);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      final entry = state.weightHistoryDesc.first;
+      final actions = find.byKey(ValueKey('weight-actions-${entry.stableId}'));
+      await tester.ensureVisible(actions);
+      await tester.tap(actions);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Edit').last);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '72.4');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(state.weights.lastWhere((w) => w.stableId == entry.stableId).kg,
+          72.4);
+
+      await tester.ensureVisible(actions);
+      await tester.tap(actions);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete').last);
+      await tester.pumpAndSettle();
+      expect(state.weights.any((w) => w.stableId == entry.stableId), isFalse);
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('imperial units', () {

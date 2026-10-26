@@ -553,6 +553,30 @@ abstract class L {
   /// **'Add weigh-in'**
   String get weightAddWeighIn;
 
+  /// No description provided for @weightEditWeighIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit weigh-in'**
+  String get weightEditWeighIn;
+
+  /// No description provided for @weightDeleteWeighIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete weigh-in?'**
+  String get weightDeleteWeighIn;
+
+  /// No description provided for @weightDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the weigh-in from your history and recalculates your trend.'**
+  String get weightDeleteConfirm;
+
+  /// No description provided for @weightWeighInActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Weigh-in actions'**
+  String get weightWeighInActions;
+
   /// No description provided for @nutritionSearchFoods.
   ///
   /// In en, this message translates to:

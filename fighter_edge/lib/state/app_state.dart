@@ -260,6 +260,38 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Replaces one saved weigh-in while preserving its document ID and date.
+  void updateWeight(WeightEntry entry, double kg) {
+    if (!requireWrite()) return;
+    final index = _weights.indexWhere((w) => w.stableId == entry.stableId);
+    if (index < 0) return;
+    final updated = WeightEntry(entry.date, kg, id: entry.stableId);
+    _weights[index] = updated;
+    _resortWeights();
+    final repo = _dataRepository;
+    final userId = _userId;
+    if (repo != null && userId != null) {
+      unawaited(_sync.run('weight-${entry.stableId}', 'weight_save_failed',
+          () => repo.addWeight(userId, updated)));
+    }
+    notifyListeners();
+  }
+
+  /// Erasure stays available even when paid access has ended.
+  void deleteWeight(WeightEntry entry) {
+    final before = _weights.length;
+    _weights.removeWhere((w) => w.stableId == entry.stableId);
+    if (_weights.length == before) return;
+    _resortWeights();
+    final repo = _dataRepository;
+    final userId = _userId;
+    if (repo != null && userId != null) {
+      unawaited(_sync.run('weight-${entry.stableId}', 'weight_delete_failed',
+          () => repo.deleteWeight(userId, entry.stableId)));
+    }
+    notifyListeners();
+  }
+
   // ---- Settings ----
   bool get useMetricUnits => _useMetricUnits;
   bool get timerHaptics => _timerHaptics;

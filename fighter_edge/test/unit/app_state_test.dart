@@ -28,6 +28,10 @@ class _FlakyRepository implements DataRepository {
       _inner.addWeight(userId, entry);
 
   @override
+  Future<void> deleteWeight(String userId, String entryId) =>
+      _inner.deleteWeight(userId, entryId);
+
+  @override
   Stream<List<Meal>> watchMeals(String userId, DateTime date) =>
       _inner.watchMeals(userId, date);
 
