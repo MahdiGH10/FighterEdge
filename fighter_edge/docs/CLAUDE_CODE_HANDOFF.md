@@ -1,5 +1,21 @@
 # Fighter Edge — Claude Code Handoff
 
+## Post-audit onboarding CI repair (2026-10-26)
+
+The initial onboarding health check now gives each checkbox its own transparent
+Material surface. This keeps its ink visible over the solid background used by
+Reduce transparency and removes the Flutter ListTile assertion. A widget test
+reproduced all seven assertions before the change and passes after it.
+
+The Android integration journey now attempts to continue before screening is
+reviewed, checks the restriction message, reviews the questions, and then
+continues. The local headless app journey, screening widget tests, format, and
+static analysis pass. A local Android emulator run was stopped during the
+debug build when the audit worktree nearly exhausted disk space. Full branch
+CI run 40345651914 then passed the Android integration journey, release APK
+launch, performance smoke test, and all other jobs. This verifies the device
+CI repair, not a signed store or live Firebase journey.
+
 ## Navigation, German setup and current docs (2026-10-26, audit task 9)
 
 Bottom navigation now exposes one accessible label and tap action per tab.

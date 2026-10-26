@@ -77,15 +77,18 @@ class SafetyScreeningFields extends StatelessWidget {
           ),
         ),
         const SizedBox(height: Insets.sm),
-        CheckboxListTile(
-          value: status != NutritionScreeningStatus.unanswered,
-          onChanged: (value) => onReviewedChanged(value ?? false),
-          controlAffinity: ListTileControlAffinity.leading,
-          contentPadding: EdgeInsets.zero,
-          activeColor: AppColors.primary,
-          title: Text(
-            l.setupHealthReviewed,
-            style: AppType.subhead(weight: FontWeight.w700),
+        Material(
+          type: MaterialType.transparency,
+          child: CheckboxListTile(
+            value: status != NutritionScreeningStatus.unanswered,
+            onChanged: (value) => onReviewedChanged(value ?? false),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+            activeColor: AppColors.primary,
+            title: Text(
+              l.setupHealthReviewed,
+              style: AppType.subhead(weight: FontWeight.w700),
+            ),
           ),
         ),
       ],
@@ -108,14 +111,17 @@ class _SafetyCheck extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: Insets.xxs),
-      child: CheckboxListTile(
-        value: value,
-        onChanged: (v) => onChanged(v ?? false),
-        controlAffinity: ListTileControlAffinity.leading,
-        contentPadding: EdgeInsets.zero,
-        dense: true,
-        activeColor: AppColors.primary,
-        title: Text(label, style: AppType.subhead(weight: FontWeight.w600)),
+      child: Material(
+        type: MaterialType.transparency,
+        child: CheckboxListTile(
+          value: value,
+          onChanged: (v) => onChanged(v ?? false),
+          controlAffinity: ListTileControlAffinity.leading,
+          contentPadding: EdgeInsets.zero,
+          dense: true,
+          activeColor: AppColors.primary,
+          title: Text(label, style: AppType.subhead(weight: FontWeight.w600)),
+        ),
       ),
     );
   }

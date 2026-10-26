@@ -108,6 +108,12 @@ void main() {
       await _enterTextVisible(tester, find.byType(TextField).at(1), '178');
       await _enterTextVisible(tester, find.byType(TextField).at(2), '77.2');
       await _tapVisible(tester, find.text('Continue'));
+      expect(
+        find.text('Review every health question before creating a target.'),
+        findsOneWidget,
+      );
+      await _tapVisible(tester, find.text('I reviewed every health question'));
+      await _tapVisible(tester, find.text('Continue'));
       expect(find.text('Which formula fits your body?'), findsOneWidget);
       await _tapVisible(tester, find.text('Continue'));
       expect(find.text('Outside the gym, how active are you?'), findsOneWidget);
