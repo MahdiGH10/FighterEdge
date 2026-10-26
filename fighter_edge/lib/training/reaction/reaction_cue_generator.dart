@@ -31,7 +31,8 @@ class ReactionCueGenerator {
   ReactionCue next() {
     final command = _deal();
 
-    var gapMs = ReactionTiming.sampleGapMs(command, spec.level, _random);
+    var gapMs = ReactionTiming.sampleGapMs(command, spec.level, _random,
+        pace: spec.pace);
     final block = spec.blockRest;
     if (block != null && ++_callsInBlock >= _blockSize) {
       gapMs += block.rest.inMilliseconds;
@@ -41,8 +42,9 @@ class ReactionCueGenerator {
     return ReactionCue(
       command,
       Duration(milliseconds: gapMs),
-      minGap:
-          Duration(milliseconds: ReactionTiming.floorMs(command, spec.level)),
+      minGap: Duration(
+          milliseconds:
+              ReactionTiming.floorMs(command, spec.level, pace: spec.pace)),
     );
   }
 

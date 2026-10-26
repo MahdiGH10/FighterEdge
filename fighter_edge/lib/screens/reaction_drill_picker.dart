@@ -34,6 +34,11 @@ String reactionLevelLabel(L l, ReactionLevel level) => switch (level) {
       ReactionLevel.advancedPlus => l.reactionLevelAdvancedPlus,
     };
 
+String reactionPaceLabel(L l, ReactionPace pace) => switch (pace) {
+      ReactionPace.steady => l.reactionPaceSteady,
+      ReactionPace.sprint => l.reactionPaceSprint,
+    };
+
 /// "0:30", "2:30".
 String formatDrillClock(Duration d) {
   final seconds = d.inSeconds.clamp(0, 24 * 60 * 60);
@@ -52,11 +57,14 @@ class ReactionDrillPicker extends StatefulWidget {
 class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
   static const _disciplineKey = 'reaction.discipline';
   static const _levelKey = 'reaction.level';
+  static const _paceKey = 'reaction.pace';
 
   var _discipline = ReactionDiscipline.mma;
   var _level = ReactionLevel.beginner;
+  var _pace = ReactionPace.steady;
 
-  ReactionDrillSpec get _spec => ReactionDrillSpec.of(_discipline, _level);
+  ReactionDrillSpec get _spec =>
+      ReactionDrillSpec.of(_discipline, _level, pace: _pace);
 
   @override
   void initState() {
@@ -71,10 +79,12 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
       final discipline =
           _byName(ReactionDiscipline.values, prefs.getString(_disciplineKey));
       final level = _byName(ReactionLevel.values, prefs.getString(_levelKey));
+      final pace = _byName(ReactionPace.values, prefs.getString(_paceKey));
       if (!mounted) return;
       setState(() {
         _discipline = discipline ?? _discipline;
         _level = level ?? _level;
+        _pace = pace ?? _pace;
       });
     } catch (_) {
       // Remembering the choice is a convenience; the defaults are fine.
@@ -88,16 +98,22 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
     return null;
   }
 
-  void _select({ReactionDiscipline? discipline, ReactionLevel? level}) {
+  void _select({
+    ReactionDiscipline? discipline,
+    ReactionLevel? level,
+    ReactionPace? pace,
+  }) {
     setState(() {
       _discipline = discipline ?? _discipline;
       _level = level ?? _level;
+      _pace = pace ?? _pace;
     });
     unawaited(() async {
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_disciplineKey, _discipline.name);
         await prefs.setString(_levelKey, _level.name);
+        await prefs.setString(_paceKey, _pace.name);
       } catch (_) {}
     }());
   }
@@ -182,13 +198,25 @@ class _ReactionDrillPickerState extends State<ReactionDrillPicker> {
             columns: 2,
           ),
         ),
+        const SizedBox(height: Insets.sm),
+        PremiumReveal(
+          index: 3,
+          child: FilterChips(
+            options: [
+              for (final p in ReactionPace.values) reactionPaceLabel(l, p),
+            ],
+            selectedIndex: _pace.index,
+            onSelected: (i) => _select(pace: ReactionPace.values[i]),
+            scrollable: false,
+          ),
+        ),
         const SizedBox(height: Insets.lg),
-        PremiumReveal(index: 3, child: _SpecCard(spec: spec)),
+        PremiumReveal(index: 4, child: _SpecCard(spec: spec)),
         const SizedBox(height: Insets.xl),
-        PremiumReveal(index: 4, child: _MoveList(spec: spec)),
+        PremiumReveal(index: 5, child: _MoveList(spec: spec)),
         const SizedBox(height: Insets.xl),
         PremiumReveal(
-          index: 5,
+          index: 6,
           child: PrimaryButton(
             l.reactionStart,
             icon: AppIconsFill.play,

@@ -721,6 +721,12 @@ class LEn extends L {
   String get reactionLevelAdvancedPlus => 'Advanced+';
 
   @override
+  String get reactionPaceSteady => 'Steady';
+
+  @override
+  String get reactionPaceSprint => 'Sprint';
+
+  @override
   String get reactionStatDuration => 'Duration';
 
   @override

@@ -83,6 +83,19 @@ class ReactionLevelTiming {
     required this.roundRest,
     this.grapplingBlockRest,
   });
+
+  /// The same level at a different pace: only the two pace numbers change,
+  /// the rounds and rests stay.
+  ReactionLevelTiming withPace(
+          {required int marginMs, required double speed}) =>
+      ReactionLevelTiming(
+        marginMs: marginMs,
+        speed: speed,
+        jitter: jitter,
+        roundWork: roundWork,
+        roundRest: roundRest,
+        grapplingBlockRest: grapplingBlockRest,
+      );
 }
 
 abstract final class ReactionTiming {
@@ -192,6 +205,29 @@ abstract final class ReactionTiming {
         ReactionLevel.advancedPlus => _advancedPlus,
       };
 
+  // -- Pace ------------------------------------------------------------------
+
+  /// Sprint keeps every level's rounds and rests and tightens the two pace
+  /// numbers: less time to react and less time allowed for the movement.
+  /// The reaction margin never drops below [sprintMarginFloorMs], so it still
+  /// clears choice reaction time plus hear-and-decide.
+  static const sprintMarginFactor = 0.8;
+  static const sprintSpeedFactor = 0.9;
+  static const sprintMarginFloorMs = 500;
+
+  /// The level's timing at [pace]. Steady is the level table itself.
+  static ReactionLevelTiming forPace(ReactionLevel level, ReactionPace pace) {
+    final t = of(level);
+    return switch (pace) {
+      ReactionPace.steady => t,
+      ReactionPace.sprint => t.withPace(
+          marginMs: max(
+              sprintMarginFloorMs, (t.marginMs * sprintMarginFactor).round()),
+          speed: t.speed * sprintSpeedFactor,
+        ),
+    };
+  }
+
   /// Rounds per drill: wrestling is short and heavy, so 2; striking and MMA 3.
   static int roundsFor(ReactionDiscipline discipline) =>
       discipline == ReactionDiscipline.grappling ? 2 : 3;
@@ -253,19 +289,37 @@ abstract final class ReactionTiming {
       };
 
   /// How long [command] takes at [level]'s pace. Never jittered.
-  static int movementMs(ReactionCommand command, ReactionLevel level) =>
-      (of(level).speed * (moveCostMs(command) + finishCostMs(command))).round();
+  static int movementMs(
+    ReactionCommand command,
+    ReactionLevel level, {
+    ReactionPace pace = ReactionPace.steady,
+  }) =>
+      (forPace(level, pace).speed *
+              (moveCostMs(command) + finishCostMs(command)))
+          .round();
 
   /// The athlete's reaction time at [level], before jitter.
-  static int reactionMs(ReactionLevel level) => of(level).marginMs;
+  static int reactionMs(
+    ReactionLevel level, {
+    ReactionPace pace = ReactionPace.steady,
+  }) =>
+      forPace(level, pace).marginMs;
 
   /// The gap with no jitter at all: movement plus nominal reaction time.
-  static int nominalGapMs(ReactionCommand command, ReactionLevel level) =>
-      movementMs(command, level) + reactionMs(level);
+  static int nominalGapMs(
+    ReactionCommand command,
+    ReactionLevel level, {
+    ReactionPace pace = ReactionPace.steady,
+  }) =>
+      movementMs(command, level, pace: pace) + reactionMs(level, pace: pace);
 
   /// The shortest the gap may ever be.
-  static int floorMs(ReactionCommand command, ReactionLevel level) =>
-      movementMs(command, level) + floorMarginMs;
+  static int floorMs(
+    ReactionCommand command,
+    ReactionLevel level, {
+    ReactionPace pace = ReactionPace.steady,
+  }) =>
+      movementMs(command, level, pace: pace) + floorMarginMs;
 
   /// The gap for a given jitter. [jitterFraction] scales the reaction part
   /// (-0.25 is a quarter shorter); [extraMs] is added to it. The movement
@@ -275,9 +329,10 @@ abstract final class ReactionTiming {
     ReactionLevel level, {
     double jitterFraction = 0,
     int extraMs = 0,
+    ReactionPace pace = ReactionPace.steady,
   }) {
-    final movement = movementMs(command, level);
-    final reaction = reactionMs(level);
+    final movement = movementMs(command, level, pace: pace);
+    final reaction = reactionMs(level, pace: pace);
     final gap = movement + (reaction * (1 + jitterFraction)).round() + extraMs;
     return max(gap, movement + floorMarginMs);
   }
@@ -288,23 +343,28 @@ abstract final class ReactionTiming {
   static int sampleGapMs(
     ReactionCommand command,
     ReactionLevel level,
-    Random random,
-  ) {
+    Random random, {
+    ReactionPace pace = ReactionPace.steady,
+  }) {
     final j = of(level).jitter;
     final skewed = pow(random.nextDouble(), jitterSkew).toDouble();
     final fraction = -j + 2 * j * skewed;
     final extra = random.nextDouble() < longGapChance
         ? longGapMinMs + random.nextInt(longGapMaxMs - longGapMinMs + 1)
         : 0;
-    return gapMs(command, level, jitterFraction: fraction, extraMs: extra);
+    return gapMs(command, level,
+        jitterFraction: fraction, extraMs: extra, pace: pace);
   }
 
   /// The reaction time the picker shows for a level, in ms, as (shortest,
   /// longest) once the jitter is applied, without the movement time (which
   /// depends on the move called) and without the occasional long breather.
-  static (int, int) reactionRangeMs(ReactionLevel level) {
+  static (int, int) reactionRangeMs(
+    ReactionLevel level, {
+    ReactionPace pace = ReactionPace.steady,
+  }) {
     final t = of(level);
-    final nominal = reactionMs(level);
+    final nominal = reactionMs(level, pace: pace);
     return (
       (nominal * (1 - t.jitter)).round(),
       (nominal * (1 + t.jitter)).round(),

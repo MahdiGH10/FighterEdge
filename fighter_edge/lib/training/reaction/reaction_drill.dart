@@ -159,6 +159,10 @@ enum ReactionDiscipline {
 
 enum ReactionLevel { beginner, intermediate, advanced, advancedPlus }
 
+/// How fast a level is run. Steady is the level as designed; sprint gives the
+/// same level less time to react and less time per movement.
+enum ReactionPace { steady, sprint }
+
 /// Everything that makes one level of one discipline hard: how many rounds it
 /// has and how long they are, and any extra breathing time. Every call is one
 /// move. The time the athlete gets after each call comes from
@@ -169,6 +173,7 @@ enum ReactionLevel { beginner, intermediate, advanced, advancedPlus }
 class ReactionDrillSpec {
   final ReactionDiscipline discipline;
   final ReactionLevel level;
+  final ReactionPace pace;
 
   /// Work rounds, each [roundDuration] long, with [restDuration] between.
   final int rounds;
@@ -181,6 +186,7 @@ class ReactionDrillSpec {
   const ReactionDrillSpec({
     required this.discipline,
     required this.level,
+    this.pace = ReactionPace.steady,
     required this.rounds,
     required this.roundDuration,
     required this.restDuration,
@@ -195,18 +201,21 @@ class ReactionDrillSpec {
 
   /// The reaction time after the voice stops, in ms, as (shortest, longest)
   /// before jitter, movement time not included. What the picker shows.
-  (int, int) get reactionMs => ReactionTiming.reactionRangeMs(level);
+  (int, int) get reactionMs =>
+      ReactionTiming.reactionRangeMs(level, pace: pace);
 
   static ReactionDrillSpec of(
     ReactionDiscipline discipline,
-    ReactionLevel level,
-  ) {
+    ReactionLevel level, {
+    ReactionPace pace = ReactionPace.steady,
+  }) {
     final t = ReactionTiming.of(level);
     // Breathing room between blocks of calls is a wrestling thing.
     final grappling = discipline == ReactionDiscipline.grappling;
     return ReactionDrillSpec(
       discipline: discipline,
       level: level,
+      pace: pace,
       rounds: ReactionTiming.roundsFor(discipline),
       roundDuration: t.roundWork,
       restDuration: t.roundRest,

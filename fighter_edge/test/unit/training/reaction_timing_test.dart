@@ -200,6 +200,85 @@ void main() {
     });
   });
 
+  group('Sprint pace', () {
+    test('every move gets a shorter gap than at the same level steady', () {
+      for (final l in _levels) {
+        for (final c in _all()) {
+          expect(
+            ReactionTiming.nominalGapMs(c, l, pace: ReactionPace.sprint),
+            lessThan(ReactionTiming.nominalGapMs(c, l)),
+            reason: '$c $l',
+          );
+        }
+      }
+    });
+
+    test('sprint still gets harder with the level', () {
+      for (final c in _all()) {
+        for (var i = 1; i < _levels.length; i++) {
+          expect(
+            ReactionTiming.nominalGapMs(c, _levels[i],
+                pace: ReactionPace.sprint),
+            lessThan(ReactionTiming.nominalGapMs(c, _levels[i - 1],
+                pace: ReactionPace.sprint)),
+            reason: '$c ${_levels[i]}',
+          );
+        }
+      }
+    });
+
+    test('the reaction margin never drops below hear-and-decide', () {
+      for (final l in _levels) {
+        expect(ReactionTiming.reactionMs(l, pace: ReactionPace.sprint),
+            greaterThanOrEqualTo(500),
+            reason: '$l');
+      }
+      expect(
+          ReactionTiming.reactionMs(ReactionLevel.beginner,
+              pace: ReactionPace.sprint),
+          1200);
+      expect(
+          ReactionTiming.reactionMs(ReactionLevel.advancedPlus,
+              pace: ReactionPace.sprint),
+          500);
+    });
+
+    test('rounds, rests and jitter belong to the level itself', () {
+      for (final l in _levels) {
+        final steady = ReactionTiming.of(l);
+        final sprint = ReactionTiming.forPace(l, ReactionPace.sprint);
+        expect(sprint.roundWork, steady.roundWork);
+        expect(sprint.roundRest, steady.roundRest);
+        expect(sprint.jitter, steady.jitter);
+        expect(
+            sprint.grapplingBlockRest?.rest, steady.grapplingBlockRest?.rest);
+      }
+      expect(
+          ReactionTiming.forPace(ReactionLevel.advanced, ReactionPace.steady),
+          same(ReactionTiming.of(ReactionLevel.advanced)));
+    });
+
+    test('a sampled sprint gap respects the sprint floor', () {
+      final random = Random(21);
+      for (final l in _levels) {
+        for (final c in _all()) {
+          expect(
+              ReactionTiming.sampleGapMs(c, l, random,
+                  pace: ReactionPace.sprint),
+              greaterThanOrEqualTo(
+                  ReactionTiming.floorMs(c, l, pace: ReactionPace.sprint)));
+        }
+      }
+    });
+
+    test('the picker range follows the pace', () {
+      expect(
+          ReactionTiming.reactionRangeMs(ReactionLevel.beginner,
+              pace: ReactionPace.sprint),
+          (900, 1500));
+    });
+  });
+
   group('Jitter', () {
     const combos = <ReactionCommand>[
       ReactionCommands.jab,

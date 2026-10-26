@@ -151,7 +151,8 @@ class _ReactionDrillScreenState extends State<ReactionDrillScreen>
       },
       child: ScreenScaffold(
         title:
-            '${reactionDisciplineLabel(l, spec.discipline)} · ${reactionLevelLabel(l, spec.level)}',
+            '${reactionDisciplineLabel(l, spec.discipline)} · ${reactionLevelLabel(l, spec.level)}'
+            '${spec.pace == ReactionPace.sprint ? ' · ${reactionPaceLabel(l, spec.pace)}' : ''}',
         showBack: true,
         body: Padding(
           padding: const EdgeInsets.fromLTRB(
