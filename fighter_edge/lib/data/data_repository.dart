@@ -10,6 +10,10 @@ abstract class DataRepository {
 
   Future<void> addWeight(String userId, WeightEntry entry);
 
+  /// Removes the weigh-in with [entryId]; editing uses [addWeight] with the
+  /// existing stable ID so it replaces the same document.
+  Future<void> deleteWeight(String userId, String entryId);
+
   Stream<List<Meal>> watchMeals(String userId, DateTime date);
 
   Future<void> saveMealsForDate(

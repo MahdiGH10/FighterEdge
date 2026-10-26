@@ -37,6 +37,10 @@ class FirestoreDataRepository implements DataRepository {
   }
 
   @override
+  Future<void> deleteWeight(String userId, String entryId) =>
+      _userCollection(userId, 'weights').doc(entryId).delete();
+
+  @override
   Stream<List<Meal>> watchMeals(String userId, DateTime date) {
     return _userCollection(userId, 'meals')
         .doc(mealDateKey(date))

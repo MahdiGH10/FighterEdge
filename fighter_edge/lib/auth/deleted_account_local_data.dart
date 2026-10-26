@@ -10,6 +10,7 @@ class DeletedAccountLocalData {
     final keys = prefs.getKeys().where((key) =>
         key == 'fe_food_memory.v1.$userId' ||
         key == 'fe_nutrition_mode.$userId' ||
+        key == 'fe_onboarding_draft.v1.$userId' ||
         key.startsWith('fe_first_run.$userId.'));
     for (final key in keys.toList()) {
       await prefs.remove(key);

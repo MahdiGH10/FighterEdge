@@ -188,16 +188,13 @@ void main() {
       expect(find.text('75.0 kg'), findsOneWidget); // history row
     });
 
-    testWidgets('non-weight tabs show an empty state and hide the add action',
-        (tester) async {
+    testWidgets('unavailable body measurement tabs are absent', (tester) async {
       await tester.pumpWidget(trackerHost(AppState()));
       await tester.pump();
       expect(find.bySemanticsLabel('Add weigh-in'), findsOneWidget);
 
-      await tester.tap(find.text('Body Fat'));
-      await tester.pumpAndSettle();
-      expect(find.text('Body Fat'), findsWidgets);
-      expect(find.bySemanticsLabel('Add weigh-in'), findsNothing);
+      expect(find.text('Body Fat'), findsNothing);
+      expect(find.text('Measurements'), findsNothing);
     });
 
     testWidgets('reads and records in pounds when metric is off',

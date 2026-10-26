@@ -252,6 +252,19 @@ class LEn extends L {
   String get weightAddWeighIn => 'Add weigh-in';
 
   @override
+  String get weightEditWeighIn => 'Edit weigh-in';
+
+  @override
+  String get weightDeleteWeighIn => 'Delete weigh-in?';
+
+  @override
+  String get weightDeleteConfirm =>
+      'This removes the weigh-in from your history and recalculates your trend.';
+
+  @override
+  String get weightWeighInActions => 'Weigh-in actions';
+
+  @override
   String get nutritionSearchFoods => 'Search foods';
 
   @override

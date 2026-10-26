@@ -26,6 +26,7 @@ import '../../widgets/primary_button.dart';
 import '../paywall_screen.dart';
 
 import 'onboarding_steps.dart';
+import 'onboarding_draft_store.dart';
 import 'onboarding_widgets.dart';
 import 'plan_ready_view.dart';
 import 'welcome_pages.dart';
@@ -57,6 +58,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       NutritionScreeningStatus.unanswered;
   String? _error;
   CompletedOnboardingPlan? _completedPlan;
+  final _draftStore = const OnboardingDraftStore();
+  String? _draftUserId;
+  bool _draftAccountInitialized = false;
+  int _draftGeneration = 0;
+  bool _draftLoaded = false;
+  bool _submitting = false;
+  bool _finishing = false;
+  bool _trialOpening = false;
+  Future<void> _draftWrites = Future.value();
 
   static const _campGoals = [
     'Build fight-camp structure',
@@ -70,7 +80,129 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const _stepCount = 7;
 
   @override
+  void initState() {
+    super.initState();
+    for (final field in [_age, _height, _currentWeight, _targetWeight]) {
+      field.addListener(_persistDraft);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final userId = Provider.of<AuthController>(context).user?.id;
+    if (_draftAccountInitialized && userId == _draftUserId) return;
+    _draftAccountInitialized = true;
+    _draftUserId = userId;
+    _draftLoaded = userId == null;
+    _resetDraft();
+    final generation = ++_draftGeneration;
+    if (userId != null) _restoreDraft(userId, generation);
+  }
+
+  void _resetDraft() {
+    _showWelcome = true;
+    _step = 0;
+    _campGoal = _campGoals.first;
+    _nutritionGoal = NutritionGoal.maintain;
+    _level = _levels.first;
+    _days = 4;
+    _activity = ActivityLevel.moderate;
+    _equationProfile = EquationProfile.neutral;
+    _safetyFlags = const NutritionSafetyFlags();
+    _screeningStatus = NutritionScreeningStatus.unanswered;
+    _completedPlan = null;
+    _error = null;
+    _age.clear();
+    _height.clear();
+    _currentWeight.clear();
+    _targetWeight.clear();
+  }
+
+  Future<void> _restoreDraft(String userId, int generation) async {
+    final draft = await _draftStore.read(userId);
+    if (!mounted || generation != _draftGeneration) return;
+    setState(() {
+      if (draft != null) _applyDraft(draft);
+      _draftLoaded = true;
+    });
+  }
+
+  T _savedEnum<T extends Enum>(List<T> values, Object? name, T fallback) =>
+      values.firstWhere((value) => value.name == name, orElse: () => fallback);
+
+  void _applyDraft(Map<String, dynamic> draft) {
+    _showWelcome = draft['showWelcome'] == true;
+    _step = ((draft['step'] as num?)?.toInt() ?? 0).clamp(0, _stepCount - 1);
+    _campGoal = _campGoals.contains(draft['campGoal'])
+        ? draft['campGoal'] as String
+        : _campGoals.first;
+    _nutritionGoal = _savedEnum(
+        NutritionGoal.values, draft['nutritionGoal'], NutritionGoal.maintain);
+    _level = _levels.contains(draft['level'])
+        ? draft['level'] as String
+        : _levels.first;
+    _days = ((draft['days'] as num?)?.toInt() ?? 4).clamp(1, 7);
+    _activity = _savedEnum(
+        ActivityLevel.values, draft['activity'], ActivityLevel.moderate);
+    _equationProfile = _savedEnum(EquationProfile.values,
+        draft['equationProfile'], EquationProfile.neutral);
+    _screeningStatus = _savedEnum(NutritionScreeningStatus.values,
+        draft['screeningStatus'], NutritionScreeningStatus.unanswered);
+    if (draft['safetyFlags'] is Map) {
+      _safetyFlags = NutritionSafetyFlags.fromJson(
+          Map<String, dynamic>.from(draft['safetyFlags'] as Map));
+    }
+    _age.text = draft['age'] as String? ?? '';
+    _height.text = draft['height'] as String? ?? '';
+    _currentWeight.text = draft['currentWeight'] as String? ?? '';
+    _targetWeight.text = draft['targetWeight'] as String? ?? '';
+    if (draft['ready'] == true) {
+      final target = draft['target'];
+      _completedPlan = CompletedOnboardingPlan(
+        target: target is Map
+            ? NutritionTarget.fromJson(Map<String, dynamic>.from(target))
+            : null,
+        nutritionGoal: _nutritionGoal,
+        campGoal: _campGoal,
+        level: _level,
+        days: _days,
+      );
+    }
+  }
+
+  Future<void> _persistDraft() {
+    final userId = _draftUserId;
+    if (!_draftLoaded ||
+        userId == null ||
+        context.read<AuthController>().user?.hasHealthDataConsent != true) {
+      return _draftWrites;
+    }
+    final draft = <String, dynamic>{
+      'showWelcome': _showWelcome,
+      'step': _step,
+      'campGoal': _campGoal,
+      'nutritionGoal': _nutritionGoal.name,
+      'level': _level,
+      'days': _days,
+      'activity': _activity.name,
+      'equationProfile': _equationProfile.name,
+      'screeningStatus': _screeningStatus.name,
+      'safetyFlags': _safetyFlags.toJson(),
+      'age': _age.text,
+      'height': _height.text,
+      'currentWeight': _currentWeight.text,
+      'targetWeight': _targetWeight.text,
+      'ready': _completedPlan != null,
+      'target': _completedPlan?.target?.toJson(),
+    };
+    _draftWrites = _draftWrites.then((_) => _draftStore.write(userId, draft));
+    return _draftWrites;
+  }
+
+  @override
   void dispose() {
+    _draftGeneration++;
     _age.dispose();
     _height.dispose();
     _currentWeight.dispose();
@@ -81,10 +213,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
+    if (!_draftLoaded) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     if (_showWelcome) {
       return WelcomePages(
         onDone: () {
           setState(() => _showWelcome = false);
+          _persistDraft();
           _trackStepViewed();
         },
       );
@@ -98,7 +234,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (completedPlan != null) {
       return PlanReadyView(
         plan: completedPlan,
-        isBusy: auth.isBusy,
+        isBusy: auth.isBusy || _submitting || _finishing || _trialOpening,
         onContinueReadOnly: auth.billingAvailable ? null : _finishOnboarding,
         trialDays: TrialGate.offeredDays(auth.billingProducts),
         onStartTrial: _startTrial,
@@ -121,23 +257,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       error: _error,
       campGoals: _campGoals,
       levels: _levels,
-      onCampGoal: (value) => setState(() {
+      onCampGoal: (value) => _change(() {
         _campGoal = value;
         _syncNutritionGoalFromCampGoal(value);
       }),
-      onNutritionGoal: (value) => setState(() {
+      onNutritionGoal: (value) => _change(() {
         _nutritionGoal = value;
         _error = null;
       }),
-      onLevel: (value) => setState(() => _level = value),
-      onDays: (value) => setState(() => _days = value),
-      onActivity: (value) => setState(() => _activity = value),
-      onEquationProfile: (value) => setState(() => _equationProfile = value),
-      onSafetyFlags: (flags) => setState(() {
+      onLevel: (value) => _change(() => _level = value),
+      onDays: (value) => _change(() => _days = value),
+      onActivity: (value) => _change(() => _activity = value),
+      onEquationProfile: (value) => _change(() => _equationProfile = value),
+      onSafetyFlags: (flags) => _change(() {
         _safetyFlags = flags;
         _screeningStatus = NutritionScreeningStatus.unanswered;
       }),
-      onScreeningReviewed: (reviewed) => setState(() {
+      onScreeningReviewed: (reviewed) => _change(() {
         _screeningStatus = !reviewed
             ? NutritionScreeningStatus.unanswered
             : _safetyFlags.any
@@ -165,7 +301,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   if (_step > 0) ...[
                     IconButton(
                       tooltip: L.of(context).onboardingBack,
-                      onPressed: auth.isBusy ? null : _back,
+                      onPressed: auth.isBusy || _submitting ? null : _back,
                       icon: const Icon(AppIcons.caretLeft),
                     ),
                     const SizedBox(width: Insets.sm),
@@ -211,18 +347,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
               const SizedBox(height: Insets.xl),
               PrimaryButton(
-                auth.isBusy
+                auth.isBusy || _submitting
                     ? 'Creating your plan...'
                     : isLastStep
                         ? 'Start my plan'
                         : 'Continue',
                 icon: isLastStep ? AppIconsFill.flag : AppIcons.arrowRight,
                 expand: true,
-                onPressed: auth.isBusy ? null : _continue,
+                onPressed: auth.isBusy || _submitting ? null : _continue,
               ),
               const SizedBox(height: Insets.md),
               PressScale(
-                onTap: auth.isBusy ? null : _skipDetailedNutrition,
+                onTap:
+                    auth.isBusy || _submitting ? null : _skipDetailedNutrition,
                 child: Padding(
                   padding: const EdgeInsets.all(Insets.sm),
                   child: Text(
@@ -249,6 +386,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         _step += 1;
         _error = null;
       });
+      _persistDraft();
       _trackStepViewed();
       return;
     }
@@ -261,6 +399,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _step -= 1;
       _error = null;
     });
+    _persistDraft();
     _trackStepViewed();
   }
 
@@ -300,6 +439,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         _ => 'other',
       };
 
+  void _change(VoidCallback update) {
+    setState(update);
+    _persistDraft();
+  }
+
   void _syncNutritionGoalFromCampGoal(String value) {
     if (value == 'Lose weight safely') {
       _nutritionGoal = NutritionGoal.loseFat;
@@ -314,9 +458,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _submit({required bool createNutritionTarget}) async {
+    if (_submitting || _completedPlan != null) return;
     if (createNutritionTarget && !_validateAll()) return;
 
-    setState(() => _error = null);
+    setState(() {
+      _error = null;
+      _submitting = true;
+    });
     final auth = context.read<AuthController>();
     final state = context.read<AppState>();
     final plan = context.read<PlanController>();
@@ -361,6 +509,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             days: _days,
           );
         });
+        await _persistDraft();
         telemetry.track(TelemetryEvent.planRevealed);
         return;
       }
@@ -375,10 +524,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           days: _days,
         );
       });
+      await _persistDraft();
       telemetry.track(TelemetryEvent.planRevealed);
     } catch (_) {
       if (!mounted) return;
       setState(() => _error = 'Could not save setup. Try again.');
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
@@ -414,15 +566,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   /// The entry gate. A purchase the store accepted carries straight on into
   /// the app; backing out leaves the plan reveal as it was.
   Future<void> _startTrial() async {
-    final started = await TrialGate.open(context);
-    if (started && mounted) await _finishOnboarding();
+    if (_trialOpening || _finishing) return;
+    setState(() => _trialOpening = true);
+    try {
+      await _draftWrites;
+      if (!mounted) return;
+      final started = await TrialGate.open(context);
+      if (started && mounted) await _finishOnboarding();
+    } finally {
+      if (mounted) setState(() => _trialOpening = false);
+    }
   }
 
   Future<void> _finishOnboarding() async {
+    if (_finishing) return;
     final plan = _completedPlan;
     if (plan == null) return;
 
+    setState(() => _finishing = true);
+
     final auth = context.read<AuthController>();
+    final userId = auth.user?.id;
     final firstRun = context.read<FirstRunController>();
     final telemetry = _telemetry;
     final currentWeight = _parseDouble(_currentWeight.text);
@@ -437,6 +601,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         weeklyTrainingDays: plan.days,
         startingWeightKg: currentWeight,
       );
+      await _draftWrites;
+      if (userId != null) await _draftStore.clear(userId);
       _trackCompleted(
         telemetry,
         goal: plan.campGoal,
@@ -446,6 +612,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() => _error = 'Could not open your plan. Try again.');
+    } finally {
+      if (mounted) setState(() => _finishing = false);
     }
   }
 

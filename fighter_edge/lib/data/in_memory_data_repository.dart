@@ -44,6 +44,13 @@ class InMemoryDataRepository implements DataRepository {
   }
 
   @override
+  Future<void> deleteWeight(String userId, String entryId) async {
+    _ensureUser(userId);
+    _weights[userId]!.removeWhere((w) => w.stableId == entryId);
+    _weightControllers[userId]?.add(_sortedWeights(userId));
+  }
+
+  @override
   Stream<List<Meal>> watchMeals(String userId, DateTime date) {
     _ensureUser(userId);
     final key = _mealStreamKey(userId, date);
