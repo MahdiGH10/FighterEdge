@@ -50,7 +50,25 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
 
   const ownerDb = (uid: string) => env.authenticatedContext(uid).firestore();
 
+  const seedPaid = async (uid: string, overrides: Record<string, unknown> = {}) => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection("users").doc(uid).set({
+        plan: "pro",
+        onboardingComplete: true,
+        billing: { expiresAtMs: Date.now() + 86_400_000 },
+        consents: {
+          healthData: {
+            version: 1,
+            grantedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          },
+        },
+        ...overrides,
+      });
+    });
+  };
+
   it("lets an athlete write, read and delete their own training log", async () => {
+    await seedPaid("alice");
     const db = ownerDb("alice");
     await assertSucceeds(logDoc("alice", db).set(entry));
     await assertSucceeds(logDoc("alice", db).get());
@@ -91,6 +109,7 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
     db.collection("users").doc(uid).collection("fightCamp").doc("current");
 
   it("lets an athlete save, read and remove their own fight", async () => {
+    await seedPaid("alice");
     const db = ownerDb("alice");
     await assertSucceeds(fightDoc("alice", db).set(fight));
     await assertSucceeds(fightDoc("alice", db).get());
@@ -131,6 +150,7 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
     db.collection("users").doc(uid).collection("trainingPlan").doc("current");
 
   it("lets an athlete save and read their own training plan", async () => {
+    await seedPaid("alice");
     const db = ownerDb("alice");
     await assertSucceeds(planDoc("alice", db).set(plan));
     await assertSucceeds(planDoc("alice", db).get());
@@ -205,7 +225,10 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
   });
 
   it("still lets an athlete edit their own profile fields", async () => {
-    await seedProfile("alice", { plan: "free", goal: "" });
+    await seedProfile("alice", {
+      plan: "free", goal: "", onboardingComplete: false,
+      consents: { healthData: { version: 1, grantedAt: serverTime() } },
+    });
     const db = ownerDb("alice");
     await assertSucceeds(
       profile("alice", db).update({ goal: "Make weight", onboardingComplete: true }),
@@ -349,24 +372,133 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
       await assertFails(
         mallory.collection("users").doc("alice").collection(sub).doc("x").get(),
       );
-      await assertSucceeds(
-        ownerDb("alice").collection("users").doc("alice").collection(sub)
-          .doc("x").set({ v: 1 }),
+      await assertFails(
+        mallory.collection("users").doc("alice").collection(sub).doc("x").set({ v: 1 }),
       );
     }
   });
 
   it("allows only the owner to edit individual food entries", async () => {
+    await seedPaid("alice");
     const owner = ownerDb("alice").collection("users").doc("alice")
       .collection("nutritionDays").doc("2026-10-25")
       .collection("entries").doc("entry-a");
     const other = ownerDb("mallory").collection("users").doc("alice")
       .collection("nutritionDays").doc("2026-10-25")
       .collection("entries").doc("entry-a");
-    await assertSucceeds(owner.set({ id: "entry-a", calories: 300 }));
+    await assertSucceeds(owner.set({
+      schemaVersion: 1, id: "entry-a", name: "Lunch", notes: "",
+      calories: 300, proteinGrams: 25, carbGrams: 30, fatGrams: 10,
+      consumed: true, saved: false, source: "manual",
+      loggedAt: "2026-10-25T12:00:00.000", deleted: false,
+    }));
     await assertSucceeds(owner.get());
     await assertFails(other.get());
     await assertFails(other.set({ id: "entry-a", calories: 0 }));
+  });
+
+  it("denies new health records to free, expired and unconsented accounts", async () => {
+    await seedPaid("free", { plan: "free" });
+    await seedPaid("expired", { billing: { expiresAtMs: Date.now() - 3_600_001 } });
+    await seedPaid("unconsented", { consents: {} });
+    for (const uid of ["free", "expired", "unconsented"]) {
+      const db = ownerDb(uid);
+      await assertFails(db.collection("users").doc(uid).collection("weights")
+        .doc("first").set({ date: "2026-10-26T00:00:00Z", kg: 72 }));
+      await assertFails(planDoc(uid, db).set(plan));
+      await assertFails(logDoc(uid, db).set(entry));
+      await assertFails(fightDoc(uid, db).set(fight));
+      await assertFails(db.collection("users").doc(uid).collection("nutritionTargets")
+        .doc("current").set({ status: "success", policyVersion: 1, calculatedAt: "2026-10-26" }));
+    }
+  });
+
+  it("requires paid access for every post-onboarding health collection", async () => {
+    await seedPaid("free", { plan: "free" });
+    const db = ownerDb("free");
+    const base = db.collection("users").doc("free");
+    await assertFails(base.collection("meals").doc("2026-10-26")
+      .set({ date: "2026-10-26", meals: [], updatedAt: serverTime() }));
+    await assertFails(base.collection("sessions").doc("slot")
+      .set({ id: "slot", day: "Mon", title: "Training", completed: false }));
+    await assertFails(base.collection("nutritionProfile").doc("current")
+      .set({ schemaVersion: 1, confirmed: false, screeningStatus: "unanswered", safetyFlags: {} }));
+    await assertFails(base.collection("nutritionDays").doc("2026-10-26")
+      .set({ schemaVersion: 1, localDate: "2026-10-26", updatedAt: serverTime() }));
+    await assertFails(base.collection("nutritionDays").doc("2026-10-26")
+      .collection("entries").doc("food").set({
+        schemaVersion: 1, id: "food", name: "Lunch", deleted: false,
+        calories: 300, proteinGrams: 25, carbGrams: 30, fatGrams: 10,
+        loggedAt: "2026-10-26T12:00:00Z",
+      }));
+  });
+
+  it("accepts valid ongoing records for a paid, consented account", async () => {
+    await seedPaid("alice");
+    const db = ownerDb("alice");
+    const base = db.collection("users").doc("alice");
+    await assertSucceeds(base.collection("weights").doc("first")
+      .set({ date: "2026-10-26T00:00:00Z", kg: 72 }));
+    await assertSucceeds(base.collection("meals").doc("2026-10-26")
+      .set({ date: "2026-10-26", meals: [], updatedAt: serverTime() }));
+    await assertSucceeds(base.collection("sessions").doc("slot")
+      .set({ id: "slot", day: "Mon", title: "Training", completed: false }));
+    await assertSucceeds(base.collection("nutritionProfile").doc("current")
+      .set({ schemaVersion: 1, confirmed: false, screeningStatus: "unanswered", safetyFlags: {} }));
+    await assertSucceeds(base.collection("nutritionTargets").doc("current")
+      .set({ status: "success", policyVersion: 1, calculatedAt: "2026-10-26" }));
+    await assertSucceeds(base.collection("nutritionDays").doc("2026-10-26")
+      .set({ schemaVersion: 1, localDate: "2026-10-26", updatedAt: serverTime() }));
+  });
+
+  it("permits only the initial onboarding records with health consent", async () => {
+    await seedPaid("new", { plan: "free", onboardingComplete: false });
+    const db = ownerDb("new");
+    const base = db.collection("users").doc("new");
+    await assertSucceeds(base.collection("weights").doc("first")
+      .set({ date: "2026-10-26T00:00:00Z", kg: 72 }));
+    await assertSucceeds(base.collection("meals").doc("2026-10-26")
+      .set({ date: "2026-10-26", meals: [], updatedAt: serverTime() }));
+    await assertSucceeds(planDoc("new", db).set(plan));
+    await assertSucceeds(base.collection("nutritionProfile").doc("current")
+      .set({ schemaVersion: 1, confirmed: false, screeningStatus: "unanswered", safetyFlags: {} }));
+    await assertSucceeds(base.collection("nutritionTargets").doc("current")
+      .set({ status: "success", policyVersion: 1, calculatedAt: "2026-10-26" }));
+    await assertFails(logDoc("new", db).set(entry));
+    await assertFails(fightDoc("new", db).set(fight));
+    await assertFails(base.collection("meals").doc("2026-10-27")
+      .set({ date: "2026-10-27", meals: [{ name: "Lunch" }], updatedAt: serverTime() }));
+    await assertFails(base.collection("nutritionDays").doc("2026-10-26")
+      .collection("entries").doc("first").set({ id: "first", deleted: false }));
+  });
+
+  it("denies malformed records even when paid and consented", async () => {
+    await seedPaid("alice");
+    const db = ownerDb("alice");
+    const base = db.collection("users").doc("alice");
+    await assertFails(base.collection("weights").doc("bad")
+      .set({ date: "2026-10-26", kg: -4 }));
+    await assertFails(base.collection("weights").doc("extra")
+      .set({ date: "2026-10-26", kg: 72, admin: true }));
+    await assertFails(planDoc("alice", db).set({ ...plan, inputs: { goal: "buildFitness" } }));
+    await assertFails(logDoc("alice", db).set({ ...entry, rpe: 99 }));
+    await assertFails(fightDoc("alice", db).set({ ...fight, weightLimitKg: -1 }));
+    await assertFails(base.collection("nutritionTargets").doc("current")
+      .set({ status: "success", policyVersion: "1", calculatedAt: "2026-10-26" }));
+    await assertFails(base.collection("nutritionTargets").doc("current")
+      .set({ status: "success", policyVersion: 1, calculatedAt: "2026-10-26", targetCalories: -50 }));
+    await assertFails(base.collection("nutritionProfile").doc("current")
+      .set({ schemaVersion: 1, confirmed: false, screeningStatus: "unanswered", safetyFlags: {}, currentWeightKg: -2 }));
+    await assertFails(base.collection("nutritionDays").doc("2026-10-26")
+      .collection("entries").doc("bad").set({ id: "bad", calories: -1 }));
+  });
+
+  it("does not reopen onboarding or accept health profile edits after consent withdrawal", async () => {
+    await seedPaid("alice", { plan: "free", onboardingComplete: true, consents: {} });
+    const db = ownerDb("alice");
+    await assertFails(profile("alice", db).update({ onboardingComplete: false }));
+    await assertFails(profile("alice", db).update({ startingWeightKg: 72 }));
+    await assertSucceeds(profile("alice", db).update({ displayName: "Alice" }));
   });
 
   it("still denies collections the rules do not name", async () => {

@@ -294,6 +294,34 @@ describe("entitlements (emulator)", { skip: !emulator && "no Firestore emulator"
       assert.equal(rc.calls.length, 2);
     });
 
+    it("reserves one slot before concurrent RevenueCat requests", async () => {
+      const id = uid("concurrent-sync");
+      await seed(id);
+      const rc = fakeRevenueCat({ [id]: NOW + DAY });
+      const results = await Promise.all([
+        syncEntitlement(db, id, { apiKey: "sk_test", nowMs: NOW, fetchImpl: rc.fetchImpl }),
+        syncEntitlement(db, id, { apiKey: "sk_test", nowMs: NOW, fetchImpl: rc.fetchImpl }),
+      ]);
+      assert.deepEqual(results.map((result) => result.status).sort(), ["throttled", "updated"]);
+      assert.equal(rc.calls.length, 1);
+    });
+
+    it("keeps a failed request's reservation until the throttle expires", async () => {
+      const id = uid("failed-sync");
+      await seed(id);
+      const down = fakeRevenueCat({ [id]: "down" });
+      assert.deepEqual(
+        await syncEntitlement(db, id, { apiKey: "sk_test", nowMs: NOW, fetchImpl: down.fetchImpl }),
+        { status: "unavailable" },
+      );
+      assert.equal((await profile(id))?.billing.lastSyncAtMs, NOW);
+      assert.deepEqual(
+        await syncEntitlement(db, id, { apiKey: "sk_test", nowMs: NOW + 1, fetchImpl: down.fetchImpl }),
+        { status: "throttled" },
+      );
+      assert.equal(down.calls.length, 1);
+    });
+
     it("degrades to unavailable without a key, for unknown accounts, or when RevenueCat is down", async () => {
       const id = uid("unavailable");
       await seed(id);
