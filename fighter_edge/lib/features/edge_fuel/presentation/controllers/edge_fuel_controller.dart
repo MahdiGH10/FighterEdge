@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../data/data_repository.dart';
+import '../../../../data/read_state.dart';
 import '../../../../observability/error_reporter.dart';
 import '../../../../observability/telemetry.dart';
 import '../../data/edge_fuel_repository.dart';
@@ -44,9 +45,9 @@ class EdgeFuelController extends ChangeNotifier {
   /// True when the most recent change could not be stored. Any later
   /// successful save clears it. The change stays on screen either way.
   bool get lastSaveFailed => _lastSaveFailed;
-  StreamSubscription<NutritionSetupDraft?>? _draftSub;
-  StreamSubscription<NutritionTarget?>? _targetSub;
-  StreamSubscription<NutritionDay>? _daySub;
+  StreamSubscription<ReadState<NutritionSetupDraft?>>? _draftSub;
+  StreamSubscription<ReadState<NutritionTarget?>>? _targetSub;
+  StreamSubscription<ReadState<NutritionDay>>? _daySub;
   String? _userId;
   NutritionSetupDraft? _draft;
   NutritionTarget? _target;
@@ -54,11 +55,27 @@ class EdgeFuelController extends ChangeNotifier {
   DateTime _selectedDate = DateTime.now();
   FoodMemory? _memory;
   bool _disposed = false;
+  ReadState<NutritionSetupDraft?> _draftRead = const ReadState(ReadPhase.empty);
+  ReadState<NutritionTarget?> _targetRead = const ReadState(ReadPhase.empty);
+  ReadState<NutritionDay> _dayRead = const ReadState(ReadPhase.empty);
+
+  ReadState<NutritionSetupDraft?> get draftRead => _draftRead;
+  ReadState<NutritionTarget?> get targetRead => _targetRead;
+  ReadState<NutritionDay> get dayRead => _dayRead;
+  bool get readsLoading =>
+      _draftRead.isLoading || _targetRead.isLoading || _dayRead.isLoading;
+  bool get readsUnavailable =>
+      _draftRead.isFailed ||
+      _targetRead.isFailed ||
+      _dayRead.isFailed ||
+      _draftRead.isStale ||
+      _targetRead.isStale ||
+      _dayRead.isStale;
 
   NutritionSetupDraft? get draft => _draft;
   NutritionTarget? get target => hasCompletedSetup ? _target : null;
   NutritionDay? get day => _day;
-  bool get dayLoaded => _day != null;
+  bool get dayLoaded => _day != null && _dayRead.isUsable;
   bool get hasCompletedSetup =>
       _draft?.confirmed == true &&
       _draft?.screeningStatus == NutritionScreeningStatus.completed &&
@@ -94,6 +111,11 @@ class EdgeFuelController extends ChangeNotifier {
     _draft = null;
     _target = null;
     _day = null;
+    _draftRead =
+        ReadState(userId == null ? ReadPhase.empty : ReadPhase.loading);
+    _targetRead =
+        ReadState(userId == null ? ReadPhase.empty : ReadPhase.loading);
+    _dayRead = ReadState(userId == null ? ReadPhase.empty : ReadPhase.loading);
     _memory = null;
     _unconfirmed.clear();
     _writeVersions.clear();
@@ -114,27 +136,43 @@ class EdgeFuelController extends ChangeNotifier {
       notifyListeners();
     });
 
-    _draftSub = _repository.watchProfileDraft(userId).listen(
-      (draft) {
-        _draft = draft;
-        notifyListeners();
-      },
-      onError: (Object error) {
-        if (kDebugMode) {
-          debugPrint('[edge_fuel] profile draft stream error: $error');
-        }
-      },
-    );
-    _targetSub = _repository.watchTarget(userId).listen(
-      (target) {
-        _target = target;
+    _subscribeReads(userId);
+  }
+
+  /// Re-subscribes after a failed or stale read. A new first snapshot must
+  /// arrive before Fuel offers entry actions again.
+  void retryReads() {
+    final userId = _userId;
+    if (userId == null) return;
+    _draftSub?.cancel();
+    _targetSub?.cancel();
+    _daySub?.cancel();
+    _draft = null;
+    _target = null;
+    _day = null;
+    _draftRead = const ReadState(ReadPhase.loading);
+    _targetRead = const ReadState(ReadPhase.loading);
+    _dayRead = const ReadState(ReadPhase.loading);
+    notifyListeners();
+    _subscribeReads(userId);
+  }
+
+  void _subscribeReads(String userId) {
+    _draftSub = _repository.watchProfileDraftRead(userId).listen((read) {
+      if (_disposed || _userId != userId) return;
+      _draftRead = read;
+      if (read.isUsable) _draft = read.value;
+      notifyListeners();
+    });
+    _targetSub = _repository.watchTargetRead(userId).listen((read) {
+      if (_disposed || _userId != userId) return;
+      _targetRead = read;
+      if (read.isUsable) {
+        _target = read.value;
         _watchSelectedDay();
-        notifyListeners();
-      },
-      onError: (Object error) {
-        if (kDebugMode) debugPrint('[edge_fuel] target stream error: $error');
-      },
-    );
+      }
+      notifyListeners();
+    });
     _watchSelectedDay();
   }
 
@@ -220,20 +258,23 @@ class EdgeFuelController extends ChangeNotifier {
     if (userId == null) return const [];
     final clock = now ?? DateTime.now();
     final today = DateTime(clock.year, clock.month, clock.day);
-    final days = <NutritionDay>[];
-    for (var i = today.weekday - 1; i >= 0; i--) {
-      final date = DateTime(today.year, today.month, today.day - i);
+    final dates = [
+      for (var i = today.weekday - 1; i >= 0; i--)
+        DateTime(today.year, today.month, today.day - i),
+    ];
+    return Future.wait(dates.map((date) async {
       final loaded = _day;
-      if (loaded != null && loaded.localDate == mealDateKey(date)) {
-        days.add(loaded);
-        continue;
+      if (dayLoaded &&
+          loaded != null &&
+          loaded.localDate == mealDateKey(date)) {
+        return loaded;
       }
-      days.add(await _repository
+      return _repository
           .watchNutritionDay(userId, date,
               targetSnapshot: hasUsableTarget ? _target : null)
-          .first);
-    }
-    return days;
+          .first
+          .timeout(const Duration(seconds: 10));
+    }));
   }
 
   /// Logs a remembered food again, as a fresh entry on the selected day.
@@ -286,31 +327,32 @@ class EdgeFuelController extends ChangeNotifier {
     if (userId == null) return;
     _daySub?.cancel();
     _day = null;
+    _dayRead = const ReadState(ReadPhase.loading);
     final dateKey = mealDateKey(_selectedDate);
     _daySub = _repository
-        .watchNutritionDay(
+        .watchNutritionDayRead(
       userId,
       _selectedDate,
       targetSnapshot: hasUsableTarget ? _target : null,
     )
         .listen(
-      (day) {
+      (read) {
         if (_disposed ||
             _userId != userId ||
             mealDateKey(_selectedDate) != dateKey) {
           return;
         }
-        var visible = day;
-        for (final mutation in _unconfirmed.values) {
-          if (mutation.userId == userId && mutation.localDate == dateKey) {
-            visible = _withMutation(visible, mutation);
+        _dayRead = read;
+        if (read.isUsable) {
+          var visible = read.value!;
+          for (final mutation in _unconfirmed.values) {
+            if (mutation.userId == userId && mutation.localDate == dateKey) {
+              visible = _withMutation(visible, mutation);
+            }
           }
+          _day = visible;
         }
-        _day = visible;
         notifyListeners();
-      },
-      onError: (Object error) {
-        if (kDebugMode) debugPrint('[edge_fuel] day stream error: $error');
       },
     );
   }

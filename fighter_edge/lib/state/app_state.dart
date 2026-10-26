@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../billing/subscription.dart';
 import '../data/data_repository.dart';
+import '../data/read_state.dart';
 import '../data/mock_data.dart';
 import '../features/training_plan/data/legacy_session_slot.dart';
 import '../models/meal.dart';
@@ -99,10 +100,16 @@ class AppState extends ChangeNotifier {
   /// Every piece of training ever logged, newest first.
   List<TrainingLogEntry> _log;
   DateTime _nutritionDate = DateTime.now();
-  StreamSubscription<List<WeightEntry>>? _weightSub;
+  StreamSubscription<ReadState<List<WeightEntry>>>? _weightSub;
   StreamSubscription<List<Meal>>? _mealSub;
   StreamSubscription<List<LegacySessionSlot>>? _sessionSub;
-  StreamSubscription<List<TrainingLogEntry>>? _logSub;
+  StreamSubscription<ReadState<List<TrainingLogEntry>>>? _logSub;
+  ReadState<List<WeightEntry>> _weightRead = const ReadState(ReadPhase.empty);
+  ReadState<List<TrainingLogEntry>> _trainingLogRead =
+      const ReadState(ReadPhase.empty);
+
+  ReadState<List<WeightEntry>> get weightRead => _weightRead;
+  ReadState<List<TrainingLogEntry>> get trainingLogRead => _trainingLogRead;
   bool _sessionsLoaded = false;
   bool _logLoaded = false;
   String? _migratedFor;
@@ -121,6 +128,10 @@ class AppState extends ChangeNotifier {
     _logSub?.cancel();
     _sessionsLoaded = false;
     _logLoaded = false;
+    _weightRead =
+        ReadState(userId == null ? ReadPhase.empty : ReadPhase.loading);
+    _trainingLogRead =
+        ReadState(userId == null ? ReadPhase.empty : ReadPhase.loading);
 
     final repo = _dataRepository;
     if (repo == null) {
@@ -132,6 +143,10 @@ class AppState extends ChangeNotifier {
       _legacySlots = [];
       _log = [];
       _resortWeights();
+      _weightRead = ReadState(
+          _weights.isEmpty ? ReadPhase.empty : ReadPhase.ready,
+          List.unmodifiable(_weights));
+      _trainingLogRead = const ReadState(ReadPhase.empty, []);
       notifyListeners();
       return;
     }
@@ -150,18 +165,7 @@ class AppState extends ChangeNotifier {
       return;
     }
 
-    _weightSub = repo.watchWeights(userId).listen(
-      (weights) {
-        _weights = List.of(weights);
-        _resortWeights();
-        notifyListeners();
-      },
-      onError: (Object error) {
-        // The last known weights stay on screen; a listener error is not
-        // fatal and Firestore keeps retrying the subscription itself.
-        if (kDebugMode) debugPrint('[app_state] weights stream error: $error');
-      },
-    );
+    _watchWeights(repo, userId);
 
     _watchMealsForCurrentDate(repo, userId);
 
@@ -177,19 +181,45 @@ class AppState extends ChangeNotifier {
       },
     );
 
-    _logSub = repo.watchTrainingLog(userId).listen(
-      (log) {
-        _log = List.of(log);
+    _watchTrainingLog(repo, userId);
+  }
+
+  void retryReviewReads() {
+    final repo = _dataRepository;
+    final userId = _userId;
+    if (repo == null || userId == null) return;
+    _weightSub?.cancel();
+    _logSub?.cancel();
+    _weightRead = const ReadState(ReadPhase.loading);
+    _trainingLogRead = const ReadState(ReadPhase.loading);
+    notifyListeners();
+    _watchWeights(repo, userId);
+    _watchTrainingLog(repo, userId);
+  }
+
+  void _watchWeights(DataRepository repo, String userId) {
+    _weightSub = repo.watchWeightsRead(userId).listen((read) {
+      if (_userId != userId) return;
+      _weightRead = read;
+      if (read.isUsable) {
+        _weights = List.of(read.value!);
+        _resortWeights();
+      }
+      notifyListeners();
+    });
+  }
+
+  void _watchTrainingLog(DataRepository repo, String userId) {
+    _logSub = repo.watchTrainingLogRead(userId).listen((read) {
+      if (_userId != userId) return;
+      _trainingLogRead = read;
+      if (read.isUsable) {
+        _log = List.of(read.value!);
         _logLoaded = true;
         _migrateLegacyCompletions(repo, userId);
-        notifyListeners();
-      },
-      onError: (Object error) {
-        if (kDebugMode) {
-          debugPrint('[app_state] training log stream error: $error');
-        }
-      },
-    );
+      }
+      notifyListeners();
+    });
   }
 
   // ---- Weight ----

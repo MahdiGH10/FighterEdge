@@ -28,6 +28,7 @@ import '../theme/app_haptics.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/animated_count.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/progress_ring.dart';
@@ -69,7 +70,26 @@ class _NutritionScreenState extends State<NutritionScreen> {
       );
     }
     final edgeFuel = context.watch<EdgeFuelController>();
-    if (!edgeFuel.dayLoaded) {
+    if (edgeFuel.readsUnavailable) {
+      final stale = edgeFuel.dayRead.isStale ||
+          edgeFuel.targetRead.isStale ||
+          edgeFuel.draftRead.isStale;
+      return ScreenScaffold.tab(
+        title: l.navFuel,
+        body: ListView(children: [
+          EmptyState(
+            icon: AppIcons.warningCircle,
+            title: 'Fuel unavailable',
+            message: stale
+                ? 'Fuel data may be out of date. Retry to refresh it.'
+                : 'Could not load Fuel data. Check your connection and retry.',
+            actionLabel: 'Retry',
+            onAction: edgeFuel.retryReads,
+          ),
+        ]),
+      );
+    }
+    if (edgeFuel.readsLoading || !edgeFuel.dayLoaded) {
       // The first snapshot may contain an existing log from another device.
       // Keep every entry action unavailable until that snapshot is merged.
       return ScreenScaffold.tab(

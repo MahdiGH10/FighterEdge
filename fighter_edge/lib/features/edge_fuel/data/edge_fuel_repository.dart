@@ -3,6 +3,7 @@ import '../domain/models/food_log_entry.dart';
 import '../domain/models/nutrition_day.dart';
 import '../domain/models/nutrition_target.dart';
 import '../../training_plan/data/stored_training_plan.dart';
+import '../../../data/read_state.dart';
 
 /// Persistence boundary for EdgeFuel. Mirrors the existing `DataRepository`
 /// convention (watchX returns a live stream, saveX writes) so the two
@@ -44,4 +45,24 @@ abstract class EdgeFuelRepository {
   );
 
   Future<void> deleteFoodEntry(String userId, String localDate, String entryId);
+}
+
+/// Uniform read status for every EdgeFuel repository implementation.
+extension EdgeFuelRepositoryReads on EdgeFuelRepository {
+  Stream<ReadState<NutritionSetupDraft?>> watchProfileDraftRead(
+          String userId) =>
+      readStates(watchProfileDraft(userId), isEmpty: (draft) => draft == null);
+
+  Stream<ReadState<NutritionTarget?>> watchTargetRead(String userId) =>
+      readStates(watchTarget(userId), isEmpty: (target) => target == null);
+
+  Stream<ReadState<NutritionDay>> watchNutritionDayRead(
+    String userId,
+    DateTime localDate, {
+    NutritionTarget? targetSnapshot,
+  }) =>
+      readStates(
+        watchNutritionDay(userId, localDate, targetSnapshot: targetSnapshot),
+        isEmpty: (day) => day.entries.isEmpty,
+      );
 }

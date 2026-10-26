@@ -44,8 +44,18 @@ class _FuelWeekCardState extends State<FuelWeekCard> {
     return FutureBuilder<List<NutritionDay>>(
       future: _week,
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return TextButton(
+            onPressed: () => setState(
+              () => _week = widget.edgeFuel.loadThisWeek(now: widget.now),
+            ),
+            child: const Text('Could not load this fuel week. Retry'),
+          );
+        }
         final days = snapshot.data;
-        if (days == null) return const SizedBox.shrink();
+        if (days == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
         final summary =
             WeeklyFuelCalculator.summarise(days: days, target: target);
         final body = _FuelWeekBody(summary: summary);

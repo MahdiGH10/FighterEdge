@@ -3,6 +3,7 @@ import '../features/training_plan/data/stored_training_plan.dart';
 import '../models/meal.dart';
 import '../models/training_log_entry.dart';
 import '../models/weight_entry.dart';
+import 'read_state.dart';
 
 abstract class DataRepository {
   Stream<List<WeightEntry>> watchWeights(String userId);
@@ -37,6 +38,19 @@ abstract class DataRepository {
   Future<void> saveTrainingLogEntry(String userId, TrainingLogEntry entry);
 
   Future<void> deleteTrainingLogEntry(String userId, String entryId);
+}
+
+/// Uniform read status for every data repository implementation.
+extension DataRepositoryReads on DataRepository {
+  Stream<ReadState<List<WeightEntry>>> watchWeightsRead(String userId) =>
+      readStates(watchWeights(userId), isEmpty: (weights) => weights.isEmpty);
+
+  Stream<ReadState<StoredTrainingPlan?>> watchTrainingPlanRead(String userId) =>
+      readStates(watchTrainingPlan(userId), isEmpty: (plan) => plan == null);
+
+  Stream<ReadState<List<TrainingLogEntry>>> watchTrainingLogRead(
+          String userId) =>
+      readStates(watchTrainingLog(userId), isEmpty: (log) => log.isEmpty);
 }
 
 String mealDateKey(DateTime date) {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fighter_edge/data/read_state.dart';
 
 import 'package:fighter_edge/features/edge_fuel/data/in_memory_edge_fuel_repository.dart';
 import 'package:fighter_edge/features/edge_fuel/domain/models/food_log_entry.dart';
@@ -165,6 +166,7 @@ void main() {
 
     // The subscription survives the error; the last known target remains.
     expect(controller.target, target);
+    expect(controller.targetRead.phase, ReadPhase.stale);
     controller.dispose();
     await repo.targetController.close();
   });
