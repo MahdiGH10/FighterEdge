@@ -263,7 +263,7 @@
   "trainTabReaction": "Reaction",
   "reactionTitle": "Reaction Drill",
   "reactionHeadline": "The coach calls it. You react.",
-  "reactionSoundHint": "Sound on. Every run is shuffled — nothing to memorize.",
+  "reactionSoundHint": "Sound on. One move per call, shuffled every run.",
   "reactionDisciplineGrappling": "Wrestling",
   "reactionDisciplineStriking": "Striking",
   "reactionDisciplineMma": "MMA",
@@ -272,7 +272,6 @@
   "reactionLevelAdvanced": "Advanced",
   "reactionLevelAdvancedPlus": "Advanced+",
   "reactionStatDuration": "Duration",
-  "reactionStatMoves": "Moves",
   "reactionStatReact": "Reaction",
   "reactionInTheMix": "IN THE MIX · {count}",
   "@reactionInTheMix": {
@@ -1069,7 +1068,7 @@
       "time": { "type": "String" }
     }
   },
-  "reactionMoveTimeNote": "Plus the time the moves themselves take.",
+  "reactionMoveTimeNote": "Plus the time the move itself takes.",
   "paywallBenefitCampTitle": "Your camp week",
   "paywallBenefitCampBody": "Dated sessions for your week, built around your level and your fight date.",
   "paywallBenefitFuelTitle": "Fuel for training days",

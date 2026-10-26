@@ -53,24 +53,20 @@ class _EarVoice implements CoachVoice {
 class _Level {
   final int marginMs;
   final double speed;
-  final int recallMs;
   final double jitter;
-  final int minMoves;
-  final int maxMoves;
   final int workMinutes;
 
   /// Wrestling only: extra seconds every `calls` calls, or null for none.
   final (int, int, int)? blockRest;
-  const _Level(this.marginMs, this.speed, this.recallMs, this.jitter,
-      this.minMoves, this.maxMoves, this.workMinutes, this.blockRest);
+  const _Level(
+      this.marginMs, this.speed, this.jitter, this.workMinutes, this.blockRest);
 }
 
 const _brief = {
-  ReactionLevel.beginner: _Level(1500, 1.3, 300, 0.25, 1, 2, 1, (3, 4, 3000)),
-  ReactionLevel.intermediate:
-      _Level(1100, 1.15, 200, 0.25, 1, 3, 2, (4, 5, 2500)),
-  ReactionLevel.advanced: _Level(800, 1.0, 150, 0.30, 2, 4, 3, (5, 6, 2000)),
-  ReactionLevel.advancedPlus: _Level(600, 0.9, 100, 0.35, 2, 5, 3, null),
+  ReactionLevel.beginner: _Level(1500, 1.3, 0.25, 1, (3, 4, 3000)),
+  ReactionLevel.intermediate: _Level(1100, 1.15, 0.25, 2, (4, 5, 2500)),
+  ReactionLevel.advanced: _Level(800, 1.0, 0.30, 3, (5, 6, 2000)),
+  ReactionLevel.advancedPlus: _Level(600, 0.9, 0.35, 3, null),
 };
 
 /// Combo cost of each spoken call, in ms, from the brief.
@@ -104,8 +100,6 @@ void main() {
       final brief = _brief[level]!;
       final grappling = discipline == ReactionDiscipline.grappling;
       final rounds = grappling ? 2 : 3;
-      final minMoves = grappling ? 1 : brief.minMoves;
-      final maxMoves = grappling ? 1 : brief.maxMoves;
       final work = Duration(minutes: brief.workMinutes);
       const rest = Duration(minutes: 1);
       const countdown = Duration(seconds: 3);
@@ -184,21 +178,15 @@ void main() {
           for (var i = 0; i < calls.length; i++) {
             final call = calls[i];
             expect(call.line, endsWith('!'));
-            final moves =
-                call.line.substring(0, call.line.length - 1).split(', ');
-            expect(moves.length, inInclusiveRange(minMoves, maxMoves),
-                reason: call.line);
-            for (final m in moves) {
-              expect(vocabulary, contains(m),
-                  reason: '"$m" is not on the list');
-              expect(_cost, contains(m),
-                  reason: '"$m" has no cost in the brief');
-            }
-            heardMoves.addAll(moves);
+            // One move per call, said on its own.
+            final move = call.line.substring(0, call.line.length - 1);
+            expect(vocabulary, contains(move),
+                reason: '"$move" is not on the list');
+            expect(_cost, contains(move),
+                reason: '"$move" has no cost in the brief');
+            heardMoves.add(move);
 
-            final movement = brief.speed *
-                (moves.fold<int>(0, (s, m) => s + _cost[m]!) +
-                    _finish(moves.last));
+            final movement = brief.speed * (_cost[move]! + _finish(move));
 
             // No call overruns its round: it is said and the athlete has at
             // least the time the movement itself takes before the bell.
@@ -215,15 +203,14 @@ void main() {
             // plus a jittered reaction time, never below movement + 300 ms.
             final silence =
                 calls[i + 1].start.difference(call.end).inMilliseconds;
-            final reaction =
-                brief.marginMs + brief.recallMs * (moves.length - 1);
+            final reaction = brief.marginMs;
             final lo =
                 max(movement + 300, movement + reaction * (1 - brief.jitter));
             // Up to +2 s breather on top; wrestling may add a block rest.
             final extra = (brief.blockRest?.$3 ?? 0) + 2000;
             final hi = movement + reaction * (1 + brief.jitter) + extra;
             expect(silence, inInclusiveRange(lo.floor() - 1, hi.ceil() + 1),
-                reason: 'after "${call.line}" (${moves.length} moves)');
+                reason: 'after "${call.line}"');
           }
         }
 

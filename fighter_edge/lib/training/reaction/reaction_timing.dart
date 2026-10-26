@@ -1,6 +1,9 @@
 /// The reaction drill's timing model: how long an athlete gets after each
-/// call, how that scales with the call and the level, and how long the coach
+/// call, how that scales with the move and the level, and how long the coach
 /// takes to say a line.
+///
+/// Every call is exactly one move, at every level. What makes a level harder
+/// is the pace: less time to react, less time allowed for the movement.
 ///
 /// Pure Dart on purpose (no Flutter, no platform, no clock). Every number is
 /// a named constant, and every random draw comes from a [Random] the caller
@@ -9,8 +12,8 @@
 /// ## The model
 ///
 /// ```
-/// movement = speed(level) * (sum(moveCost) + finishCost)
-/// reaction = margin(level) + recall(level) * (moves - 1)
+/// movement = speed(level) * (moveCost + finishCost)
+/// reaction = margin(level)
 /// gap      = movement + jittered(reaction)
 /// gap     >= movement + 300 ms            (never shorter than the movement)
 /// ```
@@ -53,25 +56,17 @@ class BlockRest {
 
 /// Everything that makes one level harder than the one before it.
 class ReactionLevelTiming {
-  /// Time to hear the call, decide and start moving, for the first move of a
-  /// call. Always above ~500 ms (choice reaction time plus hear-and-decide).
+  /// Time to hear the call, decide and start moving. Always above ~500 ms
+  /// (choice reaction time plus hear-and-decide).
   final int marginMs;
 
   /// Multiplier on how long each movement is allowed to take. Below 1 means
   /// the athlete is expected to be quicker than the nominal cost.
   final double speed;
 
-  /// Extra thinking time per move after the first, to hold the sequence in
-  /// mind.
-  final int recallMs;
-
   /// How far the reaction part may stray from nominal, as a fraction
   /// (0.25 is +-25%).
   final double jitter;
-
-  /// Moves per call, inclusive (striking and MMA; wrestling is always 1).
-  final int minMoves;
-  final int maxMoves;
 
   /// One round of work, and the rest between rounds.
   final Duration roundWork;
@@ -83,10 +78,7 @@ class ReactionLevelTiming {
   const ReactionLevelTiming({
     required this.marginMs,
     required this.speed,
-    required this.recallMs,
     required this.jitter,
-    required this.minMoves,
-    required this.maxMoves,
     required this.roundWork,
     required this.roundRest,
     this.grapplingBlockRest,
@@ -163,10 +155,7 @@ abstract final class ReactionTiming {
   static const _beginner = ReactionLevelTiming(
     marginMs: 1500,
     speed: 1.3,
-    recallMs: 300,
     jitter: 0.25,
-    minMoves: 1,
-    maxMoves: 2,
     roundWork: Duration(minutes: 1),
     roundRest: Duration(minutes: 1),
     grapplingBlockRest: BlockRest(3, 4, Duration(milliseconds: 3000)),
@@ -174,10 +163,7 @@ abstract final class ReactionTiming {
   static const _intermediate = ReactionLevelTiming(
     marginMs: 1100,
     speed: 1.15,
-    recallMs: 200,
     jitter: 0.25,
-    minMoves: 1,
-    maxMoves: 3,
     roundWork: Duration(minutes: 2),
     roundRest: Duration(minutes: 1),
     grapplingBlockRest: BlockRest(4, 5, Duration(milliseconds: 2500)),
@@ -185,10 +171,7 @@ abstract final class ReactionTiming {
   static const _advanced = ReactionLevelTiming(
     marginMs: 800,
     speed: 1.0,
-    recallMs: 150,
     jitter: 0.30,
-    minMoves: 2,
-    maxMoves: 4,
     roundWork: Duration(minutes: 3),
     roundRest: Duration(minutes: 1),
     grapplingBlockRest: BlockRest(5, 6, Duration(milliseconds: 2000)),
@@ -196,10 +179,7 @@ abstract final class ReactionTiming {
   static const _advancedPlus = ReactionLevelTiming(
     marginMs: 600,
     speed: 0.9,
-    recallMs: 100,
     jitter: 0.35,
-    minMoves: 2,
-    maxMoves: 5,
     roundWork: Duration(minutes: 3),
     roundRest: Duration(minutes: 1),
   );
@@ -217,7 +197,7 @@ abstract final class ReactionTiming {
 
   // -- Costs -----------------------------------------------------------------
 
-  /// What [command] adds inside a call. Every command in the catalog is
+  /// What [command] costs to perform. Every command in the catalog is
   /// listed; "Back hook" and the lead uppercut use the closest listed move
   /// (hook, uppercut). "Level change - front/back roll" is a level change
   /// followed by the roll, so it costs both. Anything unknown costs the same
@@ -267,40 +247,32 @@ abstract final class ReactionTiming {
         _ => finishAfterPunchMs,
       };
 
-  /// How long the call's movements take at [level]'s pace. Never jittered.
-  static int movementMs(List<ReactionCommand> commands, ReactionLevel level) {
-    assert(commands.isNotEmpty);
-    final sum = commands.fold<int>(0, (s, c) => s + moveCostMs(c));
-    return (of(level).speed * (sum + finishCostMs(commands.last))).round();
-  }
+  /// How long [command] takes at [level]'s pace. Never jittered.
+  static int movementMs(ReactionCommand command, ReactionLevel level) =>
+      (of(level).speed * (moveCostMs(command) + finishCostMs(command))).round();
 
-  /// The athlete's reaction time at [level] for a call of [moves] moves,
-  /// before jitter.
-  static int reactionMs(int moves, ReactionLevel level) {
-    final t = of(level);
-    return t.marginMs + t.recallMs * (moves - 1);
-  }
+  /// The athlete's reaction time at [level], before jitter.
+  static int reactionMs(ReactionLevel level) => of(level).marginMs;
 
   /// The gap with no jitter at all: movement plus nominal reaction time.
-  static int nominalGapMs(
-          List<ReactionCommand> commands, ReactionLevel level) =>
-      movementMs(commands, level) + reactionMs(commands.length, level);
+  static int nominalGapMs(ReactionCommand command, ReactionLevel level) =>
+      movementMs(command, level) + reactionMs(level);
 
   /// The shortest the gap may ever be.
-  static int floorMs(List<ReactionCommand> commands, ReactionLevel level) =>
-      movementMs(commands, level) + floorMarginMs;
+  static int floorMs(ReactionCommand command, ReactionLevel level) =>
+      movementMs(command, level) + floorMarginMs;
 
   /// The gap for a given jitter. [jitterFraction] scales the reaction part
   /// (-0.25 is a quarter shorter); [extraMs] is added to it. The movement
   /// part is untouched and the result is clamped to [floorMs].
   static int gapMs(
-    List<ReactionCommand> commands,
+    ReactionCommand command,
     ReactionLevel level, {
     double jitterFraction = 0,
     int extraMs = 0,
   }) {
-    final movement = movementMs(commands, level);
-    final reaction = reactionMs(commands.length, level);
+    final movement = movementMs(command, level);
+    final reaction = reactionMs(level);
     final gap = movement + (reaction * (1 + jitterFraction)).round() + extraMs;
     return max(gap, movement + floorMarginMs);
   }
@@ -309,7 +281,7 @@ abstract final class ReactionTiming {
   /// come a bit sooner than nominal), and about one call in eight gets a
   /// 1-2 s breather on top, so the rhythm cannot be learned.
   static int sampleGapMs(
-    List<ReactionCommand> commands,
+    ReactionCommand command,
     ReactionLevel level,
     Random random,
   ) {
@@ -319,21 +291,19 @@ abstract final class ReactionTiming {
     final extra = random.nextDouble() < longGapChance
         ? longGapMinMs + random.nextInt(longGapMaxMs - longGapMinMs + 1)
         : 0;
-    return gapMs(commands, level, jitterFraction: fraction, extraMs: extra);
+    return gapMs(command, level, jitterFraction: fraction, extraMs: extra);
   }
 
-  /// The reaction time the picker shows for a drill, in ms, from a
-  /// single-move call to the longest call the level makes, before jitter and
-  /// without the movement time (which depends on the moves called).
-  static (int, int) reactionRangeMs(
-    ReactionDiscipline discipline,
-    ReactionLevel level,
-  ) {
+  /// The reaction time the picker shows for a level, in ms, as (shortest,
+  /// longest) once the jitter is applied, without the movement time (which
+  /// depends on the move called) and without the occasional long breather.
+  static (int, int) reactionRangeMs(ReactionLevel level) {
     final t = of(level);
-    final grappling = discipline == ReactionDiscipline.grappling;
-    final shortest = grappling ? 1 : t.minMoves;
-    final longest = grappling ? 1 : t.maxMoves;
-    return (reactionMs(shortest, level), reactionMs(longest, level));
+    final nominal = reactionMs(level);
+    return (
+      (nominal * (1 - t.jitter)).round(),
+      (nominal * (1 + t.jitter)).round(),
+    );
   }
 }
 

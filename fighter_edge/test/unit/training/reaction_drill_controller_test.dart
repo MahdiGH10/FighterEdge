@@ -105,7 +105,6 @@ void main() {
     expect(drill.phase, ReactionDrillPhase.finished);
     expect(drill.remaining, Duration.zero);
     expect(drill.workElapsed, spec.workDuration);
-    expect(drill.commands, drill.calls, reason: 'wrestling: one move a call');
     await tester.pump();
     expect(voice.lines.last, 'Time!');
     expect(voice.lines.where((l) => l == 'Rest'), hasLength(1));
@@ -161,10 +160,8 @@ void main() {
     final commands = {
       for (final c in ReactionDiscipline.mma.commands) c.spoken: c,
     };
-    List<ReactionCommand> parse(String line) => [
-          for (final m in line.substring(0, line.length - 1).split(', '))
-            commands[m]!,
-        ];
+    ReactionCommand parse(String line) =>
+        commands[line.substring(0, line.length - 1)]!;
 
     final calls = [
       for (var i = 0; i < voice.lines.length; i++)
@@ -191,7 +188,7 @@ void main() {
 
   testWidgets('no call is started that cannot finish before its round ends',
       (tester) async {
-    // The hardest drill: up to 5 moves a call, rolls included.
+    // The hardest drill: the fastest pace, rolls included.
     final hard = ReactionDrillSpec.of(
         ReactionDiscipline.mma, ReactionLevel.advancedPlus);
     final voice = RecordingVoice(
@@ -223,14 +220,11 @@ void main() {
     for (var i = 0; i < voice.lines.length; i++) {
       final line = voice.lines[i];
       if (line == 'Get ready!' || line == 'Rest' || line == 'Time!') continue;
-      final moves = [
-        for (final m in line.substring(0, line.length - 1).split(', '))
-          commands[m]!,
-      ];
+      final move = commands[line.substring(0, line.length - 1)]!;
       final start = voice.starts[i];
       final end = roundEnds.firstWhere((e) => !start.isAfter(e));
       final need = SpeechEstimate.expected(line) +
-          Duration(milliseconds: ReactionTiming.floorMs(moves, hard.level));
+          Duration(milliseconds: ReactionTiming.floorMs(move, hard.level));
       // The round clock ticks every 100 ms, so allow one tick of slack.
       expect(
           start.add(need).isAfter(end.add(const Duration(milliseconds: 100))),

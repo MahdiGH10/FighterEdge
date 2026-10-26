@@ -51,10 +51,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ReactionDrillPicker), findsOneWidget);
     expect(find.text('THE COACH CALLS IT. YOU REACT.'), findsOneWidget);
-    // MMA beginner by default: 3 rounds of a minute, up to two moves, 24
-    // commands.
+    // MMA beginner by default: 3 rounds of a minute, 24 commands.
     expect(find.text('3 × 1:00'), findsOneWidget);
-    expect(find.text('1–2'), findsOneWidget);
     await _scrollToMix(tester);
     expect(find.text('IN THE MIX · 24'), findsOneWidget);
     await _scrollToTop(tester);
@@ -115,8 +113,14 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     await tester.pump(_callSettle);
     final first = expected.next();
-    for (final c in first.commands) {
-      expect(findDrillMove(c.label), findsOneWidget);
+    expect(findDrillMove(first.command.label), findsOneWidget);
+    // One move on screen, and no other move name beside it.
+    final others = [
+      for (final c in spec.discipline.commands)
+        if (c != first.command) c,
+    ];
+    for (final c in others) {
+      expect(findDrillMove(c.label), findsNothing, reason: c.label);
     }
 
     // Round 1 ends on the minute; the rest comes next.

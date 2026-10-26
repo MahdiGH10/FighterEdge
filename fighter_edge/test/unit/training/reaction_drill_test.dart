@@ -51,15 +51,11 @@ void main() {
           isNot(contains(ReactionCommands.sprawl)));
     });
 
-    test('the voice gets a short, clipped line with no filler', () {
-      const cue = ReactionCue(
-        [ReactionCommands.stepLeft, ReactionCommands.hook],
-        Duration(seconds: 1),
-      );
-      expect(cue.spoken, 'Step left, Hook!');
+    test('the voice gets one short, clipped move with no filler', () {
+      const cue = ReactionCue(ReactionCommands.hook, Duration(seconds: 1));
+      expect(cue.spoken, 'Hook!');
       expect(
-        const ReactionCue(
-                [ReactionCommands.levelChangeFrontRoll], Duration.zero)
+        const ReactionCue(ReactionCommands.levelChangeFrontRoll, Duration.zero)
             .spoken,
         'Level change front roll!',
       );
@@ -100,32 +96,18 @@ void main() {
           final hard = _spec(d, ReactionLevel.values[i]);
           expect(hard.roundDuration, greaterThanOrEqualTo(easy.roundDuration));
           expect(hard.workDuration, greaterThanOrEqualTo(easy.workDuration));
-          expect(hard.maxLength, greaterThanOrEqualTo(easy.maxLength));
-          expect(hard.minLength, greaterThanOrEqualTo(easy.minLength));
         }
       }
     });
 
-    test('wrestling calls are always one move', () {
-      for (final level in ReactionLevel.values) {
-        final cues = _cues(_spec(ReactionDiscipline.grappling, level));
-        expect(cues.every((c) => c.commands.length == 1), isTrue);
-      }
-    });
-
-    test('striking and MMA calls stay within each level length', () {
-      const bounds = {
-        ReactionLevel.beginner: (1, 2),
-        ReactionLevel.intermediate: (1, 3),
-        ReactionLevel.advanced: (2, 4),
-        ReactionLevel.advancedPlus: (2, 5),
-      };
-      for (final d in [ReactionDiscipline.striking, ReactionDiscipline.mma]) {
-        for (final MapEntry(key: level, value: (lo, hi)) in bounds.entries) {
-          final lengths =
-              _cues(_spec(d, level)).map((c) => c.commands.length).toSet();
-          expect(lengths, {for (var n = lo; n <= hi; n++) n},
-              reason: '$d $level uses every length from $lo to $hi');
+    test('every call is one move, at every level, and says one line', () {
+      for (final d in ReactionDiscipline.values) {
+        for (final level in ReactionLevel.values) {
+          for (final c in _cues(_spec(d, level), n: 300)) {
+            expect(d.commands, contains(c.command), reason: '$d $level');
+            expect(c.spoken, '${c.command.spoken}!');
+            expect(c.spoken, isNot(contains(',')), reason: c.spoken);
+          }
         }
       }
     });
@@ -158,7 +140,7 @@ void main() {
             expect(
                 c.minGap,
                 Duration(
-                    milliseconds: ReactionTiming.floorMs(c.commands, level)));
+                    milliseconds: ReactionTiming.floorMs(c.command, level)));
             expect(c.gapAfter, greaterThanOrEqualTo(c.minGap),
                 reason: '$d $level $c');
           }
@@ -172,9 +154,8 @@ void main() {
         for (final level in ReactionLevel.values) {
           final j = ReactionTiming.of(level).jitter;
           for (final c in _cues(_spec(d, level))) {
-            final movement = ReactionTiming.movementMs(c.commands, level);
-            final reaction =
-                ReactionTiming.reactionMs(c.commands.length, level);
+            final movement = ReactionTiming.movementMs(c.command, level);
+            final reaction = ReactionTiming.reactionMs(level);
             expect(
                 ms(c) - movement,
                 inInclusiveRange((reaction * (1 - j)).floor(),
@@ -199,8 +180,6 @@ void main() {
           rounds: 2,
           roundDuration: const Duration(minutes: 1),
           restDuration: const Duration(minutes: 1),
-          minLength: 1,
-          maxLength: 1,
           blockRest: BlockRest(
               real.minCalls, real.maxCalls, const Duration(minutes: 5)),
         );
@@ -219,8 +198,8 @@ void main() {
         }
         // And the rest is added on top of an ordinary gap.
         for (final i in restAt) {
-          final movement = ReactionTiming.movementMs(cues[i].commands, level);
-          final reaction = ReactionTiming.reactionMs(1, level);
+          final movement = ReactionTiming.movementMs(cues[i].command, level);
+          final reaction = ReactionTiming.reactionMs(level);
           expect(ms(cues[i]) - 300000 - movement,
               greaterThanOrEqualTo((reaction * 0.5).floor()));
         }
@@ -229,19 +208,19 @@ void main() {
 
     test('Advanced+ wrestling has no block rest at all', () {
       const level = ReactionLevel.advancedPlus;
-      final top = (ReactionTiming.reactionMs(1, level) * 1.35).ceil() + 2000;
+      final top = (ReactionTiming.reactionMs(level) * 1.35).ceil() + 2000;
       for (final c in _cues(_spec(ReactionDiscipline.grappling, level))) {
-        expect(ms(c) - ReactionTiming.movementMs(c.commands, level),
+        expect(ms(c) - ReactionTiming.movementMs(c.command, level),
             lessThanOrEqualTo(top));
       }
     });
 
-    test('a longer or costlier call always gets a longer nominal gap', () {
+    test('a costlier move always gets a longer nominal gap', () {
       for (final level in ReactionLevel.values) {
-        final jab = [ReactionCommands.jab];
-        final jabCross = [ReactionCommands.jab, ReactionCommands.cross];
-        final kick = [ReactionCommands.highKick];
-        expect(ReactionTiming.nominalGapMs(jabCross, level),
+        const jab = ReactionCommands.jab;
+        const cross = ReactionCommands.cross;
+        const kick = ReactionCommands.highKick;
+        expect(ReactionTiming.nominalGapMs(cross, level),
             greaterThan(ReactionTiming.nominalGapMs(jab, level)));
         expect(ReactionTiming.nominalGapMs(kick, level),
             greaterThan(ReactionTiming.nominalGapMs(jab, level)));
@@ -251,7 +230,7 @@ void main() {
 
   group('Unpredictability', () {
     List<ReactionCommand> flat(List<ReactionCue> cues) =>
-        [for (final c in cues) ...c.commands];
+        [for (final c in cues) c.command];
 
     test('never the same call twice in a row', () {
       for (final d in ReactionDiscipline.values) {
