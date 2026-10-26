@@ -51,10 +51,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ReactionDrillPicker), findsOneWidget);
     expect(find.text('THE COACH CALLS IT. YOU REACT.'), findsOneWidget);
-    // MMA beginner by default: 3 rounds of a minute, 24 commands.
+    // MMA beginner by default: 3 rounds of a minute, 27 commands.
     expect(find.text('3 × 1:00'), findsOneWidget);
     await _scrollToMix(tester);
-    expect(find.text('IN THE MIX · 24'), findsOneWidget);
+    expect(find.text('IN THE MIX · 27'), findsOneWidget);
     await _scrollToTop(tester);
 
     await tester.tap(find.text('Wrestling'));
@@ -325,7 +325,7 @@ void main() {
     await open();
     expect(find.text('3 × 3:00'), findsOneWidget, reason: 'striking advanced+');
     await _scrollToMix(tester);
-    expect(find.text('IN THE MIX · 19'), findsOneWidget);
+    expect(find.text('IN THE MIX · 22'), findsOneWidget);
   });
 }
 

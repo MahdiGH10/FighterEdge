@@ -26,8 +26,8 @@ void main() {
         'Jump',
         'Cartwheel',
       ]);
-      expect(ReactionDiscipline.striking.commands, hasLength(19));
-      expect(ReactionDiscipline.mma.commands, hasLength(24));
+      expect(ReactionDiscipline.striking.commands, hasLength(22));
+      expect(ReactionDiscipline.mma.commands, hasLength(27));
       for (final d in ReactionDiscipline.values) {
         final ids = d.commands.map((c) => c.id).toList();
         expect(ids.toSet(), hasLength(ids.length), reason: '$d has a repeat');

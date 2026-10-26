@@ -3116,3 +3116,5 @@ Next: owner decisions on TRAINING_PLAN_PROPOSAL.md (§9), NUTRITION_COMPETITOR_R
 ## Continuation update — 2026-10-26 (single-move reaction calls)
 
 Every Reaction call is now exactly one move, at every level and discipline: the voice says one line ("Hook!") and the screen shows that one move and nothing else. Levels differ only by pace: the reaction margin (1.5 s Beginner to 0.6 s Advanced+), the movement speed factor, jitter, round length, and wrestling block rest. Removed the multi-move settings (`minMoves`, `maxMoves`, `recallMs`, spec `minLength`/`maxLength`, the picker "Moves" stat). `ReactionCue` now holds one `command`. The picker shows the reaction range with jitter applied (for example 1.1-1.9 s on Beginner). Timing numbers for single moves are unchanged, so the worked examples still hold. The sections above that describe multi-move calls are history.
+
+Reaction vocabulary: added Left kick, Right kick and Side kick to Striking (now 22 moves) and MMA (now 27). Left and right kick cost the same as a middle kick (1100 ms); Side kick costs 1200 ms; all three finish like other kicks (500 ms). Costs are coaching estimates, like the other kicks.

@@ -51,6 +51,9 @@ abstract final class ReactionCommands {
   static const lowKick = ReactionCommand('low_kick', 'Low kick');
   static const highKick = ReactionCommand('high_kick', 'High kick');
   static const middleKick = ReactionCommand('middle_kick', 'Middle kick');
+  static const leftKick = ReactionCommand('left_kick', 'Left kick');
+  static const rightKick = ReactionCommand('right_kick', 'Right kick');
+  static const sideKick = ReactionCommand('side_kick', 'Side kick');
   static const teep = ReactionCommand('teep', 'Teep');
 
   // Defense.
@@ -109,6 +112,9 @@ enum ReactionDiscipline {
             ReactionCommands.lowKick,
             ReactionCommands.highKick,
             ReactionCommands.middleKick,
+            ReactionCommands.leftKick,
+            ReactionCommands.rightKick,
+            ReactionCommands.sideKick,
             ReactionCommands.teep,
             ReactionCommands.slipLeft,
             ReactionCommands.slipRight,
@@ -129,6 +135,9 @@ enum ReactionDiscipline {
             ReactionCommands.lowKick,
             ReactionCommands.highKick,
             ReactionCommands.middleKick,
+            ReactionCommands.leftKick,
+            ReactionCommands.rightKick,
+            ReactionCommands.sideKick,
             ReactionCommands.teep,
             ReactionCommands.slipLeft,
             ReactionCommands.slipRight,
