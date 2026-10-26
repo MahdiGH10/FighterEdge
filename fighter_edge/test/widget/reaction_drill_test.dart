@@ -2,12 +2,16 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fighter_edge/screens/reaction_drill_picker.dart';
 import 'package:fighter_edge/observability/telemetry.dart';
 import 'package:fighter_edge/screens/reaction_drill_screen.dart';
 import 'package:fighter_edge/screens/training_camp_screen.dart';
 import 'package:fighter_edge/training/reaction/coach_voice.dart';
+import 'package:fighter_edge/training/reaction/coach_voice_choice.dart';
+import 'package:fighter_edge/training/reaction/selectable_coach_voice.dart';
 import 'package:fighter_edge/training/reaction/reaction_cue_generator.dart';
 import 'package:fighter_edge/training/reaction/reaction_drill.dart';
 
@@ -323,6 +327,55 @@ void main() {
       for (final c in ReactionDiscipline.grappling.commands) '${c.spoken}!'
     };
     expect(wrestling, contains(voice.lines.single));
+  });
+
+  testWidgets('the coach voice can be picked, and plays as soon as it is',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final clips = <CoachVoiceChoice, _SpyVoice>{};
+    final phone = _SpyVoice();
+    final voices = SelectableCoachVoice(
+      phone: phone,
+      clips: (choice) => clips.putIfAbsent(choice, _SpyVoice.new),
+    );
+    final repo = await makeRepo(signedIn: true);
+    await tester.pumpWidget(wrapApp(
+      MultiProvider(
+        providers: [
+          Provider<CoachVoice>.value(value: voices),
+          Provider<SelectableCoachVoice>.value(value: voices),
+        ],
+        child: const Scaffold(body: ReactionDrillPicker()),
+      ),
+      repo: repo,
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('COACH VOICE'), findsOneWidget);
+    for (final label in ['US male', 'UK male', 'US female', 'Phone voice']) {
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
+
+    await tester.tap(find.text('UK male'));
+    await tester.pumpAndSettle();
+    expect(voices.choice, CoachVoiceChoice.ukMale);
+    expect(clips[CoachVoiceChoice.ukMale]!.lines, hasLength(1),
+        reason: 'picking a voice plays a sample of it');
+
+    await tester.tap(find.text('Phone voice'));
+    await tester.pumpAndSettle();
+    expect(phone.lines, hasLength(1));
+  });
+
+  testWidgets('without a selectable voice the picker shows no voice choice',
+      (tester) async {
+    final repo = await makeRepo(signedIn: true);
+    await tester.pumpWidget(wrapApp(
+      const Scaffold(body: ReactionDrillPicker()),
+      repo: repo,
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('COACH VOICE'), findsNothing);
   });
 
   testWidgets('"test voice" says so when the phone has no voice',

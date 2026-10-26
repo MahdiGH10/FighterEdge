@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import 'coach_voice.dart';
+import 'coach_voice_choice.dart';
 import 'reaction_cue_generator.dart';
 import 'reaction_drill.dart';
 import 'reaction_timing.dart';
@@ -161,7 +162,7 @@ class ReactionDrillController extends ChangeNotifier {
     _countdown = countdownFrom;
     notifyListeners();
 
-    unawaited(_voice.say('Get ready!'));
+    unawaited(_voice.say(CoachLines.getReady));
     while (_countdown > 0) {
       await _wait(const Duration(seconds: 1));
       if (run != _run) return;
@@ -232,7 +233,7 @@ class ReactionDrillController extends ChangeNotifier {
     _round++;
     _elapsed = Duration.zero;
     _restLeft = spec.restDuration;
-    unawaited(_voice.stop().then((_) => _voice.say('Rest')));
+    unawaited(_voice.stop().then((_) => _voice.say(CoachLines.rest)));
     unawaited(_go(countdownSeconds));
   }
 
@@ -252,7 +253,7 @@ class ReactionDrillController extends ChangeNotifier {
     _elapsed = spec.roundDuration;
     _phase = ReactionDrillPhase.finished;
     notifyListeners();
-    unawaited(_voice.stop().then((_) => _voice.say('Time!')));
+    unawaited(_voice.stop().then((_) => _voice.say(CoachLines.time)));
   }
 
   void _halt() {

@@ -48,6 +48,7 @@ import 'state/glass_policy_controller.dart';
 import 'state/locale_controller.dart';
 import 'state/sync_tracker.dart';
 import 'training/reaction/coach_voice.dart';
+import 'training/reaction/selectable_coach_voice.dart';
 import 'training/reaction/tts_coach_voice.dart';
 import 'theme/app_accessibility.dart';
 import 'theme/app_colors.dart';
@@ -169,6 +170,10 @@ Future<AppDependencies> _initializeProductionDependencies() async {
     return repo;
   });
 
+  // Recorded coach clips, with the phone's own voice as the fallback.
+  final coachVoice = SelectableCoachVoice.withClips(phone: TtsCoachVoice());
+  unawaited(coachVoice.load());
+
   return bootStep(
       BootStage.services,
       () => AppDependencies(
@@ -178,7 +183,7 @@ Future<AppDependencies> _initializeProductionDependencies() async {
             fightCampRepo: FirestoreFightCampRepository(),
             billingGateway: RevenueCatBillingGateway(),
             reminderGateway: LocalReminderGateway(),
-            coachVoice: TtsCoachVoice(),
+            coachVoice: coachVoice,
             telemetry: kIsWeb
                 ? const NoopTelemetry()
                 : ConsentGatedTelemetry(FirebaseTelemetry(), consent),
@@ -302,6 +307,9 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<CoachVoice>.value(
           value: coachVoice ?? const SilentCoachVoice(),
         ),
+        // The picker lists the voices when the app's voice is selectable.
+        if (coachVoice case final SelectableCoachVoice selectable)
+          Provider<SelectableCoachVoice>.value(value: selectable),
         ChangeNotifierProvider(
           create: (_) => AuthController(
             authRepo,
