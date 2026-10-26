@@ -28,40 +28,13 @@ class WelcomePages extends StatefulWidget {
 
 class _WelcomePage {
   final IconData icon;
-  final String title;
-  final String body;
-  final List<String> proof;
-
-  const _WelcomePage({
-    required this.icon,
-    required this.title,
-    required this.body,
-    required this.proof,
-  });
+  const _WelcomePage(this.icon);
 }
 
 const _pages = [
-  _WelcomePage(
-    icon: AppIcons.boxingGlove,
-    title: 'Your camp, organised.',
-    body: 'Training week, weight and fuel in one place — built around the '
-        'days you can actually train.',
-    proof: ['Weekly plan', 'Session log', 'Weigh-ins'],
-  ),
-  _WelcomePage(
-    icon: AppIcons.lightning,
-    title: 'Fuel that matches the work.',
-    body: 'EdgeFuel sets your calories and macros from your body and your '
-        'training load, then keeps score as you log.',
-    proof: ['Daily target', 'Macro split', 'Meal log'],
-  ),
-  _WelcomePage(
-    icon: AppIcons.trendUp,
-    title: '', // Localized by the page view.
-    body: 'Streaks, your weight trend and session history show progress '
-        'week over week — not just today.',
-    proof: ['Streaks', 'Weight trend', 'History'],
-  ),
+  _WelcomePage(AppIcons.boxingGlove),
+  _WelcomePage(AppIcons.lightning),
+  _WelcomePage(AppIcons.trendUp),
 ];
 
 class _WelcomePagesState extends State<WelcomePages> {
@@ -123,7 +96,7 @@ class _WelcomePagesState extends State<WelcomePages> {
                           ),
                         ),
                         child: Text(
-                          'Skip',
+                          L.of(context).welcomeSkip,
                           style: AppType.callout(
                             weight: FontWeight.w600,
                             color: AppAccessibility.textSecondary(context),
@@ -152,14 +125,16 @@ class _WelcomePagesState extends State<WelcomePages> {
                 _PageDots(count: _pages.length, current: _page),
                 const SizedBox(height: Insets.xl),
                 PrimaryButton(
-                  _isLast ? 'Build my plan' : 'Continue',
+                  _isLast
+                      ? L.of(context).welcomeBuildPlan
+                      : L.of(context).setupContinue,
                   icon: _isLast ? AppIconsFill.flag : AppIcons.arrowRight,
                   expand: true,
                   onPressed: _next,
                 ),
                 const SizedBox(height: Insets.md),
                 Text(
-                  'About 2 minutes · 7 quick questions',
+                  L.of(context).welcomeDuration,
                   textAlign: TextAlign.center,
                   style: AppType.subhead(
                       color: AppAccessibility.textMuted(context)),
@@ -180,6 +155,22 @@ class _WelcomePageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
+    final title = switch (number) {
+      1 => l.welcomeCampTitle,
+      2 => l.welcomeFuelTitle,
+      _ => l.welcomeProgressTitle,
+    };
+    final body = switch (number) {
+      1 => l.welcomeCampBody,
+      2 => l.welcomeFuelBody,
+      _ => l.welcomeProgressBody,
+    };
+    final proof = switch (number) {
+      1 => [l.welcomeWeeklyPlan, l.welcomeSessionLog, l.welcomeWeighIns],
+      2 => [l.welcomeDailyTarget, l.welcomeMacroSplit, l.welcomeMealLog],
+      _ => [l.welcomeStreaks, l.welcomeWeightTrend, l.welcomeHistory],
+    };
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
         child: ConstrainedBox(
@@ -194,17 +185,13 @@ class _WelcomePageView extends StatelessWidget {
               const SizedBox(height: Insets.xxl),
               PremiumReveal(
                 index: 1,
-                child: Text(
-                    number == 3
-                        ? L.of(context).welcomeProgressTitle
-                        : page.title,
-                    style: AppType.largeTitle()),
+                child: Text(title, style: AppType.largeTitle()),
               ),
               const SizedBox(height: Insets.md),
               PremiumReveal(
                 index: 2,
                 child: Text(
-                  page.body,
+                  body,
                   style: AppType.body(
                       color: AppAccessibility.textSecondary(context)),
                 ),
@@ -216,7 +203,7 @@ class _WelcomePageView extends StatelessWidget {
                   spacing: Insets.sm,
                   runSpacing: Insets.sm,
                   children: [
-                    for (final label in page.proof) _ProofChip(label: label),
+                    for (final label in proof) _ProofChip(label: label),
                   ],
                 ),
               ),
@@ -247,7 +234,7 @@ class _PageDots extends StatelessWidget {
         ? Duration.zero
         : MotionTokens.fast;
     return Semantics(
-      label: 'Page ${current + 1} of $count',
+      label: L.of(context).welcomePage(current + 1, count),
       excludeSemantics: true,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

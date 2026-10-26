@@ -68,13 +68,15 @@ class _SessionLogDialogState extends State<SessionLogDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return AlertDialog(
-      title: Text('Log ${widget.title}', style: AppType.title2()),
+      title: Text(l.trainingLogNamedSession(widget.title),
+          style: AppType.title2()),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('RPE $_rpe / 10',
+          Text(l.sessionLogRpe(_rpe),
               style: AppType.subhead(
                   weight: FontWeight.w700, color: AppColors.textSecondary)),
           Slider(
@@ -91,9 +93,9 @@ class _SessionLogDialogState extends State<SessionLogDialog> {
             maxLines: 3,
             style: AppType.callout(),
             cursorColor: AppColors.primary,
-            decoration: const InputDecoration(
-              hintText: 'Quick reflection',
-              focusedBorder: UnderlineInputBorder(
+            decoration: InputDecoration(
+              hintText: l.sessionLogReflection,
+              focusedBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(color: AppColors.primary),
               ),
             ),
@@ -103,13 +105,13 @@ class _SessionLogDialogState extends State<SessionLogDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel',
+          child: Text(l.commonCancel,
               style: AppType.callout(color: AppColors.textSecondary)),
         ),
         TextButton(
           onPressed: () =>
               Navigator.pop(context, (rpe: _rpe, note: _note.text)),
-          child: Text('Save',
+          child: Text(l.commonSave,
               style: AppType.callout(
                   weight: FontWeight.w700, color: AppColors.accentText)),
         ),

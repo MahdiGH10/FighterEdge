@@ -70,12 +70,14 @@ class QuestionStep extends StatelessWidget {
 class ChoiceWrap extends StatelessWidget {
   final List<String> values;
   final String selected;
+  final String Function(String)? labelFor;
   final ValueChanged<String> onSelected;
 
   const ChoiceWrap({
     super.key,
     required this.values,
     required this.selected,
+    this.labelFor,
     required this.onSelected,
   });
 
@@ -87,7 +89,7 @@ class ChoiceWrap extends StatelessWidget {
       children: [
         for (final value in values)
           ChoiceChip(
-            label: Text(value),
+            label: Text(labelFor?.call(value) ?? value),
             selected: value == selected,
             onSelected: (_) => onSelected(value),
             selectedColor: AppColors.primarySoft,
@@ -172,11 +174,12 @@ class DayStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return Row(
       children: [
         _StepButton(
           icon: AppIcons.minus,
-          semanticLabel: 'Fewer days',
+          semanticLabel: l.setupFewerDays,
           onTap: value <= 2 ? null : () => onChanged(value - 1),
         ),
         Expanded(
@@ -184,7 +187,7 @@ class DayStepper extends StatelessWidget {
             children: [
               Text('$value', style: AppType.largeTitle()),
               Text(
-                value == 1 ? 'day per week' : 'days per week',
+                l.setupDaysUnit(value),
                 style: AppType.micro(color: AppColors.textMuted),
               ),
             ],
@@ -192,7 +195,7 @@ class DayStepper extends StatelessWidget {
         ),
         _StepButton(
           icon: AppIcons.plus,
-          semanticLabel: 'More days',
+          semanticLabel: l.setupMoreDays,
           onTap: value >= 6 ? null : () => onChanged(value + 1),
         ),
       ],

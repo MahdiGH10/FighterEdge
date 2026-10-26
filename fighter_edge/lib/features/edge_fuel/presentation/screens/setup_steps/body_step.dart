@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../../l10n/gen/app_localizations.dart';
 import '../../../../../theme/app_icons.dart';
 
 import '../../../../../theme/app_colors.dart';
@@ -63,6 +64,7 @@ class _BodyStepState extends State<BodyStep> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final controller = widget.controller;
     final draft = controller.draft;
     final needsTarget =
@@ -71,16 +73,16 @@ class _BodyStepState extends State<BodyStep> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('Tell us about your body', style: AppType.title1()),
+        Text(l.fuelBodyQuestion, style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
-          'Used only to estimate your energy needs — never shown publicly.',
+          l.fuelBodyHint,
           style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
         AppTextField(
           controller: _age,
-          label: 'Age in years',
+          label: l.fuelAge,
           icon: AppIcons.cake,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -89,7 +91,7 @@ class _BodyStepState extends State<BodyStep> {
         const SizedBox(height: Insets.md),
         AppTextField(
           controller: _height,
-          label: 'Height in cm',
+          label: l.fuelHeight,
           icon: AppIcons.arrowsVertical,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
@@ -100,7 +102,7 @@ class _BodyStepState extends State<BodyStep> {
         const SizedBox(height: Insets.md),
         AppTextField(
           controller: _weight,
-          label: 'Current weight in kg',
+          label: l.fuelCurrentWeight,
           icon: AppIcons.scales,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
@@ -112,7 +114,7 @@ class _BodyStepState extends State<BodyStep> {
           const SizedBox(height: Insets.md),
           AppTextField(
             controller: _targetWeight,
-            label: 'Target weight in kg',
+            label: l.fuelTargetWeight,
             icon: AppIcons.flag,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
@@ -122,17 +124,17 @@ class _BodyStepState extends State<BodyStep> {
           ),
         ],
         const SizedBox(height: Insets.xl),
-        Text('Which formula fits your body?', style: AppType.title2()),
+        Text(l.setupEquationQuestion, style: AppType.title2()),
         const SizedBox(height: Insets.xs),
         Text(
-          NutritionCopy.equationExplainer,
+          l.setupEquationHint,
           style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.md),
         for (final profile in EquationProfile.values)
           ChoiceCard(
-            title: NutritionCopy.equationLabel(profile),
-            description: NutritionCopy.equationDescription(profile),
+            title: NutritionCopy.equationLabelL(l, profile),
+            description: NutritionCopy.equationDescriptionL(l, profile),
             selected: draft.equationProfile == profile,
             onTap: () => controller.setBodyInputs(equationProfile: profile),
           ),

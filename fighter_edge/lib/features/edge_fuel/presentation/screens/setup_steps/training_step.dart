@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../l10n/gen/app_localizations.dart';
 import '../../../../../theme/app_icons.dart';
 
 import '../../../../../theme/app_accessibility.dart';
@@ -41,6 +42,7 @@ class _TrainingStepState extends State<TrainingStep> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final controller = widget.controller;
     final draft = controller.draft;
     final days = draft.weeklyTrainingDays ?? 4;
@@ -51,11 +53,10 @@ class _TrainingStepState extends State<TrainingStep> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: Insets.lg),
       children: [
-        Text('Your training week', style: AppType.title1()),
+        Text(l.fuelTrainingQuestion, style: AppType.title1()),
         const SizedBox(height: Insets.sm),
         Text(
-          'Fighter Edge sessions per week — used so we never double-count '
-          'training inside your activity level.',
+          l.fuelTrainingHint,
           style: AppType.subhead(color: AppColors.textSecondary),
         ),
         const SizedBox(height: Insets.xl),
@@ -63,7 +64,7 @@ class _TrainingStepState extends State<TrainingStep> {
           children: [
             _StepButton(
               icon: AppIcons.minus,
-              semanticLabel: 'Fewer training days per week',
+              semanticLabel: l.fuelFewerDays,
               onTap: days <= 0
                   ? null
                   : () => controller.setTraining(weeklyTrainingDays: days - 1),
@@ -72,14 +73,14 @@ class _TrainingStepState extends State<TrainingStep> {
               child: Column(
                 children: [
                   Text('$days', style: AppType.largeTitle()),
-                  Text(days == 1 ? 'day / week' : 'days / week',
+                  Text(l.fuelDaysUnit(days),
                       style: AppType.micro(color: AppColors.textMuted)),
                 ],
               ),
             ),
             _StepButton(
               icon: AppIcons.plus,
-              semanticLabel: 'More training days per week',
+              semanticLabel: l.fuelMoreDays,
               onTap: days >= 7
                   ? null
                   : () => controller.setTraining(weeklyTrainingDays: days + 1),
@@ -88,12 +89,12 @@ class _TrainingStepState extends State<TrainingStep> {
         ),
         if (paces.isNotEmpty) ...[
           const SizedBox(height: Insets.xl),
-          Text('How fast?', style: AppType.title2()),
+          Text(l.fuelPaceQuestion, style: AppType.title2()),
           const SizedBox(height: Insets.md),
           for (final pace in paces)
             ChoiceCard(
-              title: NutritionCopy.paceLabel(pace),
-              description: NutritionCopy.paceDescription(pace),
+              title: NutritionCopy.paceLabelL(l, pace),
+              description: NutritionCopy.paceDescriptionL(l, pace),
               selected: draft.goalPace == pace,
               onTap: () => controller.setTraining(goalPace: pace),
             ),

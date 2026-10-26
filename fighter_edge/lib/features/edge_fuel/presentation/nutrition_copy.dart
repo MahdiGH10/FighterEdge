@@ -1,4 +1,5 @@
 import '../domain/models/nutrition_enums.dart';
+import '../../../l10n/gen/app_localizations.dart';
 
 /// Human-readable copy for EdgeFuel domain enums and the machine-readable
 /// reason/warning codes the calculator returns. Kept separate from the
@@ -6,6 +7,99 @@ import '../domain/models/nutrition_enums.dart';
 /// from individual screens (several screens need the same labels).
 class NutritionCopy {
   NutritionCopy._();
+
+  static String goalLabelL(L l, NutritionGoal goal) => switch (goal) {
+        NutritionGoal.loseFat => l.onboardingLoseFat,
+        NutritionGoal.maintain => l.setupGoalMaintainLabel,
+        NutritionGoal.gainMuscle => l.onboardingGainMuscle,
+      };
+
+  static String goalDescriptionL(L l, NutritionGoal goal) => switch (goal) {
+        NutritionGoal.loseFat => l.setupGoalLoseDescription,
+        NutritionGoal.maintain => l.setupGoalMaintainDescription,
+        NutritionGoal.gainMuscle => l.setupGoalGainDescription,
+      };
+
+  static String equationLabelL(L l, EquationProfile profile) =>
+      switch (profile) {
+        EquationProfile.higherOffset => l.setupEquationHigher,
+        EquationProfile.lowerOffset => l.setupEquationLower,
+        EquationProfile.neutral => l.setupEquationNeutral,
+      };
+
+  static String equationDescriptionL(L l, EquationProfile profile) =>
+      switch (profile) {
+        EquationProfile.higherOffset => l.setupEquationHigherHint,
+        EquationProfile.lowerOffset => l.setupEquationLowerHint,
+        EquationProfile.neutral => l.setupEquationNeutralHint,
+      };
+
+  static String activityLabelL(L l, ActivityLevel level) => switch (level) {
+        ActivityLevel.veryLow => l.setupActivityVeryLow,
+        ActivityLevel.light => l.setupActivityLight,
+        ActivityLevel.moderate => l.setupActivityModerate,
+        ActivityLevel.high => l.setupActivityHigh,
+        ActivityLevel.veryHigh => l.setupActivityVeryHigh,
+      };
+
+  static String activityDescriptionL(L l, ActivityLevel level) =>
+      switch (level) {
+        ActivityLevel.veryLow => l.setupActivityVeryLowHint,
+        ActivityLevel.light => l.setupActivityLightHint,
+        ActivityLevel.moderate => l.setupActivityModerateHint,
+        ActivityLevel.high => l.setupActivityHighHint,
+        ActivityLevel.veryHigh => l.setupActivityVeryHighHint,
+      };
+
+  static String paceLabelL(L l, GoalPace pace) => switch (pace) {
+        GoalPace.gentle => l.fuelPaceGentle,
+        GoalPace.standard || GoalPace.gainStandard => l.fuelPaceStandard,
+        GoalPace.upperLimit => l.fuelPaceUpper,
+        GoalPace.conservative => l.fuelPaceConservative,
+      };
+
+  static String paceDescriptionL(L l, GoalPace pace) => switch (pace) {
+        GoalPace.gentle => l.fuelPaceGentleHint,
+        GoalPace.standard => l.fuelPaceStandardHint,
+        GoalPace.upperLimit => l.fuelPaceUpperHint,
+        GoalPace.conservative => l.fuelPaceConservativeHint,
+        GoalPace.gainStandard => l.fuelPaceGainHint,
+      };
+
+  static String confidenceLabelL(L l, ConfidenceLabel confidence) =>
+      switch (confidence) {
+        ConfidenceLabel.high => l.fuelConfidenceHigh,
+        ConfidenceLabel.medium => l.fuelConfidenceMedium,
+        ConfidenceLabel.low => l.fuelConfidenceLow,
+      };
+
+  static String reasonL(L l, String code) => switch (code) {
+        'screeningUnanswered' => l.setupReasonScreeningUnanswered,
+        'screeningNeedsReview' => l.setupReasonScreeningNeedsReview,
+        'underAge' => l.setupReasonUnderAge,
+        'invalidVitals' => l.setupReasonInvalidVitals,
+        'underweightForFatLoss' => l.setupReasonUnderweight,
+        'invalidFatLossTarget' => l.setupReasonInvalidFatLoss,
+        'invalidMuscleGainTarget' => l.setupReasonInvalidMuscleGain,
+        'missingTargetWeight' => l.setupReasonMissingTarget,
+        'missingGoalPace' => l.setupReasonMissingPace,
+        'rmrCalculationOutOfRange' => l.setupReasonRmrRange,
+        'pregnantOrBreastfeeding' => l.setupHealthPregnant,
+        'eatingDisorderHistoryOrSymptoms' => l.setupHealthEatingDisorder,
+        'diabetesRequiringMedication' => l.setupHealthDiabetes,
+        'kidneyDisease' => l.setupHealthKidney,
+        'seriousLiverDisease' => l.setupHealthLiver,
+        'otherClinicianManagedDiet' => l.setupHealthOtherDiet,
+        _ => l.setupReviewNeeded,
+      };
+
+  static String warningL(L l, String code) => switch (code) {
+        'goalPaceReducedToProtectRmr' => l.fuelWarningRmr,
+        'goalPaceReducedForCarbPerformanceFloor' => l.fuelWarningCarbs,
+        'carbFloorConflictsWithProteinTarget' => l.fuelWarningProtein,
+        'carbGramsClampedToZero' => l.fuelWarningZeroCarbs,
+        _ => l.fuelReviewWorthKnowing,
+      };
 
   static String goalLabel(NutritionGoal goal) => switch (goal) {
         NutritionGoal.loseFat => 'Lose fat',

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../features/edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../theme/app_accessibility.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_icons.dart';
@@ -34,6 +35,7 @@ class FirstWinSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final secondary = AppAccessibility.textSecondary(context);
     final numbers = context.watch<NutritionModeController>().numbersVisible;
 
@@ -49,22 +51,19 @@ class FirstWinSheet extends StatelessWidget {
             const SizedBox(height: Insets.lg),
             PremiumReveal(
               index: 1,
-              child: Text('First meal logged.', style: AppType.largeTitle()),
+              child: Text(l.firstWinTitle, style: AppType.largeTitle()),
             ),
             const SizedBox(height: Insets.sm),
             PremiumReveal(
               index: 2,
               child: Text(
-                numbers
-                    ? "You're on the board. Every meal you log shows how today "
-                        'stacks up against your target.'
-                    : "You're on the board. Keep logging what you eat.",
+                numbers ? l.firstWinWithNumbers : l.firstWinWithoutNumbers,
                 style: AppType.body(color: secondary),
               ),
             ),
             const SizedBox(height: Insets.xl),
             PrimaryButton(
-              'Keep going',
+              l.firstWinContinue,
               expand: true,
               onPressed: () => Navigator.of(context).pop(),
             ),

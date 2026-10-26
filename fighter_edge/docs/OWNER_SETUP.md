@@ -1,5 +1,9 @@
 # Owner setup guide
 
+> This guide includes historical AI provider setup. The current app does not
+> offer an AI coach. Check `CLAUDE_CODE_HANDOFF.md` and the deploy workflow
+> before acting on any older AI or release instructions below.
+
 These steps need your own logins (Firebase, RevenueCat, Google Cloud and
 GitHub), so only you can do them. Run the commands from the `fighter_edge/`
 folder unless a step says otherwise.

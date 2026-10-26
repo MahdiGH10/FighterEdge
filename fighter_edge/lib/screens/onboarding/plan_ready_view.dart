@@ -60,9 +60,12 @@ class PlanReadyView extends StatelessWidget {
     final target = plan.target;
     final large = AppAccessibility.isLargeText(context);
     final macros = [
-      _PlanMetric(label: 'Protein', amount: target?.proteinGrams, suffix: 'g'),
-      _PlanMetric(label: 'Carbs', amount: target?.carbGrams, suffix: 'g'),
-      _PlanMetric(label: 'Fats', amount: target?.fatGrams, suffix: 'g'),
+      _PlanMetric(
+          label: l.nutritionProtein, amount: target?.proteinGrams, suffix: 'g'),
+      _PlanMetric(
+          label: l.nutritionCarbs, amount: target?.carbGrams, suffix: 'g'),
+      _PlanMetric(
+          label: l.nutritionFats, amount: target?.fatGrams, suffix: 'g'),
     ];
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -77,7 +80,7 @@ class PlanReadyView extends StatelessWidget {
             ),
             children: [
               Text(
-                'Your first Fighter Edge plan is ready',
+                l.planReadyTitle,
                 style: AppType.largeTitle(),
               ),
               const SizedBox(height: Insets.md),
@@ -148,14 +151,14 @@ class PlanReadyView extends StatelessWidget {
               if (onContinueReadOnly case final continueReadOnly?) ...[
                 const SizedBox(height: Insets.sm),
                 GhostButton(
-                  'Continue read-only',
+                  l.planReadyReadOnly,
                   expand: true,
                   onPressed: isBusy ? null : continueReadOnly,
                 ),
               ],
               const SizedBox(height: Insets.md),
               Text(
-                'Targets are estimates, not medical advice. Review your inputs anytime in EdgeFuel.',
+                l.planReadyDisclaimer,
                 style: AppType.micro(color: AppColors.textMuted),
               ),
             ],

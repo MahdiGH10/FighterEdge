@@ -29,6 +29,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final state = context.watch<AppState>();
     final weight = state.latestWeight;
     final auth = context.watch<AuthController>();
@@ -41,12 +42,15 @@ class ProfileScreen extends StatelessWidget {
     final showBody = context.watch<NutritionModeController>().numbersVisible;
     final largeText = AppAccessibility.isLargeText(context);
 
-    final displayName =
-        (user?.displayName.isNotEmpty ?? false) ? user!.displayName : 'Fighter';
+    final displayName = (user?.displayName.isNotEmpty ?? false)
+        ? user!.displayName
+        : l.profileAthleteFallback;
     // The camp goal replaces the old hard-coded weight-class division: weight
     // class was deliberately removed from the product, so it must not reappear
     // as an identity label here.
-    final goalLine = (user?.goal.isNotEmpty ?? false) ? user!.goal : null;
+    final goalLine = (user?.goal.isNotEmpty ?? false)
+        ? _localizedCampGoal(l, user!.goal)
+        : null;
     final measurements = [
       if (showBody && heightCm != null) '${heightCm.round()} cm',
       if (showBody && weight > 0)
@@ -100,32 +104,33 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
           const SizedBox(height: Insets.xl),
-          const SectionHeader('Subscription'),
+          SectionHeader(l.profileSubscriptionSection),
           _SubscriptionCard(auth: auth),
           const SizedBox(height: Insets.xl),
-          const SectionHeader('Training'),
+          SectionHeader(l.profileTrainingSection),
           GroupedList(
             children: [
               GroupedRow(
-                title: 'Training days',
-                subtitle: '${user?.weeklyTrainingDays ?? 0} days each week',
+                title: l.profileTrainingDays,
+                subtitle:
+                    l.profileTrainingDaysValue(user?.weeklyTrainingDays ?? 0),
               ),
               if (showBody)
-                const _ToolRow(
-                  title: 'Weight tracker',
-                  subtitle: 'Your weigh-ins and weight history',
+                _ToolRow(
+                  title: l.profileWeightTracker,
+                  subtitle: l.profileWeightTrackerHint,
                   route: AppRoutes.weightTracker,
                   screen: WeightTrackerScreen(),
                 ),
             ],
           ),
           const SizedBox(height: Insets.xl),
-          const SectionHeader('Preferences, privacy and account'),
-          const GroupedList(
+          SectionHeader(l.profilePreferencesSection),
+          GroupedList(
             children: [
               _ToolRow(
-                title: 'Settings',
-                subtitle: 'Units, reminders, data and account controls',
+                title: l.settingsTitle,
+                subtitle: l.profileSettingsHint,
                 route: AppRoutes.settings,
                 screen: SettingsScreen(),
               ),
@@ -133,7 +138,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: Insets.xl),
           GhostButton(
-            'Sign out',
+            l.commonSignOut,
             icon: AppIcons.signOut,
             expand: true,
             onPressed: () async {
@@ -148,11 +153,20 @@ class ProfileScreen extends StatelessWidget {
     );
     if (asTab) {
       return ScreenScaffold.tab(
-          title: 'Profile', scrollsUnderHeader: true, body: body);
+          title: l.navProfile, scrollsUnderHeader: true, body: body);
     }
-    return ScreenScaffold(title: 'Profile', showBack: true, body: body);
+    return ScreenScaffold(title: l.navProfile, showBack: true, body: body);
   }
 }
+
+String _localizedCampGoal(L l, String goal) => switch (goal) {
+      'Build fight-camp structure' => l.setupCampStructure,
+      'Lose weight safely' => l.setupCampLoseWeight,
+      'Gain muscle' => l.setupCampGainMuscle,
+      'Improve technique' => l.setupCampTechnique,
+      'Get competition ready' => l.setupCampCompetition,
+      _ => goal,
+    };
 
 class _ToolRow extends StatelessWidget {
   final String title;

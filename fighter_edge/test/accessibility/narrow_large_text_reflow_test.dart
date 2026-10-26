@@ -359,6 +359,8 @@ void main() {
       });
       await tester.pumpWidget(MaterialApp(
         theme: AppTheme.dark(),
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
         home: Scaffold(
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),

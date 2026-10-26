@@ -1,5 +1,8 @@
 # Product plan: one daily loop and an AI coach worth paying for
 
+> Historical plan from 2026-09. The AI coach described below is not offered in
+> the current app or paywall. See `CLAUDE_CODE_HANDOFF.md` for verified status.
+
 Approved by the owner on 2026-09-24. The readable version is the "Fighter
 Edge Game Plan" page shared in the session; this file is the record for
 future sessions. It builds on `PRODUCT_MONETIZATION_STRATEGY.md` and

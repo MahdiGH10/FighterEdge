@@ -2,9 +2,9 @@
 
 Last verified: 2026-09-09
 
-This is the current operational handoff for the repository. Read this file
-first, then `APPLICATION_BUILD_PLAYBOOK.md`. Older plans remain useful for
-history and detailed specifications, but their progress markers may be stale.
+This is a historical 2026-09 snapshot. Read `CLAUDE_CODE_HANDOFF.md` for the
+verified repository state. The AI and recipe plans below are not a description
+of currently purchasable features.
 
 ## Product
 

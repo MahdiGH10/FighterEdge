@@ -81,6 +81,7 @@ class _WeekView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final plan = context.watch<PlanController>();
     final campStart = context.watch<AuthController>().user?.createdAt;
     final now = context.watch<AppState>().now;
@@ -100,7 +101,8 @@ class _WeekView extends StatelessWidget {
     // Monday-to-Sunday range for the current week.
     final weekStart = plan.thisWeekStart;
     final weekEnd = weekStart.add(const Duration(days: 6));
-    final rangeFormat = DateFormat('MMM d');
+    final locale = Localizations.localeOf(context).toString();
+    final rangeFormat = DateFormat.MMMd(locale);
 
     return ListView(
       padding: EdgeInsets.fromLTRB(
@@ -110,7 +112,7 @@ class _WeekView extends StatelessWidget {
         ScreenScaffold.tabBottomPadding(context),
       ),
       children: [
-        Text('WEEK $weekNumber', style: AppType.title1()),
+        Text(l.trainWeekNumber(weekNumber), style: AppType.title1()),
         const SizedBox(height: Insets.xxs),
         Text(
           '${rangeFormat.format(weekStart)} – ${rangeFormat.format(weekEnd)}',
@@ -122,11 +124,11 @@ class _WeekView extends StatelessWidget {
         const SizedBox(height: Insets.lg),
         if (plan.hasPlan) ...[
           Text(
-            '${week.completed} of ${week.target} done',
+            l.trainWeekDone(week.completed, week.target),
             style: AppType.title2(),
           ),
           Text(
-            'Rest days never count against you',
+            l.trainRestHint,
             style: AppType.micro(
               color: AppAccessibility.textSecondary(context),
             ),
@@ -176,7 +178,7 @@ class _WeekView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'TODAY',
+                    l.trainTodayHeading,
                     style: AppType.micro(color: AppColors.emberSoft),
                   ),
                   const SizedBox(height: Insets.sm),
@@ -186,7 +188,7 @@ class _WeekView extends StatelessWidget {
                   ),
                   const SizedBox(height: Insets.xs),
                   Text(
-                    'About ${todayRow.session.estimatedMinutes} min',
+                    l.trainAboutMinutes(todayRow.session.estimatedMinutes),
                     style: AppType.callout(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: Insets.lg),
@@ -202,14 +204,14 @@ class _WeekView extends StatelessWidget {
                       );
                     },
                     icon: const Icon(AppIconsFill.play),
-                    label: const Text('Start session'),
+                    label: Text(l.trainStartSession),
                   ),
                 ],
               ),
             ),
           if (todayRow != null) const SizedBox(height: Insets.xl),
           Text(
-            'THIS WEEK',
+            l.trainThisWeekHeading,
             style: AppType.micro(
               color: AppAccessibility.textSecondary(context),
             ),
@@ -217,11 +219,10 @@ class _WeekView extends StatelessWidget {
           const SizedBox(height: Insets.sm),
         ],
         if (!plan.hasPlan)
-          const Padding(
-            padding: EdgeInsets.only(top: Insets.xxl),
+          Padding(
+            padding: const EdgeInsets.only(top: Insets.xxl),
             child: _PlaceholderView(
-              'No sessions planned yet. Your training week appears here '
-              'once your camp is set up.',
+              l.trainEmptyWeek,
             ),
           ),
         for (final day in orderedDays) ...[
@@ -491,9 +492,7 @@ class _HistoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     final sessions = context.watch<AppState>().trainingLog;
     if (sessions.isEmpty) {
-      return const _PlaceholderView(
-        'Complete or log a session to build history',
-      );
+      return _PlaceholderView(L.of(context).trainEmptyHistory);
     }
     // A lazy sliver list rather than building every row up front (audit
     // P-4): the log grows for as long as the account trains, with no cap.
@@ -510,7 +509,7 @@ class _HistoryView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Session history', style: AppType.title1()),
+                Text(L.of(context).trainHistoryTitle, style: AppType.title1()),
                 const SizedBox(height: Insets.lg),
               ],
             ),
@@ -562,7 +561,9 @@ class _HistoryRow extends StatelessWidget {
                   ),
                   const SizedBox(height: Insets.xxs),
                   Text(
-                    DateFormat('MMM d, h:mm a').format(completedAt),
+                    DateFormat.MMMd(Localizations.localeOf(context).toString())
+                        .add_jm()
+                        .format(completedAt),
                     style: AppType.subhead(color: AppColors.textSecondary),
                   ),
                   if (session.note.isNotEmpty) ...[

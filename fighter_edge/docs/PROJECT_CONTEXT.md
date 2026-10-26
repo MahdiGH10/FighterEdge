@@ -1,5 +1,9 @@
 # FighterEdge — Full Project Context (handoff document)
 
+> Historical context. For current product features and deployment state, read
+> `CLAUDE_CODE_HANDOFF.md`. References to an AI coach below describe earlier
+> plans and backend code, not a feature in the current app.
+
 _Written for another LLM/engineer picking this up cold — including a fresh
 model in a brand-new chat with zero memory of this project. Every claim
 below was verified against the actual code/config in this repo on the date

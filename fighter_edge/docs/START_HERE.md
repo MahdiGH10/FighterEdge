@@ -1,9 +1,9 @@
 # FIGHTER EDGE — START HERE
 
-> **Current-status notice (2026-09-09):** Read `CURRENT_HANDOFF.md` first for
-> the verified repository state, then `APPLICATION_BUILD_PLAYBOOK.md` for the
-> active ten-step execution plan. This document remains the launch philosophy
-> and detailed checklist, but some progress counts below are historical.
+> **Current-status notice (2026-10-26):** Read `CLAUDE_CODE_HANDOFF.md` for
+> the verified repository state. This document is a historical launch plan;
+> its progress counts and AI feature descriptions do not describe the current
+> app or paywall.
 
 _The single document to read first. Written 2026-09-05. Every fact below was
 verified against the code, not remembered._

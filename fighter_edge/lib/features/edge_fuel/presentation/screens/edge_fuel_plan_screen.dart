@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../theme/app_icons.dart';
 
 import '../../../../controllers/auth_controller.dart';
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../routing/app_navigation.dart';
 import '../../../../routing/app_router.dart';
 import '../../../../theme/app_accessibility.dart';
@@ -30,14 +31,15 @@ class EdgeFuelPlanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     if (!context.watch<NutritionModeController>().numbersVisible) {
-      return const NutritionPausedScreen(title: 'Your plan');
+      return NutritionPausedScreen(title: l.fuelReviewTitle);
     }
     final edgeFuel = context.watch<EdgeFuelController>();
     final target = edgeFuel.target;
 
     return ScreenScaffold(
-      title: 'Your plan',
+      title: l.fuelReviewTitle,
       showBack: true,
       body: target == null || !target.isSuccess
           ? _EmptyPlan(target: target)
@@ -52,6 +54,7 @@ class _EmptyPlan extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final userId = context.read<AuthController>().user?.id;
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -61,14 +64,14 @@ class _EmptyPlan extends StatelessWidget {
         Insets.xxl,
       ),
       children: [
-        const EmptyState(
+        EmptyState(
           icon: AppIcons.forkKnife,
-          title: 'No plan yet',
-          message: 'Run the EdgeFuel setup to get a personalized daily target.',
+          title: l.fuelPlanEmpty,
+          message: l.fuelPlanEmptyHint,
         ),
         const SizedBox(height: Insets.lg),
         PrimaryButton(
-          'Start setup',
+          l.fuelPlanStart,
           icon: AppIcons.arrowRight,
           expand: true,
           onPressed: userId == null
@@ -91,6 +94,7 @@ class _PlanBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         Insets.lg,
@@ -104,7 +108,7 @@ class _PlanBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Daily target',
+                l.fuelReviewDailyTarget,
                 style: AppType.micro(
                   weight: FontWeight.w700,
                   color: AppColors.textMuted,
@@ -116,8 +120,9 @@ class _PlanBody extends StatelessWidget {
                   style: AppType.largeTitle()),
               const SizedBox(height: Insets.xxs),
               Text(
-                'Maintenance range ${target.maintenanceRangeLowKcal}'
-                '–${target.maintenanceRangeHighKcal} kcal',
+                l.fuelReviewMaintenanceRange(
+                    target.maintenanceRangeLowKcal?.toString() ?? '—',
+                    target.maintenanceRangeHighKcal?.toString() ?? '—'),
                 style: AppType.subhead(color: AppColors.textSecondary),
               ),
             ],
@@ -135,7 +140,7 @@ class _PlanBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'How this was calculated',
+                l.fuelPlanCalculationTitle,
                 style: AppType.micro(
                   weight: FontWeight.w700,
                   color: AppColors.textMuted,
@@ -144,11 +149,13 @@ class _PlanBody extends StatelessWidget {
               ),
               const SizedBox(height: Insets.sm),
               Text(
-                'Estimated resting energy: ${target.estimatedRmrKcal} kcal '
-                '(Mifflin–St Jeor, ${target.equationProfileUsed != null ? NutritionCopy.equationLabel(target.equationProfileUsed!) : 'midpoint'}). '
-                'Multiplied by your activity factor, then adjusted for your '
-                'goal pace. This is an estimate, not a diagnosis — '
-                'recalculate any time by revisiting setup.',
+                l.fuelPlanCalculation(
+                  target.estimatedRmrKcal?.toString() ?? '—',
+                  target.equationProfileUsed != null
+                      ? NutritionCopy.equationLabelL(
+                          l, target.equationProfileUsed!)
+                      : l.fuelPlanMidpoint,
+                ),
                 style: AppType.subhead(
                   weight: FontWeight.w500,
                   color: AppColors.textSecondary,
@@ -157,7 +164,7 @@ class _PlanBody extends StatelessWidget {
               if (target.confidence != null) ...[
                 const SizedBox(height: Insets.sm),
                 Text(
-                  NutritionCopy.confidenceLabel(target.confidence!),
+                  NutritionCopy.confidenceLabelL(l, target.confidence!),
                   // Red reads as a warning; confidence is good news unless
                   // it is low.
                   style: AppType.micro(
@@ -189,7 +196,7 @@ class _PlanBody extends StatelessWidget {
                     ),
                     const SizedBox(width: Insets.sm),
                     Text(
-                      'Worth knowing',
+                      l.fuelReviewWorthKnowing,
                       style: AppType.subhead(weight: FontWeight.w800),
                     ),
                   ],
@@ -199,7 +206,7 @@ class _PlanBody extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: Insets.xs),
                     child: Text(
-                      '• ${NutritionCopy.warning(code)}',
+                      '• ${NutritionCopy.warningL(l, code)}',
                       style: AppType.subhead(color: AppColors.textSecondary),
                     ),
                   ),
@@ -213,7 +220,7 @@ class _PlanBody extends StatelessWidget {
         ],
         const SizedBox(height: Insets.lg),
         GhostButton(
-          'Redo setup',
+          l.fuelPlanRedo,
           icon: AppIcons.slidersHorizontal,
           expand: true,
           onPressed: () => AppNavigation.push(
@@ -241,10 +248,11 @@ class _MacroRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final chips = [
-      _MacroChip('Protein', protein, AppColors.protein),
-      _MacroChip('Carbs', carbs, AppColors.carbs),
-      _MacroChip('Fats', fats, AppColors.fats),
+      _MacroChip(l.nutritionProtein, protein, AppColors.protein),
+      _MacroChip(l.nutritionCarbs, carbs, AppColors.carbs),
+      _MacroChip(l.nutritionFats, fats, AppColors.fats),
     ];
     if (AppAccessibility.isLargeText(context)) {
       return Column(

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../theme/app_icons.dart';
 
 import '../../../../controllers/auth_controller.dart';
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../routing/app_navigation.dart';
 import '../../../../routing/app_router.dart';
 import '../../../../state/app_state.dart';
@@ -33,18 +34,19 @@ class EdgeFuelSetupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     if (!context.watch<NutritionModeController>().numbersVisible) {
-      return const NutritionPausedScreen(title: 'Fuel setup');
+      return NutritionPausedScreen(title: l.fuelSetupTitle);
     }
     final userId = context.read<AuthController>().user?.id;
     if (userId == null) {
-      return const ScreenScaffold(
-        title: 'Fuel setup',
+      return ScreenScaffold(
+        title: l.fuelSetupTitle,
         showBack: true,
         body: Center(
           child: Padding(
-            padding: EdgeInsets.all(Insets.xl),
-            child: Text('Sign in to set up EdgeFuel.'),
+            padding: const EdgeInsets.all(Insets.xl),
+            child: Text(l.fuelSetupSignIn),
           ),
         ),
       );
@@ -68,28 +70,28 @@ class _EdgeFuelSetupBody extends StatefulWidget {
 
 class _EdgeFuelSetupBodyState extends State<_EdgeFuelSetupBody> {
   static const _stepCount = 6;
-  static const _stepTitles = [
-    'Goal',
-    'Body',
-    'Activity',
-    'Training',
-    'Food',
-    'Review',
-  ];
-
   int? _step;
   int _lastPreviewedStep = -1;
   bool _confirming = false;
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final controller = context.watch<EdgeFuelSetupController>();
+    final stepTitles = [
+      l.fuelStepGoal,
+      l.fuelStepBody,
+      l.fuelStepActivity,
+      l.fuelStepTraining,
+      l.fuelStepFood,
+      l.fuelStepReview,
+    ];
 
     if (controller.isLoading) {
-      return const ScreenScaffold(
-        title: 'Fuel setup',
+      return ScreenScaffold(
+        title: l.fuelSetupTitle,
         showBack: true,
-        body: _SetupSkeleton(),
+        body: const _SetupSkeleton(),
       );
     }
 
@@ -112,8 +114,8 @@ class _EdgeFuelSetupBodyState extends State<_EdgeFuelSetupBody> {
       body: SafeArea(
         child: Column(
           children: [
-            const AppHeader(title: 'Fuel setup', showBack: true),
-            _StepProgress(step: step, titles: _stepTitles),
+            AppHeader(title: l.fuelSetupTitle, showBack: true),
+            _StepProgress(step: step, titles: stepTitles),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: Insets.lg),
@@ -193,8 +195,8 @@ class _EdgeFuelSetupBodyState extends State<_EdgeFuelSetupBody> {
       );
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Could not save your Fuel plan. Try again.'),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(L.of(context).fuelSetupSaveError),
         ));
       }
     } finally {
@@ -238,7 +240,9 @@ class _StepProgress extends StatelessWidget {
           ),
           const SizedBox(height: Insets.sm),
           Text(
-            'Step ${step + 1} of ${titles.length} · ${titles[step]}',
+            L
+                .of(context)
+                .fuelStepProgress(step + 1, titles.length, titles[step]),
             style: AppType.subhead(
                 weight: FontWeight.w700, color: AppColors.textSecondary),
           ),
@@ -268,12 +272,13 @@ class _NavBar extends StatelessWidget {
       child: Row(
         children: [
           if (onBack != null) ...[
-            GhostButton('Back', icon: AppIcons.caretLeft, onPressed: onBack),
+            GhostButton(L.of(context).onboardingBack,
+                icon: AppIcons.caretLeft, onPressed: onBack),
             const SizedBox(width: Insets.md),
           ],
           Expanded(
             child: PrimaryButton(
-              'Next',
+              L.of(context).fuelSetupNext,
               icon: AppIcons.caretRight,
               expand: true,
               onPressed: canAdvance ? onNext : null,

@@ -715,6 +715,240 @@ abstract class L {
   /// **'Drills'**
   String get trainTabDrills;
 
+  /// No description provided for @trainWeekNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'WEEK {number}'**
+  String trainWeekNumber(int number);
+
+  /// No description provided for @trainWeekDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {target} done'**
+  String trainWeekDone(int completed, int target);
+
+  /// No description provided for @trainRestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest days never count against you'**
+  String get trainRestHint;
+
+  /// No description provided for @trainTodayHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'TODAY'**
+  String get trainTodayHeading;
+
+  /// No description provided for @trainAboutMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'About {minutes} min'**
+  String trainAboutMinutes(int minutes);
+
+  /// No description provided for @trainStartSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start session'**
+  String get trainStartSession;
+
+  /// No description provided for @trainThisWeekHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'THIS WEEK'**
+  String get trainThisWeekHeading;
+
+  /// No description provided for @trainEmptyWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions planned yet. Your training week appears here once your camp is set up.'**
+  String get trainEmptyWeek;
+
+  /// No description provided for @trainEmptyHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete or log a session to build history'**
+  String get trainEmptyHistory;
+
+  /// No description provided for @trainHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session history'**
+  String get trainHistoryTitle;
+
+  /// No description provided for @profileAthleteFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Fighter'**
+  String get profileAthleteFallback;
+
+  /// No description provided for @profileSubscriptionSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get profileSubscriptionSection;
+
+  /// No description provided for @profileTrainingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get profileTrainingSection;
+
+  /// No description provided for @profileTrainingDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Training days'**
+  String get profileTrainingDays;
+
+  /// No description provided for @profileTrainingDaysValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day each week} other{{count} days each week}}'**
+  String profileTrainingDaysValue(int count);
+
+  /// No description provided for @profileWeightTracker.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight tracker'**
+  String get profileWeightTracker;
+
+  /// No description provided for @profileWeightTrackerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your weigh-ins and weight history'**
+  String get profileWeightTrackerHint;
+
+  /// No description provided for @profilePreferencesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences, privacy and account'**
+  String get profilePreferencesSection;
+
+  /// No description provided for @profileSettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Units, reminders, data and account controls'**
+  String get profileSettingsHint;
+
+  /// No description provided for @firstWeekPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Build your plan'**
+  String get firstWeekPlanTitle;
+
+  /// No description provided for @firstWeekPlanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your target and training week are set.'**
+  String get firstWeekPlanHint;
+
+  /// No description provided for @firstWeekTourTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the 30-second tour'**
+  String get firstWeekTourTitle;
+
+  /// No description provided for @firstWeekTourHint.
+  ///
+  /// In en, this message translates to:
+  /// **'See where everything lives.'**
+  String get firstWeekTourHint;
+
+  /// No description provided for @firstWeekMealTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log your first meal'**
+  String get firstWeekMealTitle;
+
+  /// No description provided for @firstWeekMealHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One tap from Fuel. It starts your day’s score.'**
+  String get firstWeekMealHint;
+
+  /// No description provided for @firstWeekSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete a session'**
+  String get firstWeekSessionTitle;
+
+  /// No description provided for @firstWeekSessionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete one in Train to start building consistency.'**
+  String get firstWeekSessionHint;
+
+  /// No description provided for @firstWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first week'**
+  String get firstWeekTitle;
+
+  /// No description provided for @firstWeekCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First week: set'**
+  String get firstWeekCompletedTitle;
+
+  /// No description provided for @firstWeekProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total}'**
+  String firstWeekProgress(int completed, int total);
+
+  /// No description provided for @firstWeekCompleteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan built, meal logged, first session done. That is a real start — keep training this week.'**
+  String get firstWeekCompleteHint;
+
+  /// No description provided for @firstWeekDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get firstWeekDone;
+
+  /// No description provided for @firstWeekSemanticsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}, done'**
+  String firstWeekSemanticsDone(String title);
+
+  /// No description provided for @firstWinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First meal logged.'**
+  String get firstWinTitle;
+
+  /// No description provided for @firstWinWithNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on the board. Every meal you log shows how today stacks up against your target.'**
+  String get firstWinWithNumbers;
+
+  /// No description provided for @firstWinWithoutNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on the board. Keep logging what you eat.'**
+  String get firstWinWithoutNumbers;
+
+  /// No description provided for @firstWinContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going'**
+  String get firstWinContinue;
+
+  /// No description provided for @sessionLogRpe.
+  ///
+  /// In en, this message translates to:
+  /// **'RPE {value} / 10'**
+  String sessionLogRpe(int value);
+
+  /// No description provided for @sessionLogReflection.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick reflection'**
+  String get sessionLogReflection;
+
   /// No description provided for @timerTitle.
   ///
   /// In en, this message translates to:
@@ -2047,11 +2281,1259 @@ abstract class L {
   /// **'See your progress.'**
   String get welcomeProgressTitle;
 
+  /// No description provided for @welcomeCampTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your camp, organised.'**
+  String get welcomeCampTitle;
+
+  /// No description provided for @welcomeCampBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Training week, weight and fuel in one place — built around the days you can actually train.'**
+  String get welcomeCampBody;
+
+  /// No description provided for @welcomeFuelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel that matches the work.'**
+  String get welcomeFuelTitle;
+
+  /// No description provided for @welcomeFuelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'EdgeFuel sets your calories and macros from your body and your training load, then keeps score as you log.'**
+  String get welcomeFuelBody;
+
+  /// No description provided for @welcomeProgressBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your training rhythm, weight trend and session history show progress week over week — not just today.'**
+  String get welcomeProgressBody;
+
+  /// No description provided for @welcomeWeeklyPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly plan'**
+  String get welcomeWeeklyPlan;
+
+  /// No description provided for @welcomeSessionLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Session log'**
+  String get welcomeSessionLog;
+
+  /// No description provided for @welcomeWeighIns.
+  ///
+  /// In en, this message translates to:
+  /// **'Weigh-ins'**
+  String get welcomeWeighIns;
+
+  /// No description provided for @welcomeDailyTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily target'**
+  String get welcomeDailyTarget;
+
+  /// No description provided for @welcomeMacroSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Macro split'**
+  String get welcomeMacroSplit;
+
+  /// No description provided for @welcomeMealLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal log'**
+  String get welcomeMealLog;
+
+  /// No description provided for @welcomeStreaks.
+  ///
+  /// In en, this message translates to:
+  /// **'Consistency'**
+  String get welcomeStreaks;
+
+  /// No description provided for @welcomeWeightTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight trend'**
+  String get welcomeWeightTrend;
+
+  /// No description provided for @welcomeHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get welcomeHistory;
+
+  /// No description provided for @welcomeSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get welcomeSkip;
+
+  /// No description provided for @welcomeBuildPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Build my plan'**
+  String get welcomeBuildPlan;
+
+  /// No description provided for @welcomeDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'About 2 minutes · 7 quick questions'**
+  String get welcomeDuration;
+
+  /// No description provided for @welcomePage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current} of {total}'**
+  String welcomePage(int current, int total);
+
+  /// No description provided for @setupCampEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh account'**
+  String get setupCampEyebrow;
+
+  /// No description provided for @setupCampQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What should Fighter Edge build first?'**
+  String get setupCampQuestion;
+
+  /// No description provided for @setupCampHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the outcome that should shape your first training camp.'**
+  String get setupCampHint;
+
+  /// No description provided for @setupNutritionEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition goal'**
+  String get setupNutritionEyebrow;
+
+  /// No description provided for @setupNutritionQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What should EdgeFuel optimize for?'**
+  String get setupNutritionQuestion;
+
+  /// No description provided for @setupNutritionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This creates your first calorie and macro target. You can edit it later.'**
+  String get setupNutritionHint;
+
+  /// No description provided for @setupBodyEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Body basics'**
+  String get setupBodyEyebrow;
+
+  /// No description provided for @setupBodyQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us your starting point.'**
+  String get setupBodyQuestion;
+
+  /// No description provided for @setupBodyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No weight class needed. Use normal body details so your target is personal.'**
+  String get setupBodyHint;
+
+  /// No description provided for @setupEquationEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Calorie formula'**
+  String get setupEquationEyebrow;
+
+  /// No description provided for @setupEquationQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which formula fits your body?'**
+  String get setupEquationQuestion;
+
+  /// No description provided for @setupEquationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Calorie formulas differ slightly between male and female physiology — about 80 kcal a day either way. It only fine-tunes your estimate, so skip it if you\'d rather.'**
+  String get setupEquationHint;
+
+  /// No description provided for @setupActivityEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily activity'**
+  String get setupActivityEyebrow;
+
+  /// No description provided for @setupActivityQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside the gym, how active are you?'**
+  String get setupActivityQuestion;
+
+  /// No description provided for @setupActivityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is separate from training days so calories are not double-counted.'**
+  String get setupActivityHint;
+
+  /// No description provided for @setupRhythmEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Training rhythm'**
+  String get setupRhythmEyebrow;
+
+  /// No description provided for @setupRhythmQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How many days can you train?'**
+  String get setupRhythmQuestion;
+
+  /// No description provided for @setupRhythmHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a realistic week. Consistency beats an impossible plan.'**
+  String get setupRhythmHint;
+
+  /// No description provided for @setupReviewEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get setupReviewEyebrow;
+
+  /// No description provided for @setupReviewQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first plan is ready.'**
+  String get setupReviewQuestion;
+
+  /// No description provided for @setupReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fighter Edge will start you fresh: clean dashboard, training week, and an EdgeFuel target.'**
+  String get setupReviewHint;
+
+  /// No description provided for @setupCampStructure.
+  ///
+  /// In en, this message translates to:
+  /// **'Build fight-camp structure'**
+  String get setupCampStructure;
+
+  /// No description provided for @setupCampLoseWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Lose weight safely'**
+  String get setupCampLoseWeight;
+
+  /// No description provided for @setupCampGainMuscle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gain muscle'**
+  String get setupCampGainMuscle;
+
+  /// No description provided for @setupCampTechnique.
+  ///
+  /// In en, this message translates to:
+  /// **'Improve technique'**
+  String get setupCampTechnique;
+
+  /// No description provided for @setupCampCompetition.
+  ///
+  /// In en, this message translates to:
+  /// **'Get competition ready'**
+  String get setupCampCompetition;
+
+  /// No description provided for @setupGoalLoseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce body fat while preserving strength and training quality.'**
+  String get setupGoalLoseDescription;
+
+  /// No description provided for @setupGoalMaintainLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintain'**
+  String get setupGoalMaintainLabel;
+
+  /// No description provided for @setupGoalMaintainDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold your current weight and support consistent performance.'**
+  String get setupGoalMaintainDescription;
+
+  /// No description provided for @setupGoalGainDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Build muscle with a controlled calorie surplus.'**
+  String get setupGoalGainDescription;
+
+  /// No description provided for @setupEquationHigher.
+  ///
+  /// In en, this message translates to:
+  /// **'Male physiology'**
+  String get setupEquationHigher;
+
+  /// No description provided for @setupEquationLower.
+  ///
+  /// In en, this message translates to:
+  /// **'Female physiology'**
+  String get setupEquationLower;
+
+  /// No description provided for @setupEquationNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer not to say'**
+  String get setupEquationNeutral;
+
+  /// No description provided for @setupEquationHigherHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The standard formula for male bodies.'**
+  String get setupEquationHigherHint;
+
+  /// No description provided for @setupEquationLowerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The standard formula for female bodies.'**
+  String get setupEquationLowerHint;
+
+  /// No description provided for @setupEquationNeutralHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll use the midpoint and show a slightly wider range.'**
+  String get setupEquationNeutralHint;
+
+  /// No description provided for @setupActivityVeryLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Very low'**
+  String get setupActivityVeryLow;
+
+  /// No description provided for @setupActivityLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get setupActivityLight;
+
+  /// No description provided for @setupActivityModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get setupActivityModerate;
+
+  /// No description provided for @setupActivityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get setupActivityHigh;
+
+  /// No description provided for @setupActivityVeryHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Very high'**
+  String get setupActivityVeryHigh;
+
+  /// No description provided for @setupActivityVeryLowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mostly sitting — desk job, minimal walking.'**
+  String get setupActivityVeryLowHint;
+
+  /// No description provided for @setupActivityLightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On your feet sometimes — teaching, light retail, short walks.'**
+  String get setupActivityLightHint;
+
+  /// No description provided for @setupActivityModerateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Regularly active — physical job, daily walking, errands on foot.'**
+  String get setupActivityModerateHint;
+
+  /// No description provided for @setupActivityHighHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Very active day-to-day — physical labor, long shifts on your feet.'**
+  String get setupActivityHighHint;
+
+  /// No description provided for @setupActivityVeryHighHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Constant movement — manual labor, courier work, farming.'**
+  String get setupActivityVeryHighHint;
+
+  /// No description provided for @setupAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get setupAge;
+
+  /// No description provided for @setupHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Height cm'**
+  String get setupHeight;
+
+  /// No description provided for @setupCurrentWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Current weight kg'**
+  String get setupCurrentWeight;
+
+  /// No description provided for @setupTargetMilestone.
+  ///
+  /// In en, this message translates to:
+  /// **'Target milestone in kg'**
+  String get setupTargetMilestone;
+
+  /// No description provided for @setupGainMilestone.
+  ///
+  /// In en, this message translates to:
+  /// **'Gain milestone in kg'**
+  String get setupGainMilestone;
+
+  /// No description provided for @setupOptionalMilestone.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: leave blank and Fighter Edge starts with a safe 5% milestone.'**
+  String get setupOptionalMilestone;
+
+  /// No description provided for @setupSummaryCamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Camp'**
+  String get setupSummaryCamp;
+
+  /// No description provided for @setupSummaryNutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition'**
+  String get setupSummaryNutrition;
+
+  /// No description provided for @setupSummaryExperience.
+  ///
+  /// In en, this message translates to:
+  /// **'Experience'**
+  String get setupSummaryExperience;
+
+  /// No description provided for @setupSummaryTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get setupSummaryTraining;
+
+  /// No description provided for @setupSummaryActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily activity'**
+  String get setupSummaryActivity;
+
+  /// No description provided for @setupDaysPerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day per week} other{{count} days per week}}'**
+  String setupDaysPerWeek(int count);
+
+  /// No description provided for @setupDaysUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{day per week} other{days per week}}'**
+  String setupDaysUnit(int count);
+
+  /// No description provided for @setupFewerDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer days'**
+  String get setupFewerDays;
+
+  /// No description provided for @setupMoreDays.
+  ///
+  /// In en, this message translates to:
+  /// **'More days'**
+  String get setupMoreDays;
+
+  /// No description provided for @setupCreatingPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating your plan...'**
+  String get setupCreatingPlan;
+
+  /// No description provided for @setupStartPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Start my plan'**
+  String get setupStartPlan;
+
+  /// No description provided for @setupContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get setupContinue;
+
+  /// No description provided for @setupSkipTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip detailed target for now'**
+  String get setupSkipTarget;
+
+  /// No description provided for @setupSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save setup. Try again.'**
+  String get setupSaveError;
+
+  /// No description provided for @setupBodyMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your body details first.'**
+  String get setupBodyMissing;
+
+  /// No description provided for @setupReviewNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'These details need review before we create a target.'**
+  String get setupReviewNeeded;
+
+  /// No description provided for @setupOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open your plan. Try again.'**
+  String get setupOpenError;
+
+  /// No description provided for @setupAgeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an age from 18 to 90 for automated targets.'**
+  String get setupAgeError;
+
+  /// No description provided for @setupHeightError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter height in cm, for example 178.'**
+  String get setupHeightError;
+
+  /// No description provided for @setupWeightError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter current weight in kg, from 35 to 220 (for example 78).'**
+  String get setupWeightError;
+
+  /// No description provided for @setupScreeningError.
+  ///
+  /// In en, this message translates to:
+  /// **'Review every health question before creating a target.'**
+  String get setupScreeningError;
+
+  /// No description provided for @setupTargetError.
+  ///
+  /// In en, this message translates to:
+  /// **'Target weight should be a realistic kg value.'**
+  String get setupTargetError;
+
+  /// No description provided for @setupLossTargetError.
+  ///
+  /// In en, this message translates to:
+  /// **'For weight loss, target weight should be below current weight.'**
+  String get setupLossTargetError;
+
+  /// No description provided for @setupGainTargetError.
+  ///
+  /// In en, this message translates to:
+  /// **'For weight gain, target weight should be above current weight.'**
+  String get setupGainTargetError;
+
+  /// No description provided for @setupHealthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick health check'**
+  String get setupHealthTitle;
+
+  /// No description provided for @setupHealthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We store only yes/no flags, never details. If any apply, we\'ll ask you to check with a qualified professional before showing an automated plan.'**
+  String get setupHealthHint;
+
+  /// No description provided for @setupHealthPregnant.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnant or breastfeeding'**
+  String get setupHealthPregnant;
+
+  /// No description provided for @setupHealthEatingDisorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Eating-disorder history or symptoms'**
+  String get setupHealthEatingDisorder;
+
+  /// No description provided for @setupHealthDiabetes.
+  ///
+  /// In en, this message translates to:
+  /// **'Diabetes requiring medication'**
+  String get setupHealthDiabetes;
+
+  /// No description provided for @setupHealthKidney.
+  ///
+  /// In en, this message translates to:
+  /// **'Kidney disease'**
+  String get setupHealthKidney;
+
+  /// No description provided for @setupHealthLiver.
+  ///
+  /// In en, this message translates to:
+  /// **'Serious liver disease'**
+  String get setupHealthLiver;
+
+  /// No description provided for @setupHealthOtherDiet.
+  ///
+  /// In en, this message translates to:
+  /// **'Another clinician-managed diet'**
+  String get setupHealthOtherDiet;
+
+  /// No description provided for @setupHealthReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'I reviewed every health question'**
+  String get setupHealthReviewed;
+
+  /// No description provided for @setupReasonScreeningUnanswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the health questions before an automated target can be shown.'**
+  String get setupReasonScreeningUnanswered;
+
+  /// No description provided for @setupReasonScreeningNeedsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check with a qualified professional before an automated plan.'**
+  String get setupReasonScreeningNeedsReview;
+
+  /// No description provided for @setupReasonUnderAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Automated plans are only available to adults 18 and over.'**
+  String get setupReasonUnderAge;
+
+  /// No description provided for @setupReasonInvalidVitals.
+  ///
+  /// In en, this message translates to:
+  /// **'Height, weight, or age don\'t look like valid numbers.'**
+  String get setupReasonInvalidVitals;
+
+  /// No description provided for @setupReasonUnderweight.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current stats indicate an underweight range, so an automated fat-loss plan is blocked.'**
+  String get setupReasonUnderweight;
+
+  /// No description provided for @setupReasonInvalidFatLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Your target weight should be below your current weight for a fat-loss plan.'**
+  String get setupReasonInvalidFatLoss;
+
+  /// No description provided for @setupReasonInvalidMuscleGain.
+  ///
+  /// In en, this message translates to:
+  /// **'Your target weight should be above your current weight for a muscle-gain plan.'**
+  String get setupReasonInvalidMuscleGain;
+
+  /// No description provided for @setupReasonMissingTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'A target weight is needed for this goal.'**
+  String get setupReasonMissingTarget;
+
+  /// No description provided for @setupReasonMissingPace.
+  ///
+  /// In en, this message translates to:
+  /// **'A pace is needed for this goal.'**
+  String get setupReasonMissingPace;
+
+  /// No description provided for @setupReasonRmrRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Your inputs produced an estimate outside a safe range — double-check height, weight, and age.'**
+  String get setupReasonRmrRange;
+
+  /// No description provided for @fuelSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel setup'**
+  String get fuelSetupTitle;
+
+  /// No description provided for @fuelSetupSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to set up EdgeFuel.'**
+  String get fuelSetupSignIn;
+
+  /// No description provided for @fuelStepGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get fuelStepGoal;
+
+  /// No description provided for @fuelStepBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Body'**
+  String get fuelStepBody;
+
+  /// No description provided for @fuelStepActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get fuelStepActivity;
+
+  /// No description provided for @fuelStepTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get fuelStepTraining;
+
+  /// No description provided for @fuelStepFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get fuelStepFood;
+
+  /// No description provided for @fuelStepReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get fuelStepReview;
+
+  /// No description provided for @fuelStepProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total} · {title}'**
+  String fuelStepProgress(int current, int total, String title);
+
+  /// No description provided for @fuelSetupNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get fuelSetupNext;
+
+  /// No description provided for @fuelSetupSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save your Fuel plan. Try again.'**
+  String get fuelSetupSaveError;
+
+  /// No description provided for @fuelGoalQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you training for?'**
+  String get fuelGoalQuestion;
+
+  /// No description provided for @fuelGoalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This sets the direction of your plan. You can adjust the pace later.'**
+  String get fuelGoalHint;
+
+  /// No description provided for @fuelBodyQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about your body'**
+  String get fuelBodyQuestion;
+
+  /// No description provided for @fuelBodyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Used only to estimate your energy needs — never shown publicly.'**
+  String get fuelBodyHint;
+
+  /// No description provided for @fuelAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age in years'**
+  String get fuelAge;
+
+  /// No description provided for @fuelHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Height in cm'**
+  String get fuelHeight;
+
+  /// No description provided for @fuelCurrentWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Current weight in kg'**
+  String get fuelCurrentWeight;
+
+  /// No description provided for @fuelTargetWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Target weight in kg'**
+  String get fuelTargetWeight;
+
+  /// No description provided for @fuelActivityQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Your normal activity'**
+  String get fuelActivityQuestion;
+
+  /// No description provided for @fuelActivityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Day-to-day movement outside training — Fighter Edge sessions are counted separately next.'**
+  String get fuelActivityHint;
+
+  /// No description provided for @fuelTrainingQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Your training week'**
+  String get fuelTrainingQuestion;
+
+  /// No description provided for @fuelTrainingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fighter Edge sessions per week — used so we never double-count training inside your activity level.'**
+  String get fuelTrainingHint;
+
+  /// No description provided for @fuelFewerDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer training days per week'**
+  String get fuelFewerDays;
+
+  /// No description provided for @fuelMoreDays.
+  ///
+  /// In en, this message translates to:
+  /// **'More training days per week'**
+  String get fuelMoreDays;
+
+  /// No description provided for @fuelDaysUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{day / week} other{days / week}}'**
+  String fuelDaysUnit(int count);
+
+  /// No description provided for @fuelPaceQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How fast?'**
+  String get fuelPaceQuestion;
+
+  /// No description provided for @fuelPaceGentle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gentle'**
+  String get fuelPaceGentle;
+
+  /// No description provided for @fuelPaceStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get fuelPaceStandard;
+
+  /// No description provided for @fuelPaceUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'Upper limit'**
+  String get fuelPaceUpper;
+
+  /// No description provided for @fuelPaceConservative.
+  ///
+  /// In en, this message translates to:
+  /// **'Conservative'**
+  String get fuelPaceConservative;
+
+  /// No description provided for @fuelPaceGentleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'~0.25% body weight per week.'**
+  String get fuelPaceGentleHint;
+
+  /// No description provided for @fuelPaceStandardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'~0.5% body weight per week — recommended.'**
+  String get fuelPaceStandardHint;
+
+  /// No description provided for @fuelPaceUpperHint.
+  ///
+  /// In en, this message translates to:
+  /// **'~0.75% body weight per week, the automated limit.'**
+  String get fuelPaceUpperHint;
+
+  /// No description provided for @fuelPaceConservativeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'~0.10–0.25% body weight per week.'**
+  String get fuelPaceConservativeHint;
+
+  /// No description provided for @fuelPaceGainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'~0.25–0.50% body weight per week — recommended.'**
+  String get fuelPaceGainHint;
+
+  /// No description provided for @fuelFoodQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Food preferences'**
+  String get fuelFoodQuestion;
+
+  /// No description provided for @fuelFoodHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional now — shapes meal suggestions once recipes launch.'**
+  String get fuelFoodHint;
+
+  /// No description provided for @fuelDietType.
+  ///
+  /// In en, this message translates to:
+  /// **'Diet type'**
+  String get fuelDietType;
+
+  /// No description provided for @fuelDietOmnivore.
+  ///
+  /// In en, this message translates to:
+  /// **'Omnivore'**
+  String get fuelDietOmnivore;
+
+  /// No description provided for @fuelDietVegetarian.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetarian'**
+  String get fuelDietVegetarian;
+
+  /// No description provided for @fuelDietVegan.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegan'**
+  String get fuelDietVegan;
+
+  /// No description provided for @fuelDietPescatarian.
+  ///
+  /// In en, this message translates to:
+  /// **'Pescatarian'**
+  String get fuelDietPescatarian;
+
+  /// No description provided for @fuelDietHalal.
+  ///
+  /// In en, this message translates to:
+  /// **'Halal'**
+  String get fuelDietHalal;
+
+  /// No description provided for @fuelAllergens.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergens (comma-separated)'**
+  String get fuelAllergens;
+
+  /// No description provided for @fuelDislikes.
+  ///
+  /// In en, this message translates to:
+  /// **'Disliked foods (comma-separated)'**
+  String get fuelDislikes;
+
+  /// No description provided for @fuelMealsPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Meals per day'**
+  String get fuelMealsPerDay;
+
+  /// No description provided for @fuelFewerMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer meals per day'**
+  String get fuelFewerMeals;
+
+  /// No description provided for @fuelMoreMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'More meals per day'**
+  String get fuelMoreMeals;
+
+  /// No description provided for @fuelBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get fuelBudget;
+
+  /// No description provided for @fuelBudgetLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get fuelBudgetLow;
+
+  /// No description provided for @fuelBudgetMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get fuelBudgetMedium;
+
+  /// No description provided for @fuelBudgetHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get fuelBudgetHigh;
+
+  /// No description provided for @fuelCookingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking time available'**
+  String get fuelCookingTime;
+
+  /// No description provided for @fuelCookingQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick'**
+  String get fuelCookingQuick;
+
+  /// No description provided for @fuelCookingModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get fuelCookingModerate;
+
+  /// No description provided for @fuelCookingExtended.
+  ///
+  /// In en, this message translates to:
+  /// **'Extended'**
+  String get fuelCookingExtended;
+
+  /// No description provided for @fuelReviewMoreSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'A few steps left'**
+  String get fuelReviewMoreSteps;
+
+  /// No description provided for @fuelReviewMoreStepsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the earlier steps to see your personalized plan.'**
+  String get fuelReviewMoreStepsHint;
+
+  /// No description provided for @fuelReviewUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'We can\'t automate this yet'**
+  String get fuelReviewUnsupported;
+
+  /// No description provided for @fuelReviewProfessional.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check with a professional first'**
+  String get fuelReviewProfessional;
+
+  /// No description provided for @fuelReviewProfessionalIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on what you shared, an automated plan isn\'t appropriate here:'**
+  String get fuelReviewProfessionalIntro;
+
+  /// No description provided for @fuelReviewProfessionalOutro.
+  ///
+  /// In en, this message translates to:
+  /// **'Speak with a qualified professional before starting an automated plan. You can still track meals and habits without calorie targets.'**
+  String get fuelReviewProfessionalOutro;
+
+  /// No description provided for @fuelReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan'**
+  String get fuelReviewTitle;
+
+  /// No description provided for @fuelReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'An estimate, not a diagnosis. You can revisit this any time.'**
+  String get fuelReviewHint;
+
+  /// No description provided for @fuelReviewDailyTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily target'**
+  String get fuelReviewDailyTarget;
+
+  /// No description provided for @fuelReviewMaintenanceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance range {low}–{high} kcal'**
+  String fuelReviewMaintenanceRange(String low, String high);
+
+  /// No description provided for @fuelReviewAssumptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Assumptions'**
+  String get fuelReviewAssumptions;
+
+  /// No description provided for @fuelReviewGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get fuelReviewGoal;
+
+  /// No description provided for @fuelReviewEquation.
+  ///
+  /// In en, this message translates to:
+  /// **'Equation'**
+  String get fuelReviewEquation;
+
+  /// No description provided for @fuelReviewActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily activity'**
+  String get fuelReviewActivity;
+
+  /// No description provided for @fuelReviewPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Pace'**
+  String get fuelReviewPace;
+
+  /// No description provided for @fuelReviewProteinBasedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein based on'**
+  String get fuelReviewProteinBasedOn;
+
+  /// No description provided for @fuelReviewConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidence'**
+  String get fuelReviewConfidence;
+
+  /// No description provided for @fuelReviewFiber.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber range'**
+  String get fuelReviewFiber;
+
+  /// No description provided for @fuelReviewWorthKnowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Worth knowing'**
+  String get fuelReviewWorthKnowing;
+
+  /// No description provided for @fuelReviewConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm my plan'**
+  String get fuelReviewConfirm;
+
+  /// No description provided for @fuelReviewFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'You can hide calorie numbers and use meal tracking only, or adjust these targets later in Fuel settings.'**
+  String get fuelReviewFooter;
+
+  /// No description provided for @fuelConfidenceHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High confidence'**
+  String get fuelConfidenceHigh;
+
+  /// No description provided for @fuelConfidenceMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium confidence'**
+  String get fuelConfidenceMedium;
+
+  /// No description provided for @fuelConfidenceLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low confidence'**
+  String get fuelConfidenceLow;
+
+  /// No description provided for @fuelWarningRmr.
+  ///
+  /// In en, this message translates to:
+  /// **'Your pace was reduced so your target never drops below your estimated resting energy.'**
+  String get fuelWarningRmr;
+
+  /// No description provided for @fuelWarningCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Your deficit was reduced to keep enough carbohydrate for high training load.'**
+  String get fuelWarningCarbs;
+
+  /// No description provided for @fuelWarningProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Even at maintenance calories, this protein target leaves little room for carbohydrate — consider a lower protein target or lighter training load.'**
+  String get fuelWarningProtein;
+
+  /// No description provided for @fuelWarningZeroCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbohydrate grams were clamped to zero after fat and protein were allocated.'**
+  String get fuelWarningZeroCarbs;
+
+  /// No description provided for @fuelPlanEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No plan yet'**
+  String get fuelPlanEmpty;
+
+  /// No description provided for @fuelPlanEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Run the EdgeFuel setup to get a personalized daily target.'**
+  String get fuelPlanEmptyHint;
+
+  /// No description provided for @fuelPlanStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start setup'**
+  String get fuelPlanStart;
+
+  /// No description provided for @fuelPlanCalculationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How this was calculated'**
+  String get fuelPlanCalculationTitle;
+
+  /// No description provided for @fuelPlanMidpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'midpoint'**
+  String get fuelPlanMidpoint;
+
+  /// No description provided for @fuelPlanCalculation.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated resting energy: {rmr} kcal (Mifflin–St Jeor, {equation}). Multiplied by your activity factor, then adjusted for your goal pace. This is an estimate, not a diagnosis — recalculate any time by revisiting setup.'**
+  String fuelPlanCalculation(String rmr, String equation);
+
+  /// No description provided for @fuelPlanRedo.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo setup'**
+  String get fuelPlanRedo;
+
   /// No description provided for @planReadyExplanation.
   ///
   /// In en, this message translates to:
   /// **'Your plan is based on your goals and training days. You can adjust it as your training changes.'**
   String get planReadyExplanation;
+
+  /// No description provided for @planReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first Fighter Edge plan is ready'**
+  String get planReadyTitle;
+
+  /// No description provided for @planReadyReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue read-only'**
+  String get planReadyReadOnly;
+
+  /// No description provided for @planReadyDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Targets are estimates, not medical advice. Review your inputs anytime in EdgeFuel.'**
+  String get planReadyDisclaimer;
 
   /// No description provided for @planReadyCalories.
   ///

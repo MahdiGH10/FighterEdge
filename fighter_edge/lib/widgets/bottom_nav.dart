@@ -84,7 +84,9 @@ class _NavButton extends StatelessWidget {
       button: true,
       selected: selected,
       label: item.label,
-      child: PressScale(
+      onTap: onTap,
+      child: ExcludeSemantics(
+          child: PressScale(
         onTap: onTap,
         haptic: AppHaptics.selection,
         pressedScale: 0.94,
@@ -138,7 +140,7 @@ class _NavButton extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }
