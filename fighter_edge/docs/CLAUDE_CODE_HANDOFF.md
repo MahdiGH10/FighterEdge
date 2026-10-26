@@ -1,5 +1,18 @@
 # Fighter Edge — Claude Code Handoff
 
+## Read failures (2026-10-26, F13)
+
+Repository read streams now report loading, empty, ready, stale and failed
+states. A read that errors, ends, or waits over ten seconds before its first
+snapshot is failed rather than interpreted as empty. A later stream error
+keeps the last snapshot marked stale, and a new snapshot clears that state.
+Fuel and the weekly review show an unavailable screen with Retry while their
+required reads have failed or gone stale. Retry re-subscribes and waits for
+fresh snapshots before showing entry or review actions. Historical Fuel reads
+have a ten-second deadline and the week loads in parallel. Local stream and
+widget recovery tests cover these paths. No live Firebase check was done in
+this slice. The next serial slice is F10/F11 trusted boundary.
+
 ## Subscription and recipe truth (2026-10-25, F06)
 
 The paywall no longer sells a full recipe library. Settings and the Profile

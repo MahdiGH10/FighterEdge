@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../data/data_repository.dart';
+import '../../../data/read_state.dart';
 import '../../../models/training_log_entry.dart';
 import '../../../state/app_state.dart';
 import '../../../state/sync_tracker.dart';
@@ -91,7 +92,17 @@ class PlanController extends ChangeNotifier {
   final TrainingPlanGenerator _generator;
   final SessionStatusResolver _resolver;
 
-  StreamSubscription<StoredTrainingPlan?>? _sub;
+  StreamSubscription<ReadState<StoredTrainingPlan?>>? _sub;
+  ReadState<StoredTrainingPlan?> _planRead = const ReadState(ReadPhase.empty);
+
+  ReadState<StoredTrainingPlan?> get planRead => _planRead;
+
+  void retryPlanRead() {
+    if (_repository == null || _userId == null) return;
+    _setUser(_userId);
+    notifyListeners();
+  }
+
   String? _userId;
   StoredTrainingPlan? _stored;
   bool _loaded = false;
@@ -474,28 +485,28 @@ class PlanController extends ChangeNotifier {
     // swap it for.
     if (_repository != null) _stored = null;
     _loaded = false;
+    _planRead = ReadState(userId == null ? ReadPhase.empty : ReadPhase.loading);
     _migrationTriedFor = null;
     _invalidate(inputs: true);
     final repo = _repository;
     if (repo == null) {
       // No persistence (demo, tests): the plan lives in memory.
       _loaded = true;
+      _planRead = const ReadState(ReadPhase.empty);
       return;
     }
     if (userId == null) return;
-    _sub = repo.watchTrainingPlan(userId).listen(
-      (plan) {
-        _stored = plan;
+    _sub = repo.watchTrainingPlanRead(userId).listen((read) {
+      if (_disposed || _userId != userId) return;
+      _planRead = read;
+      if (read.isUsable) {
+        _stored = read.value;
         _loaded = true;
         _invalidate(inputs: true);
-        notifyListeners();
-        if (plan == null) _migrateLegacySchedule();
-      },
-      onError: (Object error) {
-        // The last known plan stays on screen; Firestore retries itself.
-        if (kDebugMode) debugPrint('[plan] plan stream error: $error');
-      },
-    );
+        if (read.value == null) _migrateLegacySchedule();
+      }
+      notifyListeners();
+    });
   }
 
   /// The one-time move from the weekday-string schedule. It runs only while

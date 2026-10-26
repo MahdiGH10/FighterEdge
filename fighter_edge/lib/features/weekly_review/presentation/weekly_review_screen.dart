@@ -15,6 +15,8 @@ import '../../../widgets/app_scaffold.dart';
 import '../../../widgets/glass_surface.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/stat_card.dart';
+import '../../../widgets/empty_state.dart';
+import '../../../theme/app_icons.dart';
 import '../../edge_fuel/data/edge_fuel_repository.dart';
 import '../../edge_fuel/presentation/controllers/edge_fuel_controller.dart';
 import '../../edge_fuel/presentation/controllers/nutrition_mode_controller.dart';
@@ -51,20 +53,45 @@ class _WeeklyReviewScreenState extends State<WeeklyReviewScreen> {
     final l = L.of(context);
     final locale = Localizations.localeOf(context).toString();
     final mode = context.watch<NutritionModeController>();
-    if (_review == null && mode.loaded) {
+    final plan = context.watch<PlanController>();
+    final state = context.watch<AppState>();
+    final fuel = context.watch<EdgeFuelController>();
+    final includeNutrition = mode.loaded && mode.numbersVisible;
+    final unavailable = plan.planRead.isFailed ||
+        plan.planRead.isStale ||
+        state.trainingLogRead.isFailed ||
+        state.trainingLogRead.isStale ||
+        (includeNutrition &&
+            (state.weightRead.isFailed ||
+                state.weightRead.isStale ||
+                fuel.readsUnavailable));
+    final loading = !mode.loaded ||
+        plan.planRead.isLoading ||
+        state.trainingLogRead.isLoading ||
+        (includeNutrition && (state.weightRead.isLoading || fuel.readsLoading));
+    if (unavailable) return _readError(l);
+    if (loading) {
+      return ScreenScaffold(
+        title: l.reviewTitle,
+        showBack: true,
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_review == null) {
       _showNutrition = mode.numbersVisible;
       _review = buildWeeklyReview(
         includeNutrition: _showNutrition,
         weekStartDay: widget.weekStart,
-        plan: context.read<PlanController>(),
-        state: context.read<AppState>(),
-        fuel: context.read<EdgeFuelController>(),
+        plan: plan,
+        state: state,
+        fuel: fuel,
         fightCamp: context.read<FightCampController>(),
       );
     }
     return FutureBuilder<WeeklyReview>(
       future: _review,
       builder: (context, snapshot) {
+        if (snapshot.hasError) return _readError(l);
         final review = snapshot.data;
         return ScreenScaffold(
           title: l.reviewTitle,
@@ -106,6 +133,28 @@ class _WeeklyReviewScreenState extends State<WeeklyReviewScreen> {
       },
     );
   }
+
+  Widget _readError(L l) => ScreenScaffold(
+        title: l.reviewTitle,
+        showBack: true,
+        body: ListView(children: [
+          EmptyState(
+            icon: AppIcons.warningCircle,
+            title: 'Weekly review unavailable',
+            message:
+                'Could not load this week’s data. Check your connection and retry.',
+            actionLabel: 'Retry',
+            onAction: () {
+              context.read<PlanController>().retryPlanRead();
+              context.read<AppState>().retryReviewReads();
+              if (context.read<NutritionModeController>().numbersVisible) {
+                context.read<EdgeFuelController>().retryReads();
+              }
+              setState(() => _review = null);
+            },
+          ),
+        ]),
+      );
 }
 
 class _TrainingSection extends StatelessWidget {
