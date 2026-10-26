@@ -1357,6 +1357,18 @@ abstract class L {
   /// **'Advanced+'**
   String get reactionLevelAdvancedPlus;
 
+  /// No description provided for @reactionPaceSteady.
+  ///
+  /// In en, this message translates to:
+  /// **'Steady'**
+  String get reactionPaceSteady;
+
+  /// No description provided for @reactionPaceSprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sprint'**
+  String get reactionPaceSprint;
+
   /// No description provided for @reactionStatDuration.
   ///
   /// In en, this message translates to:

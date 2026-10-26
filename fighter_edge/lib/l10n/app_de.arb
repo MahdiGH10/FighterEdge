@@ -256,6 +256,8 @@
   "reactionLevelIntermediate": "Mittelstufe",
   "reactionLevelAdvanced": "Fortgeschritten",
   "reactionLevelAdvancedPlus": "Fortgeschritten+",
+  "reactionPaceSteady": "Gleichmäßig",
+  "reactionPaceSprint": "Sprint",
   "reactionStatDuration": "Dauer",
   "reactionStatReact": "Reaktion",
   "reactionInTheMix": "IM MIX · {count}",

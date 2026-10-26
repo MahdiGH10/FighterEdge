@@ -112,6 +112,27 @@ void main() {
       }
     });
 
+    test('a sprint drill deals faster gaps than the same steady drill', () {
+      for (final d in ReactionDiscipline.values) {
+        for (final level in ReactionLevel.values) {
+          final steady = ReactionDrillSpec.of(d, level);
+          final sprint =
+              ReactionDrillSpec.of(d, level, pace: ReactionPace.sprint);
+          expect(steady.pace, ReactionPace.steady);
+          expect(sprint.roundDuration, steady.roundDuration);
+          expect(sprint.reactionMs.$1, lessThan(steady.reactionMs.$1));
+          for (final c in _cues(sprint, n: 200)) {
+            expect(
+                c.minGap,
+                Duration(
+                    milliseconds: ReactionTiming.floorMs(c.command, level,
+                        pace: ReactionPace.sprint)));
+            expect(c.gapAfter, greaterThanOrEqualTo(c.minGap));
+          }
+        }
+      }
+    });
+
     test('only wrestling has block rest, and it eases off with the level', () {
       expect(
           _spec(ReactionDiscipline.striking, ReactionLevel.beginner).blockRest,

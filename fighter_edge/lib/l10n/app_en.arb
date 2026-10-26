@@ -271,6 +271,8 @@
   "reactionLevelIntermediate": "Intermediate",
   "reactionLevelAdvanced": "Advanced",
   "reactionLevelAdvancedPlus": "Advanced+",
+  "reactionPaceSteady": "Steady",
+  "reactionPaceSprint": "Sprint",
   "reactionStatDuration": "Duration",
   "reactionStatReact": "Reaction",
   "reactionInTheMix": "IN THE MIX · {count}",

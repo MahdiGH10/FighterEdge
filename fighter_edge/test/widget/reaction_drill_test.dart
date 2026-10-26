@@ -89,6 +89,40 @@ void main() {
     expect(find.byType(ReactionDrillScreen), findsNothing);
   });
 
+  testWidgets('Sprint tightens the reaction time and names itself in the drill',
+      (tester) async {
+    final repo = await makeRepo(signedIn: true);
+    await tester.pumpWidget(wrapApp(const TrainingCampScreen(), repo: repo));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reaction'));
+    await tester.pumpAndSettle();
+
+    // MMA beginner, steady by default: 1.5 s nominal, 25% either way.
+    expect(find.text('1.1–1.9 s'), findsOneWidget);
+    await tester.tap(find.text('Sprint'));
+    await tester.pumpAndSettle();
+    expect(find.text('0.9–1.5 s'), findsOneWidget);
+    expect(find.text('1.1–1.9 s'), findsNothing);
+
+    await tester.scrollUntilVisible(
+      find.text('Start drill'),
+      200,
+      scrollable: find
+          .descendant(
+              of: find.byType(ReactionDrillPicker),
+              matching: find.byType(Scrollable))
+          .first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start drill'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('MMA · BEGINNER · SPRINT'), findsOneWidget);
+
+    Navigator.of(tester.element(find.byType(ReactionDrillScreen))).pop();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('the drill screen shows each call as it is made, then the result',
       (tester) async {
     final spec = ReactionDrillSpec.of(

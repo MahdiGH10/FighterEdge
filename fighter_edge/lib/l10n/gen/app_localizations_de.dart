@@ -727,6 +727,12 @@ class LDe extends L {
   String get reactionLevelAdvancedPlus => 'Fortgeschritten+';
 
   @override
+  String get reactionPaceSteady => 'Gleichmäßig';
+
+  @override
+  String get reactionPaceSprint => 'Sprint';
+
+  @override
   String get reactionStatDuration => 'Dauer';
 
   @override
