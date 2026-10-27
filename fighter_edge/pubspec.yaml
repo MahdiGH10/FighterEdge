@@ -52,20 +52,22 @@ flutter_launcher_icons:
   ios: true
   # App Store icons must be opaque.
   remove_alpha_ios: true
-  background_color_ios: "#09090D"
+  background_color_ios: "#08070C"
   image_path: "assets/icon/icon.png"
   # Matches AppColors.background exactly — the icon reads as part of the
   # app, not a sticker on top of a mismatched adaptive-icon background.
-  adaptive_icon_background: "#09090D"
+  adaptive_icon_background: "#08070C"
   adaptive_icon_foreground: "assets/icon/foreground.png"
   min_sdk_android: 21
 
 flutter_native_splash:
-  color: "#09090D"
-  image: assets/icon/foreground.png
+  # The same mark on the same colour as the first Flutter frame (BrandSplash),
+  # so the hand-over is invisible. Built by tool/brand/build_assets.py.
+  color: "#08070C"
+  image: assets/brand/splash.png
   android_12:
-    color: "#09090D"
-    image: assets/icon/foreground.png
+    color: "#08070C"
+    image: assets/brand/splash.png
   web: false
 
 flutter:
@@ -73,6 +75,7 @@ flutter:
   generate: true
   uses-material-design: true
   assets:
+    - assets/brand/logo_mark.png
     - assets/images/login_background.webp
     - assets/images/recipes/
     - assets/images/google_g.png

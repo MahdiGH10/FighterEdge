@@ -77,9 +77,8 @@ class LayoutTokens {
   static const double recipeThumbnail = 96;
   static const double recipeHeroAspectRatio = 16 / 10;
 
-  static const double brandMark = 58;
-  static const double brandStroke = 7;
-  static const double brandSlash = 48;
+  /// The logo mark's size on the auth and onboarding screens at scale 1.
+  static const double brandMark = 84;
 
   /// Identity provider branding dimensions.
   static const double googleMark = 20;
