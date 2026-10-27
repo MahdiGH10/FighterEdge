@@ -21,6 +21,14 @@ class UnavailableReminderGateway implements ReminderGateway {
   Future<void> cancelAll() async {}
 
   @override
+  Future<bool> showNow({
+    required int id,
+    required String title,
+    required String body,
+  }) async =>
+      false;
+
+  @override
   Stream<NotificationTap> get taps => const Stream.empty();
 
   @override

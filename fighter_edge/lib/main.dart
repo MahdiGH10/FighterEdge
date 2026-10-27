@@ -47,6 +47,9 @@ import 'state/first_run_controller.dart';
 import 'state/glass_policy_controller.dart';
 import 'state/locale_controller.dart';
 import 'state/sync_tracker.dart';
+import 'notifications/push/push_gateway.dart';
+import 'notifications/push/push_registrar.dart';
+import 'notifications/push/push_token_repository.dart';
 import 'training/reaction/coach_voice.dart';
 import 'training/reaction/selectable_coach_voice.dart';
 import 'training/reaction/tts_coach_voice.dart';
@@ -177,6 +180,15 @@ Future<AppDependencies> _initializeProductionDependencies() async {
   final coachVoice = SelectableCoachVoice.withClips(phone: TtsCoachVoice());
   unawaited(coachVoice.load());
 
+  // Remote pushes: this phone's messaging token is filed under the signed-in
+  // account once notifications are allowed (see PushRegistrar).
+  final reminders = LocalReminderGateway();
+  final pushRegistrar = PushRegistrar(
+    push: FirebasePushGateway(),
+    tokens: FirestorePushTokenRepository(),
+    reminders: reminders,
+  );
+
   return bootStep(
       BootStage.services,
       () => AppDependencies(
@@ -185,8 +197,9 @@ Future<AppDependencies> _initializeProductionDependencies() async {
             edgeFuelRepo: FirestoreEdgeFuelRepository(),
             fightCampRepo: FirestoreFightCampRepository(),
             billingGateway: RevenueCatBillingGateway(),
-            reminderGateway: LocalReminderGateway(),
+            reminderGateway: reminders,
             coachVoice: coachVoice,
+            pushRegistrar: pushRegistrar,
             telemetry: kIsWeb
                 ? const NoopTelemetry()
                 : ConsentGatedTelemetry(FirebaseTelemetry(), consent),
@@ -209,6 +222,7 @@ class AppDependencies {
   final BillingGateway billingGateway;
   final ReminderGateway reminderGateway;
   final CoachVoice coachVoice;
+  final PushRegistrar? pushRegistrar;
   final Telemetry telemetry;
   final ErrorReporter errorReporter;
   final ConsentController consent;
@@ -221,6 +235,7 @@ class AppDependencies {
     required this.billingGateway,
     required this.reminderGateway,
     required this.coachVoice,
+    this.pushRegistrar,
     required this.telemetry,
     required this.errorReporter,
     required this.consent,
@@ -237,6 +252,7 @@ class FighterEdgeApp extends StatelessWidget {
   final BillingGateway? billingGateway;
   final ReminderGateway? reminderGateway;
   final CoachVoice? coachVoice;
+  final PushRegistrar? pushRegistrar;
   final Telemetry? telemetry;
   final ErrorReporter? errorReporter;
 
@@ -254,6 +270,7 @@ class FighterEdgeApp extends StatelessWidget {
     this.billingGateway,
     this.reminderGateway,
     this.coachVoice,
+    this.pushRegistrar,
     this.telemetry,
     this.errorReporter,
     this.consent,
@@ -270,6 +287,7 @@ class FighterEdgeApp extends StatelessWidget {
           billingGateway: dependencies.billingGateway,
           reminderGateway: dependencies.reminderGateway,
           coachVoice: dependencies.coachVoice,
+          pushRegistrar: dependencies.pushRegistrar,
           telemetry: dependencies.telemetry,
           errorReporter: dependencies.errorReporter,
           consent: dependencies.consent,
@@ -302,6 +320,8 @@ class FighterEdgeApp extends StatelessWidget {
         Provider<ReminderGateway>.value(
           value: reminderGateway ?? const UnavailableReminderGateway(),
         ),
+        if (pushRegistrar case final registrar?)
+          Provider<PushRegistrar>.value(value: registrar),
         ChangeNotifierProvider(
           create: (context) =>
               NotificationController(gateway: context.read<ReminderGateway>())
