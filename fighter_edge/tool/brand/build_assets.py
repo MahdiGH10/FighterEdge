@@ -13,13 +13,16 @@ Outputs (all under assets/):
                           and the OS round the corners themselves).
   icon/foreground.png     adaptive-icon foreground: the mark inside the 66%
                           safe zone, transparent background.
+  icon/notification.png   the Android notification icon: one colour (white on
+                          transparent), the fighter inside the open red ring.
+  ../android/.../drawable-*/ic_notification.png   the same at 24-96 px.
 
 Rendering uses a headless Chromium browser (Edge or Chrome), so gradients are
 drawn exactly as the SVG describes them. Usage:
 
     python build_assets.py --browser "C:/.../msedge.exe" --repo <fighter_edge>
 
-Run it again after replacing the SVG with a cleaner redraw: nothing else in
+Needs Python packages: pillow, numpy, scipy. Run it again after replacing the SVG with a cleaner redraw: nothing else in
 the app needs to change.
 """
 
@@ -31,6 +34,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+from scipy import ndimage as ndi
 
 BACKGROUND = (8, 7, 12)  # AppColors.background, #08070C
 
@@ -60,6 +64,74 @@ def render(browser: str, svg: str, size: int, out: Path) -> None:
             check=True,
             capture_output=True,
         )
+
+
+VIEW = (10.0, 21.0, 340.0, 340.0)  # the SVG viewBox
+F_TOP = 209.45  # where the F starts, in user units: the fighter is cut here
+RASTER = 2048
+
+
+def shape_mask(browser: str, svg: str, gradient: str) -> np.ndarray:
+    """One path of the logo on its own, as a boolean mask over the viewBox."""
+    d = re.search(rf'<path d="([^"]*)" fill="url\(#{gradient}\)"', svg).group(1)
+    x, y, w, h = VIEW
+    only = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{x} {y} {w} {h}" '
+        f'width="{RASTER}" height="{RASTER}">'
+        f'<path d="{d}" fill="#000" fill-rule="evenodd"/></svg>'
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "shape.png"
+        render(browser, only, RASTER, out)
+        return np.asarray(Image.open(out).convert("RGBA").getchannel("A")) > 127
+
+
+def notification_mask(browser: str, svg: str) -> np.ndarray:
+    """The fighter and the open ring, as one shape.
+
+    The fighter is the hole in the white disc. It is open at the bottom (it
+    runs into the F), so the disc is closed with a bar at the F's top edge and
+    the enclosed hole kept. The ring is the long red arcs; the small red bar
+    inside the E is dropped.
+    """
+    scale = RASTER / VIEW[3]
+    disc = shape_mask(browser, svg, "disc")
+    closed = disc.copy()
+    closed[int(round((F_TOP - VIEW[1]) * scale)):, :] = True
+    holes = ndi.binary_fill_holes(closed) & ~closed
+    labels, count = ndi.label(holes)
+    sizes = ndi.sum(holes, labels, range(1, count + 1))
+    fighter = np.isin(labels, [i + 1 for i, a in enumerate(sizes) if a > 2000])
+    # A hair of space between the fighter's waist and the ring below it.
+    rows = np.flatnonzero(fighter.any(axis=1))
+    fighter[rows.max() - int(round(3.0 * scale)):, :] = False
+
+    red = shape_mask(browser, svg, "red")
+    labels, count = ndi.label(red)
+    long_arcs = [
+        i + 1 for i, box in enumerate(ndi.find_objects(labels))
+        if max(box[0].stop - box[0].start, box[1].stop - box[1].start)
+        > 0.30 * RASTER
+    ]
+    ring = ndi.binary_dilation(
+        np.isin(labels, long_arcs), iterations=int(RASTER * 0.004))
+    return fighter | ring
+
+
+def notification_icon(mask: np.ndarray, size: int) -> Image.Image:
+    """White on transparent: Android uses only the alpha of this icon."""
+    alpha = Image.fromarray((mask * 255).astype(np.uint8))
+    alpha = alpha.crop(alpha.getbbox())
+    side = max(alpha.size)
+    square = Image.new("L", (side, side), 0)
+    square.paste(alpha, ((side - alpha.width) // 2, (side - alpha.height) // 2))
+    pad = max(1, int(size * 0.06))
+    inner = square.resize((size - 2 * pad,) * 2, Image.LANCZOS)
+    canvas = Image.new("L", (size, size), 0)
+    canvas.paste(inner, (pad, pad))
+    icon = Image.new("RGBA", (size, size), (255, 255, 255, 0))
+    icon.putalpha(canvas)
+    return icon
 
 
 def crop_square(image: Image.Image, margin: float = 0.0) -> Image.Image:
@@ -124,8 +196,19 @@ def main() -> None:
         repo / "assets/icon/foreground.png", optimize=True
     )
 
+    # -- Notification icon: Android draws only its alpha, in one colour. -------
+    mask = notification_mask(args.browser, svg)
+    notification_icon(mask, 256).save(
+        repo / "assets/icon/notification.png", optimize=True)
+    res = repo / "android/app/src/main/res"
+    for density, px in (("mdpi", 24), ("hdpi", 36), ("xhdpi", 48),
+                        ("xxhdpi", 72), ("xxxhdpi", 96)):
+        notification_icon(mask, px).save(
+            res / f"drawable-{density}" / "ic_notification.png", optimize=True)
+
     for name in ("brand/logo_mark.png", "brand/splash.png",
-                 "icon/icon.png", "icon/foreground.png"):
+                 "icon/icon.png", "icon/foreground.png",
+                 "icon/notification.png"):
         image = Image.open(repo / "assets" / name)
         arr = np.asarray(image.convert("RGBA"))
         print(f"{name}: {image.size}, opaque pixels "

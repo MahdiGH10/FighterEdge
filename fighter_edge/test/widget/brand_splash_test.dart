@@ -116,6 +116,25 @@ void main() {
       expect(_pngSize('assets/icon/foreground.png'), (1024, 1024));
     });
 
+    test('the notification icon is a one-colour RGBA image at every density',
+        () {
+      const sizes = {
+        'mdpi': 24,
+        'hdpi': 36,
+        'xhdpi': 48,
+        'xxhdpi': 72,
+        'xxxhdpi': 96,
+      };
+      for (final MapEntry(key: density, value: px) in sizes.entries) {
+        final path =
+            'android/app/src/main/res/drawable-$density/ic_notification.png';
+        expect(_pngSize(path), (px, px), reason: density);
+        // Colour type 6 is RGBA: Android draws only the alpha channel.
+        expect(File(path).readAsBytesSync()[25], 6, reason: density);
+      }
+      expect(_pngSize('assets/icon/notification.png'), (256, 256));
+    });
+
     test('the launcher icon is opaque, as the stores require', () {
       // PNG colour type 2 is RGB with no alpha channel.
       final header = File('assets/icon/icon.png').readAsBytesSync();
