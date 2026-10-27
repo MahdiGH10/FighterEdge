@@ -5,9 +5,7 @@ import '../../auth/verification_gate.dart';
 import '../../controllers/auth_controller.dart';
 import '../../models/app_user.dart';
 import '../../privacy/health_consent_screen.dart';
-import '../../theme/app_colors.dart';
 import '../../widgets/brand_logo.dart';
-import '../../widgets/premium_effects.dart';
 import '../home_shell.dart';
 import '../onboarding/onboarding_screen.dart';
 import 'login_screen.dart';
@@ -60,13 +58,8 @@ class _Splash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppColors.background,
-      body: AppBackground(
-        child: Center(
-          child: PremiumReveal(child: BrandLogo(scale: 1.2)),
-        ),
-      ),
-    );
+    // The boot screen already played the entrance; this is the same picture,
+    // held still while sign-in is checked.
+    return const BrandSplash(animate: false);
   }
 }

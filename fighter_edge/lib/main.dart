@@ -66,7 +66,10 @@ void main() {
     ),
   );
 
-  runApp(const FighterEdgeBootstrap());
+  // The splash shows the mark on its first frame; decode it before then.
+  unawaited(BrandMark.preload().whenComplete(
+    () => runApp(const FighterEdgeBootstrap()),
+  ));
 }
 
 class FighterEdgeBootstrap extends StatefulWidget {
@@ -508,16 +511,7 @@ class _BrandedBootScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppColors.background,
-      body: AppBackground(
-        child: Center(
-          child: PremiumReveal(
-            child: BrandLogo(scale: 1.15),
-          ),
-        ),
-      ),
-    );
+    return const BrandSplash();
   }
 }
 
