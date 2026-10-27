@@ -67,6 +67,16 @@ service cloud.firestore {
         allow delete: if isOwner(uid);
       }
 
+      // A phone's Firebase Cloud Messaging token, so Firebase can push to this
+      // account. Not health data: no consent or paid access is needed. Owner
+      // only, and removed with the account.
+      match /pushTokens/{tokenId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) &&
+          validPushToken(request.resource.data);
+        allow delete: if isOwner(uid);
+      }
+
       match /nutritionProfile/{docId} {
         allow read: if isOwner(uid);
         allow create, update: if isOwner(uid) && docId == 'current' &&
@@ -325,6 +335,15 @@ service cloud.firestore {
           'migratedFromLegacyMeals', 'createdAt', 'updatedAt'
         ]) && data.localDate == dateKey && data.schemaVersion is int &&
         (data.updatedAt is timestamp || data.updatedAt is string);
+    }
+
+    function validPushToken(data) {
+      return data.keys().hasAll(['token', 'platform', 'updatedAt']) &&
+        data.keys().hasOnly(['token', 'platform', 'updatedAt']) &&
+        data.token is string && data.token.size() >= 20 &&
+        data.token.size() <= 4096 &&
+        data.platform in ['android', 'ios'] &&
+        data.updatedAt == request.time;
     }
 
     function validFoodTombstone(data) {

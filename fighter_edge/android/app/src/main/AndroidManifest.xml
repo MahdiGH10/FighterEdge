@@ -67,6 +67,18 @@
         <meta-data android:name="google_analytics_default_allow_ad_user_data" android:value="false" />
         <meta-data android:name="google_analytics_default_allow_ad_personalization_signals" android:value="false" />
         <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
+        <!-- Firebase Cloud Messaging: a push that arrives while the app is closed
+             is drawn by the system, so give it the app's flat notification icon
+             and the channel the app creates at start-up (LocalReminderGateway). -->
+        <!-- No messaging token until the athlete is signed in and has allowed
+             notifications: the app turns it on then (PushRegistrar). -->
+        <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="false" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="fe_push" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

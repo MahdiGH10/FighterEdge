@@ -275,6 +275,19 @@ class FakeReminderGateway implements ReminderGateway {
     cancelAllCalls++;
     pending.clear();
   }
+
+  /// Notifications shown immediately (pushes that arrived in the foreground).
+  final List<({int id, String title, String body})> shown = [];
+
+  @override
+  Future<bool> showNow({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    shown.add((id: id, title: title, body: body));
+    return true;
+  }
 }
 
 /// One move of a live reaction-drill call, as the athlete reads it: the move

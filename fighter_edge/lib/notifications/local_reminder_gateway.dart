@@ -50,6 +50,11 @@ class LocalReminderGateway implements ReminderGateway {
 
   static const _androidIcon = 'ic_notification';
 
+  /// The channel remote pushes arrive on. Created at start-up so a push that
+  /// lands while the app is closed already has it.
+  static const pushChannelId = 'fe_push';
+  static const _pushChannelName = 'Messages from Fighter Edge';
+
   @override
   bool get isAvailable =>
       !kIsWeb &&
@@ -79,6 +84,16 @@ class LocalReminderGateway implements ReminderGateway {
       settings: const InitializationSettings(android: android, iOS: darwin),
       onDidReceiveNotificationResponse: _onResponse,
     );
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(
+          const AndroidNotificationChannel(
+            pushChannelId,
+            _pushChannelName,
+            importance: Importance.defaultImportance,
+          ),
+        );
     _initialized = true;
   }
 
@@ -208,6 +223,38 @@ class LocalReminderGateway implements ReminderGateway {
         if (_isPlanOwned(p)) await _plugin.cancel(id: p.id);
       }
     } catch (_) {}
+  }
+
+  @override
+  Future<bool> showNow({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    if (!isAvailable) return false;
+    try {
+      await _ensureInitialized();
+      await _plugin.show(
+        id: id,
+        title: title,
+        body: body,
+        // No payload: a push is not a plan-owned reminder, so the scheduler
+        // never cancels it.
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            pushChannelId,
+            _pushChannelName,
+            importance: Importance.defaultImportance,
+            icon: _androidIcon,
+            color: AppColors.primary,
+          ),
+          iOS: DarwinNotificationDetails(presentSound: true),
+        ),
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Plan-owned notifications always carry a route payload.

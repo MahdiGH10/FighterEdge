@@ -132,6 +132,37 @@ describe("firestore.rules", { skip: !emulator && "no Firestore emulator" }, () =
     );
   });
 
+  const pushToken = (uid: string, db: ReturnType<typeof ownerDb>) =>
+    db.collection("users").doc(uid).collection("pushTokens").doc("installid");
+  const pushBody = () => ({
+    token: "installid:" + "x".repeat(60),
+    platform: "android",
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+
+  it("lets an athlete file, read and remove their own push token", async () => {
+    const db = ownerDb("alice");
+    await assertSucceeds(pushToken("alice", db).set(pushBody()));
+    await assertSucceeds(pushToken("alice", db).get());
+    await assertSucceeds(pushToken("alice", db).delete());
+  });
+
+  it("keeps push tokens private and well-formed", async () => {
+    await assertSucceeds(pushToken("alice", ownerDb("alice")).set(pushBody()));
+    const mallory = ownerDb("mallory");
+    await assertFails(pushToken("alice", mallory).get());
+    await assertFails(pushToken("alice", mallory).set(pushBody()));
+    await assertFails(pushToken("alice", mallory).delete());
+    const anon = env.unauthenticatedContext().firestore();
+    await assertFails(pushToken("alice", anon).get());
+
+    const db = ownerDb("alice");
+    await assertFails(pushToken("alice", db).set({ ...pushBody(), extra: 1 }));
+    await assertFails(pushToken("alice", db).set({ ...pushBody(), token: "short" }));
+    await assertFails(pushToken("alice", db).set({ ...pushBody(), platform: "web" }));
+    await assertFails(pushToken("alice", db).set({ ...pushBody(), updatedAt: new Date(0) }));
+  });
+
   const plan = {
     schemaVersion: 1,
     origin: "onboarding",

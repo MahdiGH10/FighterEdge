@@ -64,6 +64,16 @@ abstract class ReminderGateway {
   /// the app scheduled directly.
   Future<void> cancelAll();
 
+  /// Shows a notification right now (a remote push that arrived while the app
+  /// was in front). Returns whether it was shown. Not plan-owned: the
+  /// scheduler never cancels it.
+  Future<bool> showNow({
+    required int id,
+    required String title,
+    required String body,
+  }) async =>
+      false;
+
   /// Taps on delivered notifications while the app is running.
   Stream<NotificationTap> get taps => const Stream.empty();
 

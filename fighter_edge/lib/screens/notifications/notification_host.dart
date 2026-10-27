@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import '../../features/fight_camp/presentation/fight_camp_controller.dart';
 import '../../features/training_plan/presentation/plan_controller.dart';
 import '../../notifications/notification_controller.dart';
 import '../../notifications/notification_inputs_reader.dart';
+import '../../notifications/push/push_registrar.dart';
 import '../../state/locale_controller.dart';
 import 'auto_pause_sheet.dart';
 
@@ -44,12 +46,16 @@ class _NotificationHostState extends State<NotificationHost>
   late final EdgeFuelController _edgeFuel;
   late final NutritionModeController _nutritionMode;
   late final NotificationInputsReader _reader;
+  // Null where the app has no remote push (tests, web, desktop).
+  PushRegistrar? _push;
+  String? _pushUserId;
   bool _asking = false;
 
   @override
   void initState() {
     super.initState();
     _controller = context.read<NotificationController>();
+    _push = context.read<PushRegistrar?>();
     _plan = context.read<PlanController>();
     _locale = context.read<LocaleController>();
     _auth = context.read<AuthController>();
@@ -78,6 +84,7 @@ class _NotificationHostState extends State<NotificationHost>
         readLocale: _currentLocale,
         readSignedIn: () => _auth.user != null,
       );
+      _syncPush();
       _maybeAsk();
     });
   }
@@ -85,13 +92,25 @@ class _NotificationHostState extends State<NotificationHost>
   Locale _currentLocale() =>
       _locale.locale ?? ui.PlatformDispatcher.instance.locale;
 
-  void _changed() => _controller.requestReconcile();
+  void _changed() {
+    _controller.requestReconcile();
+    _syncPush();
+  }
+
+  /// Files this phone's messaging token under the signed-in account. The
+  /// registrar itself waits for notification permission.
+  void _syncPush() {
+    final uid = _auth.user?.id;
+    _pushUserId = uid ?? _pushUserId;
+    unawaited(_push?.sync(uid) ?? Future<void>.value());
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
     _controller.refreshPermission();
     _controller.requestReconcile();
+    _syncPush();
     _maybeAsk();
   }
 
@@ -138,7 +157,12 @@ class _NotificationHostState extends State<NotificationHost>
     // inherit this one's reminders.
     final signedOut = _auth.user == null;
     _controller.detach();
-    if (signedOut) _controller.clearScheduled();
+    if (signedOut) {
+      _controller.clearScheduled();
+      // Nor may it keep receiving this account's pushes.
+      final uid = _pushUserId;
+      if (uid != null) unawaited(_push?.release(uid) ?? Future<void>.value());
+    }
     super.dispose();
   }
 
