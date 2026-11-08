@@ -7,7 +7,9 @@ the product UI must remain Flutter.
 ## Start here
 
 1. Inspect `git status --short` and the current branch before editing.
-2. Read `fighter_edge/docs/CLAUDE_CODE_HANDOFF.md` for verified state.
+2. Read `fighter_edge/docs/HANDOFF_2026-11-08.md` (current state, open PRs,
+   owner decisions) and `fighter_edge/docs/LAUNCH_ROADMAP_20261108.md` (path to
+   release). `fighter_edge/docs/CLAUDE_CODE_HANDOFF.md` is the long history.
 3. Read the relevant product/design document for the slice you are changing.
 4. Keep one bounded slice per session: implement, test, commit, then reassess.
 
