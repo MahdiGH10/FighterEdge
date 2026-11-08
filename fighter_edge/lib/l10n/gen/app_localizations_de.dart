@@ -2037,6 +2037,13 @@ class LDe extends L {
   String get planReadyTitle => 'Dein erster Fighter-Edge-Plan ist bereit';
 
   @override
+  String get planReadyWeekTitle => 'Deine ersten 7 Tage';
+
+  @override
+  String get planReadyWeekFootnote =>
+      'Die übrigen Tage sind frei. Du kannst jede Einheit später verschieben oder auslassen.';
+
+  @override
   String get planReadyReadOnly => 'Schreibgeschützt fortfahren';
 
   @override

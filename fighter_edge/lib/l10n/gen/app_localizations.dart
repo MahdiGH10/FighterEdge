@@ -3559,6 +3559,18 @@ abstract class L {
   /// **'Your first Fighter Edge plan is ready'**
   String get planReadyTitle;
 
+  /// No description provided for @planReadyWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first 7 days'**
+  String get planReadyWeekTitle;
+
+  /// No description provided for @planReadyWeekFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'The other days are rest. You can move or skip any session later.'**
+  String get planReadyWeekFootnote;
+
   /// No description provided for @planReadyReadOnly.
   ///
   /// In en, this message translates to:

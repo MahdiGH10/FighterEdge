@@ -806,6 +806,8 @@
   "fuelPlanRedo": "Redo setup",
   "planReadyExplanation": "Your plan is based on your goals and training days. You can adjust it as your training changes.",
   "planReadyTitle": "Your first Fighter Edge plan is ready",
+  "planReadyWeekTitle": "Your first 7 days",
+  "planReadyWeekFootnote": "The other days are rest. You can move or skip any session later.",
   "planReadyReadOnly": "Continue read-only",
   "planReadyDisclaimer": "Targets are estimates, not medical advice. Review your inputs anytime in EdgeFuel.",
   "planReadyCalories": "Daily calories",

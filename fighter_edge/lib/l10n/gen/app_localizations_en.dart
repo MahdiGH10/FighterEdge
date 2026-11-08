@@ -2018,6 +2018,13 @@ class LEn extends L {
   String get planReadyTitle => 'Your first Fighter Edge plan is ready';
 
   @override
+  String get planReadyWeekTitle => 'Your first 7 days';
+
+  @override
+  String get planReadyWeekFootnote =>
+      'The other days are rest. You can move or skip any session later.';
+
+  @override
   String get planReadyReadOnly => 'Continue read-only';
 
   @override
