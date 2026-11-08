@@ -16,6 +16,7 @@ import 'package:fighter_edge/screens/home_shell.dart';
 import 'package:fighter_edge/screens/nutrition_screen.dart';
 import 'package:fighter_edge/widgets/bottom_nav.dart';
 
+import '../helpers/published_recipes.dart';
 import '../helpers/test_harness.dart';
 
 /// "Hide numbers": food is still logged by name, but no calorie, gram, target,
@@ -49,7 +50,11 @@ void main() {
       addTearDown(tester.view.reset);
       final repo = await makeRepo(signedIn: true);
       await tester.pumpWidget(
-        wrapApp(const Scaffold(body: NutritionScreen()), repo: repo),
+        wrapApp(
+          const Scaffold(body: NutritionScreen()),
+          repo: repo,
+          recipeCatalogRepo: publishedRecipeCatalog(),
+        ),
       );
       await tester.pumpAndSettle();
       await tester.runAsync(() => tester

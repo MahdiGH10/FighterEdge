@@ -14,6 +14,7 @@ import '../features/edge_fuel/domain/models/food_enums.dart';
 import '../features/edge_fuel/presentation/controllers/recipe_library_controller.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 import '../features/edge_fuel/presentation/screens/recipe_library_screen.dart';
+import '../features/edge_fuel/presentation/widgets/recipes_available.dart';
 import '../features/edge_fuel/presentation/screens/edge_fuel_setup_screen.dart';
 import '../features/edge_fuel/presentation/widgets/add_food_sheet.dart';
 import '../features/edge_fuel/presentation/widgets/fuel_what_is_left.dart';
@@ -54,12 +55,16 @@ class _NutritionScreenState extends State<NutritionScreen> {
       Insets.sm, Insets.lg, AppAccessibility.minTouchTarget + Insets.xxl);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => RecipesAvailable(builder: _buildFuel);
+
+  Widget _buildFuel(BuildContext context, bool recipesAvailable) {
     final l = L.of(context);
     final mode = context.watch<NutritionModeController>();
     final numbers = mode.numbersVisible;
-    // The recipe library is made of macros, so it goes with the numbers.
-    final tab = !numbers && _tab > 1 ? 0 : _tab;
+    // The recipe library is made of macros, so it goes with the numbers, and
+    // it is only offered once at least one recipe is published.
+    final showRecipes = numbers && recipesAvailable;
+    final tab = !showRecipes && _tab > 1 ? 0 : _tab;
     // Nothing nutrition-shaped is drawn until the athlete's choice is known,
     // and none while nutrition is paused.
     if (!mode.visible) {
@@ -130,7 +135,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
               const SizedBox(height: Insets.sm),
               _NutritionSegments(
                   selected: tab,
-                  showRecipes: numbers,
+                  showRecipes: showRecipes,
                   onSelected: (index) => setState(() => _tab = index)),
             ]),
           ),
@@ -832,16 +837,24 @@ class _QuickStartMeals extends StatelessWidget {
                   height: Insets.xxs / 2,
                   color: AppAccessibility.border(context)),
           ],
-          const SizedBox(height: Insets.md),
-          GhostButton(
-            'Browse recipes',
-            icon: AppIcons.bookOpen,
-            expand: true,
-            onPressed: () => AppNavigation.push(
-              context,
-              AppRoutes.fuelRecipes,
-              fallbackBuilder: (_) => const RecipeLibraryScreen(),
-            ),
+          // Only offered once a recipe is published; until then it would
+          // lead to an empty page.
+          RecipesAvailable(
+            builder: (context, available) => !available
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(top: Insets.md),
+                    child: GhostButton(
+                      'Browse recipes',
+                      icon: AppIcons.bookOpen,
+                      expand: true,
+                      onPressed: () => AppNavigation.push(
+                        context,
+                        AppRoutes.fuelRecipes,
+                        fallbackBuilder: (_) => const RecipeLibraryScreen(),
+                      ),
+                    ),
+                  ),
           ),
         ],
       ),

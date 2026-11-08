@@ -7,6 +7,7 @@ import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_setup_dr
 import 'package:fighter_edge/features/edge_fuel/domain/models/nutrition_target.dart';
 import 'package:fighter_edge/features/edge_fuel/presentation/screens/edge_fuel_plan_screen.dart';
 
+import '../../helpers/published_recipes.dart';
 import '../../helpers/test_harness.dart';
 
 NutritionTarget _successTarget() => NutritionTarget(
@@ -86,6 +87,7 @@ void main() {
         const EdgeFuelPlanScreen(),
         repo: repo,
         edgeFuelRepo: edgeFuelRepo,
+        recipeCatalogRepo: publishedRecipeCatalog(),
       ));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
