@@ -13,6 +13,7 @@ import '../../../../widgets/press_scale.dart';
 import '../controllers/edge_fuel_controller.dart';
 import '../controllers/recipe_library_controller.dart';
 import '../screens/recipe_library_screen.dart';
+import 'recipes_available.dart';
 
 /// "What can I eat with what's left?" — the question a daily target raises
 /// and a number alone never answers. Opens the recipe library filtered to
@@ -36,7 +37,12 @@ class FuelWhatIsLeft extends StatelessWidget {
       edgeFuel.targetCalories - edgeFuel.consumedCalories >= minUsefulKcal;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => RecipesAvailable(
+        builder: (context, available) =>
+            available ? _card(context) : const SizedBox.shrink(),
+      );
+
+  Widget _card(BuildContext context) {
     final remaining = edgeFuel.targetCalories - edgeFuel.consumedCalories;
     final filters = RecipeFilters(maxCalories: remaining);
     if (compact) {
