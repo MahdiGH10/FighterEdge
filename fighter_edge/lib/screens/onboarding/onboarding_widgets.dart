@@ -89,7 +89,14 @@ class ChoiceWrap extends StatelessWidget {
       children: [
         for (final value in values)
           ChoiceChip(
-            label: Text(labelFor?.call(value) ?? value),
+            // A chip label is one line by default and ellipsises; a long
+            // answer must stay readable at large text, so it wraps.
+            label: Text(
+              labelFor?.call(value) ?? value,
+              softWrap: true,
+              maxLines: 8,
+              overflow: TextOverflow.visible,
+            ),
             selected: value == selected,
             onSelected: (_) => onSelected(value),
             selectedColor: AppColors.primarySoft,
@@ -103,7 +110,9 @@ class ChoiceWrap extends StatelessWidget {
                   ? AppColors.textPrimary
                   : AppColors.textSecondary,
             ),
-            showCheckmark: false,
+            // Selection is shown by a mark as well as by colour.
+            showCheckmark: true,
+            checkmarkColor: AppColors.textPrimary,
           ),
       ],
     );
