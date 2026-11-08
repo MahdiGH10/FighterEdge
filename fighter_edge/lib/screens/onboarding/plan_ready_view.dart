@@ -13,6 +13,7 @@ import '../../widgets/primary_button.dart';
 import '../../widgets/stat_card.dart';
 import '../paywall_screen.dart';
 import 'onboarding_widgets.dart';
+import 'plan_week_preview.dart';
 
 class CompletedOnboardingPlan {
   final NutritionTarget? target;
@@ -95,6 +96,8 @@ class PlanReadyView extends StatelessWidget {
                 level: plan.level,
                 days: plan.days,
               ),
+              const SizedBox(height: Insets.lg),
+              const PlanWeekPreview(),
               const SizedBox(height: Insets.xl),
               if (target?.isSuccess == true)
                 AppCard(

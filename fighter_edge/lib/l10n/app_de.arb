@@ -702,6 +702,8 @@
   "planReadyReadOnly": "Schreibgeschützt fortfahren",
   "planReadyDisclaimer": "Zielwerte sind Schätzungen und keine medizinische Beratung. Du kannst deine Angaben jederzeit in EdgeFuel prüfen.",
   "planReadyExplanation": "Dein Plan richtet sich nach deinen Zielen und Trainingstagen. Du kannst ihn anpassen, wenn sich dein Training ändert.",
+  "planReadyWeekTitle": "Deine ersten 7 Tage",
+  "planReadyWeekFootnote": "Die übrigen Tage sind frei. Du kannst jede Einheit später verschieben oder auslassen.",
   "planReadyCalories": "Tägliche Kalorien",
   "planReadyMissingTarget": "Deine Trainingswoche steht. Ergänze deine Körperdaten unter Fuel, um ein Tagesziel zu berechnen.",
   "@onboardingStep": {
